@@ -33,3 +33,19 @@ Route::get('/product-detail', function () {
 Route::get('/checkout-success', function () {
     return view('client.pages.checkout-success');
 })->name('checkout-success');
+
+Route::get('/search', function () {
+    return view('client.pages.search-results');
+})->name('search');
+
+Route::get('/checkout-process', function () {
+    return view('client.pages.checkout-process');
+})->name('checkout-process');
+
+Route::get('/product-compare', function () {
+    return view('client.pages.compare');
+})->name('product-compare');
+
+Route::get('/user-dashboard', function () {
+    return view('client.pages.dashboard');
+})->name('user-dashboard');
