@@ -1,12 +1,9 @@
-<!-- Footer -->
 <footer class="relative bg-gray-900 text-white overflow-hidden">
-    <!-- Decorative circles matching logo theme -->
     <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5 blur-3xl bg-primary"></div>
     <div class="absolute bottom-0 left-0 w-96 h-96 rounded-full opacity-5 blur-3xl bg-primary"></div>
 
     <div class="relative container mx-auto px-4 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mb-8">
-            <!-- Brand Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div class="space-y-4">
                 <div class="flex items-center space-x-2">
                     <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
@@ -40,7 +37,6 @@
                 </div>
             </div>
 
-            <!-- Quick Links -->
             <div class="space-y-4">
                 <h3 class="text-lg font-semibold text-white flex items-center">
                     <span class="w-1 h-6 rounded-full mr-3 bg-primary"></span>
@@ -81,6 +77,17 @@
                         </a>
                     </li>
                     <li>
+                        @auth
+                        <a href="{{ route('dashboard.overview') }}"
+                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
+                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                            Account
+                        </a>
+                        @else
                         <a href="{{ route('login') }}"
                             class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
                             <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -90,11 +97,11 @@
                             </svg>
                             Account
                         </a>
+                        @endauth
                     </li>
                 </ul>
             </div>
 
-            <!-- Customer Service -->
             <div class="space-y-4">
                 <h3 class="text-lg font-semibold text-white flex items-center">
                     <span class="w-1 h-6 rounded-full mr-3 bg-primary"></span>
@@ -102,7 +109,7 @@
                 </h3>
                 <ul class="space-y-3">
                     <li>
-                        <a href="#"
+                        <a href="{{ route('contact') }}"
                             class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
                             <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +120,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
+                        <a href="{{ route('shipping-returns') }}"
                             class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
                             <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +131,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
+                        <a href="{{ route('shipping-returns') }}"
                             class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
                             <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +142,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
+                        <a href="{{ route('faq') }}"
                             class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
                             <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +153,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
+                        <a href="{{ route('dashboard.orders') }}"
                             class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
                             <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +166,6 @@
                 </ul>
             </div>
 
-            <!-- Newsletter -->
             <div class="space-y-4">
                 <h3 class="text-lg font-semibold text-white flex items-center">
                     <span class="w-1 h-6 rounded-full mr-3 bg-primary"></span>
@@ -191,7 +197,6 @@
             </div>
         </div>
 
-        <!-- Bottom Bar -->
         <div class="border-t border-white border-opacity-10 pt-8 mt-8">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <p class="text-gray-400 text-sm text-center md:text-left">
@@ -199,9 +204,9 @@
                     <span class="text-red-400">♥</span> for tech enthusiasts.
                 </p>
                 <div class="flex flex-wrap justify-center gap-6 text-sm">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Sitemap</a>
+                    <a href="{{ route('privacy') }}" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="{{ route('terms') }}" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                    <a href="{{ route('sitemap') }}" class="text-gray-400 hover:text-white transition-colors">Sitemap</a>
                 </div>
             </div>
         </div>

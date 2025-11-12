@@ -1,21 +1,43 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ config('app.name', 'E-Zone Electronics') }}</title>
-    <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-  </head>
-  <body class="bg-white min-h-screen" x-data="sidebar">
+</head>
+
+{{-- resources/views/client/layouts/app.blade.php --}}
+
+<body x-data="{
+    sidebarCollapsed: true,
+    mobileSidebarOpen: false,
+    accountOpen: false,
+    languageOpen: false
+}" class="font-sans">
+
+    {{-- Your new header.blade.php will go here --}}
     @include('client.partials.header')
-    @include('client.partials.sidebar')
-    <!-- Main Content -->
-    <main class="min-h-screen transition-all duration-300" :class="{ 'lg:ml-16': sidebarCollapsed, 'lg:ml-72': !sidebarCollapsed }">
-      @yield('content')
-      @include('client.partials.footer')
+
+    <main class="flex">
+        {{-- Your new sidebar.blade.php will go here --}}
+        @include('client.partials.sidebar')
+
+        {{-- This is where all your page content will load --}}
+        <div class="flex-1 transition-all duration-300"
+            :class="{ 'lg:ml-72': !sidebarCollapsed, 'lg:ml-16': sidebarCollapsed }">
+            @yield('content')
+        </div>
     </main>
+
+    {{-- Your footer.blade.php will go here --}}
+    @include('client.partials.footer')
+
+    {{-- Your scripts --}}
     @stack('scripts')
-  </body>
+</body>
+
 </html>

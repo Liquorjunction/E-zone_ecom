@@ -46,6 +46,82 @@ Route::get('/product-compare', function () {
     return view('client.pages.compare');
 })->name('product-compare');
 
-Route::get('/user-dashboard', function () {
-    return view('client.pages.dashboard');
-})->name('user-dashboard');
+Route::prefix('dashboard')->name('dashboard.')->group(function () {
+
+    // /dashboard (The main overview)
+    Route::get('/', function () {
+        // Points to /client/pages/dashboard/dashboard.blade.php
+        return view('client.pages.dashboard.dashboard');
+    })->name('overview');
+
+    // /dashboard/orders
+    Route::get('/orders', function () {
+        return view('client.pages.dashboard.orders');
+    })->name('orders');
+
+    // /dashboard/profile
+    Route::get('/profile', function () {
+        return view('client.pages.dashboard.profile');
+    })->name('profile');
+
+    // /dashboard/addresses
+    Route::get('/addresses', function () {
+        return view('client.pages.dashboard.addresses');
+    })->name('addresses');
+
+    // /dashboard/wishlist
+    Route::get('/wishlist', function () {
+        return view('client.pages.dashboard.wishlist');
+    })->name('wishlist');
+
+    // /dashboard/security
+    Route::get('/security', function () {
+        return view('client.pages.dashboard.security');
+    })->name('security');
+
+    // /dashboard/payments
+    Route::get('/payment-methods', function () {
+        return view('client.pages.dashboard.payments');
+    })->name('payments');
+
+    // /dashboard/rewards
+    Route::get('/rewards', function () {
+        return view('client.pages.dashboard.rewards');
+    })->name('rewards');
+});
+
+Route::get('/contact', function () {
+    return view('client.pages.contact');
+})->name('contact');
+
+Route::get('/about', function () {
+    return view('client.pages.about');
+})->name('about');
+
+Route::get('/faq', function () {
+    return view('client.pages.faq');
+})->name('faq');
+
+Route::get('/terms', function () {
+    return view('client.pages.terms');
+})->name('terms');
+
+Route::get('/privacy', function () {
+    return view('client.pages.privacy');
+})->name('privacy');
+
+Route::get('/shipping-returns', function () {
+    return view('client.pages.shipping-returns');
+})->name('shipping-returns');
+
+Route::get('/showrooms', function () {
+    return view('client.pages.showrooms');
+})->name('showrooms');
+
+Route::get('/sitemap', function () {
+    return view('client.pages.sitemap');
+})->name('sitemap');
+
+Route::get('/support', function () {
+    return view('client.pages.support');
+})->name('support');
