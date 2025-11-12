@@ -1,212 +1,142 @@
-<footer class="relative bg-gray-900 text-white overflow-hidden">
-    <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5 blur-3xl bg-primary"></div>
-    <div class="absolute bottom-0 left-0 w-96 h-96 rounded-full opacity-5 blur-3xl bg-primary"></div>
+<footer class="bg-gray-900 text-gray-400">
+    <div class="container mx-auto px-4 py-16">
 
-    <div class="relative container mx-auto px-4 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            <div class="space-y-4">
-                <div class="flex items-center space-x-2">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
-                        class="w-30 h-22 object-contain">
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-8 border-b border-gray-700 pb-10 mb-10">
+
+            <a href="{{ route('home') }}" class="shrink-0">
+                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-zone Logo" class="h-30">
+
+            </a>
+
+            <div class="w-full lg:w-1/2 max-w-md">
+                <div class="flex-col mb-4">
+                    <h3 class="text-lg font-semibold text-white mb-2">Join Our Newsletter</h3>
+                    <p class="text-sm">Get updates on new products and special offers.</p>
+                    <input type="checkbox" id="newsletter-checkbox">
+                    <span class="text-sm text-gray-400">I accept the <a href="#"
+                            class="text-primary hover:text-primary-dark transition-colors">Terms & Conditions</a></span>
                 </div>
-                <p class="text-gray-300 leading-relaxed">
-                    Your trusted destination for cutting-edge electronics and unbeatable deals. Quality products at
-                    prices that matter.
-                </p>
-                <div class="flex space-x-3">
-                    <a href="#"
-                        class="w-10 h-10 rounded-full bg-white bg-opacity-10 hover:bg-primary flex items-center justify-center transition-all duration-300 transform hover:scale-110 group">
-                        {{-- Facebook Svg --}}
-                        <svg width="24px" height="24px" fill="currentColor" viewBox="0 0 24 24"
-                            role="img" xmlns="http://www.w3.org/2000/svg">
-                            <title>Facebook icon</title>
-                            <path
-                                d="M23.9981 11.9991C23.9981 5.37216 18.626 0 11.9991 0C5.37216 0 0 5.37216 0 11.9991C0 17.9882 4.38789 22.9522 10.1242 23.8524V15.4676H7.07758V11.9991H10.1242V9.35553C10.1242 6.34826 11.9156 4.68714 14.6564 4.68714C15.9692 4.68714 17.3424 4.92149 17.3424 4.92149V7.87439H15.8294C14.3388 7.87439 13.8739 8.79933 13.8739 9.74824V11.9991H17.2018L16.6698 15.4676H13.8739V23.8524C19.6103 22.9522 23.9981 17.9882 23.9981 11.9991Z" />
-                        </svg>
-                    </a>
-                    <a href="#"
-                        class="w-10 h-10 rounded-full bg-white bg-opacity-10 hover:bg-primary flex items-center justify-center transition-all duration-300 transform hover:scale-110 group">
-                        {{-- Instagram Svg --}}
-                        <svg width="24px" height="24px" fill="currentColor" viewBox="0 0 24 24"
-                            role="img" xmlns="http://www.w3.org/2000/svg">
-                            <title>Instagram icon</title>
-                            <path
-                                d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-white flex items-center">
-                    <span class="w-1 h-6 rounded-full mr-3 bg-primary"></span>
-                    Quick Links
-                </h3>
-                <ul class="space-y-3">
-                    <li>
-                        <a href="{{ route('home') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                            Home
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('products') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                            Products
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('cart') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                            Shopping Cart
-                        </a>
-                    </li>
-                    <li>
-                        @auth
-                        <a href="{{ route('dashboard.overview') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                            Account
-                        </a>
-                        @else
-                        <a href="{{ route('login') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                            Account
-                        </a>
-                        @endauth
-                    </li>
-                </ul>
-            </div>
-
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-white flex items-center">
-                    <span class="w-1 h-6 rounded-full mr-3 bg-primary"></span>
-                    Customer Service
-                </h3>
-                <ul class="space-y-3">
-                    <li>
-                        <a href="{{ route('contact') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                            Contact Us
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('shipping-returns') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                            Shipping Info
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('shipping-returns') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7"></path>
-                            </svg>
-                            Returns & Refunds
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('faq') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7"></path>
-                            </svg>
-                            FAQ
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('dashboard.orders') }}"
-                            class="text-gray-300 hover:text-primary transition-colors duration-300 flex items-center group">
-                            <svg class="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7"></path>
-                            </svg>
-                            Track Order
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-white flex items-center">
-                    <span class="w-1 h-6 rounded-full mr-3 bg-primary"></span>
-                    Stay Updated
-                </h3>
-                <p class="text-gray-300 text-sm">
-                    Subscribe to get special offers, updates, and exclusive deals!
-                </p>
-                <div class="space-y-2">
-                    <div class="flex flex-col sm:flex-row">
-                        <div class="flex grow">
-                            <input type="email" placeholder="Enter your email"
-                                class="bg-transparent border border-gray-300 rounded-l-md py-2 px-4 text-gray-300 focus:outline-none focus:border-white border-r-0">
-                            <button
-                                class="px-6 py-2.5 text-white rounded-r-md font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl bg-primary">
-                                Subscribe
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="newsletter" name="newsletter" class="mr-2">
-                        <label for="newsletter" class="text-gray-300 text-sm">I agree to receive emails from E-Zone
-                            Electronics.</label>
-                    </div>
-                    <p class="text-xs text-gray-400">
-                        We respect your privacy. Unsubscribe anytime.
-                    </p>
-                </div>
+                <form action="#" method="POST" class="flex">
+                    @csrf
+                    <label for="footer-email" class="sr-only">Email address</label>
+                    <input type="email" name="email" id="footer-email" placeholder="Enter your email address"
+                        class="w-full bg-gray-800 border-gray-700 text-white rounded-l-md py-3 px-5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <button type="submit" aria-label="Subscribe"
+                        class="shrink-0 bg-primary text-white rounded-r-md py-3 px-5 font-medium hover:bg-primary-dark transition-colors">
+                        Subscribe
+                    </button>
+                </form>
             </div>
         </div>
 
-        <div class="border-t border-white border-opacity-10 pt-8 mt-8">
-            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                <p class="text-gray-400 text-sm text-center md:text-left">
-                    &copy; 2025 E-Zone Electronics. All rights reserved. Crafted with
-                    <span class="text-red-400">♥</span> for tech enthusiasts.
-                </p>
-                <div class="flex flex-wrap justify-center gap-6 text-sm">
-                    <a href="{{ route('privacy') }}" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-                    <a href="{{ route('terms') }}" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
-                    <a href="{{ route('sitemap') }}" class="text-gray-400 hover:text-white transition-colors">Sitemap</a>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-5">Company</h4>
+                <ul class="space-y-3">
+                    <li><a href="{{ route('about') }}" class="hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="{{ route('showrooms') }}" class="hover:text-white transition-colors">Our Showrooms</a>
+                    </li>
+                    <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                    <li><a href="{{ route('sitemap') }}" class="hover:text-white transition-colors">Sitemap</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-5">Support</h4>
+                <ul class="space-y-3">
+                    <li><a href="{{ route('contact') }}" class="hover:text-white transition-colors">Contact Us</a></li>
+                    <li><a href="{{ route('faq') }}" class="hover:text-white transition-colors">FAQ</a></li>
+                    <li><a href="{{ route('shipping-returns') }}" class="hover:text-white transition-colors">Shipping &
+                            Returns</a></li>
+                    <li><a href="{{ route('support') }}" class="hover:text-white transition-colors">Customer Support</a>
+                    </li>
+                    <li><a href="{{ route('terms') }}" class="hover:text-white transition-colors">Terms & Conditions</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-5">Categories</h4>
+                <ul class="space-y-3">
+                    <li><a href="#" class="hover:text-white transition-colors">Computers</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Smartphones</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Cameras & Drones</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Gaming</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Headphones</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-5">Contact Us</h4>
+                <address class="not-italic space-y-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-primary shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 10A7 7 0 103 10c0 2.493 1.698 4.988 3.642 6.574.829.799 1.654 1.381 2.274 1.765.311.193.571.337.757.433.09.046.18.09.28.14l.018.008.006.003c.002.001.003.001.005.002zM10 12a2 2 0 100-4 2 2 0 000 4z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span>123 E-zone Street, Tech City, 12345</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-primary shrink-0" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.129a1.5 1.5 0 01-1.052 1.767l-.12.049c-.11.044-.204.08-.284.113A1.5 1.5 0 004.5 9.879a13.55 13.55 0 006.621 6.621 1.5 1.5 0 001.766-.71l.049-.12a1.5 1.5 0 011.767-1.052l3.129.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5H15A13.5 13.5 0 011.5 3H2.5A1.5 1.5 0 014 4.5v.001"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <a href="tel:+1234567890" class="hover:text-white transition-colors">(123) 456-7890</a>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-primary shrink-0" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
+                            <path
+                                d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+                        </svg>
+                        <a href="mailto:support@ezone.com"
+                            class="hover:text-white transition-colors">support@ezone.com</a>
+                    </div>
+                </address>
+            </div>
+
+        </div>
+
+        <div class="border-t border-gray-700 pt-8">
+            <div class="flex flex-col-reverse md:flex-row justify-between items-center text-sm">
+                <p class="mt-4 md:mt-0">&copy; {{ date('Y') }} E-zone. All rights reserved.</p>
+
+                <div class="flex space-x-5">
+                    <a href="#" aria-label="Facebook" class="hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.772-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Instagram" class="hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M12.315 2c2.43 0 2.718.01 3.69.053.972.043 1.633.18 2.19.388.556.208.97.46 1.398.888.428.428.68.842.888 1.398.208.557.345 1.218.388 2.19.043.972.053 1.26.053 3.69s-.01 2.718-.053 3.69c-.043.972-.18 1.633-.388 2.19-.208.556-.46.97-.888 1.398-.428.428-.842.68-1.398.888-.557.208-1.218.345-2.19.388-.972.043-1.26.053-3.69.053s-2.718-.01-3.69-.053c-.972-.043-1.633-.18-2.19-.388-.556-.208-.97-.46-1.398-.888-.428-.428-.68-.842-.888-1.398-.208-.557-.345-1.218-.388-2.19-.043-.972-.053-1.26-.053-3.69s.01-2.718.053-3.69c.043-.972.18-1.633.388-2.19.208-.556.46-.97.888-1.398.428-.428.842-.68 1.398-.888.557-.208 1.218-.345 2.19-.388.972-.043 1.26-.053 3.69-.053zm0-2c-2.463 0-2.776.01-3.743.054C7.6 2.098 6.864.25 6.17.44c-.694.19-1.32.48-1.888.988C3.71 1.998 3.18 2.62 2.99 3.314c-.19.694-.34 1.43-.38 2.414C2.56 6.702 2.55 7.016 2.55 9.47s.01 2.768.054 3.736c.04.98.19 1.718.38 2.414.19.694.48 1.32.988 1.888.568.568 1.19.898 1.888.988.98.04 1.718.19 2.414.38.968.044 1.278.054 3.736.054s2.768-.01 3.736-.054c.98-.04 1.718-.19 2.414-.38.694-.19 1.32-.48 1.888-.988.568-.568.898-1.19.988-1.888.04-.98.19-1.718.38-2.414.044-.968.054-1.278.054-3.736s-.01-2.768-.054-3.736c-.04-.98-.19-1.718-.38-2.414-.19-.694-.48-1.32-.988-1.888C18.002 3.18 17.38 2.89 16.686 2.99c-.98-.04-1.718-.19-2.414-.38C13.298 2.56 12.984 2.55 10.53 2.55zM12 6.865a5.135 5.135 0 100 10.27 5.135 5.135 0 000-10.27zm0 8.27a3.135 3.135 0 110-6.27 3.135 3.135 0 010 6.27zM18.135 5.865a1.162 1.162 0 100 2.324 1.162 1.162 0 000-2.324z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Twitter" class="hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                                d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <span>We accept:</span>
+                    <span class="text-white font-bold">VISA</span>
+                    <span class="text-white font-bold">MasterCard</span>
+                    <span class="text-white font-bold">PayPal</span>
                 </div>
             </div>
         </div>

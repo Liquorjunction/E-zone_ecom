@@ -125,3 +125,23 @@ Route::get('/sitemap', function () {
 Route::get('/support', function () {
     return view('client.pages.support');
 })->name('support');
+
+Route::get('/new-arrivals', function () {
+    return view('client.pages.new-arrivals');
+})->name('new-arrivals');
+
+Route::get('/best-sellers', function () {
+    return view('client.pages.best-sellers');
+})->name('best-sellers');
+
+Route::get('/deals', function () {
+    return view('client.pages.deals');
+})->name('deals');
+
+Route::get('/brand/{slug}', function ($slug) {
+    return view('client.pages.brand-products', ['brand_slug' => $slug]);
+})->name('brand-products');
+
+Route::get('/order-tracking', function () {
+    return view('client.pages.order-tracking');
+})->name('order-tracking');

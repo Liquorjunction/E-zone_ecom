@@ -4,25 +4,10 @@
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
 
-            <div class="mb-8">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h1 class="text-4xl font-extrabold text-gray-900 mb-2">
-                            @yield('dashboard-title', 'My Account')
-                        </h1>
-                        <p class="text-gray-600">Welcome back, John Doe!</p>
-                    </div>
-                    <div class="mt-4 md:mt-0">
-                        <div class="flex items-center space-x-2 text-sm text-gray-500">
-                            <a href="{{-- route('home') --}}" class="hover:text-primary transition-colors">Home</a>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                            <span class="text-primary font-medium">@yield('dashboard-title', 'My Account')</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <x-breadcrumbs>
+                <x-slot:title>@yield('dashboard-title', 'My Account')</x-slot:title>
+                <x-slot:content>Welcome back, John Doe!</x-slot:content>
+            </x-breadcrumbs>
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 

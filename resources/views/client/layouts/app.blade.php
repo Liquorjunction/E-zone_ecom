@@ -30,11 +30,10 @@
         <div class="flex-1 transition-all duration-300"
             :class="{ 'lg:ml-72': !sidebarCollapsed, 'lg:ml-16': sidebarCollapsed }">
             @yield('content')
+            {{-- Your footer.blade.php will go here --}}
+            @include('client.partials.footer')
         </div>
     </main>
-
-    {{-- Your footer.blade.php will go here --}}
-    @include('client.partials.footer')
 
     {{-- Your scripts --}}
     @stack('scripts')
