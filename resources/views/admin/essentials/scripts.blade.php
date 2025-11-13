@@ -1,0 +1,10 @@
+<script src="{{ asset('admin_assets/js/core/libs.min.js') }}"></script>
+<script src="{{ asset('admin_assets/js/core/external.min.js') }}"></script>
+<script src="{{ asset('admin_assets/js/charts/widgetcharts.js') }}"></script>
+<script src="{{ asset('admin_assets/js/charts/vectore-chart.js') }}"></script>
+<script src="{{ asset('admin_assets/js/plugins/fslightbox.js') }}"></script>
+<script src="{{ asset('admin_assets/js/plugins/setting.js') }}"></script>
+<script src="{{ asset('admin_assets/js/plugins/slider-tabs.js') }}"></script>
+<script src="{{ asset('admin_assets/js/plugins/form-wizard.js') }}"></script>
+<script src="{{ asset('admin_assets/vendor/aos/dist/aos.js') }}"></script>
+<script src="{{ asset('admin_assets/js/hope-ui.js') }}" defer></script>

@@ -149,3 +149,21 @@ Route::get('/order-tracking', function () {
 Route::get('/order-detail/{id}', function ($id) {
     return view('client.pages.order-detail', ['order_id' => $id]);
 })->name('order-detail');
+
+Route::get('/admin', function () {
+    return view('admin.layouts.app');
+})->name('admin-dashboard');
+
+Route::get('/admin/auth', function () {
+    return view('admin.auth.auth');
+})->name('admin-home');
+
+Route::get('/admin/auth/home', function () {
+    return view('admin.pages.home');
+})->name('admin-home');
+
+Route::get('/admin/auth/login', function () {
+    return view('admin.auth.login');
+})->name('admin-login');
+
+
