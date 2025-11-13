@@ -194,3 +194,9 @@ Breadcrumbs::for('order-tracking', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
     $trail->push('Order Tracking', route('order-tracking'));
 });
+
+// Home > Order Detail
+Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('home');
+    $trail->push('Order Detail', route('order-detail', $id));
+});

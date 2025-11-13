@@ -145,3 +145,7 @@ Route::get('/brand/{slug}', function ($slug) {
 Route::get('/order-tracking', function () {
     return view('client.pages.order-tracking');
 })->name('order-tracking');
+
+Route::get('/order-detail/{id}', function ($id) {
+    return view('client.pages.order-detail', ['order_id' => $id]);
+})->name('order-detail');
