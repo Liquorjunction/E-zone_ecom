@@ -32,24 +32,41 @@
                      </a>
                      <h2 class="mb-2 text-center">Sign In</h2>
                      <p class="text-center">Login to stay connected.</p>
-                     <form>
+                     @if($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                     @endif
+
+                     <form method="POST" action="{{ route('admin.login') }}">
+                        @csrf
                         <div class="row">
                            <div class="col-lg-12">
                               <div class="form-group">
-                                 <label for="email" class="form-label">Email</label>
-                                 <input type="email" class="form-control" id="email" aria-describedby="email" placeholder=" ">
+                                 <label for="login" class="form-label">Email or Username</label>
+                                 <input type="text" class="form-control @error('login') is-invalid @enderror" id="login" name="login" value="{{ old('login') }}" aria-describedby="login" placeholder=" " required>
+                                 @error('login')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                 @enderror
                               </div>
                            </div>
                            <div class="col-lg-12">
                               <div class="form-group">
                                  <label for="password" class="form-label">Password</label>
-                                 <input type="password" class="form-control" id="password" aria-describedby="password" placeholder=" ">
+                                 <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" aria-describedby="password" placeholder=" " required>
+                                 @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                 @enderror
                               </div>
                            </div>
                            <div class="col-lg-12 d-flex justify-content-between">
                               <div class="form-check mb-3">
-                                 <input type="checkbox" class="form-check-input" id="customCheck1">
-                                 <label class="form-check-label" for="customCheck1">Remember Me</label>
+                                 <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                 <label class="form-check-label" for="remember">Remember Me</label>
                               </div>
                            </div>
                         </div>

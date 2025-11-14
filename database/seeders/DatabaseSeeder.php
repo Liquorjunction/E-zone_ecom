@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\admin;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,5 +22,16 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Seed admin data
+        $this->call([
+            AdminSeeder::class,
+        ]);
+
+        // Assign super-admin role to the first admin user
+        $admin = admin::first();
+        if ($admin) {
+            $admin->assignRole('super-admin');
+        }
     }
 }
