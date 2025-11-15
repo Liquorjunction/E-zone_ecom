@@ -1,4 +1,4 @@
-<div class="iq-navbar-header" style="height: 215px;">
+<div class="iq-navbar-header" style="height: auto; min-height: 215px;">
     <div class="container-fluid iq-container">
         <div class="row">
             <div class="col-md-12">
@@ -6,6 +6,14 @@
                     <div>
                         <h1>@yield('header-title', 'Hello Devs!')</h1>
                         <p>@yield('header-description', 'We are on a mission to help developers like you build successful projects for FREE.')</p>
+                        {{-- Breadcrumbs --}}
+                        @hasSection('breadcrumbs')
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    @yield('breadcrumbs')
+                                </ol>
+                            </nav>
+                        @endif
                     </div>
                 </div>
             </div>

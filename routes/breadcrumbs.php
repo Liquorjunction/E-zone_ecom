@@ -200,3 +200,38 @@ Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail, $id) {
     $trail->parent('home');
     $trail->push('Order Detail', route('order-detail', $id));
 });
+
+// Admin Dashboard
+Breadcrumbs::for('admin.dashboard', function (BreadcrumbTrail $trail) {
+    $trail->push('Dashboard', route('admin.dashboard'));
+});
+
+// Admin Dashboard > User Management
+Breadcrumbs::for('admin.user-management.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('User Management', route('admin.user-management.index'));
+});
+
+// Admin Dashboard > User Management > Create
+Breadcrumbs::for('admin.user-management.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.user-management.index');
+    $trail->push('Create User', route('admin.user-management.create'));
+});
+
+// Admin Dashboard > User Management > Edit
+Breadcrumbs::for('admin.user-management.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.user-management.index');
+    $trail->push('Edit User', route('admin.user-management.edit', 1)); // Default ID, should be dynamic
+});
+
+// Admin Dashboard > User Management > Role & Permission
+Breadcrumbs::for('admin.user-management.role-permission', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.user-management.index');
+    $trail->push('Role & Permission', route('admin.user-management.role-permission'));
+});
+
+// Admin Dashboard > Profile
+Breadcrumbs::for('admin.profile', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Profile', route('admin.profile'));
+});

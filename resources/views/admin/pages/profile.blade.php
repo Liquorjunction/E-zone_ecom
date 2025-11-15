@@ -1,5 +1,18 @@
 @extends('admin.layouts.app')
 
+@section('header-title', 'Profile')
+@section('header-description', 'Manage your account settings and preferences')
+
+@section('breadcrumbs')
+    @foreach(Breadcrumbs::generate('admin.profile') as $breadcrumb)
+        @if($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
+
 @section('content')
 
     {{-- I've added a @push('styles') directive to add page-specific CSS --}}
@@ -56,8 +69,8 @@
                             <div class="d-flex flex-wrap align-items-center">
                                 <div class="d-flex flex-wrap align-items-center mb-3 mb-sm-0">
                                     {{-- Get auth user name and role --}}
-                                    <h4 class="me-2 h4">{{ $admin->name }}</h4>
-                                    <span>- {{ $admin->role }}</span>
+                                    <h4 class="me-2 h4">{{ \App\Helpers\AdminHelper::name() ?? 'Admin User' }}</h4>
+                                    <span>- {{ \App\Helpers\AdminHelper::role() ?? 'Administrator' }}</span>
                                 </div>
                             </div>
                             <ul class="d-flex nav nav-pills mb-0 text-center profile-tab nav-slider"
@@ -94,14 +107,8 @@
                                             @csrf
                                             <input type="file" id="profileImageInput" name="profile_image" accept="image/*">
 
-                                            @if (isset($admin->profile_image))
-                                                <img id="profileImage" src="{{ asset('admin_assets/images/avatars/' . $admin->profile_image) }}"
-                                                    alt="User-Profile"
-                                                    class="theme-color-default-img img-fluid rounded-pill avatar-100">
-                                            @else
-                                                <img id="profileImage" src="{{ asset('admin_assets/images/avatars/01.png') }}" alt="User-Profile"
-                                                    class="theme-color-default-img img-fluid rounded-pill avatar-100">
-                                            @endif
+                                            <img id="profileImage" src="{{ \App\Helpers\AdminHelper::profileImageUrl() }}" alt="User-Profile"
+                                                class="theme-color-default-img img-fluid rounded-pill avatar-100">
 
                                             {{-- This label is the new edit button. Clicking it triggers the file input. --}}
                                             <label for="profileImageInput" class="edit-profile-button">
@@ -112,9 +119,9 @@
                                         </form>
                                     </div>
                                     <div class="mt-3">
-                                        <h3 class="d-inline-block">{{ $admin->name }}</h3>
-                                        <p class="d-inline-block pl-3"> - {{ $admin->role }}</p>
-                                        <p class="mb-0">Welcome, {{ $admin->name }} </p>
+                                        <h3 class="d-inline-block">{{ \App\Helpers\AdminHelper::name() ?? 'Admin User' }}</h3>
+                                        <p class="d-inline-block pl-3"> - {{ \App\Helpers\AdminHelper::role() ?? 'Administrator' }}</p>
+                                        <p class="mb-0">Welcome, {{ \App\Helpers\AdminHelper::name() ?? 'Admin User' }} </p>
                                     </div>
                                 </div>
                             </div>
@@ -128,17 +135,17 @@
                             <div class="card-body">
                                 <div class="mt-2">
                                     <h6 class="mb-1">Joined:</h6>
-                                    <p>{{ $admin->created_at }}</p>
+                                    <p>{{ \App\Helpers\AdminHelper::user() ? \App\Helpers\AdminHelper::user()->created_at : now() }}</p>
                                 </div>
                                 <div class="mt-2">
                                     <h6 class="mb-1">Email:</h6>
-                                    <p><a href="#" class="text-body"> {{ $admin->email }}</a></p>
+                                    <p><a href="#" class="text-body"> {{ \App\Helpers\AdminHelper::email() ?? 'N/A' }}</a></p>
                                 </div>
                                 <div class="mt-2">
                                     <h6 class="mb-1">Email Verified:</h6>
                                     {{-- Show Verified or not --}}
                                     <p>
-                                        @if ($admin->email_verified_at)
+                                        @if (\App\Helpers\AdminHelper::user() && \App\Helpers\AdminHelper::user()->email_verified_at)
                                             <span style="color: green">Verified</span>
                                         @else
                                             <span style="color: red">Not Verified</span>
@@ -186,15 +193,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     // Update the image src
                     profileImage.src = data.image_url;
-                    // Show success message (you can use a toast or alert)
-                    alert(data.message);
+                    // Show success message using toast
+                    showToast(data.message, 'success');
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while updating the profile image.');
+                showToast('An error occurred while updating the profile image.', 'error');
             });
         }
     });
@@ -215,19 +222,19 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast(data.message, 'success');
                     // Close the modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
                     modal.hide();
                     // Reset the form
                     changePasswordForm.reset();
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while changing the password.');
+                showToast('An error occurred while changing the password.', 'error');
             });
         });
     }

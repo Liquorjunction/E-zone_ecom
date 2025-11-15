@@ -32,6 +32,9 @@
         @include('admin.partials.footer')
     </main>
 
+    {{-- Toast Notifications --}}
+    @include('admin.components.toast')
+
     @include('admin.essentials.scripts')
 
     {{-- Page-specific scripts --}}

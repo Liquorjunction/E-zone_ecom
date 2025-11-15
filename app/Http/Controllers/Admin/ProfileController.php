@@ -14,9 +14,8 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        // Get Auth user and pass it to the view
-        $admin = Auth::guard('admin')->user();
-        return view('admin.pages.profile', compact('admin'));
+        // Admin data is now available globally via AdminHelper
+        return view('admin.pages.profile');
     }
     /**
      * Show the form for editing the current admin's own profile.
@@ -25,7 +24,7 @@ class ProfileController extends Controller
     {
         // This method doesn't need the repository
         $admin = Auth::guard('admin')->user();
-        return view('admin.profile.edit', compact('admin'));
+        return view('admin.pages.userManagement.edit', compact('admin'));
     }
 
     /**

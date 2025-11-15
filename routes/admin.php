@@ -9,9 +9,6 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [AdminAuthController::class, 'login']);
-        Route::get('/forgot-password', function () {
-            return view('admin.auth.forgot-password');
-        })->name('forgot-password');
     });
 
     // Authenticated routes
@@ -29,7 +26,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             })->name('create');
             Route::get('/role-permission', function () {
                 return view('admin.pages.userManagement.role-permission');
-            })->name('role-permisssion');
+            })->name('role-permission');
         });
 
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');

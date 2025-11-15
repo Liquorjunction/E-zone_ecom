@@ -8,15 +8,21 @@ use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Http\Requests\Admin\Auth\StoreAdminRequest;
 use App\Http\Requests\Admin\Auth\UpdateAdminRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
 class AdminAuthController extends Controller
 {
-
     public function showLoginForm()
     {
         return view('admin.auth.login');
+    }
+
+    public function index()
+    {
+        $admin = Auth::guard('admin')->user();
+        return view('admin.pages.home' ,compact('admin'));
     }
 
     public function login(AdminLoginRequest $request, AdminRepositoryInterface $adminRepository)
