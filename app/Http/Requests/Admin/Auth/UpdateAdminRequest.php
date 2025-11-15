@@ -34,7 +34,8 @@ class UpdateAdminRequest extends FormRequest
                 Rule::unique('admin', 'email')->ignore($adminId),
             ],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|string|exists:roles,name,guard_name,admin',
+            'roles' => 'required|array',
+            'roles.*' => 'string|exists:roles,name,guard_name,admin',
             'status' => 'required|string|in:active,inactive',
         ];
     }

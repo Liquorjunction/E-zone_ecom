@@ -22,6 +22,7 @@ class AdminAuthController extends Controller
     public function index()
     {
         $admin = Auth::guard('admin')->user();
+        dd($admin);
         return view('admin.pages.home' ,compact('admin'));
     }
 
@@ -47,7 +48,7 @@ class AdminAuthController extends Controller
     {
         // This method doesn't need the repository
         $roles = Role::where('guard_name', 'admin')->pluck('name', 'name');
-        return view('admin.admins.create', compact('roles'));
+        return view('admin.pages.userManagement.create', compact('roles'));
     }
 
     /**
@@ -57,9 +58,7 @@ class AdminAuthController extends Controller
     public function store(StoreAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         $adminRepository->superadminCreateAdmin($request);
-
-        return redirect()->route('admin.admins.index')
-                         ->with('success', 'Admin created successfully.');
+        return redirect()->route('admin.user-management.index')->with('success', 'Admin created successfully.');
     }
 
     /**
@@ -74,7 +73,7 @@ class AdminAuthController extends Controller
         }
 
         $roles = Role::where('guard_name', 'admin')->pluck('name', 'name');
-        return view('admin.admins.edit', compact('admin', 'roles'));
+        return view('admin.pages.userManagement.edit', compact('admin', 'roles'));
     }
 
     /**
@@ -84,9 +83,7 @@ class AdminAuthController extends Controller
     public function update(UpdateAdminRequest $request, $id, AdminRepositoryInterface $adminRepository)
     {
         $adminRepository->superadminUpdateAdmin($request, $id);
-
-        return redirect()->route('admin.admins.edit', $id)
-                         ->with('success', 'Admin updated successfully.');
+        return redirect()->route('admin.user-management.index', $id)->with('success', 'Admin updated successfully.');
     }
 
     /**
@@ -96,7 +93,6 @@ class AdminAuthController extends Controller
     public function toggleStatus($id, AdminRepositoryInterface $adminRepository)
     {
         $adminRepository->superadminToggleAdminStatus($id);
-
         return back()->with('success', 'Admin status updated.');
     }
 

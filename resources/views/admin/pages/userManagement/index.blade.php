@@ -33,29 +33,37 @@
                                             <th>Profile</th>
                                             <th>Name</th>
                                             <th>Email</th>
-                                            <th>Country</th>
+                                            <th>Username</th>
                                             <th>Status</th>
                                             <th>Join Date</th>
                                             <th style="min-width: 100px">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- Single entry for design reference --}}
-                                        <tr>
-                                            <td class="text-center">
-                                                {{-- Updated image path to use Laravel's asset() helper --}}
-                                                <img class="bg-primary-subtle rounded img-fluid avatar-40 me-3"
-                                                    src="{{ asset('admin_assets/images/shapes/01.png') }}" alt="profile">
-                                            </td>
-                                            <td>Anna Sthesia</td>
-                                            <td>annasthesia@gmail.com</td>
-                                            <td>USA</td>
-                                            <td><span class="badge bg-primary">Active</span></td>
-                                            <td>2019/12/01</td>
-                                            <td>
-                                                @include('admin.partials.actions')
-                                            </td>
-                                        </tr>
+                                        @forelse($admins ?? [] as $admin)
+                                            <tr>
+                                                <td class="text-center">
+                                                    <img class="bg-primary-subtle rounded img-fluid avatar-40 me-3"
+                                                        src="{{ $admin->profile_image ? asset('admin_assets/images/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png') }}" alt="profile">
+                                                </td>
+                                                <td>{{ $admin->name }}</td>
+                                                <td>{{ $admin->email }}</td>
+                                                <td>{{ $admin->username }}</td>
+                                                <td>
+                                                    <span class="badge {{ $admin->status == 'active' ? 'bg-primary' : 'bg-danger' }}">
+                                                        {{ ucfirst($admin->status) }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $admin->created_at->format('Y/m/d') }}</td>
+                                                <td>
+                                                    @include('admin.partials.actions', ['model' => $admin, 'routePrefix' => 'admin.user-management'])
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center">No admins found.</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>

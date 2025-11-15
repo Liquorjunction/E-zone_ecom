@@ -227,11 +227,11 @@ Breadcrumbs::for('admin.user-management.edit', function (BreadcrumbTrail $trail)
 // Admin Dashboard > User Management > Role & Permission
 Breadcrumbs::for('admin.user-management.role-permission', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.user-management.index');
-    $trail->push('Role & Permission', route('admin.user-management.role-permission'));
+    $trail->push('Role & Permission', route('admin.roles-permissions.index'));
 });
 
 // Admin Dashboard > Profile
 Breadcrumbs::for('admin.profile', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
-    $trail->push('Profile', route('admin.profile'));
+    $trail->push('Profile', route('admin.profile.index'));
 });

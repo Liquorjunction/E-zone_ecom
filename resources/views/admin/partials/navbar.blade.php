@@ -74,7 +74,7 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{ route('admin.profile') }}">Profile</a>
+                            <li><a class="dropdown-item" href="{{ route('admin.profile.index') }}">Profile</a>
                             </li>
                             <li><a class="dropdown-item"
                                     href="{{ url('dashboard/app/user-privacy-setting') }}">Privacy

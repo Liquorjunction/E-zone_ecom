@@ -30,7 +30,7 @@
                                 You might want to combine these or ensure this form has its own
                                 route and controller method.
                             --}}
-                            <form method="POST" action="{{-- {{ route('admin.users.store.profile') }} --}}" enctype="multipart/form-data">
+                            <form method="POST" action="{{ route('admin.user-management.store') }}" enctype="multipart/form-data">
                                 @csrf
                                 <div class="form-group">
                                     <div class="profile-img-edit position-relative">
@@ -84,7 +84,7 @@
                         <div class="card-body">
                             <div class="new-user-info">
                                 {{-- Added method, action, and @csrf token --}}
-                                <form method="POST" action="{{-- {{ route('admin.users.store') }} --}}">
+                                <form method="POST" action="{{ route('admin.user-management.store') }}">
                                     @csrf
                                     <div class="row">
                                         <div class="form-group col-md-12">

@@ -31,7 +31,7 @@ class ProfileController extends Controller
      * Update the current admin's profile (pic & password).
      * Uses the standard update() method from the repo.
      */
-    public function updateProfile(UpdateProfileRequest $request, AdminRepositoryInterface $adminRepository)
+    public function update(UpdateProfileRequest $request, AdminRepositoryInterface $adminRepository)
     {
         $adminId = Auth::guard('admin')->id();
 

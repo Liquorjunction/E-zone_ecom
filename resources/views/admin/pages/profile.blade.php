@@ -103,7 +103,7 @@
                                         - This structure works for both existing and default images.
                                     --}}
                                     <div class="user-profile position-relative">
-                                        <form id="profileImageForm" method="POST" action="{{ route('admin.updateProfile') }}" enctype="multipart/form-data">
+                                    <form id="profileImageForm" method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data">
                                             @csrf
                                             <input type="file" id="profileImageInput" name="profile_image" accept="image/*">
 

@@ -139,16 +139,17 @@ class AdminRepository implements AdminRepositoryInterface
                 return false; // Not authorized
             }
 
-            $newAdmin = admin::create([
+            $admin = admin::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
+                'status' => 'active',
             ]);
 
-            $newAdmin->assignRole($request->role ?? 'admin');
+            $admin->assignRole($request->roles);
 
-            return true;
+            return $admin;
         } catch (\Exception $e) {
             Log::error('Superadmin create admin failed: '. $e->getMessage());
             return false;

@@ -16,12 +16,28 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        admin::create([
-            'name' => 'Super Admin',
-            'username' => 'superadmin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'status' => 'active',
-        ]);
+        // Check if superadmin already exists
+        $existingAdmin = admin::where('username', 'superadmin')->first();
+
+        if (!$existingAdmin) {
+            $admin = admin::create([
+                'name' => 'Super Admin',
+                'username' => 'superadmin',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('password'),
+                'status' => 'active',
+            ]);
+
+            $admin->assignRole('super-admin');
+        } else {
+            $admin = $existingAdmin;
+        }
+
+        // Assign all permissions to super-admin role
+        $superAdminRole = \Spatie\Permission\Models\Role::where('name', 'super-admin')->where('guard_name', 'admin')->first();
+        if ($superAdminRole) {
+            $permissions = \Spatie\Permission\Models\Permission::where('guard_name', 'admin')->get();
+            $superAdminRole->syncPermissions($permissions);
+        }
     }
 }
