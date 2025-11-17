@@ -2,24 +2,33 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
+use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
-class AdminAuthenticate
+class AdminAuthenticate extends Middleware
 {
     /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * Get the path the user should be redirected to when they are not authenticated.
      */
-    public function handle(Request $request, Closure $next): Response
+    protected function redirectTo(Request $request): ?string
     {
-        if (!Auth::guard('admin')->check()) {
-            return redirect()->route('admin.login');
+        // Redirect to the admin login route if not authenticated
+        return $request->expectsJson() ? null : route('admin.login');
+    }
+
+    /**
+     * Get the guard(s) to be used.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    protected function authenticate($request, array $guards)
+    {
+        // We want to force this middleware to always check the 'admin' guard
+        if ($this->auth->guard('admin')->check()) {
+            return $this->auth->shouldUse('admin');
         }
 
-        return $next($request);
+        $this->unauthenticated($request, ['admin']);
     }
 }

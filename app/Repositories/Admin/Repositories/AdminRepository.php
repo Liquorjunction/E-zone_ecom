@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AdminRepository implements AdminRepositoryInterface
 {
@@ -139,15 +140,30 @@ class AdminRepository implements AdminRepositoryInterface
                 return false; // Not authorized
             }
 
+            // --- Create user in 2 steps to get the ID ---
+
+            // 1. Create the user with a temporary unique username
+            //    (We'll use the email since it's already validated as unique)
             $admin = admin::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'username' => $request->username,
+                'username' => $request->email, // <-- TEMPORARY value
                 'password' => Hash::make($request->password),
                 'status' => 'active',
             ]);
 
-            $admin->assignRole($request->roles);
+            // 2. Now that we have the $admin->id, generate the final username
+            $baseUsername =  Str::slug($request->name, ''); // 'John Doe' -> 'johndoe'
+            $paddedId = sprintf("%06d", $admin->id);
+            $finalUsername = 'Ezn-' . strtolower($baseUsername) . '-' . $paddedId;
+
+            // 3. Update the admin with the permanent username
+            $admin->username = $finalUsername;
+            $admin->save();
+
+            // --- End Fix ---
+
+            $admin->assignRole($request->role);
 
             return $admin;
         } catch (\Exception $e) {

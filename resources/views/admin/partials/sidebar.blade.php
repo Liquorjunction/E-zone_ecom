@@ -71,7 +71,7 @@
                 <li>
                     <hr class="hr-horizontal">
                 </li>
-                @can('create admins')
+                @can('create admins', 'admin')
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.user-management.index') }}">
                             <i class="icon">
@@ -86,7 +86,7 @@
                         </a>
                     </li>
                 @endcan
-                @can('create admins')
+                @can('create roles', 'admin')
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.roles-permissions.index') }}">
                             <i class="icon">

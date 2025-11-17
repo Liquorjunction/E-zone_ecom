@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 class Admin extends Authenticatable
 {
-    use HasRoles;
+    use HasRoles, Notifiable;
 
     public $guard_name = 'admin';
     protected $guarded = [];
@@ -17,9 +18,13 @@ class Admin extends Authenticatable
     protected $fillable = [
         'name',
         'username',
-        'profile_image',
         'email',
-        'status',
         'password',
+        'status',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 }

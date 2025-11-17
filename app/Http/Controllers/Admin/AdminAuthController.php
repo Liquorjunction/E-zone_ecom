@@ -19,10 +19,20 @@ class AdminAuthController extends Controller
         return view('admin.auth.login');
     }
 
-    public function index()
+    public function dashboard()
     {
         $admin = Auth::guard('admin')->user();
         return view('admin.pages.home' ,compact('admin'));
+    }
+
+    public function index(AdminRepositoryInterface $adminRepository, Request $request)
+    {
+        // We'll just get all admins for now.
+        // You can implement datatables/pagination later.
+        $admins = $adminRepository->getDataForDataTable($request)->get();
+
+        // This view is for your user list
+        return view('admin.pages.userManagement.index', compact('admins'));
     }
 
     public function login(AdminLoginRequest $request, AdminRepositoryInterface $adminRepository)
@@ -46,7 +56,7 @@ class AdminAuthController extends Controller
     public function create()
     {
         // This method doesn't need the repository
-        $roles = Role::where('guard_name', 'admin')->pluck('name', 'name');
+        $roles = Role::where('guard_name', 'admin')->get();$roles = Role::where('guard_name', 'admin')->get();
         return view('admin.pages.userManagement.create', compact('roles'));
     }
 
@@ -71,7 +81,7 @@ class AdminAuthController extends Controller
             abort(403, 'You are not authorized to edit this user.');
         }
 
-        $roles = Role::where('guard_name', 'admin')->pluck('name', 'name');
+        $roles = Role::where('guard_name', 'admin')->get();
         return view('admin.pages.userManagement.edit', compact('admin', 'roles'));
     }
 
@@ -82,7 +92,7 @@ class AdminAuthController extends Controller
     public function update(UpdateAdminRequest $request, $id, AdminRepositoryInterface $adminRepository)
     {
         $adminRepository->superadminUpdateAdmin($request, $id);
-        return redirect()->route('admin.user-management.index', $id)->with('success', 'Admin updated successfully.');
+        return redirect()->route('admin.user-management.index', $id)->with('success', 'Admin updated successfully.');return redirect()->route('admin.user-management.index')->with('success', 'Admin updated successfully.');
     }
 
     /**

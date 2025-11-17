@@ -5,6 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\PermissionRegistrar;
 
 return new class extends Migration
 {
@@ -14,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Define the guard name
         $guardName = 'admin';
@@ -26,7 +27,6 @@ return new class extends Migration
         Permission::create(['name' => 'edit any admin', 'guard_name' => $guardName]);
         Permission::create(['name' => 'toggle admin status', 'guard_name' => $guardName]);
         Permission::create(['name' => 'update own profile', 'guard_name' => $guardName]);
-        Permission::create(['name' => 'reset own password', 'guard_name' => $guardName]);
 
         // Create Super Admin Role and assign all permissions
         $superAdminRole = Role::create(['name' => 'super-admin', 'guard_name' => $guardName]);
@@ -37,7 +37,6 @@ return new class extends Migration
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => $guardName]);
         $adminRole->givePermissionTo([
             'update own profile',
-            'reset own password',
         ]);
     }
 
@@ -47,7 +46,7 @@ return new class extends Migration
     public function down(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Define the guard name
         $guardName = 'admin';
