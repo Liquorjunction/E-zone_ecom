@@ -8,14 +8,15 @@ use Spatie\Permission\Models\Role;
 
 class RoleRepository implements RoleRepositoryInterface
 {
+    protected $guardName = 'admin';
     public function getRoles()
     {
-        return Role::all();
+        return Role::where('guard_name', $this->guardName)->get();
     }
 
     public function getPermissions()
     {
-        return Permission::all();
+        return Permission::where('guard_name', $this->guardName)->get();
     }
 
     public function getAdmin($id)
@@ -25,25 +26,48 @@ class RoleRepository implements RoleRepositoryInterface
 
     public function getAllAdmins()
     {
-        return Role::all();
+        return Role::where('guard_name', $this->guardName)->get();
     }
 
     public function updateRole($request, $id)
     {
-        $role = Role::find($id);
-        $role->update($request->all());
+        $role = Role::findOrFail($id);
+
+        // Ensure you only update the name
+        $role->update(['name' => $request->input('name')]);
+
+        // Sync permissions, ensuring they are also for the admin guard
+        if ($request->has('permissions')) {
+            $permissions = Permission::where('guard_name', $this->guardName)
+                                     ->whereIn('id', $request->input('permissions', []))
+                                     ->get();
+            $role->syncPermissions($permissions);
+        }
+
         return $role;
     }
 
     public function storeRole($request)
     {
-        $role = Role::create($request->all());
+        //  1. Create the role with the CORRECT guard
+        $role = Role::create([
+            'name' => $request->input('name'),
+            'guard_name' => $this->guardName // <-- This is the critical fix
+        ]);
+
+        // 2. Sync permissions (if you send them from your 'create' form)
+        if ($request->has('permissions')) {
+            $permissions = Permission::where('guard_name', $this->guardName)
+                                     ->whereIn('id', $request->input('permissions', []))
+                                     ->get();
+            $role->syncPermissions($permissions);
+        }
+
         return $role;
     }
 
     public function getDataForDataTable($request)
     {
-        $roles = Role::all();
-        return $roles;
+        return Role::where('guard_name', $this->guardName)->get();
     }
 }

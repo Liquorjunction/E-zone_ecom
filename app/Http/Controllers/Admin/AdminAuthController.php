@@ -22,7 +22,6 @@ class AdminAuthController extends Controller
     public function index()
     {
         $admin = Auth::guard('admin')->user();
-        dd($admin);
         return view('admin.pages.home' ,compact('admin'));
     }
 

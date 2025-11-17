@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-class admin extends Authenticatable
+class Admin extends Authenticatable
 {
     use HasRoles;
 
     public $guard_name = 'admin';
-    protected $guarded = 'admin';
+    protected $guarded = [];
     protected $table = 'admin';
 
     protected $fillable = [
