@@ -1,4 +1,4 @@
-@can('toggle admin status')
+@can('user management.update')
     <form action="{{ $toggle_url }}" method="POST" style="display: inline;">
         @csrf
         @method('PATCH')

@@ -13,7 +13,7 @@ class StoreAdminRequest extends FormRequest
     public function authorize(): bool
     {
         // Checks if the logged-in admin has the 'create admins' permission
-        return Auth::guard('admin')->user()->can('create admins');
+        return Auth::guard('admin')->user()->can('user management.create');
     }
 
     /**

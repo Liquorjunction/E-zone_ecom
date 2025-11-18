@@ -7,23 +7,32 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateRoleRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
-    public function rules(): array
-    {
-        return [
-            'name' => 'required|string|max:255',
-            'permissions' => 'required|array',
-            'permissions.*' => 'string|exists:permissions,name',
-        ];
-    }
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        // Checks if the logged-in admin has the 'update roles' permission
-        return Auth::guard('admin')->user()->can('update roles');
+        return Auth::guard('admin')->user()->can('role.update');
+    }
+
+    public function rules(): array
+    {
+        $roleId = $this->route('id'); // Get ID from route parameter
+        return [
+            'name' => 'required|string|max:255|unique:roles,name,'.$roleId.',id,guard_name,admin',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.unique' => 'The role name has already been taken.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'Role Name',
+        ];
     }
 }

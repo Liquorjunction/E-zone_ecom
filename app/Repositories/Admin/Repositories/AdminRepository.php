@@ -5,7 +5,6 @@ namespace App\Repositories\Admin\Repositories;
 use App\Models\admin;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +13,7 @@ use Illuminate\Support\Str;
 class AdminRepository implements AdminRepositoryInterface
 {
     /**
-     * Authenticate admin with login field and password.
+     * Authenticate admin.
      */
     public function authenticate(string $login, string $password, bool $remember = false): bool
     {
@@ -33,9 +32,6 @@ class AdminRepository implements AdminRepositoryInterface
 
     /**
      * Get admin model for editing.
-     * Authorized for:
-     * 1. Superadmin (can edit anyone)
-     * 2. Admin (can edit themselves)
      */
     public function edit($id)
     {
@@ -47,11 +43,13 @@ class AdminRepository implements AdminRepositoryInterface
                 return null;
             }
 
-            if ($loggedInAdmin->can('edit any admin')) {
+            // Check new permission: user management.update
+            if ($loggedInAdmin->can('user management.update')) {
                 return $adminToEdit;
             }
 
-            if ($loggedInAdmin->can('update own profile') && $loggedInAdmin->id == $id) {
+            // Check new permission: profile.update (for own profile)
+            if ($loggedInAdmin->id == $id) {
                 return $adminToEdit;
             }
 
@@ -63,53 +61,39 @@ class AdminRepository implements AdminRepositoryInterface
     }
 
     /**
-     * Update an admin's OWN profile (profile pic and password only).
-     * This action is for a regular admin managing their own account.
+     * Update an admin's OWN profile.
      */
     public function update($request, $id)
     {
         try {
             $loggedInAdmin = Auth::guard('admin')->user();
 
-            // --- Authorization Check ---
-            // You must be editing yourself AND have the 'update own profile' permission
-            if ($loggedInAdmin->id != $id || !$loggedInAdmin->can('update own profile')) {
-                return false; // Not authorized
+            // Allow updating own profile by default
+            if ($loggedInAdmin->id != $id) {
+                return false;
             }
 
-            $admin = $loggedInAdmin; // We already have the model
+            $admin = $loggedInAdmin;
             $hasChanges = false;
 
-            // --- Handle Profile Image Update ---
+            // Handle Profile Image
             if ($request->hasFile('profile_image')) {
-                // Delete old image if exists
                 if ($admin->profile_image && $admin->profile_image !== '01.png') {
                     Storage::disk('public')->delete('avatars/' . $admin->profile_image);
                 }
-                // Handle file upload
-                $file = $request->file('profile_image');
-                $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('avatars', $filename, 'public');
-                $admin->profile_image = $filename;
+                $path = $request->file('profile_image')->store('avatars', 'public');
+                $admin->profile_image = basename($path);
                 $hasChanges = true;
             }
 
-            // --- Handle Password Update ---
+            // Handle Password
             if ($request->filled('password')) {
-
-                // 1. Verify Current Password
                 if (!Hash::check($request->current_password, $admin->password)) {
-                    // Password does not match
-                    Log::warning("Admin self-update failed: Incorrect current password for user {$admin->id}");
                     return false;
                 }
-
-                // 2. (Recommended) Verify Password Confirmation
                 if ($request->password !== $request->password_confirmation) {
-                     Log::warning("Admin self-update failed: Password confirmation does not match for user {$admin->id}");
                      return false;
                 }
-
                 $admin->password = Hash::make($request->password);
                 $hasChanges = true;
             }
@@ -134,41 +118,34 @@ class AdminRepository implements AdminRepositoryInterface
         try {
             $loggedInAdmin = Auth::guard('admin')->user();
 
-            if (!$loggedInAdmin->can('create admins')) {
-                return false; // Not authorized
+            // Check new permission: user management.create
+            if (!$loggedInAdmin->can('user management.create')) {
+                return false;
             }
 
-            // --- Create user in 2 steps to get the ID ---
-
-            // 1. Create the user with a temporary unique username
-            //    (We'll use the email since it's already validated as unique)
+            // 1. Create User
             $admin = admin::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'username' => $request->email, // <-- TEMPORARY value
+                'username' => $request->email, // Temporary
                 'password' => Hash::make($request->password),
                 'status' => 'active',
             ]);
 
-            // 2. Now that we have the $admin->id, generate the final username
-            $baseUsername =  Str::slug($request->name, ''); // 'John Doe' -> 'johndoe'
+            // 2. Generate Username
+            $baseUsername =  Str::slug($request->name, '');
             $paddedId = sprintf("%06d", $admin->id);
             $finalUsername = 'Ezn-' . strtolower($baseUsername) . '-' . $paddedId;
 
-            // 3. Update the admin with the permanent username
             $admin->username = $finalUsername;
-
-            // --- Handle Profile Image Upload ---
-            if ($request->hasFile('profile_image')) {
-                $file = $request->file('profile_image');
-                $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('avatars', $filename, 'public');
-                $admin->profile_image = $filename;
-            }
-
             $admin->save();
 
-            // --- End Fix ---
+            // Handle Profile Image
+            if ($request->hasFile('profile_image')) {
+                $path = $request->file('profile_image')->store('avatars', 'public');
+                $admin->profile_image = basename($path);
+                $admin->save();
+            }
 
             $admin->assignRole($request->role);
 
@@ -180,52 +157,42 @@ class AdminRepository implements AdminRepositoryInterface
     }
 
     /**
-     * Superadmin updates another admin's details.
-     * Can update everything EXCEPT username.
+     * Superadmin updates another admin.
      */
     public function superadminUpdateAdmin($request, $id)
     {
         try {
             $loggedInAdmin = Auth::guard('admin')->user();
 
-            // --- Authorization Check ---
-            if (!$loggedInAdmin->can('edit any admin')) {
-                return false; // Not authorized
-            }
-
-            $admin = admin::find($id);
-            if (!$admin) {
+            // Check new permission: user management.update
+            if (!$loggedInAdmin->can('user management.update')) {
                 return false;
             }
 
-            // --- Handle Profile Image Upload ---
-            if ($request->hasFile('profile_image')) {
-                // Delete old image if exists
-                if ($admin->profile_image && $admin->profile_image !== '01.png') {
-                    Storage::disk('public')->delete('avatars/' . $admin->profile_image);
-                }
-                // Handle file upload
-                $file = $request->file('profile_image');
-                $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('avatars', $filename, 'public');
-                $admin->profile_image = $filename;
-            }
+            $admin = admin::find($id);
+            if (!$admin) return false;
 
-            // --- Update Fields (Rule: Everything EXCEPT username) ---
             $dataToUpdate = $request->only(['name', 'email', 'status']);
             $admin->fill($dataToUpdate);
 
-            // --- Update Role ---
+            // Handle Profile Image
+            if ($request->hasFile('profile_image')) {
+                if ($admin->profile_image && $admin->profile_image !== '01.png') {
+                    Storage::disk('public')->delete('avatars/' . $admin->profile_image);
+                }
+                $path = $request->file('profile_image')->store('avatars', 'public');
+                $admin->profile_image = basename($path);
+            }
+
             if ($request->has('role')) {
                 $admin->syncRoles([$request->role]);
             }
 
-            // --- Optional Password Reset (no current_password check) ---
             if ($request->filled('password')) {
                 $admin->password = Hash::make($request->password);
             }
 
-            $admin->save(); // Save all changes
+            $admin->save();
             return true;
 
         } catch (\Exception $e) {
@@ -235,21 +202,20 @@ class AdminRepository implements AdminRepositoryInterface
     }
 
     /**
-     * Superadmin toggles admin status (active/inactive).
+     * Superadmin toggles admin status.
      */
     public function superadminToggleAdminStatus($id)
     {
         try {
             $loggedInAdmin = Auth::guard('admin')->user();
 
-            if (!$loggedInAdmin->can('toggle admin status')) {
-                return false; // Not authorized
+            // Check new permission: user management.update (Toggling status is an update)
+            if (!$loggedInAdmin->can('user management.update')) {
+                return false;
             }
 
             $admin = admin::find($id);
-            if (!$admin) {
-                return false;
-            }
+            if (!$admin) return false;
 
             $admin->status = $admin->status === 'active' ? 'inactive' : 'active';
             $admin->save();
@@ -260,9 +226,6 @@ class AdminRepository implements AdminRepositoryInterface
         }
     }
 
-    /**
-     * Logout the admin.
-     */
     public function logout(): void
     {
         try {
@@ -272,9 +235,6 @@ class AdminRepository implements AdminRepositoryInterface
         }
     }
 
-    /**
-     * Get Datatable Data
-     */
     public function getDataForDataTable($request)
     {
         return admin::select([

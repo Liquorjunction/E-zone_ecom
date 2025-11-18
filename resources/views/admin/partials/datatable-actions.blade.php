@@ -1,5 +1,5 @@
 @if(isset($edit_url))
-    @can('edit any admin')
+    @can('user management.update')
         <a class="btn btn-sm btn-icon btn-warning" data-bs-toggle="tooltip" data-bs-placement="top"
             data-original-title="Edit" href="{{ $edit_url }}" aria-label="Edit" data-bs-original-title="Edit">
             <span class="btn-inner">
@@ -18,7 +18,7 @@
     @endcan
 @endif
 @if(isset($delete_url))
-    @can('delete admin')
+    @can('user management.delete')
         <a class="btn btn-sm btn-icon btn-danger" data-bs-toggle="tooltip" data-bs-placement="top"
             data-original-title="Delete" href="{{ $delete_url }}" aria-label="Delete" data-bs-original-title="Delete"
             onclick="return confirm('Are you sure you want to delete this item?')">
@@ -33,7 +33,7 @@
     @endcan
 @endif
 @if(isset($view_url))
-    @can('view admin')
+    @can('user management.read')
         <a class="btn btn-sm btn-icon btn-info" data-bs-toggle="tooltip" data-bs-placement="top"
             data-original-title="View" href="{{ $view_url }}" aria-label="View" data-bs-original-title="View">
             <span class="btn-inner">

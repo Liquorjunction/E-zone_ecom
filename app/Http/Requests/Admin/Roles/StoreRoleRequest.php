@@ -7,34 +7,31 @@ use Illuminate\Support\Facades\Auth;
 
 class StoreRoleRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
+    public function authorize(): bool
+    {
+        return Auth::guard('admin')->user()->can('role.create');
+    }
+
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'permissions' => 'required|array',
-            'permissions.*' => 'string|exists:permissions,name',
+            'name' => 'required|string|max:255|unique:roles,name,NULL,id,guard_name,admin',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id', // Validate IDs
         ];
     }
 
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    public function messages(): array
     {
-        // Checks if the logged-in admin has the 'create roles' permission
-        return Auth::guard('admin')->user()->can('create roles');
+        return [
+            'name.unique' => 'The role name has already been taken.',
+        ];
     }
 
-    /**
-     * Prepare the data for validation.
-     */
-    public function prepareForValidation(): void
+    public function attributes(): array
     {
-        $this->merge([
-            'guard_name' => 'admin',
-        ]);
+        return [
+            'name' => 'Role Name',
+        ];
     }
 }

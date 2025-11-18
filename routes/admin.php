@@ -17,39 +17,31 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminAuthController::class, 'dashboard'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
-        // User Management routes
+        // User Management routes (Admins)
         Route::prefix('user-management')->name('user-management.')->group(function () {
-
-            // FIX: Protected 'create admin' routes
-            Route::get('/', [AdminAuthController::class, 'index'])->name('index')->middleware('can:create admins,admin');
-            Route::get('/data', [AdminAuthController::class, 'data'])->name('data')->middleware('can:create admins,admin');
-            Route::get('/create', [AdminAuthController::class, 'create'])->name('create')->middleware('can:create admins,admin');
-            Route::post('/', [AdminAuthController::class, 'store'])->name('store')->middleware('can:create admins,admin');
-
-            // FIX: Protected 'edit admin' routes
-            Route::get('/{id}/edit', [AdminAuthController::class, 'edit'])->name('edit')->middleware('can:edit any admin,admin');
-            Route::put('/{id}', [AdminAuthController::class, 'update'])->name('update')->middleware('can:edit any admin,admin');
-
-            // FIX: Protected 'toggle status' route
-            Route::patch('/{id}/toggle-status', [AdminAuthController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:toggle admin status,admin');
+            Route::get('/', [AdminAuthController::class, 'index'])->name('index')->middleware('can:user management.read,admin');
+            Route::get('/data', [AdminAuthController::class, 'data'])->name('data')->middleware('can:user management.read,admin');
+            Route::get('/create', [AdminAuthController::class, 'create'])->name('create')->middleware('can:user management.create,admin');
+            Route::post('/', [AdminAuthController::class, 'store'])->name('store')->middleware('can:user management.create,admin');
+            Route::get('/{id}/edit', [AdminAuthController::class, 'edit'])->name('edit')->middleware('can:user management.update,admin');
+            Route::put('/{id}', [AdminAuthController::class, 'update'])->name('update')->middleware('can:user management.update,admin');
+            Route::patch('/{id}/toggle-status', [AdminAuthController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:user management.update,admin');
         });
 
         // Profile routes
-        // (No 'can' middleware needed, as this is for the logged-in user)
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/', [ProfileController::class, 'index'])->name('index');
             Route::put('/', [ProfileController::class, 'update'])->name('update');
         });
 
         // Roles & Permissions routes
-        // FIX: Protected this entire group. Only admins who can 'create roles' can access any of these.
-        Route::prefix('roles-permissions')->name('roles-permissions.')->middleware('can:create roles,admin')->group(function () {
-            Route::get('/', [RoleController::class, 'index'])->name('index');
-            Route::get('/create', [RoleController::class, 'create'])->name('create');
-            Route::post('/', [RoleController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [RoleController::class, 'update'])->name('update');
-            Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
+        Route::prefix('roles-permissions')->name('roles-permissions.')->middleware('can:role.read,admin')->group(function () {
+            Route::get('/', [RoleController::class, 'index'])->name('index'); // permission: role.read
+            Route::get('/create', [RoleController::class, 'create'])->name('create')->middleware('can:role.create,admin');
+            Route::post('/', [RoleController::class, 'store'])->name('store')->middleware('can:role.create,admin');
+            Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('can:role.update,admin');
+            Route::put('/{id}', [RoleController::class, 'update'])->name('update')->middleware('can:role.update,admin');
+            Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy')->middleware('can:role.delete,admin');
         });
     });
 });

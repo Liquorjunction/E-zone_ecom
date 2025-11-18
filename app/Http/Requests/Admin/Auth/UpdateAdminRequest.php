@@ -14,7 +14,7 @@ class UpdateAdminRequest extends FormRequest
     public function authorize(): bool
     {
         // Checks if the logged-in admin has the 'edit any admin' permission
-        return Auth::guard('admin')->user()->can('edit any admin');
+        return Auth::guard('admin')->user()->can('user management.update');
     }
 
     /**

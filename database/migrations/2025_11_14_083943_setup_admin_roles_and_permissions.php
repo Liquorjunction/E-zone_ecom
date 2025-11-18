@@ -1,11 +1,10 @@
 <?php
-// new_migration_file.php
 
 use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\PermissionRegistrar;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -14,30 +13,55 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Reset cached roles and permissions
+        // 1. Reset cached roles and permissions to ensure fresh start
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Define the guard name
+        // 2. Define the guard name explicitly for the separate 'admins' table
         $guardName = 'admin';
 
-        // Create Permissions
-        Permission::create(['name' => 'create roles', 'guard_name' => $guardName]);
-        Permission::create(['name' => 'assign permissions', 'guard_name' => $guardName]);
-        Permission::create(['name' => 'create admins', 'guard_name' => $guardName]);
-        Permission::create(['name' => 'edit any admin', 'guard_name' => $guardName]);
-        Permission::create(['name' => 'toggle admin status', 'guard_name' => $guardName]);
-        Permission::create(['name' => 'update own profile', 'guard_name' => $guardName]);
+        // 3. Define Modules (Resources) that Admins will manage
+        $modules = [
+            'user management',        // Manage other admins
+            'role',         // Manage roles
+        ];
 
-        // Create Super Admin Role and assign all permissions
-        $superAdminRole = Role::create(['name' => 'super-admin', 'guard_name' => $guardName]);
-        // Give all permissions created for the admin guard
-        $superAdminRole->givePermissionTo(Permission::where('guard_name', $guardName)->get());
+        // 4. Define Access Levels (Standard CRUD)
+        $actions = ['create', 'read', 'update', 'delete'];
 
-        // Create Admin Role and assign specific permissions
-        $adminRole = Role::create(['name' => 'admin', 'guard_name' => $guardName]);
-        $adminRole->givePermissionTo([
-            'update own profile',
-        ]);
+        // 5. Loop and Create Permissions (e.g., 'admin.create', 'user.delete')
+        foreach ($modules as $module) {
+            foreach ($actions as $action) {
+                Permission::firstOrCreate([
+                    'name' => "$module.$action",
+                    'guard_name' => $guardName
+                ]);
+            }
+        }
+
+        // 6. Create Special Standalone Permissions
+        // 'profile' permissions for admins to manage their own account
+
+        // 7. Create Roles specifically for the 'admin' guard
+        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => $guardName]);
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => $guardName]);
+
+        // 8. Assign Permissions to Roles
+
+        // Super Admin gets ALL permissions associated with the 'admin' guard
+        $allAdminPermissions = Permission::where('guard_name', $guardName)->get();
+        $superAdminRole->syncPermissions($allAdminPermissions);
+
+        // Regular Admin gets a specific subset of permissions
+        // (Example: Can view dashboard, manage their profile, and read users)
+        $defaultAdminPermissions = [
+        ];
+
+        foreach ($defaultAdminPermissions as $permName) {
+            $perm = Permission::where('name', $permName)->where('guard_name', $guardName)->first();
+            if ($perm) {
+                $adminRole->givePermissionTo($perm);
+            }
+        }
     }
 
     /**
@@ -48,10 +72,9 @@ return new class extends Migration
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Define the guard name
         $guardName = 'admin';
 
-        // Delete roles and permissions
+        // Delete all permissions and roles associated with this guard ONLY
         Permission::where('guard_name', $guardName)->delete();
         Role::where('guard_name', $guardName)->delete();
     }
