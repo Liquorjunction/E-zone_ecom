@@ -47,7 +47,7 @@ class ProfileController extends Controller
 
         if ($request->ajax()) {
             $admin = Auth::guard('admin')->user();
-            $imageUrl = $admin->profile_image ? asset('admin_assets/images/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png');
+            $imageUrl = $admin->profile_image ? asset('storage/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png');
             return response()->json(['success' => true, 'message' => 'Profile updated successfully.', 'image_url' => $imageUrl]);
         }
 

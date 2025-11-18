@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Auth\AdminLoginRequest;
-use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Http\Requests\Admin\Auth\StoreAdminRequest;
 use App\Http\Requests\Admin\Auth\UpdateAdminRequest;
+use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
+use Yajra\DataTables\Facades\DataTables;
 
 class AdminAuthController extends Controller
 {
@@ -23,20 +24,54 @@ class AdminAuthController extends Controller
     public function dashboard()
     {
         $admin = Auth::guard('admin')->user();
-        return view('admin.pages.home' ,compact('admin'));
+
+        return view('admin.pages.home', compact('admin'));
     }
 
-    public function index(AdminRepositoryInterface $adminRepository, Request $request)
+    public function index()
     {
         try {
-            // We'll just get all admins for now.
-            // You can implement datatables/pagination later.
-            $admins = $adminRepository->getDataForDataTable($request)->get();
-
             // This view is for your user list
-            return view('admin.pages.userManagement.index', compact('admins'));
+            return view('admin.pages.userManagement.index');
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@index: ' . $e->getMessage());
+            Log::error('Error in AdminAuthController@index: '.$e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function data(AdminRepositoryInterface $adminRepository, Request $request)
+    {
+        try {
+            $admins = $adminRepository->getDataForDataTable($request);
+            $dataTableJSON = DataTables::of($admins)
+                ->addIndexColumn()
+                ->addColumn('profile_image', function ($admin) {
+                    $data['image'] = $admin->profile_image ? asset('storage/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png');
+
+                    return view('admin.partials.image', $data)->render();
+                })
+                ->addColumn('status', function ($admin) {
+                    $data['status'] = $admin->status;
+                    $data['toggle_url'] = route('admin.user-management.toggleStatus', $admin->id);
+
+                    return view('admin.partials.datatable-status', $data)->render();
+                })
+                ->addColumn('created_at', function ($admin) {
+                    return $admin->created_at->format('Y/m/d');
+                })
+                ->addColumn('action', function ($admin) {
+                    $data['edit_url'] = route('admin.user-management.edit', $admin->id);
+                    $data['model'] = $admin;
+                    $data['routePrefix'] = 'admin.user-management';
+
+                    return view('admin.partials.datatable-actions', $data)->render();
+                })
+                ->rawColumns(['profile_image', 'status', 'action'])
+                ->make(true);
+
+            return $dataTableJSON;
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@data: '.$e->getMessage());
             throw $e;
         }
     }
@@ -57,7 +92,7 @@ class AdminAuthController extends Controller
                 'login' => ['The provided credentials do not match our records.'],
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@login: ' . $e->getMessage());
+            Log::error('Error in AdminAuthController@login: '.$e->getMessage());
             throw $e;
         }
     }
@@ -68,7 +103,9 @@ class AdminAuthController extends Controller
     public function create()
     {
         // This method doesn't need the repository
-        $roles = Role::where('guard_name', 'admin')->get();$roles = Role::where('guard_name', 'admin')->get();
+        $roles = Role::where('guard_name', 'admin')->get();
+        $roles = Role::where('guard_name', 'admin')->get();
+
         return view('admin.pages.userManagement.create', compact('roles'));
     }
 
@@ -80,9 +117,10 @@ class AdminAuthController extends Controller
     {
         try {
             $adminRepository->superadminCreateAdmin($request);
+
             return redirect()->route('admin.user-management.index')->with('success', 'Admin created successfully.');
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@store: ' . $e->getMessage());
+            Log::error('Error in AdminAuthController@store: '.$e->getMessage());
             throw $e;
         }
     }
@@ -95,14 +133,15 @@ class AdminAuthController extends Controller
         try {
             $admin = $adminRepository->edit($id); // Uses the edit() method for auth
 
-            if (!$admin) {
+            if (! $admin) {
                 abort(403, 'You are not authorized to edit this user.');
             }
 
             $roles = Role::where('guard_name', 'admin')->get();
+
             return view('admin.pages.userManagement.edit', compact('admin', 'roles'));
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@edit: ' . $e->getMessage());
+            Log::error('Error in AdminAuthController@edit: '.$e->getMessage());
             throw $e;
         }
     }
@@ -115,9 +154,10 @@ class AdminAuthController extends Controller
     {
         try {
             $adminRepository->superadminUpdateAdmin($request, $id);
-            return redirect()->route('admin.user-management.index', $id)->with('success', 'Admin updated successfully.');return redirect()->route('admin.user-management.index')->with('success', 'Admin updated successfully.');
+
+            return redirect()->route('admin.user-management.index')->with('success', 'Admin updated successfully.');
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@update: ' . $e->getMessage());
+            Log::error('Error in AdminAuthController@update: '.$e->getMessage());
             throw $e;
         }
     }
@@ -130,9 +170,10 @@ class AdminAuthController extends Controller
     {
         try {
             $adminRepository->superadminToggleAdminStatus($id);
+
             return back()->with('success', 'Admin status updated.');
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@toggleStatus: ' . $e->getMessage());
+            Log::error('Error in AdminAuthController@toggleStatus: '.$e->getMessage());
             throw $e;
         }
     }
@@ -147,7 +188,7 @@ class AdminAuthController extends Controller
 
             return redirect()->route('admin.login');
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@logout: ' . $e->getMessage());
+            Log::error('Error in AdminAuthController@logout: '.$e->getMessage());
             throw $e;
         }
     }

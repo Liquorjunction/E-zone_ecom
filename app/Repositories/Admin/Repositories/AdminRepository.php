@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdminRepository implements AdminRepositoryInterface
@@ -83,15 +84,12 @@ class AdminRepository implements AdminRepositoryInterface
             if ($request->hasFile('profile_image')) {
                 // Delete old image if exists
                 if ($admin->profile_image && $admin->profile_image !== '01.png') {
-                    $oldImagePath = public_path('admin_assets/images/avatars/' . $admin->profile_image);
-                    if (File::exists($oldImagePath)) {
-                        File::delete($oldImagePath);
-                    }
+                    Storage::disk('public')->delete('avatars/' . $admin->profile_image);
                 }
                 // Handle file upload
                 $file = $request->file('profile_image');
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('admin_assets/images/avatars'), $filename);
+                $path = $file->storeAs('avatars', $filename, 'public');
                 $admin->profile_image = $filename;
                 $hasChanges = true;
             }
@@ -159,6 +157,15 @@ class AdminRepository implements AdminRepositoryInterface
 
             // 3. Update the admin with the permanent username
             $admin->username = $finalUsername;
+
+            // --- Handle Profile Image Upload ---
+            if ($request->hasFile('profile_image')) {
+                $file = $request->file('profile_image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('avatars', $filename, 'public');
+                $admin->profile_image = $filename;
+            }
+
             $admin->save();
 
             // --- End Fix ---
@@ -191,8 +198,21 @@ class AdminRepository implements AdminRepositoryInterface
                 return false;
             }
 
+            // --- Handle Profile Image Upload ---
+            if ($request->hasFile('profile_image')) {
+                // Delete old image if exists
+                if ($admin->profile_image && $admin->profile_image !== '01.png') {
+                    Storage::disk('public')->delete('avatars/' . $admin->profile_image);
+                }
+                // Handle file upload
+                $file = $request->file('profile_image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('avatars', $filename, 'public');
+                $admin->profile_image = $filename;
+            }
+
             // --- Update Fields (Rule: Everything EXCEPT username) ---
-            $dataToUpdate = $request->only(['name', 'email', 'profile_image', 'status']);
+            $dataToUpdate = $request->only(['name', 'email', 'status']);
             $admin->fill($dataToUpdate);
 
             // --- Update Role ---
@@ -257,6 +277,14 @@ class AdminRepository implements AdminRepositoryInterface
      */
     public function getDataForDataTable($request)
     {
-        return admin::select('*');
+        return admin::select([
+            'id',
+            'name',
+            'email',
+            'username',
+            'status',
+            'profile_image',
+            'created_at'
+        ]);
     }
 }

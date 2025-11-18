@@ -56,7 +56,7 @@
                     <li class="nav-item dropdown custom-drop">
                         <a class="py-0 nav-link d-flex align-items-center" href="#" id="navbarDropdown"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ \App\Helpers\AdminHelper::profileImageUrl() }}" alt="User-Profile"
+                            <img id="navbar-profile-image" src="{{ \App\Helpers\AdminHelper::profileImageUrl() }}" alt="User-Profile"
                                 class="theme-color-default-img img-fluid avatar avatar-50 avatar-rounded">
                             <img src="{{ asset('admin_assets/images/avatars/avtar_1.png') }}" alt="User-Profile"
                                 class="theme-color-purple-img img-fluid avatar avatar-50 avatar-rounded">

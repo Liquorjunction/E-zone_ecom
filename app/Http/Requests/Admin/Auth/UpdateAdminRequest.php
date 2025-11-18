@@ -37,6 +37,7 @@ class UpdateAdminRequest extends FormRequest
             'role' => 'required|string|exists:roles,name,guard_name,admin',
             'roles.*' => 'string|exists:roles,name,guard_name,admin',
             'status' => 'required|string|in:active,inactive',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 }

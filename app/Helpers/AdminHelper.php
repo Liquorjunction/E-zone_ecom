@@ -88,6 +88,6 @@ class AdminHelper
     public static function profileImageUrl()
     {
         $image = self::profileImage();
-        return $image ? asset('admin_assets/images/avatars/' . $image) : asset('admin_assets/images/avatars/01.png');
+        return $image ? asset('storage/avatars/' . $image) : asset('admin_assets/images/avatars/01.png');
     }
 }

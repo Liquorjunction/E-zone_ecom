@@ -193,6 +193,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     // Update the image src
                     profileImage.src = data.image_url;
+                    // Update navbar profile image
+                    const navbarImage = document.getElementById('navbar-profile-image');
+                    if (navbarImage) {
+                        navbarImage.src = data.image_url;
+                    }
                     // Show success message using toast
                     showToast(data.message, 'success');
                 } else {

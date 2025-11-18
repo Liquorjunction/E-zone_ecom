@@ -34,18 +34,20 @@
                                 <div class="form-group">
                                     <div class="profile-img-edit position-relative">
                                         {{-- FIX: Show existing profile picture --}}
-                                        <img src="{{ $admin->profile_image ? asset('admin_assets/images/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png') }}"
+                                        <img id="profile-preview" src="{{ $admin->profile_image ? asset('storage/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png') }}"
                                             alt="profile-pic"
                                             class="theme-color-default-img profile-pic rounded avatar-100">
                                         {{-- ... other theme images ... --}}
                                         <div class="upload-icone bg-primary">
-                                            <svg class="upload-button icon-14" width="14" viewBox="0 0 24 24">
-                                                <path fill="#ffffff"
-                                                    d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z">
-                                                </path>
-                                            </svg>
+                                            <label for="profile_image" style="cursor: pointer;">
+                                                <svg class="upload-button icon-14" width="14" viewBox="0 0 24 24">
+                                                    <path fill="#ffffff"
+                                                        d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z">
+                                                    </path>
+                                                </svg>
+                                            </label>
                                             {{-- FIX: Changed name to profile_image --}}
-                                            <input class="file-upload" type="file" name="profile_image" accept="image/*">
+                                            <input class="file-upload" type="file" id="profile_image" name="profile_image" accept="image/*" style="display: none;" onchange="previewImage(this)">
                                         </div>
                                     </div>
                                     <div class="img-extension mt-3">
@@ -132,4 +134,8 @@
             </form> {{-- FIX: Closed the single, main form --}}
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('admin_assets/js/image-preview.js') }}"></script>
 @endsection

@@ -22,6 +22,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
 
             // FIX: Protected 'create admin' routes
             Route::get('/', [AdminAuthController::class, 'index'])->name('index')->middleware('can:create admins,admin');
+            Route::get('/data', [AdminAuthController::class, 'data'])->name('data')->middleware('can:create admins,admin');
             Route::get('/create', [AdminAuthController::class, 'create'])->name('create')->middleware('can:create admins,admin');
             Route::post('/', [AdminAuthController::class, 'store'])->name('store')->middleware('can:create admins,admin');
 

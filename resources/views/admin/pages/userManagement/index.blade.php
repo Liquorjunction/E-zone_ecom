@@ -4,8 +4,8 @@
 @section('header-description', 'Manage user accounts and permissions')
 
 @section('breadcrumbs')
-    @foreach(Breadcrumbs::generate('admin.user-management.index') as $breadcrumb)
-        @if($breadcrumb->url && !$loop->last)
+    @foreach (Breadcrumbs::generate('admin.user-management.index') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
             <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
         @else
             <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
@@ -23,11 +23,15 @@
                             <div class="header-title">
                                 <h4 class="card-title">User List</h4>
                             </div>
+                            <div class="card-action">
+                                <a href="{{ route('admin.user-management.create') }}"
+                                    class="btn btn-primary">Add New User</a>
+                            </div>
                         </div>
                         <div class="card-body px-0">
                             <div class="table-responsive">
                                 <table id="user-list-table" class="table table-striped" role="grid"
-                                    data-bs-toggle="data-table">
+                                    data-bs-toggle="data-table" data-url="{{ route('admin.user-management.data') }}">
                                     <thead>
                                         <tr class="ligth">
                                             <th>Profile</th>
@@ -40,30 +44,6 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($admins ?? [] as $admin)
-                                            <tr>
-                                                <td class="text-center">
-                                                    <img class="bg-primary-subtle rounded img-fluid avatar-40 me-3"
-                                                        src="{{ $admin->profile_image ? asset('admin_assets/images/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png') }}" alt="profile">
-                                                </td>
-                                                <td>{{ $admin->name }}</td>
-                                                <td>{{ $admin->email }}</td>
-                                                <td>{{ $admin->username }}</td>
-                                                <td>
-                                                    <span class="badge {{ $admin->status == 'active' ? 'bg-primary' : 'bg-danger' }}">
-                                                        {{ ucfirst($admin->status) }}
-                                                    </span>
-                                                </td>
-                                                <td>{{ $admin->created_at->format('Y/m/d') }}</td>
-                                                <td>
-                                                    @include('admin.partials.actions', ['model' => $admin, 'routePrefix' => 'admin.user-management'])
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center">No admins found.</td>
-                                            </tr>
-                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
@@ -74,3 +54,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('admin_assets/js/datatableJs/userManagement.js') }}"></script>
+@endpush
