@@ -97,11 +97,18 @@
                                     <hr>
                                     <h5 class="mb-3">Security</h5>
                                     <div class="row">
-                                        <div class="form-group col-md-12">
+                                        <div class="form-group col-md-6">
                                             <label class="form-label" for="username">User Name:</label>
                                             <input type="text" name="username" class="form-control" id="username"
                                                 value="{{ $admin->username }}" readonly disabled>
                                             <small>Usernames are auto-generated and cannot be changed.</small>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="form-label" for="status">Status:</label>
+                                            <select name="status" class="form-control" id="status" required>
+                                                <option value="active" {{ $admin->status == 'active' ? 'selected' : '' }}>Active</option>
+                                                <option value="inactive" {{ $admin->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                            </select>
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="password">Password:</label>

@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Auth\StoreAdminRequest;
 use App\Http\Requests\Admin\Auth\UpdateAdminRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
@@ -27,29 +28,40 @@ class AdminAuthController extends Controller
 
     public function index(AdminRepositoryInterface $adminRepository, Request $request)
     {
-        // We'll just get all admins for now.
-        // You can implement datatables/pagination later.
-        $admins = $adminRepository->getDataForDataTable($request)->get();
+        try {
+            // We'll just get all admins for now.
+            // You can implement datatables/pagination later.
+            $admins = $adminRepository->getDataForDataTable($request)->get();
 
-        // This view is for your user list
-        return view('admin.pages.userManagement.index', compact('admins'));
+            // This view is for your user list
+            return view('admin.pages.userManagement.index', compact('admins'));
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@index: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function login(AdminLoginRequest $request, AdminRepositoryInterface $adminRepository)
     {
-        $login = $request->input('login');
-        $password = $request->input('password');
+        try {
+            $login = $request->input('login');
+            $password = $request->input('password');
 
-        if ($adminRepository->authenticate($login, $password, $request->filled('remember'))) {
-            $request->session()->regenerate();
+            if ($adminRepository->authenticate($login, $password, $request->filled('remember'))) {
+                $request->session()->regenerate();
 
-            return redirect()->intended(route('admin.dashboard'));
+                return redirect()->intended(route('admin.dashboard'));
+            }
+
+            throw ValidationException::withMessages([
+                'login' => ['The provided credentials do not match our records.'],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@login: ' . $e->getMessage());
+            throw $e;
         }
-
-        throw ValidationException::withMessages([
-            'login' => ['The provided credentials do not match our records.'],
-        ]);
     }
+
     /**
      * Show the form for creating a new admin.
      */
@@ -66,8 +78,13 @@ class AdminAuthController extends Controller
      */
     public function store(StoreAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
-        $adminRepository->superadminCreateAdmin($request);
-        return redirect()->route('admin.user-management.index')->with('success', 'Admin created successfully.');
+        try {
+            $adminRepository->superadminCreateAdmin($request);
+            return redirect()->route('admin.user-management.index')->with('success', 'Admin created successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@store: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -75,14 +92,19 @@ class AdminAuthController extends Controller
      */
     public function edit($id, AdminRepositoryInterface $adminRepository)
     {
-        $admin = $adminRepository->edit($id); // Uses the edit() method for auth
+        try {
+            $admin = $adminRepository->edit($id); // Uses the edit() method for auth
 
-        if (!$admin) {
-            abort(403, 'You are not authorized to edit this user.');
+            if (!$admin) {
+                abort(403, 'You are not authorized to edit this user.');
+            }
+
+            $roles = Role::where('guard_name', 'admin')->get();
+            return view('admin.pages.userManagement.edit', compact('admin', 'roles'));
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@edit: ' . $e->getMessage());
+            throw $e;
         }
-
-        $roles = Role::where('guard_name', 'admin')->get();
-        return view('admin.pages.userManagement.edit', compact('admin', 'roles'));
     }
 
     /**
@@ -91,8 +113,13 @@ class AdminAuthController extends Controller
      */
     public function update(UpdateAdminRequest $request, $id, AdminRepositoryInterface $adminRepository)
     {
-        $adminRepository->superadminUpdateAdmin($request, $id);
-        return redirect()->route('admin.user-management.index', $id)->with('success', 'Admin updated successfully.');return redirect()->route('admin.user-management.index')->with('success', 'Admin updated successfully.');
+        try {
+            $adminRepository->superadminUpdateAdmin($request, $id);
+            return redirect()->route('admin.user-management.index', $id)->with('success', 'Admin updated successfully.');return redirect()->route('admin.user-management.index')->with('success', 'Admin updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@update: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -101,17 +128,27 @@ class AdminAuthController extends Controller
      */
     public function toggleStatus($id, AdminRepositoryInterface $adminRepository)
     {
-        $adminRepository->superadminToggleAdminStatus($id);
-        return back()->with('success', 'Admin status updated.');
+        try {
+            $adminRepository->superadminToggleAdminStatus($id);
+            return back()->with('success', 'Admin status updated.');
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@toggleStatus: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function logout(Request $request, AdminRepositoryInterface $adminRepository)
     {
-        $adminRepository->logout();
+        try {
+            $adminRepository->logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login');
+            return redirect()->route('admin.login');
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@logout: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
