@@ -5,17 +5,36 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Roles\StoreRoleRequest;
 use App\Http\Requests\Admin\Roles\UpdateRoleRequest;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface as RoleRepo;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Yajra\DataTables\Facades\DataTables;
 
 class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::where('guard_name', 'admin')->with('permissions')->get();
-        return view('admin.pages.rolePermission.index', compact('roles'));
+        return view('admin.pages.rolePermission.index');
+    }
+
+    public function data(Request $request, RoleRepo $roleRepo)
+    {
+        try {
+            $roles = $roleRepo->getDataForDataTable($request);
+
+            return DataTables::of($roles)
+                ->addIndexColumn()
+                ->addColumn('action', function ($role) {
+                    $data['edit_url'] = route('admin.roles-permissions.edit', $role->id);
+
+                    return view('admin.partials.datatable-actions', $data)->render();
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function create()
@@ -34,6 +53,7 @@ class RoleController extends Controller
     public function store(StoreRoleRequest $request, RoleRepo $roleRepo)
     {
         $roleRepo->storeRole($request);
+
         return redirect()->route('admin.roles-permissions.index')
             ->with('success', 'Role created successfully.');
     }
@@ -53,6 +73,7 @@ class RoleController extends Controller
     public function update(UpdateRoleRequest $request, $id, RoleRepo $roleRepo)
     {
         $roleRepo->updateRole($request, $id);
+
         return redirect()->route('admin.roles-permissions.index')
             ->with('success', 'Role updated successfully.');
     }
@@ -67,6 +88,7 @@ class RoleController extends Controller
         }
 
         $role->delete();
+
         return redirect()->route('admin.roles-permissions.index')
             ->with('success', 'Role deleted successfully.');
     }

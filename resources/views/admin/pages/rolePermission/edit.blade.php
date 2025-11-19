@@ -24,7 +24,7 @@
 
                         <h5 class="mb-3">Permissions</h5>
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped">
+                            <table id="permissions-table" class="table table-bordered table-striped">
                                 <thead class="bg-light">
                                     <tr>
                                         <th style="width: 20%;">Module</th>
@@ -85,18 +85,6 @@
 </div>
 
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const selectAllButtons = document.querySelectorAll('.select-all-row');
-
-        selectAllButtons.forEach(btn => {
-            btn.addEventListener('change', function() {
-                const moduleClass = this.getAttribute('data-module');
-                const checkboxes = document.querySelectorAll('.' + moduleClass);
-                checkboxes.forEach(cb => cb.checked = this.checked);
-            });
-        });
-    });
-</script>
+    <script src="{{ asset('admin_assets/js/roleForm.js') }}"></script>
 @endpush
 @endsection

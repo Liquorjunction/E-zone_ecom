@@ -68,6 +68,7 @@ class RoleRepository implements RoleRepositoryInterface
 
     public function getDataForDataTable($request)
     {
-        return Role::where('guard_name', $this->guardName)->get();
+        // return a query builder for server-side processing
+        return Role::where('guard_name', $this->guardName);
     }
 }

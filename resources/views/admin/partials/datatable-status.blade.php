@@ -2,17 +2,9 @@
     <form action="{{ $toggle_url }}" method="POST" style="display: inline;">
         @csrf
         @method('PATCH')
-        <button type="submit" class="btn btn-sm btn-icon" data-bs-toggle="tooltip"
-            data-bs-placement="top" data-original-title="{{ $status == 'active' ? 'Deactivate' : 'Activate' }}"
-            aria-label="{{ $status == 'active' ? 'Deactivate' : 'Activate' }}"
-            data-bs-original-title="{{ $status == 'active' ? 'Deactivate' : 'Activate' }}">
-            <span class="btn-inner">
-                @if ($status == 'active')
-                    <span class="badge rounded-pill bg-success">Active</span>
-                @else
-                    <span class="badge rounded-pill bg-danger">Inactive</span>
-                @endif
-            </span>
-        </button>
+        <div class="form-check form-switch form-check-inline pe-0">
+            <input class="form-check-input" type="checkbox" id="switch-status" {{ $status == 'active' ? 'checked' : '' }} onchange="this.form.submit()">
+            <label class="pl-2 form-check-label" for="switch-status">{{ $status == 'active' ? 'Active' : 'Inactive' }}</label>
+        </div>
     </form>
 @endcan
