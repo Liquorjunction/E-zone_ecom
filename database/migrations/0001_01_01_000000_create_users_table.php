@@ -15,8 +15,20 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone')->nullable()->unique(); // Critical for E-com (OTP/Delivery)
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable(); // Nullable for Social Login
+
+            // Social Login Fields
+            $table->string('google_id')->nullable()->unique();
+            $table->string('apple_id')->nullable()->unique();
+
+            // Profile & Status
+            $table->string('avatar')->nullable(); // To store social or uploaded photo
+            $table->boolean('is_active')->default(true); // To ban/block users
+            $table->boolean('is_newsletter_subscribed')->default(false); // Marketing opt-in
+            $table->timestamp('last_login_at')->nullable(); // Track user activity
+
             $table->rememberToken();
             $table->timestamps();
         });

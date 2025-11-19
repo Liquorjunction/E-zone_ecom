@@ -1,6 +1,26 @@
 <?php
 
+use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\Client\VerificationController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware('guest')->group(function () {
+    // Actions
+    Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Actions
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Show Notice Page
+    Route::get('/email/verify', [VerificationController::class, 'notice'])->name('verification.notice');
+    // Handle Link Click (Laravel automatically validates signature)
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
+    // Resend Email
+    Route::post('/email/verification-notification', [VerificationController::class, 'send'])->middleware(['throttle:6,1'])->name('verification.send');
+});
 
 Route::get('/', function () {
     return view('client.pages.home');
