@@ -44,5 +44,10 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/{id}', [RoleController::class, 'update'])->name('update')->middleware('can:role.update,admin');
             Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy')->middleware('can:role.delete,admin');
         });
+
+        // Hero-Slider routes
+        Route::prefix('hero-slider')->name('hero-slider.')->middleware('can:slider.read,admin')->group(function () {
+
+        });
     });
 });

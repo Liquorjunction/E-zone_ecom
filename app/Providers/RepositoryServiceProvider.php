@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
+use App\Repositories\Admin\Interfaces\SliderRepositoryInterface;
 use App\Repositories\Admin\Repositories\AdminRepository;
 use App\Repositories\Admin\Repositories\RoleRepository;
+use App\Repositories\Admin\Repositories\SliderRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -17,6 +19,7 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $this->app->bind(AdminRepositoryInterface::class, AdminRepository::class);
         $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
+        $this->app->bind(SliderRepositoryInterface::class, SliderRepository::class);
     }
 
     /**
