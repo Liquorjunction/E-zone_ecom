@@ -11,52 +11,67 @@
                     <h4>Create Category or Subcategory</h4>
                 </div>
                 <div class="card-body">
-                    {{-- Form needs an ID to be targeted by JS --}}
-                    {{-- Default action is set to category, but JS will update it immediately --}}
+                    {{-- Form with ID for JavaScript targeting --}}
                     <form id="createForm" action="{{ route('admin.category-subcategory.storeCategory') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        {{-- Hidden inputs to store route URLs for JavaScript --}}
+                        {{-- Hidden inputs for JS route switching --}}
                         <input type="hidden" id="route-category" value="{{ route('admin.category-subcategory.storeCategory') }}">
                         <input type="hidden" id="route-subcategory" value="{{ route('admin.category-subcategory.storeSubCategory') }}">
 
+                        {{-- Type Selector --}}
                         <div class="mb-3">
                             <label for="type" class="form-label">Type</label>
-                            <select name="type" id="type" class="form-select" required onchange="toggleCategoryField()">
-                                {{-- Added old() check to keep selection after validation error --}}
+                            <select name="type" id="type" class="form-select" onchange="toggleFields()">
                                 <option value="category" {{ old('type') == 'category' ? 'selected' : '' }}>Category</option>
                                 <option value="subcategory" {{ old('type') == 'subcategory' ? 'selected' : '' }}>Subcategory</option>
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
-                            @error('name') <div class="text-danger">{{ $message }}</div> @enderror
+                        {{-- SECTION: CATEGORY INPUTS --}}
+                        <div id="category-section">
+                            <div class="mb-3">
+                                <label class="form-label">Category Name</label>
+                                <input type="text" name="category-name" id="category-name" class="form-control" value="{{ old('category-name') }}">
+                                @error('category-name') <div class="text-danger">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Category Icon</label>
+                                <input type="file" name="category-icon" id="category-icon" class="form-control">
+                                @error('category-icon') <div class="text-danger">{{ $message }}</div> @enderror
+                            </div>
                         </div>
 
-                        <div class="mb-3" id="category-field" style="display: none;">
-                            <label for="category_id" class="form-label">Parent Category</label>
-                            <select name="category_id" id="category_id" class="form-select">
-                                <option value="">Select Parent Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('category_id') <div class="text-danger">{{ $message }}</div> @enderror
+                        {{-- SECTION: SUBCATEGORY INPUTS --}}
+                        <div id="subcategory-section" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Sub Category Name</label>
+                                <input type="text" name="sub-category-name" id="sub-category-name" class="form-control" value="{{ old('sub-category-name') }}">
+                                @error('sub-category-name') <div class="text-danger">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Parent Category</label>
+                                <select name="category_id" id="category_id" class="form-select">
+                                    <option value="">Select Parent Category</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->{'category-name'} }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('category_id') <div class="text-danger">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Sub Category Icon</label>
+                                <input type="file" name="sub-category-icon" id="sub-category-icon" class="form-control">
+                                @error('sub-category-icon') <div class="text-danger">{{ $message }}</div> @enderror
+                            </div>
                         </div>
 
+                        {{-- Shared Status Field --}}
                         <div class="mb-3">
-                            <label for="image" class="form-label">Image</label>
-                            <input type="file" name="image" id="image" class="form-control">
-                            @error('image') <div class="text-danger">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="is_active" class="form-label">Active</label>
-                            <input type="checkbox" name="is_active" id="is_active" value="1" checked>
+                            <label for="status" class="form-label">Active</label>
+                            <input type="checkbox" name="status" id="status" value="1" checked>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Create</button>
@@ -70,36 +85,50 @@
 
 @section('scripts')
 <script>
-function toggleCategoryField() {
+function toggleFields() {
     const type = document.getElementById('type').value;
-    const categoryField = document.getElementById('category-field');
-    const categoryInput = document.getElementById('category_id');
-
-    // Get the form element and route values
     const form = document.getElementById('createForm');
-    const routeCategory = document.getElementById('route-category').value;
-    const routeSubCategory = document.getElementById('route-subcategory').value;
+
+    const catSection = document.getElementById('category-section');
+    const subCatSection = document.getElementById('subcategory-section');
+
+    // Inputs to Enable/Disable
+    const catName = document.getElementById('category-name');
+    const subCatName = document.getElementById('sub-category-name');
+    const catId = document.getElementById('category_id');
 
     if (type === 'subcategory') {
-        // Show Parent Category dropdown
-        categoryField.style.display = 'block';
-        categoryInput.required = true;
+        // Show SubCategory
+        catSection.style.display = 'none';
+        subCatSection.style.display = 'block';
 
-        // Switch form action to SubCategory store route
-        form.action = routeSubCategory;
+        // Update Form Action
+        form.action = document.getElementById('route-subcategory').value;
+
+        // Toggle Required/Disabled (Disabled inputs are not sent in request, preventing errors)
+        catName.disabled = true;
+        subCatName.disabled = false;
+        subCatName.required = true;
+        catId.disabled = false;
+        catId.required = true;
     } else {
-        // Hide Parent Category dropdown
-        categoryField.style.display = 'none';
-        categoryInput.required = false;
+        // Show Category
+        catSection.style.display = 'block';
+        subCatSection.style.display = 'none';
 
-        // Switch form action to Category store route
-        form.action = routeCategory;
+        // Update Form Action
+        form.action = document.getElementById('route-category').value;
+
+        // Toggle Required/Disabled
+        catName.disabled = false;
+        catName.required = true;
+        subCatName.disabled = true;
+        catId.disabled = true;
     }
 }
 
-// Run on page load to ensure correct state (handles "back" button or validation redirects)
 document.addEventListener('DOMContentLoaded', function() {
-    toggleCategoryField();
+    toggleFields();
 });
 </script>
 @endsection

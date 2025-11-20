@@ -24,7 +24,6 @@ class StoreSubCategoryRequest extends FormRequest
             'sub-category-name' => 'required|string|max:255',
             'sub-category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'category_id' => 'required|exists:categories,id',
-            'slug' => 'required|string|max:255|unique:sub_categories,slug',
             'status' => 'nullable|boolean',
         ];
     }
@@ -37,9 +36,6 @@ class StoreSubCategoryRequest extends FormRequest
             'sub-category-name.required' => 'The sub-category name is required.',
             'category_id.required' => 'Please select a category.',
             'category_id.exists' => 'The selected category does not exist.',
-            'slug.unique' => 'The slug must be unique.',
-            'slug.max' => 'The slug must not exceed 255 characters.',
-            'slug.required' => 'The slug is required.',
         ];
     }
 
@@ -48,7 +44,6 @@ class StoreSubCategoryRequest extends FormRequest
         return [
             'sub-category-name' => 'sub-category name',
             'category_id' => 'category',
-            'slug' => 'slug',
         ];
     }
 }

@@ -23,7 +23,6 @@ class StoreCategoryRequest extends FormRequest
         return [
             'category-name' => 'required|string|max:255',
             'category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'slug' => 'required|string|max:255|unique:categories,slug',
             'status' => 'nullable|boolean',
         ];
     }
@@ -34,9 +33,6 @@ class StoreCategoryRequest extends FormRequest
             'category-name.string' => 'The category name must be a string.',
             'category-name.max' => 'The category name must not exceed 255 characters.',
             'category-name.required' => 'The category name is required.',
-            'slug.unique' => 'The slug must be unique.',
-            'slug.max' => 'The slug must not exceed 255 characters.',
-            'slug.required' => 'The slug is required.',
         ];
     }
 
@@ -44,7 +40,6 @@ class StoreCategoryRequest extends FormRequest
     {
         return [
             'category-name' => 'category name',
-            'slug' => 'slug',
         ];
     }
 }

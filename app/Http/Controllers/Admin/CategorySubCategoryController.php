@@ -118,12 +118,12 @@ class CategorySubCategoryController extends Controller
             $categories = $categoryRepo->getDataForDataTable();
             $getTable = DataTables::of($categories)
                 ->addIndexColumn()
-                ->addColumn('image', function ($category) {
-                    if ($category->image && Storage::disk('public')->exists($category->image)) {
-                        return asset('storage/' . $category->image);
+                ->addColumn('category-icon', function ($category) {
+                    if ($category->category_icon && Storage::disk('public')->exists($category->category_icon)) {
+                        return asset('storage/' . $category->category_icon);
                     }
                 })
-                ->addColumn('is_active', function ($category) {
+                ->addColumn('status', function ($category) {
                     $data['toggle_url'] = route('admin.category-subcategory.toggleStatus', ['type' => 'category', 'id' => $category->id]);
                     $data['status'] = $category->is_active;
                     return view('admin.partials.datatable-status', $data)->render();
@@ -133,7 +133,7 @@ class CategorySubCategoryController extends Controller
                     $data['delete_url'] = route('admin.category-subcategory.destroy', ['id' => $category->id, 'type' => 'category']);
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['action', 'image', 'is_active'])
+                ->rawColumns(['action', 'status', 'category-icon'])
                 ->make(true);
 
             return $getTable;
@@ -149,14 +149,16 @@ class CategorySubCategoryController extends Controller
             $subCategories = $subCategoryRepo->getDataForDataTable();
             $getTable = DataTables::of($subCategories)
                 ->addIndexColumn()
-                ->addColumn('image', function ($subCategory) {
-                    if ($subCategory->image && Storage::disk('public')->exists($subCategory->image)) {
-                        return asset('storage/' . $subCategory->image);
+                ->addColumn('sub-category-icon', function ($subCategory) {
+                    $icon = $subCategory->{'sub-category-icon'};
+                    if ($icon && Storage::disk('public')->exists($icon)) {
+                        return '<img src="' . asset('storage/' . $icon) . '" alt="Icon" width="50" height="50">';
                     }
+                    return '<span class="text-muted">No Image</span>';
                 })
-                ->addColumn('is_active', function ($subCategory) {
+                ->addColumn('status', function ($subCategory) {
                     $data['toggle_url'] = route('admin.category-subcategory.toggleStatus', ['type' => 'subcategory', 'id' => $subCategory->id]);
-                    $data['status'] = $subCategory->is_active;
+                    $data['status'] = $subCategory->status === 'active';
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($subCategory) {
@@ -164,7 +166,7 @@ class CategorySubCategoryController extends Controller
                     $data['delete_url'] = route('admin.category-subcategory.destroy', ['id' => $subCategory->id, 'type' => 'subcategory']);
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['action', 'image', 'is_active'])
+                ->rawColumns(['action', 'status', 'sub-category-icon'])
                 ->make(true);
 
             return $getTable;

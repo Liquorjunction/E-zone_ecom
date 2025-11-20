@@ -4,12 +4,13 @@ namespace App\Repositories\Admin\Repositories;
 
 use App\Models\Categories;
 use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryRepository implements CategoryRepositoryInterface
 {
     public function getAllCategories()
     {
-        return Categories::orderBy('sort_order', 'asc')->get();
+        return Categories::orderBy('id', 'desc')->get();
     }
 
     public function getCategoryById($id)
@@ -19,35 +20,56 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     public function storeCategory($request)
     {
-        return Categories::create($request->validated());
+        $data = $request->validated();
+
+        // Handle File Upload
+        if ($request->hasFile('category-icon')) {
+            $data['category-icon'] = $request->file('category-icon')->store('categories', 'public');
+        }
+
+        // Checkbox handling (if not checked, it might not be in request, default to 0)
+        $data['status'] = $request->has('status') ? 1 : 0;
+
+        return Categories::create($data);
     }
 
     public function updateCategory($request, $id)
     {
         $category = Categories::findOrFail($id);
-        $category->update($request->validated());
+        $data = $request->validated();
 
+        if ($request->hasFile('category-icon')) {
+            if ($category->{'category-icon'} && Storage::disk('public')->exists($category->{'category-icon'})) {
+                Storage::disk('public')->delete($category->{'category-icon'});
+            }
+            $data['category-icon'] = $request->file('category-icon')->store('categories', 'public');
+        }
+
+        $data['status'] = $request->has('status') ? 'active' : 'inactive';
+
+        $category->update($data);
         return $category;
     }
 
     public function deleteCategory($id)
     {
-        return Categories::findOrFail($id)->delete();
+        $category = Categories::findOrFail($id);
+        if ($category->{'category-icon'} && Storage::disk('public')->exists($category->{'category-icon'})) {
+            Storage::disk('public')->delete($category->{'category-icon'});
+        }
+        return $category->delete();
     }
 
     public function updateStatus($id)
     {
         $category = Categories::findOrFail($id);
-        $category->is_active = !$category->is_active;
+        $category->status = $category->status === 'active' ? 'inactive' : 'active';
         $category->save();
-
         return $category;
     }
 
     public function getDataForDataTable()
     {
-        // Return query for Yajra DataTables
         return Categories::query()->latest();
     }
-
 }

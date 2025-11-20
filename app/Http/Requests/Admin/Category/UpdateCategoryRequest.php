@@ -24,7 +24,6 @@ class UpdateCategoryRequest extends FormRequest
             'id' => 'required|exists:categories,id',
             'category-name' => 'required|string|max:255',
             'category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'slug' => 'required|string|max:255|unique:categories,slug,' . $this->route('category')->id,
             'status' => 'nullable|boolean',
         ];
     }
@@ -39,9 +38,6 @@ class UpdateCategoryRequest extends FormRequest
             'category-icon.image' => 'The category icon must be an image.',
             'category-icon.mimes' => 'The category icon must be a JPEG, PNG, JPG, or GIF image.',
             'category-icon.max' => 'The category icon size must not exceed 2MB.',
-            'slug.required' => 'The category slug is required.',
-            'slug.unique' => 'The category slug must be unique.',
-            'slug.max' => 'The category slug must not exceed 255 characters.',
         ];
     }
 
@@ -51,7 +47,6 @@ class UpdateCategoryRequest extends FormRequest
             'id' => 'Category ID',
             'category-name' => 'Category Name',
             'category-icon' => 'Category Icon',
-            'slug' => 'Category Slug',
             'status' => 'Status',
         ];
     }
