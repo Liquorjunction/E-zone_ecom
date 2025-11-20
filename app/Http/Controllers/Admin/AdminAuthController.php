@@ -166,14 +166,21 @@ class AdminAuthController extends Controller
      * Toggles the status of the admin.
      * Uses superadminToggleAdminStatus()
      */
-    public function toggleStatus($id, AdminRepositoryInterface $adminRepository)
+    public function toggleStatus($id, AdminRepositoryInterface $adminRepository, Request $request)
     {
         try {
             $adminRepository->superadminToggleAdminStatus($id);
 
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Admin status updated.']);
+            }
+
             return back()->with('success', 'Admin status updated.');
         } catch (\Exception $e) {
             Log::error('Error in AdminAuthController@toggleStatus: '.$e->getMessage());
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
             throw $e;
         }
     }

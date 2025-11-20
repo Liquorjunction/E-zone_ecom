@@ -23,7 +23,7 @@ class DestroySubCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:sub_categories,id',
+            'id' => 'required|exists:sub-categories,id',
         ];
     }
 

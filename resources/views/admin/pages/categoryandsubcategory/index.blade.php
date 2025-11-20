@@ -8,8 +8,11 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Categories & Subcategories</h4>
-                    <a href="{{ route('admin.category-subcategory.create') }}" class="btn btn-primary">Add New</a>
+                    <h4 class="card-title mb-0">Management</h4>
+                    <div>
+                        <a href="{{ route('admin.category-subcategory.categories.create') }}" class="btn btn-primary me-2">Add Category</a>
+                        <a href="{{ route('admin.category-subcategory.subcategories.create') }}" class="btn btn-secondary">Add SubCategory</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul class="nav nav-tabs" id="categoryTab" role="tablist">
@@ -20,13 +23,11 @@
                             <button class="nav-link" id="subcategories-tab" data-bs-toggle="tab" data-bs-target="#subcategories" type="button" role="tab" aria-controls="subcategories" aria-selected="false">Subcategories</button>
                         </li>
                     </ul>
-
-                    <div class="tab-content" id="categoryTabContent">
+                    <div class="tab-content mt-3" id="categoryTabContent">
                         {{-- Categories Table --}}
                         <div class="tab-pane fade show active" id="categories" role="tabpanel" aria-labelledby="categories-tab">
-                            <div class="table-responsive mt-3">
-                                {{-- ADDED data-url attribute here --}}
-                                <table id="categories-table" class="table table-striped" data-url="{{ route('admin.category-subcategory.dataCategory') }}">
+                            <div class="table-responsive">
+                                <table id="categories-table" class="table table-striped table-bordered w-100" data-route="{{ route('admin.category-subcategory.categories.data') }}">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -39,12 +40,10 @@
                                 </table>
                             </div>
                         </div>
-
-                        {{-- Subcategories Table --}}
+                        {{-- SubCategories Table --}}
                         <div class="tab-pane fade" id="subcategories" role="tabpanel" aria-labelledby="subcategories-tab">
-                            <div class="table-responsive mt-3">
-                                {{-- ADDED data-url attribute here --}}
-                                <table id="subcategories-table" class="table table-striped" data-url="{{ route('admin.category-subcategory.dataSubCategory') }}">
+                             <div class="table-responsive">
+                                <table id="subcategories-table" class="table table-striped table-bordered w-100" data-route="{{ route('admin.category-subcategory.subcategories.data') }}">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -66,6 +65,6 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="{{ asset('admin_assets/js/datatableJs/categorySubCategory.js') }}"></script>
-@endsection
+@endpush

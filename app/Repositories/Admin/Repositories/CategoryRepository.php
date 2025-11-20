@@ -22,13 +22,12 @@ class CategoryRepository implements CategoryRepositoryInterface
     {
         $data = $request->validated();
 
-        // Handle File Upload
         if ($request->hasFile('category-icon')) {
             $data['category-icon'] = $request->file('category-icon')->store('categories', 'public');
         }
 
-        // Checkbox handling (if not checked, it might not be in request, default to 0)
-        $data['status'] = $request->has('status') ? 1 : 0;
+        // FIX: Save 'active'/'inactive' instead of 1/0
+        $data['status'] = $request->has('status') ? 'active' : 'inactive';
 
         return Categories::create($data);
     }
@@ -45,6 +44,7 @@ class CategoryRepository implements CategoryRepositoryInterface
             $data['category-icon'] = $request->file('category-icon')->store('categories', 'public');
         }
 
+        // Status logic here was already correct in your file, keeping it consistent
         $data['status'] = $request->has('status') ? 'active' : 'inactive';
 
         $category->update($data);

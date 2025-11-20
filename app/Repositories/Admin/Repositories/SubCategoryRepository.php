@@ -26,7 +26,8 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
             $data['sub-category-icon'] = $request->file('sub-category-icon')->store('subcategories', 'public');
         }
 
-        $data['status'] = $request->has('status') ? 1 : 0;
+        // FIX: Save 'active'/'inactive' instead of 1/0
+        $data['status'] = $request->has('status') ? 'active' : 'inactive';
 
         return SubCategories::create($data);
     }
@@ -43,7 +44,8 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
             $data['sub-category-icon'] = $request->file('sub-category-icon')->store('subcategories', 'public');
         }
 
-        $data['status'] = $request->has('status') ? 1 : 0;
+        // FIX: Save 'active'/'inactive' instead of 1/0
+        $data['status'] = $request->has('status') ? 'active' : 'inactive';
 
         $subCategory->update($data);
         return $subCategory;
@@ -61,7 +63,8 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
     public function updateStatus($id)
     {
         $subCategory = SubCategories::findOrFail($id);
-        $subCategory->status = !$subCategory->status;
+        // FIX: Toggle string values, Boolean logic will fail on Enum
+        $subCategory->status = $subCategory->status === 'active' ? 'inactive' : 'active';
         $subCategory->save();
         return $subCategory;
     }

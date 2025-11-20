@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Category\DestroyCategoryRequest;
 use App\Http\Requests\Admin\Category\StoreCategoryRequest;
 use App\Http\Requests\Admin\Category\UpdateCategoryRequest;
-use App\Http\Requests\Admin\SubCategory\DestroySubCategoryRequest;
 use App\Http\Requests\Admin\SubCategory\StoreSubCategoryRequest;
 use App\Http\Requests\Admin\SubCategory\UpdateSubCategoryRequest;
 use App\Models\Categories;
@@ -15,7 +13,6 @@ use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface as CategoryRep
 use App\Repositories\Admin\Interfaces\SubCategoryRepositoryInterface as SubCategoryRepo;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use League\Config\Exception\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
 class CategorySubCategoryController extends Controller
@@ -25,10 +22,13 @@ class CategorySubCategoryController extends Controller
         return view('admin.pages.categoryandsubcategory.index');
     }
 
-    public function create()
+    // ==========================================
+    //               CATEGORY METHODS
+    // ==========================================
+
+    public function createCategory()
     {
-        $categories = Categories::all(); // For subcategory category selection
-        return view('admin.pages.categoryandsubcategory.create', compact('categories'));
+        return view('admin.pages.categoryandsubcategory.create_category');
     }
 
     public function storeCategory(StoreCategoryRequest $request, CategoryRepo $categoryRepo)
@@ -36,10 +36,81 @@ class CategorySubCategoryController extends Controller
         try {
             $categoryRepo->storeCategory($request);
             return redirect()->route('admin.category-subcategory.index')->with('success', 'Category created successfully.');
-        } catch (ValidationException $e) {
+        } catch (\Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
+    }
+
+    public function editCategory($id)
+    {
+        $category = Categories::findOrFail($id);
+        return view('admin.pages.categoryandsubcategory.edit_category', compact('category'));
+    }
+
+    public function updateCategory(UpdateCategoryRequest $request, $id, CategoryRepo $categoryRepo)
+    {
+        try {
+            $categoryRepo->updateCategory($request, $id);
+            return redirect()->route('admin.category-subcategory.index')->with('success', 'Category updated successfully.');
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
+    }
+
+    public function destroyCategory($id, CategoryRepo $categoryRepo)
+    {
+        try {
+            $categoryRepo->deleteCategory($id);
+            return redirect()->back()->with(['success' => true, 'message' => 'Category deleted successfully']);
+        } catch (\Exception $e) {
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function dataCategory(CategoryRepo $categoryRepo)
+    {
+        $categories = $categoryRepo->getDataForDataTable();
+        return DataTables::of($categories)
+            ->addIndexColumn()
+            ->addColumn('image', function ($category) {
+                if ($category->{'category-icon'} && Storage::disk('public')->exists($category->{'category-icon'})) {
+                    return '<img src="' . asset('storage/' . $category->{'category-icon'}) . '" alt="Category Image" class="img-thumbnail" width="50">';
+                }
+                return 'N/A';
+            })
+            ->addColumn('is_active', function ($category) {
+                $data['toggle_url'] = route('admin.category-subcategory.categories.toggleStatus', ['id' => $category->id]);
+                $data['status'] = $category->status;
+                $data['id'] = $category->id;
+                return view('admin.partials.datatable-status', $data)->render();
+            })
+            ->addColumn('action', function ($category) {
+                $data['edit_url'] = route('admin.category-subcategory.categories.edit', ['id' => $category->id]);
+                $data['delete_url'] = route('admin.category-subcategory.categories.destroy', ['id' => $category->id]);
+                $data['id'] = $category->id;
+                return view('admin.partials.datatable-actions', $data)->render();
+            })
+            ->rawColumns(['action', 'image', 'is_active'])
+            ->make(true);
+    }
+
+    public function toggleCategoryStatus($id, CategoryRepo $categoryRepo)
+    {
+        $categoryRepo->updateStatus($id);
+        return redirect()->back()->with(['success' => true, 'message' => 'Category status updated successfully']);
+    }
+
+    // ==========================================
+    //             SUBCATEGORY METHODS
+    // ==========================================
+
+    public function createSubCategory()
+    {
+        // This was correct in your original code
+        $categories = Categories::where('status', 'active')->get();
+        return view('admin.pages.categoryandsubcategory.create_subcategory', compact('categories'));
     }
 
     public function storeSubCategory(StoreSubCategoryRequest $request, SubCategoryRepo $subCategoryRepo)
@@ -47,142 +118,81 @@ class CategorySubCategoryController extends Controller
         try {
             $subCategoryRepo->storeSubCategory($request);
             return redirect()->route('admin.category-subcategory.index')->with('success', 'SubCategory created successfully.');
-        } catch (ValidationException $e) {
+        } catch (\Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
 
-    public function edit()
+    public function editSubCategory($id)
     {
-        $id = request('id');
-        $type = request('type');
-        if ($type === 'category') {
-            $item = Categories::findOrFail($id);
-        } elseif ($type === 'subcategory') {
-            $item = SubCategories::findOrFail($id);
-            $categories = Categories::all();
-        } else {
-            return redirect()->back()->withErrors(['error' => 'Invalid type']);
-        }
-        return view('admin.pages.categoryandsubcategory.edit', compact('item', 'type', 'categories'));
+        $subCategory = SubCategories::findOrFail($id);
+
+        // FIX: Changed 'is_active', 1 to 'status', 'active' to match your migration
+        $categories = Categories::where('status', 'active')->get();
+
+        return view('admin.pages.categoryandsubcategory.edit_subcategory', compact('subCategory', 'categories'));
     }
 
-    public function update(CategoryRepo $categoryRepo, SubCategoryRepo $subCategoryRepo)
-    {
-        $id = request('id');
-        $type = request('type');
-        if ($type === 'category') {
-            $request = app(UpdateCategoryRequest::class);
-            try {
-                $categoryRepo->updateCategory($request, $id);
-                return redirect()->route('admin.category-subcategory.index')->with('success', 'Category updated successfully.');
-            } catch (ValidationException $e) {
-                Log::error($e->getMessage());
-                return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
-            }
-        } elseif ($type === 'subcategory') {
-            $request = app(UpdateSubCategoryRequest::class);
-            try {
-                $subCategoryRepo->updateSubCategory($request, $id);
-                return redirect()->route('admin.category-subcategory.index')->with('success', 'SubCategory updated successfully.');
-            } catch (ValidationException $e) {
-                Log::error($e->getMessage());
-                return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
-            }
-        }
-        return redirect()->back()->withErrors(['error' => 'Invalid type']);
-    }
-
-   public function destroy(CategoryRepo $categoryRepo, SubCategoryRepo $subCategoryRepo)
-    {
-        // Fetch ID from query string (e.g. ?id=1) instead of route parameter
-        $id = request('id');
-        $type = request('type');
-
-        if ($type === 'category') {
-            $request = app(DestroyCategoryRequest::class);
-            $categoryRepo->deleteCategory($id);
-            return redirect()->route('admin.category-subcategory.index')->with('success', 'Category deleted successfully.');
-        } elseif ($type === 'subcategory') {
-            $request = app(DestroySubCategoryRequest::class);
-            $subCategoryRepo->deleteSubCategory($id);
-            return redirect()->route('admin.category-subcategory.index')->with('success', 'SubCategory deleted successfully.');
-        }
-        return redirect()->back()->withErrors(['error' => 'Invalid type']);
-    }
-
-    public function dataCategory(CategoryRepo $categoryRepo)
+    public function updateSubCategory(UpdateSubCategoryRequest $request, $id, SubCategoryRepo $subCategoryRepo)
     {
         try {
-            $categories = $categoryRepo->getDataForDataTable();
-            $getTable = DataTables::of($categories)
-                ->addIndexColumn()
-                ->addColumn('category-icon', function ($category) {
-                    if ($category->category_icon && Storage::disk('public')->exists($category->category_icon)) {
-                        return asset('storage/' . $category->category_icon);
-                    }
-                })
-                ->addColumn('status', function ($category) {
-                    $data['toggle_url'] = route('admin.category-subcategory.toggleStatus', ['type' => 'category', 'id' => $category->id]);
-                    $data['status'] = $category->is_active;
-                    return view('admin.partials.datatable-status', $data)->render();
-                })
-                ->addColumn('action', function ($category) {
-                    $data['edit_url'] = route('admin.category-subcategory.edit', ['id' => $category->id, 'type' => 'category']);
-                    $data['delete_url'] = route('admin.category-subcategory.destroy', ['id' => $category->id, 'type' => 'category']);
-                    return view('admin.partials.datatable-actions', $data)->render();
-                })
-                ->rawColumns(['action', 'status', 'category-icon'])
-                ->make(true);
-
-            return $getTable;
+            $subCategoryRepo->updateSubCategory($request, $id);
+            return redirect()->route('admin.category-subcategory.index')->with('success', 'SubCategory updated successfully.');
         } catch (\Exception $e) {
-            Log::error('Error in CategorySubCategoryController@dataCategory: '.$e->getMessage());
-            throw $e;
+            Log::error($e->getMessage());
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
+    }
+
+    public function destroySubCategory($id, SubCategoryRepo $subCategoryRepo)
+    {
+        try {
+            $subCategoryRepo->deleteSubCategory($id);
+            return redirect()->back()->with(['success' => true, 'message' => 'SubCategory deleted successfully']);
+        } catch (\Exception $e) {
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
     public function dataSubCategory(SubCategoryRepo $subCategoryRepo)
     {
-        try {
-            $subCategories = $subCategoryRepo->getDataForDataTable();
-            $getTable = DataTables::of($subCategories)
-                ->addIndexColumn()
-                ->addColumn('sub-category-icon', function ($subCategory) {
-                    $icon = $subCategory->{'sub-category-icon'};
-                    if ($icon && Storage::disk('public')->exists($icon)) {
-                        return '<img src="' . asset('storage/' . $icon) . '" alt="Icon" width="50" height="50">';
-                    }
-                    return '<span class="text-muted">No Image</span>';
-                })
-                ->addColumn('status', function ($subCategory) {
-                    $data['toggle_url'] = route('admin.category-subcategory.toggleStatus', ['type' => 'subcategory', 'id' => $subCategory->id]);
-                    $data['status'] = $subCategory->status === 'active';
-                    return view('admin.partials.datatable-status', $data)->render();
-                })
-                ->addColumn('action', function ($subCategory) {
-                    $data['edit_url'] = route('admin.category-subcategory.edit', ['id' => $subCategory->id, 'type' => 'subcategory']);
-                    $data['delete_url'] = route('admin.category-subcategory.destroy', ['id' => $subCategory->id, 'type' => 'subcategory']);
-                    return view('admin.partials.datatable-actions', $data)->render();
-                })
-                ->rawColumns(['action', 'status', 'sub-category-icon'])
-                ->make(true);
-
-            return $getTable;
-        } catch (\Exception $e) {
-            Log::error('Error in CategorySubCategoryController@dataSubCategory: '.$e->getMessage());
-            throw $e;
-        }
+        $subCategories = $subCategoryRepo->getDataForDataTable();
+        return DataTables::of($subCategories)
+            ->addIndexColumn()
+            ->addColumn('name', function ($subCategory) {
+                // Correctly using kebab-case syntax
+                return $subCategory->{'sub-category-name'};
+            })
+            ->addColumn('category.name', function ($subCategory) {
+                // Correctly checking relationship and kebab-case field
+                return $subCategory->category ? $subCategory->category->{'category-name'} : 'N/A';
+            })
+            ->addColumn('image', function ($subCategory) {
+                if ($subCategory->{'sub-category-icon'} && Storage::disk('public')->exists($subCategory->{'sub-category-icon'})) {
+                    return '<img src="' . asset('storage/' . $subCategory->{'sub-category-icon'}) . '" alt="SubCategory Image" class="img-thumbnail" width="50">';
+                }
+                return 'N/A';
+            })
+            ->addColumn('is_active', function ($subCategory) {
+                $data['toggle_url'] = route('admin.category-subcategory.subcategories.toggleStatus', ['id' => $subCategory->id]);
+                $data['status'] = $subCategory->status;
+                $data['id'] = $subCategory->id;
+                return view('admin.partials.datatable-status', $data)->render();
+            })
+            ->addColumn('action', function ($subCategory) {
+                $data['edit_url'] = route('admin.category-subcategory.subcategories.edit', ['id' => $subCategory->id]);
+                $data['delete_url'] = route('admin.category-subcategory.subcategories.destroy', ['id' => $subCategory->id]);
+                $data['id'] = $subCategory->id;
+                return view('admin.partials.datatable-actions', $data)->render();
+            })
+            ->rawColumns(['action', 'image', 'is_active'])
+            ->make(true);
     }
 
-    public function toggleStatus(CategoryRepo $categoryRepo, SubCategoryRepo $subCategoryRepo, $type, $id)
+    public function toggleSubCategoryStatus($id, SubCategoryRepo $subCategoryRepo)
     {
-        if ($type === 'category') {
-            $categoryRepo->updateStatus($id);
-        } elseif ($type === 'subcategory') {
-            $subCategoryRepo->updateStatus($id);
-        }
-        return response()->json(['success' => true]);
+        $subCategoryRepo->updateStatus($id);
+        return redirect()->back()->with(['success' => true, 'message' => 'SubCategory status updated successfully']);
     }
 }

@@ -13,7 +13,7 @@ class SubCategories extends Model
 {
     use HasRoles, HasSlug , Notifiable, SoftDeletes;
 
-    protected $table = 'sub_categories';
+    protected $table = 'sub-categories';
     public $guard_name = 'admin';
     protected $guarded = [];
 
