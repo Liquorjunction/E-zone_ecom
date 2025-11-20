@@ -111,7 +111,7 @@
                 </li>
                 @can('slider.read')
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.sliders.index') }}">
+                        <a class="nav-link" href="{{ route('admin.hero-slider.index') }}">
                             <i class="icon">
                                 <svg fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                                     xmlns:xlink="http://www.w3.org/1999/xlink" width="20px" height="20px"
@@ -146,6 +146,26 @@
                                 </svg>
                             </i>
                             <span class="item-name">Slider</span>
+                        </a>
+                    </li>
+                @endcan
+                @can('category-subcategory.read')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.category-subcategory.index') }}">
+                            <i class="icon">
+                                <svg fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" width="20px" height="20px"
+                                    viewBox="0 0 72 72" enable-background="new 0 0 72 72" xml:space="preserve">
+                                    <g>
+                                        <g>
+                                            <path d="M68.5,61.568c0,3.828-3.104,6.932-6.932,6.932H10.432c-3.828,0-6.932-3.104-6.932-6.932V26.432
+                                                            c0-3.828,3.104-6.932,6.932-6.932h51.137c3.828,0,6.932,3.104,6.932,6.932V61.568z M64.5,26.432c0-1.619-1.313-2.932-2.932-2.932
+                                                            H10.432c-1.619,0-2.932,1.313-2.932,2.932v35.137c0,1.619,1.313,2.932,2.932,2.932h51.137c1.619,0,2.932-1.313,2.932-2.932V26.432z" />
+                                        </g>
+                                    </g>
+                                </svg>
+                            </i>
+                            <span class="item-name">Category & Subcategory</span>
                         </a>
                     </li>
                 @endcan

@@ -55,6 +55,7 @@
                                             <span>Only .jpg, .png, .jpeg allowed</span>
                                         </div>
                                     </div>
+                                    @error('profile_image') <div class="text-danger">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">User Role:</label>

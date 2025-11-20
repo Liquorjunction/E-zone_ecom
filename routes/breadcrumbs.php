@@ -235,3 +235,53 @@ Breadcrumbs::for('admin.profile', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
     $trail->push('Profile', route('admin.profile.index'));
 });
+
+// Admin Dashboard > Profile > Edit
+Breadcrumbs::for('admin.profile.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.profile');
+    $trail->push('Edit Profile', route('admin.profile.edit'));
+});
+
+// Admin Dashboard > Profile > Change Password
+Breadcrumbs::for('admin.profile.change-password', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.profile');
+    $trail->push('Change Password', route('admin.profile.change-password'));
+});
+
+// Admin Dashboard > Hero Slider
+Breadcrumbs::for('admin.hero-slider.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Hero Slider', route('admin.hero-slider.index'));
+});
+
+// Admin Dashboard > Hero Slider > Create
+Breadcrumbs::for('admin.hero-slider.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.hero-slider.index');
+    $trail->push('Create Slider', route('admin.hero-slider.create'));
+});
+
+// Admin Dashboard > Hero Slider > Edit
+Breadcrumbs::for('admin.hero-slider.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.hero-slider.index');
+    $trail->push('Edit Slider', route('admin.hero-slider.edit', 1)); // Default ID, should be dynamic
+});
+
+// Admin Dashboard > Hero Slider > Toggle Status
+Breadcrumbs::for('admin.hero-slider.toggleStatus', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.hero-slider.index');
+    $trail->push('Toggle Status', route('admin.hero-slider.toggleStatus', 1)); // Default ID, should be dynamic
+});
+
+// Admin Dashboard > Hero Slider > Delete
+Breadcrumbs::for('admin.hero-slider.destroy', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.hero-slider.index');
+    $trail->push('Delete Slider', route('admin.hero-slider.destroy', 1)); // Default ID, should be dynamic
+});
+
+// Admin Dashboard > Brands
+Breadcrumbs::for('admin.brands.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Brands', route('admin.brands.index'));
+});
+
+

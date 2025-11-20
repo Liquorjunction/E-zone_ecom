@@ -60,6 +60,7 @@
                                             <option value="{{ $role->name }}">{{ $role->name }}</option>
                                         @endforeach
                                     </select>
+                                    @error('role') <div class="text-danger">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                         </div>
@@ -80,11 +81,13 @@
                                             {{-- FIX: Changed name attribute --}}
                                             <input type="text" name="name" class="form-control" id="name"
                                                 placeholder="Full Name" required>
+                                            @error('name') <div class="text-danger">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="email">Email:</label>
                                             <input type="email" name="email" class="form-control" id="email"
                                                 placeholder="Email" required>
+                                            @error('email') <div class="text-danger">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <hr>
@@ -94,11 +97,13 @@
                                             <label class="form-label" for="password">Password:</label>
                                             <input type="password" name="password" class="form-control" id="password"
                                                 placeholder="Password" required>
+                                            @error('password') <div class="text-danger">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="password_confirmation">Repeat Password:</label>
                                             <input type="password" name="password_confirmation" class="form-control"
                                                 id="password_confirmation" placeholder="Repeat Password " required>
+                                            @error('password_confirmation') <div class="text-danger">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary mt-3">Add New User</button>
