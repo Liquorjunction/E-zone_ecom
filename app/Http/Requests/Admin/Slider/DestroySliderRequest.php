@@ -12,7 +12,7 @@ class DestroySliderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('slider.create');
+        return Auth::guard('admin')->user()->can('slider.delete');
     }
 
     /**

@@ -15,7 +15,6 @@
 
                     <div class="mb-3">
                         <label class="form-label">Category Name</label>
-                        {{-- FIX: Used kebab-case syntax {'category-name'} --}}
                         <input type="text" name="category-name" id="category-name" class="form-control"
                             value="{{ old('category-name', $category->{'category-name'}) }}">
                         @error('category-name')
@@ -44,7 +43,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">Update Category</button>
-                    <a href="{{ route('admin.category-subcategory.index') }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ route('admin.category-subcategory.categories.index') }}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>

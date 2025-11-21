@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CategorySubCategoryController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -90,6 +91,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
                 Route::delete('/{id}', [SubCategoryController::class, 'destroy'])->name('destroy')->middleware('can:subcategory.delete,admin');
                 Route::patch('/{id}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:subcategory.update,admin');
             });
+        });
+
+        // Card Routes
+        Route::prefix('card')->name('card.')->middleware('can:card.read,admin')->group(function () {
+            Route::get('/', [CardController::class, 'index'])->name('index'); // permission: card.read
+            Route::get('/data', [CardController::class, 'data'])->name('data');
+            Route::get('/create', [CardController::class, 'create'])->name('create')->middleware('can:card.create,admin');
+            Route::post('/', [CardController::class, 'store'])->name('store')->middleware('can:card.create,admin');
+            Route::get('/edit', [CardController::class, 'edit'])->name('edit')->middleware('can:card.update,admin');
+            Route::put('/{id}', [CardController::class, 'update'])->name('update')->middleware('can:card.update,admin');
+            Route::delete('/{id}', [CardController::class, 'destroy'])->name('destroy')->middleware('can:card.delete,admin');
+            Route::patch('/{id}/toggle-status', [CardController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:card.update,admin');
         });
     });
 });
