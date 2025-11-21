@@ -33,7 +33,7 @@
                         <label class="form-check-label" for="active">Active</label>
                     </div>
                     <button type="submit" class="btn btn-success">Save Category</button>
-                    <a href="{{ route('admin.category-subcategory.index') }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ route('admin.category-subcategory.categories.index') }}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>

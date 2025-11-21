@@ -22,7 +22,8 @@
                         <h4 class="card-title mb-0">Roles List</h4>
 
                         {{-- Link to Create Page --}}
-                        <a href="{{ route('admin.roles-permissions.create') }}" class="btn btn-primary">
+                        @can('role.create')
+                            <a href="{{ route('admin.roles-permissions.create') }}" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 me-1" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" width="20">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -30,6 +31,7 @@
                             </svg>
                             New Role
                         </a>
+                        @endcan
                     </div>
 
                     <div class="card-body">

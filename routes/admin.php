@@ -2,10 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CategorySubCategoryController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\SubCategoryController;
 
 Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
     // Guest routes
@@ -61,30 +63,32 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         });
 
         // Categories & Subcategories routes
-        Route::prefix('category-subcategory')->name('category-subcategory.')->middleware('can:category-subcategory.read,admin')->group(function () {
-            // Index Page
-            Route::get('/', [CategorySubCategoryController::class, 'index'])->name('index');
+        Route::prefix('category-subcategory')->name('category-subcategory.')->group(function () {
+
+            // Separate Index Pages
+            Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+            Route::get('/subcategories', [SubCategoryController::class, 'index'])->name('subcategories.index');
 
             // --- Categories Routes ---
-            Route::prefix('categories')->name('categories.')->group(function () {
-                Route::get('/data', [CategorySubCategoryController::class, 'dataCategory'])->name('data');
-                Route::get('/create', [CategorySubCategoryController::class, 'createCategory'])->name('create')->middleware('can:category-subcategory.create,admin');
-                Route::post('/', [CategorySubCategoryController::class, 'storeCategory'])->name('store')->middleware('can:category-subcategory.create,admin');
-                Route::get('/{id}/edit', [CategorySubCategoryController::class, 'editCategory'])->name('edit')->middleware('can:category-subcategory.update,admin');
-                Route::put('/{id}', [CategorySubCategoryController::class, 'updateCategory'])->name('update')->middleware('can:category-subcategory.update,admin');
-                Route::delete('/{id}', [CategorySubCategoryController::class, 'destroyCategory'])->name('destroy')->middleware('can:category-subcategory.delete,admin');
-                Route::patch('/{id}/toggle-status', [CategorySubCategoryController::class, 'toggleCategoryStatus'])->name('toggleStatus')->middleware('can:category-subcategory.update,admin');
+            Route::prefix('categories')->name('categories.')->middleware('can:category.read,admin')->group(function () {
+                Route::get('/data', [CategoryController::class, 'data'])->name('data');
+                Route::get('/create', [CategoryController::class, 'create'])->name('create')->middleware('can:category.create,admin');
+                Route::post('/', [CategoryController::class, 'store'])->name('store')->middleware('can:category.create,admin');
+                Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit')->middleware('can:category.update,admin');
+                Route::put('/{id}', [CategoryController::class, 'update'])->name('update')->middleware('can:category.update,admin');
+                Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy')->middleware('can:category.delete,admin');
+                Route::patch('/{id}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:category.update,admin');
             });
 
             // --- SubCategories Routes ---
-            Route::prefix('subcategories')->name('subcategories.')->group(function () {
-                Route::get('/data', [CategorySubCategoryController::class, 'dataSubCategory'])->name('data');
-                Route::get('/create', [CategorySubCategoryController::class, 'createSubCategory'])->name('create')->middleware('can:category-subcategory.create,admin');
-                Route::post('/', [CategorySubCategoryController::class, 'storeSubCategory'])->name('store')->middleware('can:category-subcategory.create,admin');
-                Route::get('/{id}/edit', [CategorySubCategoryController::class, 'editSubCategory'])->name('edit')->middleware('can:category-subcategory.update,admin');
-                Route::put('/{id}', [CategorySubCategoryController::class, 'updateSubCategory'])->name('update')->middleware('can:category-subcategory.update,admin');
-                Route::delete('/{id}', [CategorySubCategoryController::class, 'destroySubCategory'])->name('destroy')->middleware('can:category-subcategory.delete,admin');
-                Route::patch('/{id}/toggle-status', [CategorySubCategoryController::class, 'toggleSubCategoryStatus'])->name('toggleStatus')->middleware('can:category-subcategory.update,admin');
+            Route::prefix('subcategories')->name('subcategories.')->middleware('can:subcategory.read,admin')->group(function () {
+                Route::get('/data', [SubCategoryController::class, 'data'])->name('data');
+                Route::get('/create', [SubCategoryController::class, 'create'])->name('create')->middleware('can:subcategory.create,admin');
+                Route::post('/', [SubCategoryController::class, 'store'])->name('store')->middleware('can:subcategory.create,admin');
+                Route::get('/{id}/edit', [SubCategoryController::class, 'edit'])->name('edit')->middleware('can:subcategory.update,admin');
+                Route::put('/{id}', [SubCategoryController::class, 'update'])->name('update')->middleware('can:subcategory.update,admin');
+                Route::delete('/{id}', [SubCategoryController::class, 'destroy'])->name('destroy')->middleware('can:subcategory.delete,admin');
+                Route::patch('/{id}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:subcategory.update,admin');
             });
         });
     });

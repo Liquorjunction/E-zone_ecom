@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Auth\AdminLoginRequest;
+use App\Http\Requests\Admin\Auth\ReadProfileRequest;
 use App\Http\Requests\Admin\Auth\StoreAdminRequest;
 use App\Http\Requests\Admin\Auth\UpdateAdminRequest;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
@@ -39,10 +40,10 @@ class AdminAuthController extends Controller
         }
     }
 
-    public function data(AdminRepositoryInterface $adminRepository, Request $request)
+    public function data(AdminRepositoryInterface $adminRepository, ReadProfileRequest $request)
     {
         try {
-            $admins = $adminRepository->getDataForDataTable($request);
+            $admins = $adminRepository->getDataForDataTable($request->all());
             $dataTableJSON = DataTables::of($admins)
                 ->addIndexColumn()
                 ->addColumn('profile_image', function ($admin) {
@@ -50,17 +51,17 @@ class AdminAuthController extends Controller
 
                     return view('admin.partials.image', $data)->render();
                 })
-                ->addColumn('status', function ($admin) {
+                ->addColumn('status', function ($admin) use ($request) {
                     $data['status'] = $admin->status;
-                    $data['toggle_url'] = route('admin.user-management.toggleStatus', $admin->id);
+                    $data['toggle_url'] = $request->user()->can('user management.update') ? route('admin.user-management.toggleStatus', $admin->id) : '';
 
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('created_at', function ($admin) {
                     return $admin->created_at->format('Y/m/d');
                 })
-                ->addColumn('action', function ($admin) {
-                    $data['edit_url'] = route('admin.user-management.edit', $admin->id);
+                ->addColumn('action', function ($admin) use ($request) {
+                    $data['edit_url'] = $request->user()->can('user management.update') ? route('admin.user-management.edit', $admin->id) : '';
                     $data['model'] = $admin;
                     $data['routePrefix'] = 'admin.user-management';
 

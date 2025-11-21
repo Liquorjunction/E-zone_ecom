@@ -23,10 +23,12 @@
                             <div class="header-title">
                                 <h4 class="card-title">User List</h4>
                             </div>
-                            <div class="card-action">
-                                <a href="{{ route('admin.user-management.create') }}"
-                                    class="btn btn-primary">Add New User</a>
-                            </div>
+                            @can('user management.create')
+                                <div class="card-action">
+                                    <a href="{{ route('admin.user-management.create') }}" class="btn btn-primary">Add New
+                                        User</a>
+                                </div>
+                            @endcan
                         </div>
                         <div class="card-body px-0">
                             <div class="table-responsive">

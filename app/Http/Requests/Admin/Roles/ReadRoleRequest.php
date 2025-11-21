@@ -12,6 +12,6 @@ class ReadRoleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('roles.read');
+        return Auth::guard('admin')->user()->can('role.read');
     }
 }

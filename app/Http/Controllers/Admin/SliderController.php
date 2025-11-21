@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Slider\DestroySliderRequest;
+use App\Http\Requests\Admin\Slider\ReadSliderRequest;
 use App\Http\Requests\Admin\Slider\StoreSliderRequest;
 use App\Http\Requests\Admin\Slider\UpdateSliderRequest;
 use App\Models\HeroSlider;
@@ -18,12 +19,12 @@ class SliderController extends Controller
 {
     public function index()
     {
-        return view('admin.slider.index');
+        return view('admin.pages.slider.index');
     }
 
     public function create()
     {
-        return view('admin.slider.create');
+        return view('admin.pages.slider.create');
     }
 
     public function store(StoreSliderRequest $request, SliderRepo $sliderRepo)
@@ -41,7 +42,7 @@ class SliderController extends Controller
     {
         $id = $request->query('id');
         $slider = HeroSlider::findOrFail($id);
-        return view('admin.slider.edit', compact('slider'));
+        return view('admin.pages.slider.edit', compact('slider'));
     }
 
     public function update(UpdateSliderRequest $request, SliderRepo $sliderRepo)
@@ -69,10 +70,10 @@ class SliderController extends Controller
         return redirect()->route('admin.hero-slider.index')->with('success', 'Slider status updated successfully.');
     }
 
-    public function data(SliderRepo $sliderRepo)
+    public function data(ReadSliderRequest $request,SliderRepo $sliderRepo)
     {
         try {
-            $sliders = $sliderRepo->getDataForDataTable();
+            $sliders = $sliderRepo->getDataForDataTable($request->all());
             $getTable = DataTables::of($sliders)
                 ->addIndexColumn()
                 ->addColumn('image', function ($slider) {
@@ -80,14 +81,14 @@ class SliderController extends Controller
                         return asset('storage/' . $slider->image);
                     }
                 })
-                ->addColumn('is_active', function ($slider) {
-                    $data['toggle_url'] = route('admin.hero-slider.toggleStatus', ['id' => $slider->id]);
+                ->addColumn('is_active', function ($slider) use ($request) {
+                    $data['toggle_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.toggleStatus', ['id' => $slider->id]) : '';
                     $data['status'] = $slider->is_active;
                     return view('admin.partials.datatable-status', $data)->render();
                 })
-                ->addColumn('action', function ($slider) {
-                    $data['edit_url'] = route('admin.hero-slider.edit', ['id' => $slider->id]);
-                    $data['delete_url'] = route('admin.hero-slider.destroy', ['id' => $slider->id]);
+                ->addColumn('action', function ($slider) use ($request) {
+                    $data['edit_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.edit', ['id' => $slider->id]) : '';
+                    $data['delete_url'] = $request->user()->can('slider.delete') ? route('admin.hero-slider.destroy', ['id' => $slider->id]) : '';
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->rawColumns(['action', 'image', 'is_active'])

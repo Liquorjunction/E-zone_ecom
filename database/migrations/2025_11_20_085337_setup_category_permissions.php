@@ -18,10 +18,14 @@ return new class extends Migration
         $guardName = 'admin';
 
         $permissions = [
-            'category-subcategory.create',
-            'category-subcategory.read',
-            'category-subcategory.update',
-            'category-subcategory.delete',
+            'category.create',
+            'category.read',
+            'category.update',
+            'category.delete',
+            'subcategory.create',
+            'subcategory.read',
+            'subcategory.update',
+            'subcategory.delete',
         ];
 
         // 1. Create Permissions for the Category module
@@ -50,10 +54,14 @@ return new class extends Migration
     {
         $guardName = 'admin';
         $permissions = [
-            'category-subcategory.create',
-            'category-subcategory.read',
-            'category-subcategory.update',
-            'category-subcategory.delete',
+            'category.create',
+            'category.read',
+            'category.update',
+            'category.delete',
+            'subcategory.create',
+            'subcategory.read',
+            'subcategory.update',
+            'subcategory.delete',
         ];
 
         // 1. Revoke permissions from Super Admin

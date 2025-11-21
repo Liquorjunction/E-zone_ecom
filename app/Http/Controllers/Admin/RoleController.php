@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Roles\ReadRoleRequest;
 use App\Http\Requests\Admin\Roles\StoreRoleRequest;
 use App\Http\Requests\Admin\Roles\UpdateRoleRequest;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface as RoleRepo;
-use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
@@ -18,15 +18,15 @@ class RoleController extends Controller
         return view('admin.pages.rolePermission.index');
     }
 
-    public function data(Request $request, RoleRepo $roleRepo)
+    public function data(ReadRoleRequest $request, RoleRepo $roleRepo)
     {
         try {
-            $roles = $roleRepo->getDataForDataTable($request);
+            $roles = $roleRepo->getDataForDataTable($request->all());
 
             return DataTables::of($roles)
                 ->addIndexColumn()
-                ->addColumn('action', function ($role) {
-                    $data['edit_url'] = route('admin.roles-permissions.edit', $role->id);
+                ->addColumn('action', function ($role) use ($request) {
+                    $data['edit_url'] = $request->user()->can('role.update') ? route('admin.roles-permissions.edit', ['id' => $role->id]) : '';
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })

@@ -12,7 +12,7 @@ class DestroySubCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('category-subcategory.delete');
+        return Auth::guard('admin')->user()->can('subcategory.delete');
     }
 
     /**

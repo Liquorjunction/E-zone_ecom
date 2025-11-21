@@ -23,10 +23,11 @@
                             <div class="header-title">
                                 <h4 class="card-title">Hero Slider List</h4>
                             </div>
-                            <div class="card-action">
-                                <a href="{{ route('admin.hero-slider.create') }}"
-                                    class="btn btn-primary">Add New Slider</a>
-                            </div>
+                            @can('slider.create')
+                                <div class="card-action">
+                                    <a href="{{ route('admin.hero-slider.create') }}" class="btn btn-primary">Add New Slider</a>
+                                </div>
+                            @endcan
                         </div>
                         <div class="card-body px-0">
                             <div class="table-responsive">

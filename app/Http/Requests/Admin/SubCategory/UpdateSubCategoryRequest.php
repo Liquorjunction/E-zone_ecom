@@ -12,7 +12,7 @@ class UpdateSubCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('category-subcategory.update');
+        return Auth::guard('admin')->user()->can('subcategory.update');
     }
 
     /**

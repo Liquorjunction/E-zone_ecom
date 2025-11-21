@@ -12,7 +12,7 @@ class StoreCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('category-subcategory.create');
+        return Auth::guard('admin')->user()->can('category.create');
     }
 
     /**

@@ -12,6 +12,6 @@ class ReadCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('category-subcategory.read');
+        return Auth::guard('admin')->user()->can('category.read');
     }
 }
