@@ -38,17 +38,15 @@ class SliderController extends Controller
         }
     }
 
-    public function edit(UpdateSliderRequest $request)
+    public function edit($id)
     {
-        $id = $request->query('id');
         $slider = HeroSlider::findOrFail($id);
         return view('admin.pages.slider.edit', compact('slider'));
     }
 
-    public function update(UpdateSliderRequest $request, SliderRepo $sliderRepo)
+    public function update(UpdateSliderRequest $request, $id, SliderRepo $sliderRepo)
     {
         try {
-            $id = $request->input('id');
             $sliderRepo->updateSlider($request, $id);
             return redirect()->route('admin.hero-slider.index')->with('success', 'Slider updated successfully.');
         } catch (ValidationException $e) {
@@ -57,9 +55,8 @@ class SliderController extends Controller
         }
     }
 
-    public function destroy(DestroySliderRequest $request, SliderRepo $sliderRepo)
+    public function destroy(DestroySliderRequest $request, $id, SliderRepo $sliderRepo)
     {
-        $id = $request->input('id');
         $sliderRepo->deleteSlider($id);
         return redirect()->route('admin.hero-slider.index')->with('success', 'Slider deleted successfully.');
     }

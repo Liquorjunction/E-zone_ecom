@@ -54,13 +54,13 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('hero-slider')->name('hero-slider.')->middleware('can:slider.read,admin')->group(function () {
             Route::get('/', [SliderController::class, 'index'])->name('index'); // permission: slider.read
             Route::get('/data', [SliderController::class, 'data'])->name('data');
-            Route::get('/show', [SliderController::class, 'show'])->name('show');
+            Route::get('/{id}', [SliderController::class, 'show'])->name('show');
             Route::get('/create', [SliderController::class, 'create'])->name('create')->middleware('can:slider.create,admin');
             Route::post('/', [SliderController::class, 'store'])->name('store')->middleware('can:slider.create,admin');
-            Route::get('/edit', [SliderController::class, 'edit'])->name('edit')->middleware('can:slider.update,admin');
-            Route::put('/update', [SliderController::class, 'update'])->name('update')->middleware('can:slider.update,admin');
-            Route::delete('/destroy', [SliderController::class, 'destroy'])->name('destroy')->middleware('can:slider.delete,admin');
-            Route::patch('/toggle-status', [SliderController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:slider.update,admin');
+            Route::get('/{id}/edit', [SliderController::class, 'edit'])->name('edit')->middleware('can:slider.update,admin');
+            Route::put('/{id}', [SliderController::class, 'update'])->name('update')->middleware('can:slider.update,admin');
+            Route::delete('/{id}', [SliderController::class, 'destroy'])->name('destroy')->middleware('can:slider.delete,admin');
+            Route::patch('/{id}/toggle-status', [SliderController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:slider.update,admin');
         });
 
         // Categories & Subcategories routes
