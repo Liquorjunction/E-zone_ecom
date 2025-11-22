@@ -1,14 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\CategorySubCategoryController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\SubCategoryController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
     // Guest routes
@@ -28,9 +27,9 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/data', [AdminAuthController::class, 'data'])->name('data')->middleware('can:user management.read,admin');
             Route::get('/create', [AdminAuthController::class, 'create'])->name('create')->middleware('can:user management.create,admin');
             Route::post('/', [AdminAuthController::class, 'store'])->name('store')->middleware('can:user management.create,admin');
-            Route::get('/{id}/edit', [AdminAuthController::class, 'edit'])->name('edit')->middleware('can:user management.update,admin');
-            Route::put('/{id}', [AdminAuthController::class, 'update'])->name('update')->middleware('can:user management.update,admin');
-            Route::patch('/{id}/toggle-status', [AdminAuthController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:user management.update,admin');
+            Route::get('/edit', [AdminAuthController::class, 'edit'])->name('edit')->middleware('can:user management.update,admin');
+            Route::put('/update', [AdminAuthController::class, 'update'])->name('update')->middleware('can:user management.update,admin');
+            Route::patch('/toggle-status', [AdminAuthController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:user management.update,admin');
         });
 
         // Profile routes
@@ -45,9 +44,9 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/data', [RoleController::class, 'data'])->name('data');
             Route::get('/create', [RoleController::class, 'create'])->name('create')->middleware('can:role.create,admin');
             Route::post('/', [RoleController::class, 'store'])->name('store')->middleware('can:role.create,admin');
-            Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('can:role.update,admin');
-            Route::put('/{id}', [RoleController::class, 'update'])->name('update')->middleware('can:role.update,admin');
-            Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy')->middleware('can:role.delete,admin');
+            Route::get('/edit', [RoleController::class, 'edit'])->name('edit')->middleware('can:role.update,admin');
+            Route::put('/update', [RoleController::class, 'update'])->name('update')->middleware('can:role.update,admin');
+            Route::delete('/destroy', [RoleController::class, 'destroy'])->name('destroy')->middleware('can:role.delete,admin');
         });
 
         // Hero-Slider routes

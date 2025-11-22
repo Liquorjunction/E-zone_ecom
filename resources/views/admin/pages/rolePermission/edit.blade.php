@@ -2,6 +2,16 @@
 
 @section('header-title', 'Edit Role')
 
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.roles-permissions.edit') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
+
 @section('content')
 <div class="container-fluid content-inner mt-n5 py-0">
     <div class="row">
@@ -12,10 +22,10 @@
                     <a href="{{ route('admin.roles-permissions.index') }}" class="btn btn-secondary btn-sm">Back</a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.roles-permissions.update', $role->id) }}" method="POST">
+                    <form action="{{ route('admin.roles-permissions.update') }}" method="POST">
                         @csrf
                         @method('PUT')
-
+                        <input type="hidden" name="id" value="{{ $role->id }}">
                         <div class="form-group mb-4">
                             <label class="form-label fw-bold">Role Name <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $role->name) }}" required>

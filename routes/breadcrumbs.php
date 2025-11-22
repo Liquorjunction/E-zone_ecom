@@ -4,6 +4,10 @@ use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 use Illuminate\Support\Str;
 
+// ============================================
+// FRONTEND / CLIENT ROUTES
+// ============================================
+
 // Home
 Breadcrumbs::for('home', function (BreadcrumbTrail $trail) {
     $trail->push('Home', route('home'));
@@ -185,7 +189,7 @@ Breadcrumbs::for('deals', function (BreadcrumbTrail $trail) {
 
 // Home > Products > [Brand Name]
 Breadcrumbs::for('brand-products', function (BreadcrumbTrail $trail, $slug) {
-    $trail->parent('products'); // Or 'home' if you prefer
+    $trail->parent('products');
     $trail->push(Str::title($slug), route('brand-products', $slug));
 });
 
@@ -201,87 +205,137 @@ Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail, $id) {
     $trail->push('Order Detail', route('order-detail', $id));
 });
 
+
+// ============================================
+// ADMIN DASHBOARD ROUTES
+// ============================================
+
 // Admin Dashboard
 Breadcrumbs::for('admin.dashboard', function (BreadcrumbTrail $trail) {
     $trail->push('Dashboard', route('admin.dashboard'));
 });
 
-// Admin Dashboard > User Management
+// --- User Management ---
 Breadcrumbs::for('admin.user-management.index', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
     $trail->push('User Management', route('admin.user-management.index'));
 });
 
-// Admin Dashboard > User Management > Create
 Breadcrumbs::for('admin.user-management.create', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.user-management.index');
     $trail->push('Create User', route('admin.user-management.create'));
 });
 
-// Admin Dashboard > User Management > Edit
+// No ID required here anymore
 Breadcrumbs::for('admin.user-management.edit', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.user-management.index');
-    $trail->push('Edit User', route('admin.user-management.edit', 1)); // Default ID, should be dynamic
+    $trail->push('Edit User', route('admin.user-management.edit'));
 });
 
-// Admin Dashboard > User Management > Role & Permission
+// --- Roles & Permissions ---
+Breadcrumbs::for('admin.roles-permissions.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Roles & Permissions', route('admin.roles-permissions.index'));
+});
+
+// This is the child route for User Management you asked for
 Breadcrumbs::for('admin.user-management.role-permission', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.user-management.index');
     $trail->push('Role & Permission', route('admin.roles-permissions.index'));
 });
 
-// Admin Dashboard > Profile
+Breadcrumbs::for('admin.roles-permissions.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.roles-permissions.index');
+    $trail->push('Create Role', route('admin.roles-permissions.create'));
+});
+
+Breadcrumbs::for('admin.roles-permissions.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.roles-permissions.index');
+    $trail->push('Edit Role', route('admin.roles-permissions.edit'));
+});
+
+// --- Profile ---
+Breadcrumbs::for('admin.profile.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Profile', route('admin.profile.index'));
+});
+
+// Alias for 'admin.profile' if views use it
 Breadcrumbs::for('admin.profile', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
     $trail->push('Profile', route('admin.profile.index'));
 });
 
-// Admin Dashboard > Profile > Edit
 Breadcrumbs::for('admin.profile.edit', function (BreadcrumbTrail $trail) {
-    $trail->parent('admin.profile');
-    $trail->push('Edit Profile', route('admin.profile.edit'));
+    $trail->parent('admin.profile.index');
+    $trail->push('Edit Profile', route('admin.profile.index')); // Adjust route if you have a dedicated edit route
 });
 
-// Admin Dashboard > Profile > Change Password
 Breadcrumbs::for('admin.profile.change-password', function (BreadcrumbTrail $trail) {
-    $trail->parent('admin.profile');
-    $trail->push('Change Password', route('admin.profile.change-password'));
+    $trail->parent('admin.profile.index');
+    $trail->push('Change Password', route('admin.profile.index')); // Adjust route if needed
 });
 
-// Admin Dashboard > Hero Slider
+// --- Hero Slider ---
 Breadcrumbs::for('admin.hero-slider.index', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
     $trail->push('Hero Slider', route('admin.hero-slider.index'));
 });
 
-// Admin Dashboard > Hero Slider > Create
 Breadcrumbs::for('admin.hero-slider.create', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.hero-slider.index');
     $trail->push('Create Slider', route('admin.hero-slider.create'));
 });
 
-// Admin Dashboard > Hero Slider > Edit
 Breadcrumbs::for('admin.hero-slider.edit', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.hero-slider.index');
-    $trail->push('Edit Slider', route('admin.hero-slider.edit', 1)); // Default ID, should be dynamic
+    $trail->push('Edit Slider', route('admin.hero-slider.edit'));
 });
 
-// Admin Dashboard > Hero Slider > Toggle Status
-Breadcrumbs::for('admin.hero-slider.toggleStatus', function (BreadcrumbTrail $trail) {
-    $trail->parent('admin.hero-slider.index');
-    $trail->push('Toggle Status', route('admin.hero-slider.toggleStatus', 1)); // Default ID, should be dynamic
-});
-
-// Admin Dashboard > Hero Slider > Delete
-Breadcrumbs::for('admin.hero-slider.destroy', function (BreadcrumbTrail $trail) {
-    $trail->parent('admin.hero-slider.index');
-    $trail->push('Delete Slider', route('admin.hero-slider.destroy', 1)); // Default ID, should be dynamic
-});
-
-// Admin Dashboard > Brands
-Breadcrumbs::for('admin.brands.index', function (BreadcrumbTrail $trail) {
+// --- Cards ---
+Breadcrumbs::for('admin.cards.index', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
-    $trail->push('Brands', route('admin.brands.index'));
+    $trail->push('Cards', route('admin.cards.index'));
 });
 
+Breadcrumbs::for('admin.cards.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.cards.index');
+    $trail->push('Create Card', route('admin.cards.create'));
+});
 
+Breadcrumbs::for('admin.cards.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.cards.index');
+    $trail->push('Edit Card', route('admin.cards.edit'));
+});
+
+// --- Categories ---
+Breadcrumbs::for('admin.category-subcategory.categories.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Categories', route('admin.category-subcategory.categories.index'));
+});
+
+Breadcrumbs::for('admin.category-subcategory.categories.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.category-subcategory.categories.index');
+    $trail->push('Create Category', route('admin.category-subcategory.categories.create'));
+});
+
+Breadcrumbs::for('admin.category-subcategory.categories.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.category-subcategory.categories.index');
+    $trail->push('Edit Category', route('admin.category-subcategory.categories.edit'));
+});
+
+// --- SubCategories ---
+Breadcrumbs::for('admin.category-subcategory.subcategories.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('SubCategories', route('admin.category-subcategory.subcategories.index'));
+});
+
+Breadcrumbs::for('admin.category-subcategory.subcategories.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.category-subcategory.subcategories.index');
+    $trail->push('Create SubCategory', route('admin.category-subcategory.subcategories.create'));
+});
+
+Breadcrumbs::for('admin.category-subcategory.subcategories.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.category-subcategory.subcategories.index');
+    $trail->push('Edit SubCategory', route('admin.category-subcategory.subcategories.edit'));
+});

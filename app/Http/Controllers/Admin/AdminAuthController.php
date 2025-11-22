@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Auth\AdminLoginRequest;
+use App\Http\Requests\Admin\Auth\EditAdminRequest;
 use App\Http\Requests\Admin\Auth\ReadProfileRequest;
 use App\Http\Requests\Admin\Auth\StoreAdminRequest;
 use App\Http\Requests\Admin\Auth\UpdateAdminRequest;
@@ -44,24 +45,28 @@ class AdminAuthController extends Controller
     {
         try {
             $admins = $adminRepository->getDataForDataTable($request->all());
-            $dataTableJSON = DataTables::of($admins)
+
+            return DataTables::of($admins)
                 ->addIndexColumn()
                 ->addColumn('profile_image', function ($admin) {
-                    $data['image'] = $admin->profile_image ? asset('storage/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png');
+                    $data['image'] = $admin->profile_image ? asset('storage/avatars/'.$admin->profile_image) : asset('admin_assets/images/avatars/01.png');
 
                     return view('admin.partials.image', $data)->render();
                 })
                 ->addColumn('status', function ($admin) use ($request) {
                     $data['status'] = $admin->status;
-                    $data['toggle_url'] = $request->user()->can('user management.update') ? route('admin.user-management.toggleStatus', $admin->id) : '';
+                    // FIX: Pass ID in array ['id' => $id]
+                    $data['toggle_url'] = $request->user()->can('user management.update')
+                        ? route('admin.user-management.toggleStatus', ['id' => $admin->id])
+                        : '';
 
                     return view('admin.partials.datatable-status', $data)->render();
                 })
-                ->addColumn('created_at', function ($admin) {
-                    return $admin->created_at->format('Y/m/d');
-                })
                 ->addColumn('action', function ($admin) use ($request) {
-                    $data['edit_url'] = $request->user()->can('user management.update') ? route('admin.user-management.edit', $admin->id) : '';
+                    // FIX: Pass ID in array ['id' => $id]
+                    $data['edit_url'] = $request->user()->can('user management.update')
+                        ? route('admin.user-management.edit', ['id' => $admin->id])
+                        : '';
                     $data['model'] = $admin;
                     $data['routePrefix'] = 'admin.user-management';
 
@@ -69,8 +74,6 @@ class AdminAuthController extends Controller
                 })
                 ->rawColumns(['profile_image', 'status', 'action'])
                 ->make(true);
-
-            return $dataTableJSON;
         } catch (\Exception $e) {
             Log::error('Error in AdminAuthController@data: '.$e->getMessage());
             throw $e;
@@ -129,10 +132,12 @@ class AdminAuthController extends Controller
     /**
      * Show the form for editing the specified admin.
      */
-    public function edit($id, AdminRepositoryInterface $adminRepository)
+    public function edit(EditAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         try {
-            $admin = $adminRepository->edit($id); // Uses the edit() method for auth
+            // Get ID from request input
+            $id = $request->input('id');
+            $admin = $adminRepository->edit($id);
 
             if (! $admin) {
                 abort(403, 'You are not authorized to edit this user.');
@@ -151,9 +156,10 @@ class AdminAuthController extends Controller
      * Update the specified admin in storage.
      * Uses superadminUpdateAdmin()
      */
-    public function update(UpdateAdminRequest $request, $id, AdminRepositoryInterface $adminRepository)
+    public function update(UpdateAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         try {
+            $id = $request->input('id');
             $adminRepository->superadminUpdateAdmin($request, $id);
 
             return redirect()->route('admin.user-management.index')->with('success', 'Admin updated successfully.');
@@ -167,9 +173,10 @@ class AdminAuthController extends Controller
      * Toggles the status of the admin.
      * Uses superadminToggleAdminStatus()
      */
-    public function toggleStatus($id, AdminRepositoryInterface $adminRepository, Request $request)
+    public function toggleStatus(EditAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         try {
+            $id = $request->input('id');
             $adminRepository->superadminToggleAdminStatus($id);
 
             if ($request->ajax()) {

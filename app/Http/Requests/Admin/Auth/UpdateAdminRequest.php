@@ -22,9 +22,10 @@ class UpdateAdminRequest extends FormRequest
      */
     public function rules(): array
     {
-        $adminId = $this->route('id'); // Gets the {id} from the URL
+       $adminId = $this->input('id');
 
         return [
+            'id' => 'required',
             'name' => 'required|string|max:255',
             'email' => [
                 'required',

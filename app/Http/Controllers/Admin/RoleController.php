@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Roles\DestroyRoleRequest;
+use App\Http\Requests\Admin\Roles\EditRoleRequest;
 use App\Http\Requests\Admin\Roles\ReadRoleRequest;
 use App\Http\Requests\Admin\Roles\StoreRoleRequest;
 use App\Http\Requests\Admin\Roles\UpdateRoleRequest;
@@ -26,8 +28,7 @@ class RoleController extends Controller
             return DataTables::of($roles)
                 ->addIndexColumn()
                 ->addColumn('action', function ($role) use ($request) {
-                    $data['edit_url'] = $request->user()->can('role.update') ? route('admin.roles-permissions.edit', ['id' => $role->id]) : '';
-
+                    $data['edit_url'] = $request->user()->can('role.update') ? route('admin.roles-permissions.edit', ['id' => $role->id]): '';
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->rawColumns(['action'])
@@ -53,16 +54,15 @@ class RoleController extends Controller
     public function store(StoreRoleRequest $request, RoleRepo $roleRepo)
     {
         $roleRepo->storeRole($request);
-
-        return redirect()->route('admin.roles-permissions.index')
-            ->with('success', 'Role created successfully.');
+        return redirect()->route('admin.roles-permissions.index')->with('success', 'Role created successfully.');
     }
 
-    public function edit($id)
+    public function edit(EditRoleRequest $request)
     {
+        $id = $request->input('id');
         $role = Role::where('guard_name', 'admin')->findOrFail($id);
-        $permissions = Permission::where('guard_name', 'admin')->get();
 
+        $permissions = Permission::where('guard_name', 'admin')->get();
         $permissionGroups = $permissions->groupBy(function ($permission) {
             return explode('.', $permission->name)[0];
         });
@@ -70,26 +70,25 @@ class RoleController extends Controller
         return view('admin.pages.rolePermission.edit', compact('role', 'permissionGroups'));
     }
 
-    public function update(UpdateRoleRequest $request, $id, RoleRepo $roleRepo)
+    public function update(UpdateRoleRequest $request, RoleRepo $roleRepo)
     {
+        $id = $request->input('id');
         $roleRepo->updateRole($request, $id);
 
-        return redirect()->route('admin.roles-permissions.index')
-            ->with('success', 'Role updated successfully.');
+        return redirect()->route('admin.roles-permissions.index')->with('success', 'Role updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy(DestroyRoleRequest $request)
     {
+        $id = $request->input('id');
         $role = Role::where('guard_name', 'admin')->findOrFail($id);
 
-        // Prevent deleting super-admin or admin basic roles if needed
         if (in_array($role->name, ['super-admin'])) {
             return back()->with('error', 'Cannot delete this system role.');
         }
 
         $role->delete();
 
-        return redirect()->route('admin.roles-permissions.index')
-            ->with('success', 'Role deleted successfully.');
+        return redirect()->route('admin.roles-permissions.index')->with('success', 'Role deleted successfully.');
     }
 }

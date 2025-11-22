@@ -4,7 +4,6 @@
 @section('header-description', 'Update user information and settings')
 
 @section('breadcrumbs')
-    {{-- Assuming you have a breadcrumb for this --}}
     @foreach (Breadcrumbs::generate('admin.user-management.edit', $admin) as $breadcrumb)
         @if ($breadcrumb->url && !$loop->last)
             <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
@@ -17,11 +16,10 @@
 @section('content')
     <div class="conatiner-fluid content-inner mt-n5 py-0">
         <div>
-            {{-- FIX: We will use ONE form for the entire page --}}
-            <form method="POST" action="{{ route('admin.user-management.update', $admin->id) }}"
-                enctype="multipart/form-data">
+            <form method="POST" action="{{ route('admin.user-management.update') }}" enctype="multipart/form-data">
                 @csrf
-                @method('PUT') {{-- FIX: Added PUT method for updates --}}
+                @method('PUT')
+                <input type="hidden" name="id" value="{{ $admin->id }}">
                 <div class="row">
                     <div class="col-xl-3 col-lg-4">
                         <div class="card">
@@ -33,11 +31,10 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <div class="profile-img-edit position-relative">
-                                        {{-- FIX: Show existing profile picture --}}
-                                        <img id="profile-preview" src="{{ $admin->profile_image ? asset('storage/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png') }}"
+                                        <img id="profile-preview"
+                                            src="{{ $admin->profile_image ? asset('storage/avatars/' . $admin->profile_image) : asset('admin_assets/images/avatars/01.png') }}"
                                             alt="profile-pic"
                                             class="theme-color-default-img profile-pic rounded avatar-100">
-                                        {{-- ... other theme images ... --}}
                                         <div class="upload-icone bg-primary">
                                             <label for="profile_image" style="cursor: pointer;">
                                                 <svg class="upload-button icon-14" width="14" viewBox="0 0 24 24">
@@ -46,8 +43,9 @@
                                                     </path>
                                                 </svg>
                                             </label>
-                                            {{-- FIX: Changed name to profile_image --}}
-                                            <input class="file-upload" type="file" id="profile_image" name="profile_image" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                            <input class="file-upload" type="file" id="profile_image"
+                                                name="profile_image" accept="image/*" style="display: none;"
+                                                onchange="previewImage(this)">
                                         </div>
                                     </div>
                                     <div class="img-extension mt-3">
@@ -55,11 +53,12 @@
                                             <span>Only .jpg, .png, .jpeg allowed</span>
                                         </div>
                                     </div>
-                                    @error('profile_image') <div class="text-danger">{{ $message }}</div> @enderror
+                                    @error('profile_image')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">User Role:</label>
-                                    {{-- FIX: Dynamically populate roles and select the current one --}}
                                     <select name="role" class="selectpicker form-control" data-style="py-0" required>
                                         <option value="">Select Role</option>
                                         @foreach ($roles as $role)
@@ -82,17 +81,14 @@
                             </div>
                             <div class="card-body">
                                 <div class="new-user-info">
-                                    {{-- This form tag is removed --}}
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="name">Full Name:</label>
-                                            {{-- FIX: Populate existing data --}}
                                             <input type="text" name="name" class="form-control" id="name"
                                                 placeholder="Full Name" value="{{ old('name', $admin->name) }}" required>
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="email">Email:</label>
-                                            {{-- FIX: Populate existing data --}}
                                             <input type="email" name="email" class="form-control" id="email"
                                                 placeholder="Email" value="{{ old('email', $admin->email) }}" required>
                                         </div>
@@ -109,8 +105,10 @@
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="status">Status:</label>
                                             <select name="status" class="form-control" id="status" required>
-                                                <option value="active" {{ $admin->status == 'active' ? 'selected' : '' }}>Active</option>
-                                                <option value="inactive" {{ $admin->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                                <option value="active" {{ $admin->status == 'active' ? 'selected' : '' }}>
+                                                    Active</option>
+                                                <option value="inactive"
+                                                    {{ $admin->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                             </select>
                                         </div>
                                         <div class="form-group col-md-6">
@@ -126,17 +124,16 @@
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary mt-3">Update User</button>
-                                    {{-- This form tag is removed --}}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </form> {{-- FIX: Closed the single, main form --}}
+            </form>
         </div>
     </div>
 @endsection
 
 @section('scripts')
-<script src="{{ asset('admin_assets/js/image-preview.js') }}"></script>
+    <script src="{{ asset('admin_assets/js/image-preview.js') }}"></script>
 @endsection
