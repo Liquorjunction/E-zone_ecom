@@ -14,7 +14,7 @@ class UpdateRoleRequest extends FormRequest
 
     public function rules(): array
     {
-        $roleId = $this->route('id'); // Get ID from route parameter
+        $roleId = $this->input('id');
         return [
             'id' => 'required',
             'name' => 'required|string|max:255|unique:roles,name,'.$roleId.',id,guard_name,admin',
