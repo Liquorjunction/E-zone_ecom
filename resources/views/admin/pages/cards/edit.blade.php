@@ -13,115 +13,122 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header">
-                <h4>Edit Card</h4>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('admin.cards.update') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <h4 class="card-title">Edit Card</h4>
+            <a href="{{ route('admin.cards.index') }}" class="btn btn-secondary">Back</a>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('admin.cards.update') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="id" value="{{ $card->id }}">
 
-                    <input type="hidden" name="id" value="{{ $card->id }}">
+                {{-- Language Tabs --}}
+                <ul class="nav nav-tabs mb-3" id="langTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab">English (Default)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr" type="button" role="tab">French</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar" type="button" role="tab">Arabic</button>
+                    </li>
+                </ul>
 
-                    <div class="row">
-                        <div class="col-xl-4 col-lg-5">
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between">
-                                    <div class="header-title">
-                                        <h4 class="card-title">Card Image</h4>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <div class="profile-img-edit position-relative">
-                                            <img id="card-preview"
-                                                src="{{ $card->image ? asset('storage/' . $card->image) : asset('admin_assets/images/avatars/01.png') }}"
-                                                alt="card-pic"
-                                                class="theme-color-default-img profile-pic rounded avatar-100">
-                                            <div class="upload-icone bg-primary">
-                                                <label for="image" style="cursor: pointer;">
-                                                    <svg class="upload-button icon-14" width="14" viewBox="0 0 24 24">
-                                                        <path fill="#ffffff"
-                                                            d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z">
-                                                        </path>
-                                                    </svg>
-                                                </label>
-                                                <input class="file-upload" type="file" id="image" name="image">
-                                            </div>
-                                        </div>
-                                        <div class="img-extension mt-3">
-                                            <div class="d-inline-block align-items-center">
-                                                <span>Only .jpg, .png, .jpeg, .gif, .webp, .bmp, .ico, .tiff, .avif allowed
-                                                    (max 5MB)</span>
-                                            </div>
-                                        </div>
-                                        @error('image')
-                                            <div class="text-danger">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Status:</label>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="status" name="status"
-                                                value="1" {{ $card->status ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="status">Active</label>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="sort_order">Display Order:</label>
-                                        <input type="number" name="sort_order" class="form-control" id="sort_order"
-                                            placeholder="e.g., 1" min="0" value="{{ $card->sort_order }}">
-                                    </div>
-                                </div>
-                            </div>
+                <div class="tab-content" id="langTabContent">
+                    {{-- English Fields --}}
+                    <div class="tab-pane fade show active" id="en" role="tabpanel">
+                        <div class="form-group mb-3">
+                            <label>Title (EN)</label>
+                            <input type="text" name="title[en]" class="form-control" value="{{ $card->getTranslation('title', 'en') }}" required>
                         </div>
-
-                        <div class="col-xl-8 col-lg-7">
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between">
-                                    <div class="header-title">
-                                        <h4 class="card-title">Card Information</h4>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="new-user-info">
-                                        <div class="row">
-                                            <div class="form-group col-md-12">
-                                                <label class="form-label" for="title">Title:</label>
-                                                <input type="text" name="title" class="form-control" id="title"
-                                                    placeholder="Card Title" value="{{ $card->title }}" required>
-                                                @error('title') <div class="text-danger">{{ $message }}</div> @enderror
-                                            </div>
-                                            <div class="form-group col-md-12">
-                                                <label class="form-label" for="description">Description:</label>
-                                                <textarea name="description" class="form-control" id="description"
-                                                    placeholder="Card Description" required>{{ $card->description }}</textarea>
-                                                @error('description') <div class="text-danger">{{ $message }}</div> @enderror
-                                            </div>
-                                            <div class="form-group col-md-12">
-                                                <label class="form-label" for="link_text">Link Text:</label>
-                                                <input type="text" name="link_text" class="form-control" id="link_text"
-                                                    placeholder="e.g., Shop Now" value="{{ $card->link_text }}">
-                                                @error('link_text') <div class="text-danger">{{ $message }}</div> @enderror
-                                            </div>
-                                            <div class="form-group col-md-12">
-                                                <label class="form-label" for="link">Link:</label>
-                                                <input type="url" name="link" class="form-control" id="link"
-                                                    placeholder="https://example.com" value="{{ $card->link }}">
-                                            </div>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Update Card</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Description (EN)</label>
+                            <textarea name="description[en]" class="form-control" rows="3">{{ $card->getTranslation('description', 'en') }}</textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>Link Text (EN)</label>
+                            <input type="text" name="link_text[en]" class="form-control" value="{{ $card->getTranslation('link_text', 'en') }}">
                         </div>
                     </div>
-                </form>
-            </div>
+
+                    {{-- French Fields --}}
+                    <div class="tab-pane fade" id="fr" role="tabpanel">
+                        <div class="form-group mb-3">
+                            <label>Title (FR)</label>
+                            <input type="text" name="title[fr]" class="form-control" value="{{ $card->getTranslation('title', 'fr') }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>Description (FR)</label>
+                            <textarea name="description[fr]" class="form-control" rows="3">{{ $card->getTranslation('description', 'fr') }}</textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>Link Text (FR)</label>
+                            <input type="text" name="link_text[fr]" class="form-control" value="{{ $card->getTranslation('link_text', 'fr') }}">
+                        </div>
+                    </div>
+
+                    {{-- Arabic Fields --}}
+                    <div class="tab-pane fade" id="ar" role="tabpanel">
+                        <div class="form-group mb-3" dir="rtl">
+                            <label>Title (AR)</label>
+                            <input type="text" name="title[ar]" class="form-control" value="{{ $card->getTranslation('title', 'ar') }}">
+                        </div>
+                        <div class="form-group mb-3" dir="rtl">
+                            <label>Description (AR)</label>
+                            <textarea name="description[ar]" class="form-control" rows="3">{{ $card->getTranslation('description', 'ar') }}</textarea>
+                        </div>
+                        <div class="form-group mb-3" dir="rtl">
+                            <label>Link Text (AR)</label>
+                            <input type="text" name="link_text[ar]" class="form-control" value="{{ $card->getTranslation('link_text', 'ar') }}">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Common Fields (Image, Link, etc.) --}}
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Link URL</label>
+                            <input type="url" name="link" class="form-control" value="{{ $card->link }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Sort Order</label>
+                            <input type="number" name="sort_order" class="form-control" value="{{ $card->sort_order }}">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group mb-3">
+                            <label>Image</label>
+                            <input type="file" name="image" class="form-control">
+                            @if($card->image)
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/'.$card->image) }}" width="100" class="rounded">
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group mb-3">
+                            <label>Status</label>
+                            <select name="status" class="form-control">
+                                <option value="active" {{ $card->status == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $card->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Update Card</button>
+            </form>
         </div>
     </div>
+</div>
 @endsection
 
 @push('scripts')

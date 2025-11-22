@@ -25,15 +25,30 @@ class UpdateCardRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
+            'id' => 'required|exists:cards,id',
+
+            // Translatable Fields (Arrays)
+            'title' => 'required|array',
+            'title.en' => 'required|string|max:255',
+            'title.fr' => 'nullable|string|max:255',
+            'title.ar' => 'nullable|string|max:255',
+
+            'description' => 'nullable|array',
+            'description.en' => 'nullable|string', // Removed max:255 as DB column is now TEXT
+            'description.fr' => 'nullable|string',
+            'description.ar' => 'nullable|string',
+
+            'link_text' => 'nullable|array',
+            'link_text.en' => 'nullable|string|max:50',
+            'link_text.fr' => 'nullable|string|max:50',
+            'link_text.ar' => 'nullable|string|max:50',
+
+            // Standard Fields
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:5120',
             'link'        => 'nullable|url|max:255',
-            'link_text'   => 'nullable|string|max:50',
             'tags'        => 'nullable|json',
-            'status'      => 'nullable',
-            'sort_order'  => 'nullable|integer',
+            'status'      => 'required|in:active,inactive',
+            'sort_order'  => 'nullable|integer|min:0|max:999',
         ];
     }
 
@@ -46,43 +61,33 @@ class UpdateCardRequest extends FormRequest
     {
         return [
             'id.required' => 'The card id field is required.',
-            'id.exists' => 'The card id does not exist.',
-            'title.required' => 'The card title field is required.',
-            'title.max' => 'The card title may not be greater than 255 characters.',
-            'description.required' => 'The card description field is required.',
-            'description.max' => 'The card description may not be greater than 255 characters.',
-            'image.image' => 'The card image must be an image.',
-            'image.mimes' => 'The card image must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
-            'image.max' => 'The card image may not be greater than 5MB.',
-            'link.url' => 'The card link must be a valid URL.',
-            'link.max' => 'The card link may not be greater than 255 characters.',
-            'link_text.max' => 'The card link text may not be greater than 50 characters.',
-            'tags.json' => 'The card tags must be a valid JSON.',
-            'status.required' => 'The card status field is required.',
-            'sort_order.integer' => 'The card sort order must be an integer.',
-            'sort_order.min' => 'The card sort order must be greater than or equal to 0.',
-            'sort_order.max' => 'The card sort order must be less than or equal to 999.',
-            'sort_order.unique' => 'The card sort order has already been taken.',
+            'title.en.required' => 'The English title is required.',
+            'status.in' => 'The selected status is invalid.',
+            'sort_order.integer' => 'The sort order must be an integer.',
+            'sort_order.min' => 'The sort order must be greater than or equal to 0.',
+            'sort_order.max' => 'The sort order must be less than or equal to 999.',
+            'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
+            'image.max' => 'The image may not be greater than 5MB.',
+            'link.url' => 'The link must be a valid URL.',
+            'link.max' => 'The link may not be greater than 255 characters.',
+            'link_text.max' => 'The link text may not be greater than 50 characters.',
+            'tags.json' => 'The tags must be a valid JSON.',
+
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
     public function attributes()
     {
         return [
-            'id' => 'card id',
-            'title' => 'card title',
-            'description' => 'card description',
-            'image' => 'card image',
-            'link' => 'card link',
-            'link_text' => 'card link text',
-            'tags' => 'card tags',
-            'status' => 'card status',
-            'sort_order' => 'card sort order',
+            'title.en' => 'English Title',
+            'title.fr' => 'French Title',
+            'title.ar' => 'Arabic Title',
+            'description.en' => 'English Description',
+            'description.fr' => 'French Description',
+            'description.ar' => 'Arabic Description',
+            'link_text.en' => 'English Link Text',
+            'link_text.fr' => 'French Link Text',
+            'link_text.ar' => 'Arabic Link Text',
         ];
     }
 }

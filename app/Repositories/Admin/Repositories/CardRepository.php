@@ -18,29 +18,36 @@ class CardRepository implements CardRepositoryInterface
         return Card::find($id);
     }
 
-    public function storeCard($request)
+    // Update the signature to accept $data = null
+    public function storeCard($request, $data = null)
     {
-        $data = $request->validated();
+        // If data was passed from controller (with translations), use it.
+        // Otherwise, fall back to the request's validated data.
+        $data = $data ?? $request->validated();
 
-        $data['status'] = $request->has('status') && $request->status == '1' ? 'active' : 'inactive';
+        // Ensure status is set (default to inactive if missing)
+        $data['status'] = $data['status'] ?? 'inactive';
 
-        // Handle Image Upload
+        // Handle Image Upload (Must use $request to get the file)
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('cards', 'public');
             $data['image'] = $imagePath;
         }
 
+        // Create the card
+        // Spatie's HasTranslations trait will automatically convert the arrays
+        // (title, description, etc.) into JSON for the database.
         return Card::create($data);
     }
 
     public function updateCard($request, $id)
     {
         $card = Card::findOrFail($id);
+
+        // 1. Get the validated data (which now includes arrays for translations)
         $data = $request->validated();
 
-        $data['status'] = $request->has('status') && $request->status == '1' ? 'active' : 'inactive';
-
-        // Handle Image Update
+        // 2. Handle Image Update
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if ($card->image && Storage::disk('public')->exists($card->image)) {
@@ -51,10 +58,14 @@ class CardRepository implements CardRepositoryInterface
             $imagePath = $request->file('image')->store('cards', 'public');
             $data['image'] = $imagePath;
         } else {
-            // Remove image key from data if no new image uploaded so it doesn't overwrite with null
+            // Remove image key if not uploaded to prevent overwriting with null
             unset($data['image']);
         }
 
+        // 3. Update the Card
+        // Note: We removed the manual 'status' logic because the Request validation
+        // now ensures $data['status'] is exactly 'active' or 'inactive'.
+        // The Spatie trait automatically converts the title/desc arrays to JSON.
         $card->update($data);
 
         return $card;

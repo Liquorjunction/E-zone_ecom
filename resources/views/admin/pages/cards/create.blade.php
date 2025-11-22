@@ -22,6 +22,94 @@
                 <form action="{{ route('admin.cards.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between">
+                                    <div class="header-title">
+                                        <h4 class="card-title">Card Information</h4>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+
+                                    {{-- Language Tabs --}}
+                                    <ul class="nav nav-tabs mb-3" id="langTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab">English (Default)</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr" type="button" role="tab">French</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar" type="button" role="tab">Arabic</button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content" id="langTabContent">
+                                        {{-- English Inputs --}}
+                                        <div class="tab-pane fade show active" id="en" role="tabpanel">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Title (EN) <span class="text-danger">*</span></label>
+                                                <input type="text" name="title[en]" class="form-control" value="{{ old('title.en') }}" placeholder="Card Title" required>
+                                                @error('title.en') <div class="text-danger">{{ $message }}</div> @enderror
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Description (EN) <span class="text-danger">*</span></label>
+                                                <textarea name="description[en]" class="form-control" rows="3" placeholder="Card Description" required>{{ old('description.en') }}</textarea>
+                                                @error('description.en') <div class="text-danger">{{ $message }}</div> @enderror
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Link Text (EN)</label>
+                                                <input type="text" name="link_text[en]" class="form-control" value="{{ old('link_text.en') }}" placeholder="e.g. Shop Now">
+                                            </div>
+                                        </div>
+
+                                        {{-- French Inputs --}}
+                                        <div class="tab-pane fade" id="fr" role="tabpanel">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Title (FR) <small class="text-muted">(Leave empty to auto-translate)</small></label>
+                                                <input type="text" name="title[fr]" class="form-control" value="{{ old('title.fr') }}" placeholder="Titre en Français">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Description (FR)</label>
+                                                <textarea name="description[fr]" class="form-control" rows="3" placeholder="Description en Français">{{ old('description.fr') }}</textarea>
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Link Text (FR)</label>
+                                                <input type="text" name="link_text[fr]" class="form-control" value="{{ old('link_text.fr') }}" placeholder="Texte du lien">
+                                            </div>
+                                        </div>
+
+                                        {{-- Arabic Inputs --}}
+                                        <div class="tab-pane fade" id="ar" role="tabpanel">
+                                            <div class="form-group mb-3" dir="rtl">
+                                                <label class="form-label">Title (AR) <small class="text-muted">(Leave empty to auto-translate)</small></label>
+                                                <input type="text" name="title[ar]" class="form-control" value="{{ old('title.ar') }}" placeholder="العنوان">
+                                            </div>
+                                            <div class="form-group mb-3" dir="rtl">
+                                                <label class="form-label">Description (AR)</label>
+                                                <textarea name="description[ar]" class="form-control" rows="3" placeholder="الوصف">{{ old('description.ar') }}</textarea>
+                                            </div>
+                                            <div class="form-group mb-3" dir="rtl">
+                                                <label class="form-label">Link Text (AR)</label>
+                                                <input type="text" name="link_text[ar]" class="form-control" value="{{ old('link_text.ar') }}" placeholder="نص الرابط">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-4">
+                                        <div class="form-group col-md-12">
+                                            <label class="form-label" for="link">Link URL:</label>
+                                            <input type="url" name="link" class="form-control" id="link"
+                                                placeholder="https://example.com" value="{{ old('link') }}">
+                                            @error('link') <div class="text-danger">{{ $message }}</div> @enderror
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary mt-2">Create Card</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-xl-4 col-lg-5">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between">
@@ -52,9 +140,7 @@
                                         </div>
                                         <div class="img-extension mt-3">
                                             <div class="d-inline-block align-items-center">
-                                                <span>Only .jpg, .png, .jpeg, .gif, .webp, .bmp, .ico, .tiff, .avif
-                                                    allowed
-                                                    (max 5MB)</span>
+                                                <span>Only .jpg, .png, .jpeg, .gif, .webp (max 5MB)</span>
                                             </div>
                                         </div>
                                         @error('image')
@@ -65,58 +151,15 @@
                                         <label class="form-label">Status:</label>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" id="status"
-                                                name="status" value="1" checked>
+                                                name="status" value="active" checked>
                                             <label class="form-check-label" for="status">Active</label>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="sort_order">Display Order:</label>
                                         <input type="number" name="sort_order" class="form-control" id="sort_order"
-                                            placeholder="e.g., 1" min="0">
+                                            placeholder="e.g., 1" min="0" value="{{ old('sort_order') }}">
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-8 col-lg-7">
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between">
-                                    <div class="header-title">
-                                        <h4 class="card-title">Card Information</h4>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="form-group col-md-12">
-                                            <label class="form-label" for="title">Title:</label>
-                                            <input type="text" name="title" class="form-control" id="title"
-                                                placeholder="Card Title" required>
-                                            @error('title')
-                                                <div class="text-danger">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                            <label class="form-label" for="description">Description:</label>
-                                            <textarea name="description" class="form-control" id="description" placeholder="Card Description" required></textarea>
-                                            @error('description')
-                                                <div class="text-danger">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                            <label class="form-label" for="link_text">Link Text:</label>
-                                            <input type="text" name="link_text" class="form-control" id="link_text"
-                                                placeholder="e.g., Shop Now">
-                                            @error('link_text')
-                                                <div class="text-danger">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                            <label class="form-label" for="link">Link:</label>
-                                            <input type="url" name="link" class="form-control" id="link"
-                                                placeholder="https://example.com">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Create Card</button>
                                 </div>
                             </div>
                         </div>

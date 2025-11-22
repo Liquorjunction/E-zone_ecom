@@ -27,17 +27,40 @@ class CardController extends Controller
     }
 
     public function store(StoreCardRequest $request, CardRepo $cardRepo)
-    {
-        try {
-            $cardRepo->storeCard($request);
+{
+    try {
+        // 1. Get the validated data (Includes arrays for title, description, etc.)
+        $data = $request->validated();
 
-            return redirect()->route('admin.cards.index')->with('success', 'Card created successfully.');
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
+        // 2. Smart Auto-Translate Logic
+        // Loop through the translatable fields
+        foreach (['title', 'description', 'link_text'] as $field) {
 
-            return redirect()->route('admin.cards.index')->with('error', $e->getMessage());
+            // If French is empty, auto-translate from English
+            if (empty($data[$field]['fr'])) {
+                $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+            }
+
+            // If Arabic is empty, auto-translate from English
+            if (empty($data[$field]['ar'])) {
+                $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+            }
         }
+
+        // 3. Handle Status (Checkbox sends 'active' or null)
+        $data['status'] = $request->input('status', 'inactive');
+
+        // 4. Send the PROCESSED data to the Repository
+        // Note: We pass $request (for image file) AND $data (for text)
+        $cardRepo->storeCard($request, $data);
+
+        return redirect()->route('admin.cards.index')->with('success', 'Card created successfully.');
+
+    } catch (\Exception $e) {
+        Log::error($e->getMessage());
+        return redirect()->route('admin.cards.index')->with('error', $e->getMessage());
     }
+}
 
     public function edit(EditCardRequest $request)
     {

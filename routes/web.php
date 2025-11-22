@@ -2,7 +2,22 @@
 
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\VerificationController;
+use App\Models\Card;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+
+Route::get('lang/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'fr', 'ar'])) {
+        Session::put('locale', $locale);
+    }
+    return Redirect::back();
+})->name('lang.switch');
+
+Route::get('/test-cards', function () {
+    $cards = \App\Models\Card::all();
+    return view('client.pages.test-cards', compact('cards'));
+});
 
 Route::middleware('guest')->group(function () {
     // Actions
