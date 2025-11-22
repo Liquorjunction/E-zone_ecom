@@ -10,6 +10,8 @@
                 @csrf
                 @method('PUT')
 
+                <input type="hidden" name="id" value="{{ $subCategory->id }}">
+
                 <div class="mb-3">
                     <label class="form-label">Parent Category</label>
                     <select name="category_id" class="form-select" required>

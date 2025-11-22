@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Slider\DestroySliderRequest;
+use App\Http\Requests\Admin\Slider\EditSliderRequest;
 use App\Http\Requests\Admin\Slider\ReadSliderRequest;
 use App\Http\Requests\Admin\Slider\StoreSliderRequest;
 use App\Http\Requests\Admin\Slider\UpdateSliderRequest;
@@ -38,15 +39,17 @@ class SliderController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(EditSliderRequest $request)
     {
+        $id = $request->input('id');
         $slider = HeroSlider::findOrFail($id);
         return view('admin.pages.slider.edit', compact('slider'));
     }
 
-    public function update(UpdateSliderRequest $request, $id, SliderRepo $sliderRepo)
+    public function update(UpdateSliderRequest $request, SliderRepo $sliderRepo)
     {
         try {
+            $id = $request->input('id');
             $sliderRepo->updateSlider($request, $id);
             return redirect()->route('admin.hero-slider.index')->with('success', 'Slider updated successfully.');
         } catch (ValidationException $e) {
@@ -55,14 +58,16 @@ class SliderController extends Controller
         }
     }
 
-    public function destroy(DestroySliderRequest $request, $id, SliderRepo $sliderRepo)
+    public function destroy(DestroySliderRequest $request, SliderRepo $sliderRepo)
     {
+        $id = $request->input('id');
         $sliderRepo->deleteSlider($id);
         return redirect()->route('admin.hero-slider.index')->with('success', 'Slider deleted successfully.');
     }
 
-    public function updateStatus($id, SliderRepo $sliderRepo)
+    public function updateStatus(EditSliderRequest $request, SliderRepo $sliderRepo)
     {
+        $id = $request->input('id');
         $sliderRepo->updateStatus($id);
         return redirect()->route('admin.hero-slider.index')->with('success', 'Slider status updated successfully.');
     }

@@ -54,13 +54,12 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('hero-slider')->name('hero-slider.')->middleware('can:slider.read,admin')->group(function () {
             Route::get('/', [SliderController::class, 'index'])->name('index'); // permission: slider.read
             Route::get('/data', [SliderController::class, 'data'])->name('data');
-            Route::get('/{id}', [SliderController::class, 'show'])->name('show');
             Route::get('/create', [SliderController::class, 'create'])->name('create')->middleware('can:slider.create,admin');
             Route::post('/', [SliderController::class, 'store'])->name('store')->middleware('can:slider.create,admin');
-            Route::get('/{id}/edit', [SliderController::class, 'edit'])->name('edit')->middleware('can:slider.update,admin');
-            Route::put('/{id}', [SliderController::class, 'update'])->name('update')->middleware('can:slider.update,admin');
-            Route::delete('/{id}', [SliderController::class, 'destroy'])->name('destroy')->middleware('can:slider.delete,admin');
-            Route::patch('/{id}/toggle-status', [SliderController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:slider.update,admin');
+            Route::get('/edit', [SliderController::class, 'edit'])->name('edit')->middleware('can:slider.update,admin');
+            Route::put('/update', [SliderController::class, 'update'])->name('update')->middleware('can:slider.update,admin');
+            Route::delete('/destroy', [SliderController::class, 'destroy'])->name('destroy')->middleware('can:slider.delete,admin');
+            Route::patch('/toggle-status', [SliderController::class, 'updateStatus'])->name('toggleStatus')->middleware('can:slider.update,admin');
         });
 
         // Categories & Subcategories routes
@@ -75,10 +74,10 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
                 Route::get('/data', [CategoryController::class, 'data'])->name('data');
                 Route::get('/create', [CategoryController::class, 'create'])->name('create')->middleware('can:category.create,admin');
                 Route::post('/', [CategoryController::class, 'store'])->name('store')->middleware('can:category.create,admin');
-                Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit')->middleware('can:category.update,admin');
-                Route::put('/{id}', [CategoryController::class, 'update'])->name('update')->middleware('can:category.update,admin');
-                Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy')->middleware('can:category.delete,admin');
-                Route::patch('/{id}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:category.update,admin');
+                Route::get('/edit', [CategoryController::class, 'edit'])->name('edit')->middleware('can:category.update,admin');
+                Route::put('/update', [CategoryController::class, 'update'])->name('update')->middleware('can:category.update,admin');
+                Route::delete('/destroy', [CategoryController::class, 'destroy'])->name('destroy')->middleware('can:category.delete,admin');
+                Route::patch('/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:category.update,admin');
             });
 
             // --- SubCategories Routes ---
@@ -86,23 +85,23 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
                 Route::get('/data', [SubCategoryController::class, 'data'])->name('data');
                 Route::get('/create', [SubCategoryController::class, 'create'])->name('create')->middleware('can:subcategory.create,admin');
                 Route::post('/', [SubCategoryController::class, 'store'])->name('store')->middleware('can:subcategory.create,admin');
-                Route::get('/{id}/edit', [SubCategoryController::class, 'edit'])->name('edit')->middleware('can:subcategory.update,admin');
-                Route::put('/{id}', [SubCategoryController::class, 'update'])->name('update')->middleware('can:subcategory.update,admin');
-                Route::delete('/{id}', [SubCategoryController::class, 'destroy'])->name('destroy')->middleware('can:subcategory.delete,admin');
-                Route::patch('/{id}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:subcategory.update,admin');
+                Route::get('/edit', [SubCategoryController::class, 'edit'])->name('edit')->middleware('can:subcategory.update,admin');
+                Route::put('/update', [SubCategoryController::class, 'update'])->name('update')->middleware('can:subcategory.update,admin');
+                Route::delete('/destroy', [SubCategoryController::class, 'destroy'])->name('destroy')->middleware('can:subcategory.delete,admin');
+                Route::patch('/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:subcategory.update,admin');
             });
         });
 
         // Card Routes
-        Route::prefix('card')->name('card.')->middleware('can:card.read,admin')->group(function () {
+        Route::prefix('cards')->name('cards.')->middleware('can:card.read,admin')->group(function () {
             Route::get('/', [CardController::class, 'index'])->name('index'); // permission: card.read
             Route::get('/data', [CardController::class, 'data'])->name('data');
             Route::get('/create', [CardController::class, 'create'])->name('create')->middleware('can:card.create,admin');
             Route::post('/', [CardController::class, 'store'])->name('store')->middleware('can:card.create,admin');
             Route::get('/edit', [CardController::class, 'edit'])->name('edit')->middleware('can:card.update,admin');
-            Route::put('/{id}', [CardController::class, 'update'])->name('update')->middleware('can:card.update,admin');
-            Route::delete('/{id}', [CardController::class, 'destroy'])->name('destroy')->middleware('can:card.delete,admin');
-            Route::patch('/{id}/toggle-status', [CardController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:card.update,admin');
+            Route::put('/update', [CardController::class, 'update'])->name('update')->middleware('can:card.update,admin');
+            Route::delete('/destroy', [CardController::class, 'destroy'])->name('destroy')->middleware('can:card.delete,admin');
+            Route::patch('/toggle-status', [CardController::class, 'status'])->name('toggleStatus')->middleware('can:card.update,admin');
         });
     });
 });

@@ -31,7 +31,7 @@ class StoreCardRequest extends FormRequest
             'link' => 'nullable|url|max:255',
             'link_text' => 'nullable|string|max:50',
             'tags' => 'nullable|json',
-            'status' => 'required|enum:active,inactive',
+            'status' => 'nullable',
             'sort_order' => 'nullable|integer',
         ];
     }
@@ -57,7 +57,6 @@ class StoreCardRequest extends FormRequest
             'link_text.max' => 'The card link text may not be greater than 50 characters.',
             'tags.json' => 'The card tags must be a valid JSON.',
             'status.required' => 'The card status field is required.',
-            'status.enum' => 'The card status must be active or inactive.',
             'sort_order.integer' => 'The card sort order must be an integer.',
             'sort_order.min' => 'The card sort order must be greater than or equal to 0.',
             'sort_order.max' => 'The card sort order must be less than or equal to 999.',

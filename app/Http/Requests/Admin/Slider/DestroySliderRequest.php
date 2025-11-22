@@ -23,7 +23,7 @@ class DestroySliderRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required|exists:hero_slider,id',
+            'id' => 'required',
         ];
     }
 

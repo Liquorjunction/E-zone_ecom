@@ -25,14 +25,14 @@ class UpdateCardRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required|exists:cards,id',
+            'id' => 'required',
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:5120',
             'link'        => 'nullable|url|max:255',
             'link_text'   => 'nullable|string|max:50',
             'tags'        => 'nullable|json',
-            'status'      => 'required|enum:active,inactive',
+            'status'      => 'nullable',
             'sort_order'  => 'nullable|integer',
         ];
     }
@@ -59,7 +59,6 @@ class UpdateCardRequest extends FormRequest
             'link_text.max' => 'The card link text may not be greater than 50 characters.',
             'tags.json' => 'The card tags must be a valid JSON.',
             'status.required' => 'The card status field is required.',
-            'status.enum' => 'The card status must be active or inactive.',
             'sort_order.integer' => 'The card sort order must be an integer.',
             'sort_order.min' => 'The card sort order must be greater than or equal to 0.',
             'sort_order.max' => 'The card sort order must be less than or equal to 999.',

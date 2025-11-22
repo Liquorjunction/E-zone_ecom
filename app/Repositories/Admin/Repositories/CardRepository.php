@@ -22,6 +22,8 @@ class CardRepository implements CardRepositoryInterface
     {
         $data = $request->validated();
 
+        $data['status'] = $request->has('status') && $request->status == '1' ? 'active' : 'inactive';
+
         // Handle Image Upload
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('cards', 'public');
@@ -35,6 +37,8 @@ class CardRepository implements CardRepositoryInterface
     {
         $card = Card::findOrFail($id);
         $data = $request->validated();
+
+        $data['status'] = $request->has('status') && $request->status == '1' ? 'active' : 'inactive';
 
         // Handle Image Update
         if ($request->hasFile('image')) {
@@ -71,7 +75,7 @@ class CardRepository implements CardRepositoryInterface
     public function updateStatus($id)
     {
         $card = Card::findOrFail($id);
-        $card->is_active = !$card->is_active;
+        $card->status = ($card->status === 'active') ? 'inactive' : 'active';
         $card->save();
 
         return $card;

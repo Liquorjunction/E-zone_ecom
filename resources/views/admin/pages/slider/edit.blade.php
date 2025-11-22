@@ -16,7 +16,7 @@
 @section('content')
     <div class="container-fluid content-inner mt-n5 py-0">
         <div>
-            <form method="POST" action="{{ route('admin.hero-slider.update') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('admin.hero-slider.update', ['id' => $slider->id]) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="id" value="{{ $slider->id }}">

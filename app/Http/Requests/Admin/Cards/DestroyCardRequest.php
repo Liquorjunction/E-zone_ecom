@@ -9,13 +9,13 @@ class DestroyCardRequest extends FormRequest
 {
     public function authorize()
     {
-        return Auth::guard('admin')->user()->can('cards.delete');
+        return Auth::guard('admin')->user()->can('card.delete');
     }
 
     public function rules()
     {
         return [
-            'id' => 'required|exists:cards,id',
+            'id' => 'required',
         ];
     }
 

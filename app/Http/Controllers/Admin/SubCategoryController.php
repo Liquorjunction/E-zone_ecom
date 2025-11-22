@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SubCategory\DestroySubCategoryRequest;
+use App\Http\Requests\Admin\SubCategory\EditSubCategoryRequest;
 use App\Http\Requests\Admin\SubCategory\ReadSubCategoryRequest;
 use App\Http\Requests\Admin\SubCategory\StoreSubCategoryRequest;
 use App\Http\Requests\Admin\SubCategory\UpdateSubCategoryRequest;
@@ -37,16 +39,18 @@ class SubCategoryController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(EditSubCategoryRequest $request)
     {
+        $id = $request->input('id');
         $subCategory = SubCategories::findOrFail($id);
         $categories = Categories::where('status', 'active')->get();
         return view('admin.pages.subcategory.edit', compact('subCategory', 'categories'));
     }
 
-    public function update(UpdateSubCategoryRequest $request, $id, SubCategoryRepo $subCategoryRepo)
+    public function update(UpdateSubCategoryRequest $request, SubCategoryRepo $subCategoryRepo)
     {
         try {
+            $id = $request->input('id');
             $subCategoryRepo->updateSubCategory($request, $id);
             return redirect()->route('admin.category-subcategory.subcategories.index')->with('success', 'SubCategory updated successfully.');
         } catch (\Exception $e) {
@@ -55,9 +59,10 @@ class SubCategoryController extends Controller
         }
     }
 
-    public function destroy($id, SubCategoryRepo $subCategoryRepo)
+    public function destroy(DestroySubCategoryRequest $request, SubCategoryRepo $subCategoryRepo)
     {
         try {
+            $id = $request->input('id');
             $subCategoryRepo->deleteSubCategory($id);
             return redirect()->back()->with(['success' => true, 'message' => 'SubCategory deleted successfully']);
         } catch (\Exception $e) {
@@ -98,8 +103,9 @@ class SubCategoryController extends Controller
             ->make(true);
     }
 
-    public function toggleStatus($id, SubCategoryRepo $subCategoryRepo)
+    public function toggleStatus(EditSubCategoryRequest $request, SubCategoryRepo $subCategoryRepo)
     {
+        $id = $request->input('id');
         $subCategoryRepo->updateStatus($id);
         return redirect()->back()->with(['success' => true, 'message' => 'SubCategory status updated successfully']);
     }

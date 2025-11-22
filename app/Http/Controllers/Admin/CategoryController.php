@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Category\DestroyCategoryRequest;
+use App\Http\Requests\Admin\Category\EditCategoryRequest;
 use App\Http\Requests\Admin\Category\ReadCategoryRequest;
 use App\Http\Requests\Admin\Category\StoreCategoryRequest;
 use App\Http\Requests\Admin\Category\UpdateCategoryRequest;
@@ -35,15 +37,17 @@ class CategoryController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(EditCategoryRequest $request)
     {
+        $id = $request->input('id');
         $category = Categories::findOrFail($id);
         return view('admin.pages.category.edit', compact('category'));
     }
 
-    public function update(UpdateCategoryRequest $request, $id, CategoryRepo $categoryRepo)
+    public function update(UpdateCategoryRequest $request, CategoryRepo $categoryRepo)
     {
         try {
+            $id = $request->input('id');
             $categoryRepo->updateCategory($request, $id);
             return redirect()->route('admin.category-subcategory.categories.index')->with('success', 'Category updated successfully.');
         } catch (\Exception $e) {
@@ -52,9 +56,10 @@ class CategoryController extends Controller
         }
     }
 
-    public function destroy($id, CategoryRepo $categoryRepo)
+    public function destroy(DestroyCategoryRequest $request, CategoryRepo $categoryRepo)
     {
         try {
+            $id = $request->input('id');
             $categoryRepo->deleteCategory($id);
             return redirect()->back()->with(['success' => true, 'message' => 'Category deleted successfully']);
         } catch (\Exception $e) {
@@ -89,8 +94,9 @@ class CategoryController extends Controller
             ->make(true);
     }
 
-    public function toggleStatus($id, CategoryRepo $categoryRepo)
+    public function toggleStatus(EditCategoryRequest $request, CategoryRepo $categoryRepo)
     {
+        $id = $request->input('id');
         $categoryRepo->updateStatus($id);
         return redirect()->back()->with(['success' => true, 'message' => 'Category status updated successfully']);
     }

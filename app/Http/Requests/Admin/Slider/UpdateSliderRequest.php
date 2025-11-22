@@ -15,7 +15,7 @@ class UpdateSliderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id'          => 'required|exists:hero_slider,id',
+            'id'          => 'required',
             'title'       => 'required|string|max:255',
             'subtitle'    => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:50',

@@ -13,6 +13,8 @@
                     @csrf
                     @method('PUT')
 
+                    <input type="hidden" name="id" value="{{ $category->id }}">
+
                     <div class="mb-3">
                         <label class="form-label">Category Name</label>
                         <input type="text" name="category-name" id="category-name" class="form-control"
