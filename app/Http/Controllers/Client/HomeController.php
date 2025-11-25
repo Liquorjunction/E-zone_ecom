@@ -12,7 +12,6 @@ class HomeController extends Controller
     public function index()
     {
         // 1. Hero Sliders
-        // Temporarily remove is_active filter to fetch all sliders for testing
         $sliders = HeroSlider::orderBy('sort_order', 'asc')->where('is_active', '1')->get();
 
         // 2. Categories (For the Main Grid)

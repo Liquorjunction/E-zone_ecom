@@ -12,9 +12,6 @@
     {{-- Vite Assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Swiper CSS (If not already in app.css/js) --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-
     {{-- Structured Data for SEO --}}
     @php
         $organizationLd = [
