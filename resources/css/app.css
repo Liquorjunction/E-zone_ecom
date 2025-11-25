@@ -29,3 +29,48 @@
         animation: infinite-scroll 25s linear infinite;
     }
 }
+
+/* --- Swiper Custom Styles --- */
+
+/* Customize the arrows */
+.swiper-button-next,
+.swiper-button-prev {
+    color: var(--color-primary) !important; /* Uses your theme's primary color */
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    background-color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 1.25rem !important;
+    font-weight: bold;
+}
+
+/* Customize the dots */
+.swiper-pagination-bullet-active {
+    background-color: var(--color-primary) !important;
+}
+
+.swiper-pagination-bullet {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+    width: 24px; /* Elongate the active dot */
+    border-radius: 6px;
+    background-color: var(--color-primary) !important; /* Your primary color */
+}

@@ -36,12 +36,6 @@
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab">English (Default)</button>
                                         </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr" type="button" role="tab">French</button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar" type="button" role="tab">Arabic</button>
-                                        </li>
                                     </ul>
 
                                     <div class="tab-content" id="langTabContent">
@@ -60,38 +54,6 @@
                                             <div class="form-group mb-3">
                                                 <label class="form-label">Link Text (EN)</label>
                                                 <input type="text" name="link_text[en]" class="form-control" value="{{ old('link_text.en') }}" placeholder="e.g. Shop Now">
-                                            </div>
-                                        </div>
-
-                                        {{-- French Inputs --}}
-                                        <div class="tab-pane fade" id="fr" role="tabpanel">
-                                            <div class="form-group mb-3">
-                                                <label class="form-label">Title (FR) <small class="text-muted">(Leave empty to auto-translate)</small></label>
-                                                <input type="text" name="title[fr]" class="form-control" value="{{ old('title.fr') }}" placeholder="Titre en Français">
-                                            </div>
-                                            <div class="form-group mb-3">
-                                                <label class="form-label">Description (FR)</label>
-                                                <textarea name="description[fr]" class="form-control" rows="3" placeholder="Description en Français">{{ old('description.fr') }}</textarea>
-                                            </div>
-                                            <div class="form-group mb-3">
-                                                <label class="form-label">Link Text (FR)</label>
-                                                <input type="text" name="link_text[fr]" class="form-control" value="{{ old('link_text.fr') }}" placeholder="Texte du lien">
-                                            </div>
-                                        </div>
-
-                                        {{-- Arabic Inputs --}}
-                                        <div class="tab-pane fade" id="ar" role="tabpanel">
-                                            <div class="form-group mb-3" dir="rtl">
-                                                <label class="form-label">Title (AR) <small class="text-muted">(Leave empty to auto-translate)</small></label>
-                                                <input type="text" name="title[ar]" class="form-control" value="{{ old('title.ar') }}" placeholder="العنوان">
-                                            </div>
-                                            <div class="form-group mb-3" dir="rtl">
-                                                <label class="form-label">Description (AR)</label>
-                                                <textarea name="description[ar]" class="form-control" rows="3" placeholder="الوصف">{{ old('description.ar') }}</textarea>
-                                            </div>
-                                            <div class="form-group mb-3" dir="rtl">
-                                                <label class="form-label">Link Text (AR)</label>
-                                                <input type="text" name="link_text[ar]" class="form-control" value="{{ old('link_text.ar') }}" placeholder="نص الرابط">
                                             </div>
                                         </div>
                                     </div>

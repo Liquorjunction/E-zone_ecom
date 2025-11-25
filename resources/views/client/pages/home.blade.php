@@ -2,28 +2,51 @@
 
 @section('content')
 
-<section class="relative min-h-screen bg-background bg-no-repeat bg-cover" style="background-image: url('{{ asset('images/bg.webp') }}');">
-    <div class="container mx-auto px-4 py-24 sm:py-32">
-      <div class="max-w-3xl">
-        <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
-          Latest in <span class="text-primary">Electronics</span>,
-          <br> All in One Place.
-        </h1>
-        <p class="mt-6 text-lg text-gray-600 max-w-2xl">
-          Discover top-tier tech and unbeatable deals at E-Zone. From smartphones to gaming rigs, we've got you covered.
-        </p>
-        <div class="mt-10 flex items-center gap-x-6">
-          <a href="{{ route('products') }}"
-             class="text-white px-8 py-3 rounded-full font-medium shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl bg-primary">
-            Shop All Products
-          </a>
-          <a href="#" class="font-medium px-4 py-2 transition-all duration-300 group text-primary">
-            View Deals <span class="inline-block transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
-          </a>
+{{-- Swiper Slider Hero Section --}}
+<section class="relative min-h-screen">
+    <p class="text-white text-center mb-2">Slider count: {{ count($sliders) }}</p>
+    <div class="swiper hero-swiper h-screen w-full">
+        <div class="swiper-wrapper">
+            @foreach($sliders as $slider)
+                {{-- 1. Changed 'items-center' to 'items-end' to push content to bottom --}}
+                <div class="swiper-slide relative flex items-end bg-cover bg-center bg-no-repeat"
+                     style="background-image: url('{{ asset( '/storage/' . $slider->image) }}');">
+
+                    {{-- Optional: Gradient overlay to make text readable at the bottom --}}
+                    <div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent pointer-events-none"></div>
+
+                    {{-- 2. Added 'pb-24' to lift text above the dots --}}
+                    <div class="container relative mx-auto px-4 pb-24 md:pb-32 flex flex-col justify-end h-full">
+                        <div class="max-w-3xl">
+                            <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight drop-shadow-md">
+                                {{ $slider->title }}
+                            </h1>
+
+                            <p class="mt-6 text-lg text-gray-200 max-w-2xl drop-shadow-sm">
+                                {{ $slider->subtitle }}
+                            </p>
+
+                            @if($slider->button_text)
+                                <div class="mt-10 flex items-center gap-x-6">
+                                    <a href="{{ $slider->button_link ?? '#' }}"
+                                       class="text-white px-8 py-3 rounded-full font-medium shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl bg-primary border border-transparent hover:bg-primary/90">
+                                        {{ $slider->button_text }}
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
-      </div>
+
+        {{-- 3. Pagination Dots (Centered by default Swiper CSS) --}}
+        <div class="swiper-pagination mb-6"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+
     </div>
-  </section>
+</section>
 
 <section class="py-16 sm:py-24 bg-white">
   <div class="container mx-auto px-4">
@@ -120,39 +143,57 @@
   <div class="container mx-auto px-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-      <a href="#" class="group relative block bg-gray-900 rounded-3xl p-8 md:p-12 overflow-hidden shadow-xl transform hover:-translate-y-1 transition-transform duration-300">
-        <img src={{ asset('images/gaming.png') }} alt="Gaming Setup" class="absolute inset-0 w-full h-full object-cover">
-        <div class="absolute inset-0 w-full h-full">
-          <div class="absolute inset-0 bg-black opacity-60"></div>
-          <div class="absolute bottom-0 right-0 w-64 h-64 rounded-full opacity-10 blur-3xl bg-primary"></div>
-        </div>
-        <div class="relative">
-          <span class="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-full mb-4">GAMING WEEK</span>
-          <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-4">Level Up Your Rig</h3>
-          <p class="text-lg text-white text-opacity-80 mb-6">Save up to 30% on high-performance mice, keyboards, and headsets.</p>
-          <span class="inline-flex items-center font-semibold text-white group-hover:underline">
-            Shop Gaming Deals
-            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-          </span>
-        </div>
-      </a>
+      @foreach($cards as $card)
+          {{-- Dynamic Style Selection: Alternate between Dark (Gray-900) and Primary --}}
+          @php
+              $bgClass = $loop->even ? 'bg-primary' : 'bg-gray-900';
+              $badgeClass = $loop->even ? 'bg-white text-primary' : 'bg-primary text-white';
+              $blurClass = $loop->even ? 'bg-white' : 'bg-primary';
+              $opacityClass = $loop->even ? 'opacity-20' : 'opacity-10';
+          @endphp
 
-      <a href="#" class="group relative block bg-primary rounded-3xl p-8 md:p-12 overflow-hidden shadow-xl transform hover:-translate-y-1 transition-transform duration-300">
-        <img src={{ asset('images/watch.jpeg') }} alt="Smart Home" class="absolute inset-0 w-full h-full object-cover">
-        <div class="absolute inset-0 w-full h-full">
-          <div class="absolute inset-0 bg-black opacity-10"></div>
-          <div class="absolute top-0 left-0 w-64 h-64 rounded-full opacity-20 blur-3xl bg-white"></div>
-        </div>
-        <div class="relative">
-          <span class="inline-block bg-white text-primary text-xs font-bold px-3 py-1 rounded-full mb-4">SMART HOME</span>
-          <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-4">Your Home, Smarter</h3>
-          <p class="text-lg text-white text-opacity-90 mb-6">Get connected with smart speakers, lighting, and security systems.</p>
-          <span class="inline-flex items-center font-semibold text-white group-hover:underline">
-            Explore Smart Tech
-            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-          </span>
-        </div>
-      </a>
+          <a href="{{ $card->link ?? '#' }}" class="group relative block {{ $bgClass }} rounded-3xl p-8 md:p-12 overflow-hidden shadow-xl transform hover:-translate-y-1 transition-transform duration-300">
+
+            {{-- Background Image --}}
+            <img src="{{ asset('storage/' . $card->image) }}"
+                 alt="{{ $card->title }}"
+                 class="absolute inset-0 w-full h-full object-cover">
+
+            {{-- Overlays --}}
+            <div class="absolute inset-0 w-full h-full">
+              <div class="absolute inset-0 bg-black opacity-60"></div>
+              {{-- Decorative Blur Blob --}}
+              <div class="absolute bottom-0 right-0 w-64 h-64 rounded-full {{ $opacityClass }} blur-3xl {{ $blurClass }}"></div>
+            </div>
+
+            <div class="relative">
+              {{-- Optional Badge (using tags if available, or generic 'Featured') --}}
+              <span class="inline-block {{ $badgeClass }} text-xs font-bold px-3 py-1 rounded-full mb-4">
+                  {{ !empty($card->tags) ? json_decode($card->tags)[0] ?? 'FEATURED' : 'FEATURED' }}
+              </span>
+
+              {{-- Translated Title --}}
+              <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-4">
+                  {{ $card->title }}
+              </h3>
+
+              {{-- Translated Description --}}
+              <p class="text-lg text-white text-opacity-80 mb-6">
+                  {{ $card->description }}
+              </p>
+
+              {{-- Translated Button --}}
+              @if($card->link_text)
+                  <span class="inline-flex items-center font-semibold text-white group-hover:underline">
+                    {{ $card->link_text }}
+                    <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+              @endif
+            </div>
+          </a>
+      @endforeach
 
     </div>
   </div>

@@ -5,7 +5,6 @@ $(document).ready(function () {
         ajax: $('#slider-list-table').data('url'),
         columns: [
             { data: 'title', name: 'title' },
-            { data: 'subtitle', name: 'subtitle' },
             {
                 data: 'image',
                 name: 'image',

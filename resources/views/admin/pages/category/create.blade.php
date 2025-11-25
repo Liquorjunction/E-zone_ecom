@@ -1,55 +1,40 @@
 @extends('admin.layouts.app')
-@section('title', 'Create Category')
-
-@section('breadcrumbs')
-    @foreach (Breadcrumbs::generate('admin.category-subcategory.categories.create') as $breadcrumb)
-        @if ($breadcrumb->url && !$loop->last)
-            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
-        @else
-            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
-        @endif
-    @endforeach
-@endsection
+@section('header-title', 'Create Category')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header">
-                <h4>Create Category</h4>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('admin.category-subcategory.categories.store') }}" method="POST"
-                    enctype="multipart/form-data">
-                    @csrf
-                    <div class="mb-3">
-                        <label class="form-label">Category Name</label>
-                        <input type="text" name="category-name" id="category-name" class="form-control"
-                            value="{{ old('category-name') }}">
-                        @error('category-name')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
+<div class="container-fluid content-inner mt-n5 py-0">
+    <div class="card">
+        <div class="card-header"><h4>Create Category</h4></div>
+        <div class="card-body">
+            <form action="{{ route('admin.category-subcategory.categories.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <ul class="nav nav-tabs mb-3" id="langTab" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#en">English</button></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="en">
+                        <div class="form-group mb-3">
+                            <label>Category Name (EN) *</label>
+                            <input type="text" name="category-name[en]" class="form-control" required value="{{ old('category-name.en') }}">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Category Icon</label>
-                        <input type="file" name="category-icon" id="category-icon" class="form-control">
-                        @error('category-icon')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="mb-3 form-check">
-                        {{-- Value 1 is fine because Repository uses $request->has('status') --}}
-                        <input type="checkbox" class="form-check-input" name="status" id="active" value="1"
-                            checked>
-                        <label class="form-check-label" for="active">Active</label>
-                    </div>
-                    <button type="submit" class="btn btn-success">Save Category</button>
-                    <a href="{{ route('admin.category-subcategory.categories.index') }}" class="btn btn-secondary">Cancel</a>
-                </form>
-            </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Icon/Image</label>
+                    <input type="file" name="category-icon" class="form-control">
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="status" value="active" checked>
+                    <label class="form-check-label">Active</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Category</button>
+            </form>
         </div>
     </div>
-@endsection
-
-@section('scripts')
-    <script src="{{ asset('admin_assets/js/categoryForm.js') }}"></script>
+</div>
 @endsection

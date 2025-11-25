@@ -14,13 +14,13 @@ export default defineConfig({
                     colors: {
                         'primary': 'oklch(0.69 0.14 232.2)',
                         'background': 'oklch(0.69 0.14 232.2 / 0.05)',
-
                     }
                 }
             }
         }),
     ],
     server: {
-        host: '192.168.176.68',
+        host: '192.168.176.91',
+        cors: true,
     },
 });

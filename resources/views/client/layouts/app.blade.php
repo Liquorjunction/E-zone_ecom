@@ -12,6 +12,9 @@
     {{-- Vite Assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Swiper CSS (If not already in app.css/js) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
     {{-- Structured Data for SEO --}}
     @php
         $organizationLd = [
@@ -47,16 +50,23 @@
     accountOpen: false,
     languageOpen: false
 }" class="font-sans antialiased bg-background text-foreground">
-    {{-- Header --}}
+
+    {{-- Header (Fixed at Top) --}}
+    {{-- Ensure your header partial has 'fixed top-0 w-full z-50' --}}
     @include('client.partials.header')
 
+    {{-- Main Layout --}}
     <main class="flex min-h-screen">
-        {{-- Sidebar --}}
+
+        {{-- Sidebar (Fixed at Left) --}}
+        {{-- Ensure your sidebar partial handles its own 'fixed' positioning or flex behavior --}}
         @include('client.partials.sidebar')
 
-        {{-- Main Content --}}
-        <div class="flex-1 transition-all duration-300"
-            :class="{ 'lg:ml-72': !sidebarCollapsed, 'lg:ml-16': sidebarCollapsed }">
+        {{-- Main Content Wrapper --}}
+        {{-- Pushes content right based on sidebar state --}}
+        <div class="flex-1 transition-all duration-300 relative z-0"
+             :class="{ 'lg:ml-72': !sidebarCollapsed, 'lg:ml-16': sidebarCollapsed }">
+
             @yield('content')
 
             {{-- Footer --}}

@@ -8,14 +8,18 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
+use Spatie\Translatable\HasTranslations; // <--- Import Trait
 
 class SubCategories extends Model
 {
-    use HasRoles, HasSlug , Notifiable, SoftDeletes;
+    use HasRoles, HasSlug, Notifiable, SoftDeletes, HasTranslations; // <--- Add Trait
 
     protected $table = 'sub-categories';
     public $guard_name = 'admin';
     protected $guarded = [];
+
+    // Define translatable field
+    public $translatable = ['sub-category-name'];
 
     protected $fillable = [
         'sub-category-name',
@@ -28,12 +32,15 @@ class SubCategories extends Model
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom('sub-category-name')
+            // FIX: Generate slug ONLY from the English translation
+            ->generateSlugsFrom(function($model) {
+                return $model->getTranslation('sub-category-name', 'en');
+            })
             ->saveSlugsTo('slug');
     }
 
     public function category()
     {
-        return $this->belongsTo(Categories::class);
+        return $this->belongsTo(Categories::class, 'category_id');
     }
 }

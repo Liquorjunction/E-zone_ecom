@@ -10,67 +10,78 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
 {
     public function getAllSubCategories()
     {
-        return SubCategories::orderBy('id', 'desc')->get();
+        return SubCategories::with('category')->get();
     }
 
     public function getSubCategoryById($id)
     {
-        return SubCategories::find($id);
+        return SubCategories::findOrFail($id);
     }
 
-    public function storeSubCategory($request)
+    public function storeSubCategory($request, $data = null)
     {
-        $data = $request->validated();
+        // Use passed data (with translations) or fallback
+        $data = $data ?? $request->validated();
 
+        // Handle Image Upload
         if ($request->hasFile('sub-category-icon')) {
-            $data['sub-category-icon'] = $request->file('sub-category-icon')->store('subcategories', 'public');
+            $imagePath = $request->file('sub-category-icon')->store('subcategories', 'public');
+            $data['sub-category-icon'] = $imagePath;
         }
 
-        // FIX: Save 'active'/'inactive' instead of 1/0
-        $data['status'] = $request->has('status') ? 'active' : 'inactive';
+        // Handle Status
+        $data['status'] = $request->input('status', 'inactive');
 
         return SubCategories::create($data);
     }
 
-    public function updateSubCategory($request, $id)
+    public function updateSubCategory($request, $id, $data = null)
     {
         $subCategory = SubCategories::findOrFail($id);
-        $data = $request->validated();
+        $data = $data ?? $request->validated();
 
+        // Handle Image Update
         if ($request->hasFile('sub-category-icon')) {
             if ($subCategory->{'sub-category-icon'} && Storage::disk('public')->exists($subCategory->{'sub-category-icon'})) {
                 Storage::disk('public')->delete($subCategory->{'sub-category-icon'});
             }
-            $data['sub-category-icon'] = $request->file('sub-category-icon')->store('subcategories', 'public');
+
+            $imagePath = $request->file('sub-category-icon')->store('subcategories', 'public');
+            $data['sub-category-icon'] = $imagePath;
+        } else {
+            unset($data['sub-category-icon']);
         }
 
-        // FIX: Save 'active'/'inactive' instead of 1/0
-        $data['status'] = $request->has('status') ? 'active' : 'inactive';
+        // Handle Status
+        $data['status'] = $request->input('status', 'inactive');
 
         $subCategory->update($data);
+
         return $subCategory;
     }
 
     public function deleteSubCategory($id)
     {
         $subCategory = SubCategories::findOrFail($id);
+
         if ($subCategory->{'sub-category-icon'} && Storage::disk('public')->exists($subCategory->{'sub-category-icon'})) {
             Storage::disk('public')->delete($subCategory->{'sub-category-icon'});
         }
+
         return $subCategory->delete();
     }
 
     public function updateStatus($id)
     {
         $subCategory = SubCategories::findOrFail($id);
-        // FIX: Toggle string values, Boolean logic will fail on Enum
-        $subCategory->status = $subCategory->status === 'active' ? 'inactive' : 'active';
+        $subCategory->status = ($subCategory->status === 'active') ? 'inactive' : 'active';
         $subCategory->save();
+
         return $subCategory;
     }
 
     public function getDataForDataTable()
     {
-        return SubCategories::query()->with('category')->latest();
+        return SubCategories::with('category')->latest();
     }
 }

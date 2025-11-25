@@ -10,7 +10,7 @@ class SliderRepository implements SliderRepositoryInterface
 {
     public function getAllSliders()
     {
-        return HeroSlider::orderBy('sort_order', 'asc')->get(); // SoftDeletes automatically excludes deleted records
+        return HeroSlider::orderBy('sort_order', 'asc')->get();
     }
 
     public function getSliderById($id)
@@ -18,9 +18,15 @@ class SliderRepository implements SliderRepositoryInterface
         return HeroSlider::findOrFail($id);
     }
 
-    public function storeSlider($request)
+    public function storeSlider($request, $data = null)
     {
-        $data = $request->validated();
+        // Use passed data (with translations) or fallback to validated request data
+        $data = $data ?? $request->validated();
+
+        // Ensure status is properly formatted if not already (checkbox handling)
+        if (!isset($data['is_active'])) {
+            $data['is_active'] = $request->has('status') && $request->status == 'active' ? 1 : 0;
+        }
 
         // Handle Image Upload
         if ($request->hasFile('image')) {
@@ -28,16 +34,18 @@ class SliderRepository implements SliderRepositoryInterface
             $data['image'] = $imagePath;
         }
 
-        // Handle Status (already prepared in Request, but good to be safe)
-        // If prepared in request: $data['is_active'] is already 1 or 0.
-
         return HeroSlider::create($data);
     }
 
-    public function updateSlider($request, $id)
+    public function updateSlider($request, $id, $data = null)
     {
         $slider = HeroSlider::findOrFail($id);
-        $data = $request->validated();
+        $data = $data ?? $request->validated();
+
+        // Ensure status is properly formatted
+        if (!isset($data['is_active'])) {
+            $data['is_active'] = $request->has('status') && $request->status == 'active' ? 1 : 0;
+        }
 
         // Handle Image Update
         if ($request->hasFile('image')) {
@@ -50,7 +58,7 @@ class SliderRepository implements SliderRepositoryInterface
             $imagePath = $request->file('image')->store('sliders', 'public');
             $data['image'] = $imagePath;
         } else {
-            // Remove image key from data if no new image uploaded so it doesn't overwrite with null
+            // Prevent null override if no image is uploaded
             unset($data['image']);
         }
 
@@ -63,7 +71,6 @@ class SliderRepository implements SliderRepositoryInterface
     {
         $slider = HeroSlider::findOrFail($id);
 
-        // Delete Image from storage
         if ($slider->image && Storage::disk('public')->exists($slider->image)) {
             Storage::disk('public')->delete($slider->image);
         }
@@ -82,7 +89,6 @@ class SliderRepository implements SliderRepositoryInterface
 
     public function getDataForDataTable()
     {
-        // Return query for Yajra DataTables
         return HeroSlider::query()->latest();
     }
 }

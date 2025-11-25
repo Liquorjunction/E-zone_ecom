@@ -7,49 +7,32 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateSubCategoryRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return Auth::guard('admin')->user()->can('subcategory.update');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required',
-            'sub-category-name' => 'required|string|max:255',
-            'sub-category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'id' => 'required|exists:sub-categories,id',
+
+            // Translatable Field
+            'sub-category-name' => 'required|array',
+            'sub-category-name.en' => 'required|string|max:255',
+            'sub-category-name.fr' => 'nullable|string|max:255',
+            'sub-category-name.ar' => 'nullable|string|max:255',
+
             'category_id' => 'required|exists:categories,id',
-            'status' => 'nullable|boolean',
+            'sub-category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'status' => 'nullable',
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
-            'id.required' => 'Sub-category ID is required.',
-            'id.exists' => 'Sub-category not found.',
-            'sub-category-name.string' => 'The sub-category name must be a string.',
-            'sub-category-name.max' => 'The sub-category name must not exceed 255 characters.',
-            'sub-category-name.required' => 'The sub-category name is required.',
-            'category_id.required' => 'Please select a category.',
-            'category_id.exists' => 'The selected category does not exist.',
-        ];
-    }
-
-    public function attributes()
-    {
-        return [
-            'id' => 'Sub-category ID',
-            'sub-category-name' => 'Sub-category Name',
-            'sub-category-icon' => 'Sub-category Icon',
-            'category_id' => 'Category',
-            'status' => 'Status',
+            'sub-category-name.en.required' => 'The English sub-category name is required.',
         ];
     }
 }

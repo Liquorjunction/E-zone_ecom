@@ -36,7 +36,6 @@
                                     <thead>
                                         <tr class="light">
                                             <th>Title</th>
-                                            <th>Subtitle</th>
                                             <th>Image</th>
                                             <th>Status</th>
                                             <th>Sort Order</th>

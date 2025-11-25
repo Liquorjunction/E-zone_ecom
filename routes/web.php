@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\VerificationController;
 use App\Models\Card;
 use Illuminate\Support\Facades\Redirect;
@@ -37,9 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])->middleware(['throttle:6,1'])->name('verification.send');
 });
 
-Route::get('/', function () {
-    return view('client.pages.home');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/products', function () {
     return view('client.pages.products');

@@ -29,7 +29,21 @@ class CategoryController extends Controller
     public function store(StoreCategoryRequest $request, CategoryRepo $categoryRepo)
     {
         try {
-            $categoryRepo->storeCategory($request);
+            $data = $request->validated();
+
+            // --- Smart Fill for 'category-name' ---
+            if (isset($data['category-name']['en'])) {
+                if (empty($data['category-name']['fr'])) {
+                    $data['category-name']['fr'] = gtrans($data['category-name']['en'], 'fr');
+                }
+                if (empty($data['category-name']['ar'])) {
+                    $data['category-name']['ar'] = gtrans($data['category-name']['en'], 'ar');
+                }
+            }
+            // --------------------------------------
+
+            $categoryRepo->storeCategory($request, $data);
+
             return redirect()->route('admin.category-subcategory.categories.index')->with('success', 'Category created successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -48,7 +62,21 @@ class CategoryController extends Controller
     {
         try {
             $id = $request->input('id');
-            $categoryRepo->updateCategory($request, $id);
+            $data = $request->validated();
+
+            // --- Smart Fill for Update ---
+            if (isset($data['category-name']['en'])) {
+                if (empty($data['category-name']['fr'])) {
+                    $data['category-name']['fr'] = gtrans($data['category-name']['en'], 'fr');
+                }
+                if (empty($data['category-name']['ar'])) {
+                    $data['category-name']['ar'] = gtrans($data['category-name']['en'], 'ar');
+                }
+            }
+            // -----------------------------
+
+            $categoryRepo->updateCategory($request, $id, $data);
+
             return redirect()->route('admin.category-subcategory.categories.index')->with('success', 'Category updated successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -77,6 +105,10 @@ class CategoryController extends Controller
                     return '<img src="' . asset('storage/' . $category->{'category-icon'}) . '" alt="Category Image" class="img-thumbnail" width="50">';
                 }
                 return 'N/A';
+            })
+            ->editColumn('category-name', function ($category) {
+                // Display English name in Datatable
+                return $category->getTranslation('category-name', 'en');
             })
             ->addColumn('is_active', function ($category) use ($request) {
                 $data['toggle_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.categories.toggleStatus', ['id' => $category->id]) : '';

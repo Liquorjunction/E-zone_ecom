@@ -10,7 +10,6 @@ $(document).ready(function() {
     var catTableSelector = '#categories-table';
 
     if ($(catTableSelector).length) {
-        // Destroy if exists to prevent duplication
         if ($.fn.DataTable.isDataTable(catTableSelector)) {
             $(catTableSelector).DataTable().destroy();
         }
@@ -21,11 +20,8 @@ $(document).ready(function() {
             ajax: $(catTableSelector).data('route'),
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                // Matches DB column 'category-name'
                 { data: 'category-name', name: 'category-name' },
-                // Matches Controller addColumn 'image'
                 { data: 'image', name: 'image', orderable: false, searchable: false },
-                // Matches Controller addColumn 'is_active' (HTML), sorts by DB 'status'
                 { data: 'is_active', name: 'status', orderable: true, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
             ]
@@ -48,13 +44,12 @@ $(document).ready(function() {
             ajax: $(subCatTableSelector).data('route'),
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                // Matches Controller addColumn 'name'
                 { data: 'name', name: 'sub-category-name' },
-                // Matches Controller addColumn 'category.name'
-                { data: 'category.name', name: 'category.category-name' },
-                // Matches Controller addColumn 'image'
+
+                // FIXED: Changed data from 'category.name' to 'category_name'
+                { data: 'category_name', name: 'category.category-name', orderable: false, searchable: false },
+
                 { data: 'image', name: 'image', orderable: false, searchable: false },
-                // Matches Controller addColumn 'is_active'
                 { data: 'is_active', name: 'status', orderable: true, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
             ]
@@ -62,7 +57,7 @@ $(document).ready(function() {
     }
 
     // --------------------------------------------------------------
-    // 3. Handle Tab Switching (Fixes Hidden DataTable Geometry)
+    // 3. Handle Tab Switching
     // --------------------------------------------------------------
     $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         if(typeof catTable !== 'undefined') {

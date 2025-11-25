@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\HasTranslations; // <--- Import Trait
 
 class HeroSlider extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasTranslations; // <--- Add Trait
 
     /**
      * The table associated with the model.
@@ -18,15 +19,22 @@ class HeroSlider extends Model
     protected $table = 'hero_slider';
 
     /**
+     * The attributes that are translatable.
+     *
+     * @var array
+     */
+    public $translatable = ['title', 'subtitle', 'button_text']; // <--- Define Translatable Fields
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
         'title',
-        'subtitle',    // Matches your migration
+        'subtitle',
         'button_text',
-        'button_link', // Fixed typo from 'buttton_link'
+        'button_link',
         'image',
         'sort_order',
         'is_active',

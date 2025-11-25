@@ -31,7 +31,21 @@ class SubCategoryController extends Controller
     public function store(StoreSubCategoryRequest $request, SubCategoryRepo $subCategoryRepo)
     {
         try {
-            $subCategoryRepo->storeSubCategory($request);
+            $data = $request->validated();
+
+            // --- Smart Fill for 'sub-category-name' ---
+            if (isset($data['sub-category-name']['en'])) {
+                if (empty($data['sub-category-name']['fr'])) {
+                    $data['sub-category-name']['fr'] = gtrans($data['sub-category-name']['en'], 'fr');
+                }
+                if (empty($data['sub-category-name']['ar'])) {
+                    $data['sub-category-name']['ar'] = gtrans($data['sub-category-name']['en'], 'ar');
+                }
+            }
+            // ------------------------------------------
+
+            $subCategoryRepo->storeSubCategory($request, $data);
+
             return redirect()->route('admin.category-subcategory.subcategories.index')->with('success', 'SubCategory created successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -51,7 +65,21 @@ class SubCategoryController extends Controller
     {
         try {
             $id = $request->input('id');
-            $subCategoryRepo->updateSubCategory($request, $id);
+            $data = $request->validated();
+
+            // --- Smart Fill for Update ---
+            if (isset($data['sub-category-name']['en'])) {
+                if (empty($data['sub-category-name']['fr'])) {
+                    $data['sub-category-name']['fr'] = gtrans($data['sub-category-name']['en'], 'fr');
+                }
+                if (empty($data['sub-category-name']['ar'])) {
+                    $data['sub-category-name']['ar'] = gtrans($data['sub-category-name']['en'], 'ar');
+                }
+            }
+            // -----------------------------
+
+            $subCategoryRepo->updateSubCategory($request, $id, $data);
+
             return redirect()->route('admin.category-subcategory.subcategories.index')->with('success', 'SubCategory updated successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -76,10 +104,11 @@ class SubCategoryController extends Controller
         return DataTables::of($subCategories)
             ->addIndexColumn()
             ->addColumn('name', function ($subCategory) {
-                return $subCategory->{'sub-category-name'};
+                // Show English Name
+                return $subCategory->getTranslation('sub-category-name', 'en');
             })
-            ->addColumn('category.name', function ($subCategory) {
-                return $subCategory->category ? $subCategory->category->{'category-name'} : 'N/A';
+            ->addColumn('category_name', function ($subCategory) {
+                return $subCategory->category ? $subCategory->category->getTranslation('category-name', 'en') : 'N/A';
             })
             ->addColumn('image', function ($subCategory) {
                 if ($subCategory->{'sub-category-icon'} && Storage::disk('public')->exists($subCategory->{'sub-category-icon'})) {

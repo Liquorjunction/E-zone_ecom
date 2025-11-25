@@ -10,10 +10,9 @@ use App\Http\Requests\Admin\Slider\StoreSliderRequest;
 use App\Http\Requests\Admin\Slider\UpdateSliderRequest;
 use App\Models\HeroSlider;
 use App\Repositories\Admin\Interfaces\SliderRepositoryInterface as SliderRepo;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use League\Config\Exception\ValidationException;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class SliderController extends Controller
@@ -31,9 +30,32 @@ class SliderController extends Controller
     public function store(StoreSliderRequest $request, SliderRepo $sliderRepo)
     {
         try {
-            $sliderRepo->storeSlider($request);
+            $data = $request->validated();
+
+            // --- Smart Auto-Translate Logic ---
+            foreach (['title', 'subtitle', 'button_text'] as $field) {
+                // Skip if English value is missing (should be caught by validation, but safe check)
+                if (!isset($data[$field]['en'])) continue;
+
+                // Auto-fill French if empty
+                if (empty($data[$field]['fr'])) {
+                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                }
+
+                // Auto-fill Arabic if empty
+                if (empty($data[$field]['ar'])) {
+                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                }
+            }
+            // ----------------------------------
+
+            // Pass modified data (with translations) to Repository
+            // We merge it back into request or pass explicitly depending on repo design.
+            // Since we updated the Repo to accept a second $data argument:
+            $sliderRepo->storeSlider($request, $data);
+
             return redirect()->route('admin.hero-slider.index')->with('success', 'Slider created successfully.');
-        } catch (ValidationException $e) {
+        } catch (\Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
@@ -50,9 +72,25 @@ class SliderController extends Controller
     {
         try {
             $id = $request->input('id');
-            $sliderRepo->updateSlider($request, $id);
+            $data = $request->validated();
+
+            // --- Smart Auto-Translate Logic ---
+            foreach (['title', 'subtitle', 'button_text'] as $field) {
+                if (!isset($data[$field]['en'])) continue;
+
+                if (empty($data[$field]['fr'])) {
+                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                }
+                if (empty($data[$field]['ar'])) {
+                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                }
+            }
+            // ----------------------------------
+
+            $sliderRepo->updateSlider($request, $id, $data);
+
             return redirect()->route('admin.hero-slider.index')->with('success', 'Slider updated successfully.');
-        } catch (ValidationException $e) {
+        } catch (\Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
@@ -72,16 +110,21 @@ class SliderController extends Controller
         return redirect()->route('admin.hero-slider.index')->with('success', 'Slider status updated successfully.');
     }
 
-    public function data(ReadSliderRequest $request,SliderRepo $sliderRepo)
+    public function data(ReadSliderRequest $request, SliderRepo $sliderRepo)
     {
         try {
             $sliders = $sliderRepo->getDataForDataTable($request->all());
-            $getTable = DataTables::of($sliders)
+            return DataTables::of($sliders)
                 ->addIndexColumn()
                 ->addColumn('image', function ($slider) {
                     if ($slider->image && Storage::disk('public')->exists($slider->image)) {
                         return asset('storage/' . $slider->image);
                     }
+                    return 'No Image';
+                })
+                ->addColumn('title', function ($slider) {
+                    // Helper to show English title in the list
+                    return $slider->getTranslation('title', 'en');
                 })
                 ->addColumn('is_active', function ($slider) use ($request) {
                     $data['toggle_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.toggleStatus', ['id' => $slider->id]) : '';
@@ -95,10 +138,8 @@ class SliderController extends Controller
                 })
                 ->rawColumns(['action', 'image', 'is_active'])
                 ->make(true);
-
-            return $getTable;
         } catch (\Exception $e) {
-            Log::error('Error in SliderController@getDataForDataTable: '.$e->getMessage());
+            Log::error('Error in SliderController@getDataForDataTable: ' . $e->getMessage());
             throw $e;
         }
     }
