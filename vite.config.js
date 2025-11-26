@@ -20,7 +20,7 @@ export default defineConfig({
         }),
     ],
     server: {
-        host: '192.168.176.91',
+        host: '192.168.176.64',
         cors: true,
     },
 });

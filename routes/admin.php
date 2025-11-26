@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SliderController;
@@ -101,6 +102,17 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [CardController::class, 'update'])->name('update')->middleware('can:card.update,admin');
             Route::delete('/destroy', [CardController::class, 'destroy'])->name('destroy')->middleware('can:card.delete,admin');
             Route::patch('/toggle-status', [CardController::class, 'status'])->name('toggleStatus')->middleware('can:card.update,admin');
+        });
+
+        // Privacy Policy Routes
+        Route::prefix('privacy-policy')->name('privacy-policy.')->middleware('can:privacy_policies.read,admin')->group(function () {
+            Route::get('/', [PrivacyPolicyController::class, 'index'])->name('index');
+            Route::get('/data', [PrivacyPolicyController::class, 'data'])->name('data');
+            Route::get('/create', [PrivacyPolicyController::class, 'create'])->name('create')->middleware('can:privacy_policies.create,admin');
+            Route::post('/', [PrivacyPolicyController::class, 'store'])->name('store')->middleware('can:privacy_policies.create,admin');
+            Route::get('/edit', [PrivacyPolicyController::class, 'edit'])->name('edit')->middleware('can:privacy_policies.update,admin');
+            Route::put('/update', [PrivacyPolicyController::class, 'update'])->name('update')->middleware('can:privacy_policies.update,admin');
+            Route::delete('/destroy', [PrivacyPolicyController::class, 'destroy'])->name('destroy')->middleware('can:privacy_policies.delete,admin');
         });
     });
 });

@@ -8,6 +8,7 @@
 <script src="{{ asset('admin_assets/js/plugins/form-wizard.js') }}"></script>
 <script src="{{ asset('admin_assets/vendor/aos/dist/aos.js') }}"></script>
 <script src="{{ asset('admin_assets/js/hope-ui.js') }}" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
 {{-- Toast Functionality --}}
 <script>
