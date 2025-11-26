@@ -38,22 +38,23 @@ class PrivacyPolicyController extends Controller
         try {
             $data = $request->validated();
 
-        // --- Smart Fill for 'description' ---
-        if (isset($data['description']['en'])) {
-            if (empty($data['description']['fr'])) {
-                $data['description']['fr'] = gtrans($data['description']['en'], 'fr');
+            // --- Smart Fill for 'description' ---
+            if (isset($data['description']['en'])) {
+                if (empty($data['description']['fr'])) {
+                    $data['description']['fr'] = gtrans($data['description']['en'], 'fr');
+                }
+                if (empty($data['description']['ar'])) {
+                    $data['description']['ar'] = gtrans($data['description']['en'], 'ar');
+                }
             }
-            if (empty($data['description']['ar'])) {
-                $data['description']['ar'] = gtrans($data['description']['en'], 'ar');
-            }
-        }
-        // --------------------------------------
+            // --------------------------------------
 
-        $privacyPolicyRepo->storePrivacyPolicy($request, $data);
+            $privacyPolicyRepo->storePrivacyPolicy($request, $data);
 
-        return redirect()->route('admin.privacy-policy.index')->with('success', 'Privacy Policy created successfully.');
+            return redirect()->route('admin.privacy-policy.index')->with('success', 'Privacy Policy created successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
@@ -64,22 +65,23 @@ class PrivacyPolicyController extends Controller
             $id = $request->input('id');
             $data = $request->validated();
 
-        // --- Smart Fill for Update ---
-        if (isset($data['description']['en'])) {
-            if (empty($data['description']['fr'])) {
-                $data['description']['fr'] = gtrans($data['description']['en'], 'fr');
+            // --- Smart Fill for Update ---
+            if (isset($data['description']['en'])) {
+                if (empty($data['description']['fr'])) {
+                    $data['description']['fr'] = gtrans($data['description']['en'], 'fr');
+                }
+                if (empty($data['description']['ar'])) {
+                    $data['description']['ar'] = gtrans($data['description']['en'], 'ar');
+                }
             }
-            if (empty($data['description']['ar'])) {
-                $data['description']['ar'] = gtrans($data['description']['en'], 'ar');
-            }
-        }
-        // -----------------------------
+            // -----------------------------
 
-        $privacyPolicyRepo->updatePrivacyPolicy($request, $id, $data);
+            $privacyPolicyRepo->updatePrivacyPolicy($request, $id, $data);
 
-        return redirect()->route('admin.privacy-policy.index')->with('success', 'Privacy Policy updated successfully.');
+            return redirect()->route('admin.privacy-policy.index')->with('success', 'Privacy Policy updated successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
@@ -89,6 +91,7 @@ class PrivacyPolicyController extends Controller
         try {
             $id = $request->input('id');
             $privacyPolicyRepo->destroyPrivacyPolicy($id);
+
             return redirect()->back()->with(['success' => true, 'message' => 'Privacy Policy deleted successfully']);
         } catch (\Exception $e) {
             return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
@@ -98,15 +101,16 @@ class PrivacyPolicyController extends Controller
     public function data(ReadPrivacyRequest $request, PrivacyPolicyRepo $privacyPolicyRepo)
     {
         $privacyPolicies = $privacyPolicyRepo->getDataForDataTable($request->all());
+
         return DataTables::of($privacyPolicies)
             ->addIndexColumn()
             ->addColumn('action', function ($privacyPolicy) {
                 $data['edit_url'] = route('admin.privacy-policy.edit', ['id' => $privacyPolicy->id]);
                 $data['id'] = $privacyPolicy->id;
+
                 return view('admin.partials.datatable-actions', $data)->render();
             })
             ->rawColumns(['action'])
             ->make(true);
     }
-
 }

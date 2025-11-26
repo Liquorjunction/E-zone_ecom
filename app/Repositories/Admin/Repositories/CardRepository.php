@@ -40,32 +40,22 @@ class CardRepository implements CardRepositoryInterface
         return Card::create($data);
     }
 
-    public function updateCard($request, $id)
+    public function updateCard($request, $id, $data = null)
     {
         $card = Card::findOrFail($id);
 
-        // 1. Get the validated data (which now includes arrays for translations)
-        $data = $request->validated();
+        // Use passed data (with translations) or fallback to request
+        $data = $data ?? $request->validated();
 
-        // 2. Handle Image Update
         if ($request->hasFile('image')) {
-            // Delete old image if exists
+            // Delete old image
             if ($card->image && Storage::disk('public')->exists($card->image)) {
                 Storage::disk('public')->delete($card->image);
             }
-
-            // Store new image
-            $imagePath = $request->file('image')->store('cards', 'public');
-            $data['image'] = $imagePath;
-        } else {
-            // Remove image key if not uploaded to prevent overwriting with null
-            unset($data['image']);
+            $path = $request->file('image')->store('cards', 'public');
+            $data['image'] = $path;
         }
 
-        // 3. Update the Card
-        // Note: We removed the manual 'status' logic because the Request validation
-        // now ensures $data['status'] is exactly 'active' or 'inactive'.
-        // The Spatie trait automatically converts the title/desc arrays to JSON.
         $card->update($data);
 
         return $card;

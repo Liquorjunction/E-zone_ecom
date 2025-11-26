@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\SubCategoryController;
+use App\Http\Controllers\Admin\TranslationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
@@ -21,6 +22,10 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin.auth')->group(function () {
         Route::get('/', [AdminAuthController::class, 'dashboard'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+        // Translation Routes
+        Route::post('/translate-content', [TranslationController::class, 'translate'])->name('translate.content');
+        Route::post('/translate-batch', [TranslationController::class, 'translateBatch'])->name('translate.batch');
 
         // User Management routes (Admins)
         Route::prefix('user-management')->name('user-management.')->group(function () {

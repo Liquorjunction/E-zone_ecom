@@ -47,6 +47,7 @@ class CategoryController extends Controller
             return redirect()->route('admin.category-subcategory.categories.index')->with('success', 'Category created successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
@@ -55,6 +56,7 @@ class CategoryController extends Controller
     {
         $id = $request->input('id');
         $category = Categories::findOrFail($id);
+
         return view('admin.pages.category.edit', compact('category'));
     }
 
@@ -64,8 +66,8 @@ class CategoryController extends Controller
             $id = $request->input('id');
             $data = $request->validated();
 
-            // --- Smart Fill for Update ---
-            if (isset($data['category-name']['en'])) {
+            // --- Smart Fill ---
+            if (! empty($data['category-name']['en'])) {
                 if (empty($data['category-name']['fr'])) {
                     $data['category-name']['fr'] = gtrans($data['category-name']['en'], 'fr');
                 }
@@ -73,13 +75,14 @@ class CategoryController extends Controller
                     $data['category-name']['ar'] = gtrans($data['category-name']['en'], 'ar');
                 }
             }
-            // -----------------------------
+            // ------------------
 
             $categoryRepo->updateCategory($request, $id, $data);
 
             return redirect()->route('admin.category-subcategory.categories.index')->with('success', 'Category updated successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
@@ -89,6 +92,7 @@ class CategoryController extends Controller
         try {
             $id = $request->input('id');
             $categoryRepo->deleteCategory($id);
+
             return redirect()->back()->with(['success' => true, 'message' => 'Category deleted successfully']);
         } catch (\Exception $e) {
             return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
@@ -98,12 +102,14 @@ class CategoryController extends Controller
     public function data(ReadCategoryRequest $request, CategoryRepo $categoryRepo)
     {
         $categories = $categoryRepo->getDataForDataTable($request->all());
+
         return DataTables::of($categories)
             ->addIndexColumn()
             ->addColumn('image', function ($category) {
                 if ($category->{'category-icon'} && Storage::disk('public')->exists($category->{'category-icon'})) {
-                    return '<img src="' . asset('storage/' . $category->{'category-icon'}) . '" alt="Category Image" class="img-thumbnail" width="50">';
+                    return '<img src="'.asset('storage/'.$category->{'category-icon'}).'" alt="Category Image" class="img-thumbnail" width="50">';
                 }
+
                 return 'N/A';
             })
             ->editColumn('category-name', function ($category) {
@@ -114,12 +120,14 @@ class CategoryController extends Controller
                 $data['toggle_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.categories.toggleStatus', ['id' => $category->id]) : '';
                 $data['status'] = $category->status;
                 $data['id'] = $category->id;
+
                 return view('admin.partials.datatable-status', $data)->render();
             })
             ->addColumn('action', function ($category) use ($request) {
                 $data['edit_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.categories.edit', ['id' => $category->id]) : '';
                 $data['delete_url'] = $request->user()->can('category.delete') ? route('admin.category-subcategory.categories.destroy', ['id' => $category->id]) : '';
                 $data['id'] = $category->id;
+
                 return view('admin.partials.datatable-actions', $data)->render();
             })
             ->rawColumns(['action', 'image', 'is_active'])
@@ -130,6 +138,7 @@ class CategoryController extends Controller
     {
         $id = $request->input('id');
         $categoryRepo->updateStatus($id);
+
         return redirect()->back()->with(['success' => true, 'message' => 'Category status updated successfully']);
     }
 }

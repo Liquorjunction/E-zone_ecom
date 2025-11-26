@@ -1,102 +1,115 @@
 @extends('admin.layouts.app')
-@section('header-title', 'Edit SubCategory')
+
+@section('title', 'Edit SubCategory')
 
 @section('content')
-    <div class="container-fluid content-inner mt-n5 py-0">
-        <div class="card">
-            <div class="card-header">
-                <h4>Edit SubCategory</h4>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('admin.category-subcategory.subcategories.update') }}" method="POST"
-                    enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="id" value="{{ $subCategory->id }}">
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <h4 class="card-title">Edit SubCategory</h4>
+            <a href="{{ route('admin.category-subcategory.subcategories.index') }}" class="btn btn-secondary">Back</a>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('admin.category-subcategory.subcategories.update') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="id" value="{{ $subCategory->id }}">
 
-                    <div class="form-group mb-3">
-                        <label>Parent Category</label>
-                        <select name="category_id" class="form-control" required>
-                            @foreach ($categories as $cat)
-                                <option value="{{ $cat->id }}"
-                                    {{ $subCategory->category_id == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->getTranslation('category-name', 'en') }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                <ul class="nav nav-tabs mb-3" id="langTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab">English (Default)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr" type="button" role="tab">French</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar" type="button" role="tab">Arabic</button>
+                    </li>
+                </ul>
 
-                    <ul class="nav nav-tabs mb-3" id="langTab" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#en"
-                                type="button">English</button>
-                        </li>
-                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#fr"
-                                type="button">French</button>
-                        </li>
-                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ar"
-                                type="button">Arabic</button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="en">
-                            <div class="form-group mb-3">
-                                <label>SubCategory Name (EN)</label>
-                                <input type="text" name="sub-category-name[en]" class="form-control"
-                                    value="{{ $subCategory->getTranslation('sub-category-name', 'en') }}" required>
-                            </div>
+                <div class="tab-content" id="langTabContent">
+                    {{-- English --}}
+                    <div class="tab-pane fade show active" id="en" role="tabpanel">
+                        <div class="d-flex justify-content-end mb-3">
+                            <button type="button" class="btn btn-primary btn-translate-all"
+                                data-url="{{ route('admin.translate.batch') }}"
+                                data-fields='["sub-category-name"]'>
+                                <i class="fas fa-language me-2"></i> Translate All Fields
+                            </button>
                         </div>
-                        <div class="tab-pane fade" id="fr">
-                            <div class="form-group mb-3">
-                                <label>SubCategory Name (FR)</label>
-                                <input type="text" name="sub-category-name[fr]" class="form-control"
-                                    value="{{ $subCategory->getTranslation('sub-category-name', 'fr') }}">
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="ar">
-                            <div class="form-group mb-3" dir="rtl">
-                                <label>SubCategory Name (AR)</label>
-                                <input type="text" name="sub-category-name[ar]" class="form-control"
-                                    value="{{ $subCategory->getTranslation('sub-category-name', 'ar') }}">
-                            </div>
+
+                        <div class="form-group mb-3">
+                            <label>SubCategory Name (EN) <span class="text-danger">*</span></label>
+                            <input type="text" name="sub-category-name[en]" id="sub-category-name_en" class="form-control" value="{{ $subCategory->getTranslation('sub-category-name', 'en') }}" required>
                         </div>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label>Icon</label>
-                        @if ($subCategory->{'sub-category-icon'})
-                            <img src="{{ asset('storage/' . $subCategory->{'sub-category-icon'}) }}" width="50"
-                                class="d-block mb-2">
-                        @endif
-                        <input type="file" name="sub-category-icon" class="form-control">
+                    {{-- French --}}
+                    <div class="tab-pane fade" id="fr" role="tabpanel">
+                        <div class="form-group mb-3">
+                            <label>SubCategory Name (FR)</label>
+                            <input type="text" name="sub-category-name[fr]" id="sub-category-name_fr" class="form-control" value="{{ $subCategory->getTranslation('sub-category-name', 'fr') }}">
+                        </div>
                     </div>
 
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" name="status" value="active"
-                            {{ $subCategory->status == 'active' ? 'checked' : '' }}>
-                        <label class="form-check-label">Active</label>
+                    {{-- Arabic --}}
+                    <div class="tab-pane fade" id="ar" role="tabpanel">
+                        <div class="form-group mb-3" dir="rtl">
+                            <label>SubCategory Name (AR)</label>
+                            <input type="text" name="sub-category-name[ar]" id="sub-category-name_ar" class="form-control" value="{{ $subCategory->getTranslation('sub-category-name', 'ar') }}">
+                        </div>
                     </div>
+                </div>
 
-                    <button type="submit" class="btn btn-primary">Update SubCategory</button>
-                </form>
-            </div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Parent Category</label>
+                            <select name="category_id" class="form-control" required>
+                                <option value="">Select Category</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ $subCategory->category_id == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->getTranslation('category-name', 'en') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Sort Order</label>
+                            <input type="number" name="sort_order" class="form-control" value="{{ $subCategory->sort_order }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Status</label>
+                            <select name="status" class="form-control">
+                                <option value="active" {{ $subCategory->status == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $subCategory->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group mb-3">
+                            <label>Icon / Image</label>
+                            <input type="file" name="sub-category-icon" class="form-control">
+                            @if($subCategory->{'sub-category-icon'})
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/'.$subCategory->{'sub-category-icon'}) }}" width="80" class="rounded">
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Update SubCategory</button>
+            </form>
         </div>
     </div>
+</div>
 @endsection
 
 @push('scripts')
-    <script>
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('preview-img');
-                    preview.src = e.target.result;
-                    preview.classList.remove('d-none');
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
+    <script src="{{ asset('admin_assets/js/image-preview.js') }}"></script>
 @endpush
