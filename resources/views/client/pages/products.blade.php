@@ -387,7 +387,7 @@
                             <div
                                 class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
                                 <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
-                                    <img src="https://via.placeholder.com/400x400?text=Product+{{ $i }}"
+                                    <img src="https://ui-avatars.com/api/?name=Product+{{ $i }}&size=400&background=random"
                                         alt="Product {{ $i }}"
                                         class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
 
