@@ -48,7 +48,7 @@
 
     {{-- Main Layout --}}
     {{-- PT-140px for mobile (header + search bar space), PT-88px for desktop --}}
-    <main class="flex min-h-screen pt-[88px]">
+    <main class="flex min-h-screen">
 
         {{-- Sidebar --}}
         @include('client.partials.sidebar')
