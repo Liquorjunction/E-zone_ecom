@@ -1,6 +1,6 @@
 <header @keydown.escape.window="accountOpen = false; languageOpen = false"
     class="bg-white shadow-lg sticky top-0 z-50 border-b-2 border-primary">
-    <div class="container lg:max-w-screen px-4 py-3">
+    <div class="container mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
 
             <div class="flex items-center space-x-4">
