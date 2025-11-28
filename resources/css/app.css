@@ -1,3 +1,5 @@
+/* Import the font */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -9,23 +11,34 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Custom colors */
+    /* Adjusted OKLCH for better contrast and vibrancy */
     --color-primary: oklch(0.69 0.14 232.2);
     --color-background: oklch(0.69 0.14 232.2 / 0.05);
+    --color-primary-dark: oklch(0.50 0.12 232.2);
+    --color-foreground: oklch(0.20 0.05 232.2);
 }
 
-/* Define animations the standard way — outside @theme */
-@keyframes infinite-scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+/* Alpine.js Cloak - Hide elements until Alpine loads */
+[x-cloak] {
+    display: none !important;
 }
 
 @layer utilities {
     .animate-infinite-scroll {
         animation: infinite-scroll 25s linear infinite;
     }
+
+    /* Cross-browser scrollbar hiding */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+@keyframes infinite-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
 }

@@ -1,7 +1,9 @@
 {{-- Data injected via App\View\Composers\SidebarComposer --}}
 <aside class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white shadow-xl border-r-2 border-primary z-40 transition-all duration-300"
        style="top: 88px; max-height: calc(100vh - 88px);"
-       :class="{ 'w-16': sidebarCollapsed, 'w-72': !sidebarCollapsed }">
+       :class="{ 'w-16': sidebarCollapsed, 'w-72': !sidebarCollapsed }"
+       @mouseenter="sidebarCollapsed = false"
+       @mouseleave="sidebarCollapsed = true">
 
     <div class="shrink-0 bg-white z-10 py-5 px-5 border-b-2 border-gray-100 transition-all duration-300"
          :class="{ 'px-3 hidden': sidebarCollapsed }">

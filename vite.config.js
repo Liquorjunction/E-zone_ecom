@@ -19,4 +19,8 @@ export default defineConfig({
             }
         }),
     ],
+    server: {
+        host: '192.168.176.58',
+        secure: true,
+    },
 });

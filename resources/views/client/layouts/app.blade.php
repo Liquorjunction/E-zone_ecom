@@ -5,12 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', config('app.name', 'E-Zone Electronics'))</title>
-    <meta name="description" content="@yield('description', 'E-Zone Electronics - Your trusted source for quality electronics and gadgets. Shop the latest products with fast shipping and great prices.')">
+    <meta name="description" content="@yield('description', 'E-Zone Electronics - Your trusted source for quality electronics and gadgets.')">
 
     <link rel="icon" href="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" type="image/x-icon">
 
     {{-- Vite Assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 
     {{-- Structured Data for SEO --}}
     @php
@@ -20,18 +24,11 @@
             'name' => 'E-Zone Electronics',
             'url' => url('/'),
             'logo' => asset('icon/fav-icon-high-resArtboard-1-150x150.png'),
-            'description' =>
-                'Your trusted source for quality electronics and gadgets. Shop the latest products with fast shipping and great prices.',
             'contactPoint' => [
                 '@type' => 'ContactPoint',
                 'telephone' => '+1-555-123-4567',
                 'contactType' => 'customer service',
-            ],
-            'sameAs' => [
-                'https://www.facebook.com/ezoneelectronics',
-                'https://www.twitter.com/ezoneelectronics',
-                'https://www.instagram.com/ezoneelectronics',
-            ],
+            ]
         ];
     @endphp
 
@@ -45,26 +42,36 @@
     sidebarCollapsed: true,
     mobileSidebarOpen: false,
     accountOpen: false,
-    languageOpen: false
-}" class="font-sans antialiased bg-background text-foreground">
+    languageOpen: false,
+    init() {
+        // Auto-collapse sidebar on smaller desktop screens if needed, or check localStorage
+        if (window.innerWidth >= 1024 && window.innerWidth < 1280) {
+            this.sidebarCollapsed = true;
+        }
+    }
+}" class="font-sans antialiased bg-gray-50 text-slate-800 overflow-x-hidden">
 
     {{-- Header (Fixed at Top) --}}
-    {{-- Ensure your header partial has 'fixed top-0 w-full z-50' --}}
     @include('client.partials.header')
 
     {{-- Main Layout --}}
-    <main class="flex min-h-screen">
+    <main class="flex min-h-screen"> {{-- Added padding-top to account for fixed header --}}
 
-        {{-- Sidebar (Fixed at Left) --}}
-        {{-- Ensure your sidebar partial handles its own 'fixed' positioning or flex behavior --}}
+        {{-- Sidebar (Handles both Mobile & Desktop inside the partial) --}}
         @include('client.partials.sidebar')
 
         {{-- Main Content Wrapper --}}
-        {{-- Pushes content right based on sidebar state --}}
-        <div class="flex-1 transition-all duration-300 relative z-0"
-             :class="{ 'lg:ml-72': !sidebarCollapsed, 'lg:ml-16': sidebarCollapsed }">
+        {{-- Mobile: ml-0 (no margin). Desktop: ml-72 or ml-16 based on collapse state --}}
+        <div class="flex-1 w-full transition-all duration-300 relative z-0"
+             :class="{
+                'lg:ml-72': !sidebarCollapsed,
+                'lg:ml-16': sidebarCollapsed,
+                'ml-0': true
+             }">
 
-            @yield('content')
+            <div>
+                @yield('content')
+            </div>
 
             {{-- Footer --}}
             @include('client.partials.footer')
