@@ -41,6 +41,7 @@
 <body x-data="{
     sidebarCollapsed: true,
     mobileSidebarOpen: false,
+    mobileMenuOpen: false,
     accountOpen: false,
     languageOpen: false,
     init() {
