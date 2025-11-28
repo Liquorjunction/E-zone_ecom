@@ -1,5 +1,5 @@
 {{-- Data injected via App\View\Composers\SidebarComposer --}}
-<aside class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white shadow-xl border-r-2 border-primary z-40 transition-all duration-300"
+<aside class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white shadow-xl border-r-2 border-primary z-40 transition-all duration-300 container-query"
        style="top: 88px; max-height: calc(100vh - 88px);"
        :class="{ 'w-16': sidebarCollapsed, 'w-72': !sidebarCollapsed }"
        @mouseenter="sidebarCollapsed = false"

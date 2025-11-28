@@ -1,13 +1,13 @@
 <header @keydown.escape.window="accountOpen = false; languageOpen = false"
-    class="bg-white shadow-lg sticky top-0 z-50 border-b-2 border-primary">
-    <div class="container mx-auto px-4 py-3">
+    class="bg-white shadow-lg sticky top-0 z-50 border-b-2 border-primary container-query">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-1">
         <div class="flex items-center justify-between">
 
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4">
 
                 <button @click="sidebarCollapsed = !sidebarCollapsed"
-                    class="hidden lg:flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 text-primary">
-                    <svg class="w-6 h-6 transition-transform duration-300" :class="{ 'rotate-90': sidebarCollapsed }"
+                    class="hidden lg:flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 text-primary touch:p-3">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300" :class="{ 'rotate-90': sidebarCollapsed }"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16">
@@ -17,12 +17,12 @@
 
                 <a href="{{ route('home') }}" class="flex items-center group">
                     <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
-                        class="w-24 h-16 object-contain transition-transform duration-300 group-hover:scale-105">
+                        class="w-20 h-12 xs:w-24 xs:h-16 sm:w-28 sm:h-18 lg:w-32 lg:h-20 object-contain transition-transform duration-300 group-hover:scale-105">
                 </a>
 
-                <nav class="hidden lg:flex items-center space-x-8">
+                <nav class="hidden lg:flex items-center space-x-6 xl:space-x-8">
                     <a href="{{ route('support') }}"
-                        class="relative font-medium transition-colors duration-300 group {{ request()->routeIs('support') ? 'text-primary' : 'text-gray-700 hover:text-primary' }}">
+                        class="relative font-medium text-responsive-sm transition-colors duration-300 group {{ request()->routeIs('support') ? 'text-primary' : 'text-gray-700 hover:text-primary' }}">
                         Support
                         <span
                             class="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 {{ request()->routeIs('support') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
@@ -30,11 +30,11 @@
                 </nav>
             </div>
 
-            <div class="hidden md:flex flex-1 max-w-md mx-6">
+            <div class="hidden md:flex flex-1 max-w-xs lg:max-w-md xl:max-w-lg mx-4 lg:mx-6">
                 <div class="relative w-full group">
                     <input type="text" placeholder="Search for electronics, deals..."
-                        class="w-full pl-12 pr-4 py-2.5 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
-                    <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors"
+                        class="w-full pl-10 lg:pl-12 pr-4 py-2 lg:py-2.5 text-responsive-sm border-2 border-gray-200 rounded-full focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
+                    <svg class="w-4 h-4 lg:w-5 lg:h-5 absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -42,20 +42,20 @@
                 </div>
             </div>
 
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2 sm:space-x-3">
 
-                <div class="hidden md:flex items-center space-x-3">
+                <div class="hidden md:flex items-center space-x-2 lg:space-x-3">
 
                     <div class="relative" @mouseleave="languageOpen = false">
                         <button @click="languageOpen = !languageOpen"
-                            class="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+                            class="flex items-center gap-1 lg:gap-2 p-1.5 lg:p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors touch:p-3"
                             title="Language">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5"
+                            <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" stroke-width="1.5"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c.5 0 .99.05 1.465.14M12 21c-.5 0-.99.05-1.465.14M12 3a9.004 9.004 0 0 0-8.716 6.747M12 3a9.004 9.004 0 0 1 8.716 6.747M12 3c.5 0 .99-.05 1.465-.14M12 3c-.5 0-.99-.05-1.465-.14M12 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" />
                             </svg>
-                            <span class="uppercase font-bold text-sm">{{ session('locale', 'en') }}</span>
+                            <span class="uppercase font-bold text-xs lg:text-sm">{{ session('locale', 'en') }}</span>
                         </button>
 
                         <div x-show="languageOpen" x-transition:enter="transition ease-out duration-200"
@@ -84,9 +84,9 @@
                     </div>
 
                     <a href="{{ route('product-compare') }}"
-                        class="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+                        class="flex items-center justify-center p-1.5 lg:p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors touch:p-3"
                         title="Compare Products">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5"
+                        <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" stroke-width="1.5"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M16.023 9.348h4.992v-.001a.75.75 0 0 1 .75.75c0 .414-.336.75-.75.75h-4.992a2.25 2.25 0 0 0-2.25 2.25v.001a2.25 2.25 0 0 0 2.25 2.25h4.992a.75.75 0 0 1 0 1.5h-4.992a3.75 3.75 0 0 1-3.75-3.75v-.001a3.75 3.75 0 0 1 3.75-3.75Zm-6.046 9.152H4.981v.001a.75.75 0 0 1-.75-.75c0-.414.336-.75.75-.75h4.992a2.25 2.25 0 0 0 2.25-2.25v-.001a2.25 2.25 0 0 0-2.25-2.25H4.981a.75.75 0 0 1 0-1.5h4.992a3.75 3.75 0 0 1 3.75 3.75v.001a3.75 3.75 0 0 1-3.75 3.75Z" />
@@ -94,18 +94,18 @@
                     </a>
 
                     <a href="{{ route('dashboard.wishlist') }}"
-                        class="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+                        class="flex items-center justify-center p-1.5 lg:p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors touch:p-3"
                         title="My Wishlist">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                     </a>
 
                     <a href="{{ route('cart') }}"
-                        class="relative flex items-center justify-center p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+                        class="relative flex items-center justify-center p-1.5 lg:p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors touch:p-3"
                         title="My Cart">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
@@ -176,23 +176,23 @@
                         </div>
                     </div>
                 @else
-                    <div class="hidden md:flex items-center space-x-3">
+                    <div class="hidden md:flex items-center space-x-2 lg:space-x-3">
                         <a href="{{ route('login') }}"
-                            class="font-medium px-4 py-2 rounded-full transition-all duration-300 hover:bg-gray-100 text-primary">
+                            class="font-medium px-3 lg:px-4 py-1.5 lg:py-2 rounded-full transition-all duration-300 hover:bg-gray-100 text-primary text-responsive-sm">
                             Login
                         </a>
                         <a href="{{ route('register') }}"
-                            class="text-white px-6 py-2.5 rounded-full font-medium shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl bg-primary">
+                            class="text-white px-4 lg:px-6 py-2 lg:py-2.5 rounded-full font-medium shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl bg-primary text-responsive-sm">
                             Register
                         </a>
                     </div>
                 @endauth
 
-                <div class="md:hidden flex items-center space-x-2">
+                <div class="md:hidden flex items-center space-x-1 sm:space-x-2">
                     <a href="{{ route('cart') }}"
-                        class="relative flex items-center justify-center p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+                        class="relative flex items-center justify-center p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors touch:p-3"
                         title="My Cart">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
@@ -202,8 +202,8 @@
                     </a>
 
                     <button @click="mobileSidebarOpen = true"
-                        class="text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-all duration-300">
-                        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 touch:p-3">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>

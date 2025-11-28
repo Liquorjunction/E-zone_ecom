@@ -27,11 +27,11 @@
     }">
 
         <div class="container mx-auto px-4 relative group">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold tracking-tight text-gray-900 mb-4">
+            <div class="text-center mb-8 sm:mb-12">
+                <h2 class="text-responsive-2xl sm:text-responsive-3xl lg:text-responsive-4xl font-bold tracking-tight text-gray-900 mb-2 sm:mb-4">
                     Shop by Category
                 </h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                <p class="text-responsive-base sm:text-responsive-lg text-gray-600 max-w-2xl mx-auto">
                     Explore our wide range of electronics and find exactly what you need
                 </p>
             </div>
@@ -62,7 +62,7 @@
                 @foreach ($categories as $category)
                     <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(25%-18px)] snap-start shrink-0">
                         <a href="javascript:void(0)" {{-- Assuming standard route --}}
-                            class="group relative block overflow-hidden p-8 bg-white border-2 border-gray-100 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full">
+                            class="group relative block overflow-hidden p-6 sm:p-8 bg-white border-2 border-gray-100 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full">
 
                             {{-- Decorative Circle (Hover Effect) --}}
                             <div
@@ -90,16 +90,16 @@
 
                                 {{-- Content --}}
                                 <h3
-                                    class="text-xl font-bold text-gray-900 mb-2 transition-colors group-hover:text-primary line-clamp-1">
+                                    class="text-responsive-lg sm:text-responsive-xl font-bold text-gray-900 mb-1 sm:mb-2 transition-colors group-hover:text-primary line-clamp-1">
                                     {{ $category->{'category-name'} ?? $category->{'category-name'} }}
                                     {{-- Handling both possible field names --}}
                                 </h3>
 
                                 {{-- Link Arrow --}}
                                 <span
-                                    class="inline-flex items-center text-sm font-semibold transition-colors text-primary mt-auto">
+                                    class="inline-flex items-center text-responsive-sm font-semibold transition-colors text-primary mt-auto">
                                     Explore
-                                    <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none"
+                                    <svg class="w-3 h-3 sm:w-4 sm:h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 5l7 7-7 7" />
@@ -254,34 +254,34 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 
                 <div
                     class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
                         <img src={{ asset('images/hp.webp') }} alt="AeroMax Wireless Headphones"
                             class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
-                        <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        <div class="absolute top-2 sm:top-3 right-2 sm:right-3 bg-red-500 text-white text-xs font-bold px-2 sm:px-3 py-1 rounded-full">
                             -20%
                         </div>
                     </a>
-                    <div class="p-5">
-                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">Audio</span>
+                    <div class="p-4 sm:p-5">
+                        <span class="text-xs font-semibold px-2 sm:px-3 py-1 rounded-full bg-primary/10 text-primary">Audio</span>
                         <a href="#">
                             <h3
-                                class="mt-3 text-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
+                                class="mt-2 sm:mt-3 text-responsive-base sm:text-responsive-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
                                 AeroMax Wireless Headphones
                             </h3>
                         </a>
-                        <div class="mt-4 flex items-center justify-between">
+                        <div class="mt-3 sm:mt-4 flex items-center justify-between">
                             <div>
-                                <p class="text-2xl font-bold text-primary">$199.99</p>
-                                <p class="text-sm text-gray-400 line-through">$249.99</p>
+                                <p class="text-responsive-lg sm:text-responsive-xl font-bold text-primary">$199.99</p>
+                                <p class="text-responsive-xs sm:text-responsive-sm text-gray-400 line-through">$249.99</p>
                             </div>
                             <button
-                                class="p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10"
+                                class="p-2 sm:p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10 touch:p-4"
                                 title="Add to Cart">
-                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor"
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4.5v15m7.5-7.5h-15" />
@@ -296,28 +296,28 @@
                     <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
                         <img src={{ asset('images/laptop.avif') }} alt="NovaBook Pro 14" (M3)"
                             class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
-                        <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        <div class="absolute top-2 sm:top-3 right-2 sm:right-3 bg-red-500 text-white text-xs font-bold px-2 sm:px-3 py-1 rounded-full">
                             -15%
                         </div>
                     </a>
-                    <div class="p-5">
+                    <div class="p-4 sm:p-5">
                         <span
-                            class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">Laptops</span>
+                            class="text-xs font-semibold px-2 sm:px-3 py-1 rounded-full bg-primary/10 text-primary">Laptops</span>
                         <a href="#">
                             <h3
-                                class="mt-3 text-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
+                                class="mt-2 sm:mt-3 text-responsive-base sm:text-responsive-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
                                 NovaBook Pro 14" (M3)
                             </h3>
                         </a>
-                        <div class="mt-4 flex items-center justify-between">
+                        <div class="mt-3 sm:mt-4 flex items-center justify-between">
                             <div>
-                                <p class="text-2xl font-bold text-primary">$1299.00</p>
-                                <p class="text-sm text-gray-400 line-through">$1499.00</p>
+                                <p class="text-responsive-lg sm:text-responsive-xl font-bold text-primary">$1299.00</p>
+                                <p class="text-responsive-xs sm:text-responsive-sm text-gray-400 line-through">$1499.00</p>
                             </div>
                             <button
-                                class="p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10"
+                                class="p-2 sm:p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10 touch:p-4"
                                 title="Add to Cart">
-                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor"
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4.5v15m7.5-7.5h-15" />
@@ -332,28 +332,28 @@
                     <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
                         <img src={{ asset('images/phone.jpg') }} alt="Quantum X1 5G (256GB)"
                             class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
-                        <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        <div class="absolute top-2 sm:top-3 right-2 sm:right-3 bg-red-500 text-white text-xs font-bold px-2 sm:px-3 py-1 rounded-full">
                             -10%
                         </div>
                     </a>
-                    <div class="p-5">
+                    <div class="p-4 sm:p-5">
                         <span
-                            class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">Smartphones</span>
+                            class="text-xs font-semibold px-2 sm:px-3 py-1 rounded-full bg-primary/10 text-primary">Smartphones</span>
                         <a href="#">
                             <h3
-                                class="mt-3 text-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
+                                class="mt-2 sm:mt-3 text-responsive-base sm:text-responsive-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
                                 Quantum X1 5G (256GB)
                             </h3>
                         </a>
-                        <div class="mt-4 flex items-center justify-between">
+                        <div class="mt-3 sm:mt-4 flex items-center justify-between">
                             <div>
-                                <p class="text-2xl font-bold text-primary">$899.00</p>
-                                <p class="text-sm text-gray-400 line-through">$999.00</p>
+                                <p class="text-responsive-lg sm:text-responsive-xl font-bold text-primary">$899.00</p>
+                                <p class="text-responsive-xs sm:text-responsive-sm text-gray-400 line-through">$999.00</p>
                             </div>
                             <button
-                                class="p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10"
+                                class="p-2 sm:p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10 touch:p-4"
                                 title="Add to Cart">
-                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor"
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4.5v15m7.5-7.5h-15" />
@@ -405,17 +405,17 @@
 
     <section id="new-arrivals" class="py-16 sm:py-24 bg-white">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 sm:mb-12">
                 <div>
-                    <h2 class="text-4xl font-bold tracking-tight text-gray-900 mb-2">
+                    <h2 class="text-responsive-2xl sm:text-responsive-3xl lg:text-responsive-4xl font-bold tracking-tight text-gray-900 mb-1 sm:mb-2">
                         Check Out What's New
                     </h2>
-                    <p class="text-lg text-gray-600">The very latest in personal and home technology</p>
+                    <p class="text-responsive-base sm:text-responsive-lg text-gray-600">The very latest in personal and home technology</p>
                 </div>
                 <a href="{{ route('products') }}"
-                    class="inline-flex items-center font-semibold mt-4 md:mt-0 px-6 py-3 rounded-full transition-all duration-300 group hover:shadow-lg text-primary bg-primary/10">
+                    class="inline-flex items-center font-semibold mt-4 md:mt-0 px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-all duration-300 group hover:shadow-lg text-primary bg-primary/10 touch:px-6 touch:py-4">
                     View All New Products
-                    <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none"
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 7l5 5m0 0l-5 5m5-5H6" />
