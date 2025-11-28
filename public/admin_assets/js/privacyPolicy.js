@@ -1,71 +1,56 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- 1. Common Configuration ---
-    const toolbarOptions = [
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'align': [] }],
-        [{ 'direction': 'rtl' }], // Text direction
-        ['link', 'image', 'clean']
-    ];
+    // Initialize English Editor
+    if (document.getElementById('editor_en')) {
+        var quillEn = new Quill('#editor_en', {
+            theme: 'snow'
+        });
+        // CRITICAL FIX: Attach instance to DOM element
+        document.getElementById('editor_en').__quill = quillEn;
 
-    // Variables to store editor instances
-    let quillEn = null;
-    let quillFr = null;
-    let quillAr = null;
-
-    // --- 2. Initialize Editors (Conditional) ---
-
-    // English (Used on both Create & Edit pages)
-    const enEditorEl = document.getElementById('editor_en');
-    if (enEditorEl) {
-        quillEn = new Quill('#editor_en', {
-            theme: 'snow',
-            modules: { toolbar: toolbarOptions }
+        // Update hidden input on change
+        quillEn.on('text-change', function() {
+            document.getElementById('hidden_description_en').value = quillEn.root.innerHTML;
         });
     }
 
-    // French (Used on Edit page only)
-    const frEditorEl = document.getElementById('editor_fr');
-    if (frEditorEl) {
-        quillFr = new Quill('#editor_fr', {
-            theme: 'snow',
-            modules: { toolbar: toolbarOptions }
+    // Initialize French Editor
+    if (document.getElementById('editor_fr')) {
+        var quillFr = new Quill('#editor_fr', {
+            theme: 'snow'
+        });
+        document.getElementById('editor_fr').__quill = quillFr;
+
+        quillFr.on('text-change', function() {
+            document.getElementById('hidden_description_fr').value = quillFr.root.innerHTML;
         });
     }
 
-    // Arabic (Used on Edit page only)
-    const arEditorEl = document.getElementById('editor_ar');
-    if (arEditorEl) {
-        quillAr = new Quill('#editor_ar', {
-            theme: 'snow',
-            modules: { toolbar: toolbarOptions }
+    // Initialize Arabic Editor
+    if (document.getElementById('editor_ar')) {
+        var quillAr = new Quill('#editor_ar', {
+            theme: 'snow'
+        });
+        document.getElementById('editor_ar').__quill = quillAr;
+
+        quillAr.on('text-change', function() {
+            document.getElementById('hidden_description_ar').value = quillAr.root.innerHTML;
         });
     }
 
-    // --- 3. Handle Form Submission ---
+    // Form Submission Handler (To ensure empty editors don't block submission if optional)
     const form = document.getElementById('privacyForm');
     if (form) {
-        form.onsubmit = function() {
-            // Sync English Data (Always expected if initialized)
-            if (quillEn) {
-                const hiddenEn = document.getElementById('hidden_description_en');
-                if (hiddenEn) hiddenEn.value = quillEn.root.innerHTML;
+        form.addEventListener('submit', function(e) {
+            // Populate hidden inputs one last time before submit
+            if(document.getElementById('editor_en').__quill) {
+                document.getElementById('hidden_description_en').value = document.getElementById('editor_en').__quill.root.innerHTML;
             }
-
-            // Sync French Data (Only if initialized)
-            if (quillFr) {
-                const hiddenFr = document.getElementById('hidden_description_fr');
-                if (hiddenFr) hiddenFr.value = quillFr.root.innerHTML;
+            if(document.getElementById('editor_fr').__quill) {
+                document.getElementById('hidden_description_fr').value = document.getElementById('editor_fr').__quill.root.innerHTML;
             }
-
-            // Sync Arabic Data (Only if initialized)
-            if (quillAr) {
-                const hiddenAr = document.getElementById('hidden_description_ar');
-                if (hiddenAr) hiddenAr.value = quillAr.root.innerHTML;
+            if(document.getElementById('editor_ar').__quill) {
+                document.getElementById('hidden_description_ar').value = document.getElementById('editor_ar').__quill.root.innerHTML;
             }
-
-            return true; // Allow form submission
-        };
+        });
     }
 });

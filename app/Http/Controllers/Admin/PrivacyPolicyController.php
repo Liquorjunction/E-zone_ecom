@@ -104,6 +104,12 @@ class PrivacyPolicyController extends Controller
 
         return DataTables::of($privacyPolicies)
             ->addIndexColumn()
+            ->addColumn('description', function ($privacyPolicy) {
+                // Fetch the description in english
+                $description = $privacyPolicy->getTranslation('description', 'en');
+                // Limit the description to 50 characters and its in html
+                return strlen(strip_tags($description)) > 50 ? substr(strip_tags($description), 0, 50) . '...' : strip_tags($description);
+            })
             ->addColumn('action', function ($privacyPolicy) {
                 $data['edit_url'] = route('admin.privacy-policy.edit', ['id' => $privacyPolicy->id]);
                 $data['id'] = $privacyPolicy->id;

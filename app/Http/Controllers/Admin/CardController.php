@@ -136,6 +136,12 @@ class CardController extends Controller
             $cards = $cardRepo->getDataForDataTable($request->all());
             $getTable = DataTables::of($cards)
                 ->addIndexColumn()
+                ->addColumn('title', function ($card) {
+                    // Fetch the title in english
+                    $title = $card->getTranslation('title', 'en');
+                    // Limit the title to 50 characters
+                    return strlen($title) > 50 ? substr($title, 0, 50) . '...' : $title;
+                })
                 ->addColumn('image', function ($card) {
                     if ($card->image && Storage::disk('public')->exists($card->image)) {
                         $url = asset('storage/'.$card->image);
