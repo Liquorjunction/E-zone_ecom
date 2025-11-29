@@ -179,17 +179,17 @@ class AdminAuthController extends Controller
             $id = $request->input('id');
             $adminRepository->superadminToggleAdminStatus($id);
 
-            if ($request->ajax()) {
-                return response()->json(['success' => true, 'message' => 'Admin status updated.']);
-            }
-
-            return back()->with('success', 'Admin status updated.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Admin status updated successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('Error in AdminAuthController@toggleStatus: '.$e->getMessage());
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-            }
-            throw $e;
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 

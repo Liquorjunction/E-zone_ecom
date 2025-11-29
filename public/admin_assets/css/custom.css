@@ -6,6 +6,76 @@
 * NOTE: This file contains the styling for Template.
 *
 */
+
+/* =========================================
+   Vibrant Form Overrides - Colors & Fonts
+   ========================================= */
+
+:root {
+    /* Color Palette */
+    --input-border-default: #cbd5e1;  /* Slate-300 */
+    --input-border-focus: #4f46e5;    /* Indigo-600 (Primary) */
+    --input-bg-default: #ffffff;      /* Pure White */
+    --input-shadow-focus: 0 0 0 0.25rem rgba(79, 70, 229, 0.25);
+
+    /* Font Colors */
+    --text-main: #1e293b;        /* Slate-800 (Sharp Dark Grey) */
+    --text-label: #334155;       /* Slate-700 (Readable Label) */
+    --text-placeholder: #94a3b8; /* Slate-400 (Subtle Hint) */
+}
+
+/* 1. Main Text Color for Inputs & Selects */
+.form-control,
+.form-select {
+    background-color: var(--input-bg-default) !important;
+    border: 1px solid var(--input-border-default) !important;
+    color: var(--text-main) !important; /* <--- This forces the sharp dark color */
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+/* 2. Focus State */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--input-border-focus) !important;
+    box-shadow: var(--input-shadow-focus) !important;
+    background-color: #f8fafc !important;
+    color: var(--text-main) !important; /* Ensure text stays dark on focus */
+}
+
+/* 3. Placeholder Text (The hint inside the box) */
+.form-control::placeholder {
+    color: var(--text-placeholder) !important;
+    opacity: 1; /* Fix for Firefox transparency */
+}
+
+/* 4. Labels */
+.form-label,
+label {
+    color: var(--text-label) !important; /* <--- Sharper Label Color */
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* 5. Checkbox & Switch Labels */
+.form-check-label {
+    color: var(--text-label) !important;
+    font-weight: 500;
+}
+
+/* 6. Input Groups (e.g. the "@" symbol box) */
+.input-group-text {
+    background-color: #f1f5f9;
+    border-color: var(--input-border-default);
+    color: var(--text-label) !important;
+}
+
+/* 7. Quill Editor Text (FAQ Answer Box) */
+.ql-editor {
+    color: var(--text-main) !important;
+    font-size: 1rem;
+}
+
 :focus {
   outline: none;
 }

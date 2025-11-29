@@ -25,6 +25,7 @@ class FaqController extends Controller
     {
         // Fetch categories for selection with ID
         $categories = FaqCategory::all();
+
         return view('admin.pages.faq.create', compact('categories'));
     }
 
@@ -36,7 +37,9 @@ class FaqController extends Controller
             // --- Smart Auto-Translate Logic ---
             foreach (['question', 'answer'] as $field) {
                 // Skip if English value is missing (should be caught by validation, but safe check)
-                if (!isset($data[$field]['en'])) continue;
+                if (! isset($data[$field]['en'])) {
+                    continue;
+                }
 
                 // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
@@ -77,7 +80,9 @@ class FaqController extends Controller
             // --- Smart Auto-Translate Logic ---
             foreach (['question', 'answer'] as $field) {
                 // Skip if English value is missing (should be caught by validation, but safe check)
-                if (!isset($data[$field]['en'])) continue;
+                if (! isset($data[$field]['en'])) {
+                    continue;
+                }
 
                 // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
@@ -134,13 +139,21 @@ class FaqController extends Controller
     {
         try {
             $id = $request->input('id');
-            $faqRepo->updateFaqStatus($id);
+            $status = $request->input('status'); // Optional, if repo handles automatic toggle, null is fine
 
-            return redirect()->back()->with('success', 'FAQ status updated successfully.');
+            $faqRepo->updateFaqStatus($id, $status);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'FAQ status updated successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -165,11 +178,13 @@ class FaqController extends Controller
                 ->addColumn('status', function ($faq) use ($request) {
                     $data['toggle_url'] = $request->user()->can('faqs.update') ? route('admin.faqs.toggleStatus', ['id' => $faq->id]) : '';
                     $data['status'] = $faq->status;
+
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($faq) use ($request) {
                     $data['edit_url'] = $request->user()->can('faqs.update') ? route('admin.faqs.edit', ['id' => $faq->id]) : '';
                     $data['delete_url'] = $request->user()->can('faqs.delete') ? route('admin.faqs.destroy', ['id' => $faq->id]) : '';
+
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->rawColumns(['action', 'status'])

@@ -33,7 +33,9 @@ class FaqCategoryController extends Controller
             // --- Smart Auto-Translate Logic ---
             foreach (['name', 'description'] as $field) {
                 // Skip if English value is missing (should be caught by validation, but safe check)
-                if (!isset($data[$field]['en'])) continue;
+                if (! isset($data[$field]['en'])) {
+                    continue;
+                }
 
                 // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
@@ -73,7 +75,9 @@ class FaqCategoryController extends Controller
             // --- Smart Auto-Translate Logic ---
             foreach (['name', 'description'] as $field) {
                 // Skip if English value is missing (should be caught by validation, but safe check)
-                if (!isset($data[$field]['en'])) continue;
+                if (! isset($data[$field]['en'])) {
+                    continue;
+                }
 
                 // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
@@ -104,16 +108,23 @@ class FaqCategoryController extends Controller
         return redirect()->route('admin.faq-categories.index')->with('success', 'FAQ Category deleted successfully.');
     }
 
-    public function toggleStatus($id, FaqCategoryRepo $faqCategoryRepo)
+    public function toggleStatus(EditFaqCategoryRequest $request, FaqCategoryRepo $faqCategoryRepo)
     {
         try {
+            $id = $request->input('id'); // Get ID from the request body/query
             $faqCategoryRepo->updateFaqCategoryStatus($id);
 
-            return redirect()->back()->with('success', 'FAQ Category status updated successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'FAQ Category status updated successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -147,7 +158,7 @@ class FaqCategoryController extends Controller
                 ->rawColumns(['action', 'status'])
                 ->make(true);
         } catch (\Exception $e) {
-            Log::error('Error in AdminFaqCategoryController::data ' . $e->getMessage());
+            Log::error('Error in AdminFaqCategoryController::data '.$e->getMessage());
 
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
