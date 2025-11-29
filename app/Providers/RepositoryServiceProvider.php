@@ -6,6 +6,8 @@ use App\Models\Card;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CardRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Admin\Interfaces\FaqCategoryRepositoryInterface;
+use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Admin\Interfaces\SliderRepositoryInterface;
@@ -14,6 +16,8 @@ use App\Repositories\Admin\Interfaces\TranslationRepositoryInterface;
 use App\Repositories\Admin\Repositories\AdminRepository;
 use App\Repositories\Admin\Repositories\CardRepository;
 use App\Repositories\Admin\Repositories\CategoryRepository;
+use App\Repositories\Admin\Repositories\FaqCategoryRepository;
+use App\Repositories\Admin\Repositories\FaqRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
 use App\Repositories\Admin\Repositories\RoleRepository;
 use App\Repositories\Admin\Repositories\SliderRepository;
@@ -36,6 +40,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(CardRepositoryInterface::class, CardRepository::class);
         $this->app->bind(PrivacyPolicyRespositoryInterface::class, PrivacyPolicyRespository::class);
         $this->app->bind(TranslationRepositoryInterface::class, TranslationRepository::class);
+        $this->app->bind(FaqCategoryRepositoryInterface::class, FaqCategoryRepository::class);
+        $this->app->bind(FaqRepositoryInterface::class, FaqRepository::class);
     }
 
     /**

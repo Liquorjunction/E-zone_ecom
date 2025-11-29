@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\FaqCategoryController;
+use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
@@ -118,6 +120,30 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/edit', [PrivacyPolicyController::class, 'edit'])->name('edit')->middleware('can:privacy_policies.update,admin');
             Route::put('/update', [PrivacyPolicyController::class, 'update'])->name('update')->middleware('can:privacy_policies.update,admin');
             Route::delete('/destroy', [PrivacyPolicyController::class, 'destroy'])->name('destroy')->middleware('can:privacy_policies.delete,admin');
+        });
+
+        // FAQ Category Routes
+        Route::prefix('faq-categories')->name('faq-categories.')->middleware('can:faqs.read,admin')->group(function () {
+            Route::get('/', [FaqCategoryController::class, 'index'])->name('index');
+            Route::get('/data', [FaqCategoryController::class, 'data'])->name('data');
+            Route::get('/create', [FaqCategoryController::class, 'create'])->name('create')->middleware('can:faqs.create,admin');
+            Route::post('/', [FaqCategoryController::class, 'store'])->name('store')->middleware('can:faqs.create,admin');
+            Route::get('/edit', [FaqCategoryController::class, 'edit'])->name('edit')->middleware('can:faqs.update,admin');
+            Route::put('/update', [FaqCategoryController::class, 'update'])->name('update')->middleware('can:faqs.update,admin');
+            Route::delete('/destroy', [FaqCategoryController::class, 'destroy'])->name('destroy')->middleware('can:faqs.delete,admin');
+            Route::patch('/toggle-status', [FaqCategoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:faqs.update,admin');
+        });
+
+        // FAQ Routes
+        Route::prefix('faqs')->name('faqs.')->middleware('can:faqs.read,admin')->group(function () {
+            Route::get('/', [FaqController::class, 'index'])->name('index');
+            Route::get('/data', [FaqController::class, 'data'])->name('data');
+            Route::get('/create', [FaqController::class, 'create'])->name('create')->middleware('can:faqs.create,admin');
+            Route::post('/', [FaqController::class, 'store'])->name('store')->middleware('can:faqs.create,admin');
+            Route::get('/edit', [FaqController::class, 'edit'])->name('edit')->middleware('can:faqs.update,admin');
+            Route::put('/update', [FaqController::class, 'update'])->name('update')->middleware('can:faqs.update,admin');
+            Route::delete('/destroy', [FaqController::class, 'destroy'])->name('destroy')->middleware('can:faqs.delete,admin');
+            Route::patch('/toggle-status', [FaqController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:faqs.update,admin');
         });
     });
 });

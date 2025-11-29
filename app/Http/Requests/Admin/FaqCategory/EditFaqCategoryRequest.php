@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Requests\Admin\FaqCategory;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +14,7 @@ class EditFaqCategoryRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::guard('admin')->user()->can('faq.edit');
+        return Auth::guard('admin')->user()->can('faqs.update');
     }
 
     /**

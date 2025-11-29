@@ -23,6 +23,19 @@
         {{-- Breadcrumbs --}}
         @include('admin.components.breadcrumbs')
 
+        <div class="container-fluid">
+            {{-- Error Message --}}
+            @if ($errors->any())
+                <div class="alert alert-danger w-100">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </div>
+
         {{-- Content --}}
         @yield('content')
 

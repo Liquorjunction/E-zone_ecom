@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Requests\Admin\FaqCategory;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +12,7 @@ class StoreFaqCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('faq.create');
+        return Auth::guard('admin')->user()->can('faqs.create');
     }
 
     /**
@@ -22,13 +24,14 @@ class StoreFaqCategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|array',
-            'name.en' => 'required|string|max:255|unique:faq_categories,name',
-            'name.ar' => 'nullable|string|max:255|unique:faq_categories,name',
-            'name.fr' => 'nullable|string|max:255|unique:faq_categories,name',
+            'name.en' => 'required|string|max:255',
+            'name.ar' => 'nullable|string|max:255',
+            'name.fr' => 'nullable|string|max:255',
             'description' => 'nullable|array',
             'description.en' => 'nullable|string',
             'description.ar' => 'nullable|string',
             'description.fr' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
         ];
     }
 

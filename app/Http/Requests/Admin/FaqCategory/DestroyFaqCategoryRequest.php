@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Requests\Admin\FaqCategory;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 

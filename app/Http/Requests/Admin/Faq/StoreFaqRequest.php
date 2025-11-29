@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Requests\Admin\Faq;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -7,12 +9,13 @@ class StoreFaqRequest extends FormRequest
 {
     public function authorize()
     {
-        return Auth::guard('admin')->user()->can('faq.create');
+        return Auth::guard('admin')->user()->can('faqs.create');
     }
 
     public function rules()
     {
         return [
+            'faq_category_id' => 'required|exists:faq_categories,id',
             'question' => 'required|array',
             'question.en' => 'required|string|max:255',
             'question.ar' => 'nullable|string|max:255',

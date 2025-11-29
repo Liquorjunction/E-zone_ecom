@@ -24,10 +24,6 @@ class FaqCategory extends Model
         'status',
     ];
 
-    protected $casts = [
-        'status' => 'enum:active,inactive',
-    ];
-
     protected $dates = [
         'created_at',
         'updated_at',

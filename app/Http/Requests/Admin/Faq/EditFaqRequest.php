@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Requests\Admin\Faq;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,8 +12,8 @@ class EditFaqRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Only allow users with 'edit_faqs' permission
-        return Auth::guard('admin')->user()->can('faq.edit');
+        // Only allow users with 'update_faqs' permission
+        return Auth::guard('admin')->user()->can('faqs.update');
     }
 
     /**

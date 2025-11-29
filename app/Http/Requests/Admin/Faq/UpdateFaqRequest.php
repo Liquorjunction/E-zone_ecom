@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Requests\Admin\Faq;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +12,7 @@ class UpdateFaqRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('faq.edit');
+        return Auth::guard('admin')->user()->can('faqs.update');
     }
 
     /**
@@ -21,10 +23,16 @@ class UpdateFaqRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'question' => 'required|string|max:255',
-            'answer' => 'required|string',
-            'category_id' => 'required|exists:faq_categories,id',
-            'is_active' => 'sometimes|boolean',
+            'id' => 'required|exists:faqs,id',
+            'faq_category_id' => 'required|exists:faq_categories,id',
+            'question' => 'required|array',
+            'question.en' => 'required|string|max:255',
+            'question.ar' => 'nullable|string|max:255',
+            'question.fr' => 'nullable|string|max:255',
+            'answer' => 'required|array',
+            'answer.en' => 'required|string',
+            'answer.ar' => 'nullable|string',
+            'answer.fr' => 'nullable|string',
         ];
     }
 }
