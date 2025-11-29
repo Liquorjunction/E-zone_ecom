@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Http\Requests\Admin\Tnc;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+
+class StoreTncRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return Auth::guard('admin')->user()->can('tnc.create');
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'title' => 'required|json',
+            'title.en' => 'required|string',
+            'title.ar' => 'nullable|string',
+            'title.fr' => 'nullable|string',
+            'content' => 'required|json',
+            'content.en' => 'required|string',
+            'content.ar' => 'nullable|string',
+            'content.fr' => 'nullable|string',
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'title' => 'title',
+            'title.en' => 'title in English',
+            'title.ar' => 'title in Arabic',
+            'title.fr' => 'title in French',
+            'content' => 'content',
+            'content.en' => 'content in English',
+            'content.ar' => 'content in Arabic',
+            'content.fr' => 'content in French',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'title.required' => 'The title field is required.',
+            'title.en.required' => 'The title in English is required.',
+            'content.required' => 'The content field is required.',
+            'content.en.required' => 'The content in English is required.',
+        ];
+    }
+}

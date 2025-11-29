@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\SubCategoryController;
+use App\Http\Controllers\Admin\TncController;
 use App\Http\Controllers\Admin\TranslationController;
 use Illuminate\Support\Facades\Route;
 
@@ -144,6 +145,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [FaqController::class, 'update'])->name('update')->middleware('can:faqs.update,admin');
             Route::delete('/destroy', [FaqController::class, 'destroy'])->name('destroy')->middleware('can:faqs.delete,admin');
             Route::patch('/toggle-status', [FaqController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:faqs.update,admin');
+        });
+
+        // Terms and Conditions Routes
+        Route::prefix('tncs')->name('tncs.')->middleware('can:tnc.read,admin')->group(function () {
+            Route::get('/', [TncController::class, 'index'])->name('index');
+            Route::get('/data', [TncController::class, 'data'])->name('data');
+            Route::get('/create', [TncController::class, 'create'])->name('create')->middleware('can:tnc.create,admin');
+            Route::post('/', [TncController::class, 'store'])->name('store')->middleware('can:tnc.create,admin');
+            Route::get('/edit', [TncController::class, 'edit'])->name('edit')->middleware('can:tnc.update,admin');
+            Route::put('/update', [TncController::class, 'update'])->name('update')->middleware('can:tnc.update,admin');
+            Route::delete('/destroy', [TncController::class, 'destroy'])->name('destroy')->middleware('can:tnc.delete,admin');
+            Route::patch('/toggle-status', [TncController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:tnc.update,admin');
         });
     });
 });
