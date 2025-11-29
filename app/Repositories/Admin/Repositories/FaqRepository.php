@@ -43,7 +43,7 @@ class FaqRepository implements FaqRepositoryInterface
     public function updateFaqStatus($id)
     {
         $faq = Faq::findOrFail($id);
-        $faq->is_active = !$faq->is_active;
+        $faq->status = $faq->status === 'active' ? 'inactive' : 'active';
         $faq->save();
 
         return $faq;

@@ -130,6 +130,20 @@ class FaqController extends Controller
         }
     }
 
+    public function toggleStatus(ReadFaqRequest $request, FaqRepo $faqRepo)
+    {
+        try {
+            $id = $request->input('id');
+            $faqRepo->updateFaqStatus($id);
+
+            return redirect()->back()->with('success', 'FAQ status updated successfully.');
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
     public function data(ReadFaqRequest $request, FaqRepo $faqRepo)
     {
         try {
@@ -142,8 +156,8 @@ class FaqController extends Controller
                     return $faq->getTranslation('question', 'en');
                 })
                 ->addColumn('answer', function ($faq) {
-                    // Helper to show English title in the list
-                    return $faq->getTranslation('answer', 'en');
+                    // Helper to show English title in the list using strip_tags
+                    return strip_tags($faq->getTranslation('answer', 'en'));
                 })
                 ->addColumn('category', function ($faq) {
                     return $faq->category ? $faq->category->getTranslation('name', 'en') : 'Uncategorized';
