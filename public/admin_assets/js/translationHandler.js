@@ -102,18 +102,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Helper: Update Field (Smart Detection) ---
+     // --- Helper: Update Field (Smart Detection) ---
     function updateField(elementId, content) {
         const el = document.getElementById(elementId);
-        if (!el) return;
 
-        // Check if this element is linked to a Quill instance
-        if (el.__quill) {
-            el.__quill.root.innerHTML = content; // Update Visual Editor
-            el.value = content;                  // Update Hidden Input
-        } else {
-            // Standard Input/Textarea
+        // 1. Check if the element itself is a Quill editor
+        if (el && el.__quill) {
+            el.__quill.root.innerHTML = content;
+            // Update associated hidden input if strictly naming convention follows (e.g. editor_content_en -> content_en)
+            const hiddenId = elementId.replace('editor_', '');
+            const hiddenEl = document.getElementById(hiddenId);
+            if (hiddenEl) hiddenEl.value = content;
+            return;
+        }
+
+        // 2. Check if there is a corresponding Quill editor for this input
+        // (e.g., we received 'content_fr', let's look for 'editor_content_fr')
+        const quillEl = document.getElementById('editor_' + elementId);
+        if (quillEl && quillEl.__quill) {
+            quillEl.__quill.root.innerHTML = content; // Update Visual Editor
+
+            if (el) el.value = content; // Update Hidden Input
+            return;
+        }
+
+        // 3. Fallback: Standard Input/Textarea
+        if (el) {
             el.value = content;
+        } else {
+            console.warn(`Could not find field to update: ${elementId}`);
         }
     }
 

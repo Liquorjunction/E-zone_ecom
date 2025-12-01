@@ -10,7 +10,6 @@ use App\Http\Requests\Admin\Tnc\StoreTncRequest;
 use App\Http\Requests\Admin\Tnc\UpdateTncRequest;
 use App\Models\TermsAndCondition;
 use App\Repositories\Admin\Interfaces\TncRepositoryInterface as TncRepo;
-use App\Models\Tnc;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -33,25 +32,23 @@ class TncController extends Controller
 
             // --- Smart Auto-Translate Logic ---
             foreach (['title', 'content'] as $field) {
-                // Skip if English value is missing (should be caught by validation, but safe check)
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
 
-                // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
                     $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
 
-                // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
+            // ---------------------------------
 
-            $tncRepo->createTnc($request, $data);
+            $tncRepo->createTnc($request, $data); // Pass request and data array
 
-            return redirect()->route('admin.tncs.index')->with('success', 'Terms and Conditions created successfully.');
+            return redirect()->route('admin.tncs.index')->with('success', 'T&C created successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
@@ -61,7 +58,8 @@ class TncController extends Controller
 
     public function edit(EditTncRequest $request)
     {
-        $id = $request->input('id');
+        // Validated ID comes from request (merged via prepareForValidation)
+        $id = $request->validated()['id'];
         $tnc = TermsAndCondition::findOrFail($id);
 
         return view('admin.pages.tnc.edit', compact('tnc'));
@@ -70,30 +68,28 @@ class TncController extends Controller
     public function update(UpdateTncRequest $request, TncRepo $tncRepo)
     {
         try {
-            $id = $request->input('id');
+            $id = $request->validated()['id'];
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
             foreach (['title', 'content'] as $field) {
-                // Skip if English value is missing (should be caught by validation, but safe check)
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
 
-                // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
                     $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
 
-                // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
+            // ---------------------------------
 
-            $tncRepo->updateTnc($request, $id, $data);
+            $tncRepo->updateTnc($id, $request, $data);
 
-            return redirect()->route('admin.tncs.index')->with('success', 'Terms and Conditions updated successfully.');
+            return redirect()->route('admin.tncs.index')->with('success', 'T&C updated successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
@@ -104,53 +100,48 @@ class TncController extends Controller
     public function destroy(DestroyTncRequest $request, TncRepo $tncRepo)
     {
         try {
-            $id = $request->input('id');
+            $id = $request->validated()['id'];
             $tncRepo->deleteTnc($id);
 
-            return redirect()->route('admin.tncs.index')->with('success', 'Terms and Conditions deleted successfully.');
+            return redirect()->back()->with(['success' => true, 'message' => 'T&C deleted successfully']);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    public function toggleStatus(ReadTncRequest $request, TncRepo $tncRepo)
+    public function status(EditTncRequest $request, TncRepo $tncRepo)
     {
         try {
-            $id = $request->input('id');
-            $status = $request->input('status');
+            $id = $request->validated()['id'];
+            $tncRepo->updateTncStatus($id);
 
-            $tncRepo->updateTncStatus($id, $status);
-
-            return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+            return redirect()->back()->with(['success' => true, 'message' => 'Status updated successfully']);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
     public function data(ReadTncRequest $request, TncRepo $tncRepo)
     {
         try {
-            $tncs = $tncRepo->getDataForDataTable($request);
+            $tncs = $tncRepo->getDataForDataTable();
 
             return DataTables::of($tncs)
                 ->addIndexColumn()
                 ->addColumn('title', function ($tnc) {
-                    // Helper to show English title in the list
                     return $tnc->getTranslation('title', 'en');
                 })
                 ->addColumn('status', function ($tnc) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('tncs.update') ? route('admin.tncs.toggleStatus', ['id' => $tnc->id]) : '';
+                    $data['toggle_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.toggleStatus', ['id' => $tnc->id]) : '';
                     $data['status'] = $tnc->status;
+                    $data['id'] = $tnc->id; // Ensure ID is passed for toggle
 
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($tnc) use ($request) {
-                    $data['edit_url'] = $request->user()->can('tncs.update') ? route('admin.tncs.edit', ['id' => $tnc->id]) : '';
-                    $data['delete_url'] = $request->user()->can('tncs.delete') ? route('admin.tncs.destroy', ['id' => $tnc->id]) : '';
+                    $data['edit_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.edit', ['id' => $tnc->id]) : '';
+                    $data['delete_url'] = $request->user()->can('tnc.delete') ? route('admin.tncs.destroy', ['id' => $tnc->id]) : '';
+                    $data['id'] = $tnc->id; // Ensure ID is passed for delete
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
@@ -159,7 +150,7 @@ class TncController extends Controller
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 }

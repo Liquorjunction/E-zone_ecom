@@ -25,11 +25,11 @@ class StoreTncRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required|json',
+            'title' => 'required',
             'title.en' => 'required|string',
             'title.ar' => 'nullable|string',
             'title.fr' => 'nullable|string',
-            'content' => 'required|json',
+            'content' => 'required',
             'content.en' => 'required|string',
             'content.ar' => 'nullable|string',
             'content.fr' => 'nullable|string',

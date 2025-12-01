@@ -115,4 +115,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('admin_assets/js/tncEditor.js') }}" @endpush
+    <script src="{{ asset('admin_assets/js/tncEditor.js') }}"></script>
+@endpush

@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // CRITICAL FIX: Attach instance to DOM element
         document.getElementById('editor_content_en').__quill = quillEn;
 
+        // Populate Quill with textarea content (old or DB data)
+        var contentEn = document.getElementById('content_en').value;
+        quillEn.root.innerHTML = contentEn;
+
         // Update hidden textarea on change
         quillEn.on('text-change', function() {
             document.getElementById('content_en').value = quillEn.root.innerHTML;
@@ -20,6 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         document.getElementById('editor_content_fr').__quill = quillFr;
 
+        // Populate Quill with textarea content
+        var contentFr = document.getElementById('content_fr').value;
+        quillFr.root.innerHTML = contentFr;
+
         quillFr.on('text-change', function() {
             document.getElementById('content_fr').value = quillFr.root.innerHTML;
         });
@@ -31,6 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
             theme: 'snow'
         });
         document.getElementById('editor_content_ar').__quill = quillAr;
+
+        // Populate Quill with textarea content
+        var contentAr = document.getElementById('content_ar').value;
+        quillAr.root.innerHTML = contentAr;
 
         quillAr.on('text-change', function() {
             document.getElementById('content_ar').value = quillAr.root.innerHTML;

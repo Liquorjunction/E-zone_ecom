@@ -1,0 +1,6 @@
+- Fix validation rules in StoreTncRequest and UpdateTncRequest: Change 'title' and 'content' from 'json' to 'array'
+- Add 'status' to validation rules in both requests
+- Fix status inconsistency: Use 1/0 instead of 'active'/'inactive'
+- Add tncEditor.js script to edit.blade.php
+- Set selected status in edit form
+- Ensure translations save properly (check controller logic)

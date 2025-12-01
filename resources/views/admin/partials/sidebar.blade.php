@@ -4,7 +4,8 @@
 
             <div class="logo-main">
                 <div class="logo-normal">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="logo" class="img-fluid">
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="logo" class="img-fluid" height="40" width="40" />
+                    <span>EZONE ADMIN</span>
                 </div>
                 <div class="logo-mini">
                     <svg class=" icon-30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">

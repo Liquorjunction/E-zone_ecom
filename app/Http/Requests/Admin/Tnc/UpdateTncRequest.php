@@ -26,14 +26,15 @@ class UpdateTncRequest extends FormRequest
     {
         return [
             'id' => 'required|exists:terms_and_conditions,id',
-            'title' => 'required|json',
+            'title' => 'required|array',
             'title.en' => 'required|string',
             'title.ar' => 'nullable|string',
             'title.fr' => 'nullable|string',
-            'content' => 'required|json',
+            'content' => 'required|array',
             'content.en' => 'required|string',
             'content.ar' => 'nullable|string',
             'content.fr' => 'nullable|string',
+            'status' => 'required|in:0,1',
         ];
     }
 

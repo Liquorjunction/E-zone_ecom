@@ -9,7 +9,7 @@ class TncRepository implements TncRepositoryInterface
 {
     public function getAllTncs()
     {
-        return TermsAndCondition::first();
+        return TermsAndCondition::all();
     }
 
     public function getTncById($id)
@@ -17,7 +17,8 @@ class TncRepository implements TncRepositoryInterface
         return TermsAndCondition::findOrFail($id);
     }
 
-    public function createTnc($request)
+    // FIXED: Accept optional $data
+    public function createTnc($request, $data = null)
     {
         // Use passed data (with translations) or fallback to validated request data
         $data = $data ?? $request->validated();

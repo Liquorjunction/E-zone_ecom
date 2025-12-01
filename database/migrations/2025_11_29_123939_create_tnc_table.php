@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('terms_and_conditions', function (Blueprint $table) {
             $table->id();
-            $table->json('title');   // Translatable Title
-            $table->json('content'); // Translatable Rich Text Content
+            $table->longText('title');   // Translatable Title
+            $table->longText('content'); // Translatable Rich Text Content
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->softDeletes();
             $table->timestamps();
