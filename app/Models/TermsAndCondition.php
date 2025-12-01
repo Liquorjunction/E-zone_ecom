@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Traits\HasRoles;
 use Spatie\Translatable\HasTranslations;
 
 class TermsAndCondition extends Model
 {
-    use HasFactory , SoftDeletes, HasTranslations;
+    use HasFactory , SoftDeletes, HasTranslations, HasRoles;
 
     protected $guarded = [];
     public $guard_name = 'admin';
@@ -17,7 +18,7 @@ class TermsAndCondition extends Model
 
     public $translatable = ['title','content'];
 
-    public $fillable = [
+    protected $fillable = [
         'title',
         'content',
         'status'

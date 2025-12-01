@@ -39,9 +39,9 @@
                                         <div class="tab-pane fade show active" id="en">
                                             <div class="form-group">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <button type="button" class="btn btn-primary btn-translate-all"
+                                                <button type="button" class="btn btn-primary btn-translate-all"
                                                         data-url="{{ route('admin.translate.batch') }}"
-                                                        data-fields='["title", "subtitle", "button_text"]'>
+                                                        data-fields='["title", "content"]'>
                                                         <i class="fas fa-language me-2"></i> Translate All Fields
                                                     </button>
                                                     <label class="mb-0">Title (EN) <span
@@ -57,6 +57,11 @@
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <label class="mb-0">Content (EN) <span
                                                             class="text-danger">*</span></label>
+                                                    <button type="button" class="btn btn-sm btn-info text-white btn-translate-auto"
+                                                        data-url="{{ route('admin.translate.content') }}" data-source="editor_content_en"
+                                                        data-target-base="editor_content" data-quill="true">
+                                                        <i class="fas fa-language mr-1"></i> Translate Content
+                                                    </button>
                                                 </div>
                                                 <div id="editor_content_en" style="height: 300px;"></div>
                                                 <textarea name="content[en]" id="content_en" style="display:none">{{ old('content.en', $tnc->getTranslation('content', 'en')) }}</textarea>

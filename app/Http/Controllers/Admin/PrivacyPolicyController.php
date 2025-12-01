@@ -41,10 +41,10 @@ class PrivacyPolicyController extends Controller
             // --- Smart Fill for 'description' ---
             if (isset($data['description']['en'])) {
                 if (empty($data['description']['fr'])) {
-                    $data['description']['fr'] = gtrans($data['description']['en'], 'fr');
+                    $data['description']['fr'] = gtrans_html($data['description']['en'], 'fr');
                 }
                 if (empty($data['description']['ar'])) {
-                    $data['description']['ar'] = gtrans($data['description']['en'], 'ar');
+                    $data['description']['ar'] = gtrans_html($data['description']['en'], 'ar');
                 }
             }
             // --------------------------------------

@@ -35,7 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
             btn.disabled = true;
 
-            axios.post(btn.getAttribute('data-url'), { text: sourceContent })
+            const isHtml = isQuill; // If it's Quill, it's HTML
+            axios.post(btn.getAttribute('data-url'), { text: sourceContent, is_html: isHtml })
             .then(function (response) {
                 if (response.data.success) {
                     const trans = response.data.translations;
@@ -65,15 +66,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Gather data
             fieldKeys.forEach(key => {
+                let val = '';
                 const el = document.getElementById(key + '_en');
-                if (el) {
-                    // Check if it's a Quill field or regular input
-                    const val = el.__quill ? el.__quill.root.innerHTML : el.value;
+                const quillEl = document.getElementById('editor_' + key + '_en');
 
-                    if (val && val.trim() !== '') {
-                        payload[key] = val;
-                        hasData = true;
-                    }
+                if (quillEl && quillEl.__quill) {
+                    // Prefer Quill content if available
+                    val = quillEl.__quill.root.innerHTML;
+                } else if (el) {
+                    // Fallback to input/textarea
+                    val = el.__quill ? el.__quill.root.innerHTML : el.value;
+                }
+
+                if (val && val.trim() !== '') {
+                    payload[key] = val;
+                    hasData = true;
                 }
             });
 

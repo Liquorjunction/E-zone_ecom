@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\ShippingAndReturnController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\TncController;
@@ -157,6 +158,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [TncController::class, 'update'])->name('update')->middleware('can:tnc.update,admin');
             Route::delete('/destroy', [TncController::class, 'destroy'])->name('destroy')->middleware('can:tnc.delete,admin');
             Route::patch('/toggle-status', [TncController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:tnc.update,admin');
+        });
+
+        // Shipping & Return Routes
+        Route::group(['prefix' => 'shipping-return', 'as' => 'shipping-return.'], function () {
+            Route::get('/', [ShippingAndReturnController::class, 'index'])->name('index')->can('shipping_return.read');
+            Route::get('/create', [ShippingAndReturnController::class, 'create'])->name('create')->can('shipping_return.create');
+            Route::post('/store', [ShippingAndReturnController::class, 'store'])->name('store')->can('shipping_return.create');
+            Route::get('/{id}/edit', [ShippingAndReturnController::class, 'edit'])->name('edit')->can('shipping_return.update');
+            Route::put('/update', [ShippingAndReturnController::class, 'update'])->name('update')->can('shipping_return.update');
+            Route::delete('/destroy', [ShippingAndReturnController::class, 'destroy'])->name('destroy')->can('shipping_return.delete');
+            Route::get('/data', [ShippingAndReturnController::class, 'data'])->name('data')->can('shipping_return.read');
+            Route::patch('/status/{id}', [ShippingAndReturnController::class, 'status'])->name('toggleStatus')->can('shipping_return.update');
         });
     });
 });

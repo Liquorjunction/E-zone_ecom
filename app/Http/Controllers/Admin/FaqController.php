@@ -41,14 +41,16 @@ class FaqController extends Controller
                     continue;
                 }
 
+                $translateFunc = ($field === 'answer') ? 'gtrans_html' : 'gtrans';
+
                 // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
-                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                    $data[$field]['fr'] = $translateFunc($data[$field]['en'], 'fr');
                 }
 
                 // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
-                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                    $data[$field]['ar'] = $translateFunc($data[$field]['en'], 'ar');
                 }
             }
 

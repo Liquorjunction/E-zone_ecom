@@ -6,13 +6,13 @@ use App\Repositories\Admin\Interfaces\TranslationRepositoryInterface;
 
 class TranslationRepository implements TranslationRepositoryInterface
 {
-    public function translateAll(string $text, array $locales): array
+    public function translateAll(string $text, array $locales, bool $isHtml = false): array
     {
         $translations = [];
 
         foreach ($locales as $locale) {
-            // Uses your existing helper function
-            $translations[$locale] = gtrans($text, $locale);
+            // Use HTML-aware translation if needed
+            $translations[$locale] = $isHtml ? gtrans_html($text, $locale) : gtrans($text, $locale);
         }
 
         return $translations;
@@ -23,7 +23,9 @@ class TranslationRepository implements TranslationRepositoryInterface
         $results = [];
         foreach ($fields as $key => $text) {
             if (!empty($text)) {
-                $results[$key] = $this->translateAll($text, $locales);
+                // Detect if field is HTML (e.g., 'content' fields contain HTML)
+                $isHtml = strpos($key, 'content') !== false;
+                $results[$key] = $this->translateAll($text, $locales, $isHtml);
             }
         }
         return $results;

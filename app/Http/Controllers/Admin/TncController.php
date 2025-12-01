@@ -77,12 +77,14 @@ class TncController extends Controller
                     continue;
                 }
 
+                $translateFunc = ($field === 'content') ? 'gtrans_html' : 'gtrans';
+
                 if (empty($data[$field]['fr'])) {
-                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                    $data[$field]['fr'] = $translateFunc($data[$field]['en'], 'fr');
                 }
 
                 if (empty($data[$field]['ar'])) {
-                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                    $data[$field]['ar'] = $translateFunc($data[$field]['en'], 'ar');
                 }
             }
             // ---------------------------------
@@ -109,15 +111,23 @@ class TncController extends Controller
         }
     }
 
-    public function status(EditTncRequest $request, TncRepo $tncRepo)
+    public function toggleStatus(EditTncRequest $request, TncRepo $tncRepo)
     {
         try {
             $id = $request->validated()['id'];
             $tncRepo->updateTncStatus($id);
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Status updated successfully']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully.',
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error('Error updating T&C status: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status: ' . $e->getMessage(),
+            ], 500);
         }
     }
 
