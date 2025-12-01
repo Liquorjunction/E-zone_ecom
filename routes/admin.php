@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AboutUsController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -170,6 +171,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::delete('/destroy', [ShippingAndReturnController::class, 'destroy'])->name('destroy')->can('shipping_return.delete');
             Route::get('/data', [ShippingAndReturnController::class, 'data'])->name('data')->can('shipping_return.read');
             Route::patch('/status/{id}', [ShippingAndReturnController::class, 'status'])->name('toggleStatus')->can('shipping_return.update');
+        });
+
+        // About Us Routes
+        Route::prefix('about-us')->name('about_us.')->middleware('can:about_us.read,admin')->group(function () {
+            Route::get('/', [AboutUsController::class, 'index'])->name('index'); // permission: about_us.read
+            Route::get('/data', [AboutUsController::class, 'data'])->name('data');
+            Route::get('/create', [AboutUsController::class, 'create'])->name('create')->middleware('can:about_us.create,admin');
+            Route::post('/', [AboutUsController::class, 'store'])->name('store')->middleware('can:about_us.create,admin');
+            Route::get('/edit', [AboutUsController::class, 'edit'])->name('edit')->middleware('can:about_us.update,admin');
+            Route::put('/update', [AboutUsController::class, 'update'])->name('update')->middleware('can:about_us.update,admin');
+            Route::delete('/destroy', [AboutUsController::class, 'destroy'])->name('destroy')->middleware('can:about_us.delete,admin');
+            Route::patch('/toggle-status', [AboutUsController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:about_us.update,admin');
         });
     });
 });

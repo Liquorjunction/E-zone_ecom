@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Repositories\Admin\Interfaces\AboutUsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CardRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
@@ -14,6 +15,7 @@ use App\Repositories\Admin\Interfaces\SliderRepositoryInterface;
 use App\Repositories\Admin\Interfaces\SubCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\TncRepositoryInterface;
 use App\Repositories\Admin\Interfaces\TranslationRepositoryInterface;
+use App\Repositories\Admin\Repositories\AboutUsRepository;
 use App\Repositories\Admin\Repositories\AdminRepository;
 use App\Repositories\Admin\Repositories\CardRepository;
 use App\Repositories\Admin\Repositories\CategoryRepository;
@@ -47,6 +49,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(FaqRepositoryInterface::class, FaqRepository::class);
         $this->app->bind(TncRepositoryInterface::class, TncRepository::class);
         $this->app->bind(ShippingAndReturnRepositoryInterface::class, ShippingAndReturnRepository::class);
+        $this->app->bind(AboutUsRepositoryInterface::class, AboutUsRepository::class);
     }
 
     /**

@@ -4,7 +4,8 @@
 
             <div class="logo-main">
                 <div class="logo-normal">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="logo" class="img-fluid" height="40" width="40" />
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="logo" class="img-fluid"
+                        height="40" width="40" />
                     <span>EZONE ADMIN</span>
                 </div>
                 <div class="logo-mini">
@@ -120,15 +121,15 @@
                                     <g>
                                         <g>
                                             <path d="M68.5,61.568c0,3.828-3.104,6.932-6.932,6.932H10.432c-3.828,0-6.932-3.104-6.932-6.932V26.432
-                                                                    c0-3.828,3.104-6.932,6.932-6.932h51.137c3.828,0,6.932,3.104,6.932,6.932V61.568z M64.5,26.432c0-1.619-1.313-2.932-2.932-2.932
-                                                                    H10.432c-1.619,0-2.932,1.313-2.932,2.932v35.137c0,1.619,1.313,2.932,2.932,2.932h51.137c1.619,0,2.932-1.313,2.932-2.932V26.432
-                                                            z" />
+                                                                            c0-3.828,3.104-6.932,6.932-6.932h51.137c3.828,0,6.932,3.104,6.932,6.932V61.568z M64.5,26.432c0-1.619-1.313-2.932-2.932-2.932
+                                                                            H10.432c-1.619,0-2.932,1.313-2.932,2.932v35.137c0,1.619,1.313,2.932,2.932,2.932h51.137c1.619,0,2.932-1.313,2.932-2.932V26.432
+                                                                    z" />
                                         </g>
                                         <g>
                                             <g>
                                                 <path
                                                     d="M12.5,37.5c-0.553,0-1-0.447-1-1v-3.802c0-2.721,2.313-5.198,4.903-5.198h18.051c0.552,0,1,0.447,1,1s-0.448,1-1,1
-                                                                        H16.403c-1.461,0-2.903,1.614-2.903,3.198V36.5C13.5,37.053,13.052,37.5,12.5,37.5z" />
+                                                                                H16.403c-1.461,0-2.903,1.614-2.903,3.198V36.5C13.5,37.053,13.052,37.5,12.5,37.5z" />
                                             </g>
                                             <g>
                                                 <path
@@ -229,17 +230,12 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.privacy-policy.index') }}">
                             <i class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-20">
-                                    <path
-                                        d="M12 22C12 22 4 20 4 12V6C4 6 4 2 12 2C20 2 20 6 20 6V12C20 20 12 22 12 22Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 14H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 3l8 4v5c0 5-3.5 9-8 9s-8-4-8-9V7l8-4z"></path>
+                                    <path d="M9 12l2 2 4-4"></path>
                                 </svg>
+
                             </i>
                             <span class="item-name">Privacy Policies</span>
                         </a>
@@ -249,17 +245,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.faq-categories.index') }}">
                             <i class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-20">
-                                    <path
-                                        d="M12 22C12 22 4 20 4 12V6C4 6 4 2 12 2C20 2 20 6 20 6V12C20 20 12 22 12 22Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 14H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 7h5l2 2h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path>
                                 </svg>
+
                             </i>
                             <span class="item-name">FAQ Categories</span>
                         </a>
@@ -269,59 +259,64 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.faqs.index') }}">
                             <i class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-20">
-                                    <path
-                                        d="M12 22C12 22 4 20 4 12V6C4 6 4 2 12 2C20 2 20 6 20 6V12C20 20 12 22 12 22Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 14H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9"></circle>
+                                    <path d="M9 9a3 3 0 116 0c0 2-3 2-3 4"></path>
+                                    <circle cx="12" cy="17" r="1"></circle>
                                 </svg>
+
                             </i>
                             <span class="item-name">FAQs</span>
                         </a>
                     </li>
                 @endcan
                 @can('tnc.read')
-                     <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.tncs.index') }}">
                             <i class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-20">
-                                    <path
-                                        d="M12 22C12 22 4 20 4 12V6C4 6 4 2 12 2C20 2 20 6 20 6V12C20 20 12 22 12 22Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 14H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <path d="M14 2v6h6"></path>
+                                    <line x1="8" y1="13" x2="16" y2="13"></line>
+                                    <line x1="8" y1="17" x2="14" y2="17"></line>
                                 </svg>
+
                             </i>
                             <span class="item-name">Terms & Conditions</span>
                         </a>
                     </li>
                 @endcan
                 @can('shipping_return.read')
-                   <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.shipping-return.index') }}">
                             <i class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-20">
-                                    <path
-                                        d="M12 22C12 22 4 20 4 12V6C4 6 4 2 12 2C20 2 20 6 20 6V12C20 20 12 22 12 22Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                    <path d="M8 14H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="1" y="3" width="15" height="13"></rect>
+                                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                    <circle cx="5.5" cy="18.5" r="1.5"></circle>
+                                    <circle cx="18.5" cy="18.5" r="1.5"></circle>
                                 </svg>
+
                             </i>
                             <span class="item-name">Shipping & Return</span>
+                        </a>
+                    </li>
+                @endcan
+                @can('about_us.read')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.about_us.index') }}">
+                            <i class="icon">
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="8" r="4"></circle>
+                                    <path d="M4 20c1.5-4 14.5-4 16 0"></path>
+                                </svg>
+
+                            </i>
+                            <span class="item-name">About Us</span>
                         </a>
                     </li>
                 @endcan
