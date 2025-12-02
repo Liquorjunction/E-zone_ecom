@@ -11,11 +11,12 @@ class PrivacyPolicy extends Model
 {
     use HasFactory, SoftDeletes, HasTranslations;
 
-    public $translatable = ['description'];
+    public $translatable = ['title', 'description'];
 
     protected $table = 'privacy_policies';
 
     protected $fillable = [
+        'title',
         'description',
     ];
 }

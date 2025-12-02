@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\VerificationController;
@@ -24,6 +25,9 @@ Route::middleware('guest')->group(function () {
     // Actions
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+
+    // Privacy Policy
+    Route::get('/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy-policy');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -139,10 +143,6 @@ Route::get('/faq', function () {
 Route::get('/terms', function () {
     return view('client.pages.terms');
 })->name('terms');
-
-Route::get('/privacy', function () {
-    return view('client.pages.privacy');
-})->name('privacy');
 
 Route::get('/shipping-returns', function () {
     return view('client.pages.shipping-returns');

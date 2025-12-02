@@ -39,12 +39,12 @@ class PrivacyPolicyController extends Controller
             $data = $request->validated();
 
             // --- Smart Fill for 'description' ---
-            if (isset($data['description']['en'])) {
-                if (empty($data['description']['fr'])) {
-                    $data['description']['fr'] = gtrans_html($data['description']['en'], 'fr');
+            foreach (['title', 'description'] as $field) {
+                if (empty($data[$field]['fr'])) {
+                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
-                if (empty($data['description']['ar'])) {
-                    $data['description']['ar'] = gtrans_html($data['description']['en'], 'ar');
+                if (empty($data[$field]['ar'])) {
+                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
             // --------------------------------------
@@ -66,12 +66,12 @@ class PrivacyPolicyController extends Controller
             $data = $request->validated();
 
             // --- Smart Fill for Update ---
-            if (isset($data['description']['en'])) {
-                if (empty($data['description']['fr'])) {
-                    $data['description']['fr'] = gtrans($data['description']['en'], 'fr');
+            foreach (['title', 'description'] as $field) {
+                if (empty($data[$field]['fr'])) {
+                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
-                if (empty($data['description']['ar'])) {
-                    $data['description']['ar'] = gtrans($data['description']['en'], 'ar');
+                if (empty($data[$field]['ar'])) {
+                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
             // -----------------------------
@@ -110,8 +110,9 @@ class PrivacyPolicyController extends Controller
                 // Limit the description to 50 characters and its in html
                 return strlen(strip_tags($description)) > 50 ? substr(strip_tags($description), 0, 50) . '...' : strip_tags($description);
             })
-            ->addColumn('action', function ($privacyPolicy) {
-                $data['edit_url'] = route('admin.privacy-policy.edit', ['id' => $privacyPolicy->id]);
+            ->addColumn('action', function ($privacyPolicy) use ($request) {
+            $data['delete_url'] = $request->user()->can('privacy_policies.delete') ? route('admin.privacy-policy.destroy', ['id' => $privacyPolicy->id]) : '';
+                $data['edit_url'] = $request->user()->can('privacy_policies.update') ? route('admin.privacy-policy.edit', ['id' => $privacyPolicy->id]) : '';
                 $data['id'] = $privacyPolicy->id;
 
                 return view('admin.partials.datatable-actions', $data)->render();

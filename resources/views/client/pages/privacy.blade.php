@@ -1,58 +1,94 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
-        <div class="container mx-auto px-4">
+    <div class="bg-gray-50 min-h-screen pb-16">
 
-            <x-breadcrumbs>
-                <x-slot:title>Privacy Policy</x-slot:title>
-                <x-slot:content>Your privacy is important to us.</x-slot:content>
-            </x-breadcrumbs>
+        {{-- Page Header / Breadcrumbs --}}
+        <div class="bg-white border-b border-gray-200">
+            <div class="container mx-auto px-4 py-8">
+                <x-breadcrumbs>
+                    <x-slot:title>Privacy Policy</x-slot:title>
+                    <x-slot:content>Your privacy and data security are important to us.</x-slot:content>
+                </x-breadcrumbs>
+            </div>
+        </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
-                <div
-                    class="prose max-w-none prose-p:text-gray-700 prose-p:leading-relaxed prose-h2:font-bold prose-h2:text-gray-900 prose-h3:font-semibold prose-h3:text-gray-800 prose-a:text-primary hover:prose-a:text-primary/80 prose-ul:list-disc prose-ul:ml-6 prose-ol:list-decimal prose-ol:ml-6">
+        <div class="container mx-auto px-4 py-12">
+            <div class="flex flex-col lg:flex-row gap-10 relative">
 
-                    <p class_="text-sm text-gray-500">Last updated: November 12, 2025</p>
+                {{-- LEFT SIDEBAR: Table of Contents (Sticky) --}}
+                <aside class="hidden lg:block lg:w-1/4">
+                    <div class="sticky top-24">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
+                                Table of Contents
+                            </h3>
+                            <nav class="flex flex-col space-y-1" aria-label="Privacy Policy Navigation">
+                                @foreach ($privacyPolicy as $index => $content)
+                                    <a href="#section-{{ $index }}"
+                                       class="group flex items-start py-2 px-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-primary transition-all duration-200">
+                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 mr-3 group-hover:bg-primary transition-colors"></span>
+                                        {{ $content->title }}
+                                    </a>
+                                @endforeach
+                            </nav>
+                        </div>
+                    </div>
+                </aside>
 
-                    <h2>1. Introduction</h2>
-                    <p>[Your Company Name] ("we," "our," or "us") is committed to protecting your privacy. This Privacy
-                        Policy explains how we collect, use, disclose, and safeguard your information when you visit our
-                        website.</p>
+                {{-- MAIN CONTENT AREA --}}
+                <main class="lg:w-3/4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 lg:p-12">
 
-                    <h2>2. Information We Collect</h2>
-                    <p>We may collect personal information about you in a variety of ways. The information we may collect on
-                        the Site includes:</p>
+                        <div class="prose prose-lg max-w-none
+                            prose-headings:font-bold prose-headings:text-gray-900
+                            prose-h2:text-2xl prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-4 prose-h2:mb-6 prose-h2:mt-12 first:prose-h2:mt-0
+                            prose-p:text-gray-600 prose-p:leading-8
+                            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                            prose-ul:text-gray-600 prose-li:marker:text-gray-300">
 
-                    <h3>a. Personal Data</h3>
-                    <p>Personally identifiable information, such as your name, shipping address, email address, and
-                        telephone number, that you voluntarily give to us when you register with the Site or when you choose
-                        to participate in various activities related to the Site, such as online chat and message boards.
-                    </p>
+                            {{-- Introduction / Last Updated Placeholder (Optional) --}}
+                            <div class="mb-10 pb-6 border-b border-gray-100">
+                                <p class="text-sm text-gray-500 font-medium">
+                                    Last Updated: <span class="text-gray-800">{{ now()->format('F d, Y') }}</span>
+                                </p>
+                                <p>
+                                    Please read our privacy policy carefully to get a clear understanding of how we collect, use, protect or otherwise handle your Personally Identifiable Information in accordance with our website.
+                                </p>
+                            </div>
 
-                    <h3>b. Derivative Data</h3>
-                    <p>Information our servers automatically collect when you access the Site, such as your IP address, your
-                        browser type, your operating system, your access times, and the pages you have viewed directly
-                        before and after accessing the Site.</p>
+                            {{-- Dynamic Content Loop --}}
+                            @foreach ($privacyPolicy as $index => $content)
+                                <div id="section-{{ $index }}" class="scroll-mt-24">
+                                    <h2>{{ $content->title }}</h2>
 
-                    <h2>3. Use of Your Information</h2>
-                    <p>Having accurate information about you permits us to provide you with a smooth, efficient, and
-                        customized experience. Specifically, we may use information collected about you via the Site to:</p>
-                    <ul>
-                        <li>Create and manage your account.</li>
-                        <li>Process your orders and manage payments.</li>
-                        <li>Email you regarding your account or order.</li>
-                        <li>Send you promotional information about new products, special offers, and other information we
-                            think you may find interesting.</li>
-                    </ul>
+                                    <div class="text-justify">
+                                        {!! $content->description !!}
+                                    </div>
+                                </div>
+                            @endforeach
 
-                    <h2>4. Security of Your Information</h2>
-                    <p>We use administrative, technical, and physical security measures to help protect your personal
-                        information. While we have taken reasonable steps to secure the personal information you provide to
-                        us, please be aware that despite our efforts, no security measures are perfect or impenetrable.</p>
+                        </div>
 
-                </div>
+                        {{-- Footer of the document --}}
+                        <div class="mt-16 pt-8 border-t border-gray-100 text-center">
+                            <p class="text-gray-500">
+                                If you have any questions about this policy, please
+                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">contact us</a>.
+                            </p>
+                        </div>
+
+                    </div>
+                </main>
+
             </div>
         </div>
     </div>
+
+    {{-- Optional: Smooth Scroll CSS for this page --}}
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 @endsection

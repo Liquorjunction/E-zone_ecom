@@ -4,7 +4,7 @@
     {{-- Slider Hero Section --}}
     @include('client.components.slider')
 
-    <section class="py-16 sm:py-24 bg-white" x-data="{
+    <section class="py-6 sm:py-10 bg-white" x-data="{
         scrollAmount: 0,
         container: null,
         isAtStart: true,
@@ -113,7 +113,7 @@
         </div>
     </section>
 
-    <section class="py-16 sm:py-24 bg-white" x-data="{
+    <section class="py-6 sm:py-10 bg-white" x-data="{
         scrollAmount: 0,
         container: null,
         isAtStart: true,
@@ -234,7 +234,7 @@
         </div>
     </section>
 
-    <section id="deals" class="py-16 sm:py-24 bg-linear-to-br from-gray-50 to-white">
+    <section id="deals" class="py-8 sm:py-12 bg-linear-to-br from-gray-50 to-white">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
                 <div>
@@ -403,7 +403,7 @@
         </div>
     </section>
 
-    <section id="new-arrivals" class="py-16 sm:py-24 bg-white">
+    <section id="new-arrivals" class="py-8 sm:py-12 bg-white">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 sm:mb-12">
                 <div>
@@ -565,7 +565,7 @@
         </div>
     </section>
 
-    <section id="bestsellers" class="py-16 sm:py-24 bg-white">
+    <section id="bestsellers" class="py-8 sm:py-12 bg-white">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
                 <div>
@@ -724,7 +724,7 @@
         </div>
     </section>
 
-    <section id="brands" class="py-16 sm:py-24 bg-linear-to-br from-gray-50 to-white">
+    <section id="brands" class="py-8 sm:py-12 bg-linear-to-br from-gray-50 to-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold tracking-tight text-gray-900 mb-4">
@@ -781,7 +781,7 @@
     </section>
 
 
-    <section class="py-16 sm:py-24 bg-white">
+    <section class="py-8 sm:py-12 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
                 <h2 class="text-4xl font-bold tracking-tight text-gray-900 mb-4">

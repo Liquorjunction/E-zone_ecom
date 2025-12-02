@@ -98,9 +98,9 @@ Breadcrumbs::for('terms', function (BreadcrumbTrail $trail) {
 });
 
 // Home > Privacy
-Breadcrumbs::for('privacy', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('privacy-policy', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Privacy', route('privacy'));
+    $trail->push('privacy-policy', route('privacy-policy'));
 });
 
 // Home > Shipping Returns
