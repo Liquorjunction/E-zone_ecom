@@ -11,6 +11,7 @@ use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShippingAndReturnRepositoryInterface;
+use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface;
 use App\Repositories\Admin\Interfaces\SliderRepositoryInterface;
 use App\Repositories\Admin\Interfaces\SubCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\TncRepositoryInterface;
@@ -24,11 +25,13 @@ use App\Repositories\Admin\Repositories\FaqRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
 use App\Repositories\Admin\Repositories\RoleRepository;
 use App\Repositories\Admin\Repositories\ShippingAndReturnRepository;
+use App\Repositories\Admin\Repositories\ShowroomRepository;
 use App\Repositories\Admin\Repositories\SliderRepository;
 use App\Repositories\Admin\Repositories\SubCategoryRepository;
 use App\Repositories\Admin\Repositories\TncRepository;
 use App\Repositories\Admin\Repositories\TranslationRepository;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\Commands\Show;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -50,6 +53,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(TncRepositoryInterface::class, TncRepository::class);
         $this->app->bind(ShippingAndReturnRepositoryInterface::class, ShippingAndReturnRepository::class);
         $this->app->bind(AboutUsRepositoryInterface::class, AboutUsRepository::class);
+        $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
     }
 
     /**

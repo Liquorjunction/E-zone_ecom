@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingAndReturnController;
+use App\Http\Controllers\Admin\ShowroomController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\TncController;
@@ -183,6 +184,19 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [AboutUsController::class, 'update'])->name('update')->middleware('can:about_us.update,admin');
             Route::delete('/destroy', [AboutUsController::class, 'destroy'])->name('destroy')->middleware('can:about_us.delete,admin');
             Route::patch('/toggle-status', [AboutUsController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:about_us.update,admin');
+        });
+
+        // Showroom Routes
+        Route::prefix('showrooms')->name('showrooms.')->middleware('can:showrooms.read,admin')->group(function () {
+            Route::get('/', [ShowroomController::class, 'index'])->name('index'); // permission: showrooms.read
+            Route::get('/data', [ShowroomController::class, 'data'])->name('data');
+            Route::get('/show', [ShowroomController::class, 'show'])->name('show')->middleware('can:showrooms.read,admin');
+            Route::get('/create', [ShowroomController::class, 'create'])->name('create')->middleware('can:showrooms.create,admin');
+            Route::post('/', [ShowroomController::class, 'store'])->name('store')->middleware('can:showrooms.create,admin');
+            Route::get('/edit', [ShowroomController::class, 'edit'])->name('edit')->middleware('can:showrooms.update,admin');
+            Route::put('/update', [ShowroomController::class, 'update'])->name('update')->middleware('can:showrooms.update,admin');
+            Route::delete('/destroy', [ShowroomController::class, 'destroy'])->name('destroy')->middleware('can:showrooms.delete,admin');
+            Route::patch('/toggle-status', [ShowroomController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:showrooms.update,admin');
         });
     });
 });

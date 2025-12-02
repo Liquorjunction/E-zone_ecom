@@ -67,6 +67,6 @@ class Showrooms extends Model
 
     public function images()
     {
-        return $this->hasMany(ShowroomImages::class);
+        return $this->hasMany(ShowroomImages::class, 'showroom_id');
     }
 }
