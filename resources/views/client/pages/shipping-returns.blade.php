@@ -1,132 +1,80 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
-        <div class="container mx-auto px-4">
+    <div class="bg-gray-50 min-h-screen pb-16 relative overflow-hidden">
 
-            <x-breadcrumbs>
-                <x-slot:title>Shipping & Returns</x-slot:title>
-                <x-slot:content>Learn about our shipping and return policies.</x-slot:content>
-            </x-breadcrumbs>
+        {{-- Optional: Subtle Background Blob for visual depth --}}
+        <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-96 bg-linear-to-b from-white to-transparent opacity-60 pointer-events-none">
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                        Shipping Information
-                    </h2>
-                    <div class="space-y-4">
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900">Free Shipping</div>
-                                <div class="text-sm text-gray-600">Orders over $50 qualify for free standard shipping.</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900">Standard Shipping</div>
-                                <div class="text-sm text-gray-600">5-7 business days - $4.99</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900">Express Delivery</div>
-                                <div class="text-sm text-gray-600">1-2 business days - $9.99</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900">Same Day Delivery</div>
-                                <div class="text-sm text-gray-600">Available in select areas - $14.99</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        {{-- Page Header / Breadcrumbs --}}
+        <div class="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+            <div class="container mx-auto px-4 py-6">
+                <x-breadcrumbs>
+                    <x-slot:title>Shipping & Returns</x-slot:title>
+                    <x-slot:content>Learn about our shipping and return policies.</x-slot:content>
+                </x-breadcrumbs>
+            </div>
+        </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m-3 3V9a4 4 0 014-4h4m0 0l-3 3m3-3l-3-3" />
-                        </svg>
-                        Returns & Exchanges
-                    </h2>
-                    <div class="space-y-4">
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+       {{-- Main Content --}}
+        <div class="container mx-auto px-4 py-12 relative z-10 animate-slide-up">
+            <div class="max-w-8xl mx-auto">
+
+                {{-- Document Card --}}
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+
+                    {{-- Card Top Accent --}}
+                    <div class="h-1.5 w-full bg-primary"></div>
+
+                    <div class="p-8 md:p-12 lg:p-16">
+                        @if($shippingandreturns)
+                            {{-- Header Section --}}
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-8 border-b border-gray-100">
+                                <div>
+                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Shipping & Returns</h1>
+                                    <p class="text-gray-500">Agreement between User and {{ config('app.name') }}</p>
+                                </div>
+
+                                {{-- Date Badge --}}
+                                <div class="inline-flex items-center px-4 py-2 bg-gray-50 border border-gray-100 rounded-full">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 mr-2.5 animate-pulse"></div>
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-2">Last Updated:</span>
+                                    <span class="text-sm font-bold text-gray-900"></span>
+                                </div>
                             </div>
-                            <div>
-                                <div class="font-medium text-gray-900">30-Day Returns</div>
-                                <div class="text-sm text-gray-600">Return any item within 30 days of delivery for a full
-                                    refund.</div>
+
+                             {{-- Dynamic Content (Prose) --}}
+                            <div class="prose prose-lg max-w-none
+                                {{-- Headings --}}
+                                prose-headings:font-bold prose-headings:text-gray-900 prose-headings:scroll-mt-24
+                                prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100
+                                prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-gray-800
+
+                                {{-- Text & Links --}}
+                                prose-p:text-gray-600 prose-p:leading-8 prose-p:mb-6
+                                prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline hover:prose-a:text-primary-dark
+                                prose-strong:text-gray-900 prose-strong:font-bold
+
+                                {{-- Lists --}}
+                                prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-gray-300 prose-li:pl-2
+                                prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6
+
+                                {{-- Blockquotes --}}
+                                prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:italic prose-blockquote:text-gray-700">
+
+                                {!! $shippingandreturns->description ?? $shippingandreturns->content !!}
                             </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                        @else
+                            <div class="prose prose-lg max-w-none">
+                                <h2 class="text-3xl font-bold text-gray-900 mb-2">Shipping & Returns</h2>
+                                <p class="text-gray-500">Agreement between User and {{ config('app.name') }}</p>
                             </div>
-                            <div>
-                                <div class="font-medium text-gray-900">Free Exchanges</div>
-                                <div class="text-sm text-gray-600">Exchange for a different size or color at no additional
-                                    cost.</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900">Easy Process</div>
-                                <div class="text-sm text-gray-600">Print a return label from your account or drop off at any
-                                    of our partner locations.</div>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 @endsection

@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\Client\AboutUsController;
 use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\ShippingandReturnsController;
+use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
 use App\Models\Card;
 use Illuminate\Support\Facades\Redirect;
@@ -28,6 +32,18 @@ Route::middleware('guest')->group(function () {
 
     // Privacy Policy
     Route::get('/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy-policy');
+
+    // Faq
+    Route::get('/faq', [FaqController::class, 'index'])->name('faq');
+
+    // Terms
+    Route::get('/terms', [TermsController::class, 'index'])->name('terms');
+
+    // Shipping and Returns
+    Route::get('/shipping-returns', [ShippingandReturnsController::class, 'index'])->name('shipping-returns');
+
+    // About Us
+    Route::get('/about-us', [AboutUsController::class, 'index'])->name('about');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -131,22 +147,6 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
 Route::get('/contact', function () {
     return view('client.pages.contact');
 })->name('contact');
-
-Route::get('/about', function () {
-    return view('client.pages.about');
-})->name('about');
-
-Route::get('/faq', function () {
-    return view('client.pages.faq');
-})->name('faq');
-
-Route::get('/terms', function () {
-    return view('client.pages.terms');
-})->name('terms');
-
-Route::get('/shipping-returns', function () {
-    return view('client.pages.shipping-returns');
-})->name('shipping-returns');
 
 Route::get('/showrooms', function () {
     return view('client.pages.showrooms');
