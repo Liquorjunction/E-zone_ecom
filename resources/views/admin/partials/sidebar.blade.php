@@ -334,6 +334,20 @@
                         </a>
                     </li>
                 @endcan
+                @can('brands.read')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.brands.index') }}">
+                            <i class="icon">
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <path d="M14 2v6h6"></path>
+                                </svg>
+                            </i>
+                            <span class="item-name">Brands</span>
+                        </a>
+                    </li>
+                @endcan
             </ul>
         </div>
     </div>

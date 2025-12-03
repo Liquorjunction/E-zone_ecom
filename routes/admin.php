@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AboutUsController;
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FaqCategoryController;
@@ -197,6 +198,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [ShowroomController::class, 'update'])->name('update')->middleware('can:showrooms.update,admin');
             Route::delete('/destroy', [ShowroomController::class, 'destroy'])->name('destroy')->middleware('can:showrooms.delete,admin');
             Route::patch('/toggle-status', [ShowroomController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:showrooms.update,admin');
+        });
+
+        // Brands Routes
+        Route::prefix('brands')->name('brands.')->middleware('can:brands.read,admin')->group(function () {
+            Route::get('/', [BrandController::class, 'index'])->name('index'); // permission: brands.read
+            Route::get('/data', [BrandController::class, 'data'])->name('data');
+            Route::get('/create', [BrandController::class, 'create'])->name('create')->middleware('can:brands.create,admin');
+            Route::post('/', [BrandController::class, 'store'])->name('store')->middleware('can:brands.create,admin');
+            Route::get('/edit', [BrandController::class, 'edit'])->name('edit')->middleware('can:brands.update,admin');
+            Route::put('/update', [BrandController::class, 'update'])->name('update')->middleware('can:brands.update,admin');
+            Route::delete('/destroy', [BrandController::class, 'destroy'])->name('destroy')->middleware('can:brands.delete,admin');
+            Route::patch('/toggle-status', [BrandController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:brands.update,admin');
         });
     });
 });
