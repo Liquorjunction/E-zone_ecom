@@ -10,6 +10,7 @@ use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
+use App\Repositories\Admin\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShippingAndReturnRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface;
@@ -25,6 +26,7 @@ use App\Repositories\Admin\Repositories\CategoryRepository;
 use App\Repositories\Admin\Repositories\FaqCategoryRepository;
 use App\Repositories\Admin\Repositories\FaqRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
+use App\Repositories\Admin\Repositories\ProductRepository;
 use App\Repositories\Admin\Repositories\RoleRepository;
 use App\Repositories\Admin\Repositories\ShippingAndReturnRepository;
 use App\Repositories\Admin\Repositories\ShowroomRepository;
@@ -57,6 +59,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(AboutUsRepositoryInterface::class, AboutUsRepository::class);
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(BrandRepositoryInterface::class, BrandRepository::class);
+        $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
     }
 
     /**
