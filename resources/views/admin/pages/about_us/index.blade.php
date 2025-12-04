@@ -25,6 +25,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Title</th>
                                         <th>Description (Preview)</th>
                                         <th>Last Updated</th>
                                         <th>Action</th>

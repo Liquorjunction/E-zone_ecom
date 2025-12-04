@@ -1,69 +1,97 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
-        <div class="container mx-auto px-4">
+    <div class="bg-gray-50 min-h-screen pb-16">
 
-            <x-breadcrumbs>
-                <x-slot:title>About Us</x-slot:title>
-                <x-slot:content>Learn more about us.</x-slot:content>
-            </x-breadcrumbs>
-
-            <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8 mb-6">
-                <div
-                    class="prose max-w-none prose-p:text-gray-700 prose-p:leading-relaxed prose-h2:font-bold prose-h2:text-gray-900">
-                    <h2>Who We Are</h2>
-                    <p>Welcome to our store! Founded in 2025, we set out with a simple mission: to provide the best products
-                        with the best service. We believe that shopping online should be simple, fast, and secure. That's
-                        why we've invested in a state-of-the-art platform, a dedicated customer support team, and a curated
-                        selection of products we truly believe in.</p>
-                    <p>From humble beginnings, we have grown into a trusted name for customers across the country. Our team
-                        is passionate about technology, design, and finding the next great product so you don't have to.
-                        We're more than just a retailer; we're a team of enthusiasts dedicated to enhancing your lifestyle.
-                    </p>
-
-                    <h2>Our Mission</h2>
-                    <blockquote
-                        class="border-l-4 border-primary bg-primary/10 p-4 rounded-r-lg text-xl font-medium text-gray-800 not-italic">
-                        "To provide an unparalleled shopping experience by offering a curated selection of high-quality
-                        products, exceptional customer service, and a seamless, secure platform."
-                    </blockquote>
-                </div>
+        {{-- Page Header / Breadcrumbs --}}
+        <div class="bg-white border-b border-gray-200">
+            <div class="container mx-auto px-4 py-8">
+                <x-breadcrumbs>
+                    <x-slot:title>About Us</x-slot:title>
+                    <x-slot:content>Learn more about us.</x-slot:content>
+                </x-breadcrumbs>
             </div>
+        </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
-                    Meet Our Team
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="text-center">
-                        <img src="https://via.placeholder.com/150x150" alt="Team Member 1"
-                            class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="font-bold text-gray-900 text-lg">Jane Doe</h3>
-                        <p class="text-sm text-primary font-medium">CEO & Founder</p>
+        <div class="container mx-auto px-4 py-12">
+            <div class="flex flex-col lg:flex-row gap-10 relative">
+
+                {{-- LEFT SIDEBAR: Table of Contents (Sticky) --}}
+                <aside class="hidden lg:block lg:w-1/4">
+                    <div class="sticky top-24">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
+                                Table of Contents
+                            </h3>
+                            <nav class="flex flex-col space-y-1" aria-label="About Us Navigation">
+                                @foreach ($aboutUs as $index => $content)
+                                    <a href="#section-{{ $index }}"
+                                        class="group flex items-start py-2 px-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-primary transition-all duration-200">
+                                        <span
+                                            class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 mr-3 group-hover:bg-primary transition-colors"></span>
+                                        {{ $content->title }}
+                                    </a>
+                                @endforeach
+                            </nav>
+                        </div>
                     </div>
-                    <div class="text-center">
-                        <img src="https://via.placeholder.com/150x150" alt="Team Member 2"
-                            class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="font-bold text-gray-900 text-lg">John Smith</h3>
-                        <p class="text-sm text-primary font-medium">Head of Technology</p>
+                </aside>
+
+                {{-- MAIN CONTENT AREA --}}
+                <main class="lg:w-3/4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 lg:p-12">
+
+                        <div class="prose prose-lg max-w-none
+                            prose-headings:font-bold prose-headings:text-gray-900
+                            prose-h2:text-2xl prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-4 prose-h2:mb-6 prose-h2:mt-12 first:prose-h2:mt-0
+                            prose-p:text-gray-600 prose-p:leading-8
+                            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                            prose-ul:text-gray-600 prose-li:marker:text-gray-300">
+
+                            {{-- Introduction / Last Updated Placeholder (Optional) --}}
+                            <div class="mb-10 pb-6 border-b border-gray-100">
+                                <p class="text-sm text-gray-500 font-medium">
+                                    Last Updated: <span class="text-gray-800">{{ now()->format('F d, Y') }}</span>
+                                </p>
+                                <p>
+                                    Welcome to our About Us page. Here you can learn more about our company, our mission, and what we stand for.
+                                </p>
+                            </div>
+
+                            {{-- Dynamic Content Loop --}}
+                            @foreach ($aboutUs as $index => $content)
+                                <div id="section-{{ $index }}" class="scroll-mt-24 mb-12">
+                                    <h2>{{ $content->title }}</h2>
+
+                                    <div class="text-justify">
+                                        {!! $content->description !!}
+                                    </div>
+                                </div>
+                                @if (!$loop->last)
+                                    <hr class="border-gray-100 my-8">
+                                @endif
+                            @endforeach
+
+                        </div>
+
+                        {{-- Footer of the document --}}
+                        <div class="mt-16 pt-8 border-t border-gray-100 text-center">
+                            <p class="text-gray-500">
+                                If you have any questions about us, please
+                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">contact us</a>.
+                            </p>
+                        </div>
+
                     </div>
-                    <div class="text-center">
-                        <img src="https://via.placeholder.com/150x150" alt="Team Member 3"
-                            class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="font-bold text-gray-900 text-lg">Alexa Johnson</h3>
-                        <p class="text-sm text-primary font-medium">Marketing Director</p>
-                    </div>
-                    <div class="text-center">
-                        <img src="https://via.placeholder.com/150x150" alt="Team Member 4"
-                            class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="font-bold text-gray-900 text-lg">Mike Brown</h3>
-                        <p class="text-sm text-primary font-medium">Operations Manager</p>
-                    </div>
-                </div>
+                </main>
             </div>
-
         </div>
     </div>
+
+    {{-- Optional: Smooth Scroll CSS for this page --}}
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 @endsection

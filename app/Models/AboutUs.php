@@ -16,9 +16,10 @@ class AboutUs extends Model
     public $guard_name = 'admin';
     protected $guarded = [];
 
-    public $translatable = ['description'];
+    public $translatable = ['title', 'description'];
 
     protected $fillable = [
+        'title',
         'description',
         'status',
     ];

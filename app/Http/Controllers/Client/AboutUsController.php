@@ -11,8 +11,8 @@ class AboutUsController extends Controller
     public function index()
     {
         try {
-            $aboutus = AboutUs::all();
-            return view('client.pages.about', compact('aboutus'));
+            $aboutUs = AboutUs::where('status', 'active')->get();
+            return view('client.pages.about', compact('aboutUs'));
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Unable to fetch About Us.']);
         }

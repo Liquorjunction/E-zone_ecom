@@ -31,6 +31,11 @@
                                 {{-- English Tab --}}
                                 <div class="tab-pane fade show active" id="en" role="tabpanel">
                                     <div class="form-group mb-3">
+                                        <label class="form-label">Title (EN) <span class="text-danger">*</span></label>
+                                        <input type="text" name="title[en]" id="title_en" class="form-control" value="{{ old('title.en') }}" required>
+                                        @error('title.en') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="form-group mb-3">
                                         <label class="form-label">Description (EN) <span class="text-danger">*</span></label>
                                         <div id="editor_en" style="height: 300px;">{!! old('description.en') !!}</div>
                                         <textarea name="description[en]" id="hidden_description_en" style="display:none"></textarea>

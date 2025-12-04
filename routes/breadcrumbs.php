@@ -205,6 +205,12 @@ Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail, $id) {
     $trail->push('Order Detail', route('order-detail', $id));
 });
 
+// Home > All Brands
+Breadcrumbs::for('brands', function (BreadcrumbTrail $trail) {
+    $trail->parent('home');
+    $trail->push('All Brands', route('brands'));
+});
+
 
 // ============================================
 // ADMIN DASHBOARD ROUTES

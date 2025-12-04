@@ -27,7 +27,7 @@
                             </p>
                         </div>
                         <div class="col-md-8">
-s                            @if($showroom->getTranslation('description', 'en'))
+                            @if($showroom->getTranslation('description', 'en'))
                                 <h5>Description</h5>
                                 <p>{!! $showroom->getTranslation('description', 'en') !!}</p>
                             @endif

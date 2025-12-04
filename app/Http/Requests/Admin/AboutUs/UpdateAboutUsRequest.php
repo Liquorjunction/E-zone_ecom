@@ -26,6 +26,10 @@ class UpdateAboutUsRequest extends FormRequest
     {
         return [
             'id' => 'required|exists:about_us,id',
+            'title' => 'required|array',
+            'title.en' => 'required|string',
+            'title.fr' => 'nullable|string',
+            'title.ar' => 'nullable|string',
             'description' => 'required|array',
             'description.en' => 'required|string',
             'description.fr' => 'nullable|string',
@@ -36,6 +40,7 @@ class UpdateAboutUsRequest extends FormRequest
     public function messages()
     {
         return [
+            'title.en.required' => 'The English title is required.',
             'description.en.required' => 'The English description is required.',
         ];
     }
@@ -43,6 +48,9 @@ class UpdateAboutUsRequest extends FormRequest
     public function attributes()
     {
         return [
+            'title.en' => 'title (English)',
+            'title.fr' => 'title (French)',
+            'title.ar' => 'title (Arabic)',
             'description.en' => 'description (English)',
             'description.fr' => 'description (French)',
             'description.ar' => 'description (Arabic)',

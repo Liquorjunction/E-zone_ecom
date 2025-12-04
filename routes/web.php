@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Client\BrandController;
 use App\Http\Controllers\Client\AboutUsController;
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\FaqController;
@@ -30,6 +31,7 @@ Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 Route::get('/terms', [TermsController::class, 'index'])->name('terms');
 Route::get('/shipping-returns', [ShippingandReturnsController::class, 'index'])->name('shipping-returns');
 Route::get('/about-us', [AboutUsController::class, 'index'])->name('about');
+Route::get('/brands', [BrandController::class, 'index'])->name('brands');
 
 // Auth pages (guest-only)
 Route::middleware('guest')->group(function () {

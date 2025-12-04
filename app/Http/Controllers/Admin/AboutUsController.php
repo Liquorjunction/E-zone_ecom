@@ -31,7 +31,7 @@ class AboutUsController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            foreach (['description'] as $field) {
+            foreach (['title', 'description'] as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
@@ -75,7 +75,7 @@ class AboutUsController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            foreach (['description'] as $field) {
+            foreach (['title', 'description'] as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
@@ -131,6 +131,11 @@ class AboutUsController extends Controller
             $data = $aboutUsRepo->getDataForDataTable($request);
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('title', function ($data) {
+                    // Fetch the title in english
+                    $title = $data->getTranslation('title', 'en');
+                    return $title;
+                })
                 ->addColumn('description', function ($data) {
                     // Fetch the description in english
                     $description = $data->getTranslation('description', 'en');

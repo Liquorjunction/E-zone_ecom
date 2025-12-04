@@ -49,6 +49,11 @@
                                 <div class="tab-pane fade show active" id="en" role="tabpanel"
                                     aria-labelledby="en-tab">
                                     <div class="form-group">
+                                        <label class="form-label">Title (EN) <span class="text-danger">*</span></label>
+                                        <input type="text" name="title[en]" id="title_en" class="form-control" value="{{ old('title.en', $aboutUs->getTranslation('title', 'en')) }}" required>
+                                        @error('title.en') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="form-group">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <label class="mb-0">Description (EN) <span
                                                     class="text-danger">*</span></label>
@@ -73,6 +78,11 @@
                                 {{-- French Tab --}}
                                 <div class="tab-pane fade" id="fr" role="tabpanel" aria-labelledby="fr-tab">
                                     <div class="form-group">
+                                        <label>Title (FR)</label>
+                                        <input type="text" name="title[fr]" id="title_fr" class="form-control" value="{{ old('title.fr', $aboutUs->getTranslation('title', 'fr')) }}">
+                                         @error('title.fr') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="form-group">
                                         <label>Description (FR)</label>
                                         <div id="editor_fr" style="height: 300px;">{!! old('description.fr', $aboutUs->getTranslation('description', 'fr')) !!}</div>
                                         <textarea name="description[fr]" id="hidden_description_fr" style="display:none"></textarea>
@@ -85,6 +95,11 @@
 
                                 {{-- Arabic Tab --}}
                                 <div class="tab-pane fade" id="ar" role="tabpanel" aria-labelledby="ar-tab">
+                                    <div class="form-group">
+                                        <label>Title (AR)</label>
+                                        <input type="text" name="title[ar]" id="title_ar" class="form-control" value="{{ old('title.ar', $aboutUs->getTranslation('title', 'ar')) }}">
+                                        @error('title.ar') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
                                     <div class="form-group">
                                         <label>Description (AR)</label>
                                         <div id="editor_ar" style="height: 300px;" dir="rtl">{!! old('description.ar', $aboutUs->getTranslation('description', 'ar')) !!}
