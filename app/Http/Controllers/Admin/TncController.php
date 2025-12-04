@@ -37,11 +37,11 @@ class TncController extends Controller
                 }
 
                 if (empty($data[$field]['fr'])) {
-                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                    $data[$field]['fr'] = gtrans_html($data[$field]['en'], 'fr');
                 }
 
                 if (empty($data[$field]['ar'])) {
-                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                    $data[$field]['ar'] = gtrans_html($data[$field]['en'], 'ar');
                 }
             }
             // ---------------------------------
@@ -150,7 +150,6 @@ class TncController extends Controller
                 })
                 ->addColumn('action', function ($tnc) use ($request) {
                     $data['edit_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.edit', ['id' => $tnc->id]) : '';
-                    $data['delete_url'] = $request->user()->can('tnc.delete') ? route('admin.tncs.destroy', ['id' => $tnc->id]) : '';
                     $data['id'] = $tnc->id; // Ensure ID is passed for delete
 
                     return view('admin.partials.datatable-actions', $data)->render();

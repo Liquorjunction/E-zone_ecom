@@ -13,7 +13,7 @@
                         </div>
                         <div class="card-action">
                             @can('shipping_return.create')
-                                <a href="{{ route('admin.shipping-return.create') }}" class="btn btn-sm btn-primary">
+                                <a href="{{ route('admin.shipping-return.create') }}" class="btn btn-sm btn-primary add-button">
                                     <i class="fa fa-plus mr-2"></i>Add New
                                 </a>
                             @endcan

@@ -56,10 +56,10 @@ class ShowroomController extends Controller
                     continue;
                 }
                 if (empty($data[$field]['fr'])) {
-                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                    $data[$field]['fr'] = gtrans_html($data[$field]['en'], 'fr');
                 }
                 if (empty($data[$field]['ar'])) {
-                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                    $data[$field]['ar'] = gtrans_html($data[$field]['en'], 'ar');
                 }
             }
             // ----------------------------------
@@ -100,10 +100,10 @@ class ShowroomController extends Controller
                     continue;
                 }
                 if (empty($data[$field]['fr'])) {
-                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                    $data[$field]['fr'] = gtrans_html($data[$field]['en'], 'fr');
                 }
                 if (empty($data[$field]['ar'])) {
-                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                    $data[$field]['ar'] = gtrans_html($data[$field]['en'], 'ar');
                 }
             }
             // ----------------------------------

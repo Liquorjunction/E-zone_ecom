@@ -2,7 +2,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize English Editor
     if (document.getElementById('editor_en')) {
         var quillEn = new Quill('#editor_en', {
-            theme: 'snow'
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ font: [] }],
+                    [{ size: ["small", false, "large", "huge"] }],
+                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+                    ["bold", "italic", "underline", "strike"], // text styles
+                    [{ color: [] }, { background: [] }], // color pickers
+                    [{ script: "sub" }, { script: "super" }], // subscript/superscript
+
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ list: "check" }], // checkbox lists
+                    [{ indent: "-1" }, { indent: "+1" }], // indentation
+                    [{ align: [] }], // align: left, center, right, justify
+                    [{ direction: "rtl" }], // RTL text direction
+
+                    ["blockquote", "code-block"], // blocks
+                    [{ header: 1 }, { header: 2 }], // specific headers
+
+                    ["link", "image", "video", "formula"], // embeds
+
+                    ["clean"], // remove formatting
+                    ["undo", "redo"], // requires custom handler
+                ],
+            }
         });
         // CRITICAL FIX: Attach instance to DOM element
         document.getElementById('editor_en').__quill = quillEn;
@@ -16,7 +41,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize French Editor
     if (document.getElementById('editor_fr')) {
         var quillFr = new Quill('#editor_fr', {
-            theme: 'snow'
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ font: [] }],
+                    [{ size: ["small", false, "large", "huge"] }],
+                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+                    ["bold", "italic", "underline", "strike"], // text styles
+                    [{ color: [] }, { background: [] }], // color pickers
+                    [{ script: "sub" }, { script: "super" }], // subscript/superscript
+
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ list: "check" }], // checkbox lists
+                    [{ indent: "-1" }, { indent: "+1" }], // indentation
+                    [{ align: [] }], // align: left, center, right, justify
+                    [{ direction: "rtl" }], // RTL text direction
+
+                    ["blockquote", "code-block"], // blocks
+                    [{ header: 1 }, { header: 2 }], // specific headers
+
+                    ["link", "image", "video", "formula"], // embeds
+
+                    ["clean"], // remove formatting
+                    ["undo", "redo"], // requires custom handler
+                ],
+            }
         });
         document.getElementById('editor_fr').__quill = quillFr;
 
@@ -28,7 +78,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Arabic Editor
     if (document.getElementById('editor_ar')) {
         var quillAr = new Quill('#editor_ar', {
-            theme: 'snow'
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ font: [] }],
+                    [{ size: ["small", false, "large", "huge"] }],
+                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+                    ["bold", "italic", "underline", "strike"], // text styles
+                    [{ color: [] }, { background: [] }], // color pickers
+                    [{ script: "sub" }, { script: "super" }], // subscript/superscript
+
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ list: "check" }], // checkbox lists
+                    [{ indent: "-1" }, { indent: "+1" }], // indentation
+                    [{ align: [] }], // align: left, center, right, justify
+                    [{ direction: "rtl" }], // RTL text direction
+
+                    ["blockquote", "code-block"], // blocks
+                    [{ header: 1 }, { header: 2 }], // specific headers
+
+                    ["link", "image", "video", "formula"], // embeds
+
+                    ["clean"], // remove formatting
+                    ["undo", "redo"], // requires custom handler
+                ],
+            }
         });
         document.getElementById('editor_ar').__quill = quillAr;
 

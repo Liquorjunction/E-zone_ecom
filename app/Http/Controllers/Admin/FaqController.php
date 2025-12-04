@@ -88,12 +88,12 @@ class FaqController extends Controller
 
                 // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
-                    $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
+                    $data[$field]['fr'] = gtrans_html($data[$field]['en'], 'fr');
                 }
 
                 // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
-                    $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                    $data[$field]['ar'] = gtrans_html($data[$field]['en'], 'ar');
                 }
             }
 
