@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\PrivacyPolicy;
-use Illuminate\Http\Request;
+use App\Http\Requests\Client\PrivacyPolicy\ReadPrivacyPolicyRequest;
+use App\Repositories\Client\Interfaces\PrivacyPolicyRepositoryInterface as PrivacyPolicyRepo;
 
 class PrivacyPolicyController extends Controller
 {
-    public function index()
+    public function index(ReadPrivacyPolicyRequest $request, PrivacyPolicyRepo $privacyPolicyRepo)
     {
-        $privacyPolicy = PrivacyPolicy::all();
+        $privacyPolicy = $privacyPolicyRepo->getActivePrivacyPolicyData();
         return view('client.pages.privacy', compact('privacyPolicy'));
     }
 }

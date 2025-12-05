@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Helpers\ClientHelper;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Client\Brand\ReadBrandRequest;
+use App\Repositories\Client\Interfaces\BrandRepositoryInterface as BrandRepo;
 
 class BrandController extends Controller
 {
-    public function index()
+    public function index(ReadBrandRequest $request, BrandRepo $brandRepo)
     {
-        $brands = ClientHelper::getActiveBrands();
+        $brands = $brandRepo->getActiveBrandsData();
         return view('client.pages.allbrands', compact('brands'));
     }
 }

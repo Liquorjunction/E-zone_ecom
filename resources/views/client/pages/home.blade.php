@@ -243,7 +243,7 @@
                     </h2>
                     <p class="text-lg text-gray-600">Limited time offers on premium electronics</p>
                 </div>
-                <a href="{{ route('products') }}"
+                <a href="{{ route('products.index') }}"
                     class="inline-flex items-center font-semibold mt-4 md:mt-0 px-6 py-3 rounded-full transition-all duration-300 group hover:shadow-lg text-primary bg-primary/10">
                     View All Products
                     <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none"
@@ -412,7 +412,7 @@
                     </h2>
                     <p class="text-responsive-base sm:text-responsive-lg text-gray-600">The very latest in personal and home technology</p>
                 </div>
-                <a href="{{ route('products') }}"
+                <a href="{{ route('products.index') }}"
                     class="inline-flex items-center font-semibold mt-4 md:mt-0 px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-all duration-300 group hover:shadow-lg text-primary bg-primary/10 touch:px-6 touch:py-4">
                     View All New Products
                     <svg class="w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none"
@@ -574,7 +574,7 @@
                     </h2>
                     <p class="text-lg text-gray-600">Our most popular products loved by customers</p>
                 </div>
-                <a href="{{ route('products') }}"
+                <a href="{{ route('products.index') }}"
                     class="inline-flex items-center font-semibold mt-4 md:mt-0 px-6 py-3 rounded-full transition-all duration-300 group hover:shadow-lg text-primary bg-primary/10">
                     View All Bestsellers
                     <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none"

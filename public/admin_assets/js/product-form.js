@@ -83,13 +83,53 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // ==========================================
+    // 1.b Category -> Subcategory cascade
+    // ==========================================
+    function filterSubcategories(categorySelect) {
+        const selected = categorySelect.value;
+        const subSelect = document.querySelector('select[name="sub_category_id"]');
+        if (!subSelect) return;
+
+        // Show/hide options based on data-category
+        const options = Array.from(subSelect.querySelectorAll('option'));
+        options.forEach(opt => {
+            const cat = opt.getAttribute('data-category');
+            if (!cat) {
+                // Keep placeholder option
+                opt.style.display = '';
+                return;
+            }
+            if (selected === '' || String(cat) === String(selected)) {
+                opt.style.display = '';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+
+        // If currently selected subcategory is hidden, clear selection
+        if (subSelect.value) {
+            const current = subSelect.querySelector(`option[value="${subSelect.value}"]`);
+            if (current && current.style.display === 'none') {
+                subSelect.value = '';
+            }
+        }
+    }
+
+    const categorySelect = document.querySelector('select[name="category_id"]');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() { filterSubcategories(this); });
+        // initialize on load
+        filterSubcategories(categorySelect);
+    }
+
 
     // ==========================================
     // 2. DYNAMIC SPECIFICATIONS LOGIC
     // ==========================================
     const addSpecBtns = document.querySelectorAll('.add-spec-btn');
 
-    // Event Delegation: Handles clicks on ".remove-spec-row" for both existing AND new rows
+    // Event Delegation: Handles clicks on ".remove-spec-row" for both existing and new rows
     document.querySelectorAll('[id^="spec-table-"]').forEach(table => {
         table.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-spec-row') || e.target.closest('.remove-spec-row')) {
@@ -98,31 +138,65 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // When adding a spec, create rows across ALL languages with the SAME index
     addSpecBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            const lang = this.getAttribute('data-lang');
-            const tbody = document.querySelector(`#spec-table-${lang} tbody`);
+            const langs = ['en','fr','ar'];
+            const index = Date.now(); // numeric timestamp used as key
 
-            // Generate Unique Index: Timestamp + Random number
-            const index = 'new_' + Date.now() + Math.floor(Math.random() * 1000);
+            langs.forEach(lang => {
+                const tbody = document.querySelector(`#spec-table-${lang} tbody`);
+                if (!tbody) return;
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>
-                    <input type="text" name="specifications[${lang}][${index}][title]" class="form-control form-control-sm" placeholder="Title">
-                </td>
-                <td>
-                    <input type="text" name="specifications[${lang}][${index}][value]" class="form-control form-control-sm" placeholder="Value">
-                </td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-danger btn-sm py-0 px-2 remove-spec-row">
-                        &times;
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <input type="text" name="specifications[${lang}][${index}][title]" class="form-control form-control-sm" placeholder="Title">
+                    </td>
+                    <td>
+                        <input type="text" name="specifications[${lang}][${index}][value]" class="form-control form-control-sm" placeholder="Value">
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm py-0 px-2 remove-spec-row">&times;</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         });
     });
+
+    // ==========================================
+    // 4. Quill editors handling
+    // ==========================================
+    const quillEditors = {};
+    function initQuill(id, hiddenInputId) {
+        if (!document.getElementById(id)) return;
+        // Load Quill if not already loaded (assumes Quill script added via blade)
+        const quill = new Quill(`#${id}`, { theme: 'snow' });
+        quillEditors[id] = { quill, hiddenInputId };
+        // If hidden input has old value, populate editor
+        const hidden = document.getElementById(hiddenInputId);
+        if (hidden && hidden.value) {
+            quill.root.innerHTML = hidden.value;
+        }
+    }
+
+    // Initialize quill editors for expected ids
+    ['en','fr','ar'].forEach(lang => {
+        initQuill(`quill-description-${lang}`, `description-input-${lang}`);
+    });
+
+    // On form submit, sync quill HTML into hidden inputs
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+        productForm.addEventListener('submit', function(e) {
+            Object.keys(quillEditors).forEach(id => {
+                const { quill, hiddenInputId } = quillEditors[id];
+                const hidden = document.getElementById(hiddenInputId);
+                if (hidden) hidden.value = quill.root.innerHTML;
+            });
+        });
+    }
 
 
     // ==========================================

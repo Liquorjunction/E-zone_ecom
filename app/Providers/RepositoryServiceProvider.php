@@ -60,6 +60,13 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(BrandRepositoryInterface::class, BrandRepository::class);
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
+
+        // Client Repositories
+        $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\BrandRepositoryInterface::class, \App\Repositories\Client\Repositories\BrandRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\PrivacyPolicyRepositoryInterface::class, \App\Repositories\Client\Repositories\PrivacyPolicyRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface::class, \App\Repositories\Client\Repositories\ShippingAndReturnsRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\ProductRepositoryInterface::class, \App\Repositories\Client\Repositories\ProductRepository::class);
     }
 
     /**

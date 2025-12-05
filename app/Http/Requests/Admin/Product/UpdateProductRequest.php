@@ -46,21 +46,21 @@ class UpdateProductRequest extends FormRequest
             'dimensions.ar' => 'nullable|string',
 
             'specifications' => 'required|array',
-            'specifications.en' => 'required|string',
-            'specifications.fr' => 'nullable|string',
-            'specifications.ar' => 'nullable|string',
+            'specifications.en' => 'required|array',
+            'specifications.fr' => 'nullable|array',
+            'specifications.ar' => 'nullable|array',
 
-            'warrenty' => 'required|array',
-            'warrenty.en' => 'required|string',
-            'warrenty.fr' => 'nullable|string',
-            'warrenty.ar' => 'nullable|string',
+            'warranty' => 'required|array',
+            'warranty.en' => 'required|string',
+            'warranty.fr' => 'nullable|string',
+            'warranty.ar' => 'nullable|string',
             //  -- End translatable fields --
 
             // -- Non-translatable fields --
             'brand_id' => 'required|exists:brands,id',
             'category_id' => 'required|exists:categories,id',
-            'sub_category_id' => 'required|exists:sub_categories,id',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'sub_category_id' => 'required|exists:sub-categories,id',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'price' => 'required|numeric',
             // -- End non-translatable fields --
 
@@ -68,15 +68,6 @@ class UpdateProductRequest extends FormRequest
             'image_path' => 'nullable',
             'image_path.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
             // -- End Product Images --
-
-            // -- Product Variants --
-            'variants' => 'required|array',
-            'variants.*.name' => 'required|array',
-            'variants.*.name.en' => 'required|string',
-            'variants.*.name.fr' => 'nullable|string',
-            'variants.*.name.ar' => 'nullable|string',
-            'variants.*.price' => 'required|numeric',
-            // -- End Product Variants --
         ];
     }
 
@@ -98,7 +89,6 @@ class UpdateProductRequest extends FormRequest
 
             'variants.*.name.en.required' => 'The English variant name is required.',
 
-            'cover_image.required' => 'The cover image is required.',
             'cover_image.image' => 'The cover image must be an image.',
             'cover_image.mimes' => 'The cover image must be a file of type: jpeg, png, jpg, gif, svg.',
             'cover_image.max' => 'The cover image may not be greater than 2MB.',

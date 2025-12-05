@@ -3,23 +3,15 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\ShippingandReturns;
+use App\Http\Requests\Client\ShippingAndReturns\ReadShippingAndReturnsRequest;
+use App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface as ShippingAndReturnsRepo;
 
 class ShippingandReturnsController extends Controller
 {
-    public function index()
+    public function index(ReadShippingAndReturnsRequest $request, ShippingAndReturnsRepo $shippingAndReturnsRepo)
     {
         try {
-            // Prefer latest published policy; fallback to first record
-            $policy = ShippingandReturns::query()
-                ->when(method_exists(ShippingandReturns::class, 'scopeActive'), function ($q) {
-                    $q->active();
-                })
-                ->orderByDesc('updated_at')
-                ->orderByDesc('id')
-                ->first();
-
+            $policy = $shippingAndReturnsRepo->getActiveShippingAndReturnsData();
             return view('client.pages.shipping-returns', [
                 'policy' => $policy,
             ]);

@@ -4,24 +4,21 @@
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
 
-            <div class="mb-6">
-                {!! Breadcrumbs::render('product-detail') !!}
-            </div>
+            {!! Breadcrumbs::render('products.detail', $product) !!}
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
 
                 <div class="space-y-4">
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-hidden">
                         <div class="aspect-square relative">
-                            <img src="https://via.placeholder.com/600x600?text=Product+Main"
-                                alt="Premium Wireless Headphones" class="w-full h-full object-cover">
+                            <img src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
+                                alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}" class="w-full h-full object-cover">
                             <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                    -25%
-                                </span>
-                                <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                    NEW
-                                </span>
+                                @if($product->created_at > now()->subDays(30))
+                                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                        NEW
+                                    </span>
+                                @endif
                             </div>
                             <button
                                 class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-red-50 transition-colors">
@@ -35,26 +32,34 @@
                     </div>
 
                     <div class="grid grid-cols-4 gap-4">
-                        @for ($i = 1; $i <= 4; $i++)
+                        @if($product->images && $product->images->count() > 0)
+                            @foreach($product->images->take(4) as $image)
+                                <button
+                                    class="bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50">
+                                    <img src="{{ asset('storage/' . $image->image_path) }}"
+                                        alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }} - {{ $loop->iteration }}" class="w-full h-24 object-cover">
+                                </button>
+                            @endforeach
+                        @else
                             <button
                                 class="bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50">
-                                <img src="https://via.placeholder.com/150x150?text=Thumb+{{ $i }}"
-                                    alt="Product thumbnail {{ $i }}" class="w-full h-24 object-cover">
+                                <img src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
+                                    alt="{{ $product->name }}" class="w-full h-24 object-cover">
                             </button>
-                        @endfor
+                        @endif
                     </div>
                 </div>
 
                 <div class="space-y-6">
                     <div>
                         <h1 class="text-3xl font-extrabold text-gray-900 mb-4">
-                            Premium Wireless Headphones Pro
+                            {{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}
                         </h1>
                         <div class="flex items-center space-x-4 mb-4">
                             <div class="flex items-center text-yellow-400 text-lg">
                                 ★★★★★
                             </div>
-                            <span class="text-gray-600">(247 reviews)</span>
+                            <span class="text-gray-600">(0 reviews)</span>
                             <span class="text-green-600 font-medium flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
@@ -67,60 +72,68 @@
                     </div>
 
                     <div class="flex items-center space-x-4">
-                        <span class="text-4xl font-bold text-primary">$299.99</span>
-                        <span class="text-xl text-gray-400 line-through">$399.99</span>
-                        <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
-                            Save $100
-                        </span>
+                        <span class="text-4xl font-bold text-primary">${{ number_format($product->price, 2) }}</span>
                     </div>
 
                     {{-- Categories and Tags Chips --}}
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Category:</span>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Electronics
-                        </a>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Headphones
-                        </a>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">Tags:</span>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Wireless
-                        </a>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Bluetooth
-                        </a>
+                        @if($product->category)
+                            <a href="{{ route('products.index', ['category' => $product->category->slug]) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                {{ $product->category->{'category-name'} }}
+                            </a>
+                        @endif
+                        @if($product->subCategory)
+                            <a href="{{ route('products.index', ['subcategory' => $product->subCategory->slug]) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                {{ $product->subCategory->{'sub-category-name'} }}
+                            </a>
+                        @endif
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Brand:</span>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Apple
-                        </a>
+                        @if($product->brand)
+                            <a href="{{ route('brand-products', $product->brand->slug) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                {{ $product->brand->name }}
+                            </a>
+                        @endif
                     </div>
 
                     {{-- Information About Product and more infos --}}
                     <div class="space-y-2">
                         <h2 class="text-lg font-bold text-gray-700 mb-2">Description:</h2>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
+                        <div class="text-gray-600 prose max-w-none">
+                            {!! is_array($product->description) ? ($product->description[app()->getLocale()] ?? $product->description['en'] ?? '') : $product->description !!}
+                        </div>
                     </div>
 
                     {{-- Product Features --}}
-                    <div class="space-y-2">
-                        <h2 class="text-lg font-bold text-gray-700 mb-2">Product Features:</h2>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
-                    </div>
+                    @php
+                        // Normalize specifications and dimensions: they may be cast as array, or stored as JSON string.
+                        $specifications = $product->specifications;
+                        if (is_string($specifications)) {
+                            $decoded = json_decode($specifications, true);
+                            $specifications = is_array($decoded) ? $decoded : null;
+                        }
+                        $dimensions = $product->dimensions;
+                        if (is_string($dimensions)) {
+                            $decoded = json_decode($dimensions, true);
+                            $dimensions = is_array($decoded) ? $decoded : null;
+                        }
+                    @endphp
+
+                    @if(!empty($specifications))
+                        <div class="space-y-2">
+                            <h2 class="text-lg font-bold text-gray-700 mb-2">Specifications:</h2>
+                            <div class="text-gray-600">
+                                @foreach($specifications as $key => $value)
+                                    <div class="flex justify-between py-1">
+                                        <span class="font-medium">{{ ucfirst($key) }}:</span>
+                                        <span>{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Color --}}
                     <div>
@@ -204,159 +217,90 @@
                 <div class="p-8">
                     <div id="description-tab" class="tab-content active">
                         <div class="prose max-w-none">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Premium Wireless Headphones Pro</h3>
-                            <p class="text-gray-700 mb-6 leading-relaxed">
-                                Experience unparalleled audio quality with our Premium Wireless Headphones Pro. Featuring
-                                advanced noise cancellation technology,
-                                premium materials, and exceptional comfort for extended listening sessions. Whether you're
-                                commuting, working out, or relaxing at home,
-                                these headphones deliver studio-quality sound in a sleek, modern design.
-                            </p>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                                <div>
-                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">Key Features:</h4>
-                                    <ul class="space-y-2 text-gray-700">
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Active Noise Cancellation (ANC)
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            30-hour battery life
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Premium leather cushions
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Bluetooth 5.0 connectivity
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">What's in the Box:</h4>
-                                    <ul class="space-y-2 text-gray-700">
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Premium Wireless Headphones
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            USB-C Charging Cable
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Carrying Case
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            User Manual & Warranty Card
-                                        </li>
-                                    </ul>
-                                </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}</h3>
+                            <div class="text-gray-700 mb-6 leading-relaxed">
+                                {!! is_array($product->description) ? ($product->description[app()->getLocale()] ?? $product->description['en'] ?? '') : $product->description !!}
                             </div>
+
+                            @if($product->specifications)
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-3">Specifications:</h4>
+                                        <div class="space-y-2 text-gray-700">
+                                                @foreach($product->specifications as $key => $value)
+                                                    <div class="flex justify-between py-1 border-b border-gray-100">
+                                                        <span class="font-medium">{{ ucfirst($key) }}:</span>
+                                                        <span>{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</span>
+                                                    </div>
+                                                @endforeach
+                                        </div>
+                                    </div>
+                                    @if(!empty($dimensions))
+                                        <div>
+                                            <h4 class="text-lg font-semibold text-gray-900 mb-3">Dimensions:</h4>
+                                            <div class="space-y-2 text-gray-700">
+                                                @foreach($dimensions as $key => $value)
+                                                    <div class="flex justify-between py-1 border-b border-gray-100">
+                                                        <span class="font-medium">{{ ucfirst($key) }}:</span>
+                                                        <span>{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if($product->warranty)
+                                <div class="mt-6">
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">Warranty:</h4>
+                                    <div class="text-gray-700">
+                                        {!! is_array($product->warranty) ? ($product->warranty[app()->getLocale()] ?? $product->warranty['en'] ?? '') : $product->warranty !!}
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                     <div id="specifications-tab" class="tab-content hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Audio Specifications</h4>
-                                <table class="w-full text-sm">
-                                    <tbody class="divide-y divide-gray-200">
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Driver Size</td>
-                                            <td class="py-3 text-gray-900">40mm Dynamic Drivers</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Frequency Response</td>
-                                            <td class="py-3 text-gray-900">20Hz - 20kHz</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Impedance</td>
-                                            <td class="py-3 text-gray-900">32 Ohm</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Sensitivity</td>
-                                            <td class="py-3 text-gray-900">98 dB SPL</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Noise Cancellation</td>
-                                            <td class="py-3 text-gray-900">Active ANC</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        @if(!empty($specifications) || !empty($dimensions))
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                @if(!empty($specifications))
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Specifications</h4>
+                                        <table class="w-full text-sm">
+                                            <tbody class="divide-y divide-gray-200">
+                                                @foreach($specifications as $key => $value)
+                                                    <tr class="py-2">
+                                                        <td class="py-3 text-gray-600 font-medium">{{ ucfirst($key) }}</td>
+                                                        <td class="py-3 text-gray-900">{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+                                @if(!empty($dimensions))
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Dimensions</h4>
+                                        <table class="w-full text-sm">
+                                            <tbody class="divide-y divide-gray-200">
+                                                @foreach($dimensions as $key => $value)
+                                                    <tr class="py-2">
+                                                        <td class="py-3 text-gray-600 font-medium">{{ ucfirst($key) }}</td>
+                                                        <td class="py-3 text-gray-900">{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
                             </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Connectivity & Battery</h4>
-                                <table class="w-full text-sm">
-                                    <tbody class="divide-y divide-gray-200">
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Bluetooth Version</td>
-                                            <td class="py-3 text-gray-900">5.0</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Wireless Range</td>
-                                            <td class="py-3 text-gray-900">10 meters</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Battery Life</td>
-                                            <td class="py-3 text-gray-900">30 hours (ANC on)</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Charging Time</td>
-                                            <td class="py-3 text-gray-900">2 hours</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Weight</td>
-                                            <td class="py-3 text-gray-900">290g</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        @else
+                            <div class="text-center text-gray-500 py-8">
+                                No specifications available for this product.
                             </div>
-                        </div>
+                        @endif
                     </div>
 
                     <div id="reviews-tab" class="tab-content hidden">
@@ -596,54 +540,50 @@
                 </div>
             </div>
 
-            <div class="mb-12">
-                <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">You Might Also Like</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    @for ($i = 1; $i <= 4; $i++)
-                        <div
-                            class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
-                            <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
-                                <img src="https://via.placeholder.com/300x300?text=Related+{{ $i }}"
-                                    alt="Related Product {{ $i }}"
-                                    class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
-                                @if ($i % 2 == 0)
-                                    <div class="absolute top-3 left-3">
-                                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                            -20%
-                                        </span>
-                                    </div>
-                                @endif
-                            </a>
-
-                            <div class="p-4">
-                                <a href="#">
-                                    <h3
-                                        class="font-semibold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary mb-2">
-                                        Related Electronics Product {{ $i }}
-                                    </h3>
+            @if($relatedProducts && $relatedProducts->count() > 0)
+                <div class="mb-12">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">You Might Also Like</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        @foreach($relatedProducts as $relatedProduct)
+                            <div class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
+                                <a href="{{ route('products.detail', $relatedProduct->slug) }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
+                                    <img src="{{ $relatedProduct->cover_image ? asset('storage/' . $relatedProduct->cover_image) : asset('images/placeholder-product.jpg') }}"
+                                        alt="{{ is_array($relatedProduct->name) ? ($relatedProduct->name[app()->getLocale()] ?? $relatedProduct->name['en'] ?? '') : $relatedProduct->name }}"
+                                        class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
+                                    @if($relatedProduct->created_at > now()->subDays(30))
+                                        <div class="absolute top-3 left-3">
+                                            <span class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                NEW
+                                            </span>
+                                        </div>
+                                    @endif
                                 </a>
 
-                                <div class="flex items-center mb-2">
-                                    <div class="flex items-center text-yellow-400 text-sm">
-                                        ★★★★☆
-                                    </div>
-                                    <span class="ml-2 text-sm text-gray-500">({{ rand(10, 100) }})</span>
-                                </div>
+                                <div class="p-4">
+                                    <a href="{{ route('products.detail', $relatedProduct->slug) }}">
+                                        <h3 class="font-semibold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary mb-2">
+                                            {{ is_array($relatedProduct->name) ? ($relatedProduct->name[app()->getLocale()] ?? $relatedProduct->name['en'] ?? '') : $relatedProduct->name }}
+                                        </h3>
+                                    </a>
 
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <span class="text-lg font-bold text-primary">${{ rand(99, 299) }}.99</span>
-                                        @if ($i % 2 == 0)
-                                            <span
-                                                class="text-sm text-gray-400 line-through ml-2">${{ rand(129, 399) }}.99</span>
-                                        @endif
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex items-center text-yellow-400 text-sm">
+                                            ★★★★☆
+                                        </div>
+                                        <span class="ml-2 text-sm text-gray-500">(0)</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-lg font-bold text-primary">${{ number_format($relatedProduct->price, 2) }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    @endfor
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
 
         </div>
     </div>

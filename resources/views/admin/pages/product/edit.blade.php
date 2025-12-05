@@ -56,7 +56,8 @@
                                                 </div>
                                                 <div class="mb-3 {{ $lang === 'ar' ? 'text-end' : '' }}" dir="{{ $lang === 'ar' ? 'rtl' : 'ltr' }}">
                                                     <label class="form-label">Description ({{ strtoupper($lang) }})</label>
-                                                    <textarea name="description[{{ $lang }}]" class="form-control" rows="4" {{ $lang === 'en' ? 'required' : '' }}>{{ old('description.'.$lang, $product->getTranslation('description', $lang, false)) }}</textarea>
+                                                    <div id="quill-description-{{ $lang }}" class="quill-editor">{!! old('description.'.$lang, $product->getTranslation('description', $lang, false)) !!}</div>
+                                                    <input type="hidden" name="description[{{ $lang }}]" id="description-input-{{ $lang }}" {{ $lang === 'en' ? 'required' : '' }}>
                                                 </div>
                                             </div>
                                             @endforeach
@@ -84,12 +85,12 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                        <div class="col-md-4 mb-3">
                                         <label class="form-label">Sub Category <span class="text-danger">*</span></label>
                                         <select name="sub_category_id" class="form-select" required>
                                             <option value="">Select Sub Category</option>
                                             @foreach($subCategories as $subCategory)
-                                                <option value="{{ $subCategory->id }}">
+                                                <option value="{{ $subCategory->id }}" data-category="{{ $subCategory->category_id }}" {{ $product->sub_category_id == $subCategory->id ? 'selected' : '' }}>
                                                     {{ $subCategory->getTranslation('sub-category-name', 'en') }}
                                                 </option>
                                             @endforeach
@@ -157,39 +158,54 @@
                                                                value="{{ $product->getTranslation('warranty', $lang, false) }}">
                                                     </div>
 
-                                                    {{-- Dynamic Specs Table --}}
-                                                    <div class="col-md-12">
-                                                        <label class="form-label d-flex justify-content-between">
-                                                            <span>Detailed Specifications ({{ strtoupper($lang) }})</span>
-                                                            <button type="button" class="btn btn-sm btn-info add-spec-btn" data-lang="{{ $lang }}">
-                                                                <i class="bi bi-plus-circle"></i> Add Field
-                                                            </button>
-                                                        </label>
-                                                        <table class="table table-bordered table-sm" id="spec-table-{{ $lang }}">
-                                                            <thead class="bg-light">
-                                                                <tr>
-                                                                    <th>Title / Feature</th>
-                                                                    <th>Value / Description</th>
-                                                                    <th style="width: 50px;"></th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {{-- Loop existing dynamic specs --}}
-                                                                @php
-                                                                    $existingSpecs = $product->getTranslation('specifications', $lang, false);
-                                                                    if(!is_array($existingSpecs)) $existingSpecs = [];
-                                                                @endphp
+                                                        <div class="col-md-12">
+                                                            <label class="form-label d-flex justify-content-between">
+                                                                <span>Detailed Specifications ({{ strtoupper($lang) }})</span>
+                                                                <button type="button" class="btn btn-sm btn-info add-spec-btn" data-lang="{{ $lang }}">
+                                                                    <i class="bi bi-plus-circle"></i> Add Field
+                                                                </button>
+                                                            </label>
+                                                            <table class="table table-bordered table-sm" id="spec-table-{{ $lang }}">
+                                                                <thead class="bg-light">
+                                                                    <tr>
+                                                                        <th>Title / Feature</th>
+                                                                        <th>Value / Description</th>
+                                                                        <th style="width: 50px;"></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {{-- Loop existing dynamic specs in a keys-aligned manner (use EN keys as source of truth) --}}
+                                                                    @php
+                                                                        // Try to get specifications keyed map (prefer EN keys)
+                                                                        $specsEn = $product->getTranslation('specifications', 'en', false);
+                                                                        if (!is_array($specsEn)) {
+                                                                            // if stored as JSON string or numerically indexed array
+                                                                            $specsEn = json_decode($specsEn, true) ?: [];
+                                                                        }
+                                                                        $specKeys = array_keys($specsEn ?: []);
+                                                                        if (empty($specKeys)) {
+                                                                            // Fallback to FR or AR if EN empty
+                                                                            $specsFr = $product->getTranslation('specifications', 'fr', false);
+                                                                            if (!is_array($specsFr)) $specsFr = json_decode($specsFr, true) ?: [];
+                                                                            $specKeys = array_keys($specsFr ?: []);
+                                                                        }
+                                                                    @endphp
 
-                                                                @foreach($existingSpecs as $index => $spec)
-                                                                <tr>
-                                                                    <td><input type="text" name="specifications[{{ $lang }}][{{ $index }}][title]" class="form-control form-control-sm" value="{{ $spec['title'] ?? '' }}"></td>
-                                                                    <td><input type="text" name="specifications[{{ $lang }}][{{ $index }}][value]" class="form-control form-control-sm" value="{{ $spec['value'] ?? '' }}"></td>
-                                                                    <td class="text-center"><button type="button" class="btn btn-danger btn-sm py-0 px-2 remove-spec-row">&times;</button></td>
-                                                                </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                                                    @foreach($specKeys as $key)
+                                                                        @php
+                                                                            $spec = $product->getTranslation('specifications', $lang, false);
+                                                                            if (!is_array($spec)) $spec = json_decode($spec, true) ?: [];
+                                                                            $entry = $spec[$key] ?? ['title' => '', 'value' => ''];
+                                                                        @endphp
+                                                                        <tr>
+                                                                            <td><input type="text" name="specifications[{{ $lang }}][{{ $key }}][title]" class="form-control form-control-sm" value="{{ $entry['title'] ?? '' }}"></td>
+                                                                            <td><input type="text" name="specifications[{{ $lang }}][{{ $key }}][value]" class="form-control form-control-sm" value="{{ $entry['value'] ?? '' }}"></td>
+                                                                            <td class="text-center"><button type="button" class="btn btn-danger btn-sm py-0 px-2 remove-spec-row">&times;</button></td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                 </div>
                                             </div>
                                             @endforeach
@@ -285,96 +301,6 @@
 </div>
 
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // --- 1. Navigation Logic (Same as Create) ---
-        const nextBtns = document.querySelectorAll('.next-step');
-        const prevBtns = document.querySelectorAll('.prev-step');
-
-        nextBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Simple validation for edit can be looser, or strict
-                const nextTabId = this.getAttribute('data-next');
-                const tabButton = document.getElementById(`${nextTabId}-tab`);
-                const tabInstance = bootstrap.Tab.getOrCreateInstance(tabButton);
-                tabInstance.show();
-                window.scrollTo(0, 0);
-            });
-        });
-
-        prevBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const prevTabId = this.getAttribute('data-prev');
-                const tabButton = document.getElementById(`${prevTabId}-tab`);
-                const tabInstance = bootstrap.Tab.getOrCreateInstance(tabButton);
-                tabInstance.show();
-            });
-        });
-
-        // --- 2. Dynamic Spec Row Logic ---
-        // Helper to remove rows (works for both existing and new rows)
-        document.body.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-spec-row')) {
-                e.target.closest('tr').remove();
-            }
-            if (e.target.classList.contains('remove-variant')) {
-                // If variant has ID, you might need a hidden input to flag for deletion in backend
-                // For now, we just remove from DOM (which implies no update sent for it)
-                e.target.closest('tr').remove();
-            }
-        });
-
-        const addSpecBtns = document.querySelectorAll('.add-spec-btn');
-        addSpecBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const lang = this.getAttribute('data-lang');
-                const tbody = document.querySelector(`#spec-table-${lang} tbody`);
-                const index = Date.now() + Math.floor(Math.random() * 1000);
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><input type="text" name="specifications[${lang}][${index}][title]" class="form-control form-control-sm" placeholder="Title"></td>
-                    <td><input type="text" name="specifications[${lang}][${index}][value]" class="form-control form-control-sm" placeholder="Value"></td>
-                    <td class="text-center"><button type="button" class="btn btn-danger btn-sm py-0 px-2 remove-spec-row">&times;</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        });
-
-        // --- 3. Dynamic Variant Logic ---
-        const addVariantBtn = document.getElementById('add-variant-btn');
-        const variantsTableBody = document.querySelector('#variants-table tbody');
-
-        addVariantBtn.addEventListener('click', function() {
-            const index = Date.now(); // Unique index
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>
-                    <input type="text" name="variants[${index}][name][en]" class="form-control form-control-sm" placeholder="e.g. Red / Large" required>
-                    <input type="hidden" name="variants[${index}][name][fr]">
-                    <input type="hidden" name="variants[${index}][name][ar]">
-                </td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text">$</span>
-                        <input type="number" name="variants[${index}][price]" step="0.01" class="form-control" placeholder="0.00" required>
-                    </div>
-                </td>
-                <td><span class="badge bg-secondary">New</span></td>
-                <td class="text-end"><button type="button" class="btn btn-danger btn-sm remove-variant">Delete</button></td>
-            `;
-            variantsTableBody.appendChild(tr);
-
-            // Sync languages for new row
-            const enIn = tr.querySelector(`input[name="variants[${index}][name][en]"]`);
-            const frIn = tr.querySelector(`input[name="variants[${index}][name][fr]"]`);
-            const arIn = tr.querySelector(`input[name="variants[${index}][name][ar]"]`);
-            enIn.addEventListener('input', function() { frIn.value = this.value; arIn.value = this.value; });
-        });
-    });
-</script>
+    <script src="{{ asset('admin_assets/js/product-form.js') }}"></script>
 @endpush
 @endsection

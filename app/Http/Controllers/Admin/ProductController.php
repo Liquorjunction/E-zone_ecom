@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Product\DestroyProductRequest;
 use App\Http\Requests\Admin\Product\EditProductRequest;
 use App\Http\Requests\Admin\Product\ReadProductRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
+use App\Http\Requests\Admin\Product\UpdateProductRequest;
 use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
@@ -139,7 +140,7 @@ class ProductController extends Controller
         }
     }
 
-    public function update(StoreProductRequest $request, ProductRepo $productRepo)
+    public function update(UpdateProductRequest $request, ProductRepo $productRepo)
     {
         $id = $request->input('id');
         DB::beginTransaction();
@@ -211,7 +212,7 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Record updated successfully']);
+            return redirect()->route('admin.products.index')->with(['success' => true, 'message' => 'Record updated successfully']);
 
         } catch (\Exception $e) {
             DB::rollBack();

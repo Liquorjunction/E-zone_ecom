@@ -6,6 +6,7 @@ use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\PrivacyPolicyController;
+use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\ShippingandReturnsController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
@@ -33,6 +34,12 @@ Route::get('/shipping-returns', [ShippingandReturnsController::class, 'index'])-
 Route::get('/about-us', [AboutUsController::class, 'index'])->name('about');
 Route::get('/brands', [BrandController::class, 'index'])->name('brands');
 
+// Products (public)
+Route::prefix('products')->name('products.')->group(function () {
+    Route::get('/', [ProductController::class, 'index'])->name('index');
+    Route::get('/{slug}', [ProductController::class, 'productDetail'])->name('detail');
+});
+
 // Auth pages (guest-only)
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
@@ -57,7 +64,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])->middleware(['throttle:6,1'])->name('verification.send');
 });
 
-Route::view('/products', 'client.pages.products')->name('products');
 Route::view('/cart', 'client.pages.cart')->name('cart');
 Route::view('/checkout', 'client.pages.checkout')->name('checkout');
 

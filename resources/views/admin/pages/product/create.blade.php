@@ -66,7 +66,8 @@
                                                     <div class="mb-3">
                                                         <label class="form-label">Description (EN) <span
                                                                 class="text-danger">*</span></label>
-                                                        <textarea name="description[en]" class="form-control" rows="4" required>{{ old('description.en') }}</textarea>
+                                                        <div id="quill-description-en" class="quill-editor">{!! old('description.en') !!}</div>
+                                                        <input type="hidden" name="description[en]" id="description-input-en" required>
                                                     </div>
                                                 </div>
                                                 <div class="tab-pane fade" id="basic-fr">
@@ -77,7 +78,8 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Description (FR)</label>
-                                                        <textarea name="description[fr]" class="form-control" rows="4">{{ old('description.fr') }}</textarea>
+                                                        <div id="quill-description-fr" class="quill-editor">{!! old('description.fr') !!}</div>
+                                                        <input type="hidden" name="description[fr]" id="description-input-fr">
                                                     </div>
                                                 </div>
                                                 <div class="tab-pane fade" id="basic-ar">
@@ -88,7 +90,8 @@
                                                     </div>
                                                     <div class="mb-3 text-end" dir="rtl">
                                                         <label class="form-label">Description (AR)</label>
-                                                        <textarea name="description[ar]" class="form-control" rows="4">{{ old('description.ar') }}</textarea>
+                                                        <div id="quill-description-ar" class="quill-editor">{!! old('description.ar') !!}</div>
+                                                        <input type="hidden" name="description[ar]" id="description-input-ar">
                                                     </div>
                                                 </div>
                                             </div>
@@ -120,7 +123,7 @@
                                             <select name="sub_category_id" class="form-select" required>
                                                 <option value="">Select Sub Category</option>
                                                 @foreach ($subCategories as $subCategory)
-                                                    <option value="{{ $subCategory->id }}">
+                                                    <option value="{{ $subCategory->id }}" data-category="{{ $subCategory->category_id }}">
                                                         {{ $subCategory->getTranslation('sub-category-name', 'en') }}
                                                     </option>
                                                 @endforeach
