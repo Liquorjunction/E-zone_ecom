@@ -216,13 +216,14 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         // Product Routes
         Route::prefix('products')->name('products.')->middleware('can:products.read,admin')->group(function () {
             Route::get('/', [ProductController::class, 'index'])->name('index'); // permission: products.read
-            Route::get('/data', [ProductController::class, 'data'])->name('data');
+            Route::get('/data', [ProductController::class, 'dataTable'])->name('data');
             Route::get('/create', [ProductController::class, 'create'])->name('create')->middleware('can:products.create,admin');
             Route::post('/', [ProductController::class, 'store'])->name('store')->middleware('can:products.create,admin');
             Route::get('/edit', [ProductController::class, 'edit'])->name('edit')->middleware('can:products.update,admin');
             Route::put('/update', [ProductController::class, 'update'])->name('update')->middleware('can:products.update,admin');
             Route::delete('/destroy', [ProductController::class, 'destroy'])->name('destroy')->middleware('can:products.delete,admin');
             Route::patch('/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:products.update,admin');
+            Route::get('/show', [ProductController::class, 'show'])->name('show')->middleware('can:products.read,admin');
         });
     });
 });

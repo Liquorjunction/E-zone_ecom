@@ -43,21 +43,21 @@ class StoreProductRequest extends FormRequest
             'dimensions.fr' => 'nullable|string',
             'dimensions.ar' => 'nullable|string',
 
+            'specifications.en' => 'required|array',
+            'specifications.fr' => 'nullable|array',
+            'specifications.ar' => 'nullable|array',
             'specifications' => 'required|array',
-            'specifications.en' => 'required|string',
-            'specifications.fr' => 'nullable|string',
-            'specifications.ar' => 'nullable|string',
 
-            'warrenty' => 'required|array',
-            'warrenty.en' => 'required|string',
-            'warrenty.fr' => 'nullable|string',
-            'warrenty.ar' => 'nullable|string',
+            'warranty.en' => 'required|string',
+            'warranty.fr' => 'nullable|string',
+            'warranty.ar' => 'nullable|string',
+            'warranty' => 'required|array',
             //  -- End translatable fields --
 
             // -- Non-translatable fields --
             'brand_id' => 'required|exists:brands,id',
             'category_id' => 'required|exists:categories,id',
-            'sub_category_id' => 'required|exists:sub_categories,id',
+            'sub_category_id' => 'required|exists:sub-categories,id',
             'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'price' => 'required|numeric',
             // -- End non-translatable fields --
@@ -66,15 +66,6 @@ class StoreProductRequest extends FormRequest
             'image_path' => 'nullable',
             'image_path.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
             // -- End Product Images --
-
-            // -- Product Variants --
-            'variants' => 'required|array',
-            'variants.*.name' => 'required|array',
-            'variants.*.name.en' => 'required|string',
-            'variants.*.name.fr' => 'nullable|string',
-            'variants.*.name.ar' => 'nullable|string',
-            'variants.*.price' => 'required|numeric',
-            // -- End Product Variants --
         ];
     }
 

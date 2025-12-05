@@ -194,25 +194,41 @@ class ProductRepository implements ProductRepositoryInterface
     public function deleteProduct($id)
     {
         try {
-            $product = Product::findOrFail($id)->delete();
+            // Fetch product model instance first
+            $product = Product::findOrFail($id);
 
-            // Delete all related variants
+            // Delete related variants first
             ProductVariant::where('product_id', $id)->delete();
 
-            // Delete all related images
-            // first fetch all images related to this product
+            // Delete gallery images (files + records)
             $images = ProductImage::where('product_id', $id)->get();
             foreach ($images as $image) {
-                if (Storage::disk('public')->exists($image->image_path)) {
-                    Storage::disk('public')->delete($image->image_path);
+                try {
+                    if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+                        Storage::disk('public')->delete($image->image_path);
+                    }
+                } catch (\Exception $ie) {
+                    // Log and continue with next image
+                    Log::error('ProductRepository.deleteProduct - image delete error: '.$ie->getMessage());
                 }
-                $image->delete();
+                try {
+                    $image->delete();
+                } catch (\Exception $ie) {
+                    Log::error('ProductRepository.deleteProduct - image record delete error: '.$ie->getMessage());
+                }
             }
 
-            // Delete all related Cover Image
-            if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
-                Storage::disk('public')->delete($product->cover_image);
+            // Delete cover image file if present
+            try {
+                if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
+                    Storage::disk('public')->delete($product->cover_image);
+                }
+            } catch (\Exception $ce) {
+                Log::error('ProductRepository.deleteProduct - cover image delete error: '.$ce->getMessage());
             }
+
+            // Finally delete the product record
+            $product->delete();
 
         } catch (\Exception $e) {
             Log::error('ProductRepository.deleteProduct: '.$e->getMessage());
