@@ -18,27 +18,26 @@
                             id="product-form">
                             @csrf
 
+                            {{-- Navigation Pills --}}
                             <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab-product" role="tablist">
                                 <li class="nav-item">
                                     <a class="nav-link active" id="step1-tab" data-bs-toggle="pill" href="#step1"
-                                        role="tab" aria-controls="step1" aria-selected="true">Step 1: Basic Info</a>
+                                        role="tab" aria-selected="true">Step 1: Basic Info</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link disabled" id="step2-tab" data-bs-toggle="pill" href="#step2"
-                                        role="tab" aria-controls="step2" aria-selected="false">Step 2:
-                                        Specifications</a>
+                                        role="tab" aria-selected="false">Step 2: Specifications</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link disabled" id="step3-tab" data-bs-toggle="pill" href="#step3"
-                                        role="tab" aria-controls="step3" aria-selected="false">Step 3: Variants &
-                                        Media</a>
+                                        role="tab" aria-selected="false">Step 3: Variants & Media</a>
                                 </li>
                             </ul>
 
                             <div class="tab-content" id="pills-tabContent-product">
 
-                                <div class="tab-pane fade show active" id="step1" role="tabpanel"
-                                    aria-labelledby="step1-tab">
+                                {{-- STEP 1: BASIC INFO --}}
+                                <div class="tab-pane fade show active" id="step1" role="tabpanel">
                                     <div class="row">
                                         {{-- Translatable Details --}}
                                         <div class="col-md-12 mb-3">
@@ -56,6 +55,7 @@
                                             </div>
 
                                             <div class="tab-content border p-3 rounded">
+                                                {{-- English --}}
                                                 <div class="tab-pane fade show active" id="basic-en">
                                                     <div class="mb-3">
                                                         <label class="form-label">Product Name (EN) <span
@@ -66,10 +66,13 @@
                                                     <div class="mb-3">
                                                         <label class="form-label">Description (EN) <span
                                                                 class="text-danger">*</span></label>
-                                                        <div id="quill-description-en" class="quill-editor">{!! old('description.en') !!}</div>
-                                                        <input type="hidden" name="description[en]" id="description-input-en" required>
+                                                        <div id="quill-description-en" class="quill-editor"
+                                                            style="height: 200px;">{!! old('description.en') !!}</div>
+                                                        <input type="hidden" name="description[en]"
+                                                            id="description-input-en" required>
                                                     </div>
                                                 </div>
+                                                {{-- French --}}
                                                 <div class="tab-pane fade" id="basic-fr">
                                                     <div class="mb-3">
                                                         <label class="form-label">Product Name (FR)</label>
@@ -78,10 +81,13 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Description (FR)</label>
-                                                        <div id="quill-description-fr" class="quill-editor">{!! old('description.fr') !!}</div>
-                                                        <input type="hidden" name="description[fr]" id="description-input-fr">
+                                                        <div id="quill-description-fr" class="quill-editor"
+                                                            style="height: 200px;">{!! old('description.fr') !!}</div>
+                                                        <input type="hidden" name="description[fr]"
+                                                            id="description-input-fr">
                                                     </div>
                                                 </div>
+                                                {{-- Arabic --}}
                                                 <div class="tab-pane fade" id="basic-ar">
                                                     <div class="mb-3 text-end" dir="rtl">
                                                         <label class="form-label">Product Name (AR)</label>
@@ -90,14 +96,16 @@
                                                     </div>
                                                     <div class="mb-3 text-end" dir="rtl">
                                                         <label class="form-label">Description (AR)</label>
-                                                        <div id="quill-description-ar" class="quill-editor">{!! old('description.ar') !!}</div>
-                                                        <input type="hidden" name="description[ar]" id="description-input-ar">
+                                                        <div id="quill-description-ar" class="quill-editor"
+                                                            style="height: 200px;">{!! old('description.ar') !!}</div>
+                                                        <input type="hidden" name="description[ar]"
+                                                            id="description-input-ar">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {{-- Dropdowns --}}
+                                        {{-- Dropdowns & Pricing --}}
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Brand <span class="text-danger">*</span></label>
                                             <select name="brand_id" class="form-select" required>
@@ -123,7 +131,8 @@
                                             <select name="sub_category_id" class="form-select" required>
                                                 <option value="">Select Sub Category</option>
                                                 @foreach ($subCategories as $subCategory)
-                                                    <option value="{{ $subCategory->id }}" data-category="{{ $subCategory->category_id }}">
+                                                    <option value="{{ $subCategory->id }}"
+                                                        data-category="{{ $subCategory->category_id }}">
                                                         {{ $subCategory->getTranslation('sub-category-name', 'en') }}
                                                     </option>
                                                 @endforeach
@@ -161,12 +170,13 @@
                                     </div>
                                 </div>
 
-                                <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
+                                {{-- STEP 2: SPECIFICATIONS --}}
+                                <div class="tab-pane fade" id="step2" role="tabpanel">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <label class="form-label mb-0"><strong>Technical Specifications</strong>
-                                                    <span class="text-danger">*</span></label>
+                                                <label class="form-label mb-0"><strong>Technical
+                                                        Specifications</strong></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabSpecs" role="tablist">
                                                     <li class="nav-item"><a class="nav-link active py-1 px-3"
                                                             data-bs-toggle="tab" href="#specs-en">English</a></li>
@@ -233,7 +243,8 @@
                                     </div>
                                 </div>
 
-                                <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
+                                {{-- STEP 3: VARIANTS & MEDIA --}}
+                                <div class="tab-pane fade" id="step3" role="tabpanel">
                                     <div class="row">
                                         <div class="col-md-12 mb-4">
                                             <div class="d-flex justify-content-between align-items-center mb-2">

@@ -8,19 +8,29 @@ use App\Http\Requests\Admin\Product\EditProductRequest;
 use App\Http\Requests\Admin\Product\ReadProductRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
+use App\Imports\ProductsImport;
 use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
 use App\Models\SubCategories;
 use App\Repositories\Admin\Interfaces\ProductRepositoryInterface as ProductRepo;
+use App\Services\AutoTranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
 {
+    protected $translationService;
+
+    public function __construct(AutoTranslationService $translationService)
+    {
+        $this->translationService = $translationService;
+    }
+
     public function index()
     {
         return view('admin.pages.product.index');
@@ -28,12 +38,10 @@ class ProductController extends Controller
 
     public function create()
     {
-        // 1. Fetch active Brands and Categories
         $brands = Brand::where('status', 'active')->get();
         $categories = Categories::where('status', 'active')->get();
         $subCategories = SubCategories::where('status', 'active')->get();
 
-        // 2. Pass them to the view
         return view('admin.pages.product.create', compact('brands', 'categories', 'subCategories'));
     }
 
@@ -41,73 +49,13 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
+            // 1. Get validated data
             $data = $request->validated();
 
-            // --- Smart Auto-Translate Logic ---
-            $translatableFields = [
-                'name',
-                'description',
-                'dimensions',
-                'specifications', // Array handling added below
-                'warranty',
-            ];
+            // 2. Delegate translation logic to Service
+            $data = $this->translationService->prepareProductData($data);
 
-            foreach ($translatableFields as $field) {
-                // Skip if English data is missing
-                if (! isset($data[$field]['en'])) {
-                    continue;
-                }
-
-                // CASE A: Standard String Fields (Name, Desc, etc.)
-                if (is_string($data[$field]['en'])) {
-                    // Auto-fill French
-                    if (empty($data[$field]['fr'])) {
-                        $data[$field]['fr'] = gtrans_html($data[$field]['en'], 'fr');
-                    }
-                    // Auto-fill Arabic
-                    if (empty($data[$field]['ar'])) {
-                        $data[$field]['ar'] = gtrans_html($data[$field]['en'], 'ar');
-                    }
-                }
-
-                // CASE B: Specifications Array (Dynamic Table)
-                elseif ($field === 'specifications' && is_array($data[$field]['en'])) {
-
-                    // Initialize arrays if they don't exist yet
-                    if (! isset($data[$field]['fr']) || ! is_array($data[$field]['fr'])) {
-                        $data[$field]['fr'] = [];
-                    }
-                    if (! isset($data[$field]['ar']) || ! is_array($data[$field]['ar'])) {
-                        $data[$field]['ar'] = [];
-                    }
-
-                    foreach ($data[$field]['en'] as $index => $row) {
-                        $enTitle = $row['title'] ?? '';
-                        $enValue = $row['value'] ?? '';
-
-                        // Translate to French
-                        if (empty($data[$field]['fr'][$index]['title'])) {
-                            $data[$field]['fr'][$index]['title'] = $enTitle ? gtrans_html($enTitle, 'fr') : '';
-                        }
-                        if (empty($data[$field]['fr'][$index]['value'])) {
-                            $data[$field]['fr'][$index]['value'] = $enValue ? gtrans_html($enValue, 'fr') : '';
-                        }
-
-                        // Translate to Arabic
-                        if (empty($data[$field]['ar'][$index]['title'])) {
-                            $data[$field]['ar'][$index]['title'] = $enTitle ? gtrans_html($enTitle, 'ar') : '';
-                        }
-                        if (empty($data[$field]['ar'][$index]['value'])) {
-                            $data[$field]['ar'][$index]['value'] = $enValue ? gtrans_html($enValue, 'ar') : '';
-                        }
-                    }
-                    // Re-index array to ensure keys are sequential (0,1,2) for JSON storage
-                    $data[$field]['fr'] = array_values($data[$field]['fr']);
-                    $data[$field]['ar'] = array_values($data[$field]['ar']);
-                }
-            }
-            // ---------------------------------
-
+            // 3. Delegate creation to Repository
             $productRepo->createProduct($request, $data);
 
             DB::commit();
@@ -126,93 +74,54 @@ class ProductController extends Controller
     public function edit(EditProductRequest $request)
     {
         try {
+            // 1. Get ID from Query String (?id=1)
             $id = $request->input('id');
-            // 1. Fetch active Brands and Categories
-            $product = Product::findOrFail($id);
+
+            // 2. Fetch Product with Relations
+            $product = Product::with(['productVariants', 'images'])->findOrFail($id);
+
+            // 3. Fetch Dropdowns
             $brands = Brand::where('status', 'active')->get();
             $categories = Categories::where('status', 'active')->get();
-            $subCategories = SubCategories::where('status', 'active')->get();
+
+            // Only fetch subcategories relevant to the parent category
+            $subCategories = SubCategories::where('status', 'active')
+                ->where('category_id', $product->category_id)
+                ->get();
 
             return view('admin.pages.product.edit', compact('product', 'brands', 'categories', 'subCategories'));
+
         } catch (\Exception $e) {
             Log::error('ProductController.edit: '.$e->getMessage());
-            throw $e;
+
+            return redirect()->route('admin.products.index')->withErrors(['error' => 'Product not found']);
         }
     }
 
+    /**
+     * Update the specified resource in storage.
+     * Route: PUT /admin/products/update (ID is in the form body)
+     */
     public function update(UpdateProductRequest $request, ProductRepo $productRepo)
     {
-        $id = $request->input('id');
         DB::beginTransaction();
         try {
+            // 1. Validated Data
             $data = $request->validated();
 
-            // --- Smart Auto-Translate Logic ---
-            $translatableFields = [
-                'name',
-                'description',
-                'dimensions',
-                'specifications',
-                'warranty',
-            ];
+            // 2. Extract ID from the request body (as per your route logic)
+            $id = $data['id'];
 
-            foreach ($translatableFields as $field) {
-                if (! isset($data[$field]['en'])) {
-                    continue;
-                }
+            // 3. Auto-Translate Service (Fills gaps in translations)
+            $data = $this->translationService->prepareProductData($data);
 
-                // CASE A: Standard String Fields
-                if (is_string($data[$field]['en'])) {
-                    if (empty($data[$field]['fr'])) {
-                        $data[$field]['fr'] = gtrans_html($data[$field]['en'], 'fr');
-                    }
-                    if (empty($data[$field]['ar'])) {
-                        $data[$field]['ar'] = gtrans_html($data[$field]['en'], 'ar');
-                    }
-                }
-
-                // CASE B: Specifications Array
-                elseif ($field === 'specifications' && is_array($data[$field]['en'])) {
-
-                    if (! isset($data[$field]['fr']) || ! is_array($data[$field]['fr'])) {
-                        $data[$field]['fr'] = [];
-                    }
-                    if (! isset($data[$field]['ar']) || ! is_array($data[$field]['ar'])) {
-                        $data[$field]['ar'] = [];
-                    }
-
-                    foreach ($data[$field]['en'] as $index => $row) {
-                        $enTitle = $row['title'] ?? '';
-                        $enValue = $row['value'] ?? '';
-
-                        // Translate to French
-                        if (empty($data[$field]['fr'][$index]['title'])) {
-                            $data[$field]['fr'][$index]['title'] = $enTitle ? gtrans_html($enTitle, 'fr') : '';
-                        }
-                        if (empty($data[$field]['fr'][$index]['value'])) {
-                            $data[$field]['fr'][$index]['value'] = $enValue ? gtrans_html($enValue, 'fr') : '';
-                        }
-
-                        // Translate to Arabic
-                        if (empty($data[$field]['ar'][$index]['title'])) {
-                            $data[$field]['ar'][$index]['title'] = $enTitle ? gtrans_html($enTitle, 'ar') : '';
-                        }
-                        if (empty($data[$field]['ar'][$index]['value'])) {
-                            $data[$field]['ar'][$index]['value'] = $enValue ? gtrans_html($enValue, 'ar') : '';
-                        }
-                    }
-                    // Sort keys to ensure valid JSON array
-                    $data[$field]['fr'] = array_values($data[$field]['fr']);
-                    $data[$field]['ar'] = array_values($data[$field]['ar']);
-                }
-            }
-            // ---------------------------------
-
+            // 4. Update via Repository
             $productRepo->updateProduct($id, $request, $data);
 
             DB::commit();
 
-            return redirect()->route('admin.products.index')->with(['success' => true, 'message' => 'Record updated successfully']);
+            return redirect()->route('admin.products.index')
+                ->with(['success' => true, 'message' => 'Product updated successfully']);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -233,18 +142,12 @@ class ProductController extends Controller
     public function toggleStatus(EditProductRequest $request, ProductRepo $productRepo)
     {
         try {
-            $id = $request->input('id'); // Get ID from the request body/query
+            $id = $request->input('id');
             $productRepo->updateProductStatus($id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Product status updated successfully.',
-            ]);
+            return response()->json(['success' => true, 'message' => 'Product status updated successfully.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -257,6 +160,7 @@ class ProductController extends Controller
             return redirect()->back()->with('success', 'Record deleted successfully');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
             return redirect()->back()->with('error', 'Failed to delete record');
         }
     }
@@ -272,6 +176,8 @@ class ProductController extends Controller
                     if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
                         return '<img src="'.asset('storage/'.$product->cover_image).'" alt="Product Image" class="img-thumbnail" width="60" height="60">';
                     }
+
+                    return '<span class="text-muted">No Image</span>';
                 })
                 ->addColumn('name', function ($product) {
                     return $product->getTranslation('name', 'en');
@@ -279,7 +185,7 @@ class ProductController extends Controller
                 ->addColumn('status', function ($product) use ($request) {
                     $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleStatus', ['id' => $product->id]) : '';
                     $data['status'] = $product->status;
-                    $data['id'] = $product->id; // Ensure ID is passed for toggle
+                    $data['id'] = $product->id;
 
                     return view('admin.partials.datatable-status', $data)->render();
                 })
@@ -298,5 +204,71 @@ class ProductController extends Controller
             Log::error('ProductController.dataTable: '.$e->getMessage());
             throw $e;
         }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            // We no longer pass the repo/service here; they are resolved inside the job.
+            Excel::import(new ProductsImport, $request->file('file'));
+
+            return redirect()->route('admin.products.index')
+                ->with(['success' => true, 'message' => 'Import started! Products are being processed in the background.']);
+
+        } catch (\Exception $e) {
+            Log::error('Import Error: '.$e->getMessage());
+
+            return redirect()->back()->withErrors(['error' => 'Import failed to start: '.$e->getMessage()]);
+        }
+    }
+
+public function downloadTemplate()
+    {
+        // Headers use NAMES now, not IDs
+        $headers = [
+            'name_en',
+            'description_en',
+            'brand',        // Changed from brand_id
+            'category',     // Changed from category_id
+            'sub_category', // Changed from sub_category_id
+            'price',
+            'warranty_en',
+            'dimensions_en',
+            'spec_1_title', 'spec_1_value',
+            'spec_2_title', 'spec_2_value'
+        ];
+
+        $callback = function() use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+
+            // Sample Row with NAMES
+            fputcsv($file, [
+                'Galaxy S24 Ultra',
+                'AI Phone with titanium frame.',
+                'Samsung',         // Example Brand Name (Must exist in DB)
+                'Electronics',     // Example Category Name (Must exist in DB)
+                'Mobile Phones',   // Example SubCategory Name (Must exist in DB)
+                '1200.00',
+                '1 Year',
+                '6.8 inch',
+                'Processor', 'Snapdragon 8 Gen 3',
+                'Camera', '200MP'
+            ]);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=products_import_template.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ]);
     }
 }

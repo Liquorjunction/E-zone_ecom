@@ -34,7 +34,6 @@ class ProductVariant extends Model
     ];
 
     protected $casts = [
-        'attributes' => 'array', // Cast JSON to array automatically
         'price' => 'decimal:2',
         'stock_quantity' => 'integer',
     ];

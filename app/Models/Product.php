@@ -17,11 +17,12 @@ class Product extends Model
     public $guard_name = 'admin';
     protected $guarded = [];
 
+    // Spatie Translatable Fields
     public $translatable = [
         'name',
         'description',
         'dimensions',
-        'specifications',
+        'specifications', // Stores as JSON, handled by Spatie
         'warranty'
     ];
 
@@ -35,16 +36,16 @@ class Product extends Model
         'description',
         'cover_image',
         'price',
-        'dimensions',       // JSON in migration
-        'specifications',   // JSON in migration
+        'dimensions',
+        'specifications',
         'warranty',
-        'status',           // Added (was missing)
+        'status',
     ];
 
-    // Automatically cast JSON columns to Arrays
+    // Standard Casts
+    // Note: Do NOT cast 'translatable' fields to 'array' here if using HasTranslations.
+    // Spatie handles the serialization automatically.
     protected $casts = [
-        'dimensions' => 'array',
-        'specifications' => 'array',
         'price' => 'decimal:2',
     ];
 
@@ -52,7 +53,6 @@ class Product extends Model
     {
         return SlugOptions::create()
             ->generateSlugsFrom(function($model) {
-                // Handle translation if name is translatable, otherwise just use $model->name
                 return $model->getTranslation('name', 'en');
             })
             ->saveSlugsTo('slug');
