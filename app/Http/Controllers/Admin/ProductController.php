@@ -8,7 +8,6 @@ use App\Http\Requests\Admin\Product\EditProductRequest;
 use App\Http\Requests\Admin\Product\ReadProductRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
-use App\Imports\ProductsImport;
 use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
@@ -19,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
+use Rap2hpoutre\FastExcel\FastExcel;
 use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
@@ -206,69 +205,164 @@ class ProductController extends Controller
         }
     }
 
-    public function import(Request $request)
+    public function import(Request $request, ProductRepo $productRepo)
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+            'file' => 'required|mimes:xlsx,csv,txt|max:10240',
         ]);
 
-        try {
-            // We no longer pass the repo/service here; they are resolved inside the job.
-            Excel::import(new ProductsImport, $request->file('file'));
+        $fullPath = null;
 
-            return redirect()->route('admin.products.index')
-                ->with(['success' => true, 'message' => 'Import started! Products are being processed in the background.']);
+        try {
+            // 1. FIX FILE LOCKING: Store file locally first
+            $file = $request->file('file');
+            $filename = 'import_'.time().'.'.$file->getClientOriginalExtension();
+            $relativePath = $file->storeAs('temp_imports', $filename, 'local');
+
+            // Get the absolute path for FastExcel to read
+            $fullPath = Storage::disk('local')->path($relativePath);
+
+            // 2. Pre-load Relationships (Name -> ID Map)
+            // We map the English name (lowercase) to the ID to avoid querying the DB for every row.
+            $brands = Brand::all()->mapWithKeys(function ($item) {
+                return [strtolower(trim($item->getTranslation('name', 'en'))) => $item->id];
+            });
+
+            $categories = Categories::all()->mapWithKeys(function ($item) {
+                return [strtolower(trim($item->getTranslation('category-name', 'en'))) => $item->id];
+            });
+
+            $subCategories = SubCategories::all()->mapWithKeys(function ($item) {
+                return [strtolower(trim($item->getTranslation('sub-category-name', 'en'))) => $item->id];
+            });
+
+            $successCount = 0;
+            $failedCount = 0;
+            $errors = [];
+
+            // 3. Process Import on the STORED file
+            $collection = (new FastExcel)->import($fullPath);
+
+            foreach ($collection as $index => $line) {
+                $rowNumber = $index + 2; // Adjust for 0-index and header row
+
+                // Basic Validation
+                if (empty($line['name_en'])) {
+                    continue;
+                }
+
+                // Lookup IDs by Name (Case-insensitive)
+                $brandName = strtolower(trim($line['brand'] ?? ''));
+                $catName = strtolower(trim($line['category'] ?? ''));
+                $subName = strtolower(trim($line['sub_category'] ?? ''));
+
+                $brandId = $brands[$brandName] ?? null;
+                $catId = $categories[$catName] ?? null;
+                $subId = $subCategories[$subName] ?? null;
+
+                // Check for Missing Relationships
+                $rowErrors = [];
+                if (! $brandId) {
+                    $rowErrors[] = "Brand '{$line['brand']}' not found";
+                }
+                if (! $catId) {
+                    $rowErrors[] = "Category '{$line['category']}' not found";
+                }
+                // Fail if sub-category is provided but not found
+                if (! empty($subName) && ! $subId) {
+                    $rowErrors[] = "Sub Category '{$line['sub_category']}' not found";
+                }
+
+                if (! empty($rowErrors)) {
+                    $failedCount++;
+                    $errors[] = "Row {$rowNumber} (".$line['name_en'].'): '.implode(', ', $rowErrors);
+
+                    continue; // Skip this row
+                }
+
+                // 4. Create Product
+                try {
+                    $data = [
+                        'brand_id' => $brandId,
+                        'category_id' => $catId,
+                        'sub_category_id' => $subId,
+                        'price' => $line['price'],
+                        'status' => 'active',
+                        'name' => ['en' => $line['name_en']],
+                        'description' => ['en' => $line['description_en']],
+                        'warranty' => ['en' => $line['warranty_en']],
+                        'dimensions' => ['en' => $line['dimensions_en']],
+                        // Map specs manually
+                        'specifications' => [
+                            'en' => [
+                                ['title' => $line['spec_1_title'] ?? '', 'value' => $line['spec_1_value'] ?? ''],
+                                ['title' => $line['spec_2_title'] ?? '', 'value' => $line['spec_2_value'] ?? ''],
+                            ],
+                        ],
+                    ];
+
+                    // Run Auto-Translation
+                    $processedData = $this->translationService->prepareProductData($data);
+
+                    // Save to DB
+                    $productRepo->createProduct(new Request, $processedData);
+                    $successCount++;
+
+                } catch (\Exception $e) {
+                    $failedCount++;
+                    $errors[] = "Row {$rowNumber}: Database Error - ".$e->getMessage();
+                }
+            }
+
+            // 5. Cleanup: Delete the temp file
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+
+            // 6. Return with Status for Popup
+            $status = [
+                'type' => 'import_summary',
+                'success' => $successCount,
+                'failed' => $failedCount,
+                'errors' => $errors,
+            ];
+
+            return redirect()->route('admin.products.index')->with('import_status', $status);
 
         } catch (\Exception $e) {
-            Log::error('Import Error: '.$e->getMessage());
+            // Cleanup on crash
+            if ($fullPath && file_exists($fullPath)) {
+                unlink($fullPath);
+            }
 
-            return redirect()->back()->withErrors(['error' => 'Import failed to start: '.$e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Import failed: '.$e->getMessage()]);
         }
     }
 
-public function downloadTemplate()
+    /**
+     * Download Template using FastExcel
+     */
+    public function downloadTemplate()
     {
-        // Headers use NAMES now, not IDs
-        $headers = [
-            'name_en',
-            'description_en',
-            'brand',        // Changed from brand_id
-            'category',     // Changed from category_id
-            'sub_category', // Changed from sub_category_id
-            'price',
-            'warranty_en',
-            'dimensions_en',
-            'spec_1_title', 'spec_1_value',
-            'spec_2_title', 'spec_2_value'
-        ];
-
-        $callback = function() use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-
-            // Sample Row with NAMES
-            fputcsv($file, [
-                'Galaxy S24 Ultra',
-                'AI Phone with titanium frame.',
-                'Samsung',         // Example Brand Name (Must exist in DB)
-                'Electronics',     // Example Category Name (Must exist in DB)
-                'Mobile Phones',   // Example SubCategory Name (Must exist in DB)
-                '1200.00',
-                '1 Year',
-                '6.8 inch',
-                'Processor', 'Snapdragon 8 Gen 3',
-                'Camera', '200MP'
-            ]);
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=products_import_template.csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+        $dummyData = collect([
+            [
+                'name_en' => 'Galaxy S24 Ultra',
+                'description_en' => 'AI Phone with titanium frame.',
+                'brand' => 'Samsung',
+                'category' => 'Electronics',
+                'price' => '1200.00',
+                'warranty_en' => '1 Year',
+                'dimensions_en' => '6.8 inch',
+                'spec_1_title' => 'Processor',
+                'spec_1_value' => 'Snapdragon 8 Gen 3',
+                'spec_2_title' => 'Camera',
+                'spec_2_value' => '200MP',
+            ],
         ]);
+
+        return (new FastExcel($dummyData))->download('product_import_template.csv');
     }
 }

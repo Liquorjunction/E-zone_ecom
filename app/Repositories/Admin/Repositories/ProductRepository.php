@@ -22,30 +22,34 @@ class ProductRepository implements ProductRepositoryInterface
         try {
             // 1. Prepare Data
             $data = $data ?? $request->validated();
+
+            // Ensure default status
             $data['status'] = $data['status'] ?? 'inactive';
 
-            // Handle dropdown IDs
-            $this->normalizeForeignKeys($data);
-
-            // Temporary SKU to satisfy unique constraint during initial insert
-            $data['sku'] = 'TEMP-'.uniqid();
-
-            // Handle Cover Image
-            if ($request->hasFile('cover_image')) {
+            // 2. Handle Cover Image (Check if request exists and has file)
+            if ($request instanceof \Illuminate\Http\Request && $request->hasFile('cover_image')) {
                 $data['cover_image'] = $request->file('cover_image')->store('products', 'public');
             }
+            // Logic for import if image URL is provided in CSV
+            elseif (isset($data['cover_image_url'])) {
+                // Optional: Download image from URL and store
+            }
 
-            // Create Product
+            // 3. Create Product
             $product = Product::create($data);
 
-            // 2. Generate Real SKU (EZ-XXX-0000)
+            // 4. Generate SKU
             $this->generateAndSaveSku($product, $data);
 
-            // 3. Handle Gallery Images
-            $this->handleGalleryImages($product, $request);
+            // 5. Handle Gallery Images (Only if request has files)
+            if ($request instanceof \Illuminate\Http\Request) {
+                $this->handleGalleryImages($product, $request);
+            }
 
-            // 4. Handle Variants
-            $this->handleVariants($product, $request->input('variants', []));
+            // 6. Handle Variants
+            // Ensure variants key exists if passed from import
+            $variants = $data['variants'] ?? ($request instanceof \Illuminate\Http\Request ? $request->input('variants', []) : []);
+            $this->handleVariants($product, $variants);
 
             return $product;
         } catch (\Exception $e) {

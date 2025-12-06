@@ -2,71 +2,66 @@
 
 namespace App\Services;
 
+use Stichoza\GoogleTranslate\GoogleTranslate;
 use Illuminate\Support\Facades\Log;
 
 class AutoTranslationService
 {
-    /**
-     * Iterates through data and auto-translates missing fields for supported locales.
-     *
-     * @param array $data
-     * @return array
-     */
+    protected $locales = ['fr', 'ar']; // Target locales
+    protected $tr;
+
+    public function __construct()
+    {
+        $this->tr = new GoogleTranslate();
+    }
+
     public function prepareProductData(array $data): array
     {
-        $targetLocales = ['fr', 'ar'];
-        $translatableFields = ['name', 'description', 'dimensions', 'warranty'];
-        $complexFields = ['specifications']; // Fields that are arrays of objects
+        // 1. Simple Text Fields
+        $fields = ['name', 'description', 'warranty', 'dimensions'];
 
-        // 1. Handle Standard String Fields
-        foreach ($translatableFields as $field) {
-            // Skip if the source (English) is missing
-            if (!isset($data[$field]['en'])) {
-                continue;
-            }
-
-            foreach ($targetLocales as $locale) {
-                // Only translate if the target is empty
-                if (empty($data[$field][$locale])) {
-                    // Use the helper function (gtrans_html or gtrans)
-                    $data[$field][$locale] = gtrans_html($data[$field]['en'], $locale);
+        foreach ($fields as $field) {
+            if (isset($data[$field]['en']) && !empty($data[$field]['en'])) {
+                foreach ($this->locales as $locale) {
+                    // Only translate if target is empty
+                    if (empty($data[$field][$locale])) {
+                        $data[$field][$locale] = $this->translate($data[$field]['en'], $locale);
+                    }
                 }
             }
         }
 
-        // 2. Handle Complex Array Fields (Specifications)
-        // Expected Structure: specifications['en'] = [ ['title' => 'Screen', 'value' => 'OLED'], ... ]
-        foreach ($complexFields as $field) {
-            if (!isset($data[$field]['en']) || !is_array($data[$field]['en'])) {
-                continue;
-            }
-
-            foreach ($targetLocales as $locale) {
-                // Initialize target array if missing
-                if (!isset($data[$field][$locale])) {
-                    $data[$field][$locale] = [];
+        // 2. Complex JSON (Specifications)
+        // Structure: [['title' => 'Screen', 'value' => 'OLED']]
+        if (isset($data['specifications']['en']) && is_array($data['specifications']['en'])) {
+            foreach ($this->locales as $locale) {
+                $translatedSpecs = [];
+                foreach ($data['specifications']['en'] as $spec) {
+                    $translatedSpecs[] = [
+                        'title' => $this->translate($spec['title'] ?? '', $locale),
+                        'value' => $this->translate($spec['value'] ?? '', $locale),
+                    ];
                 }
-
-                foreach ($data[$field]['en'] as $index => $row) {
-                    $title = $row['title'] ?? '';
-                    $value = $row['value'] ?? '';
-
-                    // Translate Title
-                    if (empty($data[$field][$locale][$index]['title'])) {
-                        $data[$field][$locale][$index]['title'] = $title ? gtrans($title, $locale) : '';
-                    }
-
-                    // Translate Value
-                    if (empty($data[$field][$locale][$index]['value'])) {
-                        $data[$field][$locale][$index]['value'] = $value ? gtrans($value, $locale) : '';
-                    }
+                // Save ONLY if the user didn't manually provide this locale
+                if (empty($data['specifications'][$locale])) {
+                    $data['specifications'][$locale] = $translatedSpecs;
                 }
-
-                // Re-index array to ensure it saves as a valid JSON list (not an object with numeric keys)
-                $data[$field][$locale] = array_values($data[$field][$locale]);
             }
         }
 
         return $data;
+    }
+
+    private function translate(string $text, string $target): string
+    {
+        if (empty($text)) return '';
+        try {
+            $this->tr->setSource('en');
+            $this->tr->setTarget($target);
+            return $this->tr->translate($text);
+        } catch (\Exception $e) {
+            Log::error("Translation failed for {$target}: " . $e->getMessage());
+            return $text; // Fallback to English on failure
+        }
     }
 }
