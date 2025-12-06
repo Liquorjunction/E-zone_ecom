@@ -22,32 +22,38 @@ class ProductRepository implements ProductRepositoryInterface
         try {
             // 1. Prepare Data
             $data = $data ?? $request->validated();
-
-            // Ensure default status
             $data['status'] = $data['status'] ?? 'inactive';
 
-            // 2. Handle Cover Image (Check if request exists and has file)
+            // Normalize Dropdowns (Handle 'brand' key if passed instead of 'brand_id')
+            $this->normalizeForeignKeys($data);
+
+            // ------------------------------------------------------------
+            // CRITICAL FIX: Temporary SKU to prevent SQL Error 1364
+            // ------------------------------------------------------------
+            if (empty($data['sku'])) {
+                $data['sku'] = 'TEMP-'.uniqid();
+            }
+
+            // Handle Cover Image
+            // Check if request is actually an HTTP request with a file
             if ($request instanceof \Illuminate\Http\Request && $request->hasFile('cover_image')) {
                 $data['cover_image'] = $request->file('cover_image')->store('products', 'public');
             }
-            // Logic for import if image URL is provided in CSV
-            elseif (isset($data['cover_image_url'])) {
-                // Optional: Download image from URL and store
-            }
+            // If importing, we might just leave cover_image null or handle URLs here
+            // elseif (isset($data['cover_image_url'])) { ... }
 
-            // 3. Create Product
+            // 2. Create Product
             $product = Product::create($data);
 
-            // 4. Generate SKU
+            // 3. Generate Real SKU (EZ-XXX-0000)
             $this->generateAndSaveSku($product, $data);
 
-            // 5. Handle Gallery Images (Only if request has files)
+            // 4. Handle Gallery Images (Only if request has files)
             if ($request instanceof \Illuminate\Http\Request) {
                 $this->handleGalleryImages($product, $request);
             }
 
-            // 6. Handle Variants
-            // Ensure variants key exists if passed from import
+            // 5. Handle Variants
             $variants = $data['variants'] ?? ($request instanceof \Illuminate\Http\Request ? $request->input('variants', []) : []);
             $this->handleVariants($product, $variants);
 
@@ -61,38 +67,24 @@ class ProductRepository implements ProductRepositoryInterface
     public function updateProduct($id, $request, $data = null)
     {
         try {
-            // 1. Find Product
             $product = Product::findOrFail($id);
             $data = $data ?? $request->validated();
 
-            // 2. Security: Don't allow changing SKU or ID via mass assignment
+            // Security: Don't allow changing SKU or ID
             unset($data['sku'], $data['id']);
 
-            // 3. Normalize Dropdowns (Handle 'brand' vs 'brand_id' mismatch if any)
-            if (isset($data['brand']) && ! isset($data['brand_id'])) {
-                $data['brand_id'] = $data['brand'];
-            }
-            if (isset($data['category']) && ! isset($data['category_id'])) {
-                $data['category_id'] = $data['category'];
-            }
-            if (isset($data['sub_category']) && ! isset($data['sub_category_id'])) {
-                $data['sub_category_id'] = $data['sub_category'];
-            }
+            $this->normalizeForeignKeys($data);
 
-            // 4. Handle Cover Image Replacement
-            if ($request->hasFile('cover_image')) {
-                // Delete old image
+            if ($request instanceof \Illuminate\Http\Request && $request->hasFile('cover_image')) {
                 if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
                     Storage::disk('public')->delete($product->cover_image);
                 }
                 $data['cover_image'] = $request->file('cover_image')->store('products/covers', 'public');
             }
 
-            // 5. Update Main Attributes (including JSON translations)
             $product->update($data);
 
-            // 6. Handle Gallery Images (Append New)
-            if ($request->hasFile('image_path')) {
+            if ($request instanceof \Illuminate\Http\Request && $request->hasFile('image_path')) {
                 foreach ($request->file('image_path') as $image) {
                     ProductImage::create([
                         'product_id' => $product->id,
@@ -102,7 +94,6 @@ class ProductRepository implements ProductRepositoryInterface
                 }
             }
 
-            // 7. Sync Variants
             if (isset($data['variants'])) {
                 $this->syncVariants($product, $data['variants']);
             }
@@ -115,16 +106,12 @@ class ProductRepository implements ProductRepositoryInterface
         }
     }
 
-    /**
-     * Logic to Add, Edit, or Delete variants based on form data
-     */
     private function syncVariants(Product $product, array $variantsData)
     {
         $existingVariantIds = $product->productVariants()->pluck('id')->toArray();
         $submittedIds = [];
 
         foreach ($variantsData as $variant) {
-            // Case A: Update Existing Variant
             if (! empty($variant['id']) && in_array($variant['id'], $existingVariantIds)) {
                 $submittedIds[] = $variant['id'];
                 ProductVariant::where('id', $variant['id'])->update([
@@ -132,9 +119,7 @@ class ProductRepository implements ProductRepositoryInterface
                     'price' => $variant['price'],
                     'status' => $variant['status'] ?? 'active',
                 ]);
-            }
-            // Case B: Create New Variant
-            else {
+            } else {
                 $suffix = strtoupper(Str::random(4));
                 $newSku = $product->sku.'-V-'.$suffix;
 
@@ -149,15 +134,11 @@ class ProductRepository implements ProductRepositoryInterface
             }
         }
 
-        // Case C: Delete Removed Variants
-        // Any existing ID that was NOT in the submitted form should be deleted
         $idsToDelete = array_diff($existingVariantIds, $submittedIds);
         if (! empty($idsToDelete)) {
             ProductVariant::whereIn('id', $idsToDelete)->delete();
         }
     }
-
-    // --- Helper Methods to keep main logic clean ---
 
     private function normalizeForeignKeys(array &$data)
     {
@@ -174,11 +155,8 @@ class ProductRepository implements ProductRepositoryInterface
 
     private function generateAndSaveSku(Product $product, array $data)
     {
-        // Extract English name for SKU base
         $namePart = is_array($data['name']) ? ($data['name']['en'] ?? reset($data['name'])) : $data['name'];
-        // Remove non-alphanumeric, take first 3 chars, uppercase
         $cleanName = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $namePart), 0, 3));
-        // Pad ID (e.g., 0005)
         $paddedId = str_pad($product->id, 4, '0', STR_PAD_LEFT);
 
         $finalSku = "EZ-{$cleanName}-{$paddedId}";
@@ -205,21 +183,17 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         foreach ($variantsData as $index => $variantData) {
-            // Case: Update
             if (! empty($variantData['id'])) {
+                // Update logic handled in syncVariants generally, but safe to keep basic update here
                 $variant = ProductVariant::find($variantData['id']);
                 if ($variant) {
                     $variant->update([
-                        'variant_name' => $variantData['name'], // Ensure field name matches DB
+                        'variant_name' => $variantData['name'],
                         'price' => $variantData['price'],
-                        'attributes' => $variantData['attributes'] ?? $variant->attributes,
                         'status' => $variantData['status'] ?? $variant->status,
                     ]);
                 }
-            }
-            // Case: Create
-            else {
-                // Generate Variant SKU suffix
+            } else {
                 $suffix = strtoupper(Str::random(4));
                 $variantSku = $product->sku.'-V-'.$suffix;
 
@@ -228,7 +202,6 @@ class ProductRepository implements ProductRepositoryInterface
                     'variant_name' => $variantData['name'],
                     'sku' => $variantData['sku'] ?? $variantSku,
                     'price' => $variantData['price'],
-                    'attributes' => $variantData['attributes'] ?? null,
                     'status' => $variantData['status'] ?? 'active',
                 ]);
             }
@@ -239,11 +212,7 @@ class ProductRepository implements ProductRepositoryInterface
     {
         try {
             $product = Product::findOrFail($id);
-
-            // Delete variants
             ProductVariant::where('product_id', $id)->delete();
-
-            // Delete images
             $images = ProductImage::where('product_id', $id)->get();
             foreach ($images as $image) {
                 if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
@@ -251,12 +220,9 @@ class ProductRepository implements ProductRepositoryInterface
                 }
                 $image->delete();
             }
-
-            // Delete cover
             if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
                 Storage::disk('public')->delete($product->cover_image);
             }
-
             $product->delete();
         } catch (\Exception $e) {
             Log::error('ProductRepository.deleteProduct: '.$e->getMessage());

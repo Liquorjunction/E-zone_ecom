@@ -40,56 +40,67 @@
         </div>
     </div>
 
-    {{-- Import Modal --}}
-    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+    {{-- 1. IMPORT MODAL --}}
+    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Import Products (Excel/CSV)</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Import Products</h5>
+                    {{-- Hide close button during upload to prevent interruption --}}
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close-modal"></button>
                 </div>
-                {{-- Added ID to form for JS targeting --}}
+
                 <form id="importForm" action="{{ route('admin.products.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Choose File</label>
-                            <input type="file" name="file" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <a href="{{ route('admin.products.template') }}"
-                                class="text-primary text-decoration-underline">Download Sample Template</a>
-                        </div>
-                        <div class="alert alert-warning small">
-                            <strong>Note:</strong> IDs for Brands and Categories must exist in the database.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        {{-- Buttons Container --}}
-                        <div id="import-buttons" class="d-flex gap-2">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fa fa-upload"></i> Upload & Import
-                            </button>
+                        {{-- File Input Section --}}
+                        <div id="import-input-section">
+                            <div class="mb-3">
+                                <label class="form-label">Choose File (CSV/Excel)</label>
+                                <input type="file" name="file" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <a href="{{ route('admin.products.template') }}" class="text-primary text-decoration-underline">
+                                    Download Sample Template
+                                </a>
+                            </div>
+                            <div class="alert alert-warning small">
+                                <strong>Note:</strong> Large files will be processed in the background.
+                            </div>
                         </div>
 
-                        {{-- Progress Bar Container (Hidden by default) --}}
-                        <div id="import-progress" class="w-100 d-none">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted small" id="progress-label">Uploading...</span>
-                                <span class="text-muted small" id="progress-percent">0%</span>
+                        {{-- Progress Bar Section (Hidden Initially) --}}
+                        <div id="import-progress-section" class="d-none">
+                            <div class="text-center mb-2">
+                                <h5 id="progress-status-text">Uploading...</h5>
+                                <span id="progress-percent-text" class="text-muted small">0%</span>
                             </div>
-                            <div class="progress" style="height: 20px;">
+                            <div class="progress" style="height: 25px;">
                                 <div id="progress-bar-fill"
                                      class="progress-bar progress-bar-striped progress-bar-animated bg-success"
                                      role="progressbar"
-                                     style="width: 0%"
-                                     aria-valuenow="0"
-                                     aria-valuemin="0"
-                                     aria-valuemax="100">
+                                     style="width: 0%">
                                 </div>
                             </div>
-                            <small class="text-danger mt-1 d-none" id="import-error-msg"></small>
+                            <div class="mt-2 text-center text-muted small">
+                                <span id="progress-details">Please wait...</span>
+                            </div>
+                            <div id="import-error-msg" class="alert alert-danger mt-2 d-none"></div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <div id="import-buttons">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa fa-upload"></i> Start Import
+                            </button>
+                        </div>
+                        {{-- Spinner for "Processing" state --}}
+                        <div id="loading-spinner" class="d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -97,7 +108,7 @@
         </div>
     </div>
 
-    {{-- Import Status Popup (Triggered by Session) --}}
+    {{-- 2. SUCCESS/FAILURE POPUP (Triggered after Page Reload) --}}
     @if(session('import_status'))
         <div class="modal fade" id="importStatusModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
             <div class="modal-dialog modal-lg">
@@ -118,7 +129,7 @@
                             </div>
                         </div>
 
-                        @if(count(session('import_status')['errors']) > 0)
+                        @if(!empty(session('import_status')['errors']))
                             <div class="alert alert-danger">
                                 <h6>Error Log:</h6>
                                 <ul class="mb-0 small" style="max-height: 200px; overflow-y: auto;">
@@ -130,7 +141,7 @@
                         @else
                             <div class="text-center text-success">
                                 <i class="fas fa-check-circle fa-3x mb-3"></i>
-                                <p>All products were imported successfully!</p>
+                                <p>All rows imported successfully!</p>
                             </div>
                         @endif
                     </div>
@@ -150,6 +161,7 @@
     @endif
 
     @push('scripts')
+        {{-- Ensure this path matches where you put the JS file below --}}
         <script src="{{ asset('admin_assets/js/datatableJs/products.js') }}"></script>
     @endpush
 @endsection

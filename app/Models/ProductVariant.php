@@ -41,7 +41,9 @@ class ProductVariant extends Model
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom('name') // Fixed column name
+            ->generateSlugsFrom(function($model) {
+                return $model->getTranslation('variant_name', 'en');
+            })
             ->saveSlugsTo('slug')       // Fixed column name
             ->doNotGenerateSlugsOnUpdate();
     }

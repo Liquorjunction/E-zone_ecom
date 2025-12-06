@@ -77,6 +77,9 @@ class ProductsImport implements
                 $validator = Validator::make($row->toArray(), [
                     'name_en' => 'required|string',
                     'price' => 'required|numeric',
+                    'variant_name_en' => 'nullable|string',
+                    'variant_price' => 'nullable|numeric',
+                    'variant_attributes_en' => 'nullable|string',
                 ]);
 
                 if ($validator->fails()) {
@@ -126,7 +129,7 @@ class ProductsImport implements
     private function parseSpecs($row)
     {
         $specs = [];
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
             if (!empty($row["spec_{$i}_title"]) && !empty($row["spec_{$i}_value"])) {
                 $specs[] = [
                     'title' => $row["spec_{$i}_title"],

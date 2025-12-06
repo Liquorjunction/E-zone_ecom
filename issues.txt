@@ -1,0 +1,21 @@
+Issues found in product import functionality:
+
+1. Template mismatch: The downloadTemplate in ProductController uses 'variant_name_en', 'variant_price', 'variant_attributes_en', but the ProcessProductImport job expects 'variant_1_name', 'variant_1_price', etc. This will cause variants not to be parsed.
+
+2. Missing attributes handling: The job does not parse variant attributes; it only handles name and price. The template includes attributes, but job ignores them.
+
+3. Translation inconsistency: The job sets variants with 'name' key, but ProductVariant model uses 'variant_name' for translatable field. The translation service may not handle this correctly.
+
+4. SKU auto-generation: The job does not set SKU for variants, relying on auto-generation, but the model's getSlugOptions uses 'name' which might be wrong (should be variant_name).
+
+5. ProductsImport.php not used: The controller dispatches ProcessProductImport job, so the modified ProductsImport.php is not utilized. The job has its own import logic.
+
+6. Variant validation: No validation for variant data in the job, unlike in ProductsImport.
+
+7. Multiple variants: The job supports multiple variants per row (up to 20), but template only shows one example.
+
+8. Attributes format: Template shows JSON string for attributes, but job doesn't parse it.
+
+9. Progress tracking: The job updates progress, but no real-time feedback in UI beyond polling.
+
+10. Error handling: Job catches exceptions but may not handle all edge cases, like invalid JSON in attributes.

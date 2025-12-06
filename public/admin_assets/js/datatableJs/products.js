@@ -1,107 +1,135 @@
 $(document).ready(function () {
     // 1. Initialize DataTable
-    $('#product-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: $('#product-table').data('route'),
-        columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'image', name: 'image', orderable: false, searchable: false },
-            { data: 'name', name: 'name' },
-            { data: 'status', name: 'status' },
-            { data: 'action', name: 'action', orderable: false, searchable: false }
-        ]
-    });
+    if ($('#product-table').length) {
+        $('#product-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: $('#product-table').data('route'),
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'image', name: 'image', orderable: false, searchable: false },
+                { data: 'name', name: 'name' },
+                { data: 'status', name: 'status' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ]
+        });
+    }
 
-    // 2. Handle Import Form with Progress Bar
+    // 2. Handle Import Form (Queue + Polling)
     const importForm = document.getElementById('importForm');
 
     if (importForm) {
-        const btnContainer = document.getElementById('import-buttons');
-        const progressContainer = document.getElementById('import-progress');
+        const inputSection = document.getElementById('import-input-section');
+        const progressSection = document.getElementById('import-progress-section');
+        const btnSection = document.getElementById('import-buttons');
+        const btnCloseModal = document.getElementById('btn-close-modal');
+
         const progressBar = document.getElementById('progress-bar-fill');
-        const progressPercent = document.getElementById('progress-percent');
-        const progressLabel = document.getElementById('progress-label');
+        const progressText = document.getElementById('progress-percent-text');
+        const statusText = document.getElementById('progress-status-text');
+        const detailsText = document.getElementById('progress-details');
         const errorMsg = document.getElementById('import-error-msg');
 
         importForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Reset UI
-            btnContainer.classList.add('d-none');
-            progressContainer.classList.remove('d-none');
+            // --- A. Setup UI for Upload ---
+            inputSection.classList.add('d-none');
+            btnSection.classList.add('d-none');
+            progressSection.classList.remove('d-none');
+            btnCloseModal.disabled = true; // Prevent closing
             errorMsg.classList.add('d-none');
+
+            // Reset Bars
             progressBar.style.width = '0%';
-            progressBar.classList.remove('bg-danger', 'progress-bar-striped');
+            progressBar.classList.remove('bg-danger');
             progressBar.classList.add('bg-success');
-            progressLabel.innerText = "Uploading...";
-            progressPercent.innerText = "0%";
+            statusText.innerText = "Uploading File...";
+            detailsText.innerText = "Please wait while we upload your file.";
 
             let formData = new FormData(importForm);
-            let xhr = new XMLHttpRequest();
 
-            xhr.open('POST', importForm.action, true);
-
-            // Add CSRF Token
-            const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-            if (tokenMeta) {
-                xhr.setRequestHeader('X-CSRF-TOKEN', tokenMeta.content);
-            }
-
-            // Track Upload Progress
-            xhr.upload.onprogress = function(e) {
-                if (e.lengthComputable) {
-                    let percentComplete = Math.round((e.loaded / e.total) * 100);
-                    progressBar.style.width = percentComplete + '%';
-                    progressPercent.innerText = percentComplete + '%';
-
-                    if (percentComplete === 100) {
-                        progressLabel.innerText = "Processing File (Do not close)...";
-                        // Add striped animation to indicate server-side processing
-                        progressBar.classList.add('progress-bar-striped');
+            // --- B. Step 1: Upload File & Start Job ---
+            axios.post(importForm.action, formData)
+                .then(response => {
+                    if (response.data.success && response.data.batch_id) {
+                        // Upload success, now we wait for the Queue
+                        startPolling(response.data.batch_id);
+                    } else {
+                        showImportError(response.data.message || 'Upload failed unknown error');
                     }
-                }
-            };
-
-            // Handle Response
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    // Success: Reload page to show the results modal
-                    window.location.reload();
-                } else {
-                    // Try to parse JSON error message
-                    let message = 'Upload failed. Status: ' + xhr.status;
-                    try {
-                        let response = JSON.parse(xhr.responseText);
-                        if (response.errors && response.errors.file) {
-                            message = response.errors.file[0];
-                        } else if (response.errors && response.errors.error) {
-                            message = response.errors.error; // Custom error key
-                        } else if (response.message) {
-                            message = response.message;
-                        }
-                    } catch (e) { console.error(e); }
-
-                    showError(message);
-                }
-            };
-
-            xhr.onerror = function() {
-                showError('Network error occurred. Please try again.');
-            };
-
-            xhr.send(formData);
+                })
+                .catch(error => {
+                    let msg = "Upload Failed";
+                    if(error.response && error.response.data && error.response.data.message) {
+                        msg = error.response.data.message;
+                    }
+                    showImportError(msg);
+                });
         });
 
-        function showError(message) {
-            btnContainer.classList.remove('d-none');
-            // Keep progress bar visible but red to show where it failed
+        // --- C. Step 2: Poll for Progress ---
+        function startPolling(batchId) {
+            statusText.innerText = "Processing Data...";
+
+            // Poll every 1.5 seconds
+            let interval = setInterval(() => {
+                axios.get(`/admin/products/import/progress/${batchId}`)
+                    .then(res => {
+                        const data = res.data;
+
+                        if (data.status === 'processing') {
+                            // Update UI with real numbers
+                            updateProgressUI(data);
+                        }
+                        else if (data.status === 'completed') {
+                            clearInterval(interval);
+                            progressBar.style.width = '100%';
+                            progressText.innerText = '100%';
+                            statusText.innerText = "Import Complete!";
+                            detailsText.innerText = "Refreshing page to show results...";
+
+                            // --- D. Step 3: Reload to show the Success Popup ---
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                        else if (data.status === 'failed') {
+                            clearInterval(interval);
+                            let serverErr = data.errors && data.errors.length > 0 ? data.errors[0] : 'Unknown Error';
+                            showImportError("Import Job Failed: " + serverErr);
+                        }
+                    })
+                    .catch(err => {
+                        // Don't stop polling immediately on network blip, but log it
+                        console.error("Polling error", err);
+                    });
+            }, 1500);
+        }
+
+        function updateProgressUI(data) {
+            // Update Bar
+            progressBar.style.width = data.progress + '%';
+            progressText.innerText = data.progress + '%';
+
+            // Update Text Details (e.g., "Processed 5 of 20")
+            if (data.total > 0) {
+                detailsText.innerText = `Processed ${data.processed} of ${data.total} rows.`;
+            } else {
+                detailsText.innerText = "Initializing data...";
+            }
+        }
+
+        function showImportError(message) {
             progressBar.classList.remove('bg-success');
             progressBar.classList.add('bg-danger');
             progressBar.style.width = '100%';
-            progressLabel.innerText = "Error";
+            statusText.innerText = "Error";
             errorMsg.innerText = message;
             errorMsg.classList.remove('d-none');
+
+            // Re-enable close button so they can try again
+            btnCloseModal.disabled = false;
         }
     }
 });

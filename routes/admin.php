@@ -226,6 +226,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [ProductController::class, 'show'])->name('show')->middleware('can:products.read,admin');
             Route::post('/import', [ProductController::class, 'import'])->name('import')->middleware('can:products.create,admin');
             Route::get('/template', [ProductController::class, 'downloadTemplate'])->name('template');
+            Route::get('import/progress/{batchId}', [ProductController::class, 'importProgress'])->name('import.progress');
+            Route::post('import', [ProductController::class, 'import'])->name('import');
         });
     });
 });
