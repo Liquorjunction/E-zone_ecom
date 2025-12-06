@@ -115,8 +115,9 @@ class ProductRepository implements ProductRepositoryInterface
             if (! empty($variant['id']) && in_array($variant['id'], $existingVariantIds)) {
                 $submittedIds[] = $variant['id'];
                 ProductVariant::where('id', $variant['id'])->update([
-                    'variant_name' => $variant['name'],
+                    'variant_name' => $variant['variant_name'] ?? $variant['name'],
                     'price' => $variant['price'],
+                    'attributes' => $variant['attributes'] ?? null,
                     'status' => $variant['status'] ?? 'active',
                 ]);
             } else {
@@ -199,9 +200,10 @@ class ProductRepository implements ProductRepositoryInterface
 
                 ProductVariant::create([
                     'product_id' => $product->id,
-                    'variant_name' => $variantData['name'],
+                    'variant_name' => $variantData['variant_name'] ?? $variantData['name'],
                     'sku' => $variantData['sku'] ?? $variantSku,
                     'price' => $variantData['price'],
+                    'attributes' => $variantData['attributes'] ?? null,
                     'status' => $variantData['status'] ?? 'active',
                 ]);
             }

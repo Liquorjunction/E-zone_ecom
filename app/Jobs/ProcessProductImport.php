@@ -80,6 +80,37 @@ class ProcessProductImport implements ShouldQueue
                     continue;
                 }
 
+                // 1.5. Validate Variants (if present)
+                for ($i = 1; $i <= 20; $i++) {
+                    $vNameKey = "variant_{$i}_name_en";
+                    $vPriceKey = "variant_{$i}_price";
+                    $vAttrKey = "variant_{$i}_attributes_en";
+
+                    if (!empty($line[$vNameKey]) || !empty($line[$vPriceKey]) || !empty($line[$vAttrKey])) {
+                        if (empty($line[$vNameKey])) {
+                            $failed++;
+                            $errors[] = "Row $rowNum: Variant $i name is missing.";
+                            $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
+                            continue 2;
+                        }
+                        if (empty($line[$vPriceKey]) || !is_numeric($line[$vPriceKey])) {
+                            $failed++;
+                            $errors[] = "Row $rowNum: Variant $i price is missing or invalid.";
+                            $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
+                            continue 2;
+                        }
+                        if (!empty($line[$vAttrKey])) {
+                            json_decode($line[$vAttrKey], true);
+                            if (json_last_error() !== JSON_ERROR_NONE) {
+                                $failed++;
+                                $errors[] = "Row $rowNum: Variant $i attributes must be valid JSON.";
+                                $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
+                                continue 2;
+                            }
+                        }
+                    }
+                }
+
                 $nameLower = strtolower(trim($line['name_en']));
 
                 // 2. Check File Duplicates
@@ -123,10 +154,8 @@ class ProcessProductImport implements ShouldQueue
                 // SubCategory Validation Logic
                 if (! empty($subName) && ! $subId) {
                     $rowErrors[] = "Sub Category '{$line['sub_category']}' not found";
-                } elseif (empty($subId)) {
-                    // Remove this elseif block if you enabled nullable sub_category_id in migration
-                    $rowErrors[] = 'Sub Category is required';
                 }
+                // SubCategory is now optional (nullable in migration)
 
                 if (! empty($rowErrors)) {
                     $failed++;
@@ -154,16 +183,25 @@ class ProcessProductImport implements ShouldQueue
                     }
 
                     // 2. Dynamic Variants Parsing (1 to 20)
-                    // Looks for columns like 'variant_1_name', 'variant_1_price'
+                    // Looks for columns like 'variant_1_name_en', 'variant_1_price', 'variant_1_attributes_en'
                     $variants = [];
                     for ($i = 1; $i <= 20; $i++) {
-                        $vNameKey = "variant_{$i}_name";
+                        $vNameKey = "variant_{$i}_name_en";
                         $vPriceKey = "variant_{$i}_price";
+                        $vAttrKey = "variant_{$i}_attributes_en";
 
                         if (! empty($line[$vNameKey]) && ! empty($line[$vPriceKey])) {
+                            $attributes = [];
+                            if (! empty($line[$vAttrKey])) {
+                                $attributes = json_decode($line[$vAttrKey], true);
+                                if (json_last_error() !== JSON_ERROR_NONE) {
+                                    $attributes = []; // Invalid JSON, use empty array
+                                }
+                            }
                             $variants[] = [
-                                'name' => $line[$vNameKey],
+                                'variant_name' => ['en' => $line[$vNameKey]],
                                 'price' => $line[$vPriceKey],
+                                'attributes' => ['en' => $attributes],
                                 'status' => 'active',
                             ];
                         }
