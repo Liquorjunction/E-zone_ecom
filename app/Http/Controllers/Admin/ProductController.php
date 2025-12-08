@@ -127,6 +127,22 @@ class ProductController extends Controller
         }
     }
 
+    public function toggleBestseller(EditProductRequest $request, ProductRepo $productRepo)
+    {
+        try {
+            $id = $request->input('id');
+            $product = $productRepo->updateProductBestseller($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product bestseller status updated successfully.',
+                'is_bestseller' => $product->is_bestseller
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function destroy(DestroyProductRequest $request, ProductRepo $productRepo)
     {
         try {
@@ -158,6 +174,13 @@ class ProductController extends Controller
                 ->addColumn('name', function ($product) {
                     return $product->getTranslation('name', 'en');
                 })
+                ->addColumn('is_bestseller', function ($product) use ($request) {
+                    $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleBestseller', ['id' => $product->id]) : '';
+                    $data['is_bestseller'] = $product->is_bestseller;
+                    $data['id'] = $product->id;
+
+                    return view('admin.partials.datatable-bestseller', $data)->render();
+                })
                 ->addColumn('status', function ($product) use ($request) {
                     $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleStatus', ['id' => $product->id]) : '';
                     $data['status'] = $product->status;
@@ -173,7 +196,7 @@ class ProductController extends Controller
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['image', 'name', 'status', 'action'])
+                ->rawColumns(['image', 'name', 'is_bestseller', 'status', 'action'])
                 ->make(true);
 
         } catch (\Exception $e) {
@@ -252,7 +275,7 @@ class ProductController extends Controller
     {
         $headers = [
             'name_en', 'description_en', 'brand', 'category', 'sub_category',
-            'price', 'warranty_en', 'dimensions_en',
+            'price', 'is_bestseller', 'warranty_en', 'dimensions_en',
             'spec_title', 'spec_value',
             'variant_name_en', 'variant_price',
         ];
@@ -262,18 +285,18 @@ class ProductController extends Controller
             fputcsv($file, $headers);
 
             // Example 1: Simple Product
-            fputcsv($file, ['iPhone 15', 'Latest Apple Phone', 'Apple', 'Mobile', 'Smartphones', '999', '1 Year', '6.1 inch', 'Color', 'Black', '', '', '']);
+            fputcsv($file, ['iPhone 15', 'Latest Apple Phone', 'Apple', 'Mobile', 'Smartphones', '999', '1', '1 Year', '6.1 inch', 'Color', 'Black', '', '', '']);
 
             // Example 2: Complex Product (Grouped Rows)
             // Row 1: Main Data + First Variant + First Spec
             fputcsv($file, [
-                'Galaxy S24', 'AI Phone', 'Samsung', 'Mobile', 'Smartphones', '899', '1 Year', '6.2 inch',
+                'Galaxy S24', 'AI Phone', 'Samsung', 'Mobile', 'Smartphones', '899', '0', '1 Year', '6.2 inch',
                 'Processor', 'Snapdragon 8 Gen 3', // Spec 1
                 'Titanium Gray', '899',   // Variant 1
             ]);
             // Row 2: Empty Main Data + Second Variant + Second Spec
             fputcsv($file, [
-                '', '', '', '', '', '', '', '',
+                '', '', '', '', '', '', '', '', '',
                 'Memory', '256GB',                  // Spec 2
                 'Titanium Black', '899',  // Variant 2
             ]);

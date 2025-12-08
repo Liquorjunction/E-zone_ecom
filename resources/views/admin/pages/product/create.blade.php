@@ -163,6 +163,16 @@
                                                 <option value="inactive">Inactive</option>
                                             </select>
                                         </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-check mt-4">
+                                                <input class="form-check-input" type="checkbox" name="is_bestseller"
+                                                    value="1" id="is_bestseller" {{ old('is_bestseller') ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="is_bestseller">
+                                                    Mark as Bestseller
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="d-flex justify-content-end mt-3">
                                         <button type="button" class="btn btn-primary next-step" data-next="step2">Next</button>

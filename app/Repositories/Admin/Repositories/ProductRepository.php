@@ -246,6 +246,20 @@ class ProductRepository implements ProductRepositoryInterface
         }
     }
 
+    public function updateProductBestseller($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->is_bestseller = !$product->is_bestseller;
+            $product->save();
+
+            return $product;
+        } catch (\Exception $e) {
+            Log::error('ProductRepository.updateProductBestseller: '.$e->getMessage());
+            throw $e;
+        }
+    }
+
     public function getProductById($id)
     {
         return Product::findOrFail($id);
@@ -253,6 +267,6 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getDataforDataTable($request = null)
     {
-        return Product::select('id', 'name', 'status', 'cover_image')->latest()->get();
+        return Product::select('id', 'name', 'status', 'is_bestseller', 'cover_image')->latest()->get();
     }
 }

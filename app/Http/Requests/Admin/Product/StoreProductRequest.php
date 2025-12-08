@@ -49,6 +49,7 @@ class StoreProductRequest extends FormRequest
             'variants.*.price' => 'required|numeric|min:0',
 
             'status' => 'nullable|in:active,inactive',
+            'is_bestseller' => 'nullable|boolean',
         ];
     }
 

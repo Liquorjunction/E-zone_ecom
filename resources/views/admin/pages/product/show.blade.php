@@ -9,8 +9,11 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="header-title">
-                            <h4 class="card-title">{{ $product->getTranslation('name', 'en') }} <span
-                                    class="badge bg-{{ $product->status == 'active' ? 'success' : 'danger' }} fs-6 ms-2">{{ ucfirst($product->status) }}</span>
+                            <h4 class="card-title">{{ $product->getTranslation('name', 'en') }}
+                                <span class="badge bg-{{ $product->status == 'active' ? 'success' : 'danger' }} fs-6 ms-2">{{ ucfirst($product->status) }}</span>
+                                @if($product->is_bestseller)
+                                    <span class="badge bg-warning text-dark fs-6 ms-2">⭐ Bestseller</span>
+                                @endif
                             </h4>
                         </div>
                         <div>
@@ -51,6 +54,16 @@
                                             <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
                                                 <strong>Sub Category:</strong>
                                                 <span>{{ $product->subCategory->getTranslation('sub-category-name', 'en') ?? 'N/A' }}</span>
+                                            </li>
+                                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                                <strong>Bestseller:</strong>
+                                                <span>
+                                                    @if($product->is_bestseller)
+                                                        <span class="badge bg-warning text-dark">⭐ Yes</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">No</span>
+                                                    @endif
+                                                </span>
                                             </li>
                                         </ul>
                                     </div>

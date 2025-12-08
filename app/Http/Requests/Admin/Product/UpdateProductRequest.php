@@ -42,6 +42,7 @@ class UpdateProductRequest extends FormRequest
 
             'price' => 'required|numeric|min:0',
             'status' => 'nullable|in:active,inactive',
+            'is_bestseller' => 'nullable|boolean',
 
             // Images (Nullable on update)
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',

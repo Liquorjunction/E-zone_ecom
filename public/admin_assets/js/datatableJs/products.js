@@ -9,6 +9,7 @@ $(document).ready(function () {
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'image', name: 'image', orderable: false, searchable: false },
                 { data: 'name', name: 'name' },
+                { data: 'is_bestseller', name: 'is_bestseller', orderable: false, searchable: false },
                 { data: 'status', name: 'status' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
             ]
@@ -132,4 +133,50 @@ $(document).ready(function () {
             btnCloseModal.disabled = false;
         }
     }
+
+    // 3. Handle Bestseller Toggle (using event delegation)
+    $(document).on('change', '.bestseller-toggle', function() {
+        const checkbox = $(this);
+        const url = checkbox.data('url');
+        const isChecked = checkbox.is(':checked');
+        const label = checkbox.siblings('label');
+
+        // Optimistic UI Update
+        if (label.length) {
+            if (isChecked) {
+                label.html('<span class="text-warning">⭐ Bestseller</span>');
+            } else {
+                label.html('<span class="text-muted">Regular</span>');
+            }
+        }
+
+        // Send AJAX Request
+        $.ajax({
+            url: url,
+            type: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (window.showToast) {
+                    window.showToast(response.message || 'Bestseller status updated!', 'success');
+                }
+            },
+            error: function(xhr) {
+                // Revert UI on Failure
+                checkbox.prop('checked', !isChecked);
+                if (label.length) {
+                    if (!isChecked) {
+                        label.html('<span class="text-warning">⭐ Bestseller</span>');
+                    } else {
+                        label.html('<span class="text-muted">Regular</span>');
+                    }
+                }
+
+                if (window.showToast) {
+                    window.showToast('Failed to update bestseller status. Please try again.', 'error');
+                }
+            }
+        });
+    });
 });

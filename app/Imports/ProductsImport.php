@@ -99,6 +99,7 @@ class ProductsImport implements
 
                     'price' => $row['price'],
                     'status' => 'active',
+                    'is_bestseller' => filter_var($row['is_bestseller'] ?? false, FILTER_VALIDATE_BOOLEAN),
                     'specifications' => [
                         'en' => $this->parseSpecs($row)
                     ],
