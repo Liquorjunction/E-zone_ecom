@@ -40,6 +40,7 @@ class Product extends Model
         'specifications',
         'warranty',
         'status',
+        'is_bestseller',
     ];
 
     // Standard Casts
@@ -47,6 +48,7 @@ class Product extends Model
     // Spatie handles the serialization automatically.
     protected $casts = [
         'price' => 'decimal:2',
+        'is_bestseller' => 'boolean',
     ];
 
     public function getSlugOptions() : SlugOptions

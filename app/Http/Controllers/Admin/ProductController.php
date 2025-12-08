@@ -250,62 +250,40 @@ class ProductController extends Controller
 
     public function downloadTemplate()
     {
-        // 1. Basic Headers
         $headers = [
-            'name_en',
-            'description_en',
-            'brand',
-            'category',
-            'sub_category',
-            'price',
-            'warranty_en',
-            'dimensions_en',
+            'name_en', 'description_en', 'brand', 'category', 'sub_category',
+            'price', 'warranty_en', 'dimensions_en',
+            'spec_title', 'spec_value',
+            'variant_name_en', 'variant_price',
         ];
-
-        // 2. Add Specification Headers (1-5 for template simplicity, Job supports 20)
-        for ($i = 1; $i <= 5; $i++) {
-            $headers[] = "spec_{$i}_title";
-            $headers[] = "spec_{$i}_value";
-        }
-
-        // 3. Add Variant Headers (1-3 for template simplicity, Job supports 20)
-        for ($i = 1; $i <= 3; $i++) {
-            $headers[] = "variant_{$i}_name_en";
-            $headers[] = "variant_{$i}_price";
-        }
 
         $callback = function () use ($headers) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
 
-            // Sample Row data
-            $row = [
-                'Galaxy S24 Ultra',
-                'AI Phone with titanium frame.',
-                'Samsung',
-                'Electronics',
-                'Mobile Phones',
-                '1200.00',
-                '1 Year',
-                '6.8 inch',
-                // Specs
-                'Processor', 'Snapdragon 8 Gen 3',
-                'Camera', '200MP',
-                'Battery', '5000mAh',
-                '', '', '', '', // Empty specs placeholders
-                // Variants
-                'Titanium Black', '1200.00',
-                'Titanium Gray', '1200.00',
-                'Titanium Violet', '1200.00',
-            ];
+            // Example 1: Simple Product
+            fputcsv($file, ['iPhone 15', 'Latest Apple Phone', 'Apple', 'Mobile', 'Smartphones', '999', '1 Year', '6.1 inch', 'Color', 'Black', '', '', '']);
 
-            fputcsv($file, $row);
+            // Example 2: Complex Product (Grouped Rows)
+            // Row 1: Main Data + First Variant + First Spec
+            fputcsv($file, [
+                'Galaxy S24', 'AI Phone', 'Samsung', 'Mobile', 'Smartphones', '899', '1 Year', '6.2 inch',
+                'Processor', 'Snapdragon 8 Gen 3', // Spec 1
+                'Titanium Gray', '899',   // Variant 1
+            ]);
+            // Row 2: Empty Main Data + Second Variant + Second Spec
+            fputcsv($file, [
+                '', '', '', '', '', '', '', '',
+                'Memory', '256GB',                  // Spec 2
+                'Titanium Black', '899',  // Variant 2
+            ]);
+
             fclose($file);
         };
 
         return response()->stream($callback, 200, [
-            'Content-type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=products_import_template.csv',
+            'Content-type' => '.xls/xlsx/csv',
+            'Content-Disposition' => 'attachment; filename=products_import_grouped_template.csv',
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',

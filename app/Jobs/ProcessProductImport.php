@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\DTOs\ProductImportDTO;
 use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
@@ -15,20 +16,30 @@ use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class ProcessProductImport implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 3600; // 1 Hour Timeout for large batches
+    public $timeout = 3600; // 1 hour timeout
 
-    public $tries = 1;      // Don't retry automatically to avoid duplicate partial inserts
+    public $tries = 1;
 
     protected $filePath;
 
     protected $batchId;
+
+    // Lookup Maps
+    protected $brandsMap = [];
+
+    protected $catsMap = [];
+
+    protected $subCatsMap = [];
 
     public function __construct($filePath, $batchId)
     {
@@ -41,251 +52,264 @@ class ProcessProductImport implements ShouldQueue
         $cacheKey = 'import_progress_'.$this->batchId;
 
         try {
-            // 1. Initialize Status
             $this->updateProgress($cacheKey, 'processing', 0, 0, 0, 0, []);
 
-            // 2. Read File Count
-            $collection = (new FastExcel)->import($this->filePath);
-            $totalRows = $collection->count();
+            // 1. Preload Maps (Fixes the Translation Error)
+            $this->preloadMaps();
 
-            if ($totalRows === 0) {
-                $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['File is empty. Please upload a valid CSV.']);
+            // 2. Read File
+            try {
+                $collection = (new FastExcel)->import($this->filePath);
+            } catch (\Exception $e) {
+                $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['File error: '.$e->getMessage()]);
 
                 return;
             }
 
-            // 3. Pre-load Relationships (Map Lowercase Name -> ID)
-            $brands = Brand::all()->mapWithKeys(fn ($i) => [strtolower(trim($i->getTranslation('name', 'en'))) => $i->id]);
-            $categories = Categories::all()->mapWithKeys(fn ($i) => [strtolower(trim($i->getTranslation('category-name', 'en'))) => $i->id]);
-            $subCategories = SubCategories::all()->mapWithKeys(fn ($i) => [strtolower(trim($i->getTranslation('sub-category-name', 'en'))) => $i->id]);
+            if ($collection->count() === 0) {
+                $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['File is empty.']);
 
-            $processedNames = [];
+                return;
+            }
+
+            // 3. Group Rows Logic
+            $groupedProducts = [];
+            $currentDTO = null;
+
+            foreach ($collection as $index => $row) {
+                $rowNum = $index + 2;
+
+                // Normalize Row: Cast to array, lowercase keys, trim values
+                $row = (array) $row;
+                $row = array_change_key_case($row, CASE_LOWER);
+                $row = array_map(fn ($v) => is_string($v) ? trim($v) : $v, $row);
+
+                // Check for Main Product Row
+                if (! empty($row['name_en'])) {
+                    // If we were building a product, save it to the list
+                    if ($currentDTO) {
+                        $groupedProducts[] = $currentDTO;
+                    }
+                    // Start new product DTO
+                    $currentDTO = new ProductImportDTO($rowNum, $row);
+                }
+
+                // If we have an active product, add Details (Specs & Variants)
+                // This applies to the Main Row AND Child Rows
+                if ($currentDTO) {
+                    $this->appendDetailsToDTO($currentDTO, $row);
+                }
+            }
+
+            // Don't forget the last product in the loop
+            if ($currentDTO) {
+                $groupedProducts[] = $currentDTO;
+            }
+
+            // 4. Process the Groups
+            $totalProducts = count($groupedProducts);
+            $processed = 0;
             $success = 0;
             $failed = 0;
-            $processed = 0;
             $errors = [];
 
-            foreach ($collection as $index => $line) {
+            foreach ($groupedProducts as $dto) {
                 $processed++;
-                $rowNum = $index + 2; // Excel row number (header is 1)
+                $result = $this->importSingleProduct($dto, $productRepo, $translationService);
 
-                // --- A. VALIDATION CHECKS ---
-
-                // 1. Check Name Presence
-                if (empty($line['name_en'])) {
-                    $failed++;
-                    $errors[] = "Row $rowNum: Product Name is missing.";
-                    $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-
-                    continue;
-                }
-
-                // 1.5. Validate Variants (if present)
-                for ($i = 1; $i <= 20; $i++) {
-                    $vNameKey = "variant_{$i}_name_en";
-                    $vPriceKey = "variant_{$i}_price";
-                    $vAttrKey = "variant_{$i}_attributes_en";
-
-                    // If variant name is present, require price; attributes are optional
-                    if (!empty($line[$vNameKey])) {
-                        if (empty($line[$vPriceKey]) || !is_numeric($line[$vPriceKey])) {
-                            $failed++;
-                            $errors[] = "Row $rowNum: Variant $i price is missing or invalid.";
-                            $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-                            continue 2;
-                        }
-                        if (!empty($line[$vAttrKey])) {
-                            json_decode($line[$vAttrKey], true);
-                            if (json_last_error() !== JSON_ERROR_NONE) {
-                                $failed++;
-                                $errors[] = "Row $rowNum: Variant $i attributes must be valid JSON.";
-                                $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-                                continue 2;
-                            }
-                        }
-                    } elseif (!empty($line[$vPriceKey])) {
-                        // If price is present but name is missing, that's an error
-                        $failed++;
-                        $errors[] = "Row $rowNum: Variant $i name is missing.";
-                        $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-                        continue 2;
-                    }
-                    // If only attributes are present, ignore them (treat as incomplete variant)
-                }
-
-                $nameLower = strtolower(trim($line['name_en']));
-
-                // 2. Check File Duplicates
-                if (in_array($nameLower, $processedNames)) {
-                    $failed++;
-                    $errors[] = "Row $rowNum: Skipped - Duplicate name found in this file.";
-                    $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-
-                    continue;
-                }
-                $processedNames[] = $nameLower;
-
-                // 3. Check Database Duplicates
-                // Compares against the English translation in the JSON column
-                if (Product::whereRaw('LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, "$.en"))) = ?', [$nameLower])->exists()) {
-                    $failed++;
-                    $errors[] = "Row $rowNum: Skipped - Product already exists in the system.";
-                    $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-
-                    continue;
-                }
-
-                // 4. Resolve Relationships
-                $brandName = strtolower(trim($line['brand'] ?? ''));
-                $catName = strtolower(trim($line['category'] ?? ''));
-                $subName = strtolower(trim($line['sub_category'] ?? ''));
-
-                $brandId = $brands[$brandName] ?? null;
-                $catId = $categories[$catName] ?? null;
-                $subId = (! empty($subName)) ? ($subCategories[$subName] ?? null) : null;
-
-                // 5. Logical Validation Errors
-                $rowErrors = [];
-                if (! $brandId) {
-                    $rowErrors[] = "Brand '{$line['brand']}' not found";
-                }
-                if (! $catId) {
-                    $rowErrors[] = "Category '{$line['category']}' not found";
-                }
-
-                // SubCategory Validation Logic
-                if (! empty($subName) && ! $subId) {
-                    $rowErrors[] = "Sub Category '{$line['sub_category']}' not found";
-                }
-                // SubCategory is now optional (nullable in migration)
-
-                if (! empty($rowErrors)) {
-                    $failed++;
-                    $errors[] = "Row $rowNum: ".implode(', ', $rowErrors).'.';
-                    $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-
-                    continue;
-                }
-
-                // --- B. PROCESSING ---
-                try {
-                    // 1. Dynamic Specifications Parsing (1 to 20)
-                    $specifications = [];
-                    for ($i = 1; $i <= 20; $i++) {
-                        $titleKey = "spec_{$i}_title";
-                        $valueKey = "spec_{$i}_value";
-
-                        // Only add if both title and value exist for this index
-                        if (! empty($line[$titleKey]) && ! empty($line[$valueKey])) {
-                            $specifications[] = [
-                                'title' => $line[$titleKey],
-                                'value' => $line[$valueKey],
-                            ];
-                        }
-                    }
-
-                    // 2. Dynamic Variants Parsing (1 to 20)
-                    // Looks for columns like 'variant_1_name_en', 'variant_1_price', 'variant_1_attributes_en'
-                    $variants = [];
-                    for ($i = 1; $i <= 20; $i++) {
-                        $vNameKey = "variant_{$i}_name_en";
-                        $vPriceKey = "variant_{$i}_price";
-                        $vAttrKey = "variant_{$i}_attributes_en";
-
-                        if (! empty($line[$vNameKey]) && ! empty($line[$vPriceKey])) {
-                            $attributes = [];
-                            if (! empty($line[$vAttrKey])) {
-                                $attributes = json_decode($line[$vAttrKey], true);
-                                if (json_last_error() !== JSON_ERROR_NONE) {
-                                    $attributes = []; // Invalid JSON, use empty array
-                                }
-                            }
-                            $variants[] = [
-                                'variant_name' => ['en' => $line[$vNameKey]],
-                                'price' => $line[$vPriceKey],
-                                'attributes' => ['en' => $attributes],
-                                'status' => 'active',
-                            ];
-                        }
-                    }
-
-                    $data = [
-                        'brand_id' => $brandId,
-                        'category_id' => $catId,
-                        'sub_category_id' => $subId,
-                        'price' => $line['price'],
-                        'status' => 'active',
-                        'name' => ['en' => $line['name_en']],
-                        'description' => ['en' => $line['description_en']],
-                        'warranty' => ['en' => $line['warranty_en']],
-                        'dimensions' => ['en' => $line['dimensions_en']],
-                        // Assign parsed arrays
-                        'specifications' => [
-                            'en' => $specifications,
-                        ],
-                        'variants' => $variants, // Variants passed to repository
-                    ];
-
-                    // Auto Translation
-                    $data = $translationService->prepareProductData($data);
-
-                    // Save
-                    $productRepo->createProduct(new Request, $data);
+                if ($result['status'] === 'success') {
                     $success++;
-
-                } catch (\Illuminate\Database\QueryException $e) {
-                    // Handle SQL Errors Gracefully
+                } else {
                     $failed++;
-                    $msg = $e->getMessage();
-
-                    $userMsg = 'Database Error';
-                    if (str_contains($msg, 'sub_category_id')) {
-                        $userMsg = 'Sub Category is missing or invalid.';
-                    } elseif (str_contains($msg, 'sku')) {
-                        $userMsg = 'SKU generation failed.';
-                    } elseif (str_contains($msg, 'Data too long')) {
-                        $userMsg = 'Data too long for one of the fields.';
-                    }
-
-                    $errors[] = "Row $rowNum: $userMsg";
-                    Log::error("Import SQL Error Row $rowNum: ".$msg);
-
-                } catch (\Exception $e) {
-                    $failed++;
-                    $errors[] = "Row $rowNum: System Error. Please check logs.";
-                    Log::error("Import Generic Error Row $rowNum: ".$e->getMessage());
+                    $errors[] = $result['message'];
                 }
 
-                // Update Progress
-                $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
+                // Update Progress every 5 items
+                if ($processed % 5 === 0 || $processed === $totalProducts) {
+                    $this->updateProgress($cacheKey, 'processing', $totalProducts, $processed, $success, $failed, $errors);
+                }
             }
 
             // Cleanup
             if (file_exists($this->filePath)) {
-                unlink($this->filePath);
+                @unlink($this->filePath);
             }
 
-            // Mark Complete
-            $this->updateProgress($cacheKey, 'completed', $totalRows, $processed, $success, $failed, $errors);
+            $this->updateProgress($cacheKey, 'completed', $totalProducts, $processed, $success, $failed, $errors);
 
         } catch (\Exception $e) {
-            Log::error('Import Job Fatal Error: '.$e->getMessage());
-            $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal System Error: '.$e->getMessage()]);
+            Log::error('Import Job Fatal: '.$e->getMessage());
+            $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal Error: '.$e->getMessage()]);
         }
+    }
+
+    /**
+     * Helper to add Specs and Variants to the DTO
+     */
+    private function appendDetailsToDTO(ProductImportDTO $dto, array $row)
+    {
+        // 1. Add Specification
+        $specTitle = $row['spec_title'] ?? $row['spec_1_title'] ?? null;
+        $specValue = $row['spec_value'] ?? $row['spec_1_value'] ?? null;
+
+        if (! empty($specTitle) && ! empty($specValue)) {
+            $dto->specs[] = ['title' => $specTitle, 'value' => $specValue];
+        }
+
+        // 2. Add Variant (Only if price exists)
+        $varPrice = $row['variant_price'] ?? $row['variant_1_price'] ?? null;
+
+        if (! empty($varPrice)) {
+            $varName = $row['variant_name_en'] ?? $row['variant_1_name_en'] ?? null;
+            $finalVarName = $varName ?: ($dto->mainData['name_en'].' - Variant');
+
+            // Auto-Generate Variant SKU ONLY if missing
+            $varSku = $row['variant_sku'] ?? null;
+            if (empty($varSku)) {
+                $slug = Str::slug($dto->mainData['name_en']).'-'.Str::slug($finalVarName);
+                $varSku = substr($slug, 0, 40).'-'.strtoupper(Str::random(6));
+            }
+
+            $dto->variants[] = [
+                'name_en' => $finalVarName,
+                'price' => $varPrice,
+                'sku' => $varSku,
+            ];
+        }
+    }
+
+    private function importSingleProduct(ProductImportDTO $dto, $repo, $transService)
+    {
+        $row = $dto->mainData;
+        $rowNum = $dto->rowNum;
+
+        // 1. Validation
+        $validator = Validator::make($row, [
+            'name_en' => 'required|string|max:255',
+            'brand' => 'required|string',
+            'category' => 'required|string',
+            'price' => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return ['status' => 'error', 'message' => "Row $rowNum: ".$validator->errors()->first()];
+        }
+
+        // 2. Resolve IDs (Case Insensitive)
+        $brandId = $this->brandsMap[strtolower(trim($row['brand']))] ?? null;
+        $catId = $this->catsMap[strtolower(trim($row['category']))] ?? null;
+
+        if (! $brandId) {
+            return ['status' => 'error', 'message' => "Row $rowNum: Brand '{$row['brand']}' not found."];
+        }
+        if (! $catId) {
+            return ['status' => 'error', 'message' => "Row $rowNum: Category '{$row['category']}' not found."];
+        }
+
+        $subId = null;
+        if (! empty($row['sub_category'])) {
+            $subId = $this->subCatsMap[strtolower(trim($row['sub_category']))] ?? null;
+            if (! $subId) {
+                return ['status' => 'error', 'message' => "Row $rowNum: SubCategory '{$row['sub_category']}' not found."];
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            // 3. Check Duplicates (by English Name)
+            $exists = Product::whereRaw('LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, "$.en"))) = ?', [strtolower($row['name_en'])])->exists();
+            if ($exists) {
+                DB::rollBack();
+
+                return ['status' => 'error', 'message' => "Row $rowNum: Product '{$row['name_en']}' already exists."];
+            }
+
+            // 4. Prepare Data
+            $data = [
+                'brand_id' => $brandId,
+                'category_id' => $catId,
+                'sub_category_id' => $subId,
+                'price' => $row['price'],
+                'status' => 'active',
+                // 'sku' is OMITTED so Repository generates the Main Product SKU
+
+                // Translatable Fields
+                'name' => ['en' => $row['name_en']],
+                'description' => ['en' => $row['description_en'] ?? ''],
+                'warranty' => ['en' => $row['warranty_en'] ?? ''],
+                'dimensions' => ['en' => $row['dimensions_en'] ?? ''],
+
+                // Specs (Already grouped array)
+                'specifications' => ['en' => $dto->specs],
+
+                // Variants (With auto-generated SKU if missing)
+                'variants' => array_map(fn ($v) => [
+                    'variant_name' => ['en' => $v['name_en']],
+                    'price' => $v['price'],
+                    'sku' => $v['sku'],
+                    'status' => 'active',
+                ], $dto->variants),
+            ];
+
+            // 5. Auto Translation
+            $data = $transService->prepareProductData($data);
+
+            // 6. Save via Repository
+            $repo->createProduct(new Request, $data);
+
+            DB::commit();
+
+            return ['status' => 'success'];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Import Error Row $rowNum: ".$e->getMessage());
+
+            return ['status' => 'error', 'message' => "Row $rowNum: ".$e->getMessage()];
+        }
+    }
+
+    private function preloadMaps()
+    {
+        // 1. Brands (Key: name)
+        $this->brandsMap = Brand::all()->mapWithKeys(function ($i) {
+            try {
+                $name = $i->getTranslation('name', 'en');
+            } catch (\Exception $e) {
+                $name = $i->name;
+            }
+
+            return [strtolower(trim($name)) => $i->id];
+        })->toArray();
+
+        // 2. Categories (Key: category-name) <-- FIXED
+        $this->catsMap = Categories::all()->mapWithKeys(function ($i) {
+            try {
+                // Must use the exact attribute name from your Model's $translatable array
+                $name = $i->getTranslation('category-name', 'en');
+            } catch (\Exception $e) {
+                $name = $i->name; // Fallback
+            }
+
+            return [strtolower(trim($name)) => $i->id];
+        })->toArray();
+
+        // 3. SubCategories (Key: sub-category-name) <-- FIXED
+        $this->subCatsMap = SubCategories::all()->mapWithKeys(function ($i) {
+            try {
+                // Must use the exact attribute name from your Model's $translatable array
+                $name = $i->getTranslation('sub-category-name', 'en');
+            } catch (\Exception $e) {
+                $name = $i->name; // Fallback
+            }
+
+            return [strtolower(trim($name)) => $i->id];
+        })->toArray();
     }
 
     private function updateProgress($key, $status, $total, $processed, $success, $failed, $errors)
     {
         $percent = ($total > 0) ? round(($processed / $total) * 100) : 0;
-
-        Cache::put($key, [
-            'status' => $status,
-            'progress' => $percent,
-            'total' => $total,
-            'processed' => $processed,
-            'success' => $success,
-            'failed' => $failed,
-            'errors' => $errors,
-        ], 3600);
+        Cache::put($key, compact('status', 'percent', 'total', 'processed', 'success', 'failed', 'errors'), 3600);
     }
 }
