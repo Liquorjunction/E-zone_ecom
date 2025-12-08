@@ -86,13 +86,8 @@ class ProcessProductImport implements ShouldQueue
                     $vPriceKey = "variant_{$i}_price";
                     $vAttrKey = "variant_{$i}_attributes_en";
 
-                    if (!empty($line[$vNameKey]) || !empty($line[$vPriceKey]) || !empty($line[$vAttrKey])) {
-                        if (empty($line[$vNameKey])) {
-                            $failed++;
-                            $errors[] = "Row $rowNum: Variant $i name is missing.";
-                            $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
-                            continue 2;
-                        }
+                    // If variant name is present, require price; attributes are optional
+                    if (!empty($line[$vNameKey])) {
                         if (empty($line[$vPriceKey]) || !is_numeric($line[$vPriceKey])) {
                             $failed++;
                             $errors[] = "Row $rowNum: Variant $i price is missing or invalid.";
@@ -108,7 +103,14 @@ class ProcessProductImport implements ShouldQueue
                                 continue 2;
                             }
                         }
+                    } elseif (!empty($line[$vPriceKey])) {
+                        // If price is present but name is missing, that's an error
+                        $failed++;
+                        $errors[] = "Row $rowNum: Variant $i name is missing.";
+                        $this->updateProgress($cacheKey, 'processing', $totalRows, $processed, $success, $failed, $errors);
+                        continue 2;
                     }
+                    // If only attributes are present, ignore them (treat as incomplete variant)
                 }
 
                 $nameLower = strtolower(trim($line['name_en']));

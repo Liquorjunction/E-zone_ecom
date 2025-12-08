@@ -9,7 +9,34 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!editorElement) return;
 
         // Initialize Quill
-        const quill = new Quill(`#${id}`, { theme: "snow" });
+        const quill = new Quill(`#${id}`, {
+            theme: "snow",
+             modules: {
+                toolbar: [
+                    [{ font: [] }],
+                    [{ size: ["small", false, "large", "huge"] }],
+                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+                    ["bold", "italic", "underline", "strike"], // text styles
+                    [{ color: [] }, { background: [] }], // color pickers
+                    [{ script: "sub" }, { script: "super" }], // subscript/superscript
+
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ list: "check" }], // checkbox lists
+                    [{ indent: "-1" }, { indent: "+1" }], // indentation
+                    [{ align: [] }], // align: left, center, right, justify
+                    [{ direction: "rtl" }], // RTL text direction
+
+                    ["blockquote", "code-block"], // blocks
+                    [{ header: 1 }, { header: 2 }], // specific headers
+
+                    ["link", "image", "video", "formula"], // embeds
+
+                    ["clean"], // remove formatting
+                    ["undo", "redo"], // requires custom handler
+                ],
+            }
+        });
         quillEditors[id] = { quill, hiddenInputId };
 
         const hiddenInput = document.getElementById(hiddenInputId);

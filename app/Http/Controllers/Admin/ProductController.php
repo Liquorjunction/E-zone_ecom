@@ -270,9 +270,8 @@ class ProductController extends Controller
 
         // 3. Add Variant Headers (1-3 for template simplicity, Job supports 20)
         for ($i = 1; $i <= 3; $i++) {
-            $headers[] = "variant_{$i}_name";
+            $headers[] = "variant_{$i}_name_en";
             $headers[] = "variant_{$i}_price";
-            $headers[] = "variant_{$i}_attributes"; // e.g. {"Color":"Red"}
         }
 
         $callback = function () use ($headers) {
@@ -295,9 +294,9 @@ class ProductController extends Controller
                 'Battery', '5000mAh',
                 '', '', '', '', // Empty specs placeholders
                 // Variants
-                'Titanium Black', '1200.00', '{"Color":"Black", "Storage":"256GB"}',
-                'Titanium Gray', '1200.00', '{"Color":"Gray", "Storage":"256GB"}',
-                'Titanium Violet', '1200.00', '{"Color":"Violet", "Storage":"256GB"}',
+                'Titanium Black', '1200.00',
+                'Titanium Gray', '1200.00',
+                'Titanium Violet', '1200.00',
             ];
 
             fputcsv($file, $row);

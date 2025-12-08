@@ -47,25 +47,30 @@
                 <div class="modal-header">
                     <h5 class="modal-title">Import Products</h5>
                     {{-- Hide close button during upload to prevent interruption --}}
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close-modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="btn-close-modal"></button>
                 </div>
 
-                <form id="importForm" action="{{ route('admin.products.import') }}" method="POST" enctype="multipart/form-data">
+                <form id="importForm" action="{{ route('admin.products.import') }}" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         {{-- File Input Section --}}
                         <div id="import-input-section">
                             <div class="mb-3">
-                                <label class="form-label">Choose File (CSV/Excel)</label>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">Choose File (CSV/Excel)</label>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <button type="button" class="btn btn-secondary"
+                                            onclick="window.location.href='{{ route('admin.products.template') }}'">
+                                            <i class="fa fa-download"></i> Download Sample
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <input type="file" name="file" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <a href="{{ route('admin.products.template') }}" class="text-primary text-decoration-underline">
-                                    Download Sample Template
-                                </a>
-                            </div>
-                            <div class="alert alert-warning small">
-                                <strong>Note:</strong> Large files will be processed in the background.
                             </div>
                         </div>
 
@@ -77,9 +82,8 @@
                             </div>
                             <div class="progress" style="height: 25px;">
                                 <div id="progress-bar-fill"
-                                     class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                                     role="progressbar"
-                                     style="width: 0%">
+                                    class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                    role="progressbar" style="width: 0%">
                                 </div>
                             </div>
                             <div class="mt-2 text-center text-muted small">
@@ -109,13 +113,15 @@
     </div>
 
     {{-- 2. SUCCESS/FAILURE POPUP (Triggered after Page Reload) --}}
-    @if(session('import_status'))
+    @if (session('import_status'))
         <div class="modal fade" id="importStatusModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header {{ session('import_status')['failed'] > 0 ? 'bg-warning' : 'bg-success' }} text-white">
+                    <div
+                        class="modal-header {{ session('import_status')['failed'] > 0 ? 'bg-warning' : 'bg-success' }} text-white">
                         <h5 class="modal-title">Import Summary</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row text-center mb-4">
@@ -129,11 +135,11 @@
                             </div>
                         </div>
 
-                        @if(!empty(session('import_status')['errors']))
+                        @if (!empty(session('import_status')['errors']))
                             <div class="alert alert-danger">
                                 <h6>Error Log:</h6>
                                 <ul class="mb-0 small" style="max-height: 200px; overflow-y: auto;">
-                                    @foreach(session('import_status')['errors'] as $error)
+                                    @foreach (session('import_status')['errors'] as $error)
                                         <li>{{ $error }}</li>
                                     @endforeach
                                 </ul>
@@ -153,7 +159,7 @@
         </div>
 
         <script type="module">
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 var myModal = new bootstrap.Modal(document.getElementById('importStatusModal'));
                 myModal.show();
             });

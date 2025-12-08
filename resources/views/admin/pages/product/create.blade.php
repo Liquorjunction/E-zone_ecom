@@ -139,7 +139,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-4 mb-3">
                                             <label class="form-label">Base Price <span
                                                     class="text-danger">*</span></label>
                                             <div class="input-group">
@@ -149,14 +149,14 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-4 mb-3">
                                             <label class="form-label">Cover Image <span
                                                     class="text-danger">*</span></label>
                                             <input type="file" name="cover_image" class="form-control"
                                                 accept="image/*" required>
                                         </div>
 
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-4 mb-3">
                                             <label class="form-label">Status</label>
                                             <select name="status" class="form-select">
                                                 <option value="active" selected>Active</option>
@@ -165,8 +165,7 @@
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-end mt-3">
-                                        <button type="button" class="btn btn-primary next-step" data-next="step2">Next:
-                                            Specifications</button>
+                                        <button type="button" class="btn btn-primary next-step" data-next="step2">Next</button>
                                     </div>
                                 </div>
 
@@ -238,8 +237,7 @@
                                     <div class="d-flex justify-content-between mt-3">
                                         <button type="button" class="btn btn-secondary prev-step"
                                             data-prev="step1">Previous</button>
-                                        <button type="button" class="btn btn-primary next-step" data-next="step3">Next:
-                                            Variants & Media</button>
+                                        <button type="button" class="btn btn-primary next-step" data-next="step3">Next</button>
                                     </div>
                                 </div>
 
