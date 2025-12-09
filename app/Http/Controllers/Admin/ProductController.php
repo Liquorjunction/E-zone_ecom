@@ -55,6 +55,8 @@ class ProductController extends Controller
             $productRepo->createProduct($request, $data);
             DB::commit();
 
+            Log::info('ProductController.store: Product created successfully');
+
             return redirect()->route('admin.products.index')
                 ->with(['success' => true, 'message' => 'Product created successfully']);
 

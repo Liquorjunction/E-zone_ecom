@@ -24,6 +24,18 @@ class ProductRepository implements ProductRepositoryInterface
             $data = $data ?? $request->validated();
             $data['status'] = $data['status'] ?? 'inactive';
 
+            Log::info("===== ProductRepository.createProduct START =====");
+            Log::info("Input data keys: " . json_encode(array_keys($data)));
+
+            // Enhanced logging for translatable fields with truncation for long content
+            $this->logTranslatableField('name', $data);
+            $this->logTranslatableField('description', $data);
+            $this->logTranslatableField('warranty', $data);
+            $this->logTranslatableField('dimensions', $data);
+
+            // Validate translatable fields before saving
+            $this->validateTranslatableFields($data);
+
             // Normalize Dropdowns (Handle 'brand' key if passed instead of 'brand_id')
             $this->normalizeForeignKeys($data);
 
@@ -42,10 +54,50 @@ class ProductRepository implements ProductRepositoryInterface
             // If importing, we might just leave cover_image null or handle URLs here
             // elseif (isset($data['cover_image_url'])) { ... }
 
+            Log::debug("Data before Product::create: " . json_encode($data));
+
+            // CRITICAL DEBUG: Log description structure right before create
+            if (isset($data['description'])) {
+                $descKeys = is_array($data['description']) ? array_keys($data['description']) : 'NOT_ARRAY';
+                Log::critical("BEFORE CREATE - description locales: " . json_encode($descKeys));
+                if (is_array($data['description']) && isset($data['description']['en'])) {
+                    Log::critical("BEFORE CREATE - description.en length: " . strlen($data['description']['en']));
+                    Log::critical("BEFORE CREATE - description.en preview: " . substr($data['description']['en'], 0, 50) . '...');
+                } else {
+                    Log::critical("BEFORE CREATE - description.en: MISSING!");
+                }
+            } else {
+                Log::critical("BEFORE CREATE - description field: NOT SET");
+            }
+
             // 2. Create Product
+            Log::info("Calling Product::create...");
             $product = Product::create($data);
 
-            // 3. Generate Real SKU (EZ-XXX-0000)
+            Log::info("Product created with ID: {$product->id}");
+
+            // CRITICAL DEBUG: Check what Spatie did to description
+            $rawDescription = $product->getAttributeValue('description');
+            Log::critical("AFTER CREATE - Raw description from DB: " . $rawDescription);
+            if (!empty($rawDescription)) {
+                $decoded = json_decode($rawDescription, true);
+                if ($decoded) {
+                    $afterKeys = array_keys($decoded);
+                    Log::critical("AFTER CREATE - description locales in DB: " . json_encode($afterKeys));
+                    if (isset($decoded['en'])) {
+                        Log::critical("AFTER CREATE - description.en EXISTS in DB (length: " . strlen($decoded['en']) . ")");
+                    } else {
+                        Log::critical("AFTER CREATE - description.en MISSING from DB! Spatie removed it!");
+                    }
+                }
+            } else {
+                Log::critical("AFTER CREATE - description is EMPTY in DB");
+            }
+
+            // Verify translatable data was saved correctly with detailed logging
+            $savedProduct = Product::find($product->id);
+            $this->verifyTranslatableFieldsSaved($savedProduct);            // 3. Generate Real SKU (EZ-XXX-0000)
+            Log::info("Generating SKU...");
             $this->generateAndSaveSku($product, $data);
 
             // 4. Handle Gallery Images (Only if request has files)
@@ -54,12 +106,15 @@ class ProductRepository implements ProductRepositoryInterface
             }
 
             // 5. Handle Variants
+            Log::info("Processing variants, count: " . count($data['variants'] ?? []));
             $variants = $data['variants'] ?? ($request instanceof \Illuminate\Http\Request ? $request->input('variants', []) : []);
             $this->handleVariants($product, $variants);
 
+            Log::info("===== ProductRepository.createProduct SUCCESS =====");
             return $product;
         } catch (\Exception $e) {
-            Log::error('ProductRepository.createProduct: '.$e->getMessage());
+            Log::error('ProductRepository.createProduct FAILED: '.$e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             throw $e;
         }
     }
@@ -180,10 +235,15 @@ class ProductRepository implements ProductRepositoryInterface
     private function handleVariants(Product $product, array $variantsData)
     {
         if (empty($variantsData)) {
+            Log::debug("No variants to process");
             return;
         }
 
+        Log::info("handleVariants for product ID {$product->id}, variant count: " . count($variantsData));
+
         foreach ($variantsData as $index => $variantData) {
+            Log::debug("Processing variant [{$index}]: " . json_encode($variantData));
+
             if (! empty($variantData['id'])) {
                 // Update logic handled in syncVariants generally, but safe to keep basic update here
                 $variant = ProductVariant::find($variantData['id']);
@@ -193,12 +253,15 @@ class ProductRepository implements ProductRepositoryInterface
                         'price' => $variantData['price'],
                         'status' => $variantData['status'] ?? $variant->status,
                     ]);
+                    Log::debug("Variant [{$index}] updated");
                 }
             } else {
                 $suffix = strtoupper(Str::random(4));
                 $variantSku = $product->sku.'-V-'.$suffix;
 
-                ProductVariant::create([
+                Log::debug("Variant [{$index}] - Creating with SKU: {$variantSku}");
+
+                $createdVariant = ProductVariant::create([
                     'product_id' => $product->id,
                     'variant_name' => $variantData['variant_name'] ?? $variantData['name'],
                     'sku' => $variantData['sku'] ?? $variantSku,
@@ -206,8 +269,12 @@ class ProductRepository implements ProductRepositoryInterface
                     'attributes' => $variantData['attributes'] ?? null,
                     'status' => $variantData['status'] ?? 'active',
                 ]);
+
+                Log::debug("Variant [{$index}] created with ID: {$createdVariant->id}");
             }
         }
+
+        Log::info("handleVariants completed");
     }
 
     public function deleteProduct($id)
@@ -268,5 +335,171 @@ class ProductRepository implements ProductRepositoryInterface
     public function getDataforDataTable($request = null)
     {
         return Product::select('id', 'name', 'status', 'is_bestseller', 'cover_image')->latest()->get();
+    }
+
+    /**
+     * Log translatable field data with smart truncation for long content
+     *
+     * @param string $fieldName
+     * @param array $data
+     * @return void
+     */
+    private function logTranslatableField(string $fieldName, array $data): void
+    {
+        if (!isset($data[$fieldName])) {
+            Log::debug("{$fieldName}: NOT SET");
+            return;
+        }
+
+        if (!is_array($data[$fieldName])) {
+            Log::warning("{$fieldName}: Invalid format (expected array, got " . gettype($data[$fieldName]) . ")");
+            return;
+        }
+
+        if (empty($data[$fieldName])) {
+            Log::debug("{$fieldName}: Empty array");
+            return;
+        }
+
+        $summary = [];
+        foreach ($data[$fieldName] as $locale => $value) {
+            if (is_string($value)) {
+                $length = strlen($value);
+                if ($length > 100) {
+                    $preview = substr($value, 0, 100) . '...';
+                    $summary[] = "{$locale}: {$length} chars - \"{$preview}\"";
+                } else {
+                    $summary[] = "{$locale}: \"{$value}\"";
+                }
+            } else {
+                $summary[] = "{$locale}: " . gettype($value);
+            }
+        }
+
+        Log::debug("{$fieldName}: " . json_encode($summary));
+    }
+
+    /**
+     * Validate translatable fields to ensure data integrity
+     * Prevents Spatie Translatable from removing important English content
+     *
+     * @param array $data
+     * @return void
+     * @throws \Exception if critical validation fails
+     */
+    private function validateTranslatableFields(array &$data): void
+    {
+        // Required translatable field: name must have English value
+        if (!isset($data['name']['en']) || empty(trim($data['name']['en']))) {
+            Log::error("Validation failed: Product name (English) is required");
+            throw new \Exception("Product name in English is required");
+        }
+
+        // Clean up empty translatable fields to prevent Spatie issues
+        // BUT provide default empty JSON for nullable fields to satisfy database constraints
+        $translatableFields = ['name', 'description', 'warranty', 'dimensions'];
+
+        foreach ($translatableFields as $field) {
+            if (isset($data[$field])) {
+                // If field is an empty array, replace with empty JSON object {} to satisfy DB constraint
+                if (is_array($data[$field]) && empty($data[$field])) {
+                    // For translatable fields in Spatie, use empty object that will be JSON encoded
+                    $data[$field] = (object)[];  // Empty JSON object: {}
+                    Log::debug("Set empty translatable field to empty JSON object: {$field}");
+                    continue;
+                }
+
+                // If field is an array, validate and clean up empty locale values
+                if (is_array($data[$field])) {
+                    foreach ($data[$field] as $locale => $value) {
+                        // Remove keys with empty string values (but keep null for optional fields)
+                        if ($value === '') {
+                            unset($data[$field][$locale]);
+                            Log::debug("Removed empty locale value: {$field}.{$locale}");
+                        }
+                    }
+
+                    // If all locales were removed, set to empty object to satisfy DB constraint
+                    if (empty($data[$field])) {
+                        $data[$field] = (object)[];  // Empty JSON object: {}
+                        Log::debug("Removed all locales from translatable field, setting to empty JSON: {$field}");
+                    }
+                }
+            } else {
+                // Field not provided at all - set to empty JSON object for optional fields
+                // name is required so we skip it
+                if ($field !== 'name') {
+                    $data[$field] = (object)[];  // Empty JSON object: {}
+                    Log::debug("Field '{$field}' not provided, setting to empty JSON object");
+                }
+            }
+        }
+
+        Log::info("Translatable fields validation completed successfully");
+    }
+
+    /**
+     * Verify that translatable fields were saved correctly to database
+     * Helps detect issues with Spatie Translatable behavior
+     *
+     * @param Product $product
+     * @return void
+     */
+    private function verifyTranslatableFieldsSaved(Product $product): void
+    {
+        Log::info("=== Verifying translatable fields saved to DB ===");
+
+        $translatableFields = ['name', 'description', 'warranty', 'dimensions'];
+        $issues = [];
+
+        foreach ($translatableFields as $field) {
+            $value = $product->$field;
+
+            if (is_null($value)) {
+                Log::debug("Field '{$field}': NULL (not set)");
+                continue;
+            }
+
+            // Decode JSON to check locales
+            if (is_string($value)) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $locales = array_keys($decoded);
+                    $hasEnglish = isset($decoded['en']);
+
+                    Log::info("Field '{$field}': Locales=" . json_encode($locales) . ", HasEnglish=" . ($hasEnglish ? 'YES' : 'NO'));
+
+                    // Check if English value exists and is not empty
+                    if ($hasEnglish) {
+                        $enLength = isset($decoded['en']) ? strlen($decoded['en']) : 0;
+                        if ($enLength > 0) {
+                            Log::info("  ✓ English value present (length: {$enLength})");
+                        } else {
+                            $issues[] = "Field '{$field}' has empty English value";
+                            Log::warning("  ✗ English value is empty!");
+                        }
+                    } else {
+                        // Only warn if other locales exist (translations without source)
+                        if (!empty($locales)) {
+                            $issues[] = "Field '{$field}' missing English translation (has: " . implode(', ', $locales) . ")";
+                            Log::warning("  ✗ Missing English locale! Has: " . json_encode($locales));
+                        }
+                    }
+                } else {
+                    Log::debug("Field '{$field}': Not JSON (plain text or other format)");
+                }
+            } else {
+                Log::debug("Field '{$field}': " . gettype($value));
+            }
+        }
+
+        if (!empty($issues)) {
+            Log::error("=== CRITICAL: Translatable field issues detected ===");
+            foreach ($issues as $issue) {
+                Log::error("  - {$issue}");
+            }
+        } else {
+            Log::info("=== All translatable fields verified successfully ===");
+        }
     }
 }

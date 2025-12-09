@@ -54,6 +54,7 @@ if (!function_exists('gtrans_html')) {
 
         // 1. If English or empty, return original
         if ($locale === 'en' || empty($html)) {
+            Log::info("Translation Skipped: '$html' -> ($locale)");
             return $html;
         }
 
@@ -75,6 +76,7 @@ if (!function_exists('gtrans_html')) {
                     $text = trim($node->nodeValue);
                     if (!empty($text)) {
                         $translated = gtrans($text, $locale);
+                        Log::info("HTML Translation Success: '$text' -> ($locale) -> '$translated'");
                         $node->nodeValue = $translated;
                     }
                 }
