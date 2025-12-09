@@ -8,6 +8,6 @@
         id="status-switch-{{ uniqid() }}"
     >
     <label class="pl-2 form-check-label" for="status-switch-{{ uniqid() }}">
-        {{ $status == 'active' ? 'Active' : 'Inactive' }}
+        {{-- {{ $status == 'active' ? 'Active' : 'Inactive' }} --}}
     </label>
 </div>

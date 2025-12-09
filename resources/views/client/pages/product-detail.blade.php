@@ -50,29 +50,49 @@
                     </div>
                 </div>
 
-                <div class="space-y-6">
-                    <div>
-                        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">
+                <div class="space-y-6 lg:sticky lg:top-6">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            @if($product->is_bestseller)
+                                <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.034a1 1 0 00-1.176 0l-2.802 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.88 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    Bestseller
+                                </span>
+                            @endif
+                            @if($product->created_at > now()->subDays(30))
+                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1">New Arrival</span>
+                            @endif
+                            <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1">Electronics</span>
+                            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1">SKU: {{ $product->sku }}</span>
+                        </div>
+
+                        <h1 class="text-3xl font-extrabold text-gray-900 mb-1">
                             {{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}
                         </h1>
-                        <div class="flex items-center space-x-4 mb-4">
+                        <div class="flex flex-wrap items-center gap-3 mb-4">
                             <div class="flex items-center text-yellow-400 text-lg">
                                 ★★★★★
                             </div>
-                            <span class="text-gray-600">(0 reviews)</span>
-                            <span class="text-green-600 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
+                            <span class="text-gray-600 text-sm">(0 reviews)</span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                                 In Stock
                             </span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Free returns 30d</span>
                         </div>
                     </div>
 
-                    <div class="flex items-center space-x-4">
-                        <span class="text-4xl font-bold text-primary">${{ number_format($product->price, 2) }}</span>
+                    <div class="flex items-center flex-wrap gap-3 p-4 bg-gradient-to-r from-primary/10 via-white to-white border border-primary/20 rounded-2xl shadow-sm">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-4xl font-bold text-primary">${{ number_format($product->price, 2) }}</span>
+                            <span class="text-sm text-gray-500">incl. taxes</span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-primary text-sm font-semibold shadow-xs border border-primary/20">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M4 7h16l-1 12H5L4 7zm5 3v6m6-6v6"/></svg>
+                            Fast dispatch
+                        </span>
                     </div>
 
                     {{-- Categories and Tags Chips --}}
@@ -108,66 +128,102 @@
 
                     {{-- Product Features --}}
                     @php
-                        // Normalize specifications and dimensions: they may be cast as array, or stored as JSON string.
-                        $specifications = $product->specifications;
-                        if (is_string($specifications)) {
-                            $decoded = json_decode($specifications, true);
-                            $specifications = is_array($decoded) ? $decoded : null;
+                        // Normalize specifications and dimensions: they may be JSON strings or arrays with varying shapes.
+                        $rawSpecs = $product->specifications;
+                        if (is_string($rawSpecs)) {
+                            $decoded = json_decode($rawSpecs, true);
+                            $rawSpecs = is_array($decoded) ? $decoded : null;
                         }
-                        $dimensions = $product->dimensions;
-                        if (is_string($dimensions)) {
-                            $decoded = json_decode($dimensions, true);
-                            $dimensions = is_array($decoded) ? $decoded : null;
+
+                        $specifications = [];
+                        if (is_array($rawSpecs)) {
+                            foreach ($rawSpecs as $key => $item) {
+                                // Common importer shape: [{title: ..., value: ...}]
+                                if (is_array($item) && (isset($item['title']) || isset($item['value']) || isset($item['description']))) {
+                                    $title = $item['title'] ?? $item['label'] ?? $key;
+                                    $value = $item['value'] ?? $item['description'] ?? '';
+                                } else {
+                                    // Fallback shape: associative map key => value
+                                    $title = is_numeric($key) ? 'Spec '.($key + 1) : $key;
+                                    $value = $item;
+                                }
+
+                                // Resolve translatable arrays
+                                if (is_array($title)) {
+                                    $title = $title[app()->getLocale()] ?? ($title['en'] ?? reset($title));
+                                }
+                                if (is_array($value)) {
+                                    $value = $value[app()->getLocale()] ?? ($value['en'] ?? reset($value));
+                                }
+
+                                if (filled($title) && filled($value)) {
+                                    $specifications[] = ['title' => $title, 'value' => $value];
+                                }
+                            }
+                        }
+
+                        $rawDimensions = $product->dimensions;
+                        if (is_string($rawDimensions)) {
+                            $decoded = json_decode($rawDimensions, true);
+                            $rawDimensions = is_array($decoded) ? $decoded : null;
+                        }
+
+                        $dimensions = [];
+                        if (is_array($rawDimensions)) {
+                            foreach ($rawDimensions as $key => $item) {
+                                $title = is_numeric($key) ? 'Dimension '.($key + 1) : $key;
+                                $value = $item;
+
+                                if (is_array($title)) {
+                                    $title = $title[app()->getLocale()] ?? ($title['en'] ?? reset($title));
+                                }
+                                if (is_array($value)) {
+                                    $value = $value[app()->getLocale()] ?? ($value['en'] ?? reset($value));
+                                }
+
+                                if (filled($title) && filled($value)) {
+                                    $dimensions[] = ['title' => $title, 'value' => $value];
+                                }
+                            }
                         }
                     @endphp
 
-                    @if(!empty($specifications))
-                        <div class="space-y-2">
-                            <h2 class="text-lg font-bold text-gray-700 mb-2">Specifications:</h2>
-                            <div class="text-gray-600">
-                                @foreach($specifications as $key => $value)
-                                    <div class="flex justify-between py-1">
-                                        <span class="font-medium">{{ ucfirst($key) }}:</span>
-                                        <span>{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</span>
+                    {{-- Variants --}}
+                    @if($product->productVariants && $product->productVariants->count() > 0)
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-sm font-semibold text-gray-800">Variants</label>
+                                <span class="text-xs text-gray-500">Tap to view details</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                @foreach($product->productVariants as $variant)
+                                    <div class="group border border-gray-200 hover:border-primary/50 rounded-2xl px-4 py-3 bg-white shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="text-sm font-semibold text-gray-900 line-clamp-1">{{ $variant->variant_name ?? $variant->name ?? 'Variant' }}</div>
+                                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">SKU</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600 mt-0.5 line-clamp-1">{{ $variant->sku }}</div>
+                                        <div class="flex items-center justify-between mt-2">
+                                            <div class="text-base font-bold text-primary">${{ number_format($variant->price, 2) }}</div>
+                                            <span class="text-[11px] font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">In stock</span>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
                     @endif
 
-                    {{-- Color --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                        <div class="flex items-center space-x-3">
-                            <label class="relative">
-                                <input type="radio" name="color" value="black" class="peer sr-only" checked>
-                                <span
-                                    class="w-8 h-8 rounded-full bg-gray-900 block cursor-pointer ring-2 ring-transparent peer-checked:ring-primary ring-offset-2 transition-all"></span>
-                            </label>
-                            <label class="relative">
-                                <input type="radio" name="color" value="white" class="peer sr-only">
-                                <span
-                                    class="w-8 h-8 rounded-full bg-white border border-gray-200 block cursor-pointer ring-2 ring-transparent peer-checked:ring-primary ring-offset-2 transition-all"></span>
-                            </label>
-                            <label class="relative">
-                                <input type="radio" name="color" value="blue" class="peer sr-only">
-                                <span
-                                    class="w-8 h-8 rounded-full bg-blue-600 block cursor-pointer ring-2 ring-transparent peer-checked:ring-primary ring-offset-2 transition-all"></span>
-                            </label>
-                        </div>
-                    </div>
-
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div class="flex items-center border border-gray-300 rounded-lg w-fit">
-                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors">
+                        <div class="flex items-center border border-gray-200 rounded-xl w-fit shadow-sm bg-white">
+                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors" aria-label="Decrease quantity">
                                 <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                                 </svg>
                             </button>
                             <input type="text" value="1"
-                                class="w-12 text-center text-lg font-medium text-gray-900 border-x border-gray-300 focus:outline-none"
-                                readonly>
-                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors">
+                                class="w-12 text-center text-lg font-semibold text-gray-900 border-x border-gray-200 focus:outline-none"
+                                readonly aria-label="Quantity">
+                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors" aria-label="Increase quantity">
                                 <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4v16m8-8H4" />
@@ -176,11 +232,11 @@
                         </div>
 
                         <button
-                            class="flex-1 w-full bg-primary text-white text-lg font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:bg-primary-dark transition-all duration-300 transform hover:-translate-y-0.5">
+                            class="flex-1 w-full bg-gradient-to-r from-primary to-primary-dark text-white text-lg font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
                             Add to Cart
                         </button>
                         <button
-                            class="flex-1 w-full bg-gray-800 text-white text-lg font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:bg-black transition-all duration-300 transform hover:-translate-y-0.5">
+                            class="flex-1 w-full bg-gray-900 text-white text-lg font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:bg-black transition-all duration-300 transform hover:-translate-y-0.5">
                             Buy Now
                         </button>
                     </div>
@@ -222,35 +278,6 @@
                                 {!! is_array($product->description) ? ($product->description[app()->getLocale()] ?? $product->description['en'] ?? '') : $product->description !!}
                             </div>
 
-                            @if($product->specifications)
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                                    <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 mb-3">Specifications:</h4>
-                                        <div class="space-y-2 text-gray-700">
-                                                @foreach($product->specifications as $key => $value)
-                                                    <div class="flex justify-between py-1 border-b border-gray-100">
-                                                        <span class="font-medium">{{ ucfirst($key) }}:</span>
-                                                        <span>{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</span>
-                                                    </div>
-                                                @endforeach
-                                        </div>
-                                    </div>
-                                    @if(!empty($dimensions))
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-gray-900 mb-3">Dimensions:</h4>
-                                            <div class="space-y-2 text-gray-700">
-                                                @foreach($dimensions as $key => $value)
-                                                    <div class="flex justify-between py-1 border-b border-gray-100">
-                                                        <span class="font-medium">{{ ucfirst($key) }}:</span>
-                                                        <span>{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</span>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
                             @if($product->warranty)
                                 <div class="mt-6">
                                     <h4 class="text-lg font-semibold text-gray-900 mb-3">Warranty:</h4>
@@ -266,14 +293,14 @@
                         @if(!empty($specifications) || !empty($dimensions))
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 @if(!empty($specifications))
-                                    <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Specifications</h4>
+                                    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-3">Specifications</h4>
                                         <table class="w-full text-sm">
-                                            <tbody class="divide-y divide-gray-200">
-                                                @foreach($specifications as $key => $value)
+                                            <tbody class="divide-y divide-gray-100">
+                                                @foreach($specifications as $spec)
                                                     <tr class="py-2">
-                                                        <td class="py-3 text-gray-600 font-medium">{{ ucfirst($key) }}</td>
-                                                        <td class="py-3 text-gray-900">{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</td>
+                                                        <td class="py-3 text-gray-500 font-medium w-1/3">{{ $spec['title'] }}</td>
+                                                        <td class="py-3 text-gray-900">{{ $spec['value'] }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -281,14 +308,14 @@
                                     </div>
                                 @endif
                                 @if(!empty($dimensions))
-                                    <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Dimensions</h4>
+                                    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-3">Dimensions</h4>
                                         <table class="w-full text-sm">
-                                            <tbody class="divide-y divide-gray-200">
-                                                @foreach($dimensions as $key => $value)
+                                            <tbody class="divide-y divide-gray-100">
+                                                @foreach($dimensions as $dim)
                                                     <tr class="py-2">
-                                                        <td class="py-3 text-gray-600 font-medium">{{ ucfirst($key) }}</td>
-                                                        <td class="py-3 text-gray-900">{{ is_array($value) ? ($value[app()->getLocale()] ?? $value['en'] ?? '') : $value }}</td>
+                                                        <td class="py-3 text-gray-500 font-medium w-1/3">{{ $dim['title'] }}</td>
+                                                        <td class="py-3 text-gray-900">{{ $dim['value'] }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

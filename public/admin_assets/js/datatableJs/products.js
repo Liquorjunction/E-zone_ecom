@@ -142,13 +142,13 @@ $(document).ready(function () {
         const label = checkbox.siblings('label');
 
         // Optimistic UI Update
-        if (label.length) {
-            if (isChecked) {
-                label.html('<span class="text-warning">⭐ Bestseller</span>');
-            } else {
-                label.html('<span class="text-muted">Regular</span>');
-            }
-        }
+        // if (label.length) {
+        //     if (isChecked) {
+        //         label.html('<span class="text-warning">⭐ Bestseller</span>');
+        //     } else {
+        //         label.html('<span class="text-muted">Regular</span>');
+        //     }
+        // }
 
         // Send AJAX Request
         $.ajax({

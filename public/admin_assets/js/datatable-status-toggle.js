@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const label = input.nextElementSibling; // Assuming label is immediately after input
 
             // 1. Optimistic UI Update (Make it feel instant)
-            if (label) {
-                label.textContent = isChecked ? 'Active' : 'Inactive';
-            }
+            // if (label) {
+            //     label.textContent = isChecked ? 'Active' : 'Inactive';
+            // }
 
             // 2. Send AJAX Request
             axios.patch(url)

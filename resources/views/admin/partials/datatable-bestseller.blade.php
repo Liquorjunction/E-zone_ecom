@@ -9,9 +9,9 @@
     >
     <label class="pl-2 form-check-label" for="bestseller-switch-{{ $id }}">
         @if($is_bestseller)
-            <span class="text-warning">⭐ Bestseller</span>
+            <span class="text-warning"></span>
         @else
-            <span class="text-muted">Regular</span>
+            <span class="text-muted"></span>
         @endif
     </label>
 </div>
