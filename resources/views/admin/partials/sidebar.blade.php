@@ -4,7 +4,11 @@
             <div class="logo-main">
                 <div class="logo-normal">
                     <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
-                        class="img-fluid" height="120" width="120" />
+                        class="img-fluid" style="height: 120px; width: 120px; object-fit: contain;" />
+                </div>
+                <div class="logo-mini">
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                        class="img-fluid" style="height: 50px; width: 50px; object-fit: contain;" />
                 </div>
             </div>
         </a>
@@ -29,7 +33,7 @@
                         data-bs-toggle="collapse" href="#sidebar-home" role="button"
                         aria-expanded="{{ request()->routeIs('admin.dashboard') ? 'true' : 'false' }}"
                         aria-controls="sidebar-home">
-                        <i class="icon">
+                        <i class="icon" style="display: inline-flex;">
                             <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                                 class="icon-20">
                                 <path opacity="0.4"
@@ -54,7 +58,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                                 href="{{ route('admin.dashboard') }}">
-                                <i class="icon">
+                                <i class="icon" style="display: inline-flex;">
                                     <svg width="20" height="20" fill="none" stroke="currentColor"
                                         stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <rect x="3" y="3" width="7" height="7"></rect>
@@ -84,7 +88,7 @@
                         href="#sidebar-products" role="button"
                         aria-expanded="{{ $isProductSectionActive ? 'true' : 'false' }}"
                         aria-controls="sidebar-products">
-                        <i class="icon">
+                        <i class="icon" style="display: inline-flex;">
                             <svg width="20" height="20" fill="none" stroke="currentColor"
                                 stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -109,7 +113,7 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}"
                                     href="{{ route('admin.brands.index') }}">
-                                    <i class="icon">
+                                    <i class="icon" style="display: inline-flex;">
                                         <svg width="20" height="20" fill="none" stroke="currentColor"
                                             stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
@@ -125,7 +129,7 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.category-subcategory.categories.*') ? 'active' : '' }}"
                                     href="{{ route('admin.category-subcategory.categories.index') }}">
-                                    <i class="icon">
+                                    <i class="icon" style="display: inline-flex;">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -151,7 +155,7 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.category-subcategory.subcategories.*') ? 'active' : '' }}"
                                     href="{{ route('admin.category-subcategory.subcategories.index') }}">
-                                    <i class="icon">
+                                    <i class="icon" style="display: inline-flex;">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path d="M3 6H21" stroke="currentColor" stroke-width="1.5"
@@ -171,7 +175,7 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
                                     href="{{ route('admin.products.index') }}">
-                                    <i class="icon">
+                                    <i class="icon" style="display: inline-flex;">
                                         <svg width="20" height="20" fill="none" stroke="currentColor"
                                             stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -211,7 +215,7 @@
                         href="#sidebar-pages-main" role="button"
                         aria-expanded="{{ $isPagesSectionActive ? 'true' : 'false' }}"
                         aria-controls="sidebar-pages-main">
-                        <i class="icon">
+                        <i class="icon" style="display: inline-flex;">
                             <svg width="20" height="20" fill="none" stroke="currentColor"
                                 stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -243,7 +247,7 @@
                                 data-bs-toggle="collapse" data-bs-target="#sidebar-homepage"
                                 aria-expanded="{{ $isHomeMgmtActive ? 'true' : 'false' }}"
                                 aria-controls="sidebar-homepage">
-                                <i class="icon">
+                                <i class="icon" style="display: inline-flex;">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path
@@ -269,7 +273,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.hero-slider.*') ? 'active' : '' }}"
                                             href="{{ route('admin.hero-slider.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path
@@ -289,7 +293,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.cards.*') ? 'active' : '' }}"
                                             href="{{ route('admin.cards.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M2 12.6099H19" stroke="currentColor" stroke-width="1.5"
@@ -331,7 +335,7 @@
                                 href="#sidebar-cms-pages" role="button"
                                 aria-expanded="{{ $isCMSActive ? 'true' : 'false' }}"
                                 aria-controls="sidebar-cms-pages">
-                                <i class="icon">
+                                <i class="icon" style="display: inline-flex;">
                                     <svg width="20" height="20" fill="none" stroke="currentColor"
                                         stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -354,7 +358,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.about_us.*') ? 'active' : '' }}"
                                             href="{{ route('admin.about_us.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" fill="none" stroke="currentColor"
                                                     stroke-width="1.5" viewBox="0 0 24 24"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -371,7 +375,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.showrooms.*') ? 'active' : '' }}"
                                             href="{{ route('admin.showrooms.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" fill="none" stroke="currentColor"
                                                     stroke-width="1.5" viewBox="0 0 24 24"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -388,7 +392,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.privacy-policy.*') ? 'active' : '' }}"
                                             href="{{ route('admin.privacy-policy.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" fill="none" stroke="currentColor"
                                                     stroke-width="1.5" viewBox="0 0 24 24"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -405,7 +409,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.tncs.*') ? 'active' : '' }}"
                                             href="{{ route('admin.tncs.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" fill="none" stroke="currentColor"
                                                     stroke-width="1.5" viewBox="0 0 24 24"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -427,7 +431,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.shipping-return.*') ? 'active' : '' }}"
                                             href="{{ route('admin.shipping-return.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" fill="none" stroke="currentColor"
                                                     stroke-width="1.5" viewBox="0 0 24 24"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -453,7 +457,7 @@
                                 href="#sidebar-faqs-wrap" role="button"
                                 aria-expanded="{{ $isFAQActive ? 'true' : 'false' }}"
                                 aria-controls="sidebar-faqs-wrap">
-                                <i class="icon">
+                                <i class="icon" style="display: inline-flex;">
                                     <svg width="20" height="20" fill="none" stroke="currentColor"
                                         stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <circle cx="12" cy="12" r="10"></circle>
@@ -476,7 +480,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.faq-categories.*') ? 'active' : '' }}"
                                             href="{{ route('admin.faq-categories.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" fill="none" stroke="currentColor"
                                                     stroke-width="1.5" viewBox="0 0 24 24"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -492,7 +496,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}"
                                             href="{{ route('admin.faqs.index') }}">
-                                            <i class="icon">
+                                            <i class="icon" style="display: inline-flex;">
                                                 <svg width="20" height="20" fill="none" stroke="currentColor"
                                                     stroke-width="1.5" viewBox="0 0 24 24"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -523,7 +527,7 @@
                     <a class="nav-link {{ $isUserSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-users" role="button"
                         aria-expanded="{{ $isUserSectionActive ? 'true' : 'false' }}" aria-controls="sidebar-users">
-                        <i class="icon">
+                        <i class="icon" style="display: inline-flex;">
                             <svg width="20" height="20" fill="none" stroke="currentColor"
                                 stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -547,7 +551,7 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.user-management.*') ? 'active' : '' }}"
                                     href="{{ route('admin.user-management.index') }}">
-                                    <i class="icon">
+                                    <i class="icon" style="display: inline-flex;">
                                         <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -564,7 +568,7 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.roles-permissions.*') ? 'active' : '' }}"
                                     href="{{ route('admin.roles-permissions.index') }}">
-                                    <i class="icon">
+                                    <i class="icon" style="display: inline-flex;">
                                         <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" clip-rule="evenodd"

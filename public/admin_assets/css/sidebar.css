@@ -1,0 +1,4 @@
+/* Hide logo when sidebar is collapsed */
+.sidebar.sidebar-mini .sidebar-header .logo-main {
+    display: none;
+}
