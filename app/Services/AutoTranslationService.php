@@ -9,77 +9,84 @@ class AutoTranslationService
 {
     protected $locales = ['fr', 'ar']; // Target locales
     protected $tr;
+    protected $enabled = true; // Enabled by default
 
     public function __construct()
     {
         $this->tr = new GoogleTranslate();
     }
 
+    /**
+     * Disable translation (useful for bulk imports to improve speed)
+     */
+    public function disable(): void
+    {
+        $this->enabled = false;
+    }
+
+    /**
+     * Enable translation
+     */
+    public function enable(): void
+    {
+        $this->enabled = true;
+    }
+
     public function prepareProductData(array $data): array
     {
-        // 1. Simple Text Fields
+        // Skip translation if disabled (for performance during import)
+        if (!$this->enabled) {
+            // Copy English to other locales without translation for faster import
+            $fields = ['name', 'description', 'warranty', 'dimensions'];
+            foreach ($fields as $field) {
+                if (isset($data[$field]['en']) && !empty($data[$field]['en'])) {
+                    foreach ($this->locales as $locale) {
+                        if (empty($data[$field][$locale])) {
+                            $data[$field][$locale] = $data[$field]['en'];
+                        }
+                    }
+                }
+            }
+
+            // Handle specifications
+            if (isset($data['specifications']['en']) && is_array($data['specifications']['en'])) {
+                foreach ($this->locales as $locale) {
+                    if (empty($data['specifications'][$locale])) {
+                        $data['specifications'][$locale] = $data['specifications']['en'];
+                    }
+                }
+            }
+
+            return $data;
+        }
+
+        // 1. Simple Text Fields (with translation)
         $fields = ['name', 'description', 'warranty', 'dimensions'];
 
-        Log::info("=== AutoTranslationService.prepareProductData START ===");
-        Log::info("Input data keys: " . json_encode(array_keys($data)));
-
         foreach ($fields as $field) {
-
             if (isset($data[$field]['en']) && !empty($data[$field]['en'])) {
                 $englishValue = $data[$field]['en'];
-                // Log truncated version for readability (first 100 chars)
-                $logValue = strlen($englishValue) > 100 ? substr($englishValue, 0, 100) . '...' : $englishValue;
-                Log::info("Field {$field} HAS English value (length: " . strlen($englishValue) . "): '{$logValue}'");
-
-                // CRITICAL: Store original English value to prevent loss during translation
                 $originalEnglishValue = $data[$field]['en'];
 
                 foreach ($this->locales as $locale) {
-
                     // Only translate if target is empty
                     if (empty($data[$field][$locale])) {
-                        Log::info("Translating field {$field} from EN to {$locale}");
                         $translatedValue = $this->translate($englishValue, $locale);
                         $data[$field][$locale] = $translatedValue;
-                        Log::info("Translation SUCCESS - {$field}.{$locale} (length: " . strlen($translatedValue) . ")");
-                    } else {
-                        Log::info("Skipping translation for {$field}.{$locale} - already has value: '" . $data[$field][$locale] . "'");
                     }
                 }
 
-                // CRITICAL FIX: Explicitly restore English value after translation
-                // This prevents Spatie Translatable from removing empty/lost English values
+                // Restore English value after translation
                 $data[$field]['en'] = $originalEnglishValue;
-
-                // Verify English value is STILL present
-                if (isset($data[$field]['en']) && !empty($data[$field]['en'])) {
-                    Log::info("Verification: {$field}.en preserved successfully (length: " . strlen($data[$field]['en']) . ")");
-                } else {
-                    Log::error("CRITICAL ERROR: {$field}.en was LOST after translation! Attempting recovery...");
-                    // Attempt recovery
-                    $data[$field]['en'] = $originalEnglishValue;
-                    Log::warning("Recovery attempted: {$field}.en restored from backup");
-                }
-            } else {
-                Log::info("Field {$field} - No English value found or is empty");
-                // If field exists but is empty array, skip translation to avoid issues
-                if (isset($data[$field]) && is_array($data[$field]) && empty($data[$field])) {
-                    Log::info("Field {$field} is empty array - skipping translation");
-                }
             }
         }
 
         // 2. Complex JSON (Specifications)
-        // Structure: [['title' => 'Screen', 'value' => 'OLED']]
-        Log::info("Processing specifications");
         if (isset($data['specifications']['en']) && is_array($data['specifications']['en'])) {
-            Log::info("Specifications found, count: " . count($data['specifications']['en']));
-
             foreach ($this->locales as $locale) {
                 $translatedSpecs = [];
 
                 foreach ($data['specifications']['en'] as $idx => $spec) {
-
                     $translatedTitle = $this->translate($spec['title'] ?? '', $locale);
                     $translatedValue = $this->translate($spec['value'] ?? '', $locale);
 
@@ -87,15 +94,11 @@ class AutoTranslationService
                         'title' => $translatedTitle,
                         'value' => $translatedValue,
                     ];
-
                 }
 
                 // Save ONLY if the user didn't manually provide this locale
                 if (empty($data['specifications'][$locale])) {
                     $data['specifications'][$locale] = $translatedSpecs;
-                    Log::info("Specifications saved for locale {$locale}");
-                } else {
-                    Log::info("Skipping specifications for {$locale} - user provided override");
                 }
             }
         } else {

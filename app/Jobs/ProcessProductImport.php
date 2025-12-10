@@ -41,6 +41,8 @@ class ProcessProductImport implements ShouldQueue
 
     protected $batchId;
 
+    protected $skipTranslation;
+
     // Lookup Maps
     protected $brandsMap = [];
 
@@ -48,10 +50,11 @@ class ProcessProductImport implements ShouldQueue
 
     protected $subCatsMap = [];
 
-    public function __construct($filePath, $batchId)
+    public function __construct($filePath, $batchId, $skipTranslation = false)
     {
         $this->filePath = $filePath;
         $this->batchId = $batchId;
+        $this->skipTranslation = $skipTranslation;
     }
 
     public function handle(ProductRepositoryInterface $productRepo, AutoTranslationService $translationService)
@@ -60,12 +63,19 @@ class ProcessProductImport implements ShouldQueue
 
         Log::info('========== ProcessProductImport Job START ==========');
         Log::info("Batch ID: {$this->batchId}");
-        Log::info("File path: {$this->filePath}");
-        Log::info('File exists: '.(file_exists($this->filePath) ? 'YES' : 'NO'));
 
         try {
             try {
                 $this->startProgress($cacheKey);
+
+                // Conditionally disable translation based on user choice
+                if ($this->skipTranslation) {
+                    $translationService->disable();
+                    Log::info('Translation DISABLED for this import (user option)');
+                } else {
+                    Log::info('Translation ENABLED for this import');
+                }
+
                 $this->preloadMaps();
 
                 $collection = $this->loadFile($this->filePath, $cacheKey);
@@ -100,80 +110,14 @@ class ProcessProductImport implements ShouldQueue
         $row = $dto->mainData;
         $rowNum = $dto->rowNum;
 
-        Log::info("========== importSingleProduct Row $rowNum START ==========");
-        Log::info("DTO mainData - name_en: '".($row['name_en'] ?? '')."'");
-        Log::info("DTO mainData - description_en: '".($row['description_en'] ?? '')."'");
+        // Quick validation check for critical fields only
+        if (empty($row['name_en']) || empty($row['brand']) || empty($row['category']) || !isset($row['price'])) {
+            return ['status' => 'error', 'message' => "Row $rowNum: Missing required fields"];
+        }
 
-        // 0. Check DTO-level errors (required fields validation)
+        // DTO-level errors check
         if ($dto->hasErrors()) {
-            Log::error("Row $rowNum: DTO Validation FAILED - ".$dto->getErrorsAsString());
-
             return ['status' => 'error', 'message' => "Row $rowNum: ".$dto->getErrorsAsString()];
-        }
-
-        // 1. Validation (additional field-level checks)
-        $validator = Validator::make($row, [
-            'name_en' => 'required|string|max:255',
-            'brand' => 'required|string',
-            'category' => 'required|string',
-            'price' => 'required|numeric|min:0',
-        ]);
-
-        if ($validator->fails()) {
-            Log::error("Row $rowNum: Validation FAILED - ".json_encode($validator->errors()));
-
-            return ['status' => 'error', 'message' => "Row $rowNum: ".$validator->errors()->first()];
-        }
-
-        Log::info("Row $rowNum: Validation PASSED");
-
-        // Validate sub_category if provided
-        if (! empty($row['sub_category'])) {
-            $validator = Validator::make($row, [
-                'sub_category' => 'string',
-            ]);
-            if ($validator->fails()) {
-                Log::error("Row $rowNum: Sub-category validation FAILED");
-
-                return ['status' => 'error', 'message' => "Row $rowNum: Invalid sub-category format"];
-            }
-        }
-
-            // Validate variants if present
-            if (! empty($dto->variants)) {
-                foreach ($dto->variants as $varIndex => $variant) {
-                    $varValidator = Validator::make($variant, [
-                        'name_en' => 'required|string|max:255',
-                        'price' => 'required|numeric|min:0',
-                        // SKU removed from validation as it's now auto-generated from product SKU
-                    ]);
-
-                    if ($varValidator->fails()) {
-                        Log::error("Row $rowNum: Variant $varIndex validation FAILED - ".json_encode($varValidator->errors()));
-
-                        return ['status' => 'error', 'message' => "Row $rowNum: Variant validation failed - ".$varValidator->errors()->first()];
-                    }
-                }
-            }        // Validate specs if present
-        if (! empty($dto->specs)) {
-            foreach ($dto->specs as $specIndex => $spec) {
-                if (empty($spec['title']) || empty($spec['value'])) {
-                    Log::error("Row $rowNum: Spec $specIndex is incomplete - missing title or value");
-
-                    return ['status' => 'error', 'message' => "Row $rowNum: Specification $specIndex is incomplete"];
-                }
-
-                $specValidator = Validator::make($spec, [
-                    'title' => 'required|string|max:255',
-                    'value' => 'required|string|max:1000',
-                ]);
-
-                if ($specValidator->fails()) {
-                    Log::error("Row $rowNum: Spec $specIndex validation FAILED - ".json_encode($specValidator->errors()));
-
-                    return ['status' => 'error', 'message' => "Row $rowNum: Specification validation failed - ".$specValidator->errors()->first()];
-                }
-            }
         }
 
         // 2. Resolve IDs (Case Insensitive)
@@ -211,20 +155,10 @@ class ProcessProductImport implements ShouldQueue
             $exists = Product::whereRaw('LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, "$.en"))) = ?', [strtolower($row['name_en'])])->exists();
             if ($exists) {
                 DB::rollBack();
-                Log::warning("Row $rowNum: Product '{$row['name_en']}' already exists");
-
                 return ['status' => 'error', 'message' => "Row $rowNum: Product '{$row['name_en']}' already exists in the system."];
             }
 
-            Log::info("Row $rowNum: Duplicate check PASSED");
-
             // 4. Prepare Data
-            // CRITICAL: Trim and validate translatable fields to prevent Spatie from removing empty values
-
-            // Debug: Log all keys in $row to see what's available
-            Log::critical("ROW $rowNum - All keys available in row: ".json_encode(array_keys($row)));
-            Log::critical("ROW $rowNum - Raw row data (first 500 chars): ".substr(json_encode($row), 0, 500));
-
             $description = isset($row['description_en']) ? trim($row['description_en']) : '';
             $warranty = isset($row['warranty_en']) ? trim($row['warranty_en']) : '';
             $dimensions = isset($row['dimensions_en']) ? trim($row['dimensions_en']) : '';
@@ -266,40 +200,25 @@ class ProcessProductImport implements ShouldQueue
                 ], $dto->variants),
             ];
 
-            // Add description separately with proper validation
-            // Description is important but optional - only add if non-empty
-            Log::critical("ROW $rowNum DESCRIPTION CHECK: isset=".(isset($row['description_en']) ? 'YES' : 'NO').', trimmed_len='.strlen($description).', empty_check='.(! empty($description) ? 'HAS_VALUE' : 'IS_EMPTY'));
-            Log::critical("ROW $rowNum DESCRIPTION RAW VALUE: '".$description."'");
-
+            // Add description if present
             if (! empty($description)) {
                 $data['description'] = ['en' => $description];
-                Log::critical("ROW $rowNum SETTING description to array with en value - length: ".strlen($description));
             } else {
-                // Log warning but continue - some products might not have descriptions
-                Log::warning("Row $rowNum: Product '{$row['name_en']}' has empty description (after cleaning)");
-                Log::critical("ROW $rowNum SETTING description to empty array");
                 $data['description'] = [];
             }
-
-            Log::critical('BEFORE TRANSLATION - description isset in data? '.(isset($data['description']) ? 'YES' : 'NO'));
-            Log::critical('BEFORE TRANSLATION - description value: '.json_encode($data['description']));
-            Log::info("Row $rowNum: Data prepared, about to call translation service");
 
             // 5. Auto Translation
             $data = $transService->prepareProductData($data);
 
-            Log::info("Row $rowNum: Translation service completed");
-
             // 6. Save via Repository
-            Log::info("Row $rowNum: Calling repository createProduct");
             $product = $repo->createProduct(new Request, $data);
-
-            Log::info("Row $rowNum: Product created with ID {$product->id}");
 
             DB::commit();
 
-            Log::info("Row $rowNum: Transaction committed successfully");
-            Log::info("========== importSingleProduct Row $rowNum SUCCESS ==========");
+            // Log only every 10th product or errors
+            if ($rowNum % 10 === 0) {
+                Log::info("Row $rowNum: Product created with ID {$product->id}");
+            }
 
             return ['status' => 'success', 'product' => $product];
 

@@ -71,6 +71,18 @@
 
                             <input type="file" name="file" class="form-control" id="importFile" required>
                         </div>
+
+                        {{-- Translation Option --}}
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="skip_translation" id="skipTranslation" value="1">
+                                <label class="form-check-label" for="skipTranslation">
+                                    <strong>Skip Auto-Translation (Faster Import)</strong>
+                                    <br>
+                                    <small class="text-muted">If checked, products will not be auto-translated to French/Arabic. This speeds up import by 5-10x.</small>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="modal-footer">

@@ -1,0 +1,21 @@
+name_en,description_en,brand,category,sub_category,price,warranty_en,dimensions_en,variant_1_name_en,variant_1_price,variant_2_name_en,variant_2_price,spec_1_title,spec_1_value,spec_2_title,spec_2_value
+Canon EOS R5,High-resolution mirrorless camera,Canon,Cameras,Mirrorless,3899.99,2 years warranty,138 x 98 x 88 mm,Body Only,3899.99,With RF 24-105mm,4799.99,Sensor,45MP Full-Frame,Video,8K 30fps
+Sony A1,Professional flagship mirrorless,Sony,Cameras,Mirrorless,6498.99,3 years warranty,129 x 97 x 81 mm,Body Only,6498.99,,,Sensor,50.1MP,Burst,30fps
+Nikon Z8,Professional hybrid camera,Nikon,Cameras,Mirrorless,3996.99,2 years warranty,144 x 118 x 83 mm,Body Only,3996.99,,,Resolution,45.7MP,Video,8K 60fps
+Fujifilm X-T5,Retro-styled APS-C camera,Fujifilm,Cameras,Mirrorless,1699.99,2 years warranty,130 x 91 x 64 mm,Body Only,1699.99,With 18-55mm,1999.99,Sensor,40.2MP APS-C,IBIS,7-stop
+Panasonic Lumix S5 II,Versatile full-frame hybrid,Panasonic,Cameras,Mirrorless,1997.99,2 years warranty,134 x 102 x 90 mm,Body Only,1997.99,With 20-60mm,2297.99,Sensor,24.2MP,Video,6K
+Sony FE 85mm f/1.4 GM,Premium portrait lens,Sony,Lenses,Prime,1798.99,5 years warranty,89 x 108 mm,,,,,Focal Length,85mm,Aperture,f/1.4
+Canon RF 15-35mm f/2.8L,Ultra-wide zoom lens,Canon,Lenses,Wide Angle,2299.99,2 years warranty,88 x 127 mm,,,,,Focal Length,15-35mm,Weight,840g
+Nikon Z 50mm f/1.8 S,Standard prime lens,Nikon,Lenses,Prime,626.99,5 years warranty,76 x 87 mm,,,,,Focal Length,50mm,Weight,415g
+Sigma 24-70mm f/2.8 DG DN,Art series standard zoom,Sigma,Lenses,Standard Zoom,1099.99,4 years warranty,88 x 122 mm,,,,,Mount,E/L-Mount,Filter,82mm
+Tamron 28-200mm f/2.8-5.6,All-in-one travel zoom,Tamron,Lenses,Zoom,729.99,6 years warranty,74 x 117 mm,,,,,Range,28-200mm,Weight,575g
+Profoto A10,Professional off-camera flash,Profoto,Lighting,Speedlights,1095.00,2 years warranty,80 x 158 x 110 mm,,,,,Guide Number,76,Battery,450 flashes
+Godox SL-60W,LED continuous light,Godox,Lighting,LED Lights,119.99,1 year warranty,190 x 150 x 210 mm,,,,,Power,60W,CRI,95+
+Aputure 120D Mark II,Professional LED light,Aputure,Lighting,LED Lights,595.00,2 years warranty,150 x 100 x 280 mm,,,,,Power,120W,Features,Bowens Mount
+SanDisk Extreme PRO 512GB,Professional SD card,SanDisk,Storage,Memory Cards,149.99,Lifetime warranty,32 x 24 x 2 mm,,,,,Capacity,512GB,Speed,300MB/s
+Samsung T7 2TB,Portable SSD,Samsung,Storage,External Drives,249.99,3 years warranty,85 x 57 x 8 mm,,,,,Capacity,2TB,Speed,1050MB/s
+WD My Passport 5TB,Portable hard drive,Western Digital,Storage,External Drives,139.99,2 years warranty,110 x 82 x 21 mm,,,,,Capacity,5TB,Interface,USB 3.2
+Blackmagic Pocket Cinema 6K,Professional cinema camera,Blackmagic Design,Cameras,Cinema,2495.00,1 year warranty,202 x 114 x 124 mm,Body Only,2495.00,,,Sensor,6K Super 35,Dynamic Range,13 stops
+RED Komodo 6K,Compact cinema camera,RED,Cameras,Cinema,5995.00,1 year warranty,98 x 98 x 106 mm,Body Only,5995.00,,,Sensor,6K Super 35,Recording,REDCODE RAW
+ARRI Alexa Mini LF,Large format cinema camera,ARRI,Cameras,Cinema,48000.00,2 years warranty,175 x 119 x 157 mm,Body Only,48000.00,,,Sensor,4.5K LF,Dynamic Range,14+ stops
+DJI Mavic 3 Pro,Professional drone,DJI,Drones,Consumer,2199.00,1 year warranty,221 x 96 x 91 mm,Standard,2199.00,Cine,4799.00,Camera,4/3 CMOS,Flight Time,43 minutes

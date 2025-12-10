@@ -24,55 +24,22 @@ class ProductRepository implements ProductRepositoryInterface
             $data = $data ?? $request->validated();
             $data['status'] = $data['status'] ?? 'inactive';
 
-            Log::info("===== ProductRepository.createProduct START =====");
-            Log::info("Input data keys: " . json_encode(array_keys($data)));
-
             // Validate translatable fields before saving
             $this->validateTranslatableFields($data);
 
-            // Normalize Dropdowns (Handle 'brand' key if passed instead of 'brand_id')
+            // Normalize Dropdowns
             $this->normalizeForeignKeys($data);
-
-            // ------------------------------------------------------------
-            // CRITICAL FIX: Temporary SKU to prevent SQL Error 1364
-            // ------------------------------------------------------------
             if (empty($data['sku'])) {
                 $data['sku'] = 'TEMP-'.uniqid();
             }
 
             // Handle Cover Image
-            // Check if request is actually an HTTP request with a file
             if ($request instanceof \Illuminate\Http\Request && $request->hasFile('cover_image')) {
                 $data['cover_image'] = $request->file('cover_image')->store('products', 'public');
             }
-            // If importing, we might just leave cover_image null or handle URLs here
-            // elseif (isset($data['cover_image_url'])) { ... }
-
-
-            // CRITICAL DEBUG: Log description structure right before create
-            if (isset($data['description'])) {
-                $descKeys = is_array($data['description']) ? array_keys($data['description']) : 'NOT_ARRAY';
-                Log::critical("BEFORE CREATE - description locales: " . json_encode($descKeys));
-                if (is_array($data['description']) && isset($data['description']['en'])) {
-                    Log::critical("BEFORE CREATE - description.en length: " . strlen($data['description']['en']));
-                    Log::critical("BEFORE CREATE - description.en preview: " . substr($data['description']['en'], 0, 50) . '...');
-                } else {
-                    Log::critical("BEFORE CREATE - description.en: MISSING!");
-                }
-            } else {
-                Log::critical("BEFORE CREATE - description field: NOT SET");
-            }
 
             // 2. Create Product
-            Log::info("Calling Product::create...");
-            $product = Product::create($data);
-
-            Log::info("Product created with ID: {$product->id}");
-
-            // Verify translatable data was saved correctly with detailed logging
-            $savedProduct = Product::find($product->id);
-            $this->verifyTranslatableFieldsSaved($savedProduct);            // 3. Generate Real SKU (EZ-XXX-0000)
-            Log::info("Generating SKU...");
+            $product = Product::create($data);            // 3. Generate Real SKU (EZ-XXX-0000)
             $this->generateAndSaveSku($product, $data);
 
             // 4. Handle Gallery Images (Only if request has files)
@@ -81,11 +48,9 @@ class ProductRepository implements ProductRepositoryInterface
             }
 
             // 5. Handle Variants
-            Log::info("Processing variants, count: " . count($data['variants'] ?? []));
             $variants = $data['variants'] ?? ($request instanceof \Illuminate\Http\Request ? $request->input('variants', []) : []);
             $this->handleVariants($product, $variants);
 
-            Log::info("===== ProductRepository.createProduct SUCCESS =====");
             return $product;
         } catch (\Exception $e) {
             Log::error('ProductRepository.createProduct FAILED: '.$e->getMessage());
@@ -214,11 +179,8 @@ class ProductRepository implements ProductRepositoryInterface
     private function handleVariants(Product $product, array $variantsData)
     {
         if (empty($variantsData)) {
-            Log::debug("No variants to process");
             return;
         }
-
-        Log::info("handleVariants for product ID {$product->id}, variant count: " . count($variantsData));
 
         foreach ($variantsData as $index => $variantData) {
             $variantData = $this->normalizeVariantTranslatable($variantData, $index);
@@ -248,8 +210,6 @@ class ProductRepository implements ProductRepositoryInterface
                 ]);
             }
         }
-
-        Log::info("handleVariants completed");
     }
 
     private function normalizeVariantTranslatable(array $variantData, int $index = 0): array

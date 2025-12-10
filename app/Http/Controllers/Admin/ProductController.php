@@ -236,11 +236,11 @@ class ProductController extends Controller
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,csv,txt|max:10240',
+            'skip_translation' => 'nullable|boolean',
         ]);
 
         try {
             // 1. Store file in a permanent location for the Queue Job to access
-            // Using 'local' disk to ensure it's accessible by CLI PHP
             $file = $request->file('file');
             $filename = 'import_'.Str::random(10).'.'.$file->getClientOriginalExtension();
             $relativePath = $file->storeAs('temp_imports', $filename, 'local');
@@ -254,8 +254,11 @@ class ProductController extends Controller
             // 2. Generate a unique Batch ID to track progress
             $batchId = Str::random(10);
 
-            // 3. Dispatch the Job
-            ProcessProductImport::dispatch($fullPath, $batchId);
+            // 3. Get skip_translation option (default false = translations enabled)
+            $skipTranslation = $request->input('skip_translation', false);
+
+            // 4. Dispatch the Job with translation option
+            ProcessProductImport::dispatch($fullPath, $batchId, $skipTranslation);
 
             // 4. Return JSON for the frontend polling
             return response()->json([
