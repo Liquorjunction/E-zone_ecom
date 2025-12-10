@@ -16,122 +16,66 @@ $(document).ready(function () {
         });
     }
 
-    // 2. Handle Import Form (Queue + Polling)
+    // 2. Handle Import Form (with Advanced Floating Notification)
     const importForm = document.getElementById('importForm');
 
     if (importForm) {
-        const inputSection = document.getElementById('import-input-section');
-        const progressSection = document.getElementById('import-progress-section');
-        const btnSection = document.getElementById('import-buttons');
-        const btnCloseModal = document.getElementById('btn-close-modal');
-
-        const progressBar = document.getElementById('progress-bar-fill');
-        const progressText = document.getElementById('progress-percent-text');
-        const statusText = document.getElementById('progress-status-text');
-        const detailsText = document.getElementById('progress-details');
-        const errorMsg = document.getElementById('import-error-msg');
+        const importFile = document.getElementById('importFile');
+        const btnStartImport = document.getElementById('btnStartImport');
 
         importForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // --- A. Setup UI for Upload ---
-            inputSection.classList.add('d-none');
-            btnSection.classList.add('d-none');
-            progressSection.classList.remove('d-none');
-            btnCloseModal.disabled = true; // Prevent closing
-            errorMsg.classList.add('d-none');
+            if (!importFile.files.length) {
+                if (window.showToast) {
+                    window.showToast('Please select a file to import', 'warning');
+                }
+                return;
+            }
 
-            // Reset Bars
-            progressBar.style.width = '0%';
-            progressBar.classList.remove('bg-danger');
-            progressBar.classList.add('bg-success');
-            statusText.innerText = "Uploading File...";
-            detailsText.innerText = "Please wait while we upload your file.";
+            const fileName = importFile.files[0].name;
+            const formData = new FormData(importForm);
 
-            let formData = new FormData(importForm);
+            // Disable button and close modal
+            btnStartImport.disabled = true;
+            const modal = bootstrap.Modal.getInstance(document.getElementById('importModal'));
+            if (modal) {
+                modal.hide();
+            }
 
-            // --- B. Step 1: Upload File & Start Job ---
+            // Upload file and start import job
             axios.post(importForm.action, formData)
                 .then(response => {
                     if (response.data.success && response.data.batch_id) {
-                        // Upload success, now we wait for the Queue
-                        startPolling(response.data.batch_id);
+                        // Create floating notification
+                        if (window.createImportNotification) {
+                            window.createImportNotification(
+                                response.data.batch_id,
+                                fileName,
+                                '/admin/products/import/progress/'
+                            );
+                        }
+                        // Reset form
+                        importForm.reset();
                     } else {
-                        showImportError(response.data.message || 'Upload failed unknown error');
+                        if (window.showToast) {
+                            window.showToast(response.data.message || 'Upload failed', 'error');
+                        }
                     }
                 })
                 .catch(error => {
-                    let msg = "Upload Failed";
-                    if(error.response && error.response.data && error.response.data.message) {
-                        msg = error.response.data.message;
+                    let message = 'Upload failed';
+                    if (error.response && error.response.data && error.response.data.message) {
+                        message = error.response.data.message;
                     }
-                    showImportError(msg);
+                    if (window.showToast) {
+                        window.showToast(message, 'error');
+                    }
+                })
+                .finally(() => {
+                    btnStartImport.disabled = false;
                 });
         });
-
-        // --- C. Step 2: Poll for Progress ---
-        function startPolling(batchId) {
-            statusText.innerText = "Processing Data...";
-
-            // Poll every 1.5 seconds
-            let interval = setInterval(() => {
-                axios.get(`/admin/products/import/progress/${batchId}`)
-                    .then(res => {
-                        const data = res.data;
-
-                        if (data.status === 'processing') {
-                            // Update UI with real numbers
-                            updateProgressUI(data);
-                        }
-                        else if (data.status === 'completed') {
-                            clearInterval(interval);
-                            progressBar.style.width = '100%';
-                            progressText.innerText = '100%';
-                            statusText.innerText = "Import Complete!";
-                            detailsText.innerText = "Refreshing page to show results...";
-
-                            // --- D. Step 3: Reload to show the Success Popup ---
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        }
-                        else if (data.status === 'failed') {
-                            clearInterval(interval);
-                            let serverErr = data.errors && data.errors.length > 0 ? data.errors[0] : 'Unknown Error';
-                            showImportError("Import Job Failed: " + serverErr);
-                        }
-                    })
-                    .catch(err => {
-                        // Don't stop polling immediately on network blip, but log it
-                        console.error("Polling error", err);
-                    });
-            }, 1500);
-        }
-
-        function updateProgressUI(data) {
-            // Update Bar
-            progressBar.style.width = data.progress + '%';
-            progressText.innerText = data.progress + '%';
-
-            // Update Text Details (e.g., "Processed 5 of 20")
-            if (data.total > 0) {
-                detailsText.innerText = `Processed ${data.processed} of ${data.total} rows.`;
-            } else {
-                detailsText.innerText = "Initializing data...";
-            }
-        }
-
-        function showImportError(message) {
-            progressBar.classList.remove('bg-success');
-            progressBar.classList.add('bg-danger');
-            progressBar.style.width = '100%';
-            statusText.innerText = "Error";
-            errorMsg.innerText = message;
-            errorMsg.classList.remove('d-none');
-
-            // Re-enable close button so they can try again
-            btnCloseModal.disabled = false;
-        }
     }
 
     // 3. Handle Bestseller Toggle (using event delegation)

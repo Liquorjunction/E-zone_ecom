@@ -15,6 +15,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <h4 class="card-title">Create Slider</h4>
+                <a href="{{ route('admin.hero-slider.index') }}" class="btn btn-secondary">Back</a>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ route('admin.hero-slider.store') }}" enctype="multipart/form-data">

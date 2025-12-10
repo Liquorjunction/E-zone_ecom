@@ -27,12 +27,6 @@ class ProductRepository implements ProductRepositoryInterface
             Log::info("===== ProductRepository.createProduct START =====");
             Log::info("Input data keys: " . json_encode(array_keys($data)));
 
-            // Enhanced logging for translatable fields with truncation for long content
-            $this->logTranslatableField('name', $data);
-            $this->logTranslatableField('description', $data);
-            $this->logTranslatableField('warranty', $data);
-            $this->logTranslatableField('dimensions', $data);
-
             // Validate translatable fields before saving
             $this->validateTranslatableFields($data);
 
@@ -54,7 +48,6 @@ class ProductRepository implements ProductRepositoryInterface
             // If importing, we might just leave cover_image null or handle URLs here
             // elseif (isset($data['cover_image_url'])) { ... }
 
-            Log::debug("Data before Product::create: " . json_encode($data));
 
             // CRITICAL DEBUG: Log description structure right before create
             if (isset($data['description'])) {
@@ -75,24 +68,6 @@ class ProductRepository implements ProductRepositoryInterface
             $product = Product::create($data);
 
             Log::info("Product created with ID: {$product->id}");
-
-            // CRITICAL DEBUG: Check what Spatie did to description
-            $rawDescription = $product->getAttributeValue('description');
-            Log::critical("AFTER CREATE - Raw description from DB: " . $rawDescription);
-            if (!empty($rawDescription)) {
-                $decoded = json_decode($rawDescription, true);
-                if ($decoded) {
-                    $afterKeys = array_keys($decoded);
-                    Log::critical("AFTER CREATE - description locales in DB: " . json_encode($afterKeys));
-                    if (isset($decoded['en'])) {
-                        Log::critical("AFTER CREATE - description.en EXISTS in DB (length: " . strlen($decoded['en']) . ")");
-                    } else {
-                        Log::critical("AFTER CREATE - description.en MISSING from DB! Spatie removed it!");
-                    }
-                }
-            } else {
-                Log::critical("AFTER CREATE - description is EMPTY in DB");
-            }
 
             // Verify translatable data was saved correctly with detailed logging
             $savedProduct = Product::find($product->id);
@@ -242,7 +217,6 @@ class ProductRepository implements ProductRepositoryInterface
         Log::info("handleVariants for product ID {$product->id}, variant count: " . count($variantsData));
 
         foreach ($variantsData as $index => $variantData) {
-            Log::debug("Processing variant [{$index}]: " . json_encode($variantData));
 
             if (! empty($variantData['id'])) {
                 // Update logic handled in syncVariants generally, but safe to keep basic update here
@@ -253,13 +227,11 @@ class ProductRepository implements ProductRepositoryInterface
                         'price' => $variantData['price'],
                         'status' => $variantData['status'] ?? $variant->status,
                     ]);
-                    Log::debug("Variant [{$index}] updated");
                 }
             } else {
                 $suffix = strtoupper(Str::random(4));
                 $variantSku = $product->sku.'-V-'.$suffix;
 
-                Log::debug("Variant [{$index}] - Creating with SKU: {$variantSku}");
 
                 $createdVariant = ProductVariant::create([
                     'product_id' => $product->id,
@@ -270,7 +242,6 @@ class ProductRepository implements ProductRepositoryInterface
                     'status' => $variantData['status'] ?? 'active',
                 ]);
 
-                Log::debug("Variant [{$index}] created with ID: {$createdVariant->id}");
             }
         }
 
@@ -338,48 +309,6 @@ class ProductRepository implements ProductRepositoryInterface
     }
 
     /**
-     * Log translatable field data with smart truncation for long content
-     *
-     * @param string $fieldName
-     * @param array $data
-     * @return void
-     */
-    private function logTranslatableField(string $fieldName, array $data): void
-    {
-        if (!isset($data[$fieldName])) {
-            Log::debug("{$fieldName}: NOT SET");
-            return;
-        }
-
-        if (!is_array($data[$fieldName])) {
-            Log::warning("{$fieldName}: Invalid format (expected array, got " . gettype($data[$fieldName]) . ")");
-            return;
-        }
-
-        if (empty($data[$fieldName])) {
-            Log::debug("{$fieldName}: Empty array");
-            return;
-        }
-
-        $summary = [];
-        foreach ($data[$fieldName] as $locale => $value) {
-            if (is_string($value)) {
-                $length = strlen($value);
-                if ($length > 100) {
-                    $preview = substr($value, 0, 100) . '...';
-                    $summary[] = "{$locale}: {$length} chars - \"{$preview}\"";
-                } else {
-                    $summary[] = "{$locale}: \"{$value}\"";
-                }
-            } else {
-                $summary[] = "{$locale}: " . gettype($value);
-            }
-        }
-
-        Log::debug("{$fieldName}: " . json_encode($summary));
-    }
-
-    /**
      * Validate translatable fields to ensure data integrity
      * Prevents Spatie Translatable from removing important English content
      *
@@ -405,7 +334,6 @@ class ProductRepository implements ProductRepositoryInterface
                 if (is_array($data[$field]) && empty($data[$field])) {
                     // For translatable fields in Spatie, use empty object that will be JSON encoded
                     $data[$field] = (object)[];  // Empty JSON object: {}
-                    Log::debug("Set empty translatable field to empty JSON object: {$field}");
                     continue;
                 }
 
@@ -415,14 +343,12 @@ class ProductRepository implements ProductRepositoryInterface
                         // Remove keys with empty string values (but keep null for optional fields)
                         if ($value === '') {
                             unset($data[$field][$locale]);
-                            Log::debug("Removed empty locale value: {$field}.{$locale}");
                         }
                     }
 
                     // If all locales were removed, set to empty object to satisfy DB constraint
                     if (empty($data[$field])) {
                         $data[$field] = (object)[];  // Empty JSON object: {}
-                        Log::debug("Removed all locales from translatable field, setting to empty JSON: {$field}");
                     }
                 }
             } else {
@@ -430,7 +356,6 @@ class ProductRepository implements ProductRepositoryInterface
                 // name is required so we skip it
                 if ($field !== 'name') {
                     $data[$field] = (object)[];  // Empty JSON object: {}
-                    Log::debug("Field '{$field}' not provided, setting to empty JSON object");
                 }
             }
         }
@@ -456,7 +381,6 @@ class ProductRepository implements ProductRepositoryInterface
             $value = $product->$field;
 
             if (is_null($value)) {
-                Log::debug("Field '{$field}': NULL (not set)");
                 continue;
             }
 
@@ -486,7 +410,6 @@ class ProductRepository implements ProductRepositoryInterface
                         }
                     }
                 } else {
-                    Log::debug("Field '{$field}': Not JSON (plain text or other format)");
                 }
             } else {
                 Log::debug("Field '{$field}': " . gettype($value));

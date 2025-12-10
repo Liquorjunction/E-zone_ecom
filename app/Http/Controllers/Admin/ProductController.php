@@ -138,7 +138,7 @@ class ProductController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product bestseller status updated successfully.',
-                'is_bestseller' => $product->is_bestseller
+                'is_bestseller' => $product->is_bestseller,
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -157,6 +157,29 @@ class ProductController extends Controller
 
             return redirect()->back()->with('error', 'Failed to delete record');
         }
+    }
+
+    public function importReport($batchId)
+    {
+        // Retrieve detailed import data from Cache
+        $importData = Cache::get('import_details_'.$batchId);
+
+        if (! $importData) {
+            return response()->json([
+                'successful' => [],
+                'failed' => [],
+                'skipped' => [],
+            ]);
+        }
+
+        // Organize products by status
+        $report = [
+            'successful' => $importData['successful'] ?? [],
+            'failed' => $importData['failed'] ?? [],
+            'skipped' => $importData['skipped'] ?? [],
+        ];
+
+        return response()->json($report);
     }
 
     public function dataTable(ReadProductRequest $request, ProductRepo $productRepo)
