@@ -102,6 +102,55 @@ class AutoTranslationService
             Log::info("No English specifications found");
         }
 
+        // 3. Variants (variant_name)
+        Log::info("Processing variants");
+        if (!empty($data['variants']) && is_array($data['variants'])) {
+            foreach ($data['variants'] as $idx => $variant) {
+                // Normalize incoming shapes: allow 'name' or 'variant_name'; allow strings
+                if (!isset($variant['variant_name'])) {
+                    if (isset($variant['name'])) {
+                        $variant['variant_name'] = $variant['name'];
+                    }
+                }
+
+                if (isset($variant['variant_name']) && !is_array($variant['variant_name'])) {
+                    $variant['variant_name'] = ['en' => $variant['variant_name']];
+                }
+
+                // If name.* exists but variant_name.* missing, copy locales over
+                if (isset($variant['name']) && is_array($variant['name'])) {
+                    foreach ($variant['name'] as $localeKey => $value) {
+                        if (!isset($variant['variant_name'][$localeKey])) {
+                            $variant['variant_name'][$localeKey] = $value;
+                        }
+                    }
+                }
+
+                if (empty($variant['variant_name']['en'])) {
+                    Log::info("Variant {$idx} has no English name, skipping translation");
+                    $data['variants'][$idx] = $variant;
+                    continue;
+                }
+
+                $originalEnglish = $variant['variant_name']['en'];
+                foreach ($this->locales as $locale) {
+                    if (empty($variant['variant_name'][$locale])) {
+                        $translated = $this->translate($originalEnglish, $locale);
+                        $variant['variant_name'][$locale] = $translated;
+                        Log::info("Variant {$idx} translated to {$locale}");
+                    }
+                }
+
+                // Preserve English after translation
+                $variant['variant_name']['en'] = $originalEnglish;
+
+                // Keep normalized structure for downstream consumers
+                $data['variants'][$idx] = $variant;
+            }
+        } else {
+            Log::info("No variants found for translation");
+        }
+
         Log::info("=== AutoTranslationService.prepareProductData END ===");
         Log::info("Final data structure after translation: " . json_encode(array_keys($data)));
         return $data;

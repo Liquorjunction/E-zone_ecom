@@ -293,6 +293,16 @@ class ProductController extends Controller
             ]);
         }
 
+        // Ensure percent key always present for frontend
+        if (! isset($progress['percent']) && isset($progress['progress'])) {
+            $progress['percent'] = $progress['progress'];
+        }
+
+        if (! isset($progress['percent']) && ($progress['total'] ?? 0) > 0) {
+            $progress['percent'] = round((($progress['processed'] ?? 0) / $progress['total']) * 100);
+        }
+
+
         return response()->json($progress);
     }
 

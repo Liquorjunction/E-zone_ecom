@@ -142,10 +142,12 @@ class ProductRepository implements ProductRepositoryInterface
         $submittedIds = [];
 
         foreach ($variantsData as $variant) {
+            $variant = $this->normalizeVariantTranslatable($variant);
+
             if (! empty($variant['id']) && in_array($variant['id'], $existingVariantIds)) {
                 $submittedIds[] = $variant['id'];
                 ProductVariant::where('id', $variant['id'])->update([
-                    'variant_name' => $variant['variant_name'] ?? $variant['name'],
+                    'variant_name' => $variant['variant_name'],
                     'price' => $variant['price'],
                     'attributes' => $variant['attributes'] ?? null,
                     'status' => $variant['status'] ?? 'active',
@@ -156,10 +158,11 @@ class ProductRepository implements ProductRepositoryInterface
 
                 $newVar = ProductVariant::create([
                     'product_id' => $product->id,
-                    'variant_name' => $variant['name'],
-                    'sku' => $newSku,
+                    'variant_name' => $variant['variant_name'],
+                    'sku' => $variant['sku'] ?? $newSku,
                     'price' => $variant['price'],
-                    'status' => 'active',
+                    'attributes' => $variant['attributes'] ?? null,
+                    'status' => $variant['status'] ?? 'active',
                 ]);
                 $submittedIds[] = $newVar->id;
             }
@@ -217,35 +220,64 @@ class ProductRepository implements ProductRepositoryInterface
         Log::info("handleVariants for product ID {$product->id}, variant count: " . count($variantsData));
 
         foreach ($variantsData as $index => $variantData) {
+            $variantData = $this->normalizeVariantTranslatable($variantData, $index);
 
             if (! empty($variantData['id'])) {
-                // Update logic handled in syncVariants generally, but safe to keep basic update here
                 $variant = ProductVariant::find($variantData['id']);
                 if ($variant) {
                     $variant->update([
-                        'variant_name' => $variantData['name'],
+                        'variant_name' => $variantData['variant_name'],
                         'price' => $variantData['price'],
                         'status' => $variantData['status'] ?? $variant->status,
+                        'attributes' => $variantData['attributes'] ?? null,
                     ]);
                 }
             } else {
                 $suffix = strtoupper(Str::random(4));
                 $variantSku = $product->sku.'-V-'.$suffix;
 
-
-                $createdVariant = ProductVariant::create([
+                ProductVariant::create([
                     'product_id' => $product->id,
-                    'variant_name' => $variantData['variant_name'] ?? $variantData['name'],
+                    'variant_name' => $variantData['variant_name'],
                     'sku' => $variantData['sku'] ?? $variantSku,
                     'price' => $variantData['price'],
                     'attributes' => $variantData['attributes'] ?? null,
                     'status' => $variantData['status'] ?? 'active',
                 ]);
-
             }
         }
 
         Log::info("handleVariants completed");
+    }
+
+    private function normalizeVariantTranslatable(array $variantData, int $index = 0): array
+    {
+        // Accept both 'name' and 'variant_name' keys; convert to translatable array
+        if (! isset($variantData['variant_name'])) {
+            if (isset($variantData['name'])) {
+                $variantData['variant_name'] = $variantData['name'];
+            }
+        }
+
+        if (isset($variantData['variant_name']) && ! is_array($variantData['variant_name'])) {
+            $variantData['variant_name'] = ['en' => $variantData['variant_name']];
+        }
+
+        if (isset($variantData['name']) && is_array($variantData['name'])) {
+            foreach ($variantData['name'] as $localeKey => $value) {
+                if (! isset($variantData['variant_name'][$localeKey])) {
+                    $variantData['variant_name'][$localeKey] = $value;
+                }
+            }
+        }
+
+        // DO NOT fill missing locales here - translation service already handled it
+        // Only validate English is present
+        if (empty($variantData['variant_name']['en'])) {
+            Log::warning("Variant {$index} missing English variant_name during normalization");
+        }
+
+        return $variantData;
     }
 
     public function deleteProduct($id)

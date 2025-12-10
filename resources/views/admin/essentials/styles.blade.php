@@ -6,4 +6,5 @@
 <link rel="stylesheet" href="{{ asset('admin_assets/css/custom.min.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/customizer.min.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/rtl.min.css') }}">
+<link rel="stylesheet" href="{{ asset('admin_assets/css/sidebar-hover.css') }}">
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">

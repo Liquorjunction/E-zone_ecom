@@ -3,6 +3,11 @@
 namespace App\Jobs;
 
 use App\DTOs\ProductImportDTO;
+use App\Jobs\Concerns\ImportFileLoader;
+use App\Jobs\Concerns\ImportProgress;
+use App\Jobs\Concerns\ImportReporting;
+use App\Jobs\Concerns\ProductGrouper;
+use App\Jobs\Concerns\ProductProcessing;
 use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
@@ -15,16 +20,18 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Rap2hpoutre\FastExcel\FastExcel;
 
 class ProcessProductImport implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use ImportProgress;
+    use ImportReporting;
+    use ImportFileLoader;
+    use ProductGrouper;
+    use ProductProcessing;
 
     public $timeout = 3600; // 1 hour timeout
 
@@ -57,237 +64,37 @@ class ProcessProductImport implements ShouldQueue
         Log::info('File exists: '.(file_exists($this->filePath) ? 'YES' : 'NO'));
 
         try {
-            $this->updateProgress($cacheKey, 'processing', 0, 0, 0, 0, []);
-
-            // 1. Preload Maps (Fixes the Translation Error)
-            Log::info('Preloading lookup maps...');
-            $this->preloadMaps();
-            Log::info('Brands map count: '.count($this->brandsMap));
-            Log::info('Categories map count: '.count($this->catsMap));
-            Log::info('SubCategories map count: '.count($this->subCatsMap));
-
-            // 2. Read File
-            Log::info('Reading file with FastExcel...');
             try {
-                $collection = (new FastExcel)->import($this->filePath);
+                $this->startProgress($cacheKey);
+                $this->preloadMaps();
+
+                $collection = $this->loadFile($this->filePath, $cacheKey);
+                if (! $collection) {
+                    return;
+                }
+
+                [$groupedProducts, $skippedRows] = $this->groupProducts($collection);
+
+                $result = $this->processGroupedProducts(
+                    $groupedProducts,
+                    $skippedRows,
+                    $productRepo,
+                    $translationService,
+                    $cacheKey
+                );
+
+                $this->persistReport($result['successful'], $result['failed_records'], $this->batchId);
+                $this->finalizeProgress($cacheKey, $result);
+                $this->cleanupFile();
+
             } catch (\Exception $e) {
-                Log::error('File read FAILED: '.$e->getMessage());
-                $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['File error: '.$e->getMessage()]);
-
-                return;
+                Log::error('Import Job Fatal: '.$e->getMessage());
+                $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal Error: '.$e->getMessage()]);
             }
-
-            Log::info('File read SUCCESS, total rows: '.$collection->count());
-
-            if ($collection->count() === 0) {
-                Log::error('File is empty');
-                $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['File is empty.']);
-
-                return;
-            }
-
-            // 3. Group Rows Logic
-            Log::info('Starting row grouping process...');
-            $groupedProducts = [];
-            $currentDTO = null;
-            $skippedRows = [];
-
-            foreach ($collection as $index => $row) {
-                $rowNum = $index + 2;
-
-                // Normalize Row: Cast to array, lowercase keys, trim values
-                $row = (array) $row;
-                $row = array_change_key_case($row, CASE_LOWER);
-                $row = array_map(fn ($v) => is_string($v) ? trim($v) : $v, $row);
-
-                // Check for Main Product Row (non-empty name_en indicates a new product)
-                if (! empty($row['name_en'])) {
-                    // If we were building a product, validate and save it
-                    if ($currentDTO) {
-                        if ($currentDTO->hasErrors()) {
-                            // Log errors for previous product
-                            $errorMsg = "Row {$currentDTO->rowNum}: ".$currentDTO->getErrorsAsString();
-                            Log::warning($errorMsg);
-                            $skippedRows[] = $errorMsg;
-                        } else {
-                            $groupedProducts[] = $currentDTO;
-                        }
-                    }
-
-                    // Start new product DTO
-                    $currentDTO = new ProductImportDTO($rowNum, $row);
-
-                    // Check immediately if this new product has errors
-                    if ($currentDTO->hasErrors()) {
-                        $errorMsg = "Row {$currentDTO->rowNum}: ".$currentDTO->getErrorsAsString();
-                        Log::warning($errorMsg);
-                        $skippedRows[] = $errorMsg;
-                        $currentDTO = null; // Skip this invalid product
-                    }
-                } else {
-                    // This is a detail row (variant/spec)
-                    // Only add if we have an active valid product
-                    if ($currentDTO) {
-                        $appendError = $this->appendDetailsToDTO($currentDTO, $row, $rowNum);
-                        if ($appendError) {
-                            $skippedRows[] = "Row $rowNum: $appendError";
-                        }
-                    } else {
-                        // Detail row without a parent product
-                        $skippedRows[] = "Row $rowNum: Detail row without parent product (no name_en found in previous rows)";
-                        Log::warning("Row $rowNum: Detail row without parent product");
-                    }
-                }
-            }
-
-            // Don't forget the last product in the loop
-            if ($currentDTO) {
-                if ($currentDTO->hasErrors()) {
-                    $errorMsg = "Row {$currentDTO->rowNum}: ".$currentDTO->getErrorsAsString();
-                    Log::warning($errorMsg);
-                    $skippedRows[] = $errorMsg;
-                } else {
-                    $groupedProducts[] = $currentDTO;
-                }
-            }
-
-            // Log summary of skipped rows
-            if (! empty($skippedRows)) {
-                Log::warning('Total skipped rows: '.count($skippedRows));
-                foreach ($skippedRows as $skip) {
-                    Log::warning($skip);
-                }
-            }
-
-            // 4. Process the Groups
-            $totalProducts = count($groupedProducts);
-            $processed = 0;
-            $success = 0;
-            $failed = 0;
-            $errors = [];
-            $successfulProducts = [];
-            $failedProducts = [];
-
-            foreach ($groupedProducts as $dto) {
-                $processed++;
-                $result = $this->importSingleProduct($dto, $productRepo, $translationService);
-
-                if ($result['status'] === 'success') {
-                    $success++;
-                    if (! empty($result['product'])) {
-                        $successfulProducts[] = [
-                            'name_en' => $result['product']->getTranslation('name', 'en'),
-                            'sku' => $result['product']->sku,
-                            'brand' => $result['product']->brand->getTranslation('name', 'en') ?? '',
-                            'category' => $result['product']->category->getTranslation('category-name', 'en') ?? '',
-                            'id' => $result['product']->id,
-                        ];
-                    }
-                } else {
-                    $failed++;
-                    $errors[] = $result['message'];
-                    $failedProducts[] = [
-                        'name_en' => $dto->mainData['name_en'] ?? 'Unknown',
-                        'sku' => $dto->mainData['sku'] ?? 'N/A',
-                        'brand' => $dto->mainData['brand'] ?? 'N/A',
-                        'category' => $dto->mainData['category'] ?? 'N/A',
-                        'error' => $result['message'],
-                    ];
-                }
-
-                // Update Progress every 5 items
-                if ($processed % 5 === 0 || $processed === $totalProducts) {
-                    $this->updateProgress($cacheKey, 'processing', $totalProducts, $processed, $success, $failed, $errors);
-                }
-            }
-
-            // Add validation/skip errors from earlier steps to failed list
-            foreach ($skippedRows as $skipMsg) {
-                $failedProducts[] = [
-                    'name_en' => 'N/A',
-                    'sku' => 'N/A',
-                    'brand' => 'N/A',
-                    'category' => 'N/A',
-                    'error' => $skipMsg,
-                ];
-            }
-
-            // Cleanup
-            if (file_exists($this->filePath)) {
-                @unlink($this->filePath);
-            }
-
-            // 5. Store Detailed Results in Cache for Retrieval
-            Cache::put('import_details_'.$this->batchId, [
-                'successful' => $successfulProducts,
-                'failed' => $failedProducts,
-            ], 86400);
-
-            $this->updateProgress($cacheKey, 'completed', $totalProducts, $processed, $success, $failed, $errors);
-
-        } catch (\Exception $e) {
-            Log::error('Import Job Fatal: '.$e->getMessage());
-            $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal Error: '.$e->getMessage()]);
+        } finally {
+            Log::info('========== ProcessProductImport Job END ==========');
         }
     }
-
-    /**
-     * Helper to add Specs and Variants to the DTO
-     * Returns error message if any validation fails, null otherwise
-     */
-    private function appendDetailsToDTO(ProductImportDTO $dto, array $row, int $rowNum = 0)
-    {
-        $errors = [];
-
-        // 1. Add Specification (both fields must be non-empty)
-        $specTitle = $row['spec_title'] ?? $row['spec_1_title'] ?? null;
-        $specValue = $row['spec_value'] ?? $row['spec_1_value'] ?? null;
-
-        if (! empty($specTitle) || ! empty($specValue)) {
-            // If one is empty, that's an error - both must exist together
-            if (empty($specTitle)) {
-                $errors[] = 'Spec has value but missing title';
-            } elseif (empty($specValue)) {
-                $errors[] = 'Spec has title but missing value';
-            } else {
-                // Both present and valid
-                $dto->specs[] = ['title' => $specTitle, 'value' => $specValue];
-            }
-        }
-
-        // 2. Add Variant (price is REQUIRED for variant)
-        $varPrice = $row['variant_price'] ?? $row['variant_1_price'] ?? null;
-
-        if (! empty($varPrice)) {
-            // Validate price is numeric and positive
-            if (! is_numeric($varPrice) || floatval($varPrice) <= 0) {
-                $errors[] = 'Invalid variant price: must be a positive number';
-            } else {
-                $varName = $row['variant_name_en'] ?? $row['variant_1_name_en'] ?? null;
-                $finalVarName = $varName ?: ($dto->mainData['name_en'].' - Variant');
-
-                // Auto-Generate Variant SKU ONLY if missing
-                $varSku = $row['variant_sku'] ?? null;
-                if (empty($varSku)) {
-                    $slug = Str::slug($dto->mainData['name_en']).'-'.Str::slug($finalVarName);
-                    $varSku = substr($slug, 0, 40).'-'.strtoupper(Str::random(6));
-                }
-
-                $dto->variants[] = [
-                    'name_en' => $finalVarName,
-                    'price' => $varPrice,
-                    'sku' => $varSku,
-                ];
-            }
-        } elseif (! empty($row['variant_name_en']) || ! empty($row['variant_sku'])) {
-            // Variant name or SKU provided but no price
-            $errors[] = 'Variant has name/SKU but missing price';
-        }
-
-        // Return error message if any validation failed
-        return empty($errors) ? null : implode('; ', $errors);
-    }
-
     private function importSingleProduct(ProductImportDTO $dto, $repo, $transService)
     {
         $row = $dto->mainData;
@@ -547,20 +354,11 @@ class ProcessProductImport implements ShouldQueue
         })->toArray();
     }
 
-    private function updateProgress($key, $status, $total, $processed, $success, $failed, $errors)
+    private function cleanupFile(): void
     {
-        $percent = ($total > 0) ? round(($processed / $total) * 100) : 0;
-        // Keep both keys so any consumer (progress or percent) sees the same value
-        Cache::put($key, [
-            'status' => $status,
-            'percent' => $percent,
-            'progress' => $percent,
-            'total' => $total,
-            'processed' => $processed,
-            'success' => $success,
-            'failed' => $failed,
-            'errors' => $errors,
-        ], 3600);
+        if (file_exists($this->filePath)) {
+            @unlink($this->filePath);
+        }
     }
 
     /**

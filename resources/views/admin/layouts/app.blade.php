@@ -53,6 +53,56 @@
 
     {{-- Page-specific scripts --}}
     @stack('scripts')
+
+    {{-- Sidebar hover functionality --}}
+    <style>
+        .sidebar {
+            transition: width 0.3s ease, transform 0.3s ease;
+        }
+
+        .sidebar.sidebar-mini {
+            width: 80px;
+        }
+
+        .sidebar.sidebar-mini:hover {
+            width: 260px;
+        }
+
+        .sidebar.sidebar-mini:not(:hover) .item-name,
+        .sidebar.sidebar-mini:not(:hover) .right-icon {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .sidebar .item-name,
+        .sidebar .right-icon {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+
+            if (sidebar) {
+                // Start with collapsed sidebar
+                sidebar.classList.add('sidebar-mini');
+                document.body.classList.add('sidebar-mini');
+
+                // Expand on hover
+                sidebar.addEventListener('mouseenter', function() {
+                    sidebar.classList.remove('sidebar-mini');
+                    document.body.classList.remove('sidebar-mini');
+                });
+
+                // Collapse on mouse leave
+                sidebar.addEventListener('mouseleave', function() {
+                    sidebar.classList.add('sidebar-mini');
+                    document.body.classList.add('sidebar-mini');
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
