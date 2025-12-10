@@ -1,4 +1,91 @@
+/* ========================================
+   SIDEBAR WIDTH EXPANSION TRANSITIONS
+   Smooth hover effect for collapsed sidebar
+   ======================================== */
+
+/* Smooth width transition for sidebar mini-mode expansion on hover */
+.sidebar.sidebar-mini,
+.sidebar.sidebar-hover {
+    transition: max-width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important,
+                width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important,
+                box-shadow 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+/* Smooth transition for main content adjustment when sidebar expands */
+.sidebar.sidebar-mini + .main-content,
+.sidebar.sidebar-hover + .main-content {
+    transition: margin-left 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
 /* Hide logo when sidebar is collapsed */
 .sidebar.sidebar-mini .sidebar-header .logo-main {
     display: none;
+}
+
+/* Override Bootstrap's fast transitions */
+.sidebar .nav-link {
+    transition: background-color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
+                color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
+                padding 0.3s ease-out !important,
+                box-shadow 0.3s ease-out !important;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
+}
+
+/* Smooth collapse/expand animation for sidebar menu items */
+.sidebar .sub-nav {
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important,
+                opacity 0.3s ease-in-out !important;
+    overflow: hidden;
+}
+
+.sidebar .sub-nav.collapsing {
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Smooth rotation for arrow icons */
+.sidebar .nav-link .right-icon {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.sidebar .nav-link[aria-expanded="true"] .right-icon {
+    transform: rotate(90deg);
+}
+
+/* Smooth fade effect for sub-menu items */
+.sidebar .sub-nav .nav-item {
+    transition: opacity 0.3s ease-in-out !important,
+                transform 0.3s ease-out !important;
+}
+
+.sidebar .sub-nav .nav-item .nav-link {
+    transition: background-color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
+                color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
+                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important,
+                padding-left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.sidebar .sub-nav .nav-item .nav-link:hover {
+    transform: translateX(6px);
+    padding-left: calc(0.75rem + 6px);
+    background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+/* Icon smooth transitions */
+.sidebar .nav-link .icon {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.sidebar .nav-link:hover .icon {
+    transform: scale(1.1);
+}
+
+/* Hardware acceleration for smoother animations */
+.sidebar .sub-nav,
+.sidebar .nav-link .right-icon {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
