@@ -153,13 +153,14 @@ class ProductRepository implements ProductRepositoryInterface
                     'status' => $variant['status'] ?? 'active',
                 ]);
             } else {
+                // Auto-generate variant SKU derived from product SKU
                 $suffix = strtoupper(Str::random(4));
-                $newSku = $product->sku.'-V-'.$suffix;
+                $newSku = $product->sku . '-V-' . $suffix;
 
                 $newVar = ProductVariant::create([
                     'product_id' => $product->id,
                     'variant_name' => $variant['variant_name'],
-                    'sku' => $variant['sku'] ?? $newSku,
+                    'sku' => $newSku,
                     'price' => $variant['price'],
                     'attributes' => $variant['attributes'] ?? null,
                     'status' => $variant['status'] ?? 'active',
@@ -233,13 +234,14 @@ class ProductRepository implements ProductRepositoryInterface
                     ]);
                 }
             } else {
+                // Auto-generate variant SKU derived from product SKU
                 $suffix = strtoupper(Str::random(4));
-                $variantSku = $product->sku.'-V-'.$suffix;
+                $variantSku = $product->sku . '-V-' . $suffix;
 
                 ProductVariant::create([
                     'product_id' => $product->id,
                     'variant_name' => $variantData['variant_name'],
-                    'sku' => $variantData['sku'] ?? $variantSku,
+                    'sku' => $variantSku,
                     'price' => $variantData['price'],
                     'attributes' => $variantData['attributes'] ?? null,
                     'status' => $variantData['status'] ?? 'active',

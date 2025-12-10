@@ -57,7 +57,9 @@ class Product extends Model
             ->generateSlugsFrom(function($model) {
                 return $model->getTranslation('name', 'en');
             })
-            ->saveSlugsTo('slug');
+            ->saveSlugsTo('slug')
+            ->slugsShouldBeNoLongerThan(50)
+            ->doNotGenerateSlugsOnUpdate();
     }
 
     // Relationships

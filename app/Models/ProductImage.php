@@ -15,8 +15,7 @@ class ProductImage extends Model
         'product_id',
         'product_variant_id',
         'image_path',
-        'is_primary',
-        'status'
+        'sort_order',
     ];
 
     // Relationships

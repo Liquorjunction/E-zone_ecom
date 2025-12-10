@@ -44,7 +44,8 @@ class ProductVariant extends Model
             ->generateSlugsFrom(function($model) {
                 return $model->getTranslation('variant_name', 'en');
             })
-            ->saveSlugsTo('slug')       // Fixed column name
+            ->saveSlugsTo('slug')
+            ->slugsShouldBeNoLongerThan(50)
             ->doNotGenerateSlugsOnUpdate();
     }
 
