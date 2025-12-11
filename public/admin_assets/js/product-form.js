@@ -41,6 +41,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const hiddenInput = document.getElementById(hiddenInputId);
 
+        // CRITICAL: Attach Quill instance to hidden input for translation handler
+        if (hiddenInput) {
+            hiddenInput.__quill = quill;
+        }
+        // Also attach to editor div for fallback
+        editorElement.__quill = quill;
+
         // A. Load initial data
         if (hiddenInput && hiddenInput.value) {
             quill.root.innerHTML = hiddenInput.value;
@@ -63,7 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize for all supported languages
     ["en", "fr", "ar"].forEach((lang) => {
-        initQuill(`quill-description-${lang}`, `description-input-${lang}`);
+        // Updated to match new blade ID format: description_en instead of description-input-en
+        initQuill(`quill-description-${lang}`, `description_${lang}`);
     });
 
     // ==========================================
@@ -131,10 +139,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     // If it's a hidden Quill input, highlight the editor container
                     if (
                         input.type === "hidden" &&
-                        input.id.includes("description-input")
+                        input.id.includes("description_")
                     ) {
                         const editorId = input.id.replace(
-                            "description-input-",
+                            "description_",
                             "quill-description-"
                         );
                         const editorDiv = document.getElementById(editorId);
@@ -149,10 +157,10 @@ document.addEventListener("DOMContentLoaded", function () {
                             this.classList.remove("is-invalid");
                             if (
                                 this.type === "hidden" &&
-                                this.id.includes("description-input")
+                                this.id.includes("description_")
                             ) {
                                 const editorId = this.id.replace(
-                                    "description-input-",
+                                    "description_",
                                     "quill-description-"
                                 );
                                 const editorDiv =

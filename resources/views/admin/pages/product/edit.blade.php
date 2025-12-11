@@ -58,11 +58,20 @@
                                                 @foreach (['en', 'fr', 'ar'] as $lang)
                                                     <div class="tab-pane fade {{ $lang === 'en' ? 'show active' : '' }}"
                                                         id="basic-{{ $lang }}">
+                                                        @if($lang === 'en')
+                                                        <div class="d-flex justify-content-end mb-3">
+                                                            <button type="button" class="btn btn-primary btn-translate-all"
+                                                                data-url="{{ route('admin.translate.batch') }}"
+                                                                data-fields='["name", "description"]'>
+                                                                <i class="fas fa-language me-2"></i> Translate All Fields
+                                                            </button>
+                                                        </div>
+                                                        @endif
                                                         <div class="mb-3 {{ $lang === 'ar' ? 'text-end' : '' }}"
                                                             dir="{{ $lang === 'ar' ? 'rtl' : 'ltr' }}">
                                                             <label class="form-label">Product Name
                                                                 ({{ strtoupper($lang) }})</label>
-                                                            <input type="text" name="name[{{ $lang }}]"
+                                                            <input type="text" name="name[{{ $lang }}]" id="name_{{ $lang }}"
                                                                 class="form-control"
                                                                 value="{{ old('name.' . $lang, $product->getTranslation('name', $lang, false)) }}"
                                                                 {{ $lang === 'en' ? 'required' : '' }}>
@@ -74,8 +83,7 @@
                                                             <div id="quill-description-{{ $lang }}"
                                                                 class="quill-editor" style="height: 200px;">
                                                                 {!! old('description.' . $lang, $product->getTranslation('description', $lang, false)) !!}</div>
-                                                            <input type="hidden" name="description[{{ $lang }}]"
-                                                                id="description-input-{{ $lang }}"
+                                                            <input type="hidden" name="description[{{ $lang }}]" id="description_{{ $lang }}"
                                                                 value="{{ $product->getTranslation('description', $lang, false) }}">
                                                         </div>
                                                     </div>
@@ -191,13 +199,22 @@
                                                 @foreach (['en', 'fr', 'ar'] as $lang)
                                                     <div class="tab-pane fade {{ $lang === 'en' ? 'show active' : '' }}"
                                                         id="specs-{{ $lang }}">
+                                                        @if($lang === 'en')
+                                                        <div class="d-flex justify-content-end mb-3">
+                                                            <button type="button" class="btn btn-primary btn-translate-all"
+                                                                data-url="{{ route('admin.translate.batch') }}"
+                                                                data-fields='["dimensions", "warranty"]'>
+                                                                <i class="fas fa-language me-2"></i> Translate All Fields
+                                                            </button>
+                                                        </div>
+                                                        @endif
                                                         <div class="row {{ $lang === 'ar' ? 'text-end' : '' }}"
                                                             dir="{{ $lang === 'ar' ? 'rtl' : 'ltr' }}">
                                                             <div class="col-md-6 mb-3">
                                                                 <label class="form-label">Dimensions
                                                                     ({{ strtoupper($lang) }})</label>
                                                                 <input type="text"
-                                                                    name="dimensions[{{ $lang }}]"
+                                                                    name="dimensions[{{ $lang }}]" id="dimensions_{{ $lang }}"
                                                                     class="form-control"
                                                                     value="{{ $product->getTranslation('dimensions', $lang, false) }}">
                                                             </div>
@@ -205,7 +222,7 @@
                                                                 <label class="form-label">Warranty
                                                                     ({{ strtoupper($lang) }})</label>
                                                                 <input type="text"
-                                                                    name="warranty[{{ $lang }}]"
+                                                                    name="warranty[{{ $lang }}]" id="warranty_{{ $lang }}"
                                                                     class="form-control"
                                                                     value="{{ $product->getTranslation('warranty', $lang, false) }}">
                                                             </div>

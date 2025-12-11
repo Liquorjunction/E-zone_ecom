@@ -69,7 +69,7 @@
                                                         <div id="quill-description-en" class="quill-editor"
                                                             style="height: 200px;">{!! old('description.en') !!}</div>
                                                         <input type="hidden" name="description[en]"
-                                                            id="description-input-en" required>
+                                                            id="description_en" required>
                                                     </div>
                                                 </div>
                                                 {{-- French --}}
@@ -84,7 +84,7 @@
                                                         <div id="quill-description-fr" class="quill-editor"
                                                             style="height: 200px;">{!! old('description.fr') !!}</div>
                                                         <input type="hidden" name="description[fr]"
-                                                            id="description-input-fr">
+                                                            id="description_fr">
                                                     </div>
                                                 </div>
                                                 {{-- Arabic --}}
@@ -99,7 +99,7 @@
                                                         <div id="quill-description-ar" class="quill-editor"
                                                             style="height: 200px;">{!! old('description.ar') !!}</div>
                                                         <input type="hidden" name="description[ar]"
-                                                            id="description-input-ar">
+                                                            id="description_ar">
                                                     </div>
                                                 </div>
                                             </div>

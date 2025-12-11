@@ -197,7 +197,35 @@ class ProductController extends Controller
                     return '<span class="text-muted">No Image</span>';
                 })
                 ->addColumn('name', function ($product) {
-                    return $product->getTranslation('name', 'en');
+                    $name = $product->getTranslation('name', 'en');
+
+                    // Check if product has meaningful translations (not just copied English)
+                    $hasTranslations = false;
+
+                    // Check name translations
+                    $nameFr = $product->getTranslation('name', 'fr', false);
+                    $nameAr = $product->getTranslation('name', 'ar', false);
+                    $nameEn = $product->getTranslation('name', 'en', false);
+
+                    // Check description translations
+                    $descFr = $product->getTranslation('description', 'fr', false);
+                    $descAr = $product->getTranslation('description', 'ar', false);
+                    $descEn = $product->getTranslation('description', 'en', false);
+
+                    // Consider translated if either FR or AR has different content from EN
+                    // for name OR description
+                    if (($nameFr && $nameFr !== $nameEn) ||
+                        ($nameAr && $nameAr !== $nameEn) ||
+                        ($descFr && $descFr !== $descEn) ||
+                        ($descAr && $descAr !== $descEn)) {
+                        $hasTranslations = true;
+                    }
+
+                    if (!$hasTranslations) {
+                        return $name . ' <span class="badge bg-warning text-dark ms-2" title="Product has not been translated to French/Arabic">Not Translated</span>';
+                    }
+
+                    return $name;
                 })
                 ->addColumn('is_bestseller', function ($product) use ($request) {
                     $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleBestseller', ['id' => $product->id]) : '';
