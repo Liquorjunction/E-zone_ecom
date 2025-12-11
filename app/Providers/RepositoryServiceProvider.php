@@ -15,9 +15,11 @@ use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShippingAndReturnRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface;
 use App\Repositories\Admin\Interfaces\SliderRepositoryInterface;
+use App\Repositories\Admin\Interfaces\StoreRepositoryInterface;
 use App\Repositories\Admin\Interfaces\SubCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\TncRepositoryInterface;
 use App\Repositories\Admin\Interfaces\TranslationRepositoryInterface;
+use App\Repositories\Admin\Interfaces\WarehouseRepositoryInterface;
 use App\Repositories\Admin\Repositories\AboutUsRepository;
 use App\Repositories\Admin\Repositories\AdminRepository;
 use App\Repositories\Admin\Repositories\BrandRepository;
@@ -31,9 +33,11 @@ use App\Repositories\Admin\Repositories\RoleRepository;
 use App\Repositories\Admin\Repositories\ShippingAndReturnRepository;
 use App\Repositories\Admin\Repositories\ShowroomRepository;
 use App\Repositories\Admin\Repositories\SliderRepository;
+use App\Repositories\Admin\Repositories\StoreRepository;
 use App\Repositories\Admin\Repositories\SubCategoryRepository;
 use App\Repositories\Admin\Repositories\TncRepository;
 use App\Repositories\Admin\Repositories\TranslationRepository;
+use App\Repositories\Admin\Repositories\WarehouseRepository;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Commands\Show;
 
@@ -60,6 +64,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(BrandRepositoryInterface::class, BrandRepository::class);
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
+        $this->app->bind(StoreRepositoryInterface::class, StoreRepository::class);
+        $this->app->bind(WarehouseRepositoryInterface::class, WarehouseRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);

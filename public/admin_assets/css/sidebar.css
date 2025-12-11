@@ -1,91 +1,240 @@
 /* ========================================
-   SIDEBAR WIDTH EXPANSION TRANSITIONS
-   Smooth hover effect for collapsed sidebar
+   SIDEBAR STYLES - Cleaned & Improved
+   - Concrete widths for expanded / collapsed
+   - Fewer !important uses
+   - Respect prefers-reduced-motion
    ======================================== */
 
-/* Smooth width transition for sidebar mini-mode expansion on hover */
-.sidebar.sidebar-mini,
-.sidebar.sidebar-hover {
-    transition: max-width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important,
-                width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important,
-                box-shadow 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+/* Variables (adjust if needed) */
+:root{
+  --sidebar-width: 260px;
+  --sidebar-mini-width: 72px;
+  --sidebar-bg: #fff;
+  --sidebar-border: rgba(0,0,0,0.05);
+  --pin-size: 32px;
+  --pin-radius: 6px;
+  --transition-fast: 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+  --transition-medium: 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* Smooth transition for main content adjustment when sidebar expands */
-.sidebar.sidebar-mini + .main-content,
-.sidebar.sidebar-hover + .main-content {
-    transition: margin-left 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+/* Box-sizing baseline */
+.sidebar, .sidebar * {
+  box-sizing: border-box;
 }
 
-/* Hide logo when sidebar is collapsed */
-.sidebar.sidebar-mini .sidebar-header .logo-main {
-    display: none;
+/* Sidebar structure and scrolling */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    overflow: hidden;
+    transition: width var(--transition-medium), max-width var(--transition-medium), box-shadow var(--transition-medium);
 }
 
-/* Override Bootstrap's fast transitions */
+.sidebar-header {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--sidebar-border);
+    background: var(--sidebar-bg);
+    z-index: 10;
+    position: relative;
+    padding: 0.5rem 1rem;
+}
+
+.sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.2) transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar for webkit browsers */
+.sidebar-body::-webkit-scrollbar { width: 6px; height: 6px; }
+.sidebar-body::-webkit-scrollbar-track { background: transparent; }
+.sidebar-body::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    transition: background 0.25s ease;
+}
+.sidebar-body::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.35); }
+
+/* Hide scrollbar when collapsed (best-effort) */
+.sidebar.sidebar-mini .sidebar-body {
+    scrollbar-width: none; /* Firefox */
+}
+.sidebar.sidebar-mini .sidebar-body::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Mini / pinned states (concrete sizing) */
+.sidebar.sidebar-mini {
+    width: var(--sidebar-mini-width);
+    max-width: var(--sidebar-mini-width);
+}
+
+.sidebar.sidebar-hover:hover {
+    width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+}
+
+/* Main content transition when sidebar changes */
+.sidebar + .main-content {
+    transition: margin-left var(--transition-medium);
+}
+
+/* Pin/Unpin button */
+.sidebar-pin-btn {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    z-index: 1001;
+    opacity: 0;
+    transition: opacity 0.22s ease, transform 0.18s ease, background 0.18s ease;
+    background: rgba(var(--bs-primary-rgb, 0,123,255), 0.08);
+    border: 1px solid rgba(var(--bs-primary-rgb, 0,123,255), 0.12);
+    border-radius: var(--pin-radius);
+    width: var(--pin-size);
+    height: var(--pin-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Show pin button on hover or when pinned */
+.sidebar:hover .sidebar-pin-btn,
+.sidebar.sidebar-pinned .sidebar-pin-btn {
+    opacity: 1;
+}
+
+.sidebar.sidebar-pinned .sidebar-pin-btn {
+    background: rgba(var(--bs-primary-rgb, 0,123,255), 0.16);
+}
+
+.sidebar-pin-btn:hover {
+    transform: scale(1.08);
+    background: rgba(var(--bs-primary-rgb, 0,123,255), 0.22);
+}
+
+/* SVG icon */
+.sidebar-pin-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--bs-primary, #007bff);
+    transition: transform 0.2s ease;
+}
+
+/* Rotation states for pin icon */
+.sidebar.sidebar-pinned .sidebar-pin-btn svg { transform: rotate(0deg); }
+.sidebar:not(.sidebar-pinned) .sidebar-pin-btn svg { transform: rotate(45deg); }
+
+/* Logo handling */
+.sidebar-header .logo-main { position: relative; overflow: visible; display: block; }
+.sidebar-header .logo-normal {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    display: block;
+}
+.sidebar-header .logo-mini {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    pointer-events: none;
+}
+
+/* Logo states when collapsed */
+.sidebar.sidebar-mini .sidebar-header .logo-normal {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+.sidebar.sidebar-mini .sidebar-header .logo-mini {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+}
+
+/* Text hiding when collapsed */
+.sidebar.sidebar-mini .item-name,
+.sidebar.sidebar-mini .right-icon {
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.sidebar:not(.sidebar-mini) .item-name,
+.sidebar:not(.sidebar-mini) .right-icon {
+    opacity: 1;
+    transition: opacity 0.22s ease 0.05s;
+    pointer-events: auto;
+}
+
+/* Nav link transitions (reduced !important usage) */
 .sidebar .nav-link {
-    transition: background-color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
-                color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
-                padding 0.3s ease-out !important,
-                box-shadow 0.3s ease-out !important;
+    transition: background-color var(--transition-fast), color var(--transition-fast), padding var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
 }
 
+/* Hover state */
 .sidebar .nav-link:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
+    background-color: rgba(var(--bs-primary-rgb, 0,123,255), 0.08);
 }
 
-/* Smooth collapse/expand animation for sidebar menu items */
+/* Sub-nav animation */
 .sidebar .sub-nav {
-    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important,
-                opacity 0.3s ease-in-out !important;
+    transition: height var(--transition-medium), opacity 0.22s ease-in-out;
     overflow: hidden;
 }
 
-.sidebar .sub-nav.collapsing {
-    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* Smooth rotation for arrow icons */
+/* Arrow icon rotation */
 .sidebar .nav-link .right-icon {
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease;
 }
+.sidebar .nav-link[aria-expanded="true"] .right-icon { transform: rotate(90deg); }
 
-.sidebar .nav-link[aria-expanded="true"] .right-icon {
-    transform: rotate(90deg);
-}
-
-/* Smooth fade effect for sub-menu items */
+/* Sub-menu items fade & slide */
 .sidebar .sub-nav .nav-item {
-    transition: opacity 0.3s ease-in-out !important,
-                transform 0.3s ease-out !important;
+    transition: opacity 0.22s ease, transform 0.22s ease;
 }
-
 .sidebar .sub-nav .nav-item .nav-link {
-    transition: background-color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
-                color 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important,
-                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important,
-                padding-left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transition: background-color var(--transition-fast), color var(--transition-fast), transform 0.28s cubic-bezier(0.34,1.56,0.64,1), padding-left 0.28s;
 }
-
 .sidebar .sub-nav .nav-item .nav-link:hover {
     transform: translateX(6px);
     padding-left: calc(0.75rem + 6px);
-    background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+    background-color: rgba(var(--bs-primary-rgb, 0,123,255), 0.1);
 }
 
-/* Icon smooth transitions */
+/* Icon hover scaling */
 .sidebar .nav-link .icon {
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
 }
+.sidebar .nav-link:hover .icon { transform: scale(1.08); }
 
-.sidebar .nav-link:hover .icon {
-    transform: scale(1.1);
-}
-
-/* Hardware acceleration for smoother animations */
+/* Performance hints (hardware accel) */
 .sidebar .sub-nav,
-.sidebar .nav-link .right-icon {
-    will-change: transform;
-    transform: translateZ(0);
+.sidebar .nav-link .right-icon,
+.sidebar-header .logo-normal,
+.sidebar-header .logo-mini {
+    will-change: transform, opacity;
     backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    :root { --transition-fast: 0.01s; --transition-medium: 0.01s; }
+    .sidebar, .sidebar * { transition-duration: 0.01s !important; animation-duration: 0.01s !important; }
+}
+
+/* Responsive tweak: collapse on small screens if desired */
+@media (max-width: 768px) {
+    .sidebar { width: var(--sidebar-mini-width); max-width: var(--sidebar-mini-width); }
+    .sidebar.sidebar-hover:hover { width: var(--sidebar-width); max-width: var(--sidebar-width); }
 }

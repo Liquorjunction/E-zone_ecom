@@ -54,51 +54,66 @@
     {{-- Page-specific scripts --}}
     @stack('scripts')
 
-    {{-- Sidebar hover functionality --}}
-    <style>
-        .sidebar {
-            transition: width 0.3s ease, transform 0.3s ease;
-        }
-
-        .sidebar.sidebar-mini {
-            width: 80px;
-        }
-
-        .sidebar.sidebar-mini:hover {
-            width: 260px;
-        }
-
-        .sidebar.sidebar-mini:not(:hover) .item-name,
-        .sidebar.sidebar-mini:not(:hover) .right-icon {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .sidebar .item-name,
-        .sidebar .right-icon {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-    </style>
-
+    {{-- Enhanced Sidebar functionality with Pin/Unpin --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.querySelector('.sidebar');
+            const pinBtn = document.getElementById('sidebarPinBtn');
+            let isPinned = localStorage.getItem('sidebarPinned') === 'true';
+            let hoverTimeout;
 
-            if (sidebar) {
-                // Start with collapsed sidebar
-                sidebar.classList.add('sidebar-mini');
-                document.body.classList.add('sidebar-mini');
-
-                // Expand on hover
-                sidebar.addEventListener('mouseenter', function() {
+            if (sidebar && pinBtn) {
+                // Initialize sidebar state
+                if (!isPinned) {
+                    sidebar.classList.add('sidebar-mini');
+                } else {
+                    sidebar.classList.add('sidebar-pinned');
                     sidebar.classList.remove('sidebar-mini');
-                    document.body.classList.remove('sidebar-mini');
+                }
+
+                // Pin/Unpin button click handler
+                pinBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    isPinned = !isPinned;
+                    localStorage.setItem('sidebarPinned', isPinned);
+
+                    if (isPinned) {
+                        sidebar.classList.add('sidebar-pinned');
+                        sidebar.classList.remove('sidebar-mini');
+                        pinBtn.setAttribute('title', 'Unpin Sidebar');
+                    } else {
+                        sidebar.classList.remove('sidebar-pinned');
+                        sidebar.classList.add('sidebar-mini');
+                        pinBtn.setAttribute('title', 'Pin Sidebar');
+                    }
                 });
 
-                // Collapse on mouse leave
+                // Hover functionality (only when not pinned)
+                sidebar.addEventListener('mouseenter', function() {
+                    if (!isPinned) {
+                        clearTimeout(hoverTimeout);
+                        // Small delay for smoother hover experience
+                        hoverTimeout = setTimeout(() => {
+                            sidebar.classList.remove('sidebar-mini');
+                        }, 50);
+                    }
+                });
+
                 sidebar.addEventListener('mouseleave', function() {
-                    sidebar.classList.add('sidebar-mini');
-                    document.body.classList.add('sidebar-mini');
+                    if (!isPinned) {
+                        clearTimeout(hoverTimeout);
+                        // Delay collapse to prevent flickering
+                        hoverTimeout = setTimeout(() => {
+                            sidebar.classList.add('sidebar-mini');
+                        }, 100);
+                    }
+                });
+
+                // Prevent sidebar from collapsing when clicking inside
+                sidebar.addEventListener('click', function(e) {
+                    if (!isPinned) {
+                        clearTimeout(hoverTimeout);
+                    }
                 });
             }
         });

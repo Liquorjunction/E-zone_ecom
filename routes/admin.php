@@ -14,9 +14,11 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingAndReturnController;
 use App\Http\Controllers\Admin\ShowroomController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\StoreController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\TncController;
 use App\Http\Controllers\Admin\TranslationController;
+use App\Http\Controllers\Admin\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
@@ -230,6 +232,30 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('import/progress/{batchId}', [ProductController::class, 'importProgress'])->name('import.progress');
             Route::post('import', [ProductController::class, 'import'])->name('import');
             Route::get('/import/report/{batchId}', [ProductController::class, 'importReport'])->middleware('can:products.create,admin')->name('import.report');
+        });
+
+        // Store Routes
+        Route::prefix('stores')->name('stores.')->middleware('can:store.read,admin')->group(function () {
+            Route::get('/', [StoreController::class, 'index'])->name('index'); // permission: store.read
+            Route::get('/data', [StoreController::class, 'getDataForDataTable'])->name('data');
+            Route::get('/create', [StoreController::class, 'create'])->name('create')->middleware('can:store.create,admin');
+            Route::post('/', [StoreController::class, 'store'])->name('store')->middleware('can:store.create,admin');
+            Route::get('/edit', [StoreController::class, 'edit'])->name('edit')->middleware('can:store.update,admin');
+            Route::put('/update', [StoreController::class, 'update'])->name('update')->middleware('can:store.update,admin');
+            Route::delete('/destroy', [StoreController::class, 'destroy'])->name('destroy')->middleware('can:store.delete,admin');
+            Route::patch('/toggle-status', [StoreController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:store.update,admin');
+        });
+
+        // Warehouse Routes
+        Route::prefix('warehouses')->name('warehouses.')->middleware('can:warehouse.read,admin')->group(function () {
+            Route::get('/', [WarehouseController::class, 'index'])->name('index'); // permission: warehouse.read
+            Route::get('/data', [WarehouseController::class, 'getDataForDataTable'])->name('data');
+            Route::get('/create', [WarehouseController::class, 'create'])->name('create')->middleware('can:warehouse.create,admin');
+            Route::post('/', [WarehouseController::class, 'store'])->name('store')->middleware('can:warehouse.create,admin');
+            Route::get('/edit', [WarehouseController::class, 'edit'])->name('edit')->middleware('can:warehouse.update,admin');
+            Route::put('/update', [WarehouseController::class, 'update'])->name('update')->middleware('can:warehouse.update,admin');
+            Route::delete('/destroy', [WarehouseController::class, 'destroy'])->name('destroy')->middleware('can:warehouse.delete,admin');
+            Route::patch('/toggle-status', [WarehouseController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:warehouse.update,admin');
         });
     });
 });

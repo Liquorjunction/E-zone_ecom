@@ -7,13 +7,21 @@
                         class="img-fluid" style="height: 120px; width: 120px; object-fit: contain;" />
                 </div>
                 <div class="logo-mini">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                    <img src="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" alt="E-Zone Mini Logo"
                         class="img-fluid" style="height: 50px; width: 50px; object-fit: contain;" />
                 </div>
             </div>
         </a>
+
+        <!-- Pin/Unpin Button -->
+        <button class="sidebar-pin-btn" id="sidebarPinBtn" title="Pin Sidebar" aria-label="Pin Sidebar">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 12V4H8V12H6V14H11V21H13V14H18V12H16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </button>
+
         <button class="sidebar-toggle btn btn-sm btn-link p-0" data-toggle="sidebar" data-active="true"
-            title="Toggle Sidebar" aria-label="Toggle Sidebar">
+            title="Toggle Sidebar" aria-label="Toggle Sidebar" style="display: none;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                 xmlns="http://www.w3.org/2000/svg">
                 <path d="M4.25 12.2744L19.25 12.2744" stroke="currentColor" stroke-width="1.5"
@@ -187,6 +195,75 @@
                                         </svg>
                                     </i>
                                     <span class="item-name">Products</span>
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </li>
+
+                <li>
+                    <hr class="hr-horizontal">
+                </li>
+
+                @php
+                    $isInventorySectionActive = request()->routeIs('admin.stores.*') || request()->routeIs('admin.warehouses.*');
+                @endphp
+                <li class="nav-item">
+                    <a class="nav-link {{ $isInventorySectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
+                        href="#sidebar-inventory" role="button"
+                        aria-expanded="{{ $isInventorySectionActive ? 'true' : 'false' }}"
+                        aria-controls="sidebar-inventory">
+                        <i class="icon" style="display: inline-flex;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor"
+                                stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 3h7v7H3z"></path>
+                                <path d="M14 3h7v7h-7z"></path>
+                                <path d="M14 14h7v7h-7z"></path>
+                                <path d="M3 14h7v7H3z"></path>
+                            </svg>
+                        </i>
+                        <span class="item-name">Inventory</span>
+                        <i class="right-icon">
+                            <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" width="18" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </i>
+                    </a>
+                    <ul class="sub-nav collapse {{ $isInventorySectionActive ? 'show' : '' }}" id="sidebar-inventory"
+                        data-bs-parent="#sidebar-menu">
+                        @can('store.read')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.stores.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.stores.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                        </svg>
+                                    </i>
+                                    <span class="item-name">Stores</span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('warehouse.read')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.warehouses.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.warehouses.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M3 3h18v18H3z"></path>
+                                            <path d="M3 9h18"></path>
+                                            <path d="M3 15h18"></path>
+                                            <path d="M9 3v18"></path>
+                                            <path d="M15 3v18"></path>
+                                        </svg>
+                                    </i>
+                                    <span class="item-name">Warehouses</span>
                                 </a>
                             </li>
                         @endcan
