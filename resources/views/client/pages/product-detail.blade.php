@@ -4,24 +4,21 @@
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
 
-            <div class="mb-6">
-                {!! Breadcrumbs::render('product-detail') !!}
-            </div>
+            {!! Breadcrumbs::render('products.detail', $product) !!}
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
 
                 <div class="space-y-4">
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-hidden">
                         <div class="aspect-square relative">
-                            <img src="https://via.placeholder.com/600x600?text=Product+Main"
-                                alt="Premium Wireless Headphones" class="w-full h-full object-cover">
+                            <img src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
+                                alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}" class="w-full h-full object-cover">
                             <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                    -25%
-                                </span>
-                                <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                    NEW
-                                </span>
+                                @if($product->created_at > now()->subDays(30))
+                                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                        NEW
+                                    </span>
+                                @endif
                             </div>
                             <button
                                 class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-red-50 transition-colors">
@@ -35,126 +32,198 @@
                     </div>
 
                     <div class="grid grid-cols-4 gap-4">
-                        @for ($i = 1; $i <= 4; $i++)
+                        @if($product->images && $product->images->count() > 0)
+                            @foreach($product->images->take(4) as $image)
+                                <button
+                                    class="bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50">
+                                    <img src="{{ asset('storage/' . $image->image_path) }}"
+                                        alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }} - {{ $loop->iteration }}" class="w-full h-24 object-cover">
+                                </button>
+                            @endforeach
+                        @else
                             <button
                                 class="bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50">
-                                <img src="https://via.placeholder.com/150x150?text=Thumb+{{ $i }}"
-                                    alt="Product thumbnail {{ $i }}" class="w-full h-24 object-cover">
+                                <img src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
+                                    alt="{{ $product->name }}" class="w-full h-24 object-cover">
                             </button>
-                        @endfor
+                        @endif
                     </div>
                 </div>
 
-                <div class="space-y-6">
-                    <div>
-                        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">
-                            Premium Wireless Headphones Pro
+                <div class="space-y-6 lg:sticky lg:top-6">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            @if($product->is_bestseller)
+                                <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.034a1 1 0 00-1.176 0l-2.802 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.88 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    Bestseller
+                                </span>
+                            @endif
+                            @if($product->created_at > now()->subDays(30))
+                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1">New Arrival</span>
+                            @endif
+                            <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1">Electronics</span>
+                            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1">SKU: {{ $product->sku }}</span>
+                        </div>
+
+                        <h1 class="text-3xl font-extrabold text-gray-900 mb-1">
+                            {{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}
                         </h1>
-                        <div class="flex items-center space-x-4 mb-4">
+                        <div class="flex flex-wrap items-center gap-3 mb-4">
                             <div class="flex items-center text-yellow-400 text-lg">
                                 ★★★★★
                             </div>
-                            <span class="text-gray-600">(247 reviews)</span>
-                            <span class="text-green-600 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
+                            <span class="text-gray-600 text-sm">(0 reviews)</span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                                 In Stock
                             </span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">Free returns 30d</span>
                         </div>
                     </div>
 
-                    <div class="flex items-center space-x-4">
-                        <span class="text-4xl font-bold text-primary">$299.99</span>
-                        <span class="text-xl text-gray-400 line-through">$399.99</span>
-                        <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
-                            Save $100
+                    <div class="flex items-center flex-wrap gap-3 p-4 bg-gradient-to-r from-primary/10 via-white to-white border border-primary/20 rounded-2xl shadow-sm">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-4xl font-bold text-primary">${{ number_format($product->price, 2) }}</span>
+                            <span class="text-sm text-gray-500">incl. taxes</span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-primary text-sm font-semibold shadow-xs border border-primary/20">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M4 7h16l-1 12H5L4 7zm5 3v6m6-6v6"/></svg>
+                            Fast dispatch
                         </span>
                     </div>
 
                     {{-- Categories and Tags Chips --}}
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Category:</span>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Electronics
-                        </a>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Headphones
-                        </a>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">Tags:</span>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Wireless
-                        </a>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Bluetooth
-                        </a>
+                        @if($product->category)
+                            <a href="{{ route('products.index', ['category' => $product->category->slug]) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                {{ $product->category->{'category-name'} }}
+                            </a>
+                        @endif
+                        @if($product->subCategory)
+                            <a href="{{ route('products.index', ['subcategory' => $product->subCategory->slug]) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                {{ $product->subCategory->{'sub-category-name'} }}
+                            </a>
+                        @endif
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Brand:</span>
-                        <a href="#" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                            Apple
-                        </a>
+                        @if($product->brand)
+                            <a href="{{ route('brand-products', $product->brand->slug) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                {{ $product->brand->name }}
+                            </a>
+                        @endif
                     </div>
 
                     {{-- Information About Product and more infos --}}
                     <div class="space-y-2">
                         <h2 class="text-lg font-bold text-gray-700 mb-2">Description:</h2>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
-                    </div>
-
-                    {{-- Product Features --}}
-                    <div class="space-y-2">
-                        <h2 class="text-lg font-bold text-gray-700 mb-2">Product Features:</h2>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
-                        <p class="text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos!
-                        </p>
-                    </div>
-
-                    {{-- Color --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                        <div class="flex items-center space-x-3">
-                            <label class="relative">
-                                <input type="radio" name="color" value="black" class="peer sr-only" checked>
-                                <span
-                                    class="w-8 h-8 rounded-full bg-gray-900 block cursor-pointer ring-2 ring-transparent peer-checked:ring-primary ring-offset-2 transition-all"></span>
-                            </label>
-                            <label class="relative">
-                                <input type="radio" name="color" value="white" class="peer sr-only">
-                                <span
-                                    class="w-8 h-8 rounded-full bg-white border border-gray-200 block cursor-pointer ring-2 ring-transparent peer-checked:ring-primary ring-offset-2 transition-all"></span>
-                            </label>
-                            <label class="relative">
-                                <input type="radio" name="color" value="blue" class="peer sr-only">
-                                <span
-                                    class="w-8 h-8 rounded-full bg-blue-600 block cursor-pointer ring-2 ring-transparent peer-checked:ring-primary ring-offset-2 transition-all"></span>
-                            </label>
+                        <div class="text-gray-600 prose max-w-none">
+                            {!! is_array($product->description) ? ($product->description[app()->getLocale()] ?? $product->description['en'] ?? '') : $product->description !!}
                         </div>
                     </div>
 
+                    {{-- Product Features --}}
+                    @php
+                        // Normalize specifications and dimensions: they may be JSON strings or arrays with varying shapes.
+                        $rawSpecs = $product->specifications;
+                        if (is_string($rawSpecs)) {
+                            $decoded = json_decode($rawSpecs, true);
+                            $rawSpecs = is_array($decoded) ? $decoded : null;
+                        }
+
+                        $specifications = [];
+                        if (is_array($rawSpecs)) {
+                            foreach ($rawSpecs as $key => $item) {
+                                // Common importer shape: [{title: ..., value: ...}]
+                                if (is_array($item) && (isset($item['title']) || isset($item['value']) || isset($item['description']))) {
+                                    $title = $item['title'] ?? $item['label'] ?? $key;
+                                    $value = $item['value'] ?? $item['description'] ?? '';
+                                } else {
+                                    // Fallback shape: associative map key => value
+                                    $title = is_numeric($key) ? 'Spec '.($key + 1) : $key;
+                                    $value = $item;
+                                }
+
+                                // Resolve translatable arrays
+                                if (is_array($title)) {
+                                    $title = $title[app()->getLocale()] ?? ($title['en'] ?? reset($title));
+                                }
+                                if (is_array($value)) {
+                                    $value = $value[app()->getLocale()] ?? ($value['en'] ?? reset($value));
+                                }
+
+                                if (filled($title) && filled($value)) {
+                                    $specifications[] = ['title' => $title, 'value' => $value];
+                                }
+                            }
+                        }
+
+                        $rawDimensions = $product->dimensions;
+                        if (is_string($rawDimensions)) {
+                            $decoded = json_decode($rawDimensions, true);
+                            $rawDimensions = is_array($decoded) ? $decoded : null;
+                        }
+
+                        $dimensions = [];
+                        if (is_array($rawDimensions)) {
+                            foreach ($rawDimensions as $key => $item) {
+                                $title = is_numeric($key) ? 'Dimension '.($key + 1) : $key;
+                                $value = $item;
+
+                                if (is_array($title)) {
+                                    $title = $title[app()->getLocale()] ?? ($title['en'] ?? reset($title));
+                                }
+                                if (is_array($value)) {
+                                    $value = $value[app()->getLocale()] ?? ($value['en'] ?? reset($value));
+                                }
+
+                                if (filled($title) && filled($value)) {
+                                    $dimensions[] = ['title' => $title, 'value' => $value];
+                                }
+                            }
+                        }
+                    @endphp
+
+                    {{-- Variants --}}
+                    @if($product->productVariants && $product->productVariants->count() > 0)
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-sm font-semibold text-gray-800">Variants</label>
+                                <span class="text-xs text-gray-500">Tap to view details</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                @foreach($product->productVariants as $variant)
+                                    <div class="group border border-gray-200 hover:border-primary/50 rounded-2xl px-4 py-3 bg-white shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="text-sm font-semibold text-gray-900 line-clamp-1">{{ $variant->variant_name ?? $variant->name ?? 'Variant' }}</div>
+                                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">SKU</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600 mt-0.5 line-clamp-1">{{ $variant->sku }}</div>
+                                        <div class="flex items-center justify-between mt-2">
+                                            <div class="text-base font-bold text-primary">${{ number_format($variant->price, 2) }}</div>
+                                            <span class="text-[11px] font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">In stock</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div class="flex items-center border border-gray-300 rounded-lg w-fit">
-                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors">
+                        <div class="flex items-center border border-gray-200 rounded-xl w-fit shadow-sm bg-white">
+                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors" aria-label="Decrease quantity">
                                 <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                                 </svg>
                             </button>
                             <input type="text" value="1"
-                                class="w-12 text-center text-lg font-medium text-gray-900 border-x border-gray-300 focus:outline-none"
-                                readonly>
-                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors">
+                                class="w-12 text-center text-lg font-semibold text-gray-900 border-x border-gray-200 focus:outline-none"
+                                readonly aria-label="Quantity">
+                            <button class="w-12 h-12 text-gray-600 hover:text-primary transition-colors" aria-label="Increase quantity">
                                 <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4v16m8-8H4" />
@@ -163,11 +232,11 @@
                         </div>
 
                         <button
-                            class="flex-1 w-full bg-primary text-white text-lg font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:bg-primary-dark transition-all duration-300 transform hover:-translate-y-0.5">
+                            class="flex-1 w-full bg-gradient-to-r from-primary to-primary-dark text-white text-lg font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
                             Add to Cart
                         </button>
                         <button
-                            class="flex-1 w-full bg-gray-800 text-white text-lg font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:bg-black transition-all duration-300 transform hover:-translate-y-0.5">
+                            class="flex-1 w-full bg-gray-900 text-white text-lg font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:bg-black transition-all duration-300 transform hover:-translate-y-0.5">
                             Buy Now
                         </button>
                     </div>
@@ -204,159 +273,61 @@
                 <div class="p-8">
                     <div id="description-tab" class="tab-content active">
                         <div class="prose max-w-none">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Premium Wireless Headphones Pro</h3>
-                            <p class="text-gray-700 mb-6 leading-relaxed">
-                                Experience unparalleled audio quality with our Premium Wireless Headphones Pro. Featuring
-                                advanced noise cancellation technology,
-                                premium materials, and exceptional comfort for extended listening sessions. Whether you're
-                                commuting, working out, or relaxing at home,
-                                these headphones deliver studio-quality sound in a sleek, modern design.
-                            </p>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                                <div>
-                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">Key Features:</h4>
-                                    <ul class="space-y-2 text-gray-700">
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Active Noise Cancellation (ANC)
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            30-hour battery life
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Premium leather cushions
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Bluetooth 5.0 connectivity
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">What's in the Box:</h4>
-                                    <ul class="space-y-2 text-gray-700">
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Premium Wireless Headphones
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            USB-C Charging Cable
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Carrying Case
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            User Manual & Warranty Card
-                                        </li>
-                                    </ul>
-                                </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}</h3>
+                            <div class="text-gray-700 mb-6 leading-relaxed">
+                                {!! is_array($product->description) ? ($product->description[app()->getLocale()] ?? $product->description['en'] ?? '') : $product->description !!}
                             </div>
+
+                            @if($product->warranty)
+                                <div class="mt-6">
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">Warranty:</h4>
+                                    <div class="text-gray-700">
+                                        {!! is_array($product->warranty) ? ($product->warranty[app()->getLocale()] ?? $product->warranty['en'] ?? '') : $product->warranty !!}
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                     <div id="specifications-tab" class="tab-content hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Audio Specifications</h4>
-                                <table class="w-full text-sm">
-                                    <tbody class="divide-y divide-gray-200">
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Driver Size</td>
-                                            <td class="py-3 text-gray-900">40mm Dynamic Drivers</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Frequency Response</td>
-                                            <td class="py-3 text-gray-900">20Hz - 20kHz</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Impedance</td>
-                                            <td class="py-3 text-gray-900">32 Ohm</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Sensitivity</td>
-                                            <td class="py-3 text-gray-900">98 dB SPL</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Noise Cancellation</td>
-                                            <td class="py-3 text-gray-900">Active ANC</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        @if(!empty($specifications) || !empty($dimensions))
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                @if(!empty($specifications))
+                                    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-3">Specifications</h4>
+                                        <table class="w-full text-sm">
+                                            <tbody class="divide-y divide-gray-100">
+                                                @foreach($specifications as $spec)
+                                                    <tr class="py-2">
+                                                        <td class="py-3 text-gray-500 font-medium w-1/3">{{ $spec['title'] }}</td>
+                                                        <td class="py-3 text-gray-900">{{ $spec['value'] }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+                                @if(!empty($dimensions))
+                                    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-3">Dimensions</h4>
+                                        <table class="w-full text-sm">
+                                            <tbody class="divide-y divide-gray-100">
+                                                @foreach($dimensions as $dim)
+                                                    <tr class="py-2">
+                                                        <td class="py-3 text-gray-500 font-medium w-1/3">{{ $dim['title'] }}</td>
+                                                        <td class="py-3 text-gray-900">{{ $dim['value'] }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
                             </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Connectivity & Battery</h4>
-                                <table class="w-full text-sm">
-                                    <tbody class="divide-y divide-gray-200">
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Bluetooth Version</td>
-                                            <td class="py-3 text-gray-900">5.0</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Wireless Range</td>
-                                            <td class="py-3 text-gray-900">10 meters</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Battery Life</td>
-                                            <td class="py-3 text-gray-900">30 hours (ANC on)</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Charging Time</td>
-                                            <td class="py-3 text-gray-900">2 hours</td>
-                                        </tr>
-                                        <tr class="py-2">
-                                            <td class="py-3 text-gray-600 font-medium">Weight</td>
-                                            <td class="py-3 text-gray-900">290g</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        @else
+                            <div class="text-center text-gray-500 py-8">
+                                No specifications available for this product.
                             </div>
-                        </div>
+                        @endif
                     </div>
 
                     <div id="reviews-tab" class="tab-content hidden">
@@ -596,54 +567,50 @@
                 </div>
             </div>
 
-            <div class="mb-12">
-                <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">You Might Also Like</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    @for ($i = 1; $i <= 4; $i++)
-                        <div
-                            class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
-                            <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
-                                <img src="https://via.placeholder.com/300x300?text=Related+{{ $i }}"
-                                    alt="Related Product {{ $i }}"
-                                    class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
-                                @if ($i % 2 == 0)
-                                    <div class="absolute top-3 left-3">
-                                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                            -20%
-                                        </span>
-                                    </div>
-                                @endif
-                            </a>
-
-                            <div class="p-4">
-                                <a href="#">
-                                    <h3
-                                        class="font-semibold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary mb-2">
-                                        Related Electronics Product {{ $i }}
-                                    </h3>
+            @if($relatedProducts && $relatedProducts->count() > 0)
+                <div class="mb-12">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">You Might Also Like</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        @foreach($relatedProducts as $relatedProduct)
+                            <div class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
+                                <a href="{{ route('products.detail', $relatedProduct->slug) }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
+                                    <img src="{{ $relatedProduct->cover_image ? asset('storage/' . $relatedProduct->cover_image) : asset('images/placeholder-product.jpg') }}"
+                                        alt="{{ is_array($relatedProduct->name) ? ($relatedProduct->name[app()->getLocale()] ?? $relatedProduct->name['en'] ?? '') : $relatedProduct->name }}"
+                                        class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
+                                    @if($relatedProduct->created_at > now()->subDays(30))
+                                        <div class="absolute top-3 left-3">
+                                            <span class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                NEW
+                                            </span>
+                                        </div>
+                                    @endif
                                 </a>
 
-                                <div class="flex items-center mb-2">
-                                    <div class="flex items-center text-yellow-400 text-sm">
-                                        ★★★★☆
-                                    </div>
-                                    <span class="ml-2 text-sm text-gray-500">({{ rand(10, 100) }})</span>
-                                </div>
+                                <div class="p-4">
+                                    <a href="{{ route('products.detail', $relatedProduct->slug) }}">
+                                        <h3 class="font-semibold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary mb-2">
+                                            {{ is_array($relatedProduct->name) ? ($relatedProduct->name[app()->getLocale()] ?? $relatedProduct->name['en'] ?? '') : $relatedProduct->name }}
+                                        </h3>
+                                    </a>
 
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <span class="text-lg font-bold text-primary">${{ rand(99, 299) }}.99</span>
-                                        @if ($i % 2 == 0)
-                                            <span
-                                                class="text-sm text-gray-400 line-through ml-2">${{ rand(129, 399) }}.99</span>
-                                        @endif
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex items-center text-yellow-400 text-sm">
+                                            ★★★★☆
+                                        </div>
+                                        <span class="ml-2 text-sm text-gray-500">(0)</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-lg font-bold text-primary">${{ number_format($relatedProduct->price, 2) }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    @endfor
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
 
         </div>
     </div>

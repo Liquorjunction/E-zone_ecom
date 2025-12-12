@@ -1,3 +1,5 @@
+/* Import the font */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -9,23 +11,111 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Custom colors */
+    /* Adjusted OKLCH for better contrast and vibrancy */
     --color-primary: oklch(0.69 0.14 232.2);
     --color-background: oklch(0.69 0.14 232.2 / 0.05);
+    --color-primary-dark: oklch(0.50 0.12 232.2);
+    --color-foreground: oklch(0.20 0.05 232.2);
 }
 
-/* Define animations the standard way — outside @theme */
-@keyframes infinite-scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+/* Alpine.js Cloak - Hide elements until Alpine loads */
+[x-cloak] {
+    display: none !important;
 }
 
 @layer utilities {
     .animate-infinite-scroll {
         animation: infinite-scroll 25s linear infinite;
     }
+
+    /* Cross-browser scrollbar hiding */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Responsive text scaling */
+    .text-responsive-xs { font-size: clamp(0.75rem, 2vw, 0.875rem); }
+    .text-responsive-sm { font-size: clamp(0.875rem, 2.5vw, 1rem); }
+    .text-responsive-base { font-size: clamp(1rem, 3vw, 1.125rem); }
+    .text-responsive-lg { font-size: clamp(1.125rem, 3.5vw, 1.25rem); }
+    .text-responsive-xl { font-size: clamp(1.25rem, 4vw, 1.5rem); }
+    .text-responsive-2xl { font-size: clamp(1.5rem, 5vw, 2rem); }
+    .text-responsive-3xl { font-size: clamp(2rem, 6vw, 3rem); }
+    .text-responsive-4xl { font-size: clamp(3rem, 8vw, 4rem); }
+
+    /* Responsive spacing */
+    .space-responsive-x { margin-left: clamp(0.5rem, 2vw, 1rem); margin-right: clamp(0.5rem, 2vw, 1rem); }
+    .space-responsive-y { margin-top: clamp(0.5rem, 2vw, 1rem); margin-bottom: clamp(0.5rem, 2vw, 1rem); }
+
+    /* Container queries for component-level responsiveness */
+    .container-query {
+        container-type: inline-size;
+    }
+
+    /* Aspect ratio utilities for different screen types */
+    .aspect-ultrawide { aspect-ratio: 21 / 9; }
+    .aspect-widescreen { aspect-ratio: 16 / 9; }
+    .aspect-standard { aspect-ratio: 4 / 3; }
+    .aspect-square { aspect-ratio: 1 / 1; }
+    .aspect-portrait { aspect-ratio: 3 / 4; }
+    .aspect-vertical { aspect-ratio: 9 / 16; }
+
+    /* Orientation-based utilities */
+    @media (orientation: portrait) {
+        .portrait\:block { display: block; }
+        .portrait\:hidden { display: none; }
+        .portrait\:flex { display: flex; }
+        .portrait\:grid { display: grid; }
+    }
+
+    @media (orientation: landscape) {
+        .landscape\:block { display: block; }
+        .landscape\:hidden { display: none; }
+        .landscape\:flex { display: flex; }
+        .landscape\:grid { display: grid; }
+    }
+
+    /* Height-based responsive utilities */
+    @media (min-height: 800px) {
+        .tall\:py-32 { padding-top: 8rem; padding-bottom: 8rem; }
+        .tall\:text-5xl { font-size: 3rem; line-height: 1; }
+    }
+
+    @media (max-height: 600px) {
+        .short\:py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+        .short\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+    }
+
+    /* Ultrawide screen optimizations */
+    @media (min-aspect-ratio: 21/9) {
+        .ultrawide\:max-w-7xl { max-width: 80rem; }
+        .ultrawide\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    }
+
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+        .touch\:p-4 { padding: 1rem; }
+        .touch\:text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    }
+
+    /* High DPI displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .retina\:bg-cover { background-size: cover; }
+    }
+
+    /* Print styles */
+    @media print {
+        .print\:hidden { display: none !important; }
+        .print\:block { display: block !important; }
+        .print\:text-black { color: black !important; }
+    }
+}
+
+@keyframes infinite-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
 }

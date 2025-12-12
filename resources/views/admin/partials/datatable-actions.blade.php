@@ -19,6 +19,8 @@
     <form action="{{ $delete_url }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this item?');">
         @csrf
         @method('DELETE')
+        {{-- Support multiple controllers: prefer explicit product_id, then generic id, then model_id --}}
+        <input type="hidden" name="id" value="{{ $product_id ?? $id ?? $model_id ?? '' }}">
         <button type="submit" class="btn btn-sm btn-icon btn-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-original-title="Delete" aria-label="Delete" data-bs-original-title="Delete">
             <span class="btn-inner">
                 <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

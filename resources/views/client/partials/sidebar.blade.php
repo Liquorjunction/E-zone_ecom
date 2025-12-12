@@ -1,7 +1,9 @@
 {{-- Data injected via App\View\Composers\SidebarComposer --}}
-<aside class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white shadow-xl border-r-2 border-primary z-40 transition-all duration-300"
+<aside class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white shadow-xl border-r-2 border-primary z-40 transition-all duration-300 container-query"
        style="top: 88px; max-height: calc(100vh - 88px);"
-       :class="{ 'w-16': sidebarCollapsed, 'w-72': !sidebarCollapsed }">
+       :class="{ 'w-16': sidebarCollapsed, 'w-72': !sidebarCollapsed }"
+       @mouseenter="sidebarCollapsed = false"
+       @mouseleave="sidebarCollapsed = true">
 
     <div class="shrink-0 bg-white z-10 py-5 px-5 border-b-2 border-gray-100 transition-all duration-300"
          :class="{ 'px-3 hidden': sidebarCollapsed }">
@@ -21,7 +23,7 @@
             @foreach ($sidebarCategories as $category)
                 <li x-data="{ open: false }" class="group">
                     <div class="relative">
-                        <a href="{{ route('products', ['category' => $category->slug]) }}"
+                        <a href="{{ route('products.index', ['category' => $category->slug]) }}"
                            class="flex items-center py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-all duration-300 hover:bg-gray-50 group-hover:shadow-md"
                            :class="{ 'px-2 justify-center': sidebarCollapsed, 'px-4': !sidebarCollapsed }">
 
@@ -60,7 +62,7 @@
                              x-collapse
                              class="ml-9 mt-1.5 space-y-0.5 pl-4 border-l-2 border-gray-100">
                             @foreach ($category->subcategories as $subcategory)
-                                <a href="{{ route('products', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
                                    class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:pl-4 hover:font-medium hover:text-primary">
                                     <span class="flex items-center">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-2.5 group-hover:bg-primary transition-colors"></span>
@@ -76,7 +78,7 @@
     </nav>
 
     <div x-show="!sidebarCollapsed" class="shrink-0 bg-white p-4 border-t-2 border-gray-100 shadow-lg mt-auto">
-        <a href="{{ route('products') }}"
+        <a href="{{ route('products.index') }}"
            class="flex items-center justify-center w-full px-5 py-3 text-sm font-semibold text-white bg-primary rounded-xl transition-all duration-300 hover:shadow-xl transform hover:-translate-y-0.5">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -132,7 +134,7 @@
             @foreach ($sidebarCategories as $category)
                 <li x-data="{ open: false }" class="group">
                     <div class="relative">
-                        <a href="{{ route('products', ['category' => $category->slug]) }}"
+                        <a href="{{ route('products.index', ['category' => $category->slug]) }}"
                            class="flex items-center px-4 py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-all duration-300 hover:bg-gray-50">
                             <span class="shrink-0 text-primary w-6 h-6 flex items-center justify-center">
                                 @if($category->{'category-icon'} && \Illuminate\Support\Facades\Storage::disk('public')->exists($category->{'category-icon'}))
@@ -164,7 +166,7 @@
                              x-collapse
                              class="ml-9 mt-1.5 space-y-0.5 pl-4 border-l-2 border-gray-100">
                             @foreach ($category->subcategories as $subcategory)
-                                <a href="{{ route('products', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
                                    class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-all duration-200 hover:bg-gray-50">
                                     <span class="flex items-center">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-2.5"></span>
@@ -179,15 +181,3 @@
         </ul>
     </nav>
 </aside>
-
-@push('scripts')
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('sidebar', () => ({
-            mobileSidebarOpen: false,
-            sidebarCollapsed: true
-        }))
-    })
-</script>
-@endpush

@@ -136,9 +136,19 @@ class CategoryController extends Controller
 
     public function toggleStatus(EditCategoryRequest $request, CategoryRepo $categoryRepo)
     {
-        $id = $request->input('id');
-        $categoryRepo->updateStatus($id);
+        try {
+            $id = $request->input('id');
+            $categoryRepo->updateStatus($id);
 
-        return redirect()->back()->with(['success' => true, 'message' => 'Category status updated successfully']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Category status updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

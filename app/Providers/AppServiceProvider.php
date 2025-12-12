@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\View\Composers\ClientComposer;
 use App\View\Composers\SidebarComposer;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -27,5 +28,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
         View::composer('client.partials.sidebar', SidebarComposer::class);
+        View::composer('client.*', ClientComposer::class);
     }
 }

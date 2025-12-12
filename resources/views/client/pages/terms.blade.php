@@ -1,52 +1,90 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
-        <div class="container mx-auto px-4">
+    <div class="bg-gray-50 min-h-screen pb-16 relative overflow-hidden">
 
-            <x-breadcrumbs>
-                <x-slot:title>Terms of Service</x-slot:title>
-                <x-slot:content>Read our terms of service.</x-slot:content>
-            </x-breadcrumbs>
+        {{-- Optional: Subtle Background Blob for visual depth --}}
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-96 bg-linear-to-b from-white to-transparent opacity-60 pointer-events-none"></div>
 
-            <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
-                <div
-                    class="prose max-w-none prose-p:text-gray-700 prose-p:leading-relaxed prose-h2:font-bold prose-h2:text-gray-900 prose-h3:font-semibold prose-h3:text-gray-800 prose-a:text-primary hover:prose-a:text-primary/80 prose-ul:list-disc prose-ul:ml-6 prose-ol:list-decimal prose-ol:ml-6">
+        {{-- Page Header / Breadcrumbs --}}
+        <div class="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+            <div class="container mx-auto px-4 py-6">
+                <x-breadcrumbs>
+                    <x-slot:title>Terms of Service</x-slot:title>
+                    <x-slot:content>Please read our terms and conditions carefully.</x-slot:content>
+                </x-breadcrumbs>
+            </div>
+        </div>
 
-                    <p class_="text-sm text-gray-500">Last updated: November 12, 2025</p>
+        {{-- Main Content --}}
+        <div class="container mx-auto px-4 py-12 relative z-10 animate-slide-up">
+            <div class="max-w-8xl mx-auto">
 
-                    <h2>1. Introduction</h2>
-                    <p>Welcome to [Your Company Name] ("we," "our," or "us"). These Terms of Service govern your use of our
-                        website and services. By accessing or using our service, you agree to be bound by these terms.</p>
+                {{-- Document Card --}}
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
 
-                    <h2>2. Use of Our Service</h2>
-                    <p>You must be at least 18 years old to use our service. You agree not to use the service for any
-                        illegal or unauthorized purpose. You are responsible for all activity that occurs under your
-                        account.</p>
+                    {{-- Card Top Accent --}}
+                    <div class="h-1.5 w-full bg-primary"></div>
 
-                    <h3>a. Account Registration</h3>
-                    <p>To access certain features, you may be required to create an account. You must provide accurate and
-                        complete information. You are solely responsible for the security of your password.</p>
+                    <div class="p-8 md:p-12 lg:p-16">
+                        @if($terms)
+                            {{-- Header Section --}}
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-8 border-b border-gray-100">
+                                <div>
+                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Terms of Service</h1>
+                                    <p class="text-gray-500">Agreement between User and {{ config('app.name') }}</p>
+                                </div>
 
-                    <h2>3. Products and Pricing</h2>
-                    <p>We make every effort to display product information and pricing accurately. However, we reserve the
-                        right to correct any errors or inaccuracies and to change or update information at any time without
-                        prior notice.</p>
+                                {{-- Date Badge --}}
+                                <div class="inline-flex items-center px-4 py-2 bg-gray-50 border border-gray-100 rounded-full">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 mr-2.5 animate-pulse"></div>
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-2">Last Updated:</span>
+                                    <span class="text-sm font-bold text-gray-900">{{ $terms->updated_at->format('M d, Y') }}</span>
+                                </div>
+                            </div>
 
-                    <h2>4. Limitation of Liability</h2>
-                    <p>To the fullest extent permitted by applicable law, [Your Company Name] shall not be liable for any
-                        indirect, incidental, special, consequential, or punitive damages, or any loss of profits or
-                        revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other
-                        intangible losses, resulting from:</p>
-                    <ol>
-                        <li>Your access to or use of or inability to access or use the service.</li>
-                        <li>Any conduct or content of any third party on the service.</li>
-                        <li>Any content obtained from the service.</li>
-                    </ol>
+                            {{-- Dynamic Content (Prose) --}}
+                            <div class="prose prose-lg max-w-none
+                                {{-- Headings --}}
+                                prose-headings:font-bold prose-headings:text-gray-900 prose-headings:scroll-mt-24
+                                prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100
+                                prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-gray-800
 
-                    <h2>5. Governing Law</h2>
-                    <p>These Terms shall be governed by and construed in accordance with the laws of India, without regard
-                        to its conflict of law provisions.</p>
+                                {{-- Text & Links --}}
+                                prose-p:text-gray-600 prose-p:leading-8 prose-p:mb-6
+                                prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline hover:prose-a:text-primary-dark
+                                prose-strong:text-gray-900 prose-strong:font-bold
+
+                                {{-- Lists --}}
+                                prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-gray-300 prose-li:pl-2
+                                prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6
+
+                                {{-- Blockquotes --}}
+                                prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:italic prose-blockquote:text-gray-700">
+
+                                {!! $terms->description ?? $terms->content !!}
+
+                            </div>
+                        @else
+                            {{-- Empty State --}}
+                            <div class="text-center py-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm mb-4">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900">Terms Unavailable</h3>
+                                <p class="text-gray-500 mt-2 max-w-sm mx-auto">We are currently updating our terms of service. Please check back later.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Card Footer --}}
+                    <div class="bg-gray-50 px-8 py-6 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <p class="text-sm text-gray-500">
+                            Questions? <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">Contact Support</a>
+                        </p>
+                    </div>
 
                 </div>
             </div>

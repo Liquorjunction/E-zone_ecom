@@ -15,8 +15,11 @@
 @section('content')
     <div class="container-fluid">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between">
                 <h4>Create Card</h4>
+                <a href="{{ route('admin.cards.index') }}" class="btn btn-sm btn-primary">
+                    <i class="fa fa-arrow-left mr-2"></i>Back
+                </a>
             </div>
             <div class="card-body">
                 <form action="{{ route('admin.cards.store') }}" method="POST" enctype="multipart/form-data">

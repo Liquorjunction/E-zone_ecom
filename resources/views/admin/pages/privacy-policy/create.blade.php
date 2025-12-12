@@ -1,4 +1,5 @@
 @extends('admin.layouts.app')
+@section('title', 'Create Privacy Policy')
 
 @section('content')
     <div class="container-fluid">
@@ -22,7 +23,8 @@
                             {{-- Language Tabs --}}
                             <ul class="nav nav-tabs" id="langTab" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="en-tab" data-toggle="tab" href="#en" role="tab" aria-controls="en" aria-selected="true">
+                                    <a class="nav-link active" id="en-tab" data-toggle="tab" href="#en"
+                                        role="tab" aria-controls="en" aria-selected="true">
                                         English <span class="text-danger">*</span>
                                     </a>
                                 </li>
@@ -30,7 +32,13 @@
 
                             <div class="tab-content mt-3" id="langTabContent">
                                 {{-- English Tab --}}
-                                <div class="tab-pane fade show active" id="en" role="tabpanel" aria-labelledby="en-tab">
+                                <div class="tab-pane fade show active" id="en" role="tabpanel"
+                                    aria-labelledby="en-tab">
+                                    <div class="form-group">
+                                        <label>Title (EN) <span class="text-danger">*</span></label>
+                                        <input type="text" name="title[en]" id="title_en" class="form-control" value="{{ old('title.en') }}" required>
+                                        @error('title.en') <span class="text-danger">{{ $message }}</span> @enderror
+                                    </div>
                                     <div class="form-group">
                                         <label>Description (EN) <span class="text-danger">*</span></label>
                                         <div id="editor_en" style="height: 300px;">{!! old('description.en') !!}</div>
@@ -54,6 +62,6 @@
     </div>
 
     @push('scripts')
-    <script src="{{ asset('admin_assets/js/privacyPolicy.js') }}"></script>
+        <script src="{{ asset('admin_assets/js/privacyPolicy.js') }}"></script>
     @endpush
 @endsection

@@ -122,11 +122,15 @@ class CardController extends Controller
         try {
             $cardRepo->updateStatus($request->input('id'));
 
-            return redirect()->route('admin.cards.index')->with('success', 'Card status updated successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Card status updated successfully.',
+            ]);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-
-            return redirect()->route('admin.cards.index')->with('error', $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -136,6 +140,13 @@ class CardController extends Controller
             $cards = $cardRepo->getDataForDataTable($request->all());
             $getTable = DataTables::of($cards)
                 ->addIndexColumn()
+                ->addColumn('title', function ($card) {
+                    // Fetch the title in english
+                    $title = $card->getTranslation('title', 'en');
+
+                    // Limit the title to 50 characters
+                    return strlen($title) > 50 ? substr($title, 0, 50).'...' : $title;
+                })
                 ->addColumn('image', function ($card) {
                     if ($card->image && Storage::disk('public')->exists($card->image)) {
                         $url = asset('storage/'.$card->image);

@@ -14,15 +14,15 @@ Breadcrumbs::for('home', function (BreadcrumbTrail $trail) {
 });
 
 // Home > Products
-Breadcrumbs::for('products', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('products.index', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Products', route('products'));
+    $trail->push('Products', route('products.index'));
 });
 
 // Home > Products > Product Detail
-Breadcrumbs::for('product-detail', function (BreadcrumbTrail $trail) {
-    $trail->parent('products');
-    $trail->push('Product Detail', route('product-detail'));
+Breadcrumbs::for('products.detail', function (BreadcrumbTrail $trail, $product) {
+    $trail->parent('products.index');
+    $trail->push($product->name, route('products.detail', $product->slug));
 });
 
 // Home > Cart
@@ -98,9 +98,9 @@ Breadcrumbs::for('terms', function (BreadcrumbTrail $trail) {
 });
 
 // Home > Privacy
-Breadcrumbs::for('privacy', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('privacy-policy', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Privacy', route('privacy'));
+    $trail->push('privacy-policy', route('privacy-policy'));
 });
 
 // Home > Shipping Returns
@@ -203,6 +203,12 @@ Breadcrumbs::for('order-tracking', function (BreadcrumbTrail $trail) {
 Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail, $id) {
     $trail->parent('home');
     $trail->push('Order Detail', route('order-detail', $id));
+});
+
+// Home > All Brands
+Breadcrumbs::for('brands', function (BreadcrumbTrail $trail) {
+    $trail->parent('home');
+    $trail->push('All Brands', route('brands'));
 });
 
 

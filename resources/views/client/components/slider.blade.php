@@ -1,4 +1,4 @@
-<section class="relative w-full h-screen overflow-hidden" x-data="{
+<section class="relative w-full h-80 sm:h-96 md:h-screen overflow-hidden" x-data="{
     activeSlide: 0,
     slidesCount: {{ $sliders->count() }},
     autoplayInterval: null,
@@ -37,11 +37,11 @@
                 </div>
 
                 {{-- Content --}}
-                <div class="absolute bottom-0 left-0 w-full z-20 pb-24 md:pb-32 px-4">
+                <div class="absolute bottom-0 left-0 w-full z-20 pb-12 sm:pb-16 md:pb-32 px-4">
                     <div class="container mx-auto">
                         <div class="max-w-3xl text-left">
                             {{-- Title with slight delay animation --}}
-                            <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight drop-shadow-md"
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold text-white leading-tight drop-shadow-md"
                                 x-show="activeSlide === {{ $index }}"
                                 x-transition:enter="transition delay-200 duration-700 ease-out"
                                 x-transition:enter-start="opacity-0 translate-y-4"
@@ -50,7 +50,7 @@
                             </h1>
 
                             {{-- Subtitle with more delay --}}
-                            <p class="mt-4 text-lg text-gray-200 max-w-2xl drop-shadow-sm"
+                            <p class="mt-2 sm:mt-3 md:mt-4 text-sm sm:text-base md:text-lg text-gray-200 max-w-2xl drop-shadow-sm"
                                 x-show="activeSlide === {{ $index }}"
                                 x-transition:enter="transition delay-300 duration-700 ease-out"
                                 x-transition:enter-start="opacity-0 translate-y-4"
@@ -60,12 +60,12 @@
 
                             {{-- Button --}}
                             @if ($slider->button_text)
-                                <div class="mt-8" x-show="activeSlide === {{ $index }}"
+                                <div class="mt-4 sm:mt-6 md:mt-8" x-show="activeSlide === {{ $index }}"
                                     x-transition:enter="transition delay-500 duration-700 ease-out"
                                     x-transition:enter-start="opacity-0 translate-y-4"
                                     x-transition:enter-end="opacity-100 translate-y-0">
                                     <a href="{{ $slider->button_link ?? '#' }}"
-                                        class="inline-block text-white px-8 py-3 rounded-full font-medium shadow-lg transition-transform transform hover:-translate-y-1 bg-primary border border-transparent hover:bg-primary/90">
+                                        class="inline-block text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full font-medium shadow-lg transition-transform transform hover:-translate-y-1 bg-primary border border-transparent hover:bg-primary/90 text-sm sm:text-base">
                                         {{ $slider->button_text }}
                                     </a>
                                 </div>

@@ -38,21 +38,4 @@ class Card extends Model
         'updated_at',
         'deleted_at',
     ];
-
-    // --- TRANSLATION ACCESSORS ---
-
-    public function getTitleTranslatedAttribute()
-    {
-        return gtrans($this->title);
-    }
-
-    public function getDescriptionTranslatedAttribute()
-    {
-        return gtrans($this->description);
-    }
-
-    public function getLinkTextTranslatedAttribute()
-    {
-        return gtrans($this->link_text);
-    }
 }

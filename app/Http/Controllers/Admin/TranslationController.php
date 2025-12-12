@@ -21,7 +21,8 @@ class TranslationController extends Controller
     {
         try {
             $request->validate(['text' => 'required|string']);
-            $translations = $this->translationRepo->translateAll($request->text, ['fr', 'ar']);
+            $isHtml = $request->boolean('is_html', false);
+            $translations = $this->translationRepo->translateAll($request->text, ['fr', 'ar'], $isHtml);
             return response()->json(['success' => true, 'translations' => $translations]);
         } catch (\Exception $e) {
             Log::error($e->getMessage());

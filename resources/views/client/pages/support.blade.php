@@ -98,7 +98,7 @@
                         <span>Terms of Service</span>
                     </a>
 
-                    <a href="{{ route('privacy') }}"
+                    <a href="{{ route('privacy-policy') }}"
                         class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary font-medium rounded-xl transition-colors border-2 border-gray-100">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
