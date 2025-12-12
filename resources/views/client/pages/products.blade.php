@@ -94,13 +94,13 @@
                                 <div class="p-5">
                                     <!-- Category Badge -->
                                     <span class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">
-                                        {{ $product->category ? $product->category->{'category-name'} : 'Uncategorized' }}
+                                        {{ $product->category ? (is_array($product->category->{'category-name'}) ? ($product->category->{'category-name'}[app()->getLocale()] ?? $product->category->{'category-name'}['en'] ?? '') : (string) $product->category->{'category-name'}) : 'Uncategorized' }}
                                     </span>
 
                                     <a href="#">
                                         <h3
                                             class="mt-3 text-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
-                                            {{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}
+                                            {{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : (string) $product->name }}
                                         </h3>
                                     </a>
 
@@ -131,6 +131,7 @@
                                                     clip-rule="evenodd" />
                                             </svg>
                                             {{ $product->warranty ?? '1 Year Warranty' }}
+                                                                                    {{ is_array($product->warranty) ? ($product->warranty[app()->getLocale()] ?? $product->warranty['en'] ?? '') : ($product->warranty ?? '1 Year Warranty') }}
                                         </li>
                                     </ul>
 
