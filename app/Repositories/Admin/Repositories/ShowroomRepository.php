@@ -14,6 +14,11 @@ class ShowroomRepository implements ShowroomRepositoryInterface
         return Showrooms::all();
     }
 
+    public function getActiveShowrooms()
+    {
+        return Showrooms::where('status', 'active')->get();
+    }
+
     public function getShowroomById($id)
     {
         return Showrooms::find($id);

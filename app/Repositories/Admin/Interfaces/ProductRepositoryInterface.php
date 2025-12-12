@@ -5,6 +5,8 @@ namespace App\Repositories\Admin\Interfaces;
 interface ProductRepositoryInterface
 {
     public function getAllProducts();
+    public function getAllActiveProducts();
+    public function getProductVariants($productId);
     public function createProduct($request, $data = null);
     public function updateProduct($id, $request, $data = null);
     public function deleteProduct($id);

@@ -13,6 +13,16 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
         return SubCategories::with('category')->get();
     }
 
+    public function getActiveSubCategories()
+    {
+        return SubCategories::where('status', 'active')->with('category')->get();
+    }
+
+    public function getSubCategoriesByCategoryId($categoryId)
+    {
+        return SubCategories::where('category_id', $categoryId)->with('category')->get();
+    }
+
     public function getSubCategoryById($id)
     {
         return SubCategories::findOrFail($id);

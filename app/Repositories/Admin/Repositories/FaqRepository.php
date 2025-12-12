@@ -12,6 +12,11 @@ class FaqRepository implements FaqRepositoryInterface
         return Faq::all();
     }
 
+    public function getActiveFaqs()
+    {
+        return Faq::where('status', 'active')->get();
+    }
+
     public function getFaqById($id)
     {
         return Faq::findOrFail($id);

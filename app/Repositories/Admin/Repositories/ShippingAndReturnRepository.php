@@ -12,6 +12,11 @@ class ShippingAndReturnRepository implements ShippingAndReturnRepositoryInterfac
         return ShippingAndReturns::all();
     }
 
+    public function getActiveShippingAndReturns()
+    {
+        return ShippingAndReturns::where('status', 'active')->get();
+    }
+
     public function getShippingAndReturnById($id)
     {
         return ShippingAndReturns::findOrFail($id);

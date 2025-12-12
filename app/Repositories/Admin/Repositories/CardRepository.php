@@ -13,6 +13,11 @@ class CardRepository implements CardRepositoryInterface
         return Card::all();
     }
 
+    public function getActiveCards()
+    {
+        return Card::where('status', 'active')->get();
+    }
+
     public function getCardById($id)
     {
         return Card::find($id);

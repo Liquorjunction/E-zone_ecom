@@ -12,6 +12,11 @@ class WarehouseRepository implements WarehouseRepositoryInterface
         return Warehouse::orderBy('created_at', 'desc')->get();
     }
 
+    public function getActiveWarehouses()
+    {
+        return Warehouse::where('status', 'active')->orderBy('created_at', 'desc')->get();
+    }
+
     public function getWarehouseById($id)
     {
         return Warehouse::findOrFail($id);

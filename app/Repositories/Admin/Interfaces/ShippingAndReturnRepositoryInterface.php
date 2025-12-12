@@ -5,6 +5,7 @@ namespace App\Repositories\Admin\Interfaces;
 interface ShippingAndReturnRepositoryInterface
 {
     public function getAllShippingAndReturns();
+    public function getActiveShippingAndReturns();
     public function getShippingAndReturnById($id);
     public function createShippingAndReturn($request, $data = null);
     public function updateShippingAndReturn($id, $request, $data = null);

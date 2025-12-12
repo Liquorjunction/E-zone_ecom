@@ -12,6 +12,11 @@ class TncRepository implements TncRepositoryInterface
         return TermsAndCondition::all();
     }
 
+    public function getActiveTncs()
+    {
+        return TermsAndCondition::where('status', 'active')->get();
+    }
+
     public function getTncById($id)
     {
         return TermsAndCondition::findOrFail($id);

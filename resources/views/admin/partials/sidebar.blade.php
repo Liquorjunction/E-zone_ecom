@@ -3,8 +3,8 @@
         <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
             <div class="logo-main">
                 <div class="logo-normal">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
-                        class="img-fluid" style="height: 120px; width: 120px; object-fit: contain;" />
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo" class="img-fluid"
+                        style="height: 120px; width: 120px; object-fit: contain;" />
                 </div>
                 <div class="logo-mini">
                     <img src="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" alt="E-Zone Mini Logo"
@@ -16,16 +16,16 @@
         <!-- Pin/Unpin Button -->
         <button class="sidebar-pin-btn" id="sidebarPinBtn" title="Pin Sidebar" aria-label="Pin Sidebar">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 12V4H8V12H6V14H11V21H13V14H18V12H16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M16 12V4H8V12H6V14H11V21H13V14H18V12H16Z" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" fill="none" />
             </svg>
         </button>
 
         <button class="sidebar-toggle btn btn-sm btn-link p-0" data-toggle="sidebar" data-active="true"
             title="Toggle Sidebar" aria-label="Toggle Sidebar" style="display: none;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path d="M4.25 12.2744L19.25 12.2744" stroke="currentColor" stroke-width="1.5"
-                    stroke-linecap="round" stroke-linejoin="round"></path>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.25 12.2744L19.25 12.2744" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round"></path>
                 <path d="M10.2998 18.2988L4.2498 12.2748L10.2998 6.24976" stroke="currentColor" stroke-width="1.5"
                     stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
@@ -206,7 +206,8 @@
                 </li>
 
                 @php
-                    $isInventorySectionActive = request()->routeIs('admin.stores.*') || request()->routeIs('admin.warehouses.*');
+                    $isInventorySectionActive =
+                        request()->routeIs('admin.stores.*') || request()->routeIs('admin.warehouses.*');
                 @endphp
                 <li class="nav-item">
                     <a class="nav-link {{ $isInventorySectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
@@ -233,6 +234,22 @@
                     </a>
                     <ul class="sub-nav collapse {{ $isInventorySectionActive ? 'show' : '' }}" id="sidebar-inventory"
                         data-bs-parent="#sidebar-menu">
+                        @can('inventories.read')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.inventory.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                                            <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
+                                        </svg>
+                                    </i>
+                                    <span class="item-name">Inventory</span>
+                                </a>
+                            </li>
+                        @endcan
+
                         @can('store.read')
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.stores.*') ? 'active' : '' }}"

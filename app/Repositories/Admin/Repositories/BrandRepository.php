@@ -13,6 +13,11 @@ class BrandRepository implements BrandRepositoryInterface
         return Brand::all();
     }
 
+    public function getActiveBrands()
+    {
+        return Brand::where('status', 'active')->get();
+    }
+
     public function createBrand($request, $data = null)
     {
        $data = $data ?? $request->validated();

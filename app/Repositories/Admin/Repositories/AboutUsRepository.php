@@ -12,6 +12,11 @@ class AboutUsRepository implements AboutUsRepositoryInterface
         return AboutUs::all();
     }
 
+    public function getActiveAboutUsData()
+    {
+        return AboutUs::where('status', 'active')->get();
+    }
+
     public function storeAboutUsData($request, $data = null)
     {
         $data = $data ?? $request->validated();

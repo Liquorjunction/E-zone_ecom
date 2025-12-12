@@ -17,6 +17,16 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::all();
     }
 
+    public function getAllActiveProducts()
+    {
+        return Product::where('status', 'active')->get();
+    }
+
+    public function getProductVariants($productId)
+    {
+        return ProductVariant::where('product_id', $productId)->where('status', 'active')->get();
+    }
+
     public function createProduct($request, $data = null)
     {
         try {

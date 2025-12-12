@@ -12,6 +12,11 @@ class FaqCategoryRepository implements FaqCategoryRepositoryInterface
         return FaqCategory::all();
     }
 
+    public function getActiveFaqCategories()
+    {
+        return FaqCategory::where('status', 'active')->get();
+    }
+
     public function getFaqCategoryById($id)
     {
         return FaqCategory::findOrFail($id);

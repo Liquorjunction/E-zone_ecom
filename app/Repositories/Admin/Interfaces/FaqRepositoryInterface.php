@@ -5,6 +5,7 @@ namespace App\Repositories\Admin\Interfaces;
 interface FaqRepositoryInterface
 {
     public function getAllFaqs();
+    public function getActiveFaqs();
     public function getFaqById($id);
     public function getFaqsByCategory($categoryId);
     public function createFaq($request);

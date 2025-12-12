@@ -13,6 +13,11 @@ class CategoryRepository implements CategoryRepositoryInterface
         return Categories::all();
     }
 
+    public function getActiveCategories()
+    {
+        return Categories::where('status', 'active')->get();
+    }
+
     public function getCategoryById($id)
     {
         return Categories::find($id);

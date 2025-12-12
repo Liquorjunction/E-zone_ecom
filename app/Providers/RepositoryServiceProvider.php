@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Inventory;
 use App\Repositories\Admin\Interfaces\AboutUsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Admin\Interfaces\BrandRepositoryInterface;
@@ -9,6 +10,7 @@ use App\Repositories\Admin\Interfaces\CardRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
+use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
 use App\Repositories\Admin\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
@@ -27,6 +29,7 @@ use App\Repositories\Admin\Repositories\CardRepository;
 use App\Repositories\Admin\Repositories\CategoryRepository;
 use App\Repositories\Admin\Repositories\FaqCategoryRepository;
 use App\Repositories\Admin\Repositories\FaqRepository;
+use App\Repositories\Admin\Repositories\InventoryRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
 use App\Repositories\Admin\Repositories\ProductRepository;
 use App\Repositories\Admin\Repositories\RoleRepository;
@@ -38,6 +41,10 @@ use App\Repositories\Admin\Repositories\SubCategoryRepository;
 use App\Repositories\Admin\Repositories\TncRepository;
 use App\Repositories\Admin\Repositories\TranslationRepository;
 use App\Repositories\Admin\Repositories\WarehouseRepository;
+use App\Repositories\Client\Interfaces\PrivacyPolicyRepositoryInterface;
+use App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface;
+use App\Repositories\Client\Repositories\PrivacyPolicyRepository;
+use App\Repositories\Client\Repositories\ShippingAndReturnsRepository;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Commands\Show;
 
@@ -66,6 +73,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
         $this->app->bind(StoreRepositoryInterface::class, StoreRepository::class);
         $this->app->bind(WarehouseRepositoryInterface::class, WarehouseRepository::class);
+        $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);

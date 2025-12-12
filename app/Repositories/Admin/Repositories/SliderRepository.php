@@ -13,6 +13,11 @@ class SliderRepository implements SliderRepositoryInterface
         return HeroSlider::orderBy('sort_order', 'asc')->get();
     }
 
+    public function getActiveSliders()
+    {
+        return HeroSlider::where('is_active', 1)->orderBy('sort_order', 'asc')->get();
+    }
+
     public function getSliderById($id)
     {
         return HeroSlider::findOrFail($id);

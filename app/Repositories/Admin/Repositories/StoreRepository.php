@@ -13,6 +13,11 @@ class StoreRepository implements StoreRepositoryInterface
         return Store::orderBy('created_at', 'desc')->get();
     }
 
+    public function getAllActiveStores()
+    {
+        return Store::where('status', 'active')->orderBy('created_at', 'desc')->get();
+    }
+
     public function getStoreById($id)
     {
         return Store::findOrFail($id);

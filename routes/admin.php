@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -256,6 +257,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [WarehouseController::class, 'update'])->name('update')->middleware('can:warehouse.update,admin');
             Route::delete('/destroy', [WarehouseController::class, 'destroy'])->name('destroy')->middleware('can:warehouse.delete,admin');
             Route::patch('/toggle-status', [WarehouseController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:warehouse.update,admin');
+        });
+
+        // Inventory Routes
+        Route::prefix('inventory')->name('inventory.')->middleware('can:inventories.read,admin')->group(function () {
+            Route::get('/', [InventoryController::class, 'index'])->name('index'); // permission: inventory.read
+            Route::get('/data', [InventoryController::class, 'dataTable'])->name('data');
+            Route::get('/create', [InventoryController::class, 'create'])->name('create')->middleware('can:inventories.create,admin');
+            Route::post('/', [InventoryController::class, 'store'])->name('store')->middleware('can:inventories.create,admin');
+            Route::get('/edit', [InventoryController::class, 'edit'])->name('edit')->middleware('can:inventories.update,admin');
+            Route::put('/update', [InventoryController::class, 'update'])->name('update')->middleware('can:inventories.update,admin');
+            Route::delete('/destroy', [InventoryController::class, 'destroy'])->name('destroy')->middleware('can:inventories.delete,admin');
+            Route::patch('/toggle-status', [InventoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:inventories.update,admin');
         });
     });
 });
