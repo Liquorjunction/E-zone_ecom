@@ -28,6 +28,8 @@
                                         <th>#</th>
                                         <th>Image</th>
                                         <th>Name</th>
+                                        <th>Brand</th>
+                                        <th>Category</th>
                                         <th>Bestseller</th>
                                         <th>Status</th>
                                         <th>Actions</th>

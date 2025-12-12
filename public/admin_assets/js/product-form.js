@@ -80,42 +80,79 @@ document.addEventListener("DOMContentLoaded", function () {
     const nextBtns = document.querySelectorAll(".next-step");
     const prevBtns = document.querySelectorAll(".prev-step");
 
-    function switchTab(targetId) {
-        // --- FIX START: Scope selectors to only the Main Wizard Steps ---
+    function switchTab(targetId, skipValidation = false) {
+        // Prevent Bootstrap's scrollspy from interfering
+        const mainContentContainer = document.getElementById("pills-tabContent-product");
+        const mainNavContainer = document.getElementById("pills-tab-product");
+
+        if (!mainContentContainer || !mainNavContainer) return;
 
         // 1. Hide ONLY the main step panes (Step 1, Step 2, Step 3)
-        // Use direct child selector > to avoid hitting inner language tabs
-        const mainContentContainer = document.getElementById(
-            "pills-tabContent-product"
-        );
-        if (mainContentContainer) {
-            mainContentContainer
-                .querySelectorAll(":scope > .tab-pane")
-                .forEach((pane) => {
-                    pane.classList.remove("show", "active");
-                });
-        }
+        mainContentContainer.querySelectorAll(":scope > .tab-pane").forEach((pane) => {
+            pane.classList.remove("show", "active");
+        });
 
         // 2. Deactivate ONLY the main step nav links
-        const mainNavContainer = document.getElementById("pills-tab-product");
-        if (mainNavContainer) {
-            mainNavContainer.querySelectorAll(".nav-link").forEach((nav) => {
-                nav.classList.remove("active");
-            });
-        }
-        // --- FIX END ---
+        mainNavContainer.querySelectorAll(".nav-link").forEach((nav) => {
+            nav.classList.remove("active", "show");
+            nav.setAttribute("aria-selected", "false");
+        });
 
         // 3. Activate target step
         const targetPane = document.getElementById(targetId);
         const targetBtn = document.getElementById(`${targetId}-tab`);
 
-        if (targetPane) targetPane.classList.add("show", "active");
+        if (targetPane) {
+            targetPane.classList.add("show", "active");
+        }
+
         if (targetBtn) {
             targetBtn.classList.remove("disabled");
-            targetBtn.classList.add("active");
+            targetBtn.classList.add("active", "show");
+            targetBtn.setAttribute("aria-selected", "true");
         }
+
+        // Scroll to top smoothly
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
+
+    // Prevent Bootstrap's default pill behavior from interfering with our custom logic
+    const stepTabs = document.querySelectorAll("#pills-tab-product .nav-link");
+    stepTabs.forEach((tab) => {
+        tab.addEventListener("click", function(e) {
+            // Only prevent default if the tab is not disabled and not using next/prev buttons
+            if (!this.classList.contains("disabled") &&
+                !this.classList.contains("next-step") &&
+                !this.classList.contains("prev-step")) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Get the target step from href
+                const targetId = this.getAttribute("href").substring(1);
+                switchTab(targetId, true);
+            }
+        });
+    });
+
+    // Isolate language tabs from step navigation - prevent active state bleed
+    const languageTabs = document.querySelectorAll("#langTabBasic .nav-link, #langTabSpecs .nav-link");
+    languageTabs.forEach((langTab) => {
+        langTab.addEventListener("shown.bs.tab", function(e) {
+            // Prevent Bootstrap from applying active state to step pills
+            e.stopPropagation();
+
+            // Ensure only language tabs within the same group are affected
+            const parentTabList = this.closest('[role="tablist"]');
+            if (parentTabList) {
+                parentTabList.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    link.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+            }
+        });
+    });
 
     nextBtns.forEach((btn) => {
         btn.addEventListener("click", function (e) {
@@ -195,40 +232,146 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ==========================================
-    // 3. CATEGORY -> SUBCATEGORY CASCADE
+    // 3. SELECT2 INITIALIZATION & CATEGORY -> SUBCATEGORY CASCADE
     // ==========================================
-    const categorySelect = document.querySelector('select[name="category_id"]');
-    const subSelect = document.querySelector('select[name="sub_category_id"]');
 
-    function filterSubcategories() {
-        if (!subSelect || !categorySelect) return;
+    // Initialize Select2 on all dropdowns with the select2-dropdown class
+    if (typeof $ !== 'undefined' && $.fn.select2) {
+        // Common Select2 configuration
+        const select2Config = {
+            allowClear: true,
+            width: '100%',
+            dropdownAutoWidth: false,
+            minimumResultsForSearch: 0 // Always show search
+        };
 
-        const selectedCat = categorySelect.value;
-        const options = Array.from(subSelect.querySelectorAll("option"));
-
-        // Reset selection if current option is becoming hidden
-        let currentValid = false;
-
-        options.forEach((opt) => {
-            const catId = opt.getAttribute("data-category");
-            if (!catId) return; // Skip placeholder
-
-            if (!selectedCat || String(catId) === String(selectedCat)) {
-                opt.style.display = "";
-                if (subSelect.value === opt.value) currentValid = true;
-            } else {
-                opt.style.display = "none";
-            }
+        // Brand Select2
+        $('#brand-select').select2({
+            ...select2Config,
+            placeholder: 'Select a brand'
         });
 
-        if (!currentValid && subSelect.value !== "") {
-            subSelect.value = "";
-        }
-    }
+        // Category Select2
+        $('#category-select').select2({
+            ...select2Config,
+            placeholder: 'Select a category'
+        });
 
-    if (categorySelect) {
-        categorySelect.addEventListener("change", filterSubcategories);
-        filterSubcategories(); // Run on load
+        // Store all subcategory options on page load (before updates)
+        const allSubcategoryOptions = [];
+        $('#subcategory-select option').each(function() {
+            allSubcategoryOptions.push({
+                id: $(this).val(),
+                text: $(this).text(),
+                categoryId: $(this).attr('data-category')
+            });
+        });
+
+        // Subcategory Select2 with dynamic filtering
+        const $subcategorySelect = $('#subcategory-select');
+        $subcategorySelect.select2({
+            ...select2Config,
+            placeholder: 'Select a subcategory'
+        });
+
+        // Function to filter subcategories based on selected category
+        function filterSubcategories() {
+            const selectedCategoryId = $('#category-select').val();
+            const currentValue = $subcategorySelect.val();
+
+            // Destroy Select2 temporarily to update options
+            $subcategorySelect.select2('destroy');
+
+            // Clear and rebuild options
+            $subcategorySelect.empty();
+            $subcategorySelect.append('<option value="">Select Sub Category</option>');
+
+            if (selectedCategoryId) {
+                // Add only matching subcategories
+                allSubcategoryOptions.forEach(function(option) {
+                    if (!option.categoryId || option.categoryId === selectedCategoryId) {
+                        const $option = $('<option></option>')
+                            .val(option.id)
+                            .text(option.text)
+                            .attr('data-category', option.categoryId);
+                        $subcategorySelect.append($option);
+                    }
+                });
+
+                // Enable subcategory dropdown
+                $subcategorySelect.prop('disabled', false);
+            } else {
+                // Disable subcategory dropdown when no category is selected
+                $subcategorySelect.prop('disabled', true);
+                $subcategorySelect.val('').trigger('change');
+            }
+
+            // Re-initialize Select2
+            $subcategorySelect.select2({
+                ...select2Config,
+                placeholder: selectedCategoryId ? 'Select a subcategory' : 'Please select a category first'
+            });
+
+            // Restore previous value if still valid
+            if (selectedCategoryId && currentValue && $subcategorySelect.find('option[value="' + currentValue + '"]').length > 0) {
+                $subcategorySelect.val(currentValue).trigger('change');
+            }
+        }
+
+        // Listen for category changes
+        $('#category-select').on('change', function() {
+            filterSubcategories();
+        });
+
+        // Run on page load with slight delay to ensure DOM is ready
+        setTimeout(filterSubcategories, 100);
+    } else {
+        console.warn('Select2 is not loaded. Falling back to basic dropdowns.');
+
+        // Fallback to basic filtering if Select2 is not available
+        const categorySelect = document.querySelector('select[name="category_id"]');
+        const subSelect = document.querySelector('select[name="sub_category_id"]');
+
+        function filterSubcategoriesBasic() {
+            if (!subSelect || !categorySelect) return;
+
+            const selectedCat = categorySelect.value;
+            const options = Array.from(subSelect.querySelectorAll("option"));
+
+            if (!selectedCat) {
+                // Disable subcategory when no category is selected
+                subSelect.disabled = true;
+                subSelect.value = "";
+                return;
+            }
+
+            // Enable subcategory when category is selected
+            subSelect.disabled = false;
+
+            // Reset selection if current option is becoming hidden
+            let currentValid = false;
+
+            options.forEach((opt) => {
+                const catId = opt.getAttribute("data-category");
+                if (!catId) return; // Skip placeholder
+
+                if (String(catId) === String(selectedCat)) {
+                    opt.style.display = "";
+                    if (subSelect.value === opt.value) currentValid = true;
+                } else {
+                    opt.style.display = "none";
+                }
+            });
+
+            if (!currentValid && subSelect.value !== "") {
+                subSelect.value = "";
+            }
+        }
+
+        if (categorySelect) {
+            categorySelect.addEventListener("change", filterSubcategoriesBasic);
+            filterSubcategoriesBasic(); // Run on load
+        }
     }
 
     // ==========================================
@@ -318,7 +461,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>
                         <div class="input-group input-group-sm">
                             <span class="input-group-text">$</span>
-                            <input type="number" name="variants[${index}][price]" step="0.01" class="form-control" placeholder="0.00" required>
+                            <input type="number" name="variants[${index}][price]" step="0.01" min="0" class="form-control" placeholder="0.00" required>
                         </div>
                     </td>
                     <td><span class="badge bg-secondary">Auto-Gen</span></td>

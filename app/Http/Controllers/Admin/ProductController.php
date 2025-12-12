@@ -227,6 +227,18 @@ class ProductController extends Controller
 
                     return $name;
                 })
+                ->addColumn('brand', function ($product) {
+                    if (!$product->brand) {
+                        return '<span class="text-muted">N/A</span>';
+                    }
+                    return $product->brand->getTranslation('name', 'en');
+                })
+                ->addColumn('category', function ($product) {
+                    if (!$product->category) {
+                        return '<span class="text-muted">N/A</span>';
+                    }
+                    return $product->category->getTranslation('category-name', 'en');
+                })
                 ->addColumn('is_bestseller', function ($product) use ($request) {
                     $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleBestseller', ['id' => $product->id]) : '';
                     $data['is_bestseller'] = $product->is_bestseller;
@@ -249,7 +261,7 @@ class ProductController extends Controller
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['image', 'name', 'is_bestseller', 'status', 'action'])
+                ->rawColumns(['image', 'name', 'brand', 'category', 'is_bestseller', 'status', 'action'])
                 ->make(true);
 
         } catch (\Exception $e) {

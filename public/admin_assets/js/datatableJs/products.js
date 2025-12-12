@@ -9,6 +9,8 @@ $(document).ready(function () {
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'image', name: 'image', orderable: false, searchable: false },
                 { data: 'name', name: 'name' },
+                { data: 'brand', name: 'brand.name', orderable: true, searchable: true },
+                { data: 'category', name: 'category.name', orderable: true, searchable: true },
                 { data: 'is_bestseller', name: 'is_bestseller', orderable: false, searchable: false },
                 { data: 'status', name: 'status' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }

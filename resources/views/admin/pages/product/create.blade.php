@@ -20,17 +20,17 @@
 
                             {{-- Navigation Pills --}}
                             <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab-product" role="tablist">
-                                <li class="nav-item">
+                                <li class="nav-item" role="presentation">
                                     <a class="nav-link active" id="step1-tab" data-bs-toggle="pill" href="#step1"
-                                        role="tab" aria-selected="true">Step 1: Basic Info</a>
+                                        role="tab" aria-controls="step1" aria-selected="true">Step 1: Basic Info</a>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item" role="presentation">
                                     <a class="nav-link disabled" id="step2-tab" data-bs-toggle="pill" href="#step2"
-                                        role="tab" aria-selected="false">Step 2: Specifications</a>
+                                        role="tab" aria-controls="step2" aria-selected="false">Step 2: Specifications</a>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item" role="presentation">
                                     <a class="nav-link disabled" id="step3-tab" data-bs-toggle="pill" href="#step3"
-                                        role="tab" aria-selected="false">Step 3: Variants & Media</a>
+                                        role="tab" aria-controls="step3" aria-selected="false">Step 3: Variants & Media</a>
                                 </li>
                             </ul>
 
@@ -45,12 +45,12 @@
                                                 <label class="form-label mb-0"><strong>Product Details</strong> <span
                                                         class="text-danger">*</span></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabBasic" role="tablist">
-                                                    <li class="nav-item"><a class="nav-link active py-1 px-3"
-                                                            data-bs-toggle="tab" href="#basic-en">English</a></li>
-                                                    <li class="nav-item"><a class="nav-link py-1 px-3" data-bs-toggle="tab"
-                                                            href="#basic-fr">French</a></li>
-                                                    <li class="nav-item"><a class="nav-link py-1 px-3" data-bs-toggle="tab"
-                                                            href="#basic-ar">Arabic</a></li>
+                                                    <li class="nav-item" role="presentation"><a class="nav-link active py-1 px-3"
+                                                            data-bs-toggle="tab" href="#basic-en" role="tab" aria-controls="basic-en" aria-selected="true">English</a></li>
+                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3" data-bs-toggle="tab"
+                                                            href="#basic-fr" role="tab" aria-controls="basic-fr" aria-selected="false">French</a></li>
+                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3" data-bs-toggle="tab"
+                                                            href="#basic-ar" role="tab" aria-controls="basic-ar" aria-selected="false">Arabic</a></li>
                                                 </ul>
                                             </div>
 
@@ -108,7 +108,7 @@
                                         {{-- Dropdowns & Pricing --}}
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Brand <span class="text-danger">*</span></label>
-                                            <select name="brand_id" class="form-select" required>
+                                            <select name="brand_id" id="brand-select" class="form-select select2-dropdown" required>
                                                 <option value="">Select Brand</option>
                                                 @foreach ($brands as $brand)
                                                     <option value="{{ $brand->id }}">{{ $brand->name }}</option>
@@ -117,7 +117,7 @@
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Category <span class="text-danger">*</span></label>
-                                            <select name="category_id" class="form-select" required>
+                                            <select name="category_id" id="category-select" class="form-select select2-dropdown" required>
                                                 <option value="">Select Category</option>
                                                 @foreach ($categories as $category)
                                                     <option value="{{ $category->id }}">
@@ -128,7 +128,7 @@
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Sub Category <span
                                                     class="text-danger">*</span></label>
-                                            <select name="sub_category_id" class="form-select" required>
+                                            <select name="sub_category_id" id="subcategory-select" class="form-select select2-dropdown" required>
                                                 <option value="">Select Sub Category</option>
                                                 @foreach ($subCategories as $subCategory)
                                                     <option value="{{ $subCategory->id }}"
@@ -144,8 +144,8 @@
                                                     class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text">$</span>
-                                                <input type="number" name="price" step="0.01" class="form-control"
-                                                    required value="{{ old('price') }}">
+                                                <input type="number" name="price" step="0.01" min="0" class="form-control"
+                                                    required value="{{ old('price') }}" placeholder="0.00">
                                             </div>
                                         </div>
 
@@ -187,12 +187,12 @@
                                                 <label class="form-label mb-0"><strong>Technical
                                                         Specifications</strong></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabSpecs" role="tablist">
-                                                    <li class="nav-item"><a class="nav-link active py-1 px-3"
-                                                            data-bs-toggle="tab" href="#specs-en">English</a></li>
-                                                    <li class="nav-item"><a class="nav-link py-1 px-3"
-                                                            data-bs-toggle="tab" href="#specs-fr">French</a></li>
-                                                    <li class="nav-item"><a class="nav-link py-1 px-3"
-                                                            data-bs-toggle="tab" href="#specs-ar">Arabic</a></li>
+                                                    <li class="nav-item" role="presentation"><a class="nav-link active py-1 px-3"
+                                                            data-bs-toggle="tab" href="#specs-en" role="tab" aria-controls="specs-en" aria-selected="true">English</a></li>
+                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3"
+                                                            data-bs-toggle="tab" href="#specs-fr" role="tab" aria-controls="specs-fr" aria-selected="false">French</a></li>
+                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3"
+                                                            data-bs-toggle="tab" href="#specs-ar" role="tab" aria-controls="specs-ar" aria-selected="false">Arabic</a></li>
                                                 </ul>
                                             </div>
 

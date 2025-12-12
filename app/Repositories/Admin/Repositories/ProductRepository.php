@@ -299,7 +299,10 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getDataforDataTable($request = null)
     {
-        return Product::select('id', 'name', 'status', 'is_bestseller', 'cover_image')->latest()->get();
+        return Product::with(['brand', 'category'])
+            ->select('id', 'name', 'status', 'is_bestseller', 'cover_image', 'brand_id', 'category_id')
+            ->latest()
+            ->get();
     }
 
     /**
