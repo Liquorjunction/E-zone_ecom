@@ -167,6 +167,12 @@ class WarehouseController extends Controller
                 ->addColumn('warehouse_name', function ($warehouse) {
                     return $warehouse->getTranslation('warehouse_name', 'en');
                 })
+                ->addColumn('warehouse_id', function ($warehouse) {
+                    return $warehouse->warehouse_id;
+                })
+                ->addColumn('location', function ($warehouse) {
+                    return $warehouse->getTranslation('location', 'en');
+                })
                 ->addColumn('status', function ($warehouse) use ($request) {
                     $data['toggle_url'] = $request->user()->can('warehouse.update') ? route('admin.warehouses.toggleStatus', ['id' => $warehouse->id]) : '';
                     $data['status'] = $warehouse->status;

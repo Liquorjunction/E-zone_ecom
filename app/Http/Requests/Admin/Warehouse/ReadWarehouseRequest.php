@@ -23,22 +23,7 @@ class ReadWarehouseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:warehouses,id',
-        ];
-    }
-
-    public function messages()
-    {
-        return [
-            'id.required' => 'ID is required',
-            'id.exists' => 'ID does not exist in warehouses table',
-        ];
-    }
-
-    public function attributes()
-    {
-        return [
-            'id' => 'ID of the warehouse',
+            'id' => 'sometimes|exists:warehouses,id',
         ];
     }
 }
