@@ -20,6 +20,7 @@ return new class extends Migration
             'products.read',
             'products.update',
             'products.delete',
+            'products.import',
         ];
 
         // 1. Create Permissions for the Products module
@@ -52,6 +53,7 @@ return new class extends Migration
             'products.read',
             'products.update',
             'products.delete',
+            'products.import',
         ];
         // 1. Revoke permissions from Super Admin
         $superAdminRole = Role::where('name', 'super-admin')->where('guard_name', $guardName)->first();

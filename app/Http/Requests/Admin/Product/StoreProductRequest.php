@@ -15,49 +15,50 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Basic Info
+            // --- Product Level ---
+
+            // Product Name Translatable
             'name.en' => 'required|string|max:255',
             'name.fr' => 'nullable|string|max:255',
             'name.ar' => 'nullable|string|max:255',
-
+            // Product Description Translatable
             'description.en' => 'required|string',
             'description.fr' => 'nullable|string',
             'description.ar' => 'nullable|string',
 
-            // Relations
+            // Foreign Keys
             'brand_id' => 'required|exists:brands,id',
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'required|exists:sub-categories,id',
 
-            // Pricing & Images
-            'price' => 'required|numeric|min:0',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // Required on create
+            // Images
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
 
-            // Complex JSON Structures
+            // Additional product details
             'dimensions.en' => 'nullable|string',
-
-            // Specifications
             'specifications.en' => 'nullable|array',
-            'specifications.en.*.title' => 'required_with:specifications.en|string',
-            'specifications.en.*.value' => 'required_with:specifications.en|string',
-
-            // Variants Validation (FIXED)
-            'variants' => 'nullable|array',
-            // Validate that 'name' is an array containing 'en' key
-            'variants.*.name.en' => 'required|string',
-            'variants.*.price' => 'required|numeric|min:0',
-
+            'warranty.en' => 'nullable|string',
             'status' => 'nullable|in:active,inactive',
             'is_bestseller' => 'nullable|boolean',
+
+            // --- Variant Level ---
+            'variants' => 'required|array|min:1',
+            'variants.*.name.en' => 'required|string',
+            'variants.*.name.fr' => 'nullable|string',
+            'variants.*.name.ar' => 'nullable|string',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.attributes' => 'nullable|array',
         ];
     }
 
     public function messages()
     {
         return [
-            'name.en.required' => 'The English Product Name is required.',
-            'variants.*.name.en.required' => 'All variants must have an English name.',
+            'name.en.required' => 'The Product Name (English) is required.',
+            'variants.required' => 'You must add at least one product variant.',
+            'variants.*.name.en.required' => 'All variants must have a name.',
+            'variants.*.price.required' => 'All variants must have a price.',
         ];
     }
 }

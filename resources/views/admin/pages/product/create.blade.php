@@ -30,7 +30,7 @@
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <a class="nav-link disabled" id="step3-tab" data-bs-toggle="pill" href="#step3"
-                                        role="tab" aria-controls="step3" aria-selected="false">Step 3: Variants & Media</a>
+                                        role="tab" aria-controls="step3" aria-selected="false">Step 3: Variants & Inventory</a>
                                 </li>
                             </ul>
 
@@ -105,7 +105,7 @@
                                             </div>
                                         </div>
 
-                                        {{-- Dropdowns & Pricing --}}
+                                        {{-- Dropdowns --}}
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Brand <span class="text-danger">*</span></label>
                                             <select name="brand_id" id="brand-select" class="form-select select2-dropdown" required>
@@ -139,14 +139,15 @@
                                             </select>
                                         </div>
 
+                                        {{-- Pricing & Cover --}}
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Base Price <span
-                                                    class="text-danger">*</span></label>
+                                            <label class="form-label">Display Price (Starts From)</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">$</span>
-                                                <input type="number" name="price" step="0.01" min="0" class="form-control"
-                                                    required value="{{ old('price') }}" placeholder="0.00">
+                                                <input type="text" class="form-control" disabled
+                                                    placeholder="Calculated from variants">
                                             </div>
+                                            <small class="text-muted">Actual prices are set in Step 3.</small>
                                         </div>
 
                                         <div class="col-md-4 mb-3">
@@ -164,8 +165,8 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
-                                            <div class="form-check mt-4">
+                                        <div class="col-md-12 mb-3">
+                                            <div class="form-check mt-2">
                                                 <input class="form-check-input" type="checkbox" name="is_bestseller"
                                                     value="1" id="is_bestseller" {{ old('is_bestseller') ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="is_bestseller">
@@ -179,13 +180,12 @@
                                     </div>
                                 </div>
 
-                                {{-- STEP 2: SPECIFICATIONS --}}
+                                {{-- STEP 2: SPECIFICATIONS (Unchanged) --}}
                                 <div class="tab-pane fade" id="step2" role="tabpanel">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <label class="form-label mb-0"><strong>Technical
-                                                        Specifications</strong></label>
+                                                <label class="form-label mb-0"><strong>Technical Specifications</strong></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabSpecs" role="tablist">
                                                     <li class="nav-item" role="presentation"><a class="nav-link active py-1 px-3"
                                                             data-bs-toggle="tab" href="#specs-en" role="tab" aria-controls="specs-en" aria-selected="true">English</a></li>
@@ -203,31 +203,24 @@
                                                         <div class="row {{ $lang === 'ar' ? 'text-end' : '' }}"
                                                             dir="{{ $lang === 'ar' ? 'rtl' : 'ltr' }}">
                                                             <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Dimensions
-                                                                    ({{ strtoupper($lang) }})</label>
-                                                                <input type="text"
-                                                                    name="dimensions[{{ $lang }}]"
+                                                                <label class="form-label">Dimensions ({{ strtoupper($lang) }})</label>
+                                                                <input type="text" name="dimensions[{{ $lang }}]"
                                                                     class="form-control" placeholder="e.g. 10x10x5 cm">
                                                             </div>
                                                             <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Warranty
-                                                                    ({{ strtoupper($lang) }})</label>
-                                                                <input type="text"
-                                                                    name="warranty[{{ $lang }}]"
+                                                                <label class="form-label">Warranty ({{ strtoupper($lang) }})</label>
+                                                                <input type="text" name="warranty[{{ $lang }}]"
                                                                     class="form-control" placeholder="e.g. 2 Years">
                                                             </div>
                                                             <div class="col-md-12">
                                                                 <label class="form-label d-flex justify-content-between">
-                                                                    <span>Detailed Specifications
-                                                                        ({{ strtoupper($lang) }})</span>
-                                                                    <button type="button"
-                                                                        class="btn btn-sm btn-info add-spec-btn"
+                                                                    <span>Detailed Specifications ({{ strtoupper($lang) }})</span>
+                                                                    <button type="button" class="btn btn-sm btn-info add-spec-btn"
                                                                         data-lang="{{ $lang }}">
                                                                         <i class="bi bi-plus-circle"></i> Add Field
                                                                     </button>
                                                                 </label>
-                                                                <table class="table table-bordered table-sm"
-                                                                    id="spec-table-{{ $lang }}">
+                                                                <table class="table table-bordered table-sm" id="spec-table-{{ $lang }}">
                                                                     <thead class="bg-light">
                                                                         <tr>
                                                                             <th>Title / Feature</th>
@@ -256,39 +249,35 @@
                                     <div class="row">
                                         <div class="col-md-12 mb-4">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <label class="form-label mb-0"><strong>Product Variants</strong></label>
-                                                <button type="button" class="btn btn-sm btn-success"
-                                                    id="add-variant-btn">
+                                                <label class="form-label mb-0"><strong>Product Variants (SKUs & Stock)</strong></label>
+                                                <button type="button" class="btn btn-sm btn-success" id="add-variant-btn">
                                                     <i class="bi bi-plus"></i> Add Variant
                                                 </button>
+                                            </div>
+                                            <div class="alert alert-light border small">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Upload images specific to each variant (e.g. Red Shirt). Define the selling price and initial stock here.
                                             </div>
                                             <div class="table-responsive border rounded p-2">
                                                 <table class="table table-striped mb-0" id="variants-table">
                                                     <thead>
                                                         <tr>
-                                                            <th>Variant Name (EN) <span class="text-danger">*</span></th>
-                                                            <th>Additional Price</th>
-                                                            <th>SKU (Auto)</th>
+                                                            <th style="width: 40%">Variant Details & Images <span class="text-danger">*</span></th>
+                                                            <th style="width: 20%">Selling Price ($) <span class="text-danger">*</span></th>
+                                                            <th style="width: 15%">Attributes</th>
+                                                            <th style="width: 15%">SKU (Auto)</th>
                                                             <th class="text-end">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr id="no-variants-row">
-                                                            <td colspan="4" class="text-center text-muted">No variants
-                                                                added. Click "Add Variant" to create one.</td>
+                                                            <td colspan="5" class="text-center text-muted py-4">
+                                                                No variants added. Click "Add Variant" to create one.
+                                                            </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        </div>
-
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Product Gallery Images</label>
-                                            <div class="input-group">
-                                                <input type="file" name="product_images[]" class="form-control"
-                                                    multiple accept="image/*">
-                                            </div>
-                                            <small class="text-muted">You can select multiple images.</small>
                                         </div>
                                     </div>
 
@@ -301,6 +290,82 @@
                             </div>
                         </form>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Variant Translation & Attribute Modal -->
+    <div class="modal fade" id="variantTranslationModal" tabindex="-1" aria-labelledby="variantTranslationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="variantTranslationModalLabel">Edit Variant Translations & Attributes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="modal-variant-index">
+                    <ul class="nav nav-tabs mb-3" id="variantLangTab" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#variant-en">English</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#variant-fr">French</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#variant-ar">Arabic</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <!-- EN -->
+                        <div class="tab-pane fade show active" id="variant-en">
+                            <div class="mb-3">
+                                <label class="form-label">Variant Name (EN)</label>
+                                <input type="text" class="form-control" id="modal-variant-name-en">
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <label class="form-label mb-0">Attributes (EN)</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn" data-lang="en">Add Attribute</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="variant-attr-table-en">
+                                    <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- FR -->
+                        <div class="tab-pane fade" id="variant-fr">
+                            <div class="mb-3">
+                                <label class="form-label">Variant Name (FR)</label>
+                                <input type="text" class="form-control" id="modal-variant-name-fr">
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <label class="form-label mb-0">Attributes (FR)</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn" data-lang="fr">Add Attribute</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="variant-attr-table-fr">
+                                    <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- AR -->
+                        <div class="tab-pane fade" id="variant-ar">
+                            <div class="mb-3">
+                                <label class="form-label">Variant Name (AR)</label>
+                                <input type="text" class="form-control" id="modal-variant-name-ar">
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <label class="form-label mb-0">Attributes (AR)</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn" data-lang="ar">Add Attribute</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="variant-attr-table-ar">
+                                    <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-variant-translation">Save</button>
                 </div>
             </div>
         </div>

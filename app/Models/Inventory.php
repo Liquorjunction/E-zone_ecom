@@ -15,8 +15,7 @@ class Inventory extends Model
     protected $guarded = [];
 
     protected $fillable = [
-        'product_id',
-        'product_variant_id',
+        'product_variant_id', // Strictly required now
         'store_id',
         'warehouse_id',
         'quantity',
@@ -27,22 +26,34 @@ class Inventory extends Model
 
     protected $casts = [
         'quantity' => 'decimal:3',
-        'status' => 'string',
     ];
 
     protected $hidden = [
         'deleted_at',
     ];
 
-    // Relationships
-    public function product()
+    // --- Relationships ---
+
+    public function variant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
-    public function productVariant()
+    /**
+     * Get the Product via the Variant.
+     * Useful for displaying "Product Name" in inventory lists.
+     */
+    public function product()
     {
-        return $this->belongsTo(ProductVariant::class);
+        // Defines a "Has One Through" reversed, or we can just chain it.
+        // Since belongsToThrough isn't standard Eloquent, we use the accessor or chained relationship.
+        return $this->variant->product();
+    }
+
+    // Accessor for easy usage in Blade: $inventory->product_name
+    public function getProductNameAttribute()
+    {
+        return $this->variant->product->name ?? 'Unknown Product';
     }
 
     public function store()
@@ -55,7 +66,8 @@ class Inventory extends Model
         return $this->belongsTo(Warehouse::class);
     }
 
-    // Scopes
+    // --- Scopes ---
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -63,6 +75,11 @@ class Inventory extends Model
 
     public function scopeDepleted($query)
     {
-        return $query->where('status', 'depleted');
+        return $query->where('status', 'depleted')->orWhere('quantity', '<=', 0);
+    }
+
+    public function scopeForWarehouse($query, $warehouseId)
+    {
+        return $query->where('warehouse_id', $warehouseId);
     }
 }

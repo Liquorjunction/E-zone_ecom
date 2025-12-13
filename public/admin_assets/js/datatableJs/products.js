@@ -11,6 +11,7 @@ $(document).ready(function () {
                 { data: 'name', name: 'name' },
                 { data: 'brand', name: 'brand.name', orderable: true, searchable: true },
                 { data: 'category', name: 'category.name', orderable: true, searchable: true },
+                { data: 'price', name: 'price', orderable: false, searchable: false }, // Added Price
                 { data: 'is_bestseller', name: 'is_bestseller', orderable: false, searchable: false },
                 { data: 'status', name: 'status' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }

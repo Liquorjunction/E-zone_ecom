@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\Product\EditProductRequest;
 use App\Http\Requests\Admin\Product\ReadProductRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
-use App\Jobs\ProcessProductImport; // Import the Job
+use App\Jobs\ProcessProductImport;
 use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
@@ -19,8 +19,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage; // Import Cache
-use Illuminate\Support\Str; // Import Str
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
@@ -52,19 +52,15 @@ class ProductController extends Controller
         try {
             $data = $request->validated();
             $data = $this->translationService->prepareProductData($data);
-            $productRepo->createProduct($request, $data);
+            $product = $productRepo->createProduct($request, $data);
             DB::commit();
-
-            Log::info('ProductController.store: Product created successfully');
-
+            Log::info('ProductController.store: Product created successfully', ['product_id' => $product->id]);
             return redirect()->route('admin.products.index')
                 ->with(['success' => true, 'message' => 'Product created successfully']);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('ProductController.store: '.$e->getMessage());
-
-            return redirect()->back()->withInput()->withErrors(['error' => $e->getMessage()]);
+            Log::error('ProductController.store: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
         }
     }
 
@@ -72,7 +68,9 @@ class ProductController extends Controller
     {
         try {
             $id = $request->input('id');
-            $product = Product::with(['productVariants', 'images'])->findOrFail($id);
+            // Eager load variants (and their inventory) + images
+            $product = Product::with(['productVariants.inventory', 'images'])->findOrFail($id);
+
             $brands = Brand::where('status', 'active')->get();
             $categories = Categories::where('status', 'active')->get();
             $subCategories = SubCategories::where('status', 'active')
@@ -95,24 +93,22 @@ class ProductController extends Controller
             $data = $request->validated();
             $id = $data['id'];
             $data = $this->translationService->prepareProductData($data);
-            $productRepo->updateProduct($id, $request, $data);
+            $product = $productRepo->updateProduct($id, $request, $data);
             DB::commit();
-
+            Log::info('ProductController.update: Product updated successfully', ['product_id' => $product->id]);
             return redirect()->route('admin.products.index')
                 ->with(['success' => true, 'message' => 'Product updated successfully']);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('ProductController.update: '.$e->getMessage());
-
-            return redirect()->back()->withInput()->withErrors(['error' => $e->getMessage()]);
+            Log::error('ProductController.update: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to update product: ' . $e->getMessage()]);
         }
     }
 
     public function show(Request $request)
     {
         $id = $request->input('id');
-        $product = Product::findOrFail($id);
+        $product = Product::with('productVariants')->findOrFail($id);
 
         return view('admin.pages.product.show', compact('product'));
     }
@@ -131,6 +127,10 @@ class ProductController extends Controller
 
     public function toggleBestseller(EditProductRequest $request, ProductRepo $productRepo)
     {
+        $request->validate([
+            'id' => 'required|exists:products,id',
+        ]);
+
         try {
             $id = $request->input('id');
             $product = $productRepo->updateProductBestseller($id);
@@ -150,29 +150,91 @@ class ProductController extends Controller
         try {
             $id = $request->validated()['id'];
             $productRepo->deleteProduct($id);
-
+            Log::info('ProductController.destroy: Product deleted', ['product_id' => $id]);
             return redirect()->back()->with('success', 'Record deleted successfully');
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-
-            return redirect()->back()->with('error', 'Failed to delete record');
+            Log::error('ProductController.destroy: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()->with('error', 'Failed to delete record: ' . $e->getMessage());
         }
+    }
+
+    // --- IMPORT FUNCTIONALITY ---
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv,txt|max:10240',
+            'skip_translation' => 'nullable|boolean',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $filename = 'import_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+            $relativePath = $file->storeAs('temp_imports', $filename, 'local');
+            $fullPath = storage_path('app/private/'.$relativePath);
+
+            if (! file_exists($fullPath)) {
+                $fullPath = Storage::disk('local')->path($relativePath);
+            }
+
+            $batchId = Str::random(10);
+            $skipTranslation = $request->input('skip_translation', false);
+
+            ProcessProductImport::dispatch($fullPath, $batchId, $skipTranslation);
+
+            return response()->json([
+                'success' => true,
+                'batch_id' => $batchId,
+                'message' => 'File uploaded. Processing started in background.',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Import Start Error: '.$e->getMessage());
+
+            return response()->json(['success' => false, 'message' => 'Failed to start import: '.$e->getMessage()], 500);
+        }
+    }
+
+    public function importProgress($batchId)
+    {
+        $progress = Cache::get('import_progress_'.$batchId);
+
+        if (! $progress) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        if ($progress['status'] === 'completed') {
+            // Clean up cache entries after completion
+            Cache::forget('import_progress_'.$batchId);
+            Cache::forget('import_details_'.$batchId);
+
+            session()->flash('import_status', [
+                'type' => 'import_summary',
+                'success' => $progress['success'],
+                'failed' => $progress['failed'],
+                'errors' => $progress['errors'],
+            ]);
+        }
+
+        if (! isset($progress['percent']) && isset($progress['progress'])) {
+            $progress['percent'] = $progress['progress'];
+        }
+
+        if (! isset($progress['percent']) && ($progress['total'] ?? 0) > 0) {
+            $progress['percent'] = round((($progress['processed'] ?? 0) / $progress['total']) * 100);
+        }
+
+        return response()->json($progress);
     }
 
     public function importReport($batchId)
     {
-        // Retrieve detailed import data from Cache
         $importData = Cache::get('import_details_'.$batchId);
 
         if (! $importData) {
-            return response()->json([
-                'successful' => [],
-                'failed' => [],
-                'skipped' => [],
-            ]);
+            return response()->json(['successful' => [], 'failed' => [], 'skipped' => []]);
         }
 
-        // Organize products by status
         $report = [
             'successful' => $importData['successful'] ?? [],
             'failed' => $importData['failed'] ?? [],
@@ -180,6 +242,56 @@ class ProductController extends Controller
         ];
 
         return response()->json($report);
+    }
+
+    public function downloadTemplate()
+    {
+        // Updated Headers for Variant-Centric Model
+        $headers = [
+            'name_en', 'description_en', 'brand', 'category', 'sub_category',
+            'price', 'is_bestseller', 'warranty_en', 'dimensions_en',
+            'spec_title', 'spec_value',
+            'variant_name_en', 'variant_price', 'variant_sku', 'quantity',
+        ];
+
+        $callback = function () use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+
+            // Example 1: Simple Product (Price & Quantity on Main Row)
+            fputcsv($file, [
+                'iPhone 15', 'Latest Apple Phone', 'Apple', 'Mobile', 'Smartphones',
+                '999', '1', '1 Year', '6.1 inch',
+                'Color', 'Black',
+                '', '', '', '50', // Simple product uses main price/qty mapping
+            ]);
+
+            // Example 2: Complex Product (Grouped Rows)
+            // Row 1: Main Data + First Variant (Titanium Gray)
+            fputcsv($file, [
+                'Galaxy S24', 'AI Phone', 'Samsung', 'Mobile', 'Smartphones',
+                '0', '0', '1 Year', '6.2 inch',
+                'Processor', 'Snapdragon 8 Gen 3',
+                'Titanium Gray', '899', 'S24-TIT-GRY', '100',
+            ]);
+            // Row 2: Second Variant (Titanium Black) - Empty main cols
+            fputcsv($file, [
+                '', '', '', '', '',
+                '', '', '', '',
+                'Memory', '256GB',
+                'Titanium Black', '899', 'S24-TIT-BLK', '50',
+            ]);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-type' => '.xls/xlsx/csv',
+            'Content-Disposition' => 'attachment; filename=products_import_template.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ]);
     }
 
     public function dataTable(ReadProductRequest $request, ProductRepo $productRepo)
@@ -199,45 +311,36 @@ class ProductController extends Controller
                 ->addColumn('name', function ($product) {
                     $name = $product->getTranslation('name', 'en');
 
-                    // Check if product has meaningful translations (not just copied English)
-                    $hasTranslations = false;
-
-                    // Check name translations
-                    $nameFr = $product->getTranslation('name', 'fr', false);
-                    $nameAr = $product->getTranslation('name', 'ar', false);
-                    $nameEn = $product->getTranslation('name', 'en', false);
-
-                    // Check description translations
-                    $descFr = $product->getTranslation('description', 'fr', false);
-                    $descAr = $product->getTranslation('description', 'ar', false);
-                    $descEn = $product->getTranslation('description', 'en', false);
-
-                    // Consider translated if either FR or AR has different content from EN
-                    // for name OR description
-                    if (($nameFr && $nameFr !== $nameEn) ||
-                        ($nameAr && $nameAr !== $nameEn) ||
-                        ($descFr && $descFr !== $descEn) ||
-                        ($descAr && $descAr !== $descEn)) {
-                        $hasTranslations = true;
+                    // Simple Translation Check
+                    $hasTranslations = true;
+                    if (! $product->hasTranslation('name', 'ar') && ! $product->hasTranslation('name', 'fr')) {
+                        $hasTranslations = false;
                     }
 
-                    if (!$hasTranslations) {
-                        return $name . ' <span class="badge bg-warning text-dark ms-2" title="Product has not been translated to French/Arabic">Not Translated</span>';
+                    if (! $hasTranslations) {
+                        return $name.' <span class="badge bg-warning text-dark ms-2" title="Missing Translations">Not Translated</span>';
                     }
 
                     return $name;
                 })
                 ->addColumn('brand', function ($product) {
-                    if (!$product->brand) {
-                        return '<span class="text-muted">N/A</span>';
-                    }
-                    return $product->brand->getTranslation('name', 'en');
+                    return $product->brand ? $product->brand->getTranslation('name', 'en') : 'N/A';
                 })
                 ->addColumn('category', function ($product) {
-                    if (!$product->category) {
-                        return '<span class="text-muted">N/A</span>';
-                    }
-                    return $product->category->getTranslation('category-name', 'en');
+                    return $product->category ? $product->category->getTranslation('category-name', 'en') : 'N/A';
+                })
+                // NEW: Show Variant Price Range
+                ->editColumn('price', function ($product) {
+                    // Because parent price is 0, we must show real price from variants
+                    // We assume 'productVariants' isn't eager loaded by default in dataTable query for performance,
+                    // but we can fetch min price or if the query in Repo included a subquery/join.
+                    // For now, let's fetch it if not loaded (or update Repo to include min_price).
+                    // Best practice: The Repo should select a 'min_price' attribute.
+
+                    // Fallback to model accessor:
+                    $price = $product->getRealPriceAttribute();
+
+                    return $price > 0 ? '$'.number_format($price, 2) : '<span class="text-muted">No Stock</span>';
                 })
                 ->addColumn('is_bestseller', function ($product) use ($request) {
                     $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleBestseller', ['id' => $product->id]) : '';
@@ -261,133 +364,12 @@ class ProductController extends Controller
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['image', 'name', 'brand', 'category', 'is_bestseller', 'status', 'action'])
+                ->rawColumns(['image', 'name', 'brand', 'category', 'is_bestseller', 'status', 'action', 'price'])
                 ->make(true);
 
         } catch (\Exception $e) {
             Log::error('ProductController.dataTable: '.$e->getMessage());
             throw $e;
         }
-    }
-
-    // --- IMPORT FUNCTIONALITY ---
-
-    public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,csv,txt|max:10240',
-            'skip_translation' => 'nullable|boolean',
-        ]);
-
-        try {
-            // 1. Store file in a permanent location for the Queue Job to access
-            $file = $request->file('file');
-            $filename = 'import_'.Str::random(10).'.'.$file->getClientOriginalExtension();
-            $relativePath = $file->storeAs('temp_imports', $filename, 'local');
-            $fullPath = storage_path('app/private/'.$relativePath);
-
-            // Adjust path if your 'local' disk config is different
-            if (! file_exists($fullPath)) {
-                $fullPath = Storage::disk('local')->path($relativePath);
-            }
-
-            // 2. Generate a unique Batch ID to track progress
-            $batchId = Str::random(10);
-
-            // 3. Get skip_translation option (default false = translations enabled)
-            $skipTranslation = $request->input('skip_translation', false);
-
-            // 4. Dispatch the Job with translation option
-            ProcessProductImport::dispatch($fullPath, $batchId, $skipTranslation);
-
-            // 4. Return JSON for the frontend polling
-            return response()->json([
-                'success' => true,
-                'batch_id' => $batchId,
-                'message' => 'File uploaded. Processing started in background.',
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Import Start Error: '.$e->getMessage());
-
-            return response()->json(['success' => false, 'message' => 'Failed to start import: '.$e->getMessage()], 500);
-        }
-    }
-
-    public function importProgress($batchId)
-    {
-        // Retrieve progress from Cache
-        $progress = Cache::get('import_progress_'.$batchId);
-
-        if (! $progress) {
-            return response()->json(['status' => 'not_found'], 404);
-        }
-
-        // If completed, we can clear the cache (optional, or let it expire)
-        // if ($progress['status'] === 'completed') { Cache::forget('import_progress_' . $batchId); }
-
-        // Flash session for the popup if complete
-        if ($progress['status'] === 'completed') {
-            session()->flash('import_status', [
-                'type' => 'import_summary',
-                'success' => $progress['success'],
-                'failed' => $progress['failed'],
-                'errors' => $progress['errors'],
-            ]);
-        }
-
-        // Ensure percent key always present for frontend
-        if (! isset($progress['percent']) && isset($progress['progress'])) {
-            $progress['percent'] = $progress['progress'];
-        }
-
-        if (! isset($progress['percent']) && ($progress['total'] ?? 0) > 0) {
-            $progress['percent'] = round((($progress['processed'] ?? 0) / $progress['total']) * 100);
-        }
-
-
-        return response()->json($progress);
-    }
-
-    public function downloadTemplate()
-    {
-        $headers = [
-            'name_en', 'description_en', 'brand', 'category', 'sub_category',
-            'price', 'is_bestseller', 'warranty_en', 'dimensions_en',
-            'spec_title', 'spec_value',
-            'variant_name_en', 'variant_price',
-        ];
-
-        $callback = function () use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-
-            // Example 1: Simple Product
-            fputcsv($file, ['iPhone 15', 'Latest Apple Phone', 'Apple', 'Mobile', 'Smartphones', '999', '1', '1 Year', '6.1 inch', 'Color', 'Black', '', '', '']);
-
-            // Example 2: Complex Product (Grouped Rows)
-            // Row 1: Main Data + First Variant + First Spec
-            fputcsv($file, [
-                'Galaxy S24', 'AI Phone', 'Samsung', 'Mobile', 'Smartphones', '899', '0', '1 Year', '6.2 inch',
-                'Processor', 'Snapdragon 8 Gen 3', // Spec 1
-                'Titanium Gray', '899',   // Variant 1
-            ]);
-            // Row 2: Empty Main Data + Second Variant + Second Spec
-            fputcsv($file, [
-                '', '', '', '', '', '', '', '', '',
-                'Memory', '256GB',                  // Spec 2
-                'Titanium Black', '899',  // Variant 2
-            ]);
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            'Content-type' => '.xls/xlsx/csv',
-            'Content-Disposition' => 'attachment; filename=products_import_grouped_template.csv',
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ]);
     }
 }

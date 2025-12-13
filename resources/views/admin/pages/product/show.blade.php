@@ -150,26 +150,43 @@
                                     </div>
 
                                     <div class="tab-pane fade" id="variants" role="tabpanel">
-                                        <table class="table table-hover">
+                                        <table class="table table-bordered">
                                             <thead>
                                                 <tr>
-                                                    <th>Name</th>
-                                                    <th>SKU</th>
+                                                    <th>#</th>
+                                                    <th>Variant Name</th>
+                                                    <th>Attributes</th>
                                                     <th>Price</th>
+                                                    <th>SKU</th>
+                                                    <th>Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @forelse($product->productVariants as $variant)
+                                                @foreach($product->productVariants as $i => $variant)
                                                     <tr>
-                                                        <td>{{ $variant->getTranslation('variant_name', 'en') }}</td>
+                                                        <td>{{ $i+1 }}</td>
+                                                        <td>
+                                                            @foreach(['en','fr','ar'] as $lang)
+                                                                <div><strong>{{ strtoupper($lang) }}:</strong> {{ $variant->getTranslation('variant_name', $lang, false) }}</div>
+                                                            @endforeach
+                                                        </td>
+                                                        <td>
+                                                            @foreach(['en','fr','ar'] as $lang)
+                                                                <div><strong>{{ strtoupper($lang) }}:</strong>
+                                                                    @php $attrs = $variant->getTranslation('attributes', $lang, false); @endphp
+                                                                    @if(is_array($attrs))
+                                                                        @foreach($attrs as $k=>$v)
+                                                                            <span class="badge bg-info text-dark me-1">{{ is_string($k) ? $k : json_encode($k) }}: {{ is_string($v) ? $v : json_encode($v) }}</span>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            @endforeach
+                                                        </td>
+                                                        <td>{{ $variant->price }}</td>
                                                         <td>{{ $variant->sku }}</td>
-                                                        <td>${{ number_format($variant->price, 2) }}</td>
+                                                        <td>{{ ucfirst($variant->status) }}</td>
                                                     </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="3" class="text-center">No variants available.</td>
-                                                    </tr>
-                                                @endforelse
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>

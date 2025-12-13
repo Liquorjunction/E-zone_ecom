@@ -87,4 +87,17 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+
+    // --- Helpers ---
+
+    /**
+     * Get the actual selling price range or starting price
+     */
+    public function getRealPriceAttribute()
+    {
+        if ($this->relationLoaded('productVariants')) {
+            return $this->productVariants->min('price');
+        }
+        return $this->price;
+    }
 }

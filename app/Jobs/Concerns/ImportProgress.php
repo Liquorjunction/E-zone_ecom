@@ -9,10 +9,11 @@ trait ImportProgress
     private function updateProgress($key, $status, $total, $processed, $success, $failed, $errors): void
     {
         $percent = ($total > 0) ? round(($processed / $total) * 100) : 0;
+
         Cache::put($key, [
             'status' => $status,
             'percent' => $percent,
-            'progress' => $percent,
+            'progress' => $percent, // Keep both for frontend compatibility
             'total' => $total,
             'processed' => $processed,
             'success' => $success,

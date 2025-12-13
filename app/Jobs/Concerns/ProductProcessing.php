@@ -18,6 +18,8 @@ trait ProductProcessing
 
         foreach ($groupedProducts as $dto) {
             $processed++;
+
+            // Calls the method defined in the main ProcessProductImport class
             $result = $this->importSingleProduct($dto, $productRepo, $translationService);
 
             if ($result['status'] === 'success') {
@@ -31,11 +33,13 @@ trait ProductProcessing
                 $failedProducts[] = $this->buildFailedRecord($dto, $result['message']);
             }
 
+            // Update progress every 5 items or at the end
             if ($processed % 5 === 0 || $processed === $totalProducts) {
                 $this->updateProgress($cacheKey, 'processing', $totalProducts, $processed, $success, $failed, $errors);
             }
         }
 
+        // Add skipped rows to the failed list
         foreach ($skippedRows as $skipMsg) {
             $failedProducts[] = [
                 'name_en' => 'N/A',
@@ -61,16 +65,8 @@ trait ProductProcessing
 
     private function buildSuccessRecord($product): array
     {
-        $brandName = '';
-        $categoryName = '';
-
-        if ($product->brand) {
-            $brandName = $product->brand->getTranslation('name', 'en') ?? ($product->brand->name ?? '');
-        }
-
-        if ($product->category) {
-            $categoryName = $product->category->getTranslation('category-name', 'en') ?? ($product->category->name ?? '');
-        }
+        $brandName = $product->brand ? ($product->brand->getTranslation('name', 'en') ?? $product->brand->name) : 'N/A';
+        $categoryName = $product->category ? ($product->category->getTranslation('category-name', 'en') ?? $product->category->name) : 'N/A';
 
         return [
             'name_en' => $product->getTranslation('name', 'en'),

@@ -25,24 +25,26 @@ class ProductVariant extends Model
 
     protected $fillable = [
         'product_id',
-        'variant_name',             // Fixed: was varient_name
-        'sku',              // Fixed: was varient_sku
-        'slug',             // Fixed: was varient_slug
-        'price',            // Fixed: was varient_price
-        'attributes',       // Added: matches migration JSON column
+        'variant_name', // e.g. "Red / Large"
+        'sku',          // Unique Transactional SKU
+        'slug',
+        'price',        // The actual selling price
+        'attributes',   // JSON: {"Color": "Red", "Size": "L"}
         'status'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
-        'stock_quantity' => 'integer',
+        'attributes' => 'array',
     ];
 
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
             ->generateSlugsFrom(function($model) {
-                return $model->getTranslation('variant_name', 'en');
+                // If variant name is empty, fallback to parent product name + sku suffix
+                $name = $model->getTranslation('variant_name', 'en');
+                return !empty($name) ? $name : $model->sku;
             })
             ->saveSlugsTo('slug')
             ->slugsShouldBeNoLongerThan(50)
@@ -57,12 +59,26 @@ class ProductVariant extends Model
 
     public function images()
     {
+        // Images specific to this variant
         return $this->hasMany(ProductImage::class, 'product_variant_id');
+    }
+
+    public function inventory()
+    {
+        return $this->hasMany(Inventory::class);
     }
 
     // Scopes
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    /**
+     * Get Total Stock across all warehouses
+     */
+    public function getTotalStockAttribute()
+    {
+        return $this->inventory()->sum('quantity');
     }
 }

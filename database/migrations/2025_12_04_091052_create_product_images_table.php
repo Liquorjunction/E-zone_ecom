@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
 
-            // Optional: If an image belongs to a specific variant (e.g., Red Shirt image)
             $table->foreignId('product_variant_id')->nullable()->constrained('product_variants')->onDelete('cascade');
 
             $table->string('image_path');

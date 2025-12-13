@@ -26,43 +26,30 @@ class UpdateProductRequest extends FormRequest
             'description.fr' => 'nullable|string',
             'description.ar' => 'nullable|string',
 
-            'dimensions.en' => 'nullable|string',
-
-            // Specifications
-            'specifications.en' => 'nullable|array',
-            'specifications.en.*.title' => 'required_with:specifications.en|string',
-            'specifications.en.*.value' => 'required_with:specifications.en|string',
-
-            'warranty.en' => 'nullable|string',
-
-            // Non-translatable fields
+            // Relations
             'brand_id' => 'required|exists:brands,id',
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'required|exists:sub-categories,id',
 
-            'price' => 'required|numeric|min:0',
+            // Images
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+
+            // Specs
+            'dimensions.en' => 'nullable|string',
+            'specifications.en' => 'nullable|array',
+            'warranty.en' => 'nullable|string',
+
             'status' => 'nullable|in:active,inactive',
             'is_bestseller' => 'nullable|boolean',
 
-            // Images (Nullable on update)
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'image_path.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            // --- Variants ---
+            'variants' => 'required|array|min:1',
+            'variants.*.id' => 'nullable|exists:product_variants,id', // Null = New Variant
 
-            // Variants Validation (FIXED)
-            'variants' => 'nullable|array',
-            'variants.*.id' => 'nullable|exists:product_variants,id',
-            // Validate that 'name' is an array containing 'en' key
             'variants.*.name.en' => 'required|string',
             'variants.*.price' => 'required|numeric|min:0',
-        ];
-    }
-
-    public function messages()
-    {
-        return [
-            'id.required' => 'Product ID is missing.',
-            'name.en.required' => 'Product Name (English) is required.',
-            'variants.*.name.en.required' => 'All variants must have an English name.',
+            'variants.*.attributes' => 'nullable|array',
         ];
     }
 }

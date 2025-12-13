@@ -105,7 +105,7 @@ class AutoTranslationService
             Log::info("No English specifications found");
         }
 
-        // 3. Variants (variant_name)
+        // 3. Variants (variant_name and attributes)
         Log::info("Processing variants");
         if (!empty($data['variants']) && is_array($data['variants'])) {
             foreach ($data['variants'] as $idx => $variant) {
@@ -146,6 +146,34 @@ class AutoTranslationService
 
                 // Preserve English after translation
                 $variant['variant_name']['en'] = $originalEnglish;
+
+                // --- Translate attributes (minor specs) ---
+                if (isset($variant['attributes']) && is_array($variant['attributes'])) {
+                    // If already translatable structure, skip
+                    $isTranslatable = false;
+                    foreach ($variant['attributes'] as $key => $val) {
+                        if (in_array($key, ['en', 'fr', 'ar'])) {
+                            $isTranslatable = true;
+                            break;
+                        }
+                    }
+                    if (! $isTranslatable) {
+                        // Wrap as English and translate
+                        $variant['attributes'] = ['en' => $variant['attributes']];
+                    }
+                    $originalAttr = $variant['attributes']['en'] ?? [];
+                    foreach ($this->locales as $locale) {
+                        if (empty($variant['attributes'][$locale])) {
+                            $translatedAttr = [];
+                            foreach ($originalAttr as $attrKey => $attrVal) {
+                                $translatedAttr[$attrKey] = $this->translate($attrVal, $locale);
+                            }
+                            $variant['attributes'][$locale] = $translatedAttr;
+                        }
+                    }
+                    // Preserve English after translation
+                    $variant['attributes']['en'] = $originalAttr;
+                }
 
                 // Keep normalized structure for downstream consumers
                 $data['variants'][$idx] = $variant;

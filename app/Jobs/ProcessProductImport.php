@@ -22,16 +22,11 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 class ProcessProductImport implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    use ImportProgress;
-    use ImportReporting;
-    use ImportFileLoader;
-    use ProductGrouper;
-    use ProductProcessing;
+    use ImportFileLoader, ImportProgress, ImportReporting, ProductGrouper, ProductProcessing;
 
     public $timeout = 3600; // 1 hour timeout
 
@@ -61,61 +56,58 @@ class ProcessProductImport implements ShouldQueue
     {
         $cacheKey = 'import_progress_'.$this->batchId;
 
-        Log::info('========== ProcessProductImport Job START ==========');
-        Log::info("Batch ID: {$this->batchId}");
+        Log::info("========== ProcessProductImport Job START (Batch: {$this->batchId}) ==========");
 
         try {
-            try {
-                $this->startProgress($cacheKey);
+            $this->startProgress($cacheKey);
 
-                // Conditionally disable translation based on user choice
-                if ($this->skipTranslation) {
-                    $translationService->disable();
-                    Log::info('Translation DISABLED for this import (user option)');
-                } else {
-                    Log::info('Translation ENABLED for this import');
-                }
-
-                $this->preloadMaps();
-
-                $collection = $this->loadFile($this->filePath, $cacheKey);
-                if (! $collection) {
-                    return;
-                }
-
-                [$groupedProducts, $skippedRows] = $this->groupProducts($collection);
-
-                $result = $this->processGroupedProducts(
-                    $groupedProducts,
-                    $skippedRows,
-                    $productRepo,
-                    $translationService,
-                    $cacheKey
-                );
-
-                $this->persistReport($result['successful'], $result['failed_records'], $this->batchId);
-                $this->finalizeProgress($cacheKey, $result);
-                $this->cleanupFile();
-
-            } catch (\Exception $e) {
-                Log::error('Import Job Fatal: '.$e->getMessage());
-                $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal Error: '.$e->getMessage()]);
+            if ($this->skipTranslation) {
+                $translationService->disable();
+                Log::info('Translation DISABLED for this import (user option)');
             }
+
+            $this->preloadMaps();
+
+            $collection = $this->loadFile($this->filePath, $cacheKey);
+            if (! $collection) {
+                return;
+            }
+
+            [$groupedProducts, $skippedRows] = $this->groupProducts($collection);
+
+            $result = $this->processGroupedProducts(
+                $groupedProducts,
+                $skippedRows,
+                $productRepo,
+                $translationService,
+                $cacheKey
+            );
+
+            $this->persistReport($result['successful'], $result['failed_records'], $this->batchId);
+            $this->finalizeProgress($cacheKey, $result);
+            $this->cleanupFile();
+
+        } catch (\Exception $e) {
+            Log::error('Import Job Fatal: '.$e->getMessage());
+            $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal Error: '.$e->getMessage()]);
         } finally {
             Log::info('========== ProcessProductImport Job END ==========');
         }
     }
+
+    /**
+     * Import a single product DTO using Variant-Centric Logic
+     */
     private function importSingleProduct(ProductImportDTO $dto, $repo, $transService)
     {
         $row = $dto->mainData;
         $rowNum = $dto->rowNum;
 
-        // Quick validation check for critical fields only
-        if (empty($row['name_en']) || empty($row['brand']) || empty($row['category']) || !isset($row['price'])) {
-            return ['status' => 'error', 'message' => "Row $rowNum: Missing required fields"];
+        // 1. Validation
+        if (empty($row['name_en']) || empty($row['brand']) || empty($row['category']) || ! isset($row['price'])) {
+            return ['status' => 'error', 'message' => "Row $rowNum: Missing required fields (Name, Brand, Category, Price)"];
         }
 
-        // DTO-level errors check
         if ($dto->hasErrors()) {
             return ['status' => 'error', 'message' => "Row $rowNum: ".$dto->getErrorsAsString()];
         }
@@ -125,99 +117,94 @@ class ProcessProductImport implements ShouldQueue
         $catId = $this->catsMap[strtolower(trim($row['category']))] ?? null;
 
         if (! $brandId) {
-            Log::error("Row $rowNum: Brand '{$row['brand']}' not found in map. Available brands: ".json_encode(array_keys($this->brandsMap)));
-
-            return ['status' => 'error', 'message' => "Row $rowNum: Brand '{$row['brand']}' not found. Check spelling or ensure brand exists in system."];
+            return ['status' => 'error', 'message' => "Row $rowNum: Brand '{$row['brand']}' not found."];
         }
         if (! $catId) {
-            Log::error("Row $rowNum: Category '{$row['category']}' not found in map. Available categories: ".json_encode(array_keys($this->catsMap)));
-
-            return ['status' => 'error', 'message' => "Row $rowNum: Category '{$row['category']}' not found. Check spelling or ensure category exists in system."];
+            return ['status' => 'error', 'message' => "Row $rowNum: Category '{$row['category']}' not found."];
         }
-
-        Log::info("Row $rowNum: Brand resolved to ID {$brandId}");
-        Log::info("Row $rowNum: Category resolved to ID {$catId}");
 
         $subId = null;
         if (! empty($row['sub_category'])) {
             $subId = $this->subCatsMap[strtolower(trim($row['sub_category']))] ?? null;
             if (! $subId) {
-                Log::error("Row $rowNum: SubCategory '{$row['sub_category']}' not found in map. Available subcategories: ".json_encode(array_keys($this->subCatsMap)));
-
-                return ['status' => 'error', 'message' => "Row $rowNum: SubCategory '{$row['sub_category']}' not found. Check spelling or ensure sub-category exists in system."];
+                // Log warning but don't fail hard? Or fail? Usually better to fail or allow nullable.
+                // Keeping strict per your existing logic
+                return ['status' => 'error', 'message' => "Row $rowNum: SubCategory '{$row['sub_category']}' not found."];
             }
-            Log::info("Row $rowNum: SubCategory resolved to ID {$subId}");
         }
 
         DB::beginTransaction();
         try {
-            // 3. Check Duplicates (by English Name) - only active products
+            // 3. Check Duplicates (Active products only)
             $exists = Product::whereRaw('LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, "$.en"))) = ?', [strtolower($row['name_en'])])->exists();
             if ($exists) {
                 DB::rollBack();
-                return ['status' => 'error', 'message' => "Row $rowNum: Product '{$row['name_en']}' already exists in the system."];
+
+                return ['status' => 'error', 'message' => "Row $rowNum: Product '{$row['name_en']}' already exists."];
             }
 
-            // 4. Prepare Data
-            $description = isset($row['description_en']) ? trim($row['description_en']) : '';
-            $warranty = isset($row['warranty_en']) ? trim($row['warranty_en']) : '';
-            $dimensions = isset($row['dimensions_en']) ? trim($row['dimensions_en']) : '';
-
-            // ENCODING FIX: Ensure UTF-8 encoding and remove any invalid sequences
-            // FastExcel may produce invalid UTF-8 from Excel/CSV with mixed encodings
-            $description = $this->ensureUtf8($description);
-            $warranty = $this->ensureUtf8($warranty);
-            $dimensions = $this->ensureUtf8($dimensions);
-
-            // Simple processing - don't use aggressive regex that corrupts UTF-8
-            // Only remove actual null bytes, not valid UTF-8 sequences
-            $description = str_replace("\x00", '', $description);
-            $warranty = str_replace("\x00", '', $warranty);
-            $dimensions = str_replace("\x00", '', $dimensions);
-
+            // 4. Prepare Parent Product Data (Container)
             $data = [
                 'brand_id' => $brandId,
                 'category_id' => $catId,
                 'sub_category_id' => $subId,
-                'price' => $row['price'],
+                'price' => 0, // FIXED: Parent price is 0 in variant-centric model
                 'status' => 'active',
-                // 'sku' is OMITTED so Repository generates the Main Product SKU
-
-                // Translatable Fields
-                // NOTE: Only include locale key if value is non-empty to prevent Spatie from removing it
+                'is_bestseller' => $dto->isBestseller,
                 'name' => ['en' => trim($row['name_en'])],
-                'warranty' => ! empty($warranty) ? ['en' => $warranty] : [],
-                'dimensions' => ! empty($dimensions) ? ['en' => $dimensions] : [],
-
-                // Specs (Already grouped array)
                 'specifications' => ['en' => $dto->specs],
-
-                // Variants (SKU will be auto-generated by repository from product SKU)
-                'variants' => array_map(fn ($v) => [
-                    'variant_name' => ['en' => $v['name_en']],
-                    'price' => $v['price'],
-                    'status' => 'active',
-                ], $dto->variants),
             ];
 
-            // Add description if present
-            if (! empty($description)) {
-                $data['description'] = ['en' => $description];
+            // Optional Fields
+            if (! empty($row['description_en'])) {
+                $data['description'] = ['en' => $this->ensureUtf8($row['description_en'])];
+            }
+            if (! empty($row['warranty_en'])) {
+                $data['warranty'] = ['en' => $this->ensureUtf8($row['warranty_en'])];
+            }
+            if (! empty($row['dimensions_en'])) {
+                $data['dimensions'] = ['en' => $this->ensureUtf8($row['dimensions_en'])];
+            }
+            if (! empty($row['cover_image'])) {
+                $data['cover_image'] = $row['cover_image'];
+            } // Repo will handle file path/copy
+
+            // 5. Prepare Variants & Inventory
+            $variantsData = [];
+
+            if (! empty($dto->variants)) {
+                // CASE A: Complex Product (Variants defined in CSV details)
+                foreach ($dto->variants as $v) {
+                    $variantsData[] = [
+                        'variant_name' => ['en' => $v['name_en']],
+                        'price' => $v['price'],
+                        'sku' => $v['sku'] ?? null,
+                        'quantity' => $v['quantity'] ?? 0, // Pass quantity for inventory creation
+                        'status' => 'active',
+                    ];
+                }
             } else {
-                $data['description'] = [];
+                // CASE B: Simple Product (No variants defined in CSV)
+                // We MUST create a default variant to hold the Price and Inventory
+                $variantsData[] = [
+                    'variant_name' => ['en' => trim($row['name_en'])], // Same name as parent
+                    'price' => $row['price'], // The price from main row
+                    'sku' => null, // Repo will auto-generate
+                    'quantity' => $row['quantity'] ?? 0, // Reads from main row 'quantity' column
+                    'status' => 'active',
+                ];
             }
 
-            // 5. Auto Translation
-            $data = $transService->prepareProductData($data);
+            $data['variants'] = $variantsData;
 
-            // 6. Save via Repository
+            // 6. Auto Translate & Save
+            $data = $transService->prepareProductData($data);
             $product = $repo->createProduct(new Request, $data);
 
             DB::commit();
 
-            // Log only every 10th product or errors
             if ($rowNum % 10 === 0) {
-                Log::info("Row $rowNum: Product created with ID {$product->id}");
+                Log::info("Row $rowNum: Product created successfully (ID: {$product->id})");
             }
 
             return ['status' => 'success', 'product' => $product];
@@ -225,8 +212,7 @@ class ProcessProductImport implements ShouldQueue
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Row $rowNum: Import FAILED - ".$e->getMessage());
-            Log::error("Row $rowNum: Stack trace: ".$e->getTraceAsString());
-            Log::info("========== importSingleProduct Row $rowNum FAILED ==========");
+            Log::error('Stack Trace: '.$e->getTraceAsString());
 
             return ['status' => 'error', 'message' => "Row $rowNum: ".$e->getMessage()];
         }
@@ -234,7 +220,7 @@ class ProcessProductImport implements ShouldQueue
 
     private function preloadMaps()
     {
-        // 1. Brands (Key: name)
+        // 1. Brands
         $this->brandsMap = Brand::all()->mapWithKeys(function ($i) {
             try {
                 $name = $i->getTranslation('name', 'en');
@@ -245,25 +231,23 @@ class ProcessProductImport implements ShouldQueue
             return [strtolower(trim($name)) => $i->id];
         })->toArray();
 
-        // 2. Categories (Key: category-name) <-- FIXED
+        // 2. Categories
         $this->catsMap = Categories::all()->mapWithKeys(function ($i) {
             try {
-                // Must use the exact attribute name from your Model's $translatable array
                 $name = $i->getTranslation('category-name', 'en');
             } catch (\Exception $e) {
-                $name = $i->name; // Fallback
+                $name = $i->name;
             }
 
             return [strtolower(trim($name)) => $i->id];
         })->toArray();
 
-        // 3. SubCategories (Key: sub-category-name) <-- FIXED
+        // 3. SubCategories
         $this->subCatsMap = SubCategories::all()->mapWithKeys(function ($i) {
             try {
-                // Must use the exact attribute name from your Model's $translatable array
                 $name = $i->getTranslation('sub-category-name', 'en');
             } catch (\Exception $e) {
-                $name = $i->name; // Fallback
+                $name = $i->name;
             }
 
             return [strtolower(trim($name)) => $i->id];
@@ -277,32 +261,24 @@ class ProcessProductImport implements ShouldQueue
         }
     }
 
-    /**
-     * Ensure string is valid UTF-8 encoding
-     * FastExcel may produce invalid UTF-8 from Excel files with mixed encodings
-     *
-     * @param  string  $string
-     * @return string
-     */
     private function ensureUtf8($string)
     {
         if (empty($string)) {
             return $string;
         }
 
-        // Check if string is valid UTF-8
+        // Remove null bytes which can cause JSON errors
+        $string = str_replace("\x00", '', $string);
+
         if (mb_check_encoding($string, 'UTF-8')) {
             return $string;
         }
 
-        // If not valid UTF-8, try to detect encoding and convert
         $detected = mb_detect_encoding($string, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true);
-
         if ($detected && $detected !== 'UTF-8') {
             return mb_convert_encoding($string, 'UTF-8', $detected);
         }
 
-        // Last resort: remove invalid UTF-8 sequences
         return mb_convert_encoding($string, 'UTF-8', 'UTF-8');
     }
 }
