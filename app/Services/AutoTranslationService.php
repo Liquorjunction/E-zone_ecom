@@ -161,12 +161,24 @@ class AutoTranslationService
                         // Wrap as English and translate
                         $variant['attributes'] = ['en' => $variant['attributes']];
                     }
+                    // Ensure the English attributes are an array. The form sometimes submits JSON strings.
                     $originalAttr = $variant['attributes']['en'] ?? [];
+                    if (is_string($originalAttr)) {
+                        $decoded = json_decode($originalAttr, true);
+                        if (is_array($decoded)) {
+                            $originalAttr = $decoded;
+                        } else {
+                            // If not JSON, keep as single value under a default key
+                            $originalAttr = ['value' => $originalAttr];
+                        }
+                    }
                     foreach ($this->locales as $locale) {
                         if (empty($variant['attributes'][$locale])) {
                             $translatedAttr = [];
                             foreach ($originalAttr as $attrKey => $attrVal) {
-                                $translatedAttr[$attrKey] = $this->translate($attrVal, $locale);
+                                // Ensure attribute value is string before translating
+                                $valToTranslate = is_string($attrVal) ? $attrVal : json_encode($attrVal);
+                                $translatedAttr[$attrKey] = $this->translate($valToTranslate, $locale);
                             }
                             $variant['attributes'][$locale] = $translatedAttr;
                         }

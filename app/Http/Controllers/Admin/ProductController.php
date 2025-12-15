@@ -115,6 +115,10 @@ class ProductController extends Controller
 
     public function toggleStatus(EditProductRequest $request, ProductRepo $productRepo)
     {
+        $request->validate([
+            'id' => 'required|exists:products,id',
+        ]);
+
         try {
             $id = $request->input('id');
             $productRepo->updateProductStatus($id);
@@ -171,11 +175,7 @@ class ProductController extends Controller
             $file = $request->file('file');
             $filename = 'import_'.Str::random(10).'.'.$file->getClientOriginalExtension();
             $relativePath = $file->storeAs('temp_imports', $filename, 'local');
-            $fullPath = storage_path('app/private/'.$relativePath);
-
-            if (! file_exists($fullPath)) {
-                $fullPath = Storage::disk('local')->path($relativePath);
-            }
+            $fullPath = Storage::disk('local')->path($relativePath);
 
             $batchId = Str::random(10);
             $skipTranslation = $request->input('skip_translation', false);
@@ -331,14 +331,8 @@ class ProductController extends Controller
                 })
                 // NEW: Show Variant Price Range
                 ->editColumn('price', function ($product) {
-                    // Because parent price is 0, we must show real price from variants
-                    // We assume 'productVariants' isn't eager loaded by default in dataTable query for performance,
-                    // but we can fetch min price or if the query in Repo included a subquery/join.
-                    // For now, let's fetch it if not loaded (or update Repo to include min_price).
-                    // Best practice: The Repo should select a 'min_price' attribute.
-
-                    // Fallback to model accessor:
-                    $price = $product->getRealPriceAttribute();
+                    // Use the min_price from the repository query to avoid N+1 queries
+                    $price = $product->min_price ?? 0;
 
                     return $price > 0 ? '$'.number_format($price, 2) : '<span class="text-muted">No Stock</span>';
                 })

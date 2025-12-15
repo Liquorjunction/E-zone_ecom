@@ -228,7 +228,18 @@
                                                                             <th style="width: 50px;"></th>
                                                                         </tr>
                                                                     </thead>
-                                                                    <tbody></tbody>
+                                                                    <tbody>
+                                                                        @php
+                                                                            $oldSpecs = old("specifications.{$lang}", []);
+                                                                        @endphp
+                                                                        @foreach($oldSpecs as $key => $spec)
+                                                                        <tr>
+                                                                            <td><input type="text" name="specifications[{{ $lang }}][{{ $key }}][title]" class="form-control form-control-sm" value="{{ $spec['title'] ?? '' }}"></td>
+                                                                            <td><input type="text" name="specifications[{{ $lang }}][{{ $key }}][value]" class="form-control form-control-sm" value="{{ $spec['value'] ?? '' }}"></td>
+                                                                            <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-spec-row">&times;</button></td>
+                                                                        </tr>
+                                                                        @endforeach
+                                                                    </tbody>
                                                                 </table>
                                                             </div>
                                                         </div>
@@ -270,11 +281,49 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
+                                                        @php
+                                                            $oldVariants = old('variants', []);
+                                                            $hasVariants = !empty($oldVariants);
+                                                        @endphp
+                                                        @if(!$hasVariants)
                                                         <tr id="no-variants-row">
                                                             <td colspan="5" class="text-center text-muted py-4">
                                                                 No variants added. Click "Add Variant" to create one.
                                                             </td>
                                                         </tr>
+                                                        @else
+                                                            @foreach($oldVariants as $index => $variant)
+                                                            <tr>
+                                                                <td style="vertical-align: top;">
+                                                                    <input type="text" name="variants[{{ $index }}][name][en]" class="form-control form-control-sm mb-2 variant-name-input" placeholder="Name (e.g. Blue / Small)" value="{{ $variant['name']['en'] ?? '' }}" required>
+                                                                    <input type="hidden" name="variants[{{ $index }}][name][fr]" class="variant-name-fr" value="{{ $variant['name']['fr'] ?? '' }}">
+                                                                    <input type="hidden" name="variants[{{ $index }}][name][ar]" class="variant-name-ar" value="{{ $variant['name']['ar'] ?? '' }}">
+                                                                    <div class="mt-2">
+                                                                        <label class="small text-muted">Upload Images</label>
+                                                                        <input type="file" name="variants[{{ $index }}][images][]" class="form-control form-control-sm" multiple accept="image/*">
+                                                                    </div>
+                                                                </td>
+                                                                <td style="vertical-align: top;">
+                                                                    <div class="input-group input-group-sm">
+                                                                        <span class="input-group-text">$</span>
+                                                                        <input type="number" name="variants[{{ $index }}][price]" step="0.01" min="0" class="form-control" placeholder="0.00" value="{{ $variant['price'] ?? '' }}" required>
+                                                                    </div>
+                                                                </td>
+                                                                <td style="vertical-align: top;">
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-variant-attributes" data-index="{{ $index }}">Edit Attributes</button>
+                                                                    <input type="hidden" name="variants[{{ $index }}][attributes][en]" value="{{ isset($variant['attributes']['en']) ? json_encode($variant['attributes']['en']) : '[]' }}">
+                                                                    <input type="hidden" name="variants[{{ $index }}][attributes][fr]" value="{{ isset($variant['attributes']['fr']) ? json_encode($variant['attributes']['fr']) : '[]' }}">
+                                                                    <input type="hidden" name="variants[{{ $index }}][attributes][ar]" value="{{ isset($variant['attributes']['ar']) ? json_encode($variant['attributes']['ar']) : '[]' }}">
+                                                                </td>
+                                                                <td style="vertical-align: top;">
+                                                                    <span class="badge bg-secondary">Auto-Gen</span>
+                                                                </td>
+                                                                <td class="text-end">
+                                                                    <button type="button" class="btn btn-danger btn-sm remove-variant"><i class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                            @endforeach
+                                                        @endif
                                                     </tbody>
                                                 </table>
                                             </div>

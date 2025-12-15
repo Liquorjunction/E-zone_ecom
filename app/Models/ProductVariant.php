@@ -35,7 +35,6 @@ class ProductVariant extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
-        'attributes' => 'array',
     ];
 
     public function getSlugOptions(): SlugOptions
