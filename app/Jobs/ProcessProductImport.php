@@ -185,8 +185,14 @@ class ProcessProductImport implements ShouldQueue
                         // Do not accept SKU or quantity from import; repository will handle SKU and inventory
                         'status' => 'active',
                     ];
-                    if (!empty($v['attributes']) && is_array($v['attributes'])) {
-                        $entry['attributes'] = $v['attributes'];
+                    // Normalize attributes to ensure we always pass a translatable shape with 'en' key
+                    if (! empty($v['attributes']) && is_array($v['attributes'])) {
+                        if (isset($v['attributes']['en'])) {
+                            $entry['attributes'] = ['en' => $v['attributes']['en']];
+                        } else {
+                            // If attributes were collected as a flat list, wrap under 'en'
+                            $entry['attributes'] = ['en' => $v['attributes']];
+                        }
                     }
                     $variantsData[] = $entry;
                 }
@@ -197,12 +203,22 @@ class ProcessProductImport implements ShouldQueue
                     'variant_name' => ['en' => trim($row['name_en'])], // Same name as parent
                     'price' => $row['price'], // The price from main row
                     // Repo will auto-generate SKU; do not include quantity in variant payload
-                    'attributes' => $dto->variants[0]['attributes'] ?? null,
+                    'attributes' => ['en' => []],
                     'status' => 'active',
                 ];
             }
 
             $data['variants'] = $variantsData;
+
+            // Log a concise, safe sample of the variant payloads before translation
+            $variantSamples = [];
+            foreach ($variantsData as $vd) {
+                $variantSamples[] = [
+                    'name_en' => $vd['variant_name']['en'] ?? ($vd['name']['en'] ?? null),
+                    'attributes_count' => isset($vd['attributes']['en']) ? count($vd['attributes']['en']) : 0,
+                ];
+            }
+            Log::info("Row $rowNum: Prepared variants for import", ['variants' => count($variantsData), 'samples' => $variantSamples]);
 
             // 6. Auto Translate & Save
             $data = $transService->prepareProductData($data);

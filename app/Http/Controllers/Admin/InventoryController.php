@@ -14,6 +14,7 @@ use App\Repositories\Admin\Interfaces\WarehouseRepositoryInterface as WarehouseR
 use App\Repositories\Admin\Interfaces\StoreRepositoryInterface as StoreRepo;
 use App\Models\Inventory;
 use App\Models\ProductVariant;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -77,7 +78,8 @@ class InventoryController extends Controller
             // Fetch products, warehouses, variants, and stores for the edit form from the repositories
             $products = $productRepo->getAllActiveProducts();
             $warehouses = $warehouseRepo->getActiveWarehouses();
-            $variants = $productRepo->getProductVariants($inventory->product_id);
+            $productId = $inventory->variant->product_id ?? null;
+            $variants = $productRepo->getProductVariants($productId);
             $stores = $storeRepo->getAllActiveStores();
 
             return view('admin.pages.inventory.edit', compact('inventory', 'products', 'warehouses', 'variants', 'stores'));
@@ -187,5 +189,32 @@ class InventoryController extends Controller
             ]);
             return response()->json(['error' => 'Failed to fetch data: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Alias for routes that expect `dataTable` method name.
+     * Kept for backward compatibility with routing definitions.
+     */
+    public function dataTable(InventoryRepo $inventoryRepo, ReadInventoryRequest $request)
+    {
+        return $this->getDataForDataTable($inventoryRepo, $request);
+    }
+
+    /**
+     * Return active variants for a given product as JSON.
+     */
+    public function variants(Request $request)
+    {
+        $productId = $request->input('product_id');
+
+        if (empty($productId)) {
+            return response()->json([], 200);
+        }
+
+        $variants = ProductVariant::where('product_id', $productId)
+            ->where('status', 'active')
+            ->get(['id', 'variant_name']);
+
+        return response()->json($variants, 200);
     }
 }

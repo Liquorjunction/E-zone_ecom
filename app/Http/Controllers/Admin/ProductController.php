@@ -164,6 +164,11 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Return active variants for a given product as JSON.
+     */
+    // Variants endpoint moved to InventoryController to centralize inventory-related APIs.
+
     // --- IMPORT FUNCTIONALITY ---
 
     public function import(Request $request)
@@ -253,10 +258,7 @@ class ProductController extends Controller
                 'price', 'is_bestseller', 'warranty_en', 'dimensions_en',
                 'spec_title', 'spec_value',
                 'variant_name_en', 'variant_price',
-                // Attribute columns (key/value per language) - supports repeated rows where only attribute columns are populated
                 'attributes_en_key', 'attributes_en_value',
-                'attributes_fr_key', 'attributes_fr_value',
-                'attributes_ar_key', 'attributes_ar_value',
             ];
 
         $callback = function () use ($headers) {
@@ -270,7 +272,6 @@ class ProductController extends Controller
                 'Color', 'Black',
                 '', '',
                 '', '',
-                '', '',
             ]);
 
             // Example 2: Complex Product (Grouped Rows)
@@ -282,7 +283,6 @@ class ProductController extends Controller
                 'Titanium Gray', '899',
                 'color', 'Titanium Gray',
                 'couleur', 'Gris',
-                '', '',
             ]);
             // Row 2: Second Variant (Titanium Black) - Empty main cols
             fputcsv($file, [

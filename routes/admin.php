@@ -263,6 +263,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('inventory')->name('inventory.')->middleware('can:inventories.read,admin')->group(function () {
             Route::get('/', [InventoryController::class, 'index'])->name('index'); // permission: inventory.read
             Route::get('/data', [InventoryController::class, 'dataTable'])->name('data');
+            Route::get('/variants', [InventoryController::class, 'variants'])->name('variants');
             Route::get('/create', [InventoryController::class, 'create'])->name('create')->middleware('can:inventories.create,admin');
             Route::post('/', [InventoryController::class, 'store'])->name('store')->middleware('can:inventories.create,admin');
             Route::get('/edit', [InventoryController::class, 'edit'])->name('edit')->middleware('can:inventories.update,admin');

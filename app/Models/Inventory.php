@@ -47,9 +47,17 @@ class Inventory extends Model
     {
         // Defines a "Has One Through" reversed, or we can just chain it.
         // Since belongsToThrough isn't standard Eloquent, we use the accessor or chained relationship.
-        return $this->variant->product();
+        return $this->variant ? $this->variant->product() : null;
     }
 
+    /**
+     * Provide a `product` attribute so callers can use `$inventory->product->name`.
+     * This mirrors the product relation via the variant (product master is variant-based).
+     */
+    public function getProductAttribute()
+    {
+        return $this->variant ? $this->variant->product : null;
+    }
     // Accessor for easy usage in Blade: $inventory->product_name
     public function getProductNameAttribute()
     {

@@ -4,7 +4,6 @@ namespace App\Jobs\Concerns;
 
 use App\DTOs\ProductImportDTO;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 trait ProductGrouper
 {

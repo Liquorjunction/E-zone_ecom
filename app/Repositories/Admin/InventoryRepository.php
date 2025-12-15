@@ -19,12 +19,19 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     public function create(array $data)
     {
+        // Defensive: ensure only one of warehouse_id or store_id is provided
+        if (!empty($data['warehouse_id']) && !empty($data['store_id'])) {
+            throw new \InvalidArgumentException('Provide either warehouse_id or store_id, not both.');
+        }
         return Inventory::create($data);
     }
 
     public function update(int $id, array $data)
     {
         $inventory = $this->find($id);
+        if (!empty($data['warehouse_id']) && !empty($data['store_id'])) {
+            throw new \InvalidArgumentException('Provide either warehouse_id or store_id, not both.');
+        }
         $inventory->update($data);
         return $inventory;
     }
