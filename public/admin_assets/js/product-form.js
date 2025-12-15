@@ -70,17 +70,119 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ---------------------------
+    // Translate All (fallback copy EN -> FR/AR for nested fields)
+    // ---------------------------
+    selectAll('.btn-translate-all').forEach(btn => btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Copy top-level simple fields
+        const langs = ['fr', 'ar'];
+        const copyIfEmpty = (selector, value) => {
+            if (!value) return;
+            langs.forEach(lang => {
+                const el = select(`${selector.replace('{lang}', lang)}`);
+                if (el && isEmpty(el.value)) el.value = value;
+            });
+        };
+
+        // Names
+        const enName = select('input[name="name[en]"]')?.value || '';
+        copyIfEmpty('input[name="name[{lang}]"]', enName);
+
+        // Descriptions (hidden inputs)
+        const descEn = select('#description_en')?.value || '';
+        copyIfEmpty('input[name="description[{lang}]"]', descEn);
+
+        // Dimensions & Warranty
+        const dimEn = select('input[name="dimensions[en]"]')?.value || '';
+        copyIfEmpty('input[name="dimensions[{lang}]"]', dimEn);
+        const warEn = select('input[name="warranty[en]"]')?.value || '';
+        copyIfEmpty('input[name="warranty[{lang}]"]', warEn);
+
+        // Specifications tables: copy each row title/value as plain JSON if target empty
+        ['en'].forEach(srcLang => {
+            langs.forEach(tLang => {
+                const srcRows = selectAll(`#spec-table-${srcLang} tbody tr`);
+                const tgtBody = select(`#spec-table-${tLang} tbody`);
+                if (!tgtBody) return;
+                if (tgtBody.children.length <= 0) {
+                    // replicate rows (best-effort)
+                    srcRows.forEach(r => {
+                        const title = r.querySelector('input')?.value || '';
+                        const value = r.querySelectorAll('input')[1]?.value || '';
+                        if (title || value) {
+                            tgtBody.insertAdjacentHTML('beforeend', `<tr><td><input type="text" name="specifications[${tLang}][${Date.now()}][title]" class="form-control form-control-sm" value="${title}"></td><td><input type="text" name="specifications[${tLang}][${Date.now()}][value]" class="form-control form-control-sm" value="${value}"></td><td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-spec-row">&times;</button></td></tr>`);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Variants: copy name[en] -> name[fr|ar] and attributes en->fr/ar if empty
+        const variantRows = selectAll('#variants-table tbody tr');
+        variantRows.forEach(row => {
+            if (row.id === 'no-variants-row') return;
+            const enInput = row.querySelector('input[name*="[name][en]"]');
+            if (!enInput) return;
+            const nameAttr = enInput.getAttribute('name') || '';
+            const idxMatch = nameAttr.match(/^variants\[(.+?)\]/);
+            const idx = idxMatch ? idxMatch[1] : null;
+            if (!idx) return;
+
+            langs.forEach(lang => {
+                const targetName = row.querySelector(`input[name="variants[${idx}][name][${lang}]"]`);
+                if (targetName && isEmpty(targetName.value)) targetName.value = enInput.value;
+
+                const aEn = row.querySelector(`input[name="variants[${idx}][attributes][en]"]`);
+                const aTarget = row.querySelector(`input[name="variants[${idx}][attributes][${lang}]"]`);
+                if (aEn && aTarget && (isEmpty(aTarget.value) || aTarget.value === '[]')) {
+                    aTarget.value = aEn.value || '[]';
+                }
+            });
+        });
+
+        // Quick UX feedback
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i> Done';
+        setTimeout(() => btn.innerHTML = original, 1500);
+    }));
+
+    // ---------------------------
     // TAB NAVIGATION + VALIDATION
     // ---------------------------
     function activatePane(targetId) {
-        const pane = document.getElementById(targetId);
-        if (!pane) return;
-        const container = pane.closest('.tab-content');
-        if (container) container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
-        pane.classList.add('show', 'active');
+        // Prefer using Bootstrap Tab API for proper activation
+        const allNavLinks = selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]');
+        const targetLink = allNavLinks.find(link => {
+            const href = (link.getAttribute('href') || '').split('#')[1];
+            const dataTarget = (link.getAttribute('data-bs-target') || '').replace('#', '');
+            return (href || dataTarget) === targetId;
+        });
 
-        // Update nav links that target panes
-        selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]').forEach(link => {
+        if (targetLink) {
+            // enable the target and show via bootstrap API
+            targetLink.classList.remove('disabled');
+            try {
+                new bootstrap.Tab(targetLink).show();
+            } catch (e) {
+                // fallback to manual activation
+                const pane = document.getElementById(targetId);
+                if (pane) {
+                    const container = pane.closest('.tab-content');
+                    if (container) container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+                    pane.classList.add('show', 'active');
+                }
+            }
+        } else {
+            // simple fallback if no nav link found
+            const pane = document.getElementById(targetId);
+            if (!pane) return;
+            const container = pane.closest('.tab-content');
+            if (container) container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+            pane.classList.add('show', 'active');
+        }
+
+        // ensure nav links reflect active state
+        allNavLinks.forEach(link => {
             const href = (link.getAttribute('href') || '').split('#')[1];
             const dataTarget = (link.getAttribute('data-bs-target') || '').replace('#', '');
             const linkTarget = href || dataTarget;
@@ -93,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.setAttribute('aria-selected', 'false');
             }
         });
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 

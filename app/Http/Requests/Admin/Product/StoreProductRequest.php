@@ -68,4 +68,47 @@ class StoreProductRequest extends FormRequest
             'variants.*.price.required' => 'All variants must have a price.',
         ];
     }
+
+    /**
+     * Normalize incoming variant attributes after validation.
+     * Converts JSON strings to arrays and ensures consistent ['key','value'] entries.
+     */
+    protected function passedValidation()
+    {
+        $data = $this->validated();
+        if (!empty($data['variants']) && is_array($data['variants'])) {
+            foreach ($data['variants'] as $i => $variant) {
+                if (isset($variant['attributes'])) {
+                    $attrs = $variant['attributes'];
+                    // If attributes submitted as JSON string, decode
+                    if (is_string($attrs)) {
+                        $decoded = json_decode($attrs, true);
+                        if (is_array($decoded)) {
+                            $attrs = $decoded;
+                        } else {
+                            $attrs = [$attrs];
+                        }
+                    }
+
+                    // If associative like ['Color' => 'Red'] convert to normalized array
+                    if (is_array($attrs)) {
+                        $normalized = [];
+                        foreach ($attrs as $k => $v) {
+                            if (is_int($k) && is_array($v) && (isset($v['key']) || isset($v['value']))) {
+                                $normalized[] = $v;
+                            } elseif (is_string($k)) {
+                                $normalized[] = ['key' => (string)$k, 'value' => $v];
+                            } else {
+                                $normalized[] = ['key' => (string)$k, 'value' => (string)$v];
+                            }
+                        }
+                        $data['variants'][$i]['attributes'] = $normalized;
+                    }
+                }
+            }
+        }
+
+        // Replace request data with normalized version
+        $this->replace(array_merge($this->all(), $data));
+    }
 }

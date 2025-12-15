@@ -10,6 +10,8 @@ class AutoTranslationService
     protected $locales = ['fr', 'ar']; // Target locales
     protected $tr;
     protected $enabled = true; // Enabled by default
+    // Request-scoped translation cache to avoid duplicate calls
+    protected $cache = [];
 
     public function __construct()
     {
@@ -137,15 +139,41 @@ class AutoTranslationService
 
                 $originalEnglish = $variant['variant_name']['en'];
                 foreach ($this->locales as $locale) {
+                    $needTranslate = false;
+                    // Translate when target locale missing or when it's identical to English (frontend may have copied English into other locales)
                     if (empty($variant['variant_name'][$locale])) {
+                        $needTranslate = true;
+                    } else {
+                        if (is_string($variant['variant_name'][$locale]) && $variant['variant_name'][$locale] === $originalEnglish) {
+                            $needTranslate = true;
+                        }
+                    }
+
+                    if ($needTranslate) {
                         $translated = $this->translate($originalEnglish, $locale);
                         $variant['variant_name'][$locale] = $translated;
-                        Log::info("Variant {$idx} translated to {$locale}");
+                        Log::info("Variant {$idx} translated/overwritten to {$locale}");
                     }
                 }
 
                 // Preserve English after translation
                 $variant['variant_name']['en'] = $originalEnglish;
+
+                // Ensure variant_name values are plain strings (not arrays/objects)
+                foreach (['en','fr','ar'] as $ln) {
+                    if (isset($variant['variant_name'][$ln]) && is_array($variant['variant_name'][$ln])) {
+                        $v = $variant['variant_name'][$ln];
+                        // If numeric indexed, prefer first element
+                        if (isset($v[0]) && is_string($v[0]) && count($v) === 1) {
+                            $variant['variant_name'][$ln] = $v[0];
+                        } elseif (isset($v[0]) && is_string($v[0])) {
+                            $variant['variant_name'][$ln] = implode(' / ', array_map('strval', $v));
+                        } else {
+                            // associative array: join values
+                            $variant['variant_name'][$ln] = implode(' - ', array_map('strval', array_values($v)));
+                        }
+                    }
+                }
 
                 // --- Translate attributes (minor specs) ---
                 if (isset($variant['attributes']) && is_array($variant['attributes'])) {
@@ -172,19 +200,70 @@ class AutoTranslationService
                             $originalAttr = ['value' => $originalAttr];
                         }
                     }
+                    // Normalize attribute entries: ensure each item is an associative array with key/value
+                    $normalizedOriginalAttr = [];
+                    foreach ($originalAttr as $k => $item) {
+                        if (is_array($item)) {
+                            $normalizedOriginalAttr[] = $item;
+                        } elseif (is_string($item)) {
+                            // Try to decode string to key/value
+                            $decoded = json_decode($item, true);
+                            if (is_array($decoded)) {
+                                $normalizedOriginalAttr[] = $decoded;
+                            } else {
+                                $normalizedOriginalAttr[] = ['key' => (string)$k, 'value' => $item];
+                            }
+                        } else {
+                            $normalizedOriginalAttr[] = ['key' => (string)$k, 'value' => (string)$item];
+                        }
+                    }
+                    $originalAttr = $normalizedOriginalAttr;
                     foreach ($this->locales as $locale) {
+                        $needTranslateAttr = false;
                         if (empty($variant['attributes'][$locale])) {
+                            $needTranslateAttr = true;
+                        } else {
+                            // If frontend already populated target locale but it's identical to English entries, re-translate
+                            $existing = $variant['attributes'][$locale];
+                            if (is_array($existing) && json_encode($existing) === json_encode($originalAttr)) {
+                                $needTranslateAttr = true;
+                            }
+                        }
+
+                        if ($needTranslateAttr) {
                             $translatedAttr = [];
-                            foreach ($originalAttr as $attrKey => $attrVal) {
-                                // Ensure attribute value is string before translating
-                                $valToTranslate = is_string($attrVal) ? $attrVal : json_encode($attrVal);
-                                $translatedAttr[$attrKey] = $this->translate($valToTranslate, $locale);
+                            foreach ($originalAttr as $attrEntry) {
+                                $origKey = $attrEntry['key'] ?? null;
+                                $val = $attrEntry['value'] ?? '';
+
+                                // Translate both key and value from English -> target locale
+                                $translatedKey = null;
+                                if (!empty($origKey) && is_string($origKey)) {
+                                    $translatedKey = $this->translate($origKey, $locale);
+                                }
+
+                                $translatedVal = $this->translate(is_string($val) ? $val : json_encode($val), $locale);
+                                $translatedAttr[] = ['key' => $translatedKey ?? $origKey, 'value' => $translatedVal];
                             }
                             $variant['attributes'][$locale] = $translatedAttr;
+                            Log::info("Variant {$idx} attributes translated/overwritten to {$locale}");
                         }
                     }
                     // Preserve English after translation
                     $variant['attributes']['en'] = $originalAttr;
+                    // Ensure we have values for target locales; fallback to English if translation produced empty
+                    foreach ($this->locales as $locale) {
+                        if (empty($variant['attributes'][$locale])) {
+                            // Deep copy English attributes as fallback
+                            $variant['attributes'][$locale] = $originalAttr;
+                        }
+                    }
+                    // Ensure variant_name has fallback for locales as well
+                    foreach (['fr','ar'] as $ln) {
+                        if (empty($variant['variant_name'][$ln])) {
+                            $variant['variant_name'][$ln] = $originalEnglish;
+                        }
+                    }
                 }
 
                 // Keep normalized structure for downstream consumers
@@ -201,22 +280,47 @@ class AutoTranslationService
 
     private function translate(string $text, string $target): string
     {
+        // Fast path: empty text -> keep empty
+        if (trim($text) === '') {
+            return '';
+        }
+
+        // Normalize cache key
+        $cacheKey = $target . '|' . trim($text);
+        if (isset($this->cache[$cacheKey])) {
+            return $this->cache[$cacheKey];
+        }
 
         try {
-            $this->tr->setSource('en');
+            // Prefer auto-detection to be more robust with incoming text
+            $this->tr->setSource('auto');
             $this->tr->setTarget($target);
 
             $result = $this->tr->translate($text);
 
+            // If translator returned identical text, attempt one retry with explicit English source
+            if ($result === $text) {
+                try {
+                    $this->tr->setSource('en');
+                    $this->tr->setTarget($target);
+                    $result = $this->tr->translate($text);
+                } catch (\Exception $inner) {
+                    Log::warning("Translation retry failed for target {$target}: " . $inner->getMessage());
+                }
+            }
 
             if ($result === $text) {
                 Log::warning("Translation returned original text (no change detected) for {$target}");
             }
 
+            // Save to request-scoped cache
+            $this->cache[$cacheKey] = $result;
+
             return $result;
         } catch (\Exception $e) {
             Log::error("Translation FAILED for {$target}: " . $e->getMessage());
             Log::warning("Fallback: Using English text instead");
+            $this->cache[$cacheKey] = $text;
             return $text; // Fallback to English on failure
         }
     }

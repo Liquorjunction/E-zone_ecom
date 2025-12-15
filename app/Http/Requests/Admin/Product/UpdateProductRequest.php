@@ -60,4 +60,38 @@ class UpdateProductRequest extends FormRequest
             'variants.*.images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
     }
+
+    protected function passedValidation()
+    {
+        $data = $this->validated();
+        if (!empty($data['variants']) && is_array($data['variants'])) {
+            foreach ($data['variants'] as $i => $variant) {
+                if (isset($variant['attributes'])) {
+                    $attrs = $variant['attributes'];
+                    if (is_string($attrs)) {
+                        $decoded = json_decode($attrs, true);
+                        if (is_array($decoded)) {
+                            $attrs = $decoded;
+                        } else {
+                            $attrs = [$attrs];
+                        }
+                    }
+                    if (is_array($attrs)) {
+                        $normalized = [];
+                        foreach ($attrs as $k => $v) {
+                            if (is_int($k) && is_array($v) && (isset($v['key']) || isset($v['value']))) {
+                                $normalized[] = $v;
+                            } elseif (is_string($k)) {
+                                $normalized[] = ['key' => (string)$k, 'value' => $v];
+                            } else {
+                                $normalized[] = ['key' => (string)$k, 'value' => (string)$v];
+                            }
+                        }
+                        $data['variants'][$i]['attributes'] = $normalized;
+                    }
+                }
+            }
+        }
+        $this->replace(array_merge($this->all(), $data));
+    }
 }

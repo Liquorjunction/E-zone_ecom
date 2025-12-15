@@ -29,7 +29,7 @@ class ProductImportDTO
             'name_en' => 'Product Name (English)',
             'brand' => 'Brand',
             'category' => 'Category',
-            'price' => 'Price', // This becomes the "Display Price" or "Default Variant Price"
+            // Note: price is optional here for grouped/variant-centric imports — variants may carry price
         ];
 
         foreach ($requiredFields as $field => $label) {
@@ -48,10 +48,7 @@ class ProductImportDTO
             }
         }
 
-        // Optional Quantity Check (if provided for simple product)
-        if (isset($this->mainData['quantity']) && !is_numeric($this->mainData['quantity'])) {
-            $this->errors[] = "Quantity must be numeric";
-        }
+        // Quantity is no longer required or validated at DTO stage; importer ignores quantity input
     }
 
     public function hasErrors(): bool

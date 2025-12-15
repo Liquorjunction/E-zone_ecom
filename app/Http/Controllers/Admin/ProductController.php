@@ -59,8 +59,8 @@ class ProductController extends Controller
                 ->with(['success' => true, 'message' => 'Product created successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('ProductController.store: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
+            Log::error('ProductController.store: Failed to create product', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to create product. Please check logs for details.']);
         }
     }
 
@@ -80,7 +80,7 @@ class ProductController extends Controller
             return view('admin.pages.product.edit', compact('product', 'brands', 'categories', 'subCategories'));
 
         } catch (\Exception $e) {
-            Log::error('ProductController.edit: '.$e->getMessage());
+            Log::error('ProductController.edit: Failed to fetch product for edit', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
             return redirect()->route('admin.products.index')->withErrors(['error' => 'Product not found']);
         }
@@ -100,8 +100,8 @@ class ProductController extends Controller
                 ->with(['success' => true, 'message' => 'Product updated successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('ProductController.update: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to update product: ' . $e->getMessage()]);
+            Log::error('ProductController.update: Failed to update product', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to update product. Please check logs for details.']);
         }
     }
 
@@ -125,7 +125,8 @@ class ProductController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Product status updated successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error('ProductController.toggleStatus: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update product status.'], 500);
         }
     }
 
@@ -145,7 +146,8 @@ class ProductController extends Controller
                 'is_bestseller' => $product->is_bestseller,
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error('ProductController.toggleBestseller: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update bestseller status.'], 500);
         }
     }
 
@@ -157,8 +159,8 @@ class ProductController extends Controller
             Log::info('ProductController.destroy: Product deleted', ['product_id' => $id]);
             return redirect()->back()->with('success', 'Record deleted successfully');
         } catch (\Exception $e) {
-            Log::error('ProductController.destroy: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect()->back()->with('error', 'Failed to delete record: ' . $e->getMessage());
+            Log::error('ProductController.destroy: Failed to delete product', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return redirect()->back()->with('error', 'Failed to delete record. Please check logs for details.');
         }
     }
 
@@ -189,9 +191,9 @@ class ProductController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Import Start Error: '.$e->getMessage());
+            Log::error('Import Start Error: Failed to start import', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
-            return response()->json(['success' => false, 'message' => 'Failed to start import: '.$e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to start import. Please check logs for details.'], 500);
         }
     }
 
@@ -206,7 +208,6 @@ class ProductController extends Controller
         if ($progress['status'] === 'completed') {
             // Clean up cache entries after completion
             Cache::forget('import_progress_'.$batchId);
-            Cache::forget('import_details_'.$batchId);
 
             session()->flash('import_status', [
                 'type' => 'import_summary',
@@ -247,23 +248,29 @@ class ProductController extends Controller
     public function downloadTemplate()
     {
         // Updated Headers for Variant-Centric Model
-        $headers = [
-            'name_en', 'description_en', 'brand', 'category', 'sub_category',
-            'price', 'is_bestseller', 'warranty_en', 'dimensions_en',
-            'spec_title', 'spec_value',
-            'variant_name_en', 'variant_price', 'variant_sku', 'quantity',
-        ];
+            $headers = [
+                'name_en', 'description_en', 'brand', 'category', 'sub_category',
+                'price', 'is_bestseller', 'warranty_en', 'dimensions_en',
+                'spec_title', 'spec_value',
+                'variant_name_en', 'variant_price',
+                // Attribute columns (key/value per language) - supports repeated rows where only attribute columns are populated
+                'attributes_en_key', 'attributes_en_value',
+                'attributes_fr_key', 'attributes_fr_value',
+                'attributes_ar_key', 'attributes_ar_value',
+            ];
 
         $callback = function () use ($headers) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
 
-            // Example 1: Simple Product (Price & Quantity on Main Row)
+            // Example 1: Simple Product (Price on Main Row)
             fputcsv($file, [
                 'iPhone 15', 'Latest Apple Phone', 'Apple', 'Mobile', 'Smartphones',
                 '999', '1', '1 Year', '6.1 inch',
                 'Color', 'Black',
-                '', '', '', '50', // Simple product uses main price/qty mapping
+                '', '',
+                '', '',
+                '', '',
             ]);
 
             // Example 2: Complex Product (Grouped Rows)
@@ -272,14 +279,19 @@ class ProductController extends Controller
                 'Galaxy S24', 'AI Phone', 'Samsung', 'Mobile', 'Smartphones',
                 '0', '0', '1 Year', '6.2 inch',
                 'Processor', 'Snapdragon 8 Gen 3',
-                'Titanium Gray', '899', 'S24-TIT-GRY', '100',
+                'Titanium Gray', '899',
+                'color', 'Titanium Gray',
+                'couleur', 'Gris',
+                '', '',
             ]);
             // Row 2: Second Variant (Titanium Black) - Empty main cols
             fputcsv($file, [
                 '', '', '', '', '',
                 '', '', '', '',
                 'Memory', '256GB',
-                'Titanium Black', '899', 'S24-TIT-BLK', '50',
+                'Titanium Black', '899',
+                'memory', '256GB',
+                '', '',
             ]);
 
             fclose($file);

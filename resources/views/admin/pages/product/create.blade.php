@@ -21,16 +21,13 @@
                             {{-- Navigation Pills --}}
                             <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab-product" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <a class="nav-link active" id="step1-tab" data-bs-toggle="pill" href="#step1"
-                                        role="tab" aria-controls="step1" aria-selected="true">Step 1: Basic Info</a>
+                                    <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">Step 1: Basic Info</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <a class="nav-link disabled" id="step2-tab" data-bs-toggle="pill" href="#step2"
-                                        role="tab" aria-controls="step2" aria-selected="false">Step 2: Specifications</a>
+                                    <button class="nav-link disabled" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">Step 2: Specifications</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <a class="nav-link disabled" id="step3-tab" data-bs-toggle="pill" href="#step3"
-                                        role="tab" aria-controls="step3" aria-selected="false">Step 3: Variants & Inventory</a>
+                                    <button class="nav-link disabled" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">Step 3: Variants & Inventory</button>
                                 </li>
                             </ul>
 
@@ -45,18 +42,22 @@
                                                 <label class="form-label mb-0"><strong>Product Details</strong> <span
                                                         class="text-danger">*</span></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabBasic" role="tablist">
-                                                    <li class="nav-item" role="presentation"><a class="nav-link active py-1 px-3"
-                                                            data-bs-toggle="tab" href="#basic-en" role="tab" aria-controls="basic-en" aria-selected="true">English</a></li>
-                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3" data-bs-toggle="tab"
-                                                            href="#basic-fr" role="tab" aria-controls="basic-fr" aria-selected="false">French</a></li>
-                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3" data-bs-toggle="tab"
-                                                            href="#basic-ar" role="tab" aria-controls="basic-ar" aria-selected="false">Arabic</a></li>
+                                                    <li class="nav-item" role="presentation"><button class="nav-link active py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-en" type="button" role="tab" aria-controls="basic-en" aria-selected="true">English</button></li>
+                                                    <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-fr" type="button" role="tab" aria-controls="basic-fr" aria-selected="false">French</button></li>
+                                                    <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-ar" type="button" role="tab" aria-controls="basic-ar" aria-selected="false">Arabic</button></li>
                                                 </ul>
                                             </div>
 
                                             <div class="tab-content border p-3 rounded">
                                                 {{-- English --}}
                                                 <div class="tab-pane fade show active" id="basic-en">
+                                                    <div class="d-flex justify-content-end mb-3">
+                                                        <button type="button" class="btn btn-primary btn-translate-all"
+                                                            data-url="{{ route('admin.translate.batch') }}"
+                                                            data-fields='["name","description","dimensions","warranty","specifications"]'>
+                                                            <i class="fas fa-language me-2"></i> Translate All Fields
+                                                        </button>
+                                                    </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Product Name (EN) <span
                                                                 class="text-danger">*</span></label>
@@ -187,12 +188,9 @@
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <label class="form-label mb-0"><strong>Technical Specifications</strong></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabSpecs" role="tablist">
-                                                    <li class="nav-item" role="presentation"><a class="nav-link active py-1 px-3"
-                                                            data-bs-toggle="tab" href="#specs-en" role="tab" aria-controls="specs-en" aria-selected="true">English</a></li>
-                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3"
-                                                            data-bs-toggle="tab" href="#specs-fr" role="tab" aria-controls="specs-fr" aria-selected="false">French</a></li>
-                                                    <li class="nav-item" role="presentation"><a class="nav-link py-1 px-3"
-                                                            data-bs-toggle="tab" href="#specs-ar" role="tab" aria-controls="specs-ar" aria-selected="false">Arabic</a></li>
+                                                    <li class="nav-item" role="presentation"><button class="nav-link active py-1 px-3" data-bs-toggle="tab" data-bs-target="#specs-en" type="button" role="tab" aria-controls="specs-en" aria-selected="true">English</button></li>
+                                                    <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#specs-fr" type="button" role="tab" aria-controls="specs-fr" aria-selected="false">French</button></li>
+                                                    <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#specs-ar" type="button" role="tab" aria-controls="specs-ar" aria-selected="false">Arabic</button></li>
                                                 </ul>
                                             </div>
 
@@ -354,9 +352,9 @@
                 <div class="modal-body">
                     <input type="hidden" id="modal-variant-index">
                     <ul class="nav nav-tabs mb-3" id="variantLangTab" role="tablist">
-                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#variant-en">English</a></li>
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#variant-fr">French</a></li>
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#variant-ar">Arabic</a></li>
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#variant-en" type="button">English</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#variant-fr" type="button">French</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#variant-ar" type="button">Arabic</button></li>
                     </ul>
                     <div class="tab-content">
                         <!-- EN -->

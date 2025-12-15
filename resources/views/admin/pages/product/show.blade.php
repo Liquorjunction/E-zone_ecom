@@ -71,139 +71,126 @@
                             </div>
 
                             <div class="col-md-8">
-                                <ul class="nav nav-tabs" id="productShowTabs" role="tablist">
-                                    <li class="nav-item">
-                                        <button class="nav-link active" id="desc-tab" data-bs-toggle="tab"
-                                            data-bs-target="#desc" type="button">Description</button>
-                                    </li>
-                                    <li class="nav-item">
-                                        <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs"
-                                            type="button">Specifications</button>
-                                    </li>
-                                    <li class="nav-item">
-                                        <button class="nav-link" id="variants-tab" data-bs-toggle="tab"
-                                            data-bs-target="#variants" type="button">Variants</button>
-                                    </li>
-                                    <li class="nav-item">
-                                        <button class="nav-link" id="gallery-tab" data-bs-toggle="tab"
-                                            data-bs-target="#gallery" type="button">Gallery</button>
-                                    </li>
+                                <ul class="nav nav-tabs mb-3" id="langTabs" role="tablist">
+                                    @foreach(['en' => 'English', 'fr' => 'French', 'ar' => 'Arabic'] as $code => $label)
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link {{ $code == 'en' ? 'active' : '' }}" id="tab-{{ $code }}" data-bs-toggle="tab" data-bs-target="#lang-{{ $code }}" type="button" role="tab">{{ $label }}</button>
+                                        </li>
+                                    @endforeach
                                 </ul>
 
-                                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="productShowTabsContent">
+                                <div class="tab-content" id="langTabsContent">
+                                    @foreach(['en' => 'English', 'fr' => 'French', 'ar' => 'Arabic'] as $code => $label)
+                                        <div class="tab-pane fade {{ $code == 'en' ? 'show active' : '' }}" id="lang-{{ $code }}" role="tabpanel" @if($code == 'ar') dir="rtl" @endif>
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="mb-0">{{ $label }}</h5>
+                                                <div class="text-end text-muted small">Language: {{ strtoupper($code) }}</div>
+                                            </div>
 
-                                    <div class="tab-pane fade show active" id="desc" role="tabpanel">
-                                        <h6 class="text-muted">English</h6>
-                                        <p>{!! nl2br($product->getTranslation('description', 'en')) !!}</p>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <h6 class="text-muted">French</h6>
-                                                <p class="small text-muted">{!! nl2br($product->getTranslation('description', 'fr')) !!}</p>
+                                            <div class="card mb-3">
+                                                <div class="card-body">
+                                                    <h6 class="small text-muted">Description</h6>
+                                                    <div class="product-desc">{!! nl2br(e($product->getTranslation('description', $code))) !!}</div>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6 text-end" dir="rtl">
-                                                <h6 class="text-muted">Arabic</h6>
-                                                <p class="small text-muted">{!! nl2br($product->getTranslation('description', 'ar')) !!}</p>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="tab-pane fade" id="specs" role="tabpanel">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <strong>Dimensions:</strong>
-                                                {{ $product->getTranslation('dimensions', 'en') }}
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h6 class="small text-muted">Dimensions</h6>
+                                                            <div class="fw-medium">{{ $product->getTranslation('dimensions', $code) ?: '—' }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h6 class="small text-muted">Warranty</h6>
+                                                            <div class="fw-medium">{{ $product->getTranslation('warranty', $code) ?: '—' }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <strong>Warranty:</strong> {{ $product->getTranslation('warranty', 'en') }}
-                                            </div>
-                                        </div>
-                                        <h6 class="mt-4">Detailed Specifications</h6>
-                                        <table class="table table-bordered table-sm mt-2">
-                                            <thead class="bg-light">
-                                                <tr>
-                                                    <th>Feature</th>
-                                                    <th>Value</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @php
-                                                    $rawSpecs = $product->getTranslation('specifications', 'en', false);
-                                                    $specs = is_array($rawSpecs)
-                                                        ? $rawSpecs
-                                                        : json_decode($rawSpecs, true);
-                                                    $specs = $specs ?: [];
-                                                @endphp
-                                                @forelse($specs as $spec)
-                                                    <tr>
-                                                        <td>{{ $spec['title'] ?? '' }}</td>
-                                                        <td>{{ $spec['value'] ?? '' }}</td>
-                                                    </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="2" class="text-center text-muted">No detailed
-                                                            specifications added.</td>
-                                                    </tr>
-                                                @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
 
-                                    <div class="tab-pane fade" id="variants" role="tabpanel">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Variant Name</th>
-                                                    <th>Attributes</th>
-                                                    <th>Price</th>
-                                                    <th>SKU</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($product->productVariants as $i => $variant)
-                                                    <tr>
-                                                        <td>{{ $i+1 }}</td>
-                                                        <td>
-                                                            @foreach(['en','fr','ar'] as $lang)
-                                                                <div><strong>{{ strtoupper($lang) }}:</strong> {{ $variant->getTranslation('variant_name', $lang, false) }}</div>
-                                                            @endforeach
-                                                        </td>
-                                                        <td>
-                                                            @foreach(['en','fr','ar'] as $lang)
-                                                                <div><strong>{{ strtoupper($lang) }}:</strong>
-                                                                    @php $attrs = $variant->getTranslation('attributes', $lang, false); @endphp
-                                                                    @if(is_array($attrs))
-                                                                        @foreach($attrs as $k=>$v)
-                                                                            <span class="badge bg-info text-dark me-1">{{ is_string($k) ? $k : json_encode($k) }}: {{ is_string($v) ? $v : json_encode($v) }}</span>
-                                                                        @endforeach
-                                                                    @endif
+                                            <div class="card mb-3">
+                                                <div class="card-body">
+                                                    <h6 class="mb-3">Specifications</h6>
+                                                    @php
+                                                        $rawSpecs = $product->getTranslation('specifications', $code, false);
+                                                        $specs = is_array($rawSpecs) ? $rawSpecs : json_decode($rawSpecs, true);
+                                                        $specs = $specs ?: [];
+                                                    @endphp
+                                                    @if(!empty($specs))
+                                                        <div class="row">
+                                                            @foreach($specs as $spec)
+                                                                <div class="col-md-6 mb-2">
+                                                                    <div class="small text-muted">{{ $spec['title'] ?? '' }}</div>
+                                                                    <div>{{ $spec['value'] ?? '' }}</div>
                                                                 </div>
                                                             @endforeach
-                                                        </td>
-                                                        <td>{{ $variant->price }}</td>
-                                                        <td>{{ $variant->sku }}</td>
-                                                        <td>{{ ucfirst($variant->status) }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                        </div>
+                                                    @else
+                                                        <div class="text-muted">No specifications</div>
+                                                    @endif
+                                                </div>
+                                            </div>
 
-                                    <div class="tab-pane fade" id="gallery" role="tabpanel">
-                                        <div class="d-flex flex-wrap gap-3">
-                                            @forelse($product->images as $image)
-                                                <a href="{{ asset('storage/' . $image->image_path) }}" target="_blank">
-                                                    <img src="{{ asset('storage/' . $image->image_path) }}"
-                                                        class="img-thumbnail"
-                                                        style="height: 120px; width: 120px; object-fit: cover;">
-                                                </a>
-                                            @empty
-                                                <p class="text-muted">No gallery images.</p>
-                                            @endforelse
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="mb-3">Variants</h6>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-striped table-hover table-sm align-middle">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th style="width:48px">#</th>
+                                                                    <th>Name</th>
+                                                                    <th style="min-width:240px">Attributes</th>
+                                                                    <th style="width:100px">Price</th>
+                                                                    <th style="width:160px">SKU</th>
+                                                                    <th style="width:90px">Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($product->productVariants as $i => $variant)
+                                                                    @php
+                                                                        $vName = $variant->getTranslation('variant_name', $code, false);
+                                                                        $vAttrsRaw = $variant->getTranslation('attributes', $code, false);
+                                                                        $vAttrs = is_array($vAttrsRaw) ? $vAttrsRaw : json_decode($vAttrsRaw, true);
+                                                                        $vAttrs = $vAttrs ?: [];
+                                                                    @endphp
+                                                                    <tr>
+                                                                        <td>{{ $i + 1 }}</td>
+                                                                        <td class="fw-semibold">{{ is_array($vName) ? json_encode($vName, JSON_UNESCAPED_UNICODE) : $vName }}</td>
+                                                                        <td>
+                                                                            @if(!empty($vAttrs))
+                                                                                <div class="d-flex flex-wrap gap-2">
+                                                                                    @foreach($vAttrs as $attr)
+                                                                                        @php $k = $attr['key'] ?? ''; $val = $attr['value'] ?? ''; @endphp
+                                                                                        <div class="badge bg-light text-dark border d-inline-flex align-items-center" style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                                                                            <strong class="me-1 small text-muted">{{ $k }}</strong>
+                                                                                            <span class="small ms-1">{{ is_array($val) ? json_encode($val, JSON_UNESCAPED_UNICODE) : $val }}</span>
+                                                                                        </div>
+                                                                                    @endforeach
+                                                                                </div>
+                                                                            @else
+                                                                                <span class="text-muted">—</span>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td>${{ number_format($variant->price, 2) }}</td>
+                                                                        <td>{{ $variant->sku }}</td>
+                                                                        <td>
+                                                                            <span class="badge bg-{{ $variant->status == 'active' ? 'success' : 'secondary' }}">{{ ucfirst($variant->status) }}</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>

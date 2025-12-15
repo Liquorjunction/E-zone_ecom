@@ -33,8 +33,10 @@ class ProductVariant extends Model
         'status'
     ];
 
+    // Casts: price as decimal and attributes as array to avoid double-encoded JSON issues
     protected $casts = [
         'price' => 'decimal:2',
+        'attributes' => 'array',
     ];
 
     public function getSlugOptions(): SlugOptions

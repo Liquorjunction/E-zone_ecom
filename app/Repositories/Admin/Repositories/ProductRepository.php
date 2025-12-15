@@ -148,8 +148,14 @@ class ProductRepository implements ProductRepositoryInterface
             }
             return $product;
         } catch (\Exception $e) {
-            Log::error('ProductRepository.createProduct FAILED: ' . $e->getMessage() . ' | Data: ' . json_encode($data));
-            throw new \Exception('Failed to create product: ' . $e->getMessage());
+            $summary = [
+                'name_en' => $data['name']['en'] ?? null,
+                'brand_id' => $data['brand_id'] ?? ($data['brand'] ?? null),
+                'category_id' => $data['category_id'] ?? ($data['category'] ?? null),
+                'variants' => isset($data['variants']) ? count($data['variants']) : 0,
+            ];
+            Log::error('ProductRepository.createProduct FAILED', array_merge(['exception' => $e->getMessage()], $summary));
+            throw new \Exception('Failed to create product');
         }
     }
 
@@ -261,8 +267,13 @@ class ProductRepository implements ProductRepositoryInterface
             }
             return $product;
         } catch (\Exception $e) {
-            Log::error('ProductRepository.updateProduct FAILED: ' . $e->getMessage() . ' | Data: ' . json_encode($data));
-            throw new \Exception('Failed to update product: ' . $e->getMessage());
+            $summary = [
+                'product_id' => $id,
+                'name_en' => $data['name']['en'] ?? null,
+                'variants' => isset($data['variants']) ? count($data['variants']) : 0,
+            ];
+            Log::error('ProductRepository.updateProduct FAILED', array_merge(['exception' => $e->getMessage()], $summary));
+            throw new \Exception('Failed to update product');
         }
     }
 
@@ -326,16 +337,49 @@ class ProductRepository implements ProductRepositoryInterface
             }
             $data = $this->normalizeVariantData($data, is_numeric($key) ? (int)$key : 0);
 
+            // Ensure attributes locales are arrays (decode JSON strings submitted from frontend)
+            if (isset($data['attributes']) && is_array($data['attributes'])) {
+                foreach (['en','fr','ar'] as $ln) {
+                    if (isset($data['attributes'][$ln]) && is_string($data['attributes'][$ln])) {
+                        $decoded = json_decode($data['attributes'][$ln], true);
+                        if (is_array($decoded)) {
+                            $data['attributes'][$ln] = $decoded;
+                        } else {
+                            // keep as single item array
+                            $data['attributes'][$ln] = [['key' => 'value', 'value' => $data['attributes'][$ln]]];
+                        }
+                    }
+                }
+            }
+
             // Update
             if (isset($data['id']) && in_array($data['id'], $existingIds)) {
                 $variant = ProductVariant::find($data['id']);
-                if ($variant) {
-                    $variant->update([
-                        'variant_name' => $data['variant_name'],
-                        'price'        => $data['price'],
-                        'attributes'   => $data['attributes'] ?? null,
-                        'status'       => $data['status'] ?? 'active',
-                    ]);
+                    if ($variant) {
+                        // Log sanitized variant payload before update (no sensitive/full dumps)
+                        $logPayload = [
+                            'action' => 'update_variant',
+                            'variant_id' => $variant->id,
+                            'variant_name_en' => $data['variant_name']['en'] ?? ($data['name']['en'] ?? null),
+                            'attributes_counts' => [
+                                    'en' => isset($data['attributes']['en']) ? count($data['attributes']['en']) : 0,
+                                    'fr' => isset($data['attributes']['fr']) ? count($data['attributes']['fr']) : 0,
+                                    'ar' => isset($data['attributes']['ar']) ? count($data['attributes']['ar']) : 0,
+                                ],
+                            'attributes_sample' => [
+                                'en' => $this->extractSampleAttribute($data['attributes']['en'] ?? []),
+                                'fr' => $this->extractSampleAttribute($data['attributes']['fr'] ?? []),
+                                'ar' => $this->extractSampleAttribute($data['attributes']['ar'] ?? []),
+                            ],
+                        ];
+                        Log::info('ProductRepository.syncVariants variant payload before update', $logPayload);
+
+                        $variant->update([
+                            'variant_name' => $data['variant_name'],
+                            'price'        => $data['price'],
+                            'attributes'   => $data['attributes'] ?? null,
+                            'status'       => $data['status'] ?? 'active',
+                        ]);
                     // Inventory
                     if (isset($data['quantity'])) {
                         $inventory = $variant->inventory()->first();
@@ -361,6 +405,39 @@ class ProductRepository implements ProductRepositoryInterface
                     $suffix = strtoupper(Str::random(4));
                     $data['sku'] = $product->sku . '-V-' . $suffix . '-' . $variantCounter;
                 }
+                // If target locales for attributes are missing, attempt a quick server-side translation
+                if (isset($data['attributes']['en']) && (empty($data['attributes']['fr']) || empty($data['attributes']['ar']))) {
+                    try {
+                        $translator = app(\App\Services\AutoTranslationService::class);
+                        // Prepare minimal payload shape expected by the service
+                        $mini = ['variants' => [$data]];
+                        $miniTranslated = $translator->prepareProductData($mini);
+                        if (!empty($miniTranslated['variants'][0]['attributes'])) {
+                            $data['attributes'] = $miniTranslated['variants'][0]['attributes'];
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning('Auto-translate fallback failed for variant attributes: ' . $e->getMessage());
+                    }
+                }
+
+                // Log sanitized variant payload before create
+                $logPayload = [
+                    'action' => 'create_variant',
+                    'product_id' => $product->id,
+                    'variant_name_en' => $data['variant_name']['en'] ?? ($data['name']['en'] ?? null),
+                    'attributes_counts' => [
+                        'en' => isset($data['attributes']['en']) ? count($data['attributes']['en']) : 0,
+                        'fr' => isset($data['attributes']['fr']) ? count($data['attributes']['fr']) : 0,
+                        'ar' => isset($data['attributes']['ar']) ? count($data['attributes']['ar']) : 0,
+                    ],
+                    'attributes_sample' => [
+                        'en' => $this->extractSampleAttribute($data['attributes']['en'] ?? []),
+                        'fr' => $this->extractSampleAttribute($data['attributes']['fr'] ?? []),
+                        'ar' => $this->extractSampleAttribute($data['attributes']['ar'] ?? []),
+                    ],
+                ];
+                Log::info('ProductRepository.syncVariants variant payload before create', $logPayload);
+
                 $variant = ProductVariant::create([
                     'product_id'   => $product->id,
                     'variant_name' => $data['variant_name'],
@@ -429,17 +506,43 @@ class ProductRepository implements ProductRepositoryInterface
         }
     }
 
+    /**
+     * Extract a short sample string from attributes array for safe logging.
+     */
+    private function extractSampleAttribute(array $attrs): ?string
+    {
+        if (empty($attrs)) return null;
+        $first = $attrs[0] ?? null;
+        if (!$first) return null;
+        $val = $first['value'] ?? (is_string($first) ? $first : null);
+        if (is_array($val)) $val = json_encode($val, JSON_UNESCAPED_UNICODE);
+        if (!is_string($val)) $val = (string)$val;
+        // Trim and shorten
+        $val = trim($val);
+        if (mb_strlen($val) > 60) {
+            return mb_substr($val, 0, 57) . '...';
+        }
+        return $val;
+    }
+
     private function handleImportedFile($sourcePath, $targetDir)
     {
         if (Storage::disk('public')->exists($sourcePath)) {
             return $sourcePath;
         }
 
+        // Only allow copying from a controlled import temporary directory to avoid arbitrary file reads.
         if (file_exists($sourcePath)) {
-            $filename = basename($sourcePath);
-            $targetPath = $targetDir . '/' . Str::random(5) . '_' . $filename;
-            Storage::disk('public')->put($targetPath, file_get_contents($sourcePath));
-            return $targetPath;
+            $realSource = realpath($sourcePath);
+            $allowedBase = realpath(storage_path('app/temp_imports')) ?: null;
+            if ($allowedBase && $realSource && strpos($realSource, $allowedBase) === 0) {
+                $filename = basename($realSource);
+                $targetPath = $targetDir . '/' . Str::random(5) . '_' . $filename;
+                Storage::disk('public')->put($targetPath, file_get_contents($realSource));
+                return $targetPath;
+            }
+            Log::warning('handleImportedFile: attempted import from disallowed path', ['source' => $sourcePath]);
+            return null;
         }
 
         return null;
@@ -473,11 +576,31 @@ class ProductRepository implements ProductRepositoryInterface
                     $attrs = $data['attributes'][$lang];
                     if (is_string($attrs)) {
                         // Decode JSON string from form
-                        $attrs = json_decode($attrs, true) ?? [];
+                        $decoded = json_decode($attrs, true);
+                        if (is_array($decoded)) {
+                            $attrs = $decoded;
+                        } else {
+                            // Maybe it's a single serialized entry
+                            $attrs = [$attrs];
+                        }
                     }
-                    if (is_array($attrs)) {
-                        $cleanAttributes[$lang] = array_values($attrs);
+                    // Normalize to array of ['key'=>..., 'value'=>...]
+                    $normalized = [];
+                    foreach ($attrs as $k => $item) {
+                        if (is_array($item) && (isset($item['key']) || isset($item['value']))) {
+                            $normalized[] = $item;
+                        } elseif (is_string($item)) {
+                            $decoded = json_decode($item, true);
+                            if (is_array($decoded) && (isset($decoded['key']) || isset($decoded['value']))) {
+                                $normalized[] = $decoded;
+                            } else {
+                                $normalized[] = ['key' => (string)$k, 'value' => $item];
+                            }
+                        } else {
+                            $normalized[] = ['key' => (string)$k, 'value' => (string)$item];
+                        }
                     }
+                    $cleanAttributes[$lang] = array_values($normalized);
                 }
             }
             // Ensure attributes have keys for each language (empty arrays if missing)

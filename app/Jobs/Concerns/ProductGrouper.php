@@ -106,28 +106,148 @@ trait ProductGrouper
         // Note: For simple products (on the main row), these might be empty, but 'price' is in mainData.
         $varName  = $row['variant_name_en'] ?? $row['variant_1_name_en'] ?? null;
         $varPrice = $row['variant_price'] ?? $row['variant_1_price'] ?? null;
-        $varSku   = $row['variant_sku'] ?? null;
-        // Support 'quantity', 'variant_quantity' or 'qty'
-        $varQty   = $row['variant_quantity'] ?? $row['quantity'] ?? $row['qty'] ?? 0;
+        $hasExplicitVariant = !empty($varName) || !empty($varPrice);
+        // Parse attributes from row (support multiple formats) — importer only passes English values.
+        $attributes = ['en' => []];
+        $attributesFound = false;
+
+        // 1) JSON or semicolon-list column like 'attributes_en'
+        $col = 'attributes_en';
+        if (! empty($row[$col])) {
+            $val = $row[$col];
+            $decoded = json_decode($val, true);
+            if (is_array($decoded)) {
+                $list = [];
+                if (array_values($decoded) !== $decoded) {
+                    foreach ($decoded as $k => $v) {
+                        $list[] = ['key' => (string)$k, 'value' => (string)$v];
+                    }
+                } else {
+                    foreach ($decoded as $item) {
+                        if (is_array($item) && (isset($item['key']) || isset($item['value']))) {
+                            $list[] = $item;
+                        } elseif (is_string($item)) {
+                            $list[] = ['key' => '', 'value' => $item];
+                        }
+                    }
+                }
+                if (! empty($list)) {
+                    $attributes['en'] = $list;
+                    $attributesFound = true;
+                }
+            } else {
+                // try semicolon-separated pairs 'color:Red;size:L'
+                $pairs = preg_split('/\s*;\s*/', $val);
+                $list = [];
+                foreach ($pairs as $p) {
+                    if (strpos($p, ':') !== false) {
+                        [$k, $v] = array_map('trim', explode(':', $p, 2));
+                    } else {
+                        $k = '';
+                        $v = trim($p);
+                    }
+                    if ($k !== '' || $v !== '') $list[] = ['key' => $k, 'value' => $v];
+                }
+                if (! empty($list)) {
+                    $attributes['en'] = $list;
+                    $attributesFound = true;
+                }
+            }
+        }
+
+        // 2) Patterned columns like attribute_1_key_en / attribute_1_value_en or attr_key_en
+        $temp = [];
+        foreach ($row as $col => $val) {
+            if (!is_string($col) || $val === null || $val === '') continue;
+            // Pattern 1: attribute[_N]_key|value[_lang]  (existing support)
+            if (preg_match('/^(?:attribute|attr)(?:_?(\d+))?_?(key|value)_?(en|fr|ar)$/i', $col, $m)) {
+                $index = isset($m[1]) && $m[1] !== '' ? (int)$m[1] : 0;
+                $type = strtolower($m[2]);
+                $lang = strtolower($m[3]);
+                // Only capture English attribute patterned columns
+                if ($lang !== 'en') continue;
+                if (! isset($temp[$lang][$index])) $temp[$lang][$index] = ['key' => '', 'value' => ''];
+                $temp[$lang][$index][$type] = (string)$val;
+            }
+            // Pattern 2: attributes_{lang}_key or attributes_{lang}_value (sample.csv format)
+            elseif (preg_match('/^attributes_(en)_(key|value)$/i', $col, $m2)) {
+                $lang = strtolower($m2[1]);
+                $type = strtolower($m2[2]);
+                $index = 0; // no index provided in this format; treat as first/only
+                if (! isset($temp[$lang][$index])) $temp[$lang][$index] = ['key' => '', 'value' => ''];
+                $temp[$lang][$index][$type] = (string)$val;
+            }
+            // Pattern 3: attributes_{lang} single-cell handled earlier (json/semicolon)
+        }
+        foreach ($temp as $lang => $entries) {
+            // only 'en' entries will be present
+            foreach ($entries as $entry) {
+                if (! empty($entry['key']) || $entry['value'] !== '') {
+                    $attributes[$lang][] = ['key' => (string)$entry['key'], 'value' => (string)$entry['value']];
+                }
+            }
+        }
+
+        // Clean and normalize attribute lists: trim and remove empty rows
+        // Clean and normalize English attribute list
+        $attributesFound = false;
+        $clean = [];
+        foreach ($attributes['en'] as $it) {
+            $k = is_string($it['key']) ? trim($it['key']) : '';
+            $v = is_string($it['value']) ? trim($it['value']) : (string)$it['value'];
+            if ($k === '' && $v === '') continue;
+            $clean[] = ['key' => $k, 'value' => $v];
+        }
+        $attributes['en'] = array_values($clean);
+        if (count($attributes['en']) > 0) $attributesFound = true;
 
         // If explicit variant data exists
-        if (!empty($varName) || !empty($varPrice) || !empty($varSku)) {
+        if ($hasExplicitVariant) {
             if (empty($varPrice) || !is_numeric($varPrice) || floatval($varPrice) < 0) {
                 $errors[] = 'Variant missing valid price';
             } else {
                 // Auto-generate name if missing but price exists
                 $finalVarName = $varName ?: ($dto->mainData['name_en'] . ' - Option');
 
-                $dto->variants[] = [
+                $variantEntry = [
                     'name_en'  => $finalVarName,
                     'price'    => $varPrice,
-                    'sku'      => $varSku, // Nullable, repo will generate if null
-                    'quantity' => is_numeric($varQty) ? $varQty : 0,
+                    // SKU intentionally omitted: importer should not set SKU; repository will generate
+                ];
+                if ($attributesFound) {
+                    $variantEntry['attributes'] = $attributes; // only contains 'en' entries
+                }
+                $dto->variants[] = $variantEntry;
+            }
+        } elseif (!empty($varName)) {
+            // Partially filled variant row
+            $errors[] = 'Variant has name but missing price';
+        }
+
+        // If this row contains only attributes (no explicit variant), attach them to last variant if exists,
+        // otherwise create a default variant on the parent product.
+        if (!$hasExplicitVariant && $attributesFound) {
+            if (!empty($dto->variants)) {
+                // Merge into last variant
+                $lastIndex = array_key_last($dto->variants);
+                if ($lastIndex === null) $lastIndex = 0;
+                $last = $dto->variants[$lastIndex];
+                // Ensure last has attributes structure
+                if (! isset($last['attributes']) || ! is_array($last['attributes'])) {
+                    $last['attributes'] = ['en' => []];
+                }
+                // append English attributes preserving order
+                $existing = $last['attributes']['en'] ?? [];
+                $merged = array_values(array_merge($existing, $attributes['en']));
+                $last['attributes']['en'] = $merged;
+                $dto->variants[$lastIndex] = $last;
+            } else {
+                $dto->variants[] = [
+                    'name_en' => $dto->mainData['name_en'],
+                    'price' => $dto->mainData['price'] ?? 0,
+                    'attributes' => $attributes, // only 'en'
                 ];
             }
-        } elseif (!empty($varName) || !empty($varSku)) {
-            // Partially filled variant row
-            $errors[] = 'Variant has name/SKU but missing price';
         }
 
         return empty($errors) ? null : implode('; ', $errors);

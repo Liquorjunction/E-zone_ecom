@@ -104,8 +104,12 @@ class ProcessProductImport implements ShouldQueue
         $rowNum = $dto->rowNum;
 
         // 1. Validation
-        if (empty($row['name_en']) || empty($row['brand']) || empty($row['category']) || ! isset($row['price'])) {
-            return ['status' => 'error', 'message' => "Row $rowNum: Missing required fields (Name, Brand, Category, Price)"];
+        if (empty($row['name_en']) || empty($row['brand']) || empty($row['category'])) {
+            return ['status' => 'error', 'message' => "Row $rowNum: Missing required fields (Name, Brand, Category)"];
+        }
+        // Price is required only for simple products (no variants provided in DTO)
+        if (empty($dto->variants) && ! isset($row['price'])) {
+            return ['status' => 'error', 'message' => "Row $rowNum: Missing required field: Price (required when no variants are provided)"];
         }
 
         if ($dto->hasErrors()) {
@@ -175,13 +179,16 @@ class ProcessProductImport implements ShouldQueue
             if (! empty($dto->variants)) {
                 // CASE A: Complex Product (Variants defined in CSV details)
                 foreach ($dto->variants as $v) {
-                    $variantsData[] = [
+                    $entry = [
                         'variant_name' => ['en' => $v['name_en']],
                         'price' => $v['price'],
-                        'sku' => $v['sku'] ?? null,
-                        'quantity' => $v['quantity'] ?? 0, // Pass quantity for inventory creation
+                        // Do not accept SKU or quantity from import; repository will handle SKU and inventory
                         'status' => 'active',
                     ];
+                    if (!empty($v['attributes']) && is_array($v['attributes'])) {
+                        $entry['attributes'] = $v['attributes'];
+                    }
+                    $variantsData[] = $entry;
                 }
             } else {
                 // CASE B: Simple Product (No variants defined in CSV)
@@ -189,8 +196,8 @@ class ProcessProductImport implements ShouldQueue
                 $variantsData[] = [
                     'variant_name' => ['en' => trim($row['name_en'])], // Same name as parent
                     'price' => $row['price'], // The price from main row
-                    'sku' => null, // Repo will auto-generate
-                    'quantity' => $row['quantity'] ?? 0, // Reads from main row 'quantity' column
+                    // Repo will auto-generate SKU; do not include quantity in variant payload
+                    'attributes' => $dto->variants[0]['attributes'] ?? null,
                     'status' => 'active',
                 ];
             }
@@ -211,10 +218,9 @@ class ProcessProductImport implements ShouldQueue
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Row $rowNum: Import FAILED - ".$e->getMessage());
-            Log::error('Stack Trace: '.$e->getTraceAsString());
+            Log::error("Row $rowNum: Import FAILED", ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
-            return ['status' => 'error', 'message' => "Row $rowNum: ".$e->getMessage()];
+            return ['status' => 'error', 'message' => "Row $rowNum: Import failed. Please check logs."];
         }
     }
 
