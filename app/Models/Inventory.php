@@ -15,9 +15,12 @@ class Inventory extends Model
     protected $guarded = [];
 
     protected $fillable = [
-        'product_variant_id', // Strictly required now
+        'product_id',
+        'product_variant_id',
+        'location_type',
         'store_id',
         'warehouse_id',
+        'cost_price',
         'quantity',
         'batch_no',
         'status',
@@ -72,6 +75,14 @@ class Inventory extends Model
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
+    }
+
+    /**
+     * Transaction history for this inventory record.
+     */
+    public function transactions()
+    {
+        return $this->hasMany(InventoryTransaction::class, 'inventory_id');
     }
 
     // --- Scopes ---

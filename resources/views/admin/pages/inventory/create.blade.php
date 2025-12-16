@@ -1,206 +1,245 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Create Inventory')
+@section('title', isset($referenceItem) ? 'Edit Inventory Batch' : 'Inward New Stock')
 
 @section('content')
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between">
+            <div class="card shadow-sm border-0">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="header-title">
-                        <h4 class="card-title">Create New Inventory</h4>
+                        <h4 class="card-title">
+                            {{ isset($referenceItem) ? 'Edit Batch: ' . $referenceItem->batch_no : 'Inward New Stock' }}
+                        </h4>
                     </div>
-                    <a href="{{ route('admin.inventory.index') }}" class="btn btn-primary btn-sm">Back to List</a>
+                    <a href="{{ route('admin.inventory.index') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Back to List
+                    </a>
                 </div>
+
                 <div class="card-body">
-                    <form action="{{ route('admin.inventory.store') }}" method="POST" id="inventory-form">
+                    {{-- FORM START --}}
+                    {{-- Action toggles between STORE and UPDATE routes based on existence of $referenceItem --}}
+                    <form action="{{ isset($referenceItem) ? route('admin.inventory.update', $referenceItem->id) : route('admin.inventory.store') }}"
+                          method="POST"
+                          id="batch-form"
+                          data-variants-url="{{ route('admin.inventory.get-variants') }}">
+
                         @csrf
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Product <span class="text-danger">*</span></label>
-                                <select name="product_id" class="form-select @error('product_id') is-invalid @enderror" required>
-                                    <option value="">Select Product</option>
-                                    @foreach($products ?? [] as $product)
-                                        <option value="{{ $product->id }}">{{ is_array($product->name) ? ($product->name['en'] ?? reset($product->name)) : $product->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('product_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Product Variant</label>
-                                <select name="product_variant_id" class="form-select @error('product_variant_id') is-invalid @enderror">
-                                    <option value="">Select Variant</option>
-                                    @foreach($variants ?? [] as $variant)
-                                        <option value="{{ $variant->id }}">{{ is_array($variant->variant_name) ? ($variant->variant_name['en'] ?? reset($variant->variant_name)) : $variant->variant_name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('product_variant_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Location <span class="text-danger">*</span></label>
-                                <div class="d-flex gap-3 mb-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="location_type" id="loc_warehouse" value="warehouse">
-                                        <label class="form-check-label" for="loc_warehouse">Warehouse</label>
+                        @if(isset($referenceItem))
+                            @method('PUT')
+                        @endif
+
+                        {{-- SECTION 1: GLOBAL DETAILS --}}
+                        <div class="card mb-4 shadow-none border bg-soft-primary">
+                            <div class="card-body p-3">
+                                <div class="row align-items-center">
+                                    <div class="col-12 mb-2">
+                                        <h6 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-geo-alt-fill me-2"></i>Step 1: Batch Details
+                                        </h6>
                                     </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="location_type" id="loc_store" value="store">
-                                        <label class="form-check-label" for="loc_store">Store</label>
+
+                                    {{-- Determine Values (Old Input > DB Value > Default) --}}
+                                    @php
+                                        $locType = old('location_type', $referenceItem->location_type ?? 'warehouse');
+                                        $selWarehouse = old('warehouse_id', $referenceItem->warehouse_id ?? '');
+                                        $selStore = old('store_id', $referenceItem->store_id ?? '');
+                                        $notes = old('notes', $referenceItem->notes ?? '');
+                                    @endphp
+
+                                    {{-- Location Type --}}
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold small text-uppercase text-muted">Location Type <span class="text-danger">*</span></label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="location_type" id="lt_warehouse" value="warehouse"
+                                                    {{ $locType === 'warehouse' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="lt_warehouse">Warehouse</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="location_type" id="lt_store" value="store"
+                                                    {{ $locType === 'store' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="lt_store">Store</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Warehouse Dropdown --}}
+                                    <div class="col-md-4" id="warehouse_div" style="{{ $locType !== 'warehouse' ? 'display:none;' : '' }}">
+                                        <label class="form-label fw-bold small text-uppercase text-muted">Select Warehouse <span class="text-danger">*</span></label>
+                                        <select name="warehouse_id" class="form-select @error('warehouse_id') is-invalid @enderror">
+                                            <option value="">Choose Warehouse...</option>
+                                            @foreach($warehouses as $w)
+                                                <option value="{{ $w->id }}" {{ $selWarehouse == $w->id ? 'selected' : '' }}>
+                                                    {{ $w->warehouse_name ?? $w->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('warehouse_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+
+                                    {{-- Store Dropdown --}}
+                                    <div class="col-md-4" id="store_div" style="{{ $locType !== 'store' ? 'display:none;' : '' }}">
+                                        <label class="form-label fw-bold small text-uppercase text-muted">Select Store <span class="text-danger">*</span></label>
+                                        <select name="store_id" class="form-select @error('store_id') is-invalid @enderror">
+                                            <option value="">Choose Store...</option>
+                                            @foreach($stores as $s)
+                                                <option value="{{ $s->id }}" {{ $selStore == $s->id ? 'selected' : '' }}>
+                                                    {{ $s->store_name ?? $s->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('store_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+
+                                    {{-- Notes --}}
+                                    <div class="col-md-5 mt-3 mt-md-0">
+                                        <label class="form-label fw-bold small text-uppercase text-muted">Reference / Notes</label>
+                                        <input type="text" name="notes" class="form-control" placeholder="e.g. PO-8832 from Supplier X" value="{{ $notes }}">
                                     </div>
                                 </div>
-                                <select name="warehouse_id" class="form-select location-select location-warehouse d-none @error('warehouse_id') is-invalid @enderror">
-                                    <option value="">Select Warehouse</option>
-                                    @foreach($warehouses ?? [] as $warehouse)
-                                        <option value="{{ $warehouse->id }}">{{ is_array($warehouse->warehouse_name) ? ($warehouse->warehouse_name['en'] ?? reset($warehouse->warehouse_name)) : $warehouse->warehouse_name }}</option>
-                                    @endforeach
-                                </select>
-                                <select name="store_id" class="form-select location-select location-store d-none @error('store_id') is-invalid @enderror">
-                                    <option value="">Select Store</option>
-                                    @foreach($stores ?? [] as $store)
-                                        <option value="{{ $store->id }}">{{ is_array($store->store_name) ? ($store->store_name['en'] ?? reset($store->store_name)) : $store->store_name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('warehouse_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                @error('store_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Quantity <span class="text-danger">*</span></label>
-                                <input type="number" name="quantity" class="form-control @error('quantity') is-invalid @enderror" min="0" required>
-                                @error('quantity')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Batch No</label>
-                                <input type="text" name="batch_no" class="form-control @error('batch_no') is-invalid @enderror">
-                                @error('batch_no')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Status <span class="text-danger">*</span></label>
-                                <select name="status" class="form-select @error('status') is-invalid @enderror" required>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="depleted">Depleted</option>
-                                </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Notes</label>
-                                <textarea name="notes" class="form-control @error('notes') is-invalid @enderror"></textarea>
-                                @error('notes')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success">Create Inventory</button>
+
+                        {{-- SECTION 2: ITEMS TABLE --}}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold text-primary mb-0">
+                                        <i class="bi bi-box-seam me-2"></i>Step 2: Product List
+                                    </h6>
+                                    <button type="button" class="btn btn-success btn-sm rounded-pill" id="add-row-btn">
+                                        <i class="bi bi-plus-lg me-1"></i> Add Item
+                                    </button>
+                                </div>
+
+                                {{-- Validation Errors for Items Array --}}
+                                @if($errors->has('items'))
+                                    <div class="alert alert-danger p-2 small">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> {{ $errors->first('items') }}
+                                    </div>
+                                @endif
+
+                                <div class="table-responsive rounded border">
+                                    <table class="table table-striped table-hover align-middle mb-0" id="inventory-table">
+                                        <thead class="bg-primary text-white">
+                                            <tr>
+                                                <th style="width: 30%">Product <span class="text-warning">*</span></th>
+                                                <th style="width: 25%">Variant</th>
+                                                <th style="width: 15%">Cost Price <span class="text-warning">*</span></th>
+                                                <th style="width: 15%">Quantity <span class="text-warning">*</span></th>
+                                                <th style="width: 50px" class="text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="table-body" class="bg-white">
+
+                                            {{-- CASE A: Validation Failed (Prioritize Old Input) --}}
+                                            @if(old('items'))
+                                                @foreach(old('items') as $key => $item)
+                                                    @include('admin.pages.inventory.partials.row-create', ['key' => $key, 'item' => $item, 'products' => $products])
+                                                @endforeach
+
+                                            {{-- CASE B: Edit Mode (Load from DB) --}}
+                                            @elseif(isset($batchItems) && count($batchItems) > 0)
+                                                @foreach($batchItems as $key => $item)
+                                                    {{-- We manually construct the row here to ensure values map correctly from Model --}}
+                                                    <tr class="item-row">
+                                                        <td>
+                                                            <select name="items[{{ $key }}][product_id]" class="form-select product-select" required>
+                                                                <option value="">Select Product</option>
+                                                                @foreach($products as $p)
+                                                                    <option value="{{ $p->id }}" {{ $item->product_id == $p->id ? 'selected' : '' }}>
+                                                                        {{ $p->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select name="items[{{ $key }}][product_variant_id]" class="form-select variant-select">
+                                                                @if($item->variant)
+                                                                    <option value="{{ $item->product_variant_id }}" selected>
+                                                                        {{ $item->variant->variant_name }}
+                                                                    </option>
+                                                                @else
+                                                                    <option value="">Select Product First</option>
+                                                                @endif
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text">$</span>
+                                                                <input type="number" step="0.01" name="items[{{ $key }}][cost_price]" class="form-control" value="{{ $item->cost_price }}" required>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" step="0.01" name="items[{{ $key }}][quantity]" class="form-control text-center" value="{{ $item->quantity }}" required>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-soft-danger btn-sm remove-row rounded-circle">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @endif
+                                            {{-- CASE C: Empty (JS will add first row on load) --}}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                {{ isset($referenceItem) ? 'Update Inventory Batch' : 'Save Inventory Batch' }}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+{{-- Hidden Template for JS --}}
+<template id="row-template">
+    <tr class="item-row">
+        <td>
+            <select name="items[INDEX][product_id]" class="form-select product-select" required>
+                <option value="">Select Product</option>
+                @foreach($products as $p)
+                    <option value="{{ $p->id }}">{{ $p->name }}</option>
+                @endforeach
+            </select>
+        </td>
+        <td>
+            <select name="items[INDEX][product_variant_id]" class="form-select variant-select">
+                <option value="">Select Product First</option>
+            </select>
+        </td>
+        <td>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input type="number" step="0.01" name="items[INDEX][cost_price]" class="form-control" placeholder="0.00" required>
+            </div>
+        </td>
+        <td>
+            <input type="number" step="0.01" name="items[INDEX][quantity]" class="form-control text-center" placeholder="Qty" required>
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-soft-danger btn-sm remove-row rounded-circle">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var productSelect = document.querySelector('select[name="product_id"]');
-    var variantSelect = document.querySelector('select[name="product_variant_id"]');
-
-    function clearVariants() {
-        variantSelect.innerHTML = '<option value="">Select Variant</option>';
-    }
-
-    function renderVariantOption(v) {
-        var opt = document.createElement('option');
-        opt.value = v.id;
-        var name = v.variant_name;
-        try {
-            if (typeof name === 'string') {
-                var parsed = JSON.parse(name);
-                if (parsed && typeof parsed === 'object') {
-                    name = parsed.en || Object.values(parsed)[0] || '';
-                }
-            } else if (typeof name === 'object') {
-                name = name.en || Object.values(name)[0] || '';
-            }
-        } catch (e) {
-        }
-        opt.textContent = name || 'Variant ' + v.id;
-        return opt;
-    }
-
-    function loadVariants(productId) {
-        clearVariants();
-        if (!productId) return;
-        var url = '{{ route('admin.inventory.variants') }}' + '?product_id=' + encodeURIComponent(productId);
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (!Array.isArray(data)) return;
-                data.forEach(function (v) {
-                    variantSelect.appendChild(renderVariantOption(v));
-                });
-            }).catch(function (err) {
-                console.error('Failed to load variants', err);
-            });
-    }
-
-    if (productSelect) {
-        productSelect.addEventListener('change', function (e) {
-            loadVariants(e.target.value);
-        });
-    }
-    // Location selector logic
-    var locWarehouseRadio = document.getElementById('loc_warehouse');
-    var locStoreRadio = document.getElementById('loc_store');
-    var locWarehouseSelect = document.querySelector('.location-warehouse');
-    var locStoreSelect = document.querySelector('.location-store');
-
-    function setLocationVisibility() {
-        if (locWarehouseRadio && locWarehouseRadio.checked) {
-            locWarehouseSelect.classList.remove('d-none');
-            locWarehouseSelect.required = true;
-            locWarehouseSelect.style.display = '';
-            locStoreSelect.classList.add('d-none');
-            locStoreSelect.required = false;
-            locStoreSelect.style.display = 'none';
-            locStoreSelect.value = '';
-        } else if (locStoreRadio && locStoreRadio.checked) {
-            locStoreSelect.classList.remove('d-none');
-            locStoreSelect.required = true;
-            locStoreSelect.style.display = '';
-            locWarehouseSelect.classList.add('d-none');
-            locWarehouseSelect.required = false;
-            locWarehouseSelect.style.display = 'none';
-            locWarehouseSelect.value = '';
-        } else {
-            locWarehouseSelect.classList.add('d-none');
-            locWarehouseSelect.required = false;
-            locWarehouseSelect.style.display = 'none';
-            locStoreSelect.classList.add('d-none');
-            locStoreSelect.required = false;
-            locStoreSelect.style.display = 'none';
-        }
-    }
-
-    if (locWarehouseRadio) locWarehouseRadio.addEventListener('change', setLocationVisibility);
-    if (locStoreRadio) locStoreRadio.addEventListener('change', setLocationVisibility);
-    // initialize
-    setLocationVisibility();
-});
-</script>
+{{-- Include the Form Logic JS --}}
+    <script src="{{ asset('admin_assets/js/inventory.js') }}"></script>
 @endpush

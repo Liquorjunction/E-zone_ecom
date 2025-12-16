@@ -365,7 +365,7 @@ class ProductController extends Controller
                 ->addColumn('action', function ($product) use ($request) {
                     $data['view_url'] = $request->user()->can('products.read') ? route('admin.products.show', ['id' => $product->id]) : '';
                     $data['edit_url'] = $request->user()->can('products.update') ? route('admin.products.edit', ['id' => $product->id]) : '';
-                    $data['delete_url'] = $request->user()->can('products.delete') ? route('admin.products.destroy') : '';
+                    $data['delete_url'] = $request->user()->can('products.delete') ? route('admin.products.destroy', ['id' => $product->id]) : '';
                     $data['product_id'] = $product->id;
 
                     return view('admin.partials.datatable-actions', $data)->render();

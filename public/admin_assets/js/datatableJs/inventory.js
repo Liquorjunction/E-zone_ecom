@@ -1,15 +1,22 @@
 $(function () {
-    $('#inventory-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: $('#inventory-table').data('route'),
-        columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'product', name: 'product' },
-            { data: 'warehouse', name: 'warehouse' },
-            { data: 'quantity', name: 'quantity' },
-            { data: 'status', name: 'status', orderable: false, searchable: false },
-            { data: 'action', name: 'action', orderable: false, searchable: false }
-        ]
-    });
+    "use strict";
+
+    if ($('#inventory-table').length) {
+        $('#inventory-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: $('#inventory-table').data('route'),
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'batch_no', name: 'batch_no' },
+                { data: 'created_at', name: 'created_at' },
+                { data: 'location', name: 'location', orderable: false },
+                { data: 'items_count', name: 'items_count', searchable: false },
+                { data: 'total_quantity', name: 'total_quantity', searchable: false },
+                { data: 'status', name: 'status' },
+                { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
+            ],
+            order: [[2, 'desc']] // Sort by Date desc
+        });
+    }
 });

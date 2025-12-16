@@ -140,11 +140,7 @@ class ProductRepository implements ProductRepositoryInterface
                     'attributes' => ['en' => []],
                     'status' => 'active',
                 ]);
-                Inventory::create([
-                    'product_variant_id' => $defaultVariant->id,
-                    'quantity' => 1,
-                    'status' => 'active'
-                ]);
+                // Inventory creation removed. User will manually enter inventory in the inventory module.
             }
             return $product;
         } catch (\Exception $e) {
@@ -259,11 +255,7 @@ class ProductRepository implements ProductRepositoryInterface
                     'attributes' => ['en' => []],
                     'status' => 'active',
                 ]);
-                Inventory::create([
-                    'product_variant_id' => $defaultVariant->id,
-                    'quantity' => 1,
-                    'status' => 'active'
-                ]);
+                $this->syncVariants($product, [$defaultVariant->id => []]);
             }
             return $product;
         } catch (\Exception $e) {
@@ -380,19 +372,7 @@ class ProductRepository implements ProductRepositoryInterface
                             'attributes'   => $data['attributes'] ?? null,
                             'status'       => $data['status'] ?? 'active',
                         ]);
-                    // Inventory
-                    if (isset($data['quantity'])) {
-                        $inventory = $variant->inventory()->first();
-                        if ($inventory) {
-                            $inventory->update(['quantity' => $data['quantity']]);
-                        } else {
-                            Inventory::create([
-                                'product_variant_id' => $variant->id,
-                                'quantity' => $data['quantity'],
-                                'status' => 'active'
-                            ]);
-                        }
-                    }
+                    // Inventory management is now handled via batch process, not product CRUD
                     $processedIds[] = $variant->id;
                     // Images
                     if (!empty($data['images'])) {
@@ -445,11 +425,6 @@ class ProductRepository implements ProductRepositoryInterface
                     'price'        => $data['price'],
                     'attributes'   => $data['attributes'] ?? null,
                     'status'       => $data['status'] ?? 'active',
-                ]);
-                Inventory::create([
-                    'product_variant_id' => $variant->id,
-                    'quantity'           => $data['quantity'] ?? 0,
-                    'status'             => 'active',
                 ]);
                 $processedIds[] = $variant->id;
                 if (!empty($data['images'])) {

@@ -11,13 +11,15 @@ return new class extends Migration
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
 
-            // STRICT VARIANT-CENTRIC RELATIONSHIP
-            // Removed 'product_id' to prevent data duplication and anomalies.
-            // Inventory tracks items (variants), not concepts (products).
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_variant_id')->constrained('product_variants')->onDelete('cascade');
+
+            $table->enum('location_type', ['warehouse', 'store']);
 
             $table->foreignId('store_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('warehouse_id')->nullable()->constrained()->onDelete('cascade');
+
+            $table->decimal('cost_price', 18, 3)->default(0);
 
             $table->decimal('quantity', 18, 3)->default(0);
             $table->string('batch_no')->nullable();
@@ -30,7 +32,7 @@ return new class extends Migration
 
             // Index for fast lookups
             // Determine stock for a variant in a specific location
-            $table->index(['product_variant_id', 'warehouse_id', 'store_id'], 'inv_variant_loc_index');
+            $table->index(['product_id', 'product_variant_id', 'warehouse_id', 'store_id'], 'inv_variant_loc_index');
         });
     }
 

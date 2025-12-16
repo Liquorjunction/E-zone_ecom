@@ -265,11 +265,11 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/data', [InventoryController::class, 'dataTable'])->name('data');
             Route::get('/variants', [InventoryController::class, 'variants'])->name('variants');
             Route::get('/create', [InventoryController::class, 'create'])->name('create')->middleware('can:inventories.create,admin');
+            Route::post('/batch', [InventoryController::class, 'storeBatch'])->name('storeBatch')->middleware('can:inventories.create,admin');
             Route::post('/', [InventoryController::class, 'store'])->name('store')->middleware('can:inventories.create,admin');
             Route::get('/edit', [InventoryController::class, 'edit'])->name('edit')->middleware('can:inventories.update,admin');
             Route::put('/update', [InventoryController::class, 'update'])->name('update')->middleware('can:inventories.update,admin');
-            Route::delete('/destroy', [InventoryController::class, 'destroy'])->name('destroy')->middleware('can:inventories.delete,admin');
-            Route::patch('/toggle-status', [InventoryController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:inventories.update,admin');
+            Route::get('/show', [InventoryController::class, 'show'])->name('show')->middleware('can:inventories.read,admin');
         });
     });
 });

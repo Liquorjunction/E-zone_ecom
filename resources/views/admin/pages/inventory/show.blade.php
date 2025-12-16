@@ -21,17 +21,18 @@
                         <dt class="col-sm-3">Product Variant</dt>
                         <dd class="col-sm-9">{{ $inventory->productVariant->variant_name ?? '-' }}</dd>
 
+
                         <dt class="col-sm-3">Warehouse</dt>
                         <dd class="col-sm-9">{{ $inventory->warehouse->warehouse_name ?? '-' }}</dd>
 
                         <dt class="col-sm-3">Store</dt>
                         <dd class="col-sm-9">{{ $inventory->store->store_name ?? '-' }}</dd>
 
-                        <dt class="col-sm-3">Quantity</dt>
-                        <dd class="col-sm-9">{{ $inventory->quantity }}</dd>
-
                         <dt class="col-sm-3">Batch No</dt>
                         <dd class="col-sm-9">{{ $inventory->batch_no ?? '-' }}</dd>
+
+                        <dt class="col-sm-3">Quantity</dt>
+                        <dd class="col-sm-9">{{ $inventory->quantity }}</dd>
 
                         <dt class="col-sm-3">Status</dt>
                         <dd class="col-sm-9">{{ ucfirst($inventory->status) }}</dd>

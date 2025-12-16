@@ -23,6 +23,9 @@ class SubCategorySeeder extends Seeder
                 ['sub-category-name' => ['en' => 'Audio Systems', 'ar' => 'أنظمة صوتية'], 'sub-category-icon' => 'icon/audio.png'],
                 ['sub-category-name' => ['en' => 'Speakers', 'ar' => 'سماعات'], 'sub-category-icon' => 'icon/speakers.png'],
                 ['sub-category-name' => ['en' => 'Headphones', 'ar' => 'سماعات رأس'], 'sub-category-icon' => 'icon/headphones.png'],
+                ['sub-category-name' => ['en' => 'Drones', 'ar' => 'الطائرات بدون طيار'], 'sub-category-icon' => 'icon/drone.png'],
+                ['sub-category-name' => ['en' => 'Smart Home Devices', 'ar' => 'أجهزة المنزل الذكي'], 'sub-category-icon' => 'icon/smart-home.png'],
+                ['sub-category-name' => ['en' => 'Cameras', 'ar' => 'كاميرات'], 'sub-category-icon' => 'icon/camera.png'],
             ],
             // Computers & Laptops subcategories
             'Computers & Laptops' => [
