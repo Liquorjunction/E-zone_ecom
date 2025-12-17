@@ -28,13 +28,13 @@
 
         <!-- View Toggle (Mobile Hidden) -->
         <div class="hidden lg:flex items-center space-x-2 border-2 border-gray-200 rounded-xl p-1">
-            <button class="p-2 rounded-lg bg-primary text-white transition-colors">
+            <button id="view-grid-btn" data-view="grid" class="p-2 rounded-lg bg-primary text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
             </button>
-            <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <button id="view-list-btn" data-view="list" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 6h16M4 12h16M4 18h16" />

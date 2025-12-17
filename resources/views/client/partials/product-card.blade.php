@@ -1,6 +1,41 @@
+@php
+  $locale = app()->getLocale() ?? 'en';
+  $isVariant = isset($product) && class_basename($product) === 'ProductVariant';
+  $master = $isVariant ? $product->product : $product;
+
+  $nameRaw = $master?->getTranslation('name', $locale) ?? '';
+  $variantName = $isVariant ? ($product->getTranslation('variant_name', $locale) ?? '') : '';
+  $name = trim((is_array($nameRaw) ? implode(' ', array_filter($nameRaw)) : (string) $nameRaw) . ($variantName ? ' - ' . (is_array($variantName) ? implode(' ', $variantName) : $variantName) : ''));
+
+  $catRaw = $master->category?->{'category-name'} ?? $master->category?->name ?? 'Uncategorized';
+  $categoryName = is_array($catRaw) ? implode(' ', array_filter($catRaw)) : (string) $catRaw;
+
+  // Image preference order:
+  // 1) Variant-assigned image (product_variant_id)
+  // 2) Product images that are for the product (product_variant_id IS NULL)
+  // 3) Product cover_image
+  // 4) Placeholder
+  $variantImage = null;
+  if ($isVariant) {
+    $variantImage = optional($product->images()->ordered()->first())->image_path;
+  }
+
+  $productImage = optional($master->images()->forProduct($master->id)->ordered()->first())->image_path;
+
+  if ($variantImage) {
+    $imagePath = asset('storage/' . $variantImage);
+  } elseif ($productImage) {
+    $imagePath = asset('storage/' . $productImage);
+  } elseif ($master->cover_image) {
+    $imagePath = asset('storage/' . $master->cover_image);
+  } else {
+    $imagePath = null;
+  }
+@endphp
+
 <div class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
-  <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
-    <img src="https://via.placeholder.com/400x400?text=Product" alt="Product" class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
+  <a href="{{ route('products.detail', $master->slug) }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
+  <img src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}" alt="{{ $name }}" class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
 
     <!-- Badges -->
     <div class="absolute top-3 left-3 flex flex-col gap-2">
@@ -30,12 +65,12 @@
   <div class="p-5">
     <!-- Category Badge -->
     <span class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">
-      Electronics
+      {{ $categoryName }}
     </span>
 
-    <a href="#">
+    <a href="{{ route('products.detail', $master->slug) }}">
       <h3 class="mt-3 text-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
-        Premium Electronics Product
+        {{ $name }}
       </h3>
     </a>
 
@@ -66,8 +101,15 @@
     <!-- Price and Add to Cart -->
     <div class="mt-4 flex items-center justify-between">
       <div>
-        <p class="text-2xl font-bold text-primary">$299.99</p>
-        <p class="text-sm text-gray-400 line-through">$399.99</p>
+        @php
+          // Price: prefer variant price if available
+          $real = $isVariant ? ($product->price ?? $master->real_price ?? $master->price ?? 0) : ($master->real_price ?? $master->price ?? 0);
+          $orig = $isVariant ? ($master->price ?? null) : ($master->price ?? null);
+        @endphp
+        <p class="text-2xl font-bold text-primary">${{ number_format($real, 2) }}</p>
+        @if($orig && $orig > $real)
+          <p class="text-sm text-gray-400 line-through">${{ number_format($orig, 2) }}</p>
+        @endif
       </div>
       <button class="p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10 group-hover:bg-primary">
         <svg class="w-5 h-5 text-primary group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

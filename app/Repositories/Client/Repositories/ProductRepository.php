@@ -2,107 +2,182 @@
 
 namespace App\Repositories\Client\Repositories;
 
-use App\Models\Brand;
-use App\Models\Categories;
-use App\Models\Product;
 use App\Repositories\Client\Interfaces\ProductRepositoryInterface;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-    public function getFilteredProducts(Request $request, int $perPage = 12)
+    public function getAllActiveProducts(Request $request, int $perPage = 12): LengthAwarePaginator
     {
         $query = Product::query()
-            ->with(['category', 'brand', 'images', 'productVariants.inventory']) // Load relations efficiently
-            ->where('status', 'active');
+            ->where('status', 'active') // Ensure we only show active
+            ->with(['category', 'brand', 'images', 'productVariants' => function($q) {
+                $q->where('status', 'active');
+            }]);
 
-        // 1. Search Filter
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%");
-            });
-        }
-
-        // 2. Category Filter (Slug)
+        // 1. Filter by Category (supports single slug or array of slugs)
         if ($request->filled('category')) {
-            $query->whereHas('category', function ($q) use ($request) {
-                $q->where('slug', $request->category);
+            $categories = is_array($request->category) ? $request->category : [$request->category];
+            $query->whereHas('category', function (Builder $q) use ($categories) {
+                $q->whereIn('slug', $categories);
             });
         }
 
-        // 3. SubCategory Filter (Slug)
-        if ($request->filled('subcategory')) {
-            $query->whereHas('subCategory', function ($q) use ($request) {
-                $q->where('slug', $request->subcategory);
-            });
-        }
-
-        // 4. Brand Filter (Slug)
+        // 2. Filter by Brand (supports single slug or array of slugs)
         if ($request->filled('brand')) {
-            $query->whereHas('brand', function ($q) use ($request) {
-                $q->where('slug', $request->brand);
+            $brands = is_array($request->brand) ? $request->brand : [$request->brand];
+            $query->whereHas('brand', function (Builder $q) use ($brands) {
+                $q->whereIn('slug', $brands);
             });
         }
 
-        // 5. Sorting
-        if ($request->filled('sort')) {
-            switch ($request->sort) {
-                case 'price_asc': $query->orderBy('price', 'asc'); break;
-                case 'price_desc': $query->orderBy('price', 'desc'); break;
-                case 'name_asc': $query->orderBy('name', 'asc'); break;
-                case 'newest': default: $query->latest(); break;
-            }
-        } else {
-            $query->latest();
+        // 2.1 Filter by Subcategory IDs (supports single id or array)
+        if ($request->filled('subcategory')) {
+            $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
+            $query->whereIn('sub_category_id', $subcategories);
+        }
+
+        // 3. Filter by Price
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // 4. Sorting
+        switch ($request->get('sort')) {
+            case 'price_asc': $query->orderBy('price', 'asc'); break;
+            case 'price_desc': $query->orderBy('price', 'desc'); break;
+            case 'newest': default: $query->latest(); break;
         }
 
         return $query->paginate($perPage)->withQueryString();
     }
 
-    public function getProductBySlug(string $slug)
+    /**
+     * Return paginated active ProductVariants (sellable items) with parent product data attached.
+     */
+    public function getAllActiveVariants(Request $request, int $perPage = 12): LengthAwarePaginator
     {
-        return Product::with([
+        $query = ProductVariant::query()
+            ->where('status', 'active')
+            ->with(['images', 'inventory', 'product' => function($q) {
+                $q->where('status', 'active')->with(['category', 'brand', 'images']);
+            }])
+            ->whereHas('product', function (Builder $q) {
+                $q->where('status', 'active');
+            });
+
+        // Filters applied on parent product
+        if ($request->filled('category')) {
+            $categories = is_array($request->category) ? $request->category : [$request->category];
+            $query->whereHas('product.category', function (Builder $q) use ($categories) {
+                $q->whereIn('slug', $categories);
+            });
+        }
+
+        if ($request->filled('brand')) {
+            $brands = is_array($request->brand) ? $request->brand : [$request->brand];
+            $query->whereHas('product.brand', function (Builder $q) use ($brands) {
+                $q->whereIn('slug', $brands);
+            });
+        }
+
+        if ($request->filled('subcategory')) {
+            $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
+            $query->whereHas('product', function (Builder $q) use ($subcategories) {
+                $q->whereIn('sub_category_id', $subcategories);
+            });
+        }
+
+        // Price filters on variant price (sellable price)
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Sorting
+        switch ($request->get('sort')) {
+            case 'price_asc': $query->orderBy('price', 'asc'); break;
+            case 'price_desc': $query->orderBy('price', 'desc'); break;
+            case 'newest': default: $query->latest(); break;
+        }
+
+        $paginator = $query->paginate($perPage)->withQueryString();
+
+        // Ensure product is attached on each variant (already eager-loaded) for convenience
+        $paginator->getCollection()->each(function (ProductVariant $variant) {
+            if (!$variant->relationLoaded('product') || !$variant->product) {
+                $variant->load('product.category', 'product.brand', 'product.images');
+            }
+        });
+
+        return $paginator;
+    }
+
+    public function findActiveBySlug(string $slug): ?Product
+    {
+        return Product::where('slug', $slug)
+            ->where('status', 'active')
+            ->with([
                 'category',
-                'subCategory',
                 'brand',
-                'images',
-                // Important: Load active variants AND their specific inventory
+                'images', // General Gallery
                 'productVariants' => function($q) {
-                    $q->where('status', 'active')->with('inventory');
+                    $q->where('status', 'active')
+                      ->with(['images', 'inventory']); // Load Variant Images and Inventory
                 }
             ])
-            ->where('slug', $slug)
-            ->where('status', 'active')
             ->firstOrFail();
     }
 
-    public function getRelatedProducts($product, int $limit = 4)
+    public function getRelatedProducts(Product $product, int $limit = 4): Collection
     {
-        return Product::with(['category', 'images'])
+        return Product::where('status', 'active')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->where('status', 'active')
-            ->inRandomOrder()
-            ->limit($limit)
+            ->with('images')
+            ->take($limit)
             ->get();
     }
 
-    public function getActiveBrands()
+    public function searchProducts(string $keyword, int $limit = 10): Collection
     {
-        // Only return brands that actually have active products
-        return Brand::whereHas('products', fn($q) => $q->where('status', 'active'))->get();
+        return Product::where('status', 'active')
+            ->where('name', 'LIKE', "%{$keyword}%")
+            ->orWhere('description', 'LIKE', "%{$keyword}%")
+            ->with('images')
+            ->take($limit)
+            ->get();
     }
 
-    public function getActiveCategories()
+    public function getDataforproductlisting(int $productId): Collection
     {
-        // Fetch categories with subcategories that have active products
-        return Categories::with(['subCategories' => function($q) {
-            $q->whereHas('products', fn($p) => $p->where('status', 'active'));
-        }])
-        ->whereHas('products', fn($p) => $p->where('status', 'active'))
-        ->get();
+        // Load product (ensure exists and is active)
+        $product = Product::where('id', $productId)
+            ->where('status', 'active')
+            ->with(['category', 'brand', 'images'])
+            ->firstOrFail();
+
+        // Load active variants with their relations
+        $productVariants = ProductVariant::where('product_id', $productId)
+            ->where('status', 'active')
+            ->with(['images', 'inventory'])
+            ->get();
+
+        // Attach product-level data to each variant for controller convenience
+        $productVariants->each(function (ProductVariant $variant) use ($product) {
+            $variant->product = $product;
+        });
+
+        return $productVariants;
     }
 }

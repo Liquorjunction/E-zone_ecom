@@ -3,36 +3,30 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Client\Product\ReadProductRequest;
-use App\Repositories\Client\Interfaces\ProductRepositoryInterface as ProductRepo;
+use App\Repositories\Client\Interfaces\ProductRepositoryInterface;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
 
-    public function index(ReadProductRequest $request, ProductRepo $productRepo)
+    public function index(Request $request, ProductRepositoryInterface $productRepository)
     {
-        // 1. Get Products (Filtered & Paginated)
-        $products = $productRepo->getFilteredProducts($request, 12);
-
-        // 2. Get Sidebar Data (Optimized to only show relevant filters)
-        $categories = $productRepo->getActiveCategories();
-        $brands = $productRepo->getActiveBrands();
-
-        // Note: $subCategories isn't strictly needed if loaded inside categories,
-        // but if your view expects a flat list, you can fetch it similarly.
-        $subCategories = collect();
-
-        return view('client.pages.products', compact('products', 'categories', 'subCategories', 'brands'));
+        // Get sellable variants (flattened view for listing)
+        $products = $productRepository->getAllActiveVariants($request);
+        return view('client.pages.products', compact('products'));
     }
 
-    /**
-     * Display Single Product Detail.
-     */
-    public function productDetail($slug, ProductRepo $productRepo)
+    public function show($slug, ProductRepositoryInterface $productRepository)
     {
-        $product = $productRepo->getProductBySlug($slug);
-        $relatedProducts = $productRepo->getRelatedProducts($product);
+        $product = $productRepository->findActiveBySlug($slug);
+        $relatedProducts = $productRepository->getRelatedProducts($product);
 
         return view('client.pages.product-detail', compact('product', 'relatedProducts'));
+    }
+
+    // Route expects `productDetail` — keep a named method to match routes
+    public function productDetail($slug, ProductRepositoryInterface $productRepository)
+    {
+        return $this->show($slug, $productRepository);
     }
 }
