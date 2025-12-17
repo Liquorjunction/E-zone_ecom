@@ -11,8 +11,8 @@
                 <div class="space-y-4">
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-hidden">
                         <div class="aspect-square relative">
-                            <img src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
-                                alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}" class="w-full h-full object-cover">
+                            <img id="main-product-image" src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
+                                alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}" class="w-full h-full object-cover" loading="lazy" decoding="async">
                             <div class="absolute top-4 left-4 flex flex-col gap-2">
                                 @if($product->created_at > now()->subDays(30))
                                     <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -33,18 +33,17 @@
 
                     <div class="grid grid-cols-4 gap-4">
                         @if($product->images && $product->images->count() > 0)
-                            @foreach($product->images->take(4) as $image)
-                                <button
-                                    class="bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50">
+                            @foreach($product->images->take(6) as $image)
+                                <button type="button" data-image="{{ asset('storage/' . $image->image_path) }}"
+                                    class="thumb-button bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50">
                                     <img src="{{ asset('storage/' . $image->image_path) }}"
-                                        alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }} - {{ $loop->iteration }}" class="w-full h-24 object-cover">
+                                        alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }} - {{ $loop->iteration }}" class="w-full h-24 object-cover" loading="lazy" decoding="async">
                                 </button>
                             @endforeach
                         @else
-                            <button
-                                class="bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50">
+                            <button type="button" class="thumb-button bg-white rounded-xl shadow-sm border-2 border-gray-100 overflow-hidden hover:border-primary transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50" data-image="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}">
                                 <img src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
-                                    alt="{{ $product->name }}" class="w-full h-24 object-cover">
+                                    alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : $product->name }}" class="w-full h-24 object-cover" loading="lazy" decoding="async">
                             </button>
                         @endif
                     </div>
@@ -63,7 +62,7 @@
                                 <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1">New Arrival</span>
                             @endif
                             <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1">Electronics</span>
-                            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1">SKU: {{ $product->sku }}</span>
+                            <span id="product-sku" class="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1">SKU: {{ is_array($product->sku) ? ($product->sku[app()->getLocale()] ?? ($product->sku['en'] ?? '')) : ($product->sku ?? '') }}</span>
                         </div>
 
                         <h1 class="text-3xl font-extrabold text-gray-900 mb-1">
@@ -86,7 +85,18 @@
 
                     <div class="flex items-center flex-wrap gap-3 p-4 bg-gradient-to-r from-primary/10 via-white to-white border border-primary/20 rounded-2xl shadow-sm">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl font-bold text-primary">${{ number_format($product->price, 2) }}</span>
+                            @php
+                                $variantCount = $product->productVariants ? $product->productVariants->count() : 0;
+                                $minPrice = $variantCount ? $product->productVariants->min('price') : $product->price;
+                                $maxPrice = $variantCount ? $product->productVariants->max('price') : $product->price;
+                            @endphp
+
+                            @if($variantCount > 1 && $minPrice != $maxPrice)
+                                <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }} - ${{ number_format($maxPrice, 2) }}</span>
+                            @else
+                                <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }}</span>
+                            @endif
+
                             <span class="text-sm text-gray-500">incl. taxes</span>
                         </div>
                         <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-primary text-sm font-semibold shadow-xs border border-primary/20">
@@ -100,20 +110,20 @@
                         <span class="text-sm text-gray-600">Category:</span>
                         @if($product->category)
                             <a href="{{ route('products.index', ['category' => $product->category->slug]) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                                {{ $product->category->{'category-name'} }}
+                                {{ method_exists($product->category ?? null, 'getTranslation') ? $product->category->getTranslation('category-name', app()->getLocale()) : (is_array(optional($product->category)->{'category-name'}) ? (optional($product->category)->{'category-name'}[app()->getLocale()] ?? optional($product->category)->{'category-name'}['en'] ?? '') : optional($product->category)->{'category-name'}) }}
                             </a>
                         @endif
                         @if($product->subCategory)
                             <a href="{{ route('products.index', ['subcategory' => $product->subCategory->slug]) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                                {{ $product->subCategory->{'sub-category-name'} }}
+                                {{ method_exists($product->subCategory ?? null, 'getTranslation') ? $product->subCategory->getTranslation('sub-category-name', app()->getLocale()) : (is_array(optional($product->subCategory)->{'sub-category-name'}) ? (optional($product->subCategory)->{'sub-category-name'}[app()->getLocale()] ?? optional($product->subCategory)->{'sub-category-name'}['en'] ?? '') : optional($product->subCategory)->{'sub-category-name'}) }}
                             </a>
                         @endif
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Brand:</span>
                         @if($product->brand)
-                            <a href="{{ route('brand-products', $product->brand->slug) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
-                                {{ $product->brand->name }}
+                                <a href="{{ route('brand-products', $product->brand->slug) }}" class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                {{ method_exists($product->brand ?? null, 'getTranslation') ? $product->brand->getTranslation('name', app()->getLocale()) : (is_array(optional($product->brand)->name) ? (optional($product->brand)->name[app()->getLocale()] ?? optional($product->brand)->name['en'] ?? '') : optional($product->brand)->name) }}
                             </a>
                         @endif
                     </div>
@@ -197,17 +207,24 @@
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach($product->productVariants as $variant)
-                                    <div class="group border border-gray-200 hover:border-primary/50 rounded-2xl px-4 py-3 bg-white shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer">
+                                    @php
+                                        $qty = optional($variant->inventory)->quantity ?? 0;
+                                    @endphp
+                                    <button type="button" class="variant-button group border border-gray-200 hover:border-primary/50 rounded-2xl px-4 py-3 bg-white shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer" data-variant-id="{{ $variant->id }}" data-price="{{ is_null($variant->price) ? '' : $variant->price }}" data-sku="{{ is_array($variant->sku) ? ($variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku))) : ($variant->sku ?? '') }}" data-qty="{{ $qty }}">
                                         <div class="flex items-start justify-between gap-2">
-                                            <div class="text-sm font-semibold text-gray-900 line-clamp-1">{{ $variant->variant_name ?? $variant->name ?? 'Variant' }}</div>
-                                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">SKU</span>
-                                        </div>
-                                        <div class="text-xs text-gray-600 mt-0.5 line-clamp-1">{{ $variant->sku }}</div>
+                                            <div class="text-sm font-semibold text-gray-900 line-clamp-1">{{ is_array($variant->variant_name) ? ($variant->variant_name[app()->getLocale()] ?? ($variant->variant_name['en'] ?? reset($variant->variant_name))) : (is_array($variant->name) ? ($variant->name[app()->getLocale()] ?? ($variant->name['en'] ?? reset($variant->name))) : ($variant->variant_name ?? $variant->name ?? 'Variant')) }}</div>
+                                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{{ is_array($variant->sku) ? ($variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku))) : ($variant->sku ?? '') }}</span>
+                                            </div>
+                                            <div class="text-xs text-gray-600 mt-0.5 line-clamp-1">{{ is_string($variant->attributes) ? $variant->attributes : (is_array($variant->attributes) ? json_encode($variant->attributes) : '') }}</div>
                                         <div class="flex items-center justify-between mt-2">
                                             <div class="text-base font-bold text-primary">${{ number_format($variant->price, 2) }}</div>
-                                            <span class="text-[11px] font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">In stock</span>
+                                            @if($qty > 0)
+                                                <span class="text-[11px] font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full stock-badge">In stock</span>
+                                            @else
+                                                <span class="text-[11px] font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full stock-badge">Out of stock</span>
+                                            @endif
                                         </div>
-                                    </div>
+                                    </button>
                                 @endforeach
                             </div>
                         </div>
@@ -650,6 +667,79 @@
                     }
                 });
             });
+
+            // Thumbnail click -> swap main image
+            const thumbButtons = document.querySelectorAll('.thumb-button');
+            const mainImage = document.getElementById('main-product-image');
+            thumbButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const src = btn.getAttribute('data-image');
+                    if (src && mainImage) {
+                        mainImage.src = src;
+                    }
+                });
+            });
+
+            // Variant selection handling
+            const variantButtons = document.querySelectorAll('.variant-button');
+            const priceEl = document.getElementById('product-price');
+            const skuEl = document.getElementById('product-sku');
+            const qtyInput = document.querySelector('input[aria-label="Quantity"]');
+            let addToCartBtn = null;
+            document.querySelectorAll('button').forEach(b => {
+                if (!addToCartBtn && b.textContent && b.textContent.trim().toLowerCase().includes('add to cart')) {
+                    addToCartBtn = b;
+                }
+            });
+            if (!addToCartBtn) {
+                addToCartBtn = document.querySelector('button:nth-of-type(1)');
+            }
+
+            function setActiveVariant(btn) {
+                variantButtons.forEach(v => v.classList.remove('ring-2', 'ring-primary/30'));
+                btn.classList.add('ring-2', 'ring-primary/30');
+
+                const price = btn.getAttribute('data-price');
+                const sku = btn.getAttribute('data-sku');
+                const qty = parseInt(btn.getAttribute('data-qty') || '0', 10);
+
+                if (priceEl && price) {
+                    priceEl.textContent = '$' + parseFloat(price).toFixed(2);
+                }
+                if (skuEl && sku) {
+                    skuEl.textContent = 'SKU: ' + sku;
+                }
+
+                // Update stock / quantity and Add to Cart state
+                if (qtyInput) {
+                    if (qty > 0) {
+                        qtyInput.removeAttribute('disabled');
+                        qtyInput.value = '1';
+                    } else {
+                        qtyInput.value = '0';
+                        qtyInput.setAttribute('disabled', 'disabled');
+                    }
+                }
+                if (addToCartBtn) {
+                    if (qty > 0) {
+                        addToCartBtn.removeAttribute('disabled');
+                        addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        addToCartBtn.setAttribute('disabled', 'disabled');
+                        addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+
+            if (variantButtons.length > 0) {
+                // Attach click handlers
+                variantButtons.forEach(btn => {
+                    btn.addEventListener('click', () => setActiveVariant(btn));
+                });
+
+                // Activate first variant by default
+                setActiveVariant(variantButtons[0]);
+            }
         });
     </script>
 @endpush

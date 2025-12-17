@@ -59,7 +59,7 @@
                                 class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
                                 <a href="{{ route('products.detail', $product->slug) }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
                                     <img src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : 'https://via.placeholder.com/400x400?text=No+Image' }}"
-                                        alt="{{ $product->name }}"
+                                        alt="{{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : (string) $product->name }}"
                                         class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
 
                                     <!-- Badges -->
@@ -97,7 +97,7 @@
                                         {{ $product->category ? (is_array($product->category->{'category-name'}) ? ($product->category->{'category-name'}[app()->getLocale()] ?? $product->category->{'category-name'}['en'] ?? '') : (string) $product->category->{'category-name'}) : 'Uncategorized' }}
                                     </span>
 
-                                    <a href="#">
+                                    <a href="{{ route('products.detail', $product->slug) }}">
                                         <h3
                                             class="mt-3 text-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
                                             {{ is_array($product->name) ? ($product->name[app()->getLocale()] ?? $product->name['en'] ?? '') : (string) $product->name }}
@@ -130,8 +130,7 @@
                                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            {{ $product->warranty ?? '1 Year Warranty' }}
-                                                                                    {{ is_array($product->warranty) ? ($product->warranty[app()->getLocale()] ?? $product->warranty['en'] ?? '') : ($product->warranty ?? '1 Year Warranty') }}
+                                            {{ is_array($product->warranty) ? ($product->warranty[app()->getLocale()] ?? $product->warranty['en'] ?? '') : ($product->warranty ?? '1 Year Warranty') }}
                                         </li>
                                     </ul>
 

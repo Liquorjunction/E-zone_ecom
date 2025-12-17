@@ -194,7 +194,7 @@
                             </a>
 
                             <!-- Continue Shopping Button -->
-                            <a href="{{ route('products') }}"
+                            <a href="{{ route('products.index') }}"
                                 class="block w-full px-6 py-4 border-2 border-gray-200 text-gray-700 text-center font-semibold rounded-xl transition-all duration-300 hover:border-primary hover:text-primary">
                                 Continue Shopping
                             </a>
@@ -244,7 +244,7 @@
                         <h2 class="text-3xl font-bold text-gray-900 mb-4">Your Cart is Empty</h2>
                         <p class="text-gray-600 mb-8">Looks like you haven't added anything to your cart yet. Start
                             shopping to fill it up!</p>
-                        <a href="{{ route('products') }}"
+                        <a href="{{ route('products.index') }}"
                             class="inline-flex items-center px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

@@ -69,7 +69,6 @@ Route::view('/checkout', 'client.pages.checkout')->name('checkout');
 
 // login/register GET are defined in guest group above
 
-Route::view('/product-detail', 'client.pages.product-detail')->name('product-detail');
 Route::view('/checkout-success', 'client.pages.checkout-success')->name('checkout-success');
 Route::view('/search', 'client.pages.search-results')->name('search');
 Route::view('/checkout-process', 'client.pages.checkout-process')->name('checkout-process');
