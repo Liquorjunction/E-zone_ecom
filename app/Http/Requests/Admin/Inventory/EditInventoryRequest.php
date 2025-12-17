@@ -26,4 +26,15 @@ class EditInventoryRequest extends FormRequest
             'id' => 'required|exists:inventories,id',
         ];
     }
+
+    /**
+     * Merge route parameter into request data so route-based requests validate correctly.
+     */
+    protected function prepareForValidation(): void
+    {
+        $inventoryId = $this->route('inventory');
+        if ($inventoryId) {
+            $this->merge(['id' => $inventoryId]);
+        }
+    }
 }

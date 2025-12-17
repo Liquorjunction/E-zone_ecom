@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     "use strict";
 
-    // --- Configuration ---
+    // --- Configuration & Selectors ---
     const config = {
         selectors: {
             batchForm: '#batch-form',
@@ -19,15 +19,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    // Helper functions
     const $ = (selector, scope = document) => scope.querySelector(selector);
     const $$ = (selector, scope = document) => scope.querySelectorAll(selector);
 
     const mainForm = $(config.selectors.batchForm);
-    if (!mainForm) return; // Exit if not on the form page
+    if (!mainForm) return; // Exit if not on the correct page
 
     const getVariantsUrl = mainForm.getAttribute('data-variants-url');
 
-    // 1. Location Toggle Logic
+    // ----------------------------------------------------------------------
+    // 1. Location Toggle Logic (Warehouse vs Store)
+    // ----------------------------------------------------------------------
     function initLocationToggle() {
         const radios = $$(config.selectors.locationRadio);
         const whDiv = $(config.selectors.warehouseDiv);
@@ -42,14 +45,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (whSelect) whSelect.required = true;
                 if (stSelect) {
                     stSelect.required = false;
-                    stSelect.value = "";
+                    stSelect.value = ""; // Clear value
                 }
             } else {
                 whDiv.style.display = 'none';
                 stDiv.style.display = '';
                 if (whSelect) {
                     whSelect.required = false;
-                    whSelect.value = "";
+                    whSelect.value = ""; // Clear value
                 }
                 if (stSelect) stSelect.required = true;
             }
@@ -57,12 +60,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         radios.forEach(radio => {
             radio.addEventListener('change', (e) => toggle(e.target.value));
+            // Run on init if checked
             if (radio.checked) toggle(radio.value);
         });
     }
 
-    // 2. Variant Fetching
+    // ----------------------------------------------------------------------
+    // 2. Variant Fetching (AJAX)
+    // ----------------------------------------------------------------------
     function fetchVariants(productId, variantSelect) {
+        // Reset UI
         variantSelect.innerHTML = '<option value="">Loading...</option>';
         variantSelect.disabled = true;
 
@@ -72,7 +79,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         fetch(`${getVariantsUrl}?product_id=${productId}`)
-            .then(r => r.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
                 variantSelect.disabled = false;
                 if (data.length > 0) {
@@ -91,47 +101,59 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // 3. Table Logic
+    // ----------------------------------------------------------------------
+    // 3. Batch Table Logic (Add/Remove Rows)
+    // ----------------------------------------------------------------------
     function initBatchTable() {
         const addBtn = $(config.selectors.addRowBtn);
         const tableBody = $(config.selectors.tableBody);
         const template = $(config.selectors.rowTemplate);
 
-        // Count existing rows (edit mode or validation fail)
+        if (!addBtn || !tableBody || !template) return;
+
+        // Determine starting index based on existing rows (server rendered)
         let rowIdx = tableBody.querySelectorAll('tr').length;
 
         function addRow() {
+            // Replace INDEX placeholder with unique ID
             let html = template.innerHTML.replace(/INDEX/g, rowIdx);
             tableBody.insertAdjacentHTML('beforeend', html);
             rowIdx++;
         }
 
+        // Add Row Event
         addBtn.addEventListener('click', addRow);
 
+        // Remove Row Event (Delegation)
         tableBody.addEventListener('click', function (e) {
             if (e.target.closest(config.selectors.removeRowBtn)) {
-                if (tableBody.querySelectorAll('tr').length > 1) {
+                const rows = tableBody.querySelectorAll('tr');
+                if (rows.length > 1) {
                     e.target.closest('tr').remove();
                 } else {
-                    alert("At least one item is required.");
+                    alert("You must have at least one product in the list.");
                 }
             }
         });
 
-        // Delegate change event for Product Selects
+        // Variant Fetching Event (Delegation for dynamic rows)
         tableBody.addEventListener('change', function (e) {
             if (e.target.classList.contains('product-select')) {
+                const productId = e.target.value;
                 const row = e.target.closest('tr');
                 const variantSelect = row.querySelector(config.selectors.variantSelect);
-                fetchVariants(e.target.value, variantSelect);
+
+                fetchVariants(productId, variantSelect);
             }
         });
 
-        // Add first row if empty
-        if (rowIdx === 0) addRow();
+        // Init: Add first row if table is empty
+        if (rowIdx === 0) {
+            addRow();
+        }
     }
 
-    // Initialize
+    // --- Run Initialization ---
     initLocationToggle();
     initBatchTable();
 });

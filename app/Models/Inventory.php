@@ -48,23 +48,19 @@ class Inventory extends Model
      */
     public function product()
     {
-        // Defines a "Has One Through" reversed, or we can just chain it.
-        // Since belongsToThrough isn't standard Eloquent, we use the accessor or chained relationship.
-        return $this->variant ? $this->variant->product() : null;
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     /**
      * Provide a `product` attribute so callers can use `$inventory->product->name`.
      * This mirrors the product relation via the variant (product master is variant-based).
      */
-    public function getProductAttribute()
-    {
-        return $this->variant ? $this->variant->product : null;
-    }
+    // Remove custom accessor so the `product` relation can be eager-loaded normally.
+    // If a fallback is needed, use `getProductNameAttribute()` below.
     // Accessor for easy usage in Blade: $inventory->product_name
     public function getProductNameAttribute()
     {
-        return $this->variant->product->name ?? 'Unknown Product';
+        return optional($this->product)->name ?? optional(optional($this->variant)->product)->name ?? 'Unknown Product';
     }
 
     public function store()

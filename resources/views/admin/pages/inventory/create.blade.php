@@ -21,7 +21,7 @@
                 <div class="card-body">
                     {{-- FORM START --}}
                     {{-- Action toggles between STORE and UPDATE routes based on existence of $referenceItem --}}
-                    <form action="{{ isset($referenceItem) ? route('admin.inventory.update', $referenceItem->id) : route('admin.inventory.store') }}"
+                    <form action="{{ isset($referenceItem) ? route('admin.inventory.update') : route('admin.inventory.store') }}"
                           method="POST"
                           id="batch-form"
                           data-variants-url="{{ route('admin.inventory.get-variants') }}">
@@ -29,19 +29,21 @@
                         @csrf
                         @if(isset($referenceItem))
                             @method('PUT')
+                            {{-- HIDDEN ID for Update Route --}}
+                            <input type="hidden" name="id" value="{{ $referenceItem->id }}">
                         @endif
 
-                        {{-- SECTION 1: GLOBAL DETAILS --}}
+                        {{-- SECTION 1: GLOBAL BATCH DETAILS --}}
                         <div class="card mb-4 shadow-none border bg-soft-primary">
                             <div class="card-body p-3">
                                 <div class="row align-items-center">
                                     <div class="col-12 mb-2">
                                         <h6 class="fw-bold text-primary mb-0">
-                                            <i class="bi bi-geo-alt-fill me-2"></i>Step 1: Batch Details
+                                            <i class="bi bi-geo-alt-fill me-2"></i>Step 1: Batch Destination
                                         </h6>
                                     </div>
 
-                                    {{-- Determine Values (Old Input > DB Value > Default) --}}
+                                    {{-- Determine Initial Values (Old Input > DB Value > Default) --}}
                                     @php
                                         $locType = old('location_type', $referenceItem->location_type ?? 'warehouse');
                                         $selWarehouse = old('warehouse_id', $referenceItem->warehouse_id ?? '');
@@ -64,6 +66,7 @@
                                                 <label class="form-check-label" for="lt_store">Store</label>
                                             </div>
                                         </div>
+                                        @error('location_type') <div class="text-danger small">{{ $message }}</div> @enderror
                                     </div>
 
                                     {{-- Warehouse Dropdown --}}
@@ -110,12 +113,12 @@
                                     <h6 class="fw-bold text-primary mb-0">
                                         <i class="bi bi-box-seam me-2"></i>Step 2: Product List
                                     </h6>
-                                    <button type="button" class="btn btn-success btn-sm rounded-pill" id="add-row-btn">
+                                    <button type="button" class="btn btn-success btn-sm rounded-pill shadow-sm" id="add-row-btn">
                                         <i class="bi bi-plus-lg me-1"></i> Add Item
                                     </button>
                                 </div>
 
-                                {{-- Validation Errors for Items Array --}}
+                                {{-- General Validation Errors --}}
                                 @if($errors->has('items'))
                                     <div class="alert alert-danger p-2 small">
                                         <i class="bi bi-exclamation-triangle me-1"></i> {{ $errors->first('items') }}
@@ -138,13 +141,44 @@
                                             {{-- CASE A: Validation Failed (Prioritize Old Input) --}}
                                             @if(old('items'))
                                                 @foreach(old('items') as $key => $item)
-                                                    @include('admin.pages.inventory.partials.row-create', ['key' => $key, 'item' => $item, 'products' => $products])
+                                                    <tr class="item-row">
+                                                        <td>
+                                                            <select name="items[{{ $key }}][product_id]" class="form-select product-select" required>
+                                                                <option value="">Select Product</option>
+                                                                @foreach($products as $p)
+                                                                    <option value="{{ $p->id }}" {{ ($item['product_id'] ?? '') == $p->id ? 'selected' : '' }}>
+                                                                        {{ $p->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error("items.$key.product_id") <div class="text-danger small">{{ $message }}</div> @enderror
+                                                        </td>
+                                                        <td>
+                                                            <select name="items[{{ $key }}][product_variant_id]" class="form-select variant-select">
+                                                                <option value="">Select Product First</option>
+                                                                {{-- Variants are re-fetched via JS, or you can check if variant ID is set and pre-fill just that one option --}}
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text">$</span>
+                                                                <input type="number" step="0.01" name="items[{{ $key }}][cost_price]" class="form-control" value="{{ $item['cost_price'] ?? '' }}" required>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" step="0.01" name="items[{{ $key }}][quantity]" class="form-control text-center" value="{{ $item['quantity'] ?? '' }}" required>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-danger btn-sm remove-row text-white" title="Remove item" aria-label="Remove item" data-bs-toggle="tooltip" data-bs-placement="top" style="width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;">
+                                                                <i class="bi bi-trash-fill"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
                                                 @endforeach
 
                                             {{-- CASE B: Edit Mode (Load from DB) --}}
                                             @elseif(isset($batchItems) && count($batchItems) > 0)
                                                 @foreach($batchItems as $key => $item)
-                                                    {{-- We manually construct the row here to ensure values map correctly from Model --}}
                                                     <tr class="item-row">
                                                         <td>
                                                             <select name="items[{{ $key }}][product_id]" class="form-select product-select" required>
@@ -177,8 +211,8 @@
                                                             <input type="number" step="0.01" name="items[{{ $key }}][quantity]" class="form-control text-center" value="{{ $item->quantity }}" required>
                                                         </td>
                                                         <td class="text-center">
-                                                            <button type="button" class="btn btn-soft-danger btn-sm remove-row rounded-circle">
-                                                                <i class="bi bi-trash"></i>
+                                                            <button type="button" class="btn btn-danger btn-sm remove-row text-white" title="Remove item" aria-label="Remove item" data-bs-toggle="tooltip" data-bs-placement="top" style="width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;">
+                                                                <i class="bi bi-trash-fill"></i>
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -230,8 +264,8 @@
             <input type="number" step="0.01" name="items[INDEX][quantity]" class="form-control text-center" placeholder="Qty" required>
         </td>
         <td class="text-center">
-            <button type="button" class="btn btn-soft-danger btn-sm remove-row rounded-circle">
-                <i class="bi bi-trash"></i>
+            <button type="button" class="btn btn-danger btn-sm remove-row text-white" title="Remove item" aria-label="Remove item" data-bs-toggle="tooltip" data-bs-placement="top" style="width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;">
+                <i class="bi bi-trash-fill"></i>
             </button>
         </td>
     </tr>
@@ -240,6 +274,13 @@
 @endsection
 
 @push('scripts')
-{{-- Include the Form Logic JS --}}
     <script src="{{ asset('admin_assets/js/inventory.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (el) {
+                try { new bootstrap.Tooltip(el); } catch (e) { /* bootstrap may not be loaded yet */ }
+            });
+        });
+    </script>
 @endpush
