@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Repositories\Client\Interfaces\AddressRepositoryInterface;
 use App\Models\Inventory;
 use App\Repositories\Admin\Interfaces\AboutUsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
@@ -81,6 +82,9 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\Client\Interfaces\PrivacyPolicyRepositoryInterface::class, \App\Repositories\Client\Repositories\PrivacyPolicyRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface::class, \App\Repositories\Client\Repositories\ShippingAndReturnsRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\ProductRepositoryInterface::class, \App\Repositories\Client\Repositories\ProductRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\CartRepositoryInterface::class, \App\Repositories\Client\Repositories\CartRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\OrderRepositoryInterface::class, \App\Repositories\Client\Repositories\OrderRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\AddressRepositoryInterface::class, \App\Repositories\Client\Repositories\AddressRepository::class);
     }
 
     /**

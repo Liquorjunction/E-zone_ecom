@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Http\Requests\Client\Address;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+
+class UpdateAddressRequest extends FormRequest
+{
+    public function authorize()
+    {
+        return Auth::check();
+    }
+
+    public function rules()
+    {
+        return [
+            'type' => ['nullable','in:billing,shipping'],
+            'is_default' => ['nullable','boolean'],
+            'address_label' => ['nullable','string','max:255'],
+            'name' => ['nullable','string','max:255'],
+            'street' => ['nullable','string','max:255'],
+            'city' => ['nullable','string','max:255'],
+            'state' => ['nullable','string','max:255'],
+            'postal_code' => ['nullable','string','max:20'],
+            'country' => ['nullable','string','max:255'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'type.in' => 'The type must be billing or shipping.',
+            'is_default.boolean' => 'The is default must be a boolean.',
+            'address_label.max' => 'The address label must not be greater than 255 characters.',
+            'name.max' => 'The name must not be greater than 255 characters.',
+            'street.max' => 'The street must not be greater than 255 characters.',
+            'city.max' => 'The city must not be greater than 255 characters.',
+            'state.max' => 'The state must not be greater than 255 characters.',
+            'postal_code.max' => 'The postal code must not be greater than 20 characters.',
+            'country.max' => 'The country must not be greater than 255 characters.',
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'type' => 'type',
+            'is_default' => 'is default',
+            'address_label' => 'address label',
+            'name' => 'name',
+            'street' => 'street',
+            'city' => 'city',
+            'state' => 'state',
+            'postal_code' => 'postal code',
+            'country' => 'country',
+        ];
+    }
+}

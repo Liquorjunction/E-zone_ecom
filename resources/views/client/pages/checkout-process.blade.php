@@ -2,12 +2,9 @@
 
 @section('content')
 @php
-  // FOR DESIGNING ONLY: Uncomment the line you want to test.
-  // Your real controller will set this variable.
-  // $step = 1; // Cart
-  // $step = 2; // Checkout Form
-  // $step = 3; // Success
-  $step = 1;
+  // Use controller-provided step; default to cart review (1) if not provided.
+  $step = $step ?? (int) request()->get('step', 1);
+  $cart = $cart ?? null;
 @endphp
 
 <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
@@ -126,7 +123,7 @@
       </div>
     </div>
 
-    <form method="POST" action="{{-- route('checkout.process') --}}">
+    <form method="POST" action="{{ route('checkout.process') }}">
       @csrf
 
       @if($step == 1)
@@ -135,37 +132,47 @@
           <div class="lg:col-span-2 space-y-4">
 
             <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 transition-all duration-300 hover:shadow-lg">
-              <div class="flex flex-col sm:flex-row gap-4">
-                <div class="shrink-0">
-                  <img src="https://via.placeholder.com/150x150?text=Product" alt="Product" class="w-full sm:w-32 h-32 object-cover rounded-xl">
-                </div>
-
-                <div class="flex-1">
-                  <div class="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 class="text-lg font-bold text-gray-900 mb-1">Sample Product</h3>
-                      <span class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">Electronics</span>
+              @if($cart && $cart->items->count() > 0)
+                @foreach($cart->items as $item)
+                  <div class="cart-item-row flex flex-col sm:flex-row gap-4 mb-6" data-item-id="{{ $item->id }}">
+                    <div class="shrink-0">
+                      <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/150x150?text=Product' }}" alt="{{ optional($item->product)->name ?? 'Product' }}" class="w-full sm:w-32 h-32 object-cover rounded-xl">
                     </div>
-                    <button class="text-gray-400 hover:text-red-500 transition-colors p-2">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                  </div>
-                  <div class="space-y-2 text-sm text-gray-600 mb-4">
-                    <p class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>In Stock</p>
-                  </div>
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700 mr-4">Quantity:</span>
-                      <div class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
-                        <button type="button" class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg></button>
-                        <input type="number" value="1" min="1" class="w-16 text-center border-0 focus:outline-none font-semibold text-gray-900">
-                        <button type="button" class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
+                        <div class="flex-1">
+                      <div class="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 class="text-lg font-bold text-gray-900 mb-1">{{ optional($item->variant)->variant_name ?? optional($item->product)->name ?? 'Product' }}</h3>
+                          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-700">{{ optional($item->product)->brand->name ?? '' }}</span>
+                        </div>
+                        <form method="POST" action="{{ route('cart.remove') }}" class="cart-remove-form">
+                          @csrf
+                          <input type="hidden" name="item_id" value="{{ $item->id }}">
+                          <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors p-2">Remove</button>
+                        </form>
+                      </div>
+                      <div class="space-y-2 text-sm text-gray-600 mb-4">
+                        <p class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>In Stock</p>
+                      </div>
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div class="flex items-center">
+                          <span class="text-sm font-medium text-gray-700 mr-4">Quantity:</span>
+                          <div class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
+                            <button type="button" class="qty-decrease px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold transition-colors" data-item-id="{{ $item->id }}">-</button>
+                            <input type="number" value="{{ $item->quantity }}" min="1" class="cart-quantity-input w-16 text-center border-0 focus:outline-none font-semibold text-gray-900" data-item-id="{{ $item->id }}">
+                            <button type="button" class="qty-increase px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold transition-colors" data-item-id="{{ $item->id }}">+</button>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <div class="text-sm text-gray-500">Unit: ${{ number_format($item->unit_price, 2) }}</div>
+                          <p class="text-2xl font-bold text-primary item-line-total" id="item-line-total-{{ $item->id }}">${{ number_format($item->quantity * $item->unit_price, 2) }}</p>
+                        </div>
                       </div>
                     </div>
-                    <div class="text-right"><p class="text-2xl font-bold text-primary">$29.99</p></div>
                   </div>
-                </div>
-              </div>
+                @endforeach
+              @else
+                <div class="text-center py-12 text-gray-500">Your cart is empty.</div>
+              @endif
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
@@ -180,17 +187,24 @@
           <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 sticky top-24">
               <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center"><span class="w-1 h-7 rounded-full bg-primary mr-3"></span>Order Summary</h2>
+              @php
+                $subtotal = $cart ? $cart->items->sum(function($i){ return ($i->quantity * $i->unit_price); }) : 0;
+                $tax = round($subtotal * 0.08, 2);
+                $shipping = 0.00;
+                $total = $subtotal + $tax + $shipping;
+                $itemCount = $cart ? $cart->items->sum('quantity') : 0;
+              @endphp
               <div class="space-y-4 mb-6">
-                <div class="flex justify-between text-gray-600"><span>Subtotal (1 item)</span><span class="font-semibold">$29.99</span></div>
-                <div class="flex justify-between text-gray-600"><span>Shipping</span><span class="font-semibold text-green-600">FREE</span></div>
-                <div class="flex justify-between text-gray-600"><span>Tax (8%)</span><span class="font-semibold">$2.40</span></div>
+                <div class="flex justify-between text-gray-600"><span>Subtotal (<span id="order-item-count">{{ $itemCount }}</span> item{{ $itemCount !== 1 ? 's' : '' }})</span><span id="order-subtotal" class="font-semibold">${{ number_format($subtotal, 2) }}</span></div>
+                <div class="flex justify-between text-gray-600"><span>Shipping</span><span id="order-shipping" class="font-semibold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span></div>
+                <div class="flex justify-between text-gray-600"><span>Tax (8%)</span><span id="order-tax" class="font-semibold">${{ number_format($tax, 2) }}</span></div>
                 <div class="border-t-2 border-gray-100 pt-4">
-                  <div class="flex justify-between items-center"><span class="text-xl font-bold text-gray-900">Total</span><span class="text-3xl font-bold text-primary">$32.39</span></div>
+                  <div class="flex justify-between items-center"><span class="text-xl font-bold text-gray-900">Total</span><span id="order-total" class="text-3xl font-bold text-primary">${{ number_format($total, 2) }}</span></div>
                 </div>
               </div>
-              <button type="submit" name="step" value="2" class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl ...">
+              <a href="{{ route('checkout', ['step' => 2]) }}" class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl ...">
                 Proceed to Checkout
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -347,3 +361,7 @@
   </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/checkout-process.js') }}"></script>
+@endpush

@@ -1,10 +1,12 @@
 <?php
 
-use App\Http\Controllers\Client\BrandController;
 use App\Http\Controllers\Client\AboutUsController;
 use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\Client\BrandController;
+use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\OrderController;
 use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\ShippingandReturnsController;
@@ -64,14 +66,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])->middleware(['throttle:6,1'])->name('verification.send');
 });
 
-Route::view('/cart', 'client.pages.cart')->name('cart');
-Route::view('/checkout', 'client.pages.checkout')->name('checkout');
+// Cart & checkout views are served by controllers to keep behavior consistent
+// Route::view('/cart', 'client.pages.cart')->name('cart');
+// Route::view('/checkout', 'client.pages.checkout')->name('checkout');
 
 // login/register GET are defined in guest group above
 
 Route::view('/checkout-success', 'client.pages.checkout-success')->name('checkout-success');
 Route::view('/search', 'client.pages.search-results')->name('search');
 Route::view('/checkout-process', 'client.pages.checkout-process')->name('checkout-process');
+// Design-only checkout view (demo / design preview)
+Route::view('/checkout-demo', 'client.pages.checkout')->name('checkout.demo');
 Route::view('/product-compare', 'client.pages.compare')->name('product-compare');
 
 // Dashboard static views (can be moved to controller later)
@@ -102,3 +107,20 @@ Route::get('/brand/{slug}', function ($slug) {
 Route::get('/order-detail/{id}', function ($id) {
     return view('client.pages.order-detail', ['order_id' => $id]);
 })->name('order-detail');
+
+// Cart endpoints
+// GET: Redirect to cart page (only accessible to authenticated users)
+Route::get('/cart/add', function () {
+    return redirect()->route('cart');
+})->middleware('auth');
+
+// POST: Require authentication for adding to cart so guests are redirected to login
+Route::post('/cart/add', [CartController::class, 'add'])->middleware('auth')->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'update'])->middleware('auth')->name('cart.update');
+Route::post('/cart/remove', [CartController::class, 'remove'])->middleware('auth')->name('cart.remove');
+Route::get('/cart', [CartController::class, 'show'])->name('cart');
+
+// Checkout (process)
+Route::post('/checkout', [OrderController::class, 'checkout'])->middleware('auth')->name('checkout.process');
+// Show checkout form (requires auth)
+Route::get('/checkout', [OrderController::class, 'show'])->middleware('auth')->name('checkout');

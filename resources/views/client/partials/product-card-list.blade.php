@@ -50,7 +50,7 @@
     <div class="flex flex-col md:flex-row h-full">
 
         <div class="w-full md:w-64 md:shrink-0 bg-gray-50 relative p-4 flex items-center justify-center overflow-hidden">
-            <a href="{{ route('products.detail', $product->slug) }}" class="block w-full h-48 md:h-full">
+            <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}" class="block w-full h-48 md:h-full">
                 <img src="{{ $imagePath }}"
                      alt="{{ $name }}"
                      class="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105">
@@ -84,7 +84,7 @@
             </div>
 
             <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">
-                <a href="{{ route('products.detail', $product->slug) }}">
+                <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
                     {{ $name }}
                 </a>
             </h3>

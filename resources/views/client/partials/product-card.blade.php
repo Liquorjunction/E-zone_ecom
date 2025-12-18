@@ -34,7 +34,7 @@
 @endphp
 
 <div class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
-  <a href="{{ route('products.detail', $master->slug) }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
+  <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
   <img src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}" alt="{{ $name }}" class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
 
     <!-- Badges -->
@@ -68,7 +68,7 @@
       {{ $categoryName }}
     </span>
 
-    <a href="{{ route('products.detail', $master->slug) }}">
+    <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
       <h3 class="mt-3 text-lg font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary">
         {{ $name }}
       </h3>

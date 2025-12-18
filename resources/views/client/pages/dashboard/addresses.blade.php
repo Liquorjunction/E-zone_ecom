@@ -3,54 +3,594 @@
 @section('dashboard-title', 'Saved Addresses')
 
 @section('dashboard-content')
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-900">Manage Your Addresses</h2>
-    <button class="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg ...">
-      <span class="flex items-center justify-center">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-        Add New Address
-      </span>
-    </button>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900 mb-1">Your Addresses</h2>
+        <p class="text-sm text-gray-600">Manage delivery and billing addresses</p>
+      </div>
+      <button type="button" onclick="openAddModal()" class="hidden sm:flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+        <span>Add New Address</span>
+      </button>
+    </div>
+
+    <div id="addresses-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      @forelse($addresses ?? [] as $address)
+        <div id="address-card-{{ $address->id }}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address="{{ json_encode($address) }}">
+          <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="bg-white p-2 rounded-lg shadow-sm">
+                  <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900">{{ $address->address_label ?? ($address->type ?? 'Address') }}</h3>
+              </div>
+              @if(isset($address->is_default) && $address->is_default)
+                <span class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  Default
+                </span>
+              @else
+                <button class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>
+              @endif
+            </div>
+          </div>
+
+          <div class="px-6 py-5">
+            <div class="space-y-3">
+              <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <p class="font-semibold text-gray-900">{{ $address->name }}</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <p class="text-gray-700 text-sm leading-relaxed">
+                  {!! nl2br(e($address->street)) !!}<br>
+                  {{ $address->city }}, {{ $address->state }} {{ $address->postal_code }}<br>
+                  {{ $address->country }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+            <button type="button" onclick="openEditModalFromElem(this)" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit
+            </button>
+            <button type="button" onclick="deleteAddress({{ $address->id }})" class="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-600 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      @empty
+        <div class="col-span-full text-center py-16">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
+            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">No saved addresses yet</h3>
+          <p class="text-gray-600 mb-6">Add your first address to get started</p>
+          <button type="button" onclick="openAddModal()" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            Add Address
+          </button>
+        </div>
+      @endforelse
+
+      @if(isset($addresses) && count($addresses) > 0)
+        <button type="button" onclick="openAddModal()" class="group flex flex-col items-center justify-center min-h-[280px] border-3 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
+          <div class="bg-gray-100 group-hover:bg-primary/10 p-4 rounded-full mb-3 transition-colors duration-300">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+          </div>
+          <span class="font-semibold text-base">Add New Address</span>
+          <span class="text-sm text-gray-400 mt-1">Click to add</span>
+        </button>
+      @endif
+    </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white rounded-2xl shadow-sm border-2 border-primary p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-900">Home</h3>
-        <span class="px-3 py-1 text-xs font-semibold text-primary bg-primary/10 rounded-full">Default</span>
+  <div id="addr-unique-modal" style="z-index: 99999;" class="hidden fixed inset-0 items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+    <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl transform transition-all duration-300 scale-95 opacity-0" id="addr-unique-content">
+      <div class="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-primary/10">
+        <div class="flex items-center gap-3">
+          <div class="bg-primary/10 p-2.5 rounded-xl">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 id="addr-modal-title" class="text-2xl font-bold text-gray-900">Add Address</h3>
+        </div>
+        <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <div class="text-gray-700 space-y-2">
-        <p class="font-semibold">John Doe</p>
-        <p>123 Main Street, Apt 4B<br>New York, NY 10001<br>United States</p>
-        <p>+1 (555) 000-0000</p>
-      </div>
-      <div class="flex items-center gap-2 mt-6 pt-6 border-t-2 border-gray-100">
-        <button class="text-sm font-semibold text-primary hover:opacity-80">Edit</button>
-        <span class="text-gray-300">|</span>
-        <button class="text-sm font-semibold text-red-500 hover:opacity-80">Delete</button>
+
+      <form id="address-form" method="POST" action="{{ url('/client/addresses') }}" class="max-h-[calc(90vh-180px)] overflow-y-auto">
+        @csrf
+        <input type="hidden" name="_method" id="form-method" value="POST">
+        <input type="hidden" name="id" id="address-id" value="">
+
+        <div class="px-8 py-6 space-y-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
+              <div class="relative">
+                <select id="field-type" name="type" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+                  <option>Home</option>
+                  <option>Work</option>
+                  <option>Other</option>
+                </select>
+                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Custom Label <span class="text-gray-400 font-normal">(Optional)</span></label>
+              <input id="field-address_label" name="address_label" placeholder="e.g., Mom's House" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+            <input id="field-name" name="name" placeholder="John Doe" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Street Address</label>
+            <input id="field-street" name="street" placeholder="123 Main Street, Apt 4B" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
+              <input id="field-city" name="city" placeholder="New York" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">State / Province</label>
+              <input id="field-state" name="state" placeholder="NY" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Postal Code</label>
+              <input id="field-postal_code" name="postal_code" placeholder="10001" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
+              <input id="field-country" name="country" placeholder="United States" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 px-8 py-6 bg-gray-50 border-t border-gray-200 rounded-b-3xl">
+          <button type="button" onclick="closeModal()" class="px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all">
+            Cancel
+          </button>
+          <button type="submit" id="form-submit" class="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Save Address
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="mobile-address-form" style="z-index: 99999;" class="sm:hidden fixed inset-0 bg-white transform translate-y-full transition-transform duration-300">
+    <div class="sticky top-0 z-10 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-gray-200">
+      <div class="flex items-center justify-between px-4 py-4">
+        <button type="button" onclick="closeMobileForm()" class="p-2 hover:bg-white/50 rounded-lg transition-colors">
+          <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h3 id="mobile-form-title" class="text-lg font-bold text-gray-900">Add Address</h3>
+        <div class="w-10"></div>
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-900">Work</h3>
-        <button class="text-sm font-semibold text-gray-600 hover:text-primary">Set as Default</button>
-      </div>
-      <div class="text-gray-700 space-y-2">
-        <p class="font-semibold">John Doe</p>
-        <p>456 Business Ave, Suite 500<br>New York, NY 10005<br>United States</p>
-        <p>+1 (555) 000-1111</p>
-      </div>
-      <div class="flex items-center gap-2 mt-6 pt-6 border-t-2 border-gray-100">
-        <button class="text-sm font-semibold text-primary hover:opacity-80">Edit</button>
-        <span class="text-gray-300">|</span>
-        <button class="text-sm font-semibold text-red-500 hover:opacity-80">Delete</button>
-      </div>
+    <div class="overflow-y-auto h-[calc(100vh-73px)] pb-24">
+      <form id="mobile-address-form-element" method="POST" action="{{ url('/client/addresses') }}" class="p-4 space-y-5">
+        @csrf
+        <input type="hidden" name="_method" id="mobile-form-method" value="POST">
+        <input type="hidden" name="id" id="mobile-address-id" value="">
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
+          <div class="relative">
+            <select id="mobile-field-type" name="type" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base">
+              <option>Home</option>
+              <option>Work</option>
+              <option>Other</option>
+            </select>
+            <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Custom Label <span class="text-gray-400 font-normal">(Optional)</span></label>
+          <input id="mobile-field-address_label" name="address_label" placeholder="e.g., Mom's House" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+          <input id="mobile-field-name" name="name" placeholder="John Doe" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Street Address</label>
+          <input id="mobile-field-street" name="street" placeholder="123 Main Street, Apt 4B" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
+          <input id="mobile-field-city" name="city" placeholder="New York" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">State / Province</label>
+          <input id="mobile-field-state" name="state" placeholder="NY" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Postal Code</label>
+          <input id="mobile-field-postal_code" name="postal_code" placeholder="10001" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
+          <input id="mobile-field-country" name="country" placeholder="United States" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+        </div>
+      </form>
     </div>
 
-    <a href="#" class="flex flex-col items-center justify-center w-full min-h-[200px] border-4 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-primary hover:text-primary transition-colors">
-      <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-      <span class="font-semibold mt-2">Add New Address</span>
-    </a>
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-2xl">
+      <button type="button" onclick="submitMobileForm()" id="mobile-form-submit-btn" class="w-full py-4 rounded-xl bg-primary text-white font-bold text-base hover:shadow-lg transition-all flex items-center justify-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        Save Address
+      </button>
+    </div>
   </div>
+
+  <button type="button" onclick="openAddModal()" style="z-index: 9998;" class="sm:hidden fixed bottom-6 right-6 bg-primary text-white p-5 rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+    <svg class="w-7 h-7 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+  </button>
+
+  <script>
+    // 1. Move Modal to Body on Load (Fixes stacking context "under header" issue)
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('addr-unique-modal');
+        const mobileForm = document.getElementById('mobile-address-form');
+        const mobileFab = document.querySelector('button[onclick="openAddModal()"].fixed');
+        if(modal) document.body.appendChild(modal);
+        if(mobileForm) document.body.appendChild(mobileForm);
+        if(mobileFab) document.body.appendChild(mobileFab);
+    });
+
+    // Helper to get CSRF token
+    function getCsrfToken(){
+      const t = document.querySelector('input[name="_token"]');
+      return t ? t.value : '';
+    }
+
+    // Open Add Modal
+    function openAddModal(){
+      if(window.innerWidth < 640) {
+        openMobileAddForm();
+      } else {
+        // Desktop
+        document.getElementById('addr-modal-title').textContent = 'Add Address';
+        document.getElementById('address-form').action = '{{ url('/client/addresses') }}';
+        document.getElementById('form-method').value = 'POST';
+        document.getElementById('address-id').value = '';
+
+        ['type','address_label','name','street','city','state','postal_code','country'].forEach(function(k){
+          const el = document.getElementById('field-'+k.replace('_','-')) || document.getElementById('field-'+k);
+          if(el) el.value = '';
+        });
+
+        // Unique IDs
+        const modal = document.getElementById('addr-unique-modal');
+        const content = document.getElementById('addr-unique-content');
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex'); // Ensure flex is added
+
+        // Double RAF to ensure browser paints the display:flex state before transitioning opacity
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            });
+        });
+      }
+    }
+
+    // Mobile Add Form
+    function openMobileAddForm(){
+      document.getElementById('mobile-form-title').textContent = 'Add Address';
+      document.getElementById('mobile-address-form-element').action = '{{ url('/client/addresses') }}';
+      document.getElementById('mobile-form-method').value = 'POST';
+      document.getElementById('mobile-address-id').value = '';
+
+      ['type','address_label','name','street','city','state','postal_code','country'].forEach(function(k){
+        const el = document.getElementById('mobile-field-'+k.replace('_','-')) || document.getElementById('mobile-field-'+k);
+        if(el) el.value = '';
+      });
+
+      const form = document.getElementById('mobile-address-form');
+      form.classList.remove('translate-y-full');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close Mobile Form
+    function closeMobileForm(){
+      const form = document.getElementById('mobile-address-form');
+      form.classList.add('translate-y-full');
+      document.body.style.overflow = '';
+    }
+
+    // Submit Mobile Form
+    function submitMobileForm() {
+       document.getElementById('mobile-address-form-element').dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+
+    // Open Edit Modal from Element
+    function openEditModalFromElem(elem){
+      const card = elem.closest('.address-card');
+      if(!card) return;
+      let data = {};
+      try{
+          data = JSON.parse(card.dataset.address);
+      }catch(e){ console.error("Error parsing address data", e); }
+
+      if(window.innerWidth < 640) {
+        openMobileEditForm(data);
+      } else {
+        openEditModal(data);
+      }
+    }
+
+    // Desktop Edit Modal
+    function openEditModal(data){
+      document.getElementById('addr-modal-title').textContent = 'Edit Address';
+      document.getElementById('address-form').action = '{{ url('/client/addresses') }}' + '/' + data.id;
+      document.getElementById('form-method').value = 'PUT';
+      document.getElementById('address-id').value = data.id || '';
+
+      const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
+
+      setVal('field-type', data.type);
+      setVal('field-address_label', data.address_label);
+      setVal('field-name', data.name);
+      setVal('field-street', data.street);
+      setVal('field-city', data.city);
+      setVal('field-state', data.state);
+      setVal('field-postal_code', data.postal_code);
+      setVal('field-country', data.country);
+
+      const modal = document.getElementById('addr-unique-modal');
+      const content = document.getElementById('addr-unique-content');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            });
+        });
+    }
+
+    // Mobile Edit Form
+    function openMobileEditForm(data){
+      document.getElementById('mobile-form-title').textContent = 'Edit Address';
+      document.getElementById('mobile-address-form-element').action = '{{ url('/client/addresses') }}' + '/' + data.id;
+      document.getElementById('mobile-form-method').value = 'PUT';
+      document.getElementById('mobile-address-id').value = data.id || '';
+
+      const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
+
+      setVal('mobile-field-type', data.type);
+      setVal('mobile-field-address_label', data.address_label);
+      setVal('mobile-field-name', data.name);
+      setVal('mobile-field-street', data.street);
+      setVal('mobile-field-city', data.city);
+      setVal('mobile-field-state', data.state);
+      setVal('mobile-field-postal_code', data.postal_code);
+      setVal('mobile-field-country', data.country);
+
+      const form = document.getElementById('mobile-address-form');
+      form.classList.remove('translate-y-full');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close Modal with Animation
+    function closeModal(){
+      const content = document.getElementById('addr-unique-content');
+      content.classList.add('scale-95', 'opacity-0');
+      content.classList.remove('scale-100', 'opacity-100');
+      setTimeout(() => {
+        document.getElementById('addr-unique-modal').classList.add('hidden');
+        document.getElementById('addr-unique-modal').classList.remove('flex');
+      }, 300);
+    }
+
+    // Unified AJAX Submit Handler
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const isMobile = form.id === 'mobile-address-form-element';
+      const url = form.action;
+      const method = (form.querySelector('input[name="_method"]').value || 'POST').toUpperCase();
+      const token = getCsrfToken();
+      const fd = new FormData(form);
+      const submitBtn = isMobile ? document.getElementById('mobile-form-submit-btn') : document.getElementById('form-submit');
+      const originalBtnHtml = submitBtn.innerHTML;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5 inline mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
+
+      try{
+        const res = await fetch(url, {
+          method: method === 'GET' ? 'POST' : method,
+          headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+          },
+          body: fd
+        });
+
+        const json = await res.json();
+        if(!res.ok){
+          alert(json.message || 'Failed to save address');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+          return;
+        }
+
+        const data = json.data || json;
+
+        // Update or add card
+        const existing = document.getElementById('address-card-' + data.id);
+        const newCardHTML = renderAddressCardHTML(data);
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newCardHTML;
+        const newCard = tempDiv.firstElementChild;
+
+        if(existing){
+          existing.replaceWith(newCard);
+        } else {
+          const grid = document.getElementById('addresses-grid');
+          const emptyMsg = grid.querySelector('.col-span-full');
+          if(emptyMsg) emptyMsg.remove();
+
+          const addBtn = grid.querySelector('button[onclick="openAddModal()"]');
+          if(addBtn) grid.insertBefore(newCard, addBtn);
+          else grid.appendChild(newCard);
+        }
+
+        if(isMobile) closeMobileForm();
+        else closeModal();
+
+      }catch(err){
+        console.error(err);
+        alert('An error occurred while saving the address.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
+    }
+
+    document.getElementById('address-form').addEventListener('submit', handleFormSubmit);
+    document.getElementById('mobile-address-form-element').addEventListener('submit', handleFormSubmit);
+
+    function renderAddressCardHTML(data){
+      const label = data.address_label || data.type || 'Address';
+      const isDefault = data.is_default ?
+        `<span class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>Default</span>` :
+        `<button class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>`;
+
+      const street = (data.street || '').replace(/\n/g, '<br>');
+      const safeJson = JSON.stringify(data).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+
+      return `
+        <div id="address-card-${data.id}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address='${safeJson}'>
+          <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="bg-white p-2 rounded-lg shadow-sm">
+                  <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900">${label}</h3>
+              </div>
+              ${isDefault}
+            </div>
+          </div>
+          <div class="px-6 py-5">
+            <div class="space-y-3">
+              <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <p class="font-semibold text-gray-900">${data.name || ''}</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                <p class="text-gray-700 text-sm leading-relaxed">${street}<br>${data.city || ''}, ${data.state || ''} ${data.postal_code || ''}<br>${data.country || ''}</p>
+              </div>
+            </div>
+          </div>
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+            <button type="button" onclick="openEditModalFromElem(this)" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>Edit</button>
+            <button type="button" onclick="deleteAddress(${data.id})" class="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-600 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>Delete</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Delete Address via AJAX
+    async function deleteAddress(id){
+      if(!confirm('Are you sure you want to delete this address?')) return;
+      const token = getCsrfToken();
+      try{
+        const res = await fetch('{{ url('/client/addresses') }}/' + id, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+          }
+        });
+        const json = await res.json();
+        if(!res.ok){
+          alert(json.message || 'Failed to delete address');
+          return;
+        }
+        const el = document.getElementById('address-card-' + id);
+        if(el) {
+          el.style.opacity = '0';
+          el.style.transform = 'scale(0.95)';
+          setTimeout(() => el.remove(), 300);
+        }
+      }catch(e){
+        console.error(e);
+        alert('Failed to delete address');
+      }
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('addr-unique-modal').addEventListener('click', function(e){
+      if(e.target === this) closeModal();
+    });
+  </script>
 @endsection
