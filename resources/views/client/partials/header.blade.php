@@ -46,22 +46,15 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <div class="container max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div class="flex items-center justify-between gap-4 z-50">
 
-            <div class="flex items-center space-x-3 sm:space-x-4">
-                <a href="{{ route('home') }}" class="flex items-center group">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
-                        class="w-24 h-14 xs:w-28 xs:h-16 sm:w-32 sm:h-18 lg:w-36 lg:h-20 object-contain transition-transform duration-300 group-hover:scale-105">
-                </a>
-
-                <nav class="hidden lg:flex items-center space-x-1 ml-4">
-                    <a href="{{ route('support') }}"
-                        class="px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 {{ request()->routeIs('support') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        Support
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <a href="{{ route('home') }}" class="flex items-center group">
+                        <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                            class="w-24 h-14 xs:w-28 xs:h-16 sm:w-32 sm:h-18 lg:w-36 lg:h-20 object-contain transition-transform duration-300 group-hover:scale-105">
                     </a>
-                </nav>
-            </div>
+                </div>
 
             <div class="hidden md:flex flex-1 max-w-xl mx-4">
                 <div class="relative w-full group">
@@ -79,7 +72,10 @@
 
                 <div class="hidden md:flex items-center space-x-1">
 
-                    <div class="relative" @mouseleave="languageOpen = false">
+                    <div class="relative"
+                        @click.away="languageOpen = false; if(languageCloseTimeout){ clearTimeout(languageCloseTimeout); languageCloseTimeout = null }"
+                        @mouseenter="languageOpen = true; if(languageCloseTimeout){ clearTimeout(languageCloseTimeout); languageCloseTimeout = null }"
+                        @mouseleave="languageCloseTimeout = setTimeout(function(){ languageOpen = false }, 150)">
                         <button @click="languageOpen = !languageOpen"
                             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
                             title="Language">
@@ -121,6 +117,11 @@
                         </div>
                     </div>
 
+                    <a href="{{ route('support') }}"
+                        class="hidden lg:inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 {{ request()->routeIs('support') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                        Support
+                    </a>
+
                     <a href="{{ route('product-compare') }}"
                         class="p-2.5 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors group"
                         title="Compare Products">
@@ -141,6 +142,7 @@
                         </svg>
                     </a>
 
+
                     <a href="{{ route('cart') }}"
                         class="relative p-2.5 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors group"
                         title="My Cart">
@@ -156,7 +158,10 @@
                 </div>
 
                 @auth
-                    <div class="hidden md:block relative" @mouseleave="accountOpen = false">
+                    <div class="hidden md:block relative"
+                        @click.away="accountOpen = false; if(accountCloseTimeout){ clearTimeout(accountCloseTimeout); accountCloseTimeout = null }"
+                        @mouseenter="accountOpen = true; if(accountCloseTimeout){ clearTimeout(accountCloseTimeout); accountCloseTimeout = null }"
+                        @mouseleave="accountCloseTimeout = setTimeout(function(){ accountOpen = false }, 150)">
                         <button @click="accountOpen = !accountOpen"
                             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
                             <img src="https://via.placeholder.com/32x32" alt="User Avatar"

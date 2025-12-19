@@ -14,11 +14,11 @@ class FaqController extends Controller
         try {
             // Fetch Active Categories that have Active FAQs
             $categories = FaqCategory::with(['faqs' => function($query) {
-                    $query->where('status', 'active');
+                    $query->where('status', 1);
                 }])
-                ->where('status', 'active')
+                ->where('status', 1)
                 ->whereHas('faqs', function($query) {
-                    $query->where('status', 'active'); // Only get categories that actually have FAQs
+                    $query->where('status', 1); // Only get categories that actually have FAQs
                 })
                 ->get();
 

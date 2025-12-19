@@ -119,3 +119,344 @@
     0% { transform: translateX(0); }
     100% { transform: translateX(-100%); }
 }
+
+
+/* ---- */
+
+/* Add this to your app.css or create a separate home.css file */
+
+/* Smooth scrolling for the entire page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Product card hover effects */
+.group:hover .group-hover\:scale-105 {
+    transform: scale(1.05);
+}
+
+/* Wishlist button pulse animation */
+@keyframes pulse-heart {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.group:hover button svg {
+    animation: pulse-heart 0.5s ease-in-out;
+}
+
+/* Category icon hover effect */
+@keyframes bounce-gentle {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Stats bar icon animation on hover */
+.hover\:bg-primary\/5:hover svg {
+    animation: bounce-gentle 0.6s ease-in-out;
+}
+
+/* Badge animations */
+@keyframes badge-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+}
+
+.bg-red-500 {
+    animation: badge-pulse 2s infinite;
+}
+
+/* Gradient text effect for headings */
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.skeleton {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(to right, #f0f0f0 8%, #e0e0e0 18%, #f0f0f0 33%);
+    background-size: 1000px 100%;
+}
+
+/* Improved shadow on scroll */
+.sticky-shadow {
+    transition: box-shadow 0.3s ease;
+}
+
+.sticky-shadow.scrolled {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Product grid responsive improvements */
+@media (min-width: 640px) and (max-width: 1023px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+/* Smooth transitions for interactive elements */
+button, a, .transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+/* Focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* Image lazy loading blur effect */
+img[loading="lazy"] {
+    filter: blur(5px);
+    transition: filter 0.3s;
+}
+
+img[loading="lazy"].loaded {
+    filter: blur(0);
+}
+
+/* Newsletter input focus effect */
+input[type="email"]:focus {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
+}
+
+/* Add to cart button ripple effect */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%) scale(0);
+}
+
+.ripple-effect:active::after {
+    animation: ripple 0.6s ease-out;
+}
+
+/* Price strike-through animation */
+.line-through {
+    position: relative;
+}
+
+.line-through::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+}
+
+/* Featured banner parallax effect (optional) */
+@media (min-width: 1024px) {
+    .parallax-banner {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+/* Improved mobile touch feedback */
+@media (hover: none) {
+    button:active,
+    a:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Stats counter animation */
+@keyframes count-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-item {
+    animation: count-up 0.5s ease-out forwards;
+}
+
+.stat-item:nth-child(1) { animation-delay: 0.1s; }
+.stat-item:nth-child(2) { animation-delay: 0.2s; }
+.stat-item:nth-child(3) { animation-delay: 0.3s; }
+.stat-item:nth-child(4) { animation-delay: 0.4s; }
+
+/* Brand logo hover effect */
+.brand-logo {
+    transition: all 0.3s ease;
+}
+
+.brand-logo:hover {
+    transform: translateY(-5px);
+    filter: grayscale(0) !important;
+    opacity: 1 !important;
+}
+
+/* Section fade-in on scroll (for JS implementation) */
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Improve text rendering */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Loading state for images */
+.image-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive font scaling */
+@media (max-width: 640px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+
+/* Print styles */
+@media print {
+    header, footer, .no-print {
+        display: none;
+    }
+}
+
+/* Sidebar responsive layout fixes */
+main > div[style*="margin-left"] {
+    transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: margin-left;
+}
+
+body, html, main {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    main > .flex-1 {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 1023px) {
+    main > div[style*="margin-left"] {
+        margin-left: 0 !important;
+    }
+}
+
+/* Fixed header styles moved from inline Blade file */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 50;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.main-content-wrapper {
+    transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    padding-top: var(--header-height);
+}

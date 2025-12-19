@@ -12,10 +12,6 @@
     {{-- Vite Assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
-
     {{-- Structured Data for SEO --}}
     @php
         $organizationLd = [
@@ -44,17 +40,18 @@
     mobileMenuOpen: false,
     accountOpen: false,
     languageOpen: false,
+    languageCloseTimeout: null,
+    accountCloseTimeout: null,
     pinned: false,
-    // tracks whether we're at least at the `lg` breakpoint
     isLg: window.innerWidth >= 1024,
     init() {
-        const setHeaderHeight = () =&gt; {
+        const setHeaderHeight = () => {
             const header = document.querySelector('header');
             const h = header ? header.offsetHeight : 120;
             document.documentElement.style.setProperty('--header-height', h + 'px');
         };
         setHeaderHeight();
-        window.addEventListener('resize', () =&gt; {
+        window.addEventListener('resize', () => {
             setHeaderHeight();
             this.isLg = window.innerWidth >= 1024;
         });
@@ -66,27 +63,22 @@
 }"
     @keydown.escape.window="accountOpen = false; languageOpen = false; mobileMenuOpen = false; mobileSidebarOpen = false"
     style="--header-height:140px;"
-    class="font-sans antialiased bg-gray-50 text-slate-800 overflow-x-hidden">
+    class="font-sans antialiased bg-gray-50 text-slate-800">
 
     {{-- Header (Fixed at Top) --}}
     @include('client.partials.header')
 
-    {{-- Main Layout --}}
-    <main class="flex min-h-screen"> {{-- Added padding-top to account for fixed header --}}
+    {{-- Main Layout with padding for fixed header --}}
+    <main class="flex min-h-screen main-content-wrapper" style="padding-top: var(--header-height);">
 
         {{-- Sidebar (Handles both Mobile & Desktop inside the partial) --}}
         @include('client.partials.sidebar')
 
-        {{-- Main Content Wrapper --}}
-        {{-- Mobile: ml-0 (no margin). Desktop: ml-72 or ml-16 based on collapse state --}}
-          <div class="flex-1 w-full transition-all duration-300 relative z-0"
-                 :class="{
-                     'lg:ml-72': !sidebarCollapsed,
-                     'lg:ml-16': sidebarCollapsed
-                 }"
-                 :style="isLg ? (sidebarCollapsed ? 'margin-left:4rem' : 'margin-left:18rem') : 'margin-left:0'">
+        {{-- Main Content Wrapper with proper transitions --}}
+        <div class="flex-1 w-full transition-all duration-300 relative z-0"
+             :style="isLg ? (sidebarCollapsed ? 'margin-left: 4rem' : 'margin-left: 18rem') : 'margin-left: 0'">
 
-            <div>
+            <div class="w-full">
                 @yield('content')
             </div>
 
