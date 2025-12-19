@@ -44,13 +44,29 @@
     mobileMenuOpen: false,
     accountOpen: false,
     languageOpen: false,
+    pinned: false,
+    // tracks whether we're at least at the `lg` breakpoint
+    isLg: window.innerWidth >= 1024,
     init() {
-        // Auto-collapse sidebar on smaller desktop screens if needed, or check localStorage
+        const setHeaderHeight = () =&gt; {
+            const header = document.querySelector('header');
+            const h = header ? header.offsetHeight : 120;
+            document.documentElement.style.setProperty('--header-height', h + 'px');
+        };
+        setHeaderHeight();
+        window.addEventListener('resize', () =&gt; {
+            setHeaderHeight();
+            this.isLg = window.innerWidth >= 1024;
+        });
+        // Auto-collapse sidebar on some narrower desktop widths
         if (window.innerWidth >= 1024 && window.innerWidth < 1280) {
             this.sidebarCollapsed = true;
         }
     }
-}" class="font-sans antialiased bg-gray-50 text-slate-800 overflow-x-hidden">
+}"
+    @keydown.escape.window="accountOpen = false; languageOpen = false; mobileMenuOpen = false; mobileSidebarOpen = false"
+    style="--header-height:140px;"
+    class="font-sans antialiased bg-gray-50 text-slate-800 overflow-x-hidden">
 
     {{-- Header (Fixed at Top) --}}
     @include('client.partials.header')
@@ -63,12 +79,12 @@
 
         {{-- Main Content Wrapper --}}
         {{-- Mobile: ml-0 (no margin). Desktop: ml-72 or ml-16 based on collapse state --}}
-        <div class="flex-1 w-full transition-all duration-300 relative z-0"
-             :class="{
-                'lg:ml-72': !sidebarCollapsed,
-                'lg:ml-16': sidebarCollapsed,
-                'ml-0': true
-             }">
+          <div class="flex-1 w-full transition-all duration-300 relative z-0"
+                 :class="{
+                     'lg:ml-72': !sidebarCollapsed,
+                     'lg:ml-16': sidebarCollapsed
+                 }"
+                 :style="isLg ? (sidebarCollapsed ? 'margin-left:4rem' : 'margin-left:18rem') : 'margin-left:0'">
 
             <div>
                 @yield('content')
