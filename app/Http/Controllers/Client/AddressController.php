@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Client\Address\ReadAddressRequest;
 use App\Http\Requests\Client\Address\StoreAddressRequest;
 use App\Http\Requests\Client\Address\UpdateAddressRequest;
 use App\Http\Requests\Client\Address\DestroyAddressRequest;
-use App\Http\Requests\Client\Address\EditAddressRequest;
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
