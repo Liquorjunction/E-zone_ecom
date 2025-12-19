@@ -4,6 +4,33 @@ document.addEventListener('DOMContentLoaded', function() {
     return t || '';
   };
 
+  // Add loading state helper
+  function setLoading(element, isLoading) {
+    if (isLoading) {
+      element.style.opacity = '0.6';
+      element.style.pointerEvents = 'none';
+    } else {
+      element.style.opacity = '1';
+      element.style.pointerEvents = 'auto';
+    }
+  }
+
+  // Add smooth number animation
+  function animateValue(element, start, end, duration = 500) {
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+        current = end;
+        clearInterval(timer);
+      }
+      element.textContent = '$' + current.toFixed(2);
+    }, 16);
+  }
+
   function updateCartItem(itemId, quantity) {
     const url = '/cart/update';
     const body = new URLSearchParams();
@@ -24,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function removeCartItem(itemId, formAction, formData) {
     const url = formAction || '/cart/remove';
-    // formData is FormData or key/value mapping
     const body = new URLSearchParams();
     body.append('_token', getCsrf());
     body.append('item_id', String(itemId));
@@ -40,82 +66,326 @@ document.addEventListener('DOMContentLoaded', function() {
     }).then(r => r.json());
   }
 
-  // Quantity button handlers
+  // Debounce function for input changes
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Quantity button handlers with smooth animations
   document.querySelectorAll('.qty-decrease, .qty-increase').forEach(btn => {
     btn.addEventListener('click', function(e) {
+      e.preventDefault();
       const itemId = this.getAttribute('data-item-id');
       const input = document.querySelector('.cart-quantity-input[data-item-id="' + itemId + '"]');
+      const row = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
+
       if (!input) return;
+
       let v = parseInt(input.value || '1', 10);
-      if (this.classList.contains('qty-decrease')) v = Math.max(1, v - 1);
-      else v = v + 1;
+      if (this.classList.contains('qty-decrease')) {
+        v = Math.max(1, v - 1);
+      } else {
+        v = v + 1;
+      }
+
       input.value = v;
+
+      // Add loading state
+      if (row) setLoading(row, true);
+
       updateCartItem(itemId, v).then(resp => {
-        if (!resp || !resp.success) return console.error('Update failed', resp);
-        // update line total
+        if (!resp || !resp.success) {
+          console.error('Update failed', resp);
+          if (row) setLoading(row, false);
+          return;
+        }
+
+        // Update line total with animation
         const lineEl = document.getElementById('item-line-total-' + itemId);
         if (lineEl && resp.item && resp.item.line_total !== undefined) {
-          lineEl.textContent = '$' + Number(resp.item.line_total).toFixed(2);
+          const currentValue = parseFloat(lineEl.textContent.replace('$', ''));
+          const newValue = Number(resp.item.line_total);
+          if (currentValue !== newValue) {
+            lineEl.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+              lineEl.style.transform = 'scale(1)';
+            }, 200);
+          }
+          lineEl.textContent = '$' + newValue.toFixed(2);
         }
-        // update order summary
+
+        // Update order summary with animations
         if (resp.summary) {
-          document.getElementById('order-subtotal').textContent = '$' + Number(resp.summary.subtotal).toFixed(2);
-          document.getElementById('order-tax').textContent = '$' + Number(resp.summary.tax).toFixed(2);
-          document.getElementById('order-total').textContent = '$' + Number(resp.summary.total).toFixed(2);
-          document.getElementById('order-item-count').textContent = resp.summary.itemCount;
+          updateSummary(resp.summary);
         }
-      }).catch(err => console.error(err));
+
+        // Remove loading state
+        if (row) {
+          setLoading(row, false);
+          // Add success pulse effect
+          row.style.transition = 'all 0.3s ease';
+          row.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
+          setTimeout(() => {
+            row.style.backgroundColor = '';
+          }, 500);
+        }
+      }).catch(err => {
+        console.error(err);
+        if (row) setLoading(row, false);
+      });
     });
   });
 
-  // Quantity input manual change
+  // Quantity input manual change with debounce
   document.querySelectorAll('.cart-quantity-input').forEach(input => {
-    input.addEventListener('change', function() {
+    const handleChange = debounce(function() {
       const itemId = this.getAttribute('data-item-id');
+      const row = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
       let v = parseInt(this.value || '1', 10);
+
       if (isNaN(v) || v < 1) v = 1;
       this.value = v;
+
+      if (row) setLoading(row, true);
+
       updateCartItem(itemId, v).then(resp => {
-        if (!resp || !resp.success) return console.error('Update failed', resp);
+        if (!resp || !resp.success) {
+          console.error('Update failed', resp);
+          if (row) setLoading(row, false);
+          return;
+        }
+
         const lineEl = document.getElementById('item-line-total-' + itemId);
         if (lineEl && resp.item && resp.item.line_total !== undefined) {
+          lineEl.style.transform = 'scale(1.1)';
+          setTimeout(() => {
+            lineEl.style.transform = 'scale(1)';
+          }, 200);
           lineEl.textContent = '$' + Number(resp.item.line_total).toFixed(2);
         }
+
         if (resp.summary) {
-          document.getElementById('order-subtotal').textContent = '$' + Number(resp.summary.subtotal).toFixed(2);
-          document.getElementById('order-tax').textContent = '$' + Number(resp.summary.tax).toFixed(2);
-          document.getElementById('order-total').textContent = '$' + Number(resp.summary.total).toFixed(2);
-          document.getElementById('order-item-count').textContent = resp.summary.itemCount;
+          updateSummary(resp.summary);
         }
-      }).catch(err => console.error(err));
-    });
+
+        if (row) {
+          setLoading(row, false);
+          row.style.transition = 'all 0.3s ease';
+          row.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
+          setTimeout(() => {
+            row.style.backgroundColor = '';
+          }, 500);
+        }
+      }).catch(err => {
+        console.error(err);
+        if (row) setLoading(row, false);
+      });
+    }, 500);
+
+    input.addEventListener('change', handleChange);
+    input.addEventListener('input', handleChange);
   });
 
-  // Remove forms via AJAX
+  // Helper function to update summary with animations
+  function updateSummary(summary) {
+    const subtotalEl = document.getElementById('order-subtotal');
+    const taxEl = document.getElementById('order-tax');
+    const totalEl = document.getElementById('order-total');
+    const itemCountEl = document.getElementById('order-item-count');
+
+    if (subtotalEl) {
+      subtotalEl.style.transition = 'transform 0.3s ease';
+      subtotalEl.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        subtotalEl.style.transform = 'scale(1)';
+        subtotalEl.textContent = '$' + Number(summary.subtotal).toFixed(2);
+      }, 150);
+    }
+
+    if (taxEl) {
+      taxEl.style.transition = 'transform 0.3s ease';
+      taxEl.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        taxEl.style.transform = 'scale(1)';
+        taxEl.textContent = '$' + Number(summary.tax).toFixed(2);
+      }, 150);
+    }
+
+    if (totalEl) {
+      totalEl.style.transition = 'transform 0.3s ease';
+      totalEl.style.transform = 'scale(1.15)';
+      setTimeout(() => {
+        totalEl.style.transform = 'scale(1)';
+        totalEl.textContent = '$' + Number(summary.total).toFixed(2);
+      }, 150);
+    }
+
+    if (itemCountEl) {
+      itemCountEl.textContent = summary.itemCount;
+    }
+  }
+
+  // Remove forms via AJAX with smooth animations
   document.querySelectorAll('.cart-remove-form').forEach(form => {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       const itemId = this.querySelector('input[name="item_id"]')?.value;
       if (!itemId) return;
+
       const action = this.getAttribute('action');
+      const row = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
+
+      // Confirm removal
+      if (!confirm('Are you sure you want to remove this item from your cart?')) {
+        return;
+      }
+
+      // Add removing animation
+      if (row) {
+        row.style.transition = 'all 0.4s ease';
+        row.style.opacity = '0.5';
+        row.style.transform = 'translateX(-20px)';
+      }
+
       removeCartItem(itemId, action).then(resp => {
-        if (!resp || !resp.success) return console.error('Remove failed', resp);
-        // remove DOM row
-        const row = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
-        if (row) row.remove();
-        // update summary
+        if (!resp || !resp.success) {
+          console.error('Remove failed', resp);
+          if (row) {
+            row.style.opacity = '1';
+            row.style.transform = 'translateX(0)';
+          }
+          return;
+        }
+
+        // Smooth remove animation
+        if (row) {
+          row.style.opacity = '0';
+          row.style.transform = 'translateX(-100%)';
+          row.style.maxHeight = row.offsetHeight + 'px';
+
+          setTimeout(() => {
+            row.style.maxHeight = '0';
+            row.style.padding = '0';
+            row.style.margin = '0';
+            row.style.border = 'none';
+          }, 400);
+
+          setTimeout(() => {
+            row.remove();
+          }, 800);
+        }
+
+        // Update summary
         if (resp.summary) {
-          document.getElementById('order-subtotal').textContent = '$' + Number(resp.summary.subtotal).toFixed(2);
-          document.getElementById('order-tax').textContent = '$' + Number(resp.summary.tax).toFixed(2);
-          document.getElementById('order-total').textContent = '$' + Number(resp.summary.total).toFixed(2);
-          document.getElementById('order-item-count').textContent = resp.summary.itemCount;
+          updateSummary(resp.summary);
         }
-        // if cart empty, reload to show empty state
+
+        // If cart empty, reload to show empty state
         if (resp.summary && parseInt(resp.summary.itemCount, 10) === 0) {
-          window.location.reload();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         }
-      }).catch(err => console.error(err));
+      }).catch(err => {
+        console.error(err);
+        if (row) {
+          row.style.opacity = '1';
+          row.style.transform = 'translateX(0)';
+        }
+      });
     });
   });
 
+  // Add smooth scroll to top on step change
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('step')) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Form validation with better UX
+  const checkoutForm = document.querySelector('form[action*="checkout.process"]');
+  if (checkoutForm) {
+    checkoutForm.addEventListener('submit', function(e) {
+      const submitBtn = this.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...';
+      }
+    });
+  }
+
+  // Add input focus effects
+  document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"]').forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement?.classList.add('input-focused');
+    });
+
+    input.addEventListener('blur', function() {
+      this.parentElement?.classList.remove('input-focused');
+    });
+  });
+
+  // Autofill shipping address when selecting a saved address
+  const savedSelect = document.getElementById('savedAddressSelect');
+  if (savedSelect) {
+    savedSelect.addEventListener('change', function() {
+      const opt = this.options[this.selectedIndex];
+      const data = opt.getAttribute('data-addr');
+      if (!data) {
+        // clear fields
+        ['firstName','lastName','address','city','state','zip'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        return;
+      }
+
+      try {
+        const addr = JSON.parse(data);
+        const name = (addr.name || '').split(' ');
+        const first = name.shift() || '';
+        const last = name.join(' ') || '';
+
+        if (document.getElementById('firstName')) document.getElementById('firstName').value = first;
+        if (document.getElementById('lastName')) document.getElementById('lastName').value = last;
+        if (document.getElementById('address')) document.getElementById('address').value = addr.street || '';
+        if (document.getElementById('city')) document.getElementById('city').value = addr.city || '';
+        if (document.getElementById('state')) document.getElementById('state').value = addr.state || '';
+        if (document.getElementById('zip')) document.getElementById('zip').value = addr.postal_code || '';
+      } catch (e) {
+        console.error('Invalid address data', e);
+      }
+    });
+  }
+
+  // Add smooth transitions to all elements
+  const style = document.createElement('style');
+  style.textContent = `
+    * {
+      transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+      transition-timing-function: ease-in-out;
+      transition-duration: 200ms;
+    }
+
+    input, button, select, textarea {
+      transition-duration: 300ms;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+  `;
+  document.head.appendChild(style);
 });

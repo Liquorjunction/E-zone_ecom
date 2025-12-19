@@ -15,12 +15,14 @@ class OrderRepository implements OrderRepositoryInterface
         $order = null;
         DB::transaction(function() use ($cart, $data, &$order) {
             // Create order first to get its real auto-increment ID, then build a stable order_number
+            // Provide a temporary unique order_number so the DB insert doesn't fail
             $order = Order::create([
                 'user_id' => $cart->user_id ?? null,
                 'total' => 0,
                 'status' => 'pending',
                 'shipping_address' => $data['shipping_address'] ?? null,
                 'payment_method' => $data['payment_method'] ?? null,
+                'order_number' => 'EZ-ORD-'.uniqid(),
             ]);
 
             $total = 0;
