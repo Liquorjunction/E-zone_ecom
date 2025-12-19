@@ -28,6 +28,17 @@ class StoreAddressRequest extends FormRequest
         ];
     }
 
+    protected function prepareForValidation()
+    {
+        if ($this->has('type')) {
+            $t = strtolower($this->input('type'));
+            if (in_array($t, ['home','work','other'])) {
+                $t = 'shipping';
+            }
+            $this->merge(['type' => $t]);
+        }
+    }
+
     public function messages()
     {
         return [

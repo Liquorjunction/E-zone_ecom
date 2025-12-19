@@ -19,4 +19,15 @@ class EditAddressRequest extends FormRequest
             'type' => ['nullable','in:billing,shipping'],
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        if ($this->has('type')) {
+            $t = strtolower($this->input('type'));
+            if (in_array($t, ['home','work','other'])) {
+                $t = 'shipping';
+            }
+            $this->merge(['type' => $t]);
+        }
+    }
 }

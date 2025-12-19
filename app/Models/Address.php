@@ -11,6 +11,7 @@ class Address extends Model
     protected $fillable = [
         'type',
         'user_id',
+        'is_default',
         'address_label',
         'name',
         'street',

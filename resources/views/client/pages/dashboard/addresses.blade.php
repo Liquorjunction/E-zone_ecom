@@ -15,9 +15,18 @@
       </button>
     </div>
 
-    <div id="addresses-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-      @forelse($addresses ?? [] as $address)
-        <div id="address-card-{{ $address->id }}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address="{{ json_encode($address) }}">
+    <div id="addresses-grid" class="space-y-8">
+      @php
+        $all = collect($addresses ?? []);
+        $shipping = $all->where('type', 'shipping')->values();
+        $billing = $all->where('type', 'billing')->values();
+      @endphp
+
+      <section>
+        <h3 class="text-xl font-semibold mb-4">Shipping Addresses</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          @forelse($shipping as $address)
+            <div id="address-card-{{ $address->id }}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address="{{ json_encode($address) }}" data-id="{{ $address->id }}">
           <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -30,14 +39,14 @@
                 <h3 class="text-lg font-bold text-gray-900">{{ $address->address_label ?? ($address->type ?? 'Address') }}</h3>
               </div>
               @if(isset($address->is_default) && $address->is_default)
-                <span class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1">
+                <span data-default="1" class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1">
                   <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                   Default
                 </span>
               @else
-                <button class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>
+                <button onclick="setDefault({{ $address->id }})" class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>
               @endif
             </div>
           </div>
@@ -77,8 +86,74 @@
               Delete
             </button>
           </div>
+          @empty
+            <div class="col-span-full text-center py-8">
+              <button type="button" onclick="openAddModal()" class="group flex flex-col items-center justify-center min-h-[200px] w-full border-3 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
+                <div class="bg-gray-100 group-hover:bg-primary/10 p-4 rounded-full mb-3 transition-colors duration-300">
+                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                </div>
+                <span class="font-semibold text-base">Add Shipping Address</span>
+                <span class="text-sm text-gray-400 mt-1">Click to add</span>
+              </button>
+            </div>
+          @endforelse
         </div>
-      @empty
+      </section>
+
+      <section>
+        <h3 class="text-xl font-semibold mb-4">Billing Addresses</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          @forelse($billing as $address)
+            <div id="address-card-{{ $address->id }}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address="{{ json_encode($address) }}" data-id="{{ $address->id }}">
+              <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="bg-white p-2 rounded-lg shadow-sm">
+                      <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">{{ $address->address_label ?? ($address->type ?? 'Address') }}</h3>
+                  </div>
+                  @if(isset($address->is_default) && $address->is_default)
+                    <span data-default="1" class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1">Default</span>
+                  @else
+                    <button onclick="setDefault({{ $address->id }})" class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>
+                  @endif
+                </div>
+              </div>
+
+              <div class="px-6 py-5">
+                <div class="space-y-3">
+                  <div class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    <p class="font-semibold text-gray-900">{{ $address->name }}</p>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                    <p class="text-gray-700 text-sm leading-relaxed">{!! nl2br(e($address->street)) !!}<br>{{ $address->city }}, {{ $address->state }} {{ $address->postal_code }}<br>{{ $address->country }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <button type="button" onclick="openEditModalFromElem(this)" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">Edit</button>
+                <button type="button" onclick="deleteAddress({{ $address->id }})" class="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-600 transition-colors">Delete</button>
+              </div>
+            </div>
+          @empty
+            <div class="col-span-full text-center py-8">
+              <button type="button" onclick="openAddModal()" class="group flex flex-col items-center justify-center min-h-[200px] w-full border-3 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
+                <div class="bg-gray-100 group-hover:bg-primary/10 p-4 rounded-full mb-3 transition-colors duration-300">
+                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                </div>
+                <span class="font-semibold text-base">Add Billing Address</span>
+                <span class="text-sm text-gray-400 mt-1">Click to add</span>
+              </button>
+            </div>
+          @endforelse
+        </div>
+      </section>
+
+      @if($all->count() === 0)
         <div class="col-span-full text-center py-16">
           <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
             <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,16 +168,15 @@
             Add Address
           </button>
         </div>
-      @endforelse
-
-      @if(isset($addresses) && count($addresses) > 0)
-        <button type="button" onclick="openAddModal()" class="group flex flex-col items-center justify-center min-h-[280px] border-3 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
-          <div class="bg-gray-100 group-hover:bg-primary/10 p-4 rounded-full mb-3 transition-colors duration-300">
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-          </div>
-          <span class="font-semibold text-base">Add New Address</span>
-          <span class="text-sm text-gray-400 mt-1">Click to add</span>
-        </button>
+      @elseif($shipping->count() > 0 && $billing->count() > 0)
+        <div class="flex items-center justify-center">
+          <button type="button" onclick="openAddModal()" class="group flex flex-col items-center justify-center min-h-[120px] w-full max-w-xs border-3 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
+            <div class="bg-gray-100 group-hover:bg-primary/10 p-4 rounded-full mb-3 transition-colors duration-300">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            </div>
+            <span class="font-semibold text-base">Add New Address</span>
+          </button>
+        </div>
       @endif
     </div>
   </div>
@@ -137,9 +211,8 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
               <div class="relative">
                 <select id="field-type" name="type" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
-                  <option>Home</option>
-                  <option>Work</option>
-                  <option>Other</option>
+                  <option value="billing">Billing</option>
+                  <option value="shipping">Shipping</option>
                 </select>
                 <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -226,9 +299,8 @@
           <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
           <div class="relative">
             <select id="mobile-field-type" name="type" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base">
-              <option>Home</option>
-              <option>Work</option>
-              <option>Other</option>
+              <option value="billing">Billing</option>
+              <option value="shipping">Shipping</option>
             </select>
             <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -283,9 +355,11 @@
     </div>
   </div>
 
-  <button type="button" onclick="openAddModal()" style="z-index: 9998;" class="sm:hidden fixed bottom-6 right-6 bg-primary text-white p-5 rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group">
-    <svg class="w-7 h-7 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-  </button>
+  @if($shipping->count() > 0 && $billing->count() > 0)
+    <button type="button" onclick="openAddModal()" style="z-index: 9998;" class="sm:hidden fixed bottom-6 right-6 bg-primary text-white p-5 rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+      <svg class="w-7 h-7 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+    </button>
+  @endif
 
   <script>
     // 1. Move Modal to Body on Load (Fixes stacking context "under header" issue)
@@ -304,6 +378,51 @@
       return t ? t.value : '';
     }
 
+    // Set an address as default via AJAX
+    async function setDefault(id){
+      if(!confirm('Set this address as your default?')) return;
+      const token = getCsrfToken();
+      try{
+        const res = await fetch('{{ url('/client/addresses') }}/' + id + '/default', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+          }
+        });
+        const json = await res.json();
+        if(!res.ok){
+          alert(json.message || 'Failed to set default address');
+          return;
+        }
+
+        const newDefaultId = json.data?.id || id;
+
+        // Clear previous default badge/button
+        const prevBadge = document.querySelector('.address-card [data-default="1"]');
+        if(prevBadge){
+          const prevCard = prevBadge.closest('.address-card');
+          if(prevCard){
+            // replace badge with button
+            prevBadge.outerHTML = `<button onclick="setDefault(${prevCard.dataset.id})" class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>`;
+            try{ let obj = JSON.parse(prevCard.dataset.address || '{}'); obj.is_default = false; prevCard.dataset.address = JSON.stringify(obj); } catch(e){}
+          }
+        }
+
+        // Set new default badge
+        const newCard = document.getElementById('address-card-' + newDefaultId);
+        if(newCard){
+          const btn = newCard.querySelector('button[onclick^="setDefault"]');
+          if(btn) btn.outerHTML = `<span data-default="1" class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>Default</span>`;
+          try{ let obj = JSON.parse(newCard.dataset.address || '{}'); obj.is_default = true; newCard.dataset.address = JSON.stringify(obj); } catch(e){}
+        }
+
+      }catch(e){
+        console.error(e);
+        alert('Failed to set default address');
+      }
+    }
+
     // Open Add Modal
     function openAddModal(){
       if(window.innerWidth < 640) {
@@ -319,6 +438,9 @@
           const el = document.getElementById('field-'+k.replace('_','-')) || document.getElementById('field-'+k);
           if(el) el.value = '';
         });
+        // sensible default
+        const defaultType = document.getElementById('field-type');
+        if (defaultType) defaultType.value = 'shipping';
 
         // Unique IDs
         const modal = document.getElementById('addr-unique-modal');
@@ -348,6 +470,8 @@
         const el = document.getElementById('mobile-field-'+k.replace('_','-')) || document.getElementById('mobile-field-'+k);
         if(el) el.value = '';
       });
+      const mobileDefaultType = document.getElementById('mobile-field-type');
+      if (mobileDefaultType) mobileDefaultType.value = 'shipping';
 
       const form = document.getElementById('mobile-address-form');
       form.classList.remove('translate-y-full');
@@ -371,9 +495,29 @@
       const card = elem.closest('.address-card');
       if(!card) return;
       let data = {};
+      const raw = card.dataset.address || '';
       try{
-          data = JSON.parse(card.dataset.address);
-      }catch(e){ console.error("Error parsing address data", e); }
+        data = JSON.parse(raw);
+      }catch(e){
+        // try common fallbacks for encoded entities
+        try {
+          const replaced = raw.replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+          data = JSON.parse(replaced);
+        } catch(e2) {
+          try {
+            data = JSON.parse(decodeURIComponent(raw));
+          } catch(e3) {
+            console.error("Error parsing address data", e3);
+            data = {};
+          }
+        }
+      }
+
+      // fallback to data-id attribute when JSON parsing doesn't provide id
+      if((!data || !data.id) && card.dataset.id){
+        data = data || {};
+        data.id = card.dataset.id;
+      }
 
       if(window.innerWidth < 640) {
         openMobileEditForm(data);
@@ -518,16 +662,16 @@
     document.getElementById('mobile-address-form-element').addEventListener('submit', handleFormSubmit);
 
     function renderAddressCardHTML(data){
-      const label = data.address_label || data.type || 'Address';
+      const label = data.address_label || (data.type === 'billing' ? 'Billing' : (data.type === 'shipping' ? 'Shipping' : 'Address'));
       const isDefault = data.is_default ?
-        `<span class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>Default</span>` :
-        `<button class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>`;
+        `<span data-default="1" class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>Default</span>` :
+        `<button onclick="setDefault(${data.id})" class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>`;
 
       const street = (data.street || '').replace(/\n/g, '<br>');
       const safeJson = JSON.stringify(data).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
 
       return `
-        <div id="address-card-${data.id}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address='${safeJson}'>
+        <div id="address-card-${data.id}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address='${safeJson}' data-id='${data.id}'>
           <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">

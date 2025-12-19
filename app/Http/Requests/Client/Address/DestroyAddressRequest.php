@@ -19,4 +19,19 @@ class DestroyAddressRequest extends FormRequest
             'type' => ['nullable','in:billing,shipping'],
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        // Ensure route parameter 'id' is available for validation when deleting via URL
+        if ($this->route('id') && !$this->has('id')) {
+            $this->merge(['id' => $this->route('id')]);
+        }
+        if ($this->has('type')) {
+            $t = strtolower($this->input('type'));
+            if (in_array($t, ['home','work','other'])) {
+                $t = 'shipping';
+            }
+            $this->merge(['type' => $t]);
+        }
+    }
 }

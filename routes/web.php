@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\Client\AddressController;
 use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\ShippingandReturnsController;
@@ -84,7 +85,7 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::view('/', 'client.pages.dashboard.dashboard')->name('overview');
     Route::view('/orders', 'client.pages.dashboard.orders')->name('orders');
     Route::view('/profile', 'client.pages.dashboard.profile')->name('profile');
-    Route::view('/addresses', 'client.pages.dashboard.addresses')->name('addresses');
+    Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
     Route::view('/wishlist', 'client.pages.dashboard.wishlist')->name('wishlist');
     Route::view('/security', 'client.pages.dashboard.security')->name('security');
     Route::view('/payment-methods', 'client.pages.dashboard.payments')->name('payments');
@@ -124,3 +125,9 @@ Route::get('/cart', [CartController::class, 'show'])->name('cart');
 Route::post('/checkout', [OrderController::class, 'checkout'])->middleware('auth')->name('checkout.process');
 // Show checkout form (requires auth)
 Route::get('/checkout', [OrderController::class, 'show'])->middleware('auth')->name('checkout');
+
+// Client addresses endpoints (AJAX-driven from dashboard)
+Route::post('/client/addresses', [AddressController::class, 'store'])->middleware('auth');
+Route::put('/client/addresses/{id}', [AddressController::class, 'update'])->middleware('auth');
+Route::delete('/client/addresses/{id}', [AddressController::class, 'destroy'])->middleware('auth');
+Route::post('/client/addresses/{id}/default', [AddressController::class, 'setDefault'])->middleware('auth');
