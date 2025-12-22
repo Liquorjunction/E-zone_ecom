@@ -1,4 +1,4 @@
-<aside class="sidebar sidebar-default sidebar-white sidebar-base navs-rounded-all">
+<aside class="sidebar sidebar-default sidebar-white sidebar-base navs-rounded-all" style="height:100vh;display:flex;flex-direction:column;">
     <div class="sidebar-header d-flex align-items-center justify-content-center px-3 py-3">
         <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
             <div class="logo-main">
@@ -32,7 +32,7 @@
         </button>
     </div>
 
-    <div class="sidebar-body pt-0" data-scrollbar>
+    <div class="sidebar-body pt-0" data-scrollbar style="overflow:auto;flex:1 1 auto;">
         <div class="sidebar-list">
             <ul class="navbar-nav iq-main-menu" id="sidebar-menu">
 
@@ -679,6 +679,57 @@
 
                 <li>
                     <hr class="hr-horizontal">
+                </li>
+
+                @php
+                    $isOrderSectionActive =
+                        request()->routeIs('admin.orders.*') ||
+                        request()->routeIs('admin.return-requests.*');
+                @endphp
+                <li class="nav-item">
+                    <a class="nav-link {{ $isOrderSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
+                        href="#sidebar-orders" role="button"
+                        aria-expanded="{{ $isOrderSectionActive ? 'true' : 'false' }}"
+                        aria-controls="sidebar-orders">
+                        <i class="icon" style="display: inline-flex;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor"
+                                stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 8m5-8v8m4-8v8m1-13h2"></path>
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                            </svg>
+                        </i>
+                        <span class="item-name">Orders & Returns</span>
+                        <i class="right-icon">
+                            <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" width="18" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </i>
+                    </a>
+                    <ul class="sub-nav collapse {{ $isOrderSectionActive ? 'show' : '' }}" id="sidebar-orders"
+                        data-bs-parent="#sidebar-menu">
+                        @can('order.read')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.orders.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                d="M3.5 4C2.67157 4 2 4.67157 2 5.5V18.5C2 19.3284 2.67157 20 3.5 20H20.5C21.3284 20 22 19.3284 22 18.5V5.5C22 4.67157 21.3284 4 20.5 4H3.5ZM3.5 6C3.22386 6 3 6.22386 3 6.5V18.5C3 18.7761 3.22386 19 3.5 19H20.5C20.7761 19 21 18.7761 21 18.5V6.5C21 6.22386 20.7761 6 20.5 6H3.5Z"
+                                                fill="currentColor"></path>
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                d="M7 9C6.44772 9 6 9.44772 6 10C6 10.5523 6.44772 11 7 11H17C17.5523 11 18 10.5523 18 10C18 9.44772 17.5523 9 17 9H7ZM6 13C6 12.4477 6.44772 12 7 12H13C13.5523 12 14 12.4477 14 13C14 13.5523 13.5523 14 13 14H7C6.44772 14 6 13.5523 6 13Z"
+                                                fill="currentColor"></path>
+                                        </svg>
+                                    </i>
+                                    <span class="item-name">Orders</span>
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
                 </li>
             </ul>
         </div>
