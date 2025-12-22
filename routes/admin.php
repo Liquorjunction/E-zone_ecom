@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -270,6 +271,16 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [InventoryController::class, 'update'])->name('update')->middleware('can:inventories.update,admin');
             Route::get('/show', [InventoryController::class, 'show'])->name('show')->middleware('can:inventories.read,admin');
             Route::delete('/destroy', [InventoryController::class, 'destroy'])->name('destroy')->middleware('can:inventories.delete,admin');
+        });
+
+        // Order Routes
+        Route::prefix('orders')->name('orders.')->middleware('can:order.read,admin')->group(function () {
+            Route::get('/', [OrderController::class, 'index'])->name('index'); // permission: order.read
+            Route::get('/data', [OrderController::class, 'dataTable'])->name('data');
+            Route::get('/show', [OrderController::class, 'show'])->name('show')->middleware('can:order.read,admin');
+            Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
+            Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
+
         });
     });
 });
