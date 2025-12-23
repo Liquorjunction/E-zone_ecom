@@ -1,4 +1,4 @@
-<div class="group bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary/30">
+<a href="{{ $url ?? 'javascript:void(0);' }}" class="group bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary/30 block">
     <div class="relative aspect-square overflow-hidden bg-gray-50">
         <img src="{{ asset($image) }}" alt="{{ $title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
         <div class="absolute top-3 right-3 {{ $badgeColor }} text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
@@ -25,4 +25,4 @@
             {{ gtrans('Add to Cart') }}
         </button>
     </div>
-</div>
+</a>

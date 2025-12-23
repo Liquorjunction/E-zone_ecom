@@ -433,7 +433,7 @@
 <section id="new-arrivals" class="py-12 sm:py-16 lg:py-20 bg-white" x-data="{
     currentSlide: 0,
     itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
-    totalItems: 8,
+    totalItems: {{ isset($newArrivals) ? $newArrivals->count() : 0 }},
     autoplay: null,
     get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
     get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
@@ -453,7 +453,7 @@
     stopAutoplay() {
         clearInterval(this.autoplay);
     }
-}" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
+    }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-end justify-between mb-8 sm:mb-10">
             <div>
@@ -491,81 +491,53 @@
         <div class="relative overflow-hidden">
             <div class="flex transition-transform duration-500 ease-out"
                  :style="`transform: translateX(-${currentSlide * 100}%)`">
-                {{-- First Slide --}}
+                @foreach(($newArrivals ?? collect())->chunk(4) as $chunk)
                 <div class="w-full flex-shrink-0">
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                        @include('client.components.product-card', [
-                            'image' => 'images/drone.webp',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Drones',
-                            'title' => 'SkyPro 4K HDR Drone',
-                            'price' => '$449.00'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/watch.jpeg',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Wearables',
-                            'title' => 'E-Zone Watch Series 8',
-                            'price' => '$399.00'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/vr.avif',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Gaming',
-                            'title' => 'Metaverse VR Headset',
-                            'price' => '$549.00'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/sepaker.webp',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Smart Home',
-                            'title' => 'AudioHome Mini Speaker',
-                            'price' => '$79.99'
-                        ])
-                    </div>
-                </div>
+                        @foreach($chunk as $productVariant)
+                            @php
+                                $isVariant = class_basename($productVariant) === 'ProductVariant';
+                                $master = $isVariant ? $productVariant->product : $productVariant;
 
-                {{-- Second Slide --}}
-                <div class="w-full flex-shrink-0">
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                        @include('client.components.product-card', [
-                            'image' => 'images/laptop.avif',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Laptops',
-                            'title' => 'UltraBook Pro 15"',
-                            'price' => '$1599.00'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/phone.jpg',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Smartphones',
-                            'title' => 'Quantum X2 Pro 5G',
-                            'price' => '$1099.00'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/buds.webp',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Audio',
-                            'title' => 'Pro Earbuds Ultra',
-                            'price' => '$179.99'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/mouse.png',
-                            'badge' => 'NEW',
-                            'badgeColor' => 'bg-green-500',
-                            'category' => 'Gaming',
-                            'title' => 'Elite Gaming Mouse X',
-                            'price' => '$119.99'
-                        ])
+                                $variantImage = $isVariant ? optional($productVariant->images()->ordered()->first())->image_path : null;
+                                $productImage = optional($master->images()->forProduct($master->id)->ordered()->first())->image_path ?? null;
+
+                                if ($variantImage) {
+                                    $img = 'storage/' . $variantImage;
+                                } elseif ($productImage) {
+                                    $img = 'storage/' . $productImage;
+                                } elseif (!empty($master->cover_image)) {
+                                    $img = 'storage/' . $master->cover_image;
+                                } else {
+                                    $img = 'images/mouse.png';
+                                }
+
+                                $locale = app()->getLocale() ?? 'en';
+                                $baseName = $master?->getTranslation('name', $locale) ?? '';
+                                if (is_array($baseName)) { $baseName = implode(' ', $baseName); }
+                                $variantName = $isVariant ? ($productVariant->getTranslation('variant_name', $locale) ?? '') : '';
+                                if (is_array($variantName)) { $variantName = implode(' ', $variantName); }
+                                $title = trim($baseName . ($variantName ? ' - ' . $variantName : '')) ?: 'Product';
+
+                                $category = $master->category?->name ?? 'General';
+                                if (is_array($category)) { $category = implode(' ', $category); }
+
+                                $price = $isVariant ? ('$' . number_format($productVariant->price ?? 0, 2)) : ('$' . number_format($master->real_price ?? $master->price ?? 0, 2));
+                            @endphp
+
+                            @include('client.components.product-card', [
+                                'image' => $img,
+                                'badge' => 'NEW',
+                                'badgeColor' => 'bg-green-500',
+                                'category' => $category,
+                                'title' => $title,
+                                'price' => $price,
+                                'url' => route('products.detail', $master->slug ?? $master->id)
+                            ])
+                        @endforeach
                     </div>
                 </div>
+                @endforeach
             </div>
         </div>
 
@@ -634,95 +606,53 @@
         <div class="relative overflow-hidden">
             <div class="flex transition-transform duration-500 ease-out"
                  :style="`transform: translateX(-${currentSlide * 100}%)`">
-                {{-- First Slide --}}
+                @foreach(($bestSellers ?? collect())->chunk(4) as $chunk)
                 <div class="w-full flex-shrink-0">
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                        <div class="group bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary/30">
-                            <div class="relative aspect-square overflow-hidden bg-gray-50">
-                                <img src="{{ asset('images/mouse.png') }}" alt="Product" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">#1</div>
-                                <button class="absolute top-3 right-3 w-9 h-9 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-primary hover:text-white">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="p-4">
-                                <span class="inline-block text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">Gaming</span>
-                                <h3 class="mt-2 text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-primary transition-colors min-h-[40px]">
-                                    Gaming Mouse Pro
-                                </h3>
-                                <div class="mt-3"><span class="text-lg font-bold text-gray-900">$89.99</span></div>
-                                <button class="mt-3 w-full bg-primary/10 text-primary hover:bg-primary hover:text-white font-semibold py-2.5 rounded-lg transition-colors text-sm">
-                                    {{ gtrans('Add to Cart') }}
-                                </button>
-                            </div>
-                        </div>
+                        @foreach($chunk as $productVariant)
+                            @php
+                                $isVariant = class_basename($productVariant) === 'ProductVariant';
+                                $master = $isVariant ? $productVariant->product : $productVariant;
 
-                        @include('client.components.product-card', [
-                            'image' => 'images/buds.webp',
-                            'badge' => '#2',
-                            'badgeColor' => 'bg-orange-500',
-                            'category' => 'Audio',
-                            'title' => 'Wireless Earbuds Max',
-                            'price' => '$149.99'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/case.jpg',
-                            'badge' => '#3',
-                            'badgeColor' => 'bg-orange-500',
-                            'category' => 'Accessories',
-                            'title' => 'Smartphone Case Premium',
-                            'price' => '$29.99'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/powerbank.jpg',
-                            'badge' => '#4',
-                            'badgeColor' => 'bg-orange-500',
-                            'category' => 'Power',
-                            'title' => 'Portable Charger 20000mAh',
-                            'price' => '$49.99'
-                        ])
+                                $variantImage = $isVariant ? optional($productVariant->images()->ordered()->first())->image_path : null;
+                                $productImage = optional($master->images()->forProduct($master->id)->ordered()->first())->image_path ?? null;
+
+                                if ($variantImage) {
+                                    $img = 'storage/' . $variantImage;
+                                } elseif ($productImage) {
+                                    $img = 'storage/' . $productImage;
+                                } elseif (!empty($master->cover_image)) {
+                                    $img = 'storage/' . $master->cover_image;
+                                } else {
+                                    $img = 'images/mouse.png';
+                                }
+
+                                $locale = app()->getLocale() ?? 'en';
+                                $baseName = $master?->getTranslation('name', $locale) ?? '';
+                                if (is_array($baseName)) { $baseName = implode(' ', $baseName); }
+                                $variantName = $isVariant ? ($productVariant->getTranslation('variant_name', $locale) ?? '') : '';
+                                if (is_array($variantName)) { $variantName = implode(' ', $variantName); }
+                                $title = trim($baseName . ($variantName ? ' - ' . $variantName : '')) ?: 'Product';
+
+                                $category = $master->category?->name ?? 'General';
+                                if (is_array($category)) { $category = implode(' ', $category); }
+
+                                $price = $isVariant ? ('$' . number_format($productVariant->price ?? 0, 2)) : ('$' . number_format($master->real_price ?? $master->price ?? 0, 2));
+                            @endphp
+
+                            @include('client.components.product-card', [
+                                'image' => $img,
+                                'badge' => 'TOP',
+                                'badgeColor' => 'bg-orange-500',
+                                'category' => $category,
+                                'title' => $title,
+                                'price' => $price,
+                                'url' => route('products.detail', $master->slug ?? $master->id)
+                            ])
+                        @endforeach
                     </div>
                 </div>
-
-                {{-- Second Slide --}}
-                <div class="w-full flex-shrink-0">
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                        @include('client.components.product-card', [
-                            'image' => 'images/hp.webp',
-                            'badge' => '#5',
-                            'badgeColor' => 'bg-orange-500',
-                            'category' => 'Audio',
-                            'title' => 'Premium Headphones',
-                            'price' => '$199.99'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/watch.jpeg',
-                            'badge' => '#6',
-                            'badgeColor' => 'bg-orange-500',
-                            'category' => 'Wearables',
-                            'title' => 'Fitness Smartwatch',
-                            'price' => '$299.00'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/phone.jpg',
-                            'badge' => '#7',
-                            'badgeColor' => 'bg-orange-500',
-                            'category' => 'Smartphones',
-                            'title' => 'Latest Smartphone',
-                            'price' => '$899.00'
-                        ])
-                        @include('client.components.product-card', [
-                            'image' => 'images/laptop.avif',
-                            'badge' => '#8',
-                            'badgeColor' => 'bg-orange-500',
-                            'category' => 'Laptops',
-                            'title' => 'Business Laptop Pro',
-                            'price' => '$1299.00'
-                        ])
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
 
@@ -737,25 +667,8 @@
     </div>
 </section>
 
-{{-- Brands Carousel --}}
-<section id="brands" class="py-12 sm:py-16 bg-white border-y border-gray-100" x-data="{
-    currentPosition: 0,
-    autoplay: null,
-    init() {
-        this.startAutoplay();
-    },
-    startAutoplay() {
-        this.autoplay = setInterval(() => {
-            this.currentPosition -= 1;
-            if (this.currentPosition <= -50) {
-                this.currentPosition = 0;
-            }
-        }, 30);
-    },
-    stopAutoplay() {
-        clearInterval(this.autoplay);
-    }
-}" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
+{{-- Brands Carousel (CSS marquee for smooth continuous scroll) --}}
+<section id="brands" class="py-12 sm:py-16 bg-white border-y border-gray-100">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10">
             <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
@@ -766,22 +679,40 @@
             </p>
         </div>
 
-        <div class="overflow-hidden">
-            <div class="flex items-center gap-12 lg:gap-16 transition-transform duration-100 ease-linear"
-                 :style="`transform: translateX(${currentPosition}%)`">
-                <img src="https://logo.clearbit.com/apple.com" alt="Apple" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/samsung.com" alt="Samsung" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/sony.com" alt="Sony" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/google.com" alt="Google" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/dell.com" alt="Dell" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/lg.com" alt="LG" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/nvidia.com" alt="Nvidia" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
+        @php $brandCount = ($brands ?? collect())->count(); $duration = max(12, $brandCount * 2); @endphp
+        <style>
+            .brand-marquee { display: flex; gap: 3rem; align-items: center; }
+            .brand-marquee img { display: block; }
+            .brand-marquee-wrapper { overflow: hidden; }
+            .brand-marquee-inner { display: flex; gap: 3rem; animation: marquee linear infinite; }
+            .brand-marquee-inner:hover { animation-play-state: paused; }
+            @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        </style>
+
+        <div class="brand-marquee-wrapper">
+            <div class="brand-marquee-inner" style="animation-duration: {{ $duration }}s;">
+                <div class="brand-marquee">
+                    @foreach(($brands ?? collect()) as $brand)
+                        @php
+                            $imgPath = $brand->image ? asset('storage/' . $brand->image) : 'https://logo.clearbit.com/' . ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
+                        @endphp
+                        <a href="{{ route('brand-products', $brand->slug ?? $brand->id) }}" class="flex-shrink-0">
+                            <img src="{{ $imgPath }}" alt="{{ $brand->name }}" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
+                        </a>
+                    @endforeach
+                </div>
+
                 {{-- Duplicate for seamless loop --}}
-                <img src="https://logo.clearbit.com/apple.com" alt="Apple" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/samsung.com" alt="Samsung" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/sony.com" alt="Sony" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
-                <img src="https://logo.clearbit.com/google.com" alt="Google" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer flex-shrink-0">
+                <div class="brand-marquee" aria-hidden="true">
+                    @foreach(($brands ?? collect()) as $brand)
+                        @php
+                            $imgPath = $brand->image ? asset('storage/' . $brand->image) : 'https://logo.clearbit.com/' . ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
+                        @endphp
+                        <a href="{{ route('brand-products', $brand->slug ?? $brand->id) }}" class="flex-shrink-0">
+                            <img src="{{ $imgPath }}" alt="{{ $brand->name }}" class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
+                        </a>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
