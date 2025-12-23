@@ -40,7 +40,7 @@
                             <table class="table table-borderless table-sm">
                                 <tr><th>Name</th><td>{{ $order->user->name ?? $order->customer_name ?? ($order->user->email ?? 'N/A') }}</td></tr>
                                 <tr><th>Email</th><td>{{ $order->user->email ?? $order->customer_email ?? 'N/A' }}</td></tr>
-                                <tr><th>Phone</th><td>{{ $order->user->phone ?? $order->customer_phone ?? ($shipping['phone'] ?? 'N/A') }}</td></tr>
+                                <tr><th>Phone</th><td>{{ $order->phone_no ?? $order->user->phone ?? $order->customer_phone ?? ($shipping['phone'] ?? 'N/A') }}</td></tr>
                             </table>
                         </div>
                     </div>
@@ -51,9 +51,15 @@
                             <div class="border rounded p-3">
                                 @if(!empty($shipping))
                                     <div>{{ $shipping['name'] ?? 'N/A' }}</div>
-                                    <div>{{ $shipping['address'] ?? ($shipping['line1'] ?? '') }}</div>
-                                    <div>{{ ($shipping['city'] ?? '') }} {{ $shipping['state'] ?? '' }} {{ $shipping['postcode'] ?? '' }}</div>
+                                    <div>{{ $shipping['street'] ?? $shipping['address'] ?? $shipping['line1'] ?? '' }}</div>
+                                    <div>
+                                        {{ trim((($shipping['city'] ?? '') . ' ' . ($shipping['state'] ?? ''))) }}
+                                        {{ ($shipping['postal_code'] ?? $shipping['postcode'] ?? $shipping['zip'] ?? '') ? (' ' . ($shipping['postal_code'] ?? $shipping['postcode'] ?? $shipping['zip'] ?? '')) : '' }}
+                                    </div>
                                     <div>{{ $shipping['country'] ?? '' }}</div>
+                                    @if(!empty($order->phone_no) || !empty($shipping['phone']))
+                                        <div>Phone: {{ $order->phone_no ?? $shipping['phone'] }}</div>
+                                    @endif
                                 @else
                                     <div>{{ $order->shipping_address_text ?? 'N/A' }}</div>
                                 @endif
@@ -85,7 +91,7 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $productName }}</td>
-                                                <td>{{ $item->sku ?? '—' }}</td>
+                                                <td>{{ optional($item->variant)->sku ?? optional($item->product)->sku ?? ($item->sku ?? '—') }}</td>
                                                 <td>{{ $qty }}</td>
                                                 <td>{{ number_format($price, 2) }}</td>
                                                 <td>{{ number_format($subtotal, 2) }}</td>

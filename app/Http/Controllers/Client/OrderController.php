@@ -29,6 +29,14 @@ class OrderController extends Controller
 
         $data = $request->validated();
 
+        // Normalize payment input: form uses `payment_method` (radio) — accept `payment` too.
+        $data['payment_method'] = $request->input('payment_method') ?? $request->input('payment') ?? ($data['payment_method'] ?? null);
+
+        // Attach raw card fields so PaymentService can use them (if using card)
+        $data['cardNumber'] = $request->input('cardNumber');
+        $data['expiry'] = $request->input('expiry');
+        $data['cvv'] = $request->input('cvv');
+
         // If shipping_address not provided as an array, assemble from individual inputs
         if (empty($data['shipping_address']) || !is_array($data['shipping_address'])) {
             $data['shipping_address'] = [
@@ -41,6 +49,61 @@ class OrderController extends Controller
             ];
         }
 
+        // Include phone in shipping address and normalize phone into data for order
+        $phone = $request->input('phone') ?? $data['shipping_address']['phone'] ?? null;
+        if ($phone) {
+            $data['shipping_address']['phone'] = $phone;
+        }
+        $data['phone_no'] = $phone ?? ($data['phone_no'] ?? null);
+
+        // Handle saved address selection or saving new address for authenticated users
+        if (Auth::check()) {
+            $savedAddressId = $request->input('saved_address_id');
+
+            if (!empty($savedAddressId)) {
+                // Use an existing saved address (ensure it belongs to the user)
+                $saved = Address::where('id', $savedAddressId)->where('user_id', Auth::id())->first();
+                if ($saved) {
+                    $data['shipping_address'] = [
+                        'name' => $saved->name,
+                        'street' => $saved->street,
+                        'city' => $saved->city,
+                        'state' => $saved->state,
+                        'postal_code' => $saved->postal_code,
+                        'country' => $saved->country,
+                    ];
+                }
+            } else {
+                // No saved address selected; only create a new saved address if user opted in via checkbox
+                if (!empty($data['shipping_address']) && is_array($data['shipping_address']) && $request->filled('save_address')) {
+                    $addrData = $data['shipping_address'];
+                    $country = $addrData['country'] ?? $request->input('country') ?? '';
+
+                    // Attempt to find an existing identical address for this user to avoid duplicates
+                    $exists = Address::where('user_id', Auth::id())
+                        ->where('street', $addrData['street'] ?? '')
+                        ->where('city', $addrData['city'] ?? '')
+                        ->where('state', $addrData['state'] ?? '')
+                        ->where('postal_code', $addrData['postal_code'] ?? $addrData['zip'] ?? '')
+                        ->where('country', $country)
+                        ->first();
+
+                    if (! $exists) {
+                        $address = new Address();
+                        $address->user_id = Auth::id();
+                        $address->name = $addrData['name'] ?? null;
+                        $address->street = $addrData['street'] ?? null;
+                        $address->city = $addrData['city'] ?? null;
+                        $address->state = $addrData['state'] ?? null;
+                        $address->postal_code = $addrData['postal_code'] ?? $addrData['zip'] ?? null;
+                        $address->country = $country ?: '';
+                        $address->save();
+                    }
+                }
+            }
+        }
+
+        // Create order via service (keeps logging and higher-level behavior)
         $order = $orders->createFromCart($cart, $data);
 
         Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id()]);

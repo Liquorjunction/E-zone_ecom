@@ -279,17 +279,40 @@
                 Shipping Address
               </h2>
               <div class="space-y-5">
-                @if(isset($addresses) && $addresses->isNotEmpty())
+                @if(Auth::check())
                   <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Saved Addresses</label>
-                    <select id="savedAddressSelect" class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Saved Addresses <span class="text-xs text-gray-500">({{ $addresses->count() }} saved)</span></label>
+                    <select id="savedAddressSelect" name="saved_address_id" class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white">
                       <option value="">Use a new address</option>
-                      @foreach($addresses as $addr)
+                      @forelse($addresses as $addr)
                         <option value="{{ $addr->id }}" data-addr='@json($addr)'>{{ $addr->address_label ?? ($addr->street . ', ' . $addr->city . ' ' . $addr->postal_code) }}</option>
-                      @endforeach
+                      @empty
+                        <option value="" disabled>No saved addresses</option>
+                      @endforelse
                     </select>
                   </div>
                 @endif
+
+                <script>
+                  (function(){
+                    const sel = document.getElementById('savedAddressSelect');
+                    if (!sel) return;
+                    sel.addEventListener('change', function(){
+                      const opt = sel.options[sel.selectedIndex];
+                      if (!opt || !opt.dataset || !opt.dataset.addr) return;
+                      try {
+                        const addr = JSON.parse(opt.dataset.addr);
+                        // populate form fields
+                        document.getElementById('firstName').value = addr.name ? (addr.name.split(' ')[0] || addr.name) : '';
+                        document.getElementById('lastName').value = addr.name ? (addr.name.split(' ').slice(1).join(' ') || '') : '';
+                        document.getElementById('address').value = addr.street || '';
+                        document.getElementById('city').value = addr.city || '';
+                        document.getElementById('state').value = addr.state || '';
+                        document.getElementById('zip').value = addr.postal_code || addr.postcode || addr.zip || '';
+                      } catch (e) { /* ignore parse errors */ }
+                    });
+                  })();
+                </script>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
@@ -319,6 +342,14 @@
                     <input type="text" id="zip" name="zip" required class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                   </div>
                 </div>
+                @auth
+                  <div class="mt-3">
+                    <label class="inline-flex items-center text-sm">
+                      <input type="checkbox" name="save_address" value="1" class="form-checkbox h-4 w-4 text-primary mr-2">
+                      Save this address to my account
+                    </label>
+                  </div>
+                @endauth
               </div>
             </div>
 
@@ -352,10 +383,23 @@
                 <span class="w-1.5 h-8 rounded-full bg-gradient-to-b from-primary to-primary/60 mr-3"></span>
                 Payment Method
               </h2>
-              <label class="flex items-center p-5 border-2 border-primary bg-primary/5 rounded-xl cursor-pointer mb-6">
-                <input type="radio" name="payment" value="card" checked class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
-                <span class="ml-4 font-semibold text-gray-900">Credit / Debit Card</span>
-              </label>
+              <div class="space-y-4 mb-6">
+                <label class="flex items-center p-4 border-2 border-primary rounded-xl cursor-pointer bg-primary/5">
+                  <input type="radio" name="payment_method" value="card" checked class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
+                  <span class="ml-4 font-semibold text-gray-900">Credit / Debit Card</span>
+                </label>
+
+                <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
+                  <input type="radio" name="payment_method" value="paypal" class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
+                  <span class="ml-4 font-semibold text-gray-900">PayPal</span>
+                </label>
+
+                <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
+                  <input type="radio" name="payment_method" value="cod" class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
+                  <span class="ml-4 font-semibold text-gray-900">Cash on Delivery</span>
+                </label>
+              </div>
+
               <div id="cardDetails" class="space-y-5">
                 <div>
                   <label for="cardNumber" class="block text-sm font-semibold text-gray-700 mb-2">Card Number *</label>
@@ -372,6 +416,20 @@
                   </div>
                 </div>
               </div>
+              <script>
+                (function(){
+                  const radios = document.querySelectorAll('input[name="payment_method"]');
+                  const cardDetails = document.getElementById('cardDetails');
+                  function update() {
+                    const sel = document.querySelector('input[name="payment_method"]:checked')?.value;
+                    if (sel === 'card') cardDetails.style.display = '';
+                    else cardDetails.style.display = 'none';
+                  }
+                  radios.forEach(r => r.addEventListener('change', update));
+                  // init
+                  update();
+                })();
+              </script>
             </div>
           </div>
 

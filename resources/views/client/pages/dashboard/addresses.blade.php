@@ -17,9 +17,9 @@
 
     <div id="addresses-grid" class="space-y-8">
       @php
-        $all = collect($addresses ?? []);
-        $shipping = $all->where('type', 'shipping')->values();
-        $billing = $all->where('type', 'billing')->values();
+        // If controller supplied pre-sorted collections use them, otherwise fallback
+        $shipping = $shipping ?? (collect($addresses ?? [])->where('type', 'shipping')->values());
+        $billing = $billing ?? (collect($addresses ?? [])->where('type', 'billing')->values());
       @endphp
 
       <section>
@@ -27,6 +27,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           @forelse($shipping as $address)
             <div id="address-card-{{ $address->id }}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address="{{ json_encode($address) }}" data-id="{{ $address->id }}">
+              <input type="hidden" class="address-card-input-id" value="{{ $address->id }}">
           <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -105,6 +106,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           @forelse($billing as $address)
             <div id="address-card-{{ $address->id }}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address="{{ json_encode($address) }}" data-id="{{ $address->id }}">
+              <input type="hidden" class="address-card-input-id" value="{{ $address->id }}">
               <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
@@ -153,7 +155,7 @@
         </div>
       </section>
 
-      @if($all->count() === 0)
+      @if( ( ($shipping->count() ?? 0) + ($billing->count() ?? 0) ) === 0 )
         <div class="col-span-full text-center py-16">
           <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
             <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -383,12 +385,14 @@
       if(!confirm('Set this address as your default?')) return;
       const token = getCsrfToken();
       try{
-        const res = await fetch('{{ url('/client/addresses') }}/' + id + '/default', {
+        const res = await fetch('{{ url('/client/addresses/default') }}', {
           method: 'POST',
           headers: {
             'X-CSRF-TOKEN': token,
-            'Accept': 'application/json'
-          }
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id: id })
         });
         const json = await res.json();
         if(!res.ok){
@@ -493,44 +497,76 @@
     // Open Edit Modal from Element
     function openEditModalFromElem(elem){
       const card = elem.closest('.address-card');
-      if(!card) return;
-      let data = {};
-      const raw = card.dataset.address || '';
-      try{
-        data = JSON.parse(raw);
-      }catch(e){
-        // try common fallbacks for encoded entities
-        try {
-          const replaced = raw.replace(/&quot;/g, '"').replace(/&apos;/g, "'");
-          data = JSON.parse(replaced);
-        } catch(e2) {
-          try {
-            data = JSON.parse(decodeURIComponent(raw));
-          } catch(e3) {
-            console.error("Error parsing address data", e3);
-            data = {};
+        if(!card) return;
+        // Prefer simple id extraction first (dataset, hidden input, element id)
+        let idCandidate = card.dataset && card.dataset.id ? card.dataset.id : null;
+        if(!idCandidate){
+          const h = card.querySelector('.address-card-input-id');
+          if(h && h.value) idCandidate = h.value;
+        }
+        if(!idCandidate && card.id){
+          const m = card.id.match(/address-card-(\d+)/);
+          if(m && m[1]) idCandidate = m[1];
+        }
+
+        let data = {};
+        if(idCandidate) data.id = idCandidate;
+
+        // Attempt to parse full JSON payload to populate fields, merging but keeping id
+        const raw = card.dataset.address || '';
+        if(raw){
+          try{
+            const parsed = JSON.parse(raw);
+            if(parsed && typeof parsed === 'object') data = Object.assign({}, parsed, data);
+          }catch(e){
+            try {
+              const replaced = raw.replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+              const parsed = JSON.parse(replaced);
+              if(parsed && typeof parsed === 'object') data = Object.assign({}, parsed, data);
+            } catch(e2) {
+              try {
+                const parsed = JSON.parse(decodeURIComponent(raw));
+                if(parsed && typeof parsed === 'object') data = Object.assign({}, parsed, data);
+              } catch(e3) {
+                console.warn("Could not parse address JSON payload; proceeding with id-only fallback.", e3);
+              }
+            }
           }
         }
-      }
 
-      // fallback to data-id attribute when JSON parsing doesn't provide id
-      if((!data || !data.id) && card.dataset.id){
-        data = data || {};
-        data.id = card.dataset.id;
-      }
-
-      if(window.innerWidth < 640) {
-        openMobileEditForm(data);
-      } else {
-        openEditModal(data);
-      }
+        if(window.innerWidth < 640) {
+          openMobileEditForm(data);
+        } else {
+          openEditModal(data, card);
+        }
     }
 
     // Desktop Edit Modal
-    function openEditModal(data){
+    function openEditModal(data, cardElem){
+      // Ensure we have an id, try fallback to card element if provided
+      if((!data || !data.id) && cardElem){
+        try{
+          const hidden = cardElem.querySelector('.address-card-input-id');
+          if(hidden && hidden.value) data = data || {}, data.id = hidden.value;
+        }catch(e){}
+        if((!data || !data.id) && cardElem.id){
+          const m = cardElem.id.match(/address-card-(\d+)/);
+          if(m && m[1]) data = data || {}, data.id = m[1];
+        }
+        if((!data || !data.id) && cardElem.dataset && cardElem.dataset.id){
+          data = data || {};
+          data.id = cardElem.dataset.id;
+        }
+      }
+
+      if(!data || !data.id){
+        alert('Address id missing — cannot edit this address.');
+        return;
+      }
+
       document.getElementById('addr-modal-title').textContent = 'Edit Address';
-      document.getElementById('address-form').action = '{{ url('/client/addresses') }}' + '/' + data.id;
-      document.getElementById('form-method').value = 'PUT';
+      document.getElementById('address-form').action = '{{ url('/client/addresses/update') }}';
+      document.getElementById('form-method').value = 'POST';
       document.getElementById('address-id').value = data.id || '';
 
       const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
@@ -560,8 +596,8 @@
     // Mobile Edit Form
     function openMobileEditForm(data){
       document.getElementById('mobile-form-title').textContent = 'Edit Address';
-      document.getElementById('mobile-address-form-element').action = '{{ url('/client/addresses') }}' + '/' + data.id;
-      document.getElementById('mobile-form-method').value = 'PUT';
+      document.getElementById('mobile-address-form-element').action = '{{ url('/client/addresses/update') }}';
+      document.getElementById('mobile-form-method').value = 'POST';
       document.getElementById('mobile-address-id').value = data.id || '';
 
       const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
@@ -607,8 +643,9 @@
       submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5 inline mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
 
       try{
+        // Always POST form submissions to match AJAX endpoints; `_method` stays in FormData for server-side
         const res = await fetch(url, {
-          method: method === 'GET' ? 'POST' : method,
+          method: 'POST',
           headers: {
             'X-CSRF-TOKEN': token,
             'Accept': 'application/json'
@@ -625,25 +662,30 @@
         }
 
         const data = json.data || json;
+        const jsonResp = json; // preserve full response
 
-        // Update or add card
+        // Update or add card using server-rendered HTML
         const existing = document.getElementById('address-card-' + data.id);
-        const newCardHTML = renderAddressCardHTML(data);
+        const newCardHtml = jsonResp.html || null;
+        if(newCardHtml){
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = newCardHtml.trim();
+          const newCard = tempDiv.firstElementChild;
 
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = newCardHTML;
-        const newCard = tempDiv.firstElementChild;
+          if(existing){
+            existing.replaceWith(newCard);
+          } else {
+            const grid = document.getElementById('addresses-grid');
+            const emptyMsg = grid.querySelector('.col-span-full');
+            if(emptyMsg) emptyMsg.remove();
 
-        if(existing){
-          existing.replaceWith(newCard);
-        } else {
-          const grid = document.getElementById('addresses-grid');
-          const emptyMsg = grid.querySelector('.col-span-full');
-          if(emptyMsg) emptyMsg.remove();
-
-          const addBtn = grid.querySelector('button[onclick="openAddModal()"]');
-          if(addBtn) grid.insertBefore(newCard, addBtn);
-          else grid.appendChild(newCard);
+            const addBtn = grid.querySelector('button[onclick="openAddModal()"]');
+            if (addBtn && addBtn.parentNode === grid) {
+              grid.insertBefore(newCard, addBtn);
+            } else {
+              grid.appendChild(newCard);
+            }
+          }
         }
 
         if(isMobile) closeMobileForm();
@@ -672,6 +714,7 @@
 
       return `
         <div id="address-card-${data.id}" class="address-card group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/30" data-address='${safeJson}' data-id='${data.id}'>
+          <input type="hidden" class="address-card-input-id" value="${data.id}">
           <div class="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -708,12 +751,14 @@
       if(!confirm('Are you sure you want to delete this address?')) return;
       const token = getCsrfToken();
       try{
-        const res = await fetch('{{ url('/client/addresses') }}/' + id, {
-          method: 'DELETE',
+        const res = await fetch('{{ url('/client/addresses/delete') }}', {
+          method: 'POST',
           headers: {
             'X-CSRF-TOKEN': token,
-            'Accept': 'application/json'
-          }
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id: id })
         });
         const json = await res.json();
         if(!res.ok){

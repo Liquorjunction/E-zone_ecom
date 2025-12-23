@@ -22,6 +22,7 @@ class OrderRepository implements OrderRepositoryInterface
                 'status' => 'pending',
                 'shipping_address' => $data['shipping_address'] ?? null,
                 'payment_method' => $data['payment_method'] ?? null,
+                'phone_no' => $data['phone_no'] ?? null,
                 'order_number' => 'EZ-ORD-'.uniqid(),
             ]);
 

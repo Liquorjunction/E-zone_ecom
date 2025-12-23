@@ -115,7 +115,9 @@ Route::middleware('auth')->group(function () {
 // Client addresses endpoints (AJAX-driven from dashboard)
 Route::prefix('client')->middleware('auth')->group(function () {
     Route::post('/addresses', [AddressController::class, 'store']);
-    Route::put('/addresses/{id}', [AddressController::class, 'update']);
-    Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
-    Route::post('/addresses/{id}/default', [AddressController::class, 'setDefault']);
+    // AJAX endpoints without URL parameters: id is passed in request body
+    Route::post('/addresses/show', [AddressController::class, 'show']);
+    Route::post('/addresses/update', [AddressController::class, 'update']);
+    Route::post('/addresses/delete', [AddressController::class, 'destroy']);
+    Route::post('/addresses/default', [AddressController::class, 'setDefault']);
 });

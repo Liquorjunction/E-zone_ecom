@@ -16,7 +16,15 @@ class OrderCheckoutRequest extends FormRequest
     {
         return [
             'shipping_address' => ['nullable','array'],
-            'payment_method' => ['nullable','string'],
+            // Payment
+            'payment_method' => ['required','string','in:card,paypal,cod,cash,bank_transfer,other'],
+
+            // Card fields: required only when `payment_method` is `card`
+            'cardNumber' => ['nullable','string','required_if:payment_method,card','digits_between:12,19'],
+            'expiry' => ['nullable','string','required_if:payment_method,card'],
+            'cvv' => ['nullable','string','required_if:payment_method,card','digits_between:3,4'],
+
+            'phone' => ['nullable','string'],
         ];
     }
 }

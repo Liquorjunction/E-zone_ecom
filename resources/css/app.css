@@ -235,7 +235,6 @@ input:focus-visible {
 
 /* Image lazy loading blur effect */
 img[loading="lazy"] {
-    filter: blur(5px);
     transition: filter 0.3s;
 }
 

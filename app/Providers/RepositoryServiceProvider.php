@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Http\Repositories\Client\Interfaces\AddressRepositoryInterface;
+use App\Repositories\Client\Interfaces\AddressRepositoryInterface;
 use App\Models\Inventory;
 use App\Repositories\Admin\Interfaces\AboutUsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
