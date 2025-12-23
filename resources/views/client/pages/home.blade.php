@@ -111,7 +111,7 @@
         <div class="relative overflow-hidden">
             <div class="flex transition-transform duration-500 ease-out"
                 :style="`transform: translateX(-${currentSlide * 100}%)`">
-                @foreach ($categories->chunk(12) as $categoryChunk)
+                @foreach ($categories->chunk(6) as $categoryChunk)
                 <div class="w-full flex-shrink-0">
                     <div
                         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
@@ -158,9 +158,12 @@
 </section>
 
 {{-- Featured Promotional Banners Carousel --}}
+@php
+    $chunks = $cards->take(4)->chunk(2);
+@endphp
 <section class="py-8 sm:py-12 bg-white" x-data="{
         currentBanner: 0,
-        totalBanners: {{ $cards->count() }},
+        totalBanners: {{ $chunks->count() }},
         autoplay: null,
         init() {
             this.startAutoplay();
@@ -182,49 +185,54 @@
     }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="relative">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
-                @foreach ($cards->take(4) as $card)
-                @php
-                $bgClass = $loop->iteration % 2 == 1 ? 'from-indigo-600 to-primary' : 'from-gray-800 to-gray-900';
-                $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
-                $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
-                @endphp
-                <a href="{{ $card->link ?? '#' }}"
-                    x-show="currentBanner === {{ $loop->index }} || currentBanner === {{ $loop->index }} + 2"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 transform translate-x-full"
-                    x-transition:enter-end="opacity-100 transform translate-x-0"
-                    x-transition:leave="transition ease-in duration-300"
-                    x-transition:leave-start="opacity-100 transform translate-x-0"
-                    x-transition:leave-end="opacity-0 transform -translate-x-full"
-                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br {{ $bgClass }} min-h-[280px] sm:min-h-[320px] flex items-center">
-                    <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
-                        class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40 group-hover:scale-105 transition-transform duration-700">
+            <div class="overflow-hidden">
+                @foreach ($chunks as $chunk)
+                <div x-show="currentBanner === {{ $loop->index }}"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform translate-x-full"
+                     x-transition:enter-end="opacity-100 transform translate-x-0"
+                     x-transition:leave="transition ease-in duration-300"
+                     x-transition:leave-start="opacity-100 transform translate-x-0"
+                     x-transition:leave-end="opacity-0 transform -translate-x-full"
+                     class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    @foreach ($chunk as $card)
+                    @php
+                        // remove gradient background so images show directly
+                        $bgClass = '';
+                        $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
+                        $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
+                    @endphp
+                    <a href="{{ $card->link ?? '#' }}"
+                        class="group relative overflow-hidden rounded-2xl bg-transparent min-h-[280px] sm:min-h-[320px] flex items-center">
+                        <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
+                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
 
-                    <div class="relative z-10 p-8 sm:p-10 lg:p-12">
-                        <span
-                            class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
-                            {{ $firstTag }}
-                        </span>
-                        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
-                            {{ $card->title }}
-                        </h3>
-                        <p class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2">
-                            {{ $card->description }}
-                        </p>
-                        @if ($card->link_text)
-                        <span
-                            class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
-                            {{ $card->link_text }}
-                            <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </span>
-                        @endif
-                    </div>
-                </a>
+                        <div class="relative z-10 p-8 sm:p-10 lg:p-12">
+                            <span
+                                class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+                                {{ $firstTag }}
+                            </span>
+                            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
+                                {{ $card->title }}
+                            </h3>
+                            <p class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2">
+                                {{ $card->description }}
+                            </p>
+                            @if ($card->link_text)
+                            <span
+                                class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
+                                {{ $card->link_text }}
+                                <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </span>
+                            @endif
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
                 @endforeach
             </div>
 
@@ -245,9 +253,9 @@
 
         {{-- Dots Indicator --}}
         <div class="flex justify-center gap-2 mt-6">
-            <template x-for="i in Math.ceil(totalBanners / 2)" :key="i">
-                <button @click="currentBanner = (i - 1) * 2"
-                    :class="Math.floor(currentBanner / 2) === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
+            <template x-for="i in totalBanners" :key="i">
+                <button @click="currentBanner = i - 1"
+                    :class="currentBanner === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
                     class="h-2 rounded-full transition-all duration-300"></button>
             </template>
         </div>
