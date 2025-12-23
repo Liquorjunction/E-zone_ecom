@@ -1,102 +1,141 @@
 @extends('admin.layouts.app')
-@section('title', 'Edit Brands')
+@section('title', 'Edit Brand')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between">
-                        <div class="header-title">
-                            <h4 class="card-title">Edit Brands</h4>
+<div class="container-fluid content-inner mt-n5 py-0">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Edit Brand</h4>
+            <a href="{{ route('admin.brands.index') }}" class="btn btn-sm btn-primary">
+                <i class="fa fa-arrow-left mr-2"></i>Back
+            </a>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('admin.brands.update') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="id" value="{{ $brand->id }}">
+
+                <div class="row g-3">
+                    {{-- Left Column: Main Inputs --}}
+                    <div class="col-lg-8 col-md-12">
+
+                        {{-- Language Tabs & Translate Button --}}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <ul class="nav nav-tabs" id="langTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en" type="button" role="tab">English</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr" type="button" role="tab">French</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar" type="button" role="tab">Arabic</button>
+                                </li>
+                            </ul>
+
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-translate-all"
+                                data-url="{{ route('admin.translate.batch') }}"
+                                data-fields='["name"]'>
+                                <i class="fas fa-language me-1"></i> Auto Translate
+                            </button>
                         </div>
-                        <a href="{{ route('admin.brands.index') }}" class="btn btn-sm btn-primary">Back</a>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('admin.brands.update') }}" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="id" value="{{ $brand->id }}">
 
-                            <div class="row">
-                                <div class="col-xl-12 col-lg-7">
-                                    <div class="card">
-                                        <div class="card-body">
-
-                                            <ul class="nav nav-tabs mb-3" id="langTab" role="tablist">
-                                                <li class="nav-item">
-                                                    <button class="nav-link active" id="en-tab" data-bs-toggle="tab"
-                                                        data-bs-target="#en" type="button" role="tab">English
-                                                        (Default)</button>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <button class="nav-link" id="fr-tab" data-bs-toggle="tab"
-                                                        data-bs-target="#fr" type="button" role="tab">French</button>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <button class="nav-link" id="ar-tab" data-bs-toggle="tab"
-                                                        data-bs-target="#ar" type="button" role="tab">Arabic</button>
-                                                </li>
-                                            </ul>
-
-                                            <div class="tab-content" id="langTabContent">
-                                                <div class="tab-pane fade show active" id="en">
-                                                    <div class="form-group mb-3">
-                                                        <label class="form-label">Name (EN) <span class="text-danger">*</span></label>
-                                                        <input type="text" name="name[en]" class="form-control" value="{{ $brand->getTranslation('name', 'en') }}" required>
-                                                    </div>
-                                                </div>
-                                                <div class="tab-pane fade" id="fr">
-                                                    <div class="form-group mb-3">
-                                                        <label class="form-label">Name (FR)</label>
-                                                        <input type="text" name="name[fr]" class="form-control" value="{{ $brand->getTranslation('name', 'fr') }}">
-                                                    </div>
-                                                </div>
-                                                <div class="tab-pane fade" id="ar">
-                                                    <div class="form-group mb-3" dir="rtl">
-                                                        <label class="form-label">Name (AR)</label>
-                                                        <input type="text" name="name[ar]" class="form-control" value="{{ $brand->getTranslation('name', 'ar') }}">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
+                        <div class="tab-content" id="langTabContent">
+                            {{-- English --}}
+                            <div class="tab-pane fade show active" id="en" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="name_en" class="form-label">Brand Name (EN) <span class="text-danger">*</span></label>
+                                    <input type="text" name="name[en]" id="name_en" class="form-control"
+                                           value="{{ old('name.en', $brand->getTranslation('name', 'en')) }}"
+                                           required>
+                                    @error('name.en')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
+
+                            {{-- French --}}
+                            <div class="tab-pane fade" id="fr" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="name_fr" class="form-label">Brand Name (FR)</label>
+                                    <input type="text" name="name[fr]" id="name_fr" class="form-control"
+                                           value="{{ old('name.fr', $brand->getTranslation('name', 'fr')) }}">
+                                </div>
+                            </div>
+
+                            {{-- Arabic --}}
+                            <div class="tab-pane fade" id="ar" role="tabpanel">
+                                <div class="mb-3" dir="rtl">
+                                    <label for="name_ar" class="form-label">Brand Name (AR)</label>
+                                    <input type="text" name="name[ar]" id="name_ar" class="form-control"
+                                           value="{{ old('name.ar', $brand->getTranslation('name', 'ar')) }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Update Brand</button>
+                            <a href="{{ route('admin.brands.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                        </div>
+                    </div>
+
+                    {{-- Right Column: Sidebar (Image & Status) --}}
+                    <div class="col-lg-4 col-md-12">
+                        <div class="card border-1 p-3 shadow-sm">
 
                             {{-- Image Upload --}}
-                            <div class="row">
-                                <div class="col-xl-12 col-lg-7">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="form-group mb-3">
-                                                <label class="form-label">Image</label>
-                                                <input type="file" name="image" class="form-control" accept="image/*">
-                                                @if($brand->image && \Storage::disk('public')->exists($brand->image))
-                                                    <div class="mt-2">
-                                                        <img src="{{ asset('storage/'.$brand->image) }}" width="80" class="rounded">
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="text-center mb-3">
+                                <label class="form-label fw-bold small text-uppercase text-muted">
+                                    Brand Logo <br>
+                                    <span class="text-info" style="font-size: 0.8em; text-transform: none;">(Recommended: Square 1:1)</span>
+                                </label>
+                                <div class="bg-light p-2 rounded mb-2">
+                                    <img id="iconPreview"
+                                         src="{{ $brand->image ? asset('storage/'.$brand->image) : asset('assets/images/no-image.png') }}"
+                                         alt="Icon preview"
+                                         class="img-fluid rounded"
+                                         style="max-width: 120px; max-height: 120px; object-fit: cover;">
                                 </div>
+                                <input id="brand-icon" type="file" name="image" class="form-control form-control-sm" accept="image/*">
+                                <div class="form-text mt-1 text-xs">Accepted: jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif. Max 2MB.</div>
+                                <div class="form-text mt-0 text-xs text-muted">Leave empty to keep current image.</div>
+                                <div class="mt-2 text-danger small" id="iconFeedback" style="display:none;"></div>
+                                @error('image')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
-                            <div class="form-group">
-                                <label class="form-label">Status:</label>
+                            <hr class="my-3">
+
+                            {{-- Status Switch --}}
+                            <div class="mb-3">
+                                <label class="form-label d-block fw-bold">Status</label>
+                                <input type="hidden" name="status" value="inactive">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="status" value="active" {{ $brand->status == 'active' ? 'checked' : '' }}>
-                                    <label class="form-check-label">Active</label>
+                                    <input class="form-check-input" type="checkbox" id="statusSwitch" name="status" value="active"
+                                           {{ $brand->status == 'active' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="statusSwitch">Active</label>
                                 </div>
                             </div>
-
-                            <button type="submit" class="btn btn-primary">Update Brand</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
+</div>
 @endsection
+
+@push('scripts')
+    {{-- Include common image preview logic --}}
+    <script src="{{ asset('admin_assets/js/cat/subcat_image-preview.js') }}"></script>
+    <script>
+        // Initialize for Brand Form
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof setupImagePreview === 'function') {
+                setupImagePreview('brand-icon', 'iconPreview', 'iconFeedback');
+            }
+        });
+    </script>
+@endpush

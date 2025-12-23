@@ -22,7 +22,7 @@ class StoreCategoryRequest extends FormRequest
             'category-name.ar' => 'nullable|string|max:255',
 
             // Standard Fields
-            'category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'category-icon' => 'required|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
             'status' => 'nullable', // Processed in controller/repo
         ];
     }
@@ -31,6 +31,10 @@ class StoreCategoryRequest extends FormRequest
     {
         return [
             'category-name.en.required' => 'The English category name is required.',
+            'category-icon.required' => 'The category icon is required.',
+            'category-icon.image' => 'The category icon must be an image file.',
+            'category-icon.mimes' => 'The category icon must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
+            'category-icon.max' => 'The category icon must not be greater than 2MB.',
         ];
     }
 }

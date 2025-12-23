@@ -32,10 +32,10 @@ class StoreProductRequest extends FormRequest
             'sub_category_id' => 'required|exists:sub-categories,id',
 
             // Images
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:2048',
+            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:2048',
             // New gallery field name used by repository — accept both for compatibility
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:2048',
             'gallery_images_existing' => 'nullable|array',
             'gallery_images_variant_id' => 'nullable|integer',
 

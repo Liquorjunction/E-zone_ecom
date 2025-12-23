@@ -299,7 +299,7 @@ class ProductController extends Controller
 
         return response()->stream($callback, 200, [
             'Content-type' => '.xls/xlsx/csv',
-            'Content-Disposition' => 'attachment; filename=products_import_template.csv',
+            'Content-Disposition' => 'attachment; filename=product_template.csv',
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',

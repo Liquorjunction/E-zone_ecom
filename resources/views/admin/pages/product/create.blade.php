@@ -152,10 +152,13 @@
                                         </div>
 
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Cover Image <span
-                                                    class="text-danger">*</span></label>
+                                            <label class="form-label">
+                                                Cover Image <span class="text-muted">(Recommended: 800x800px)</span>
+                                                <span class="text-danger">*</span></label>
                                             <input type="file" name="cover_image" class="form-control"
                                                 accept="image/*" required>
+                                                <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
+                                                <span class="text-danger d-block">Max size: 2MB.</span>
                                         </div>
 
                                         <div class="col-md-4 mb-3">
@@ -297,8 +300,13 @@
                                                                     <input type="hidden" name="variants[{{ $index }}][name][fr]" class="variant-name-fr" value="{{ $variant['name']['fr'] ?? '' }}">
                                                                     <input type="hidden" name="variants[{{ $index }}][name][ar]" class="variant-name-ar" value="{{ $variant['name']['ar'] ?? '' }}">
                                                                     <div class="mt-2">
-                                                                        <label class="small text-muted">Upload Images</label>
+                                                                        <label class="small text-muted">
+                                                                            Upload Images <span class="text-muted">(You can select multiple)</span>
+                                                                            <span class="text-danger">*</span>
+                                                                        </label>
                                                                         <input type="file" name="variants[{{ $index }}][images][]" class="form-control form-control-sm" multiple accept="image/*">
+                                                                        <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
+                                                                        <span class="text-danger d-block">Max size per image: 2MB.</span>
                                                                     </div>
                                                                 </td>
                                                                 <td style="vertical-align: top;">

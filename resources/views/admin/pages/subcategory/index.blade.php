@@ -35,7 +35,6 @@
                                         <th>#</th>
                                         <th>Name</th>
                                         <th>Parent Category</th>
-                                        <th>Image</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>

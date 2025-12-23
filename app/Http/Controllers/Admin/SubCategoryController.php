@@ -116,13 +116,6 @@ class SubCategoryController extends Controller
             ->addColumn('category_name', function ($subCategory) {
                 return $subCategory->category ? $subCategory->category->getTranslation('category-name', 'en') : 'N/A';
             })
-            ->addColumn('image', function ($subCategory) {
-                if ($subCategory->{'sub-category-icon'} && Storage::disk('public')->exists($subCategory->{'sub-category-icon'})) {
-                    return '<img src="'.asset('storage/'.$subCategory->{'sub-category-icon'}).'" alt="SubCategory Image" class="img-thumbnail" width="50">';
-                }
-
-                return 'N/A';
-            })
             ->addColumn('is_active', function ($subCategory) use ($request) {
                 $data['toggle_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.subcategories.toggleStatus', ['id' => $subCategory->id]) : '';
                 $data['status'] = $subCategory->status;
@@ -137,7 +130,7 @@ class SubCategoryController extends Controller
 
                 return view('admin.partials.datatable-actions', $data)->render();
             })
-            ->rawColumns(['action', 'image', 'is_active'])
+            ->rawColumns(['action', 'is_active'])
             ->make(true);
     }
 

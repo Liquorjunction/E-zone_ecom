@@ -161,9 +161,11 @@
                                         </div>
 
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Update Cover Image</label>
+                                            <label class="form-label">Update Cover Image <span class="text-muted">(Recommended: 800x800px)</span></label>
                                             <input type="file" name="cover_image" class="form-control"
                                                 accept="image/*">
+                                            <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
+                                            <span class="text-danger d-block">Max size: 2MB.</span>
                                             @if ($product->cover_image)
                                                 <div class="mt-2">
                                                     <img src="{{ asset('storage/' . $product->cover_image) }}"
@@ -303,7 +305,7 @@
                                                 <label class="form-label mb-0"><strong>Product Variants</strong></label>
                                                 <button type="button" class="btn btn-sm btn-success"
                                                     id="add-variant-btn">
-                                                    <i class="fas fa-plus"></i> Add New Variant
+                                                    <i class="bi bi-plus"></i> Add New Variant
                                                 </button>
                                             </div>
                                             <div class="alert alert-light border small">

@@ -24,7 +24,7 @@ class UpdateSubCategoryRequest extends FormRequest
             'sub-category-name.ar' => 'nullable|string|max:255',
 
             'category_id' => 'required|exists:categories,id',
-            'sub-category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'sub-category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
             'status' => 'nullable',
         ];
     }
