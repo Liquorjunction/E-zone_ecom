@@ -88,6 +88,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\Client\Interfaces\CartRepositoryInterface::class, \App\Repositories\Client\Repositories\CartRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\OrderRepositoryInterface::class, \App\Repositories\Client\Repositories\OrderRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\AddressRepositoryInterface::class, \App\Repositories\Client\Repositories\AddressRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\WishlistRepositoryInterface::class, \App\Repositories\Client\Repositories\WishlistRepository::class);
     }
 
     /**

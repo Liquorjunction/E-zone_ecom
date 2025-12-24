@@ -3,34 +3,45 @@
 @section('dashboard-title', 'My Wishlist')
 
 @section('dashboard-content')
-  @php
-    // Set to true or false to test the empty state
-    $hasItems = true;
-  @endphp
-
-  @if($hasItems)
+  @if(isset($wishlist) && $wishlist->count())
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      @for($i = 1; $i <= 8; $i++)
-      <div class="bg-white rounded-2xl shadow-sm overflow-hidden group border-2 border-gray-100">
-        <a href="#" class="block relative aspect-square bg-gray-100 overflow-hidden">
-          <img src="https://via.placeholder.com/300x300?text=Product+{{$i}}" alt="Product {{$i}}" class="w-full h-full object-cover ...">
-          <button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-red-500">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
-          </button>
-        </a>
-        <div class="p-4">
-          <a href="#"><h3 class="font-semibold text-gray-900 ...">Sample Product Name {{$i}}</h3></a>
-          <div class="flex items-center mb-2">
-            <div class="flex items-center text-yellow-400 text-sm">★★★★☆</div>
-            <span class="ml-2 text-sm text-gray-500">({{ rand(10, 100) }})</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-lg font-bold text-primary">${{ rand(99, 299) }}.99</span>
-            <button class="px-4 py-2 bg-primary/10 text-primary font-semibold rounded-lg ...">Add to Cart</button>
+      @foreach($wishlist as $item)
+        @php
+          $variant = $item->productVariant ?? null;
+          $master = $variant?->product ?? null;
+          $locale = app()->getLocale() ?? 'en';
+          $name = $master?->getTranslation('name', $locale) ?? ($variant?->getTranslation('variant_name', $locale) ?? ($variant->name ?? 'Product'));
+          $variantSlug = $variant?->slug ?? null;
+          $productSlug = $master?->slug ?? null;
+          $image = optional($variant?->images()->ordered()->first())->image_path ?? optional($master?->images()->forProduct($master?->id)->ordered()->first())->image_path ?? $master?->cover_image ?? null;
+          $imageUrl = $image ? asset('storage/' . $image) : 'https://via.placeholder.com/300x300?text=No+Image';
+          $price = $variant?->price ?? $master?->real_price ?? $master?->price ?? 0;
+        @endphp
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden group border-2 border-gray-100">
+          <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
+            <img src="{{ $imageUrl }}" alt="{{ $name }}" class="w-full h-full object-cover">
+            <button type="button" data-product-variant-id="{{ $variant?->id }}" data-init-wishlisted="1" class="wishlist-btn absolute top-4 right-4 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-red-500">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+            </button>
+          </a>
+          <div class="p-4">
+            <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}"><h3 class="font-semibold text-gray-900">{{ $name }}</h3></a>
+            <div class="flex items-center mb-2">
+              <div class="flex items-center text-yellow-400 text-sm">★★★★☆</div>
+              <span class="ml-2 text-sm text-gray-500">({{ rand(10, 100) }})</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-lg font-bold text-primary">${{ number_format($price, 2) }}</span>
+              <form method="post" action="#">
+                @csrf
+                <input type="hidden" name="product_variant_id" value="{{ $variant?->id }}">
+                <button type="button" class="px-4 py-2 bg-primary/10 text-primary font-semibold rounded-lg">Add to Cart</button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
-      @endfor
+      @endforeach
     </div>
   @else
     <div class="flex items-center justify-center py-20 bg-white rounded-2xl border-2 border-gray-100">

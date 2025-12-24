@@ -10,6 +10,7 @@ use App\Http\Controllers\Client\OrderController;
 use App\Http\Controllers\Client\AddressController;
 use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\ProductController;
+use App\Http\Controllers\Client\WishlistController;
 use App\Http\Controllers\Client\ShippingandReturnsController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
@@ -90,7 +91,7 @@ Route::middleware('auth')->group(function () {
         Route::view('/orders', 'client.pages.dashboard.orders')->name('orders');
         Route::view('/profile', 'client.pages.dashboard.profile')->name('profile');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
-        Route::view('/wishlist', 'client.pages.dashboard.wishlist')->name('wishlist');
+        Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
         Route::view('/security', 'client.pages.dashboard.security')->name('security');
         Route::view('/payment-methods', 'client.pages.dashboard.payments')->name('payments');
         Route::view('/rewards', 'client.pages.dashboard.rewards')->name('rewards');
@@ -120,4 +121,10 @@ Route::prefix('client')->middleware('auth')->group(function () {
     Route::post('/addresses/update', [AddressController::class, 'update']);
     Route::post('/addresses/delete', [AddressController::class, 'destroy']);
     Route::post('/addresses/default', [AddressController::class, 'setDefault']);
+    // Wishlist AJAX endpoints
+    Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
+    Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
+    Route::post('/wishlist/get', [WishlistController::class, 'getWishlist']);
+    Route::post('/wishlist/count', [WishlistController::class, 'countWishlist']);
+    Route::post('/wishlist/clear', [WishlistController::class, 'clearWishlist']);
 });

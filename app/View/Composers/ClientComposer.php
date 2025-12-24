@@ -26,5 +26,13 @@ class ClientComposer
             'categories' => $categories,
             'subCategories' => $categories->flatMap->subcategories,
         ]);
+
+        // Provide wishlist variant ids for the authenticated user to avoid per-item queries
+        $wishlistVariantIds = [];
+        if (auth()->check()) {
+            $wishlistVariantIds = \App\Models\Wishlist::where('user_id', auth()->id())->pluck('product_variant_id')->toArray();
+        }
+
+        $view->with('wishlistVariantIds', $wishlistVariantIds);
     }
 }

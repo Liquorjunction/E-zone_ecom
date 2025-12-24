@@ -48,8 +48,12 @@
     </div>
 
     <!-- Wishlist Button -->
-    <button class="absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50">
-      <svg class="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    @php
+      $variantId = $isVariant ? ($product->id ?? null) : ($master->productVariants()->ordered()->pluck('id')->first() ?? null);
+      $isWishlisted = isset($wishlistVariantIds) && $variantId ? in_array($variantId, $wishlistVariantIds) : false;
+    @endphp
+    <button type="button" data-product-variant-id="{{ $variantId }}" data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}" class="wishlist-btn absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 {{ $isWishlisted ? 'is-wishlisted' : '' }}" @if(!$variantId) disabled @endif>
+      <svg class="w-5 h-5 {{ $isWishlisted ? 'text-red-500' : 'text-gray-600' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
       </svg>
     </button>
