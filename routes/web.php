@@ -87,8 +87,8 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard (authenticated)
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::view('/', 'client.pages.dashboard.dashboard')->name('overview');
-        Route::view('/orders', 'client.pages.dashboard.orders')->name('orders');
+        Route::get('/', [HomeController::class, 'dashboard'])->name('overview');
+        Route::get('/orders', [HomeController::class, 'orders'])->name('orders');
         Route::view('/profile', 'client.pages.dashboard.profile')->name('profile');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');

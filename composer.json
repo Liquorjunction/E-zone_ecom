@@ -38,7 +38,8 @@
         "files": [
             "app/Helpers/AdminHelper.php",
             "app/Helpers/ClientHelper.php",
-            "app/Helpers/TranslationHelper.php"
+            "app/Helpers/TranslationHelper.php",
+            "app/Helpers/helpers.php"
         ]
     },
     "autoload-dev": {

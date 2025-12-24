@@ -6,7 +6,7 @@
 
             <x-breadcrumbs>
                 <x-slot:title>@yield('dashboard-title', 'My Account')</x-slot:title>
-                <x-slot:content>Welcome back, John Doe!</x-slot:content>
+                <x-slot:content>Welcome Back {{Auth::user()->name }}</x-slot:content>
             </x-breadcrumbs>
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -15,10 +15,14 @@
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 sticky top-24">
 
                         <div class="flex items-center gap-4 mb-6 pb-6 border-b-2 border-gray-100">
-                            <img src="https://via.placeholder.com/64x64" alt="User Avatar" class="w-16 h-16 rounded-full">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ Auth::user()->avatar }}" alt="User Avatar" class="w-16 h-16 rounded-full">
+                            @else
+                                <img src="{{ asset('images/avatar-placeholder.png') }}" alt="User Avatar" class="w-16 h-16 rounded-full">
+                            @endif
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">John Doe</h3>
-                                <p class="text-sm text-gray-600">john.doe@example.com</p>
+                                <h3 class="text-lg font-bold text-gray-900">{{ Auth::user()->name }}</h3>
+                                <p class="text-sm text-gray-600">{{ Auth::user()->email }}</p>
                             </div>
                         </div>
 
