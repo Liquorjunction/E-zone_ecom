@@ -266,23 +266,73 @@ document.addEventListener('DOMContentLoaded', () => {
     // Select2 & subcategory filtering
     // ---------------------------
     if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
-        const cfg = { allowClear: true, width: '100%' };
-        $('#brand-select, #category-select').select2(cfg);
+        // Initialize brand and category select2 with their own placeholder so allowClear shows correctly
+        $('#brand-select, #category-select, #subcategory-select').each(function () {
+            const $el = $(this);
+            const placeholder = $el.data('placeholder') || $el.attr('placeholder') || $el.find('option[value=""]').text() || '';
+            const options = { width: '100%', allowClear: true };
+            if (placeholder) options.placeholder = placeholder;
+            $el.select2(options);
+        });
 
         // capture all options for subcategory and rebuild on category change
-        const allOpts = [];
-        $('#subcategory-select option').each(function () { allOpts.push({ id: $(this).val(), text: $(this).text(), categoryId: $(this).attr('data-category') }); });
-        const $sub = $('#subcategory-select').select2({ ...cfg, placeholder: 'Select Sub Category' });
+        const cfg = { allowClear: true, width: '100%' };
+        // Prefer full list provided by server in edit mode (window.__ALL_SUBCATEGORIES)
+        const allOpts = (window.__ALL_SUBCATEGORIES && Array.isArray(window.__ALL_SUBCATEGORIES))
+            ? window.__ALL_SUBCATEGORIES
+            : (function(){ const tmp = []; $('#subcategory-select option').each(function () { tmp.push({ id: $(this).val(), text: $(this).text(), categoryId: $(this).attr('data-category') }); }); return tmp; })();
+        const $sub = $('#subcategory-select');
+
+        function setSubDisabled(disabled) {
+            $sub.prop('disabled', !!disabled);
+            try { $sub.trigger('change.select2'); } catch (e) { $sub.trigger('change'); }
+        }
 
         function rebuildSub() {
             const selCat = $('#category-select').val();
             const curVal = $sub.val();
-            $sub.empty().append('<option value="">Select Sub Category</option>');
-            allOpts.forEach(o => { if (!selCat || !o.categoryId || o.categoryId === selCat) $sub.append(new Option(o.text, o.id)); });
+
+            // Rebuild DOM options from original snapshot
+            const fragment = document.createDocumentFragment();
+            const placeholderOpt = new Option('Select Sub Category', '');
+            fragment.appendChild(placeholderOpt);
+            allOpts.forEach(o => {
+                if (selCat && o.categoryId && (String(o.categoryId) === String(selCat))) {
+                    const opt = new Option(o.text, o.id);
+                    opt.setAttribute('data-category', o.categoryId);
+                    fragment.appendChild(opt);
+                }
+            });
+
+            // destroy select2 instance if present, replace options, then re-init
+            const hadSelect2 = !!($sub.data('select2'));
+            if (hadSelect2) {
+                try { $sub.select2('destroy'); } catch (e) { /* ignore */ }
+            }
+
+            $sub.empty();
+            $sub[0].appendChild(fragment);
+
+            // Restore value if still available
             if (curVal && $sub.find(`option[value="${curVal}"]`).length) $sub.val(curVal);
-            $sub.trigger('change');
+            else $sub.val('');
+
+            // re-init select2 if it was present before
+            if (hadSelect2 && $.fn && $.fn.select2) {
+                $sub.select2({ ...cfg, placeholder: $sub.data('placeholder') || 'Select Sub Category' });
+            }
+
+            setSubDisabled(!selCat);
         }
-        $('#category-select').on('change', rebuildSub); setTimeout(rebuildSub, 200);
+
+        // Initially disable subcategory if no category selected
+        setSubDisabled(!$('#category-select').val());
+        $('#category-select').on('change', function () {
+            const has = !!$(this).val();
+            setSubDisabled(!has);
+            rebuildSub();
+        });
+        setTimeout(rebuildSub, 200);
     } else {
         // Fallback: basic select functionality without Select2
         const categorySelect = select('#category-select');
@@ -300,14 +350,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selCat = categorySelect.value;
                 subcategorySelect.innerHTML = '<option value="">Select Sub Category</option>';
                 allSubOptions.forEach(opt => {
-                    if (!selCat || !opt.categoryId || opt.categoryId === selCat) {
+                    if (selCat && opt.categoryId && String(opt.categoryId) === String(selCat)) {
                         const newOpt = new Option(opt.text, opt.value);
+                        if (opt.categoryId) newOpt.setAttribute('data-category', opt.categoryId);
                         subcategorySelect.appendChild(newOpt);
                     }
                 });
+                // toggle disabled state
+                subcategorySelect.disabled = !categorySelect.value;
             }
 
-            categorySelect.addEventListener('change', rebuildSub);
+            categorySelect.addEventListener('change', () => { rebuildSub(); });
+            // initial state
             setTimeout(rebuildSub, 200);
         }
     }

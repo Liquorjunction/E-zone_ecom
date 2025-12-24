@@ -502,6 +502,19 @@
     </div>
 
     @push('scripts')
+        @php
+            // Provide a complete list of subcategories to the JS so edit mode can refresh correctly
+            $__allSubCats = \App\Models\SubCategories::all()->map(function($s){
+                return [
+                    'id' => $s->id,
+                    'text' => $s->getTranslation('sub-category-name', 'en'),
+                    'categoryId' => $s->category_id,
+                ];
+            });
+        @endphp
+        <script>
+            window.__ALL_SUBCATEGORIES = {!! json_encode($__allSubCats) !!};
+        </script>
         <script src="{{ asset('admin_assets/js/product-form.js') }}"></script>
     @endpush
 @endsection

@@ -8,14 +8,26 @@ return new class extends Migration
 {
     public function up()
     {
-        // Add generated column for English sub-category name and composite unique index with category_id
-        DB::statement("ALTER TABLE `sub-categories` ADD COLUMN `sub_category_name_en` VARCHAR(255) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(`sub-category-name`, '$.en'))) STORED;");
-        DB::statement("CREATE UNIQUE INDEX `subcategories_category_name_unique` ON `sub-categories` (`category_id`, `sub_category_name_en`);");
+        // Add generated column for English name and unique index if they don't exist
+        if (!Schema::hasColumn('categories', 'category_name_en')) {
+            DB::statement("ALTER TABLE `categories` ADD COLUMN `category_name_en` VARCHAR(255) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(`category-name`, '$.en'))) STORED;");
+        }
+
+        $indexExists = DB::select("SHOW INDEX FROM `categories` WHERE Key_name = ?", ['category_name_en_unique']);
+        if (empty($indexExists)) {
+            DB::statement("CREATE UNIQUE INDEX `category_name_en_unique` ON `categories` (`category_name_en`);");
+        }
     }
 
     public function down()
     {
-        DB::statement("DROP INDEX `subcategories_category_name_unique` ON `sub-categories`;");
-        DB::statement("ALTER TABLE `sub-categories` DROP COLUMN `sub_category_name_en`;");
+        $indexExists = DB::select("SHOW INDEX FROM `categories` WHERE Key_name = ?", ['category_name_en_unique']);
+        if (!empty($indexExists)) {
+            DB::statement("DROP INDEX `category_name_en_unique` ON `categories`;");
+        }
+
+        if (Schema::hasColumn('categories', 'category_name_en')) {
+            DB::statement("ALTER TABLE `categories` DROP COLUMN `category_name_en`;");
+        }
     }
 };
