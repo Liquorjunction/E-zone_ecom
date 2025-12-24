@@ -3,6 +3,7 @@
 namespace App\Repositories\Admin\Repositories;
 
 use App\Models\SubCategories;
+use Illuminate\Validation\ValidationException;
 use App\Repositories\Admin\Interfaces\SubCategoryRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 
@@ -39,6 +40,17 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
             $data['sub-category-icon'] = $imagePath;
         }
 
+        // Duplicate check: English sub-category name within the same category
+        $english = data_get($data, 'sub-category-name.en');
+        $categoryId = data_get($data, 'category_id');
+        if ($english && $categoryId) {
+            $query = SubCategories::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`sub-category-name`, '$.en')) = ?", [$english])
+                ->where('category_id', $categoryId);
+            if ($query->exists()) {
+                throw ValidationException::withMessages(['sub-category-name.en' => 'The English sub-category name has already been taken for this category.']);
+            }
+        }
+
         // Handle Status
         $data['status'] = $request->input('status', 'inactive');
 
@@ -49,6 +61,18 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
     {
         $subCategory = SubCategories::findOrFail($id);
         $data = $data ?? $request->validated();
+
+        // Duplicate check: English sub-category name within same category (exclude current)
+        $english = data_get($data, 'sub-category-name.en');
+        $categoryId = data_get($data, 'category_id');
+        if ($english && $categoryId) {
+            $query = SubCategories::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`sub-category-name`, '$.en')) = ?", [$english])
+                ->where('category_id', $categoryId)
+                ->where('id', '!=', $id);
+            if ($query->exists()) {
+                throw ValidationException::withMessages(['sub-category-name.en' => 'The English sub-category name has already been taken for this category.']);
+            }
+        }
 
         // Handle Image Update
         if ($request->hasFile('sub-category-icon')) {
