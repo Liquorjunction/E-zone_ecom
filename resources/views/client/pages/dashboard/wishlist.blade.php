@@ -4,7 +4,19 @@
 
 @section('dashboard-content')
   @if(isset($wishlist) && $wishlist->count())
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {{-- Wishlist Header with Count --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 lg:mb-6 p-4 lg:p-6 bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100">
+      <div>
+        <h2 class="text-xl lg:text-2xl font-bold text-gray-900">Your Wishlist</h2>
+        <p class="text-sm text-gray-600 mt-1">{{ $wishlist->count() }} {{ Str::plural('item', $wishlist->count()) }} saved</p>
+      </div>
+      <button class="mt-3 sm:mt-0 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5 rounded-lg transition-colors">
+        Share Wishlist
+      </button>
+    </div>
+
+    {{-- Wishlist Grid --}}
+    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
       @foreach($wishlist as $item)
         @php
           $variant = $item->productVariant ?? null;
@@ -16,44 +28,157 @@
           $image = optional($variant?->images()->ordered()->first())->image_path ?? optional($master?->images()->forProduct($master?->id)->ordered()->first())->image_path ?? $master?->cover_image ?? null;
           $imageUrl = $image ? asset('storage/' . $image) : 'https://via.placeholder.com/300x300?text=No+Image';
           $price = $variant?->price ?? $master?->real_price ?? $master?->price ?? 0;
+          $originalPrice = ($master?->price ?? 0) > $price ? $master?->price : null;
         @endphp
 
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden group border-2 border-gray-100">
-          <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
-            <img src="{{ $imageUrl }}" alt="{{ $name }}" class="w-full h-full object-cover">
-            <button type="button" data-product-variant-id="{{ $variant?->id }}" data-init-wishlisted="1" class="wishlist-btn absolute top-4 right-4 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-red-500">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+        <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm overflow-hidden group border-2 border-gray-100 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+          {{-- Product Image with Wishlist Button --}}
+          <div class="relative aspect-square bg-gray-50 overflow-hidden">
+            <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}">
+              <img
+                src="{{ $imageUrl }}"
+                alt="{{ $name }}"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              >
+            </a>
+
+            {{-- Wishlist Remove Button --}}
+            <button
+              type="button"
+              data-product-variant-id="{{ $variant?->id }}"
+              data-init-wishlisted="1"
+              class="wishlist-btn absolute top-2 right-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
+              title="Remove from wishlist"
+            >
+              <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+              </svg>
             </button>
-          </a>
-          <div class="p-4">
-            <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}"><h3 class="font-semibold text-gray-900">{{ $name }}</h3></a>
-            <div class="flex items-center mb-2">
-              <div class="flex items-center text-yellow-400 text-sm">★★★★☆</div>
-              <span class="ml-2 text-sm text-gray-500">({{ rand(10, 100) }})</span>
+
+            {{-- Discount Badge (if applicable) --}}
+            @if($originalPrice && $originalPrice > $price)
+              @php
+                $discount = round((($originalPrice - $price) / $originalPrice) * 100);
+              @endphp
+              <div class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg">
+                -{{ $discount }}%
+              </div>
+            @endif
+
+            {{-- Quick View Overlay --}}
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <a
+                href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}"
+                class="px-4 py-2 bg-white text-gray-900 font-semibold rounded-lg text-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300"
+              >
+                Quick View
+              </a>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-lg font-bold text-primary">${{ number_format($price, 2) }}</span>
-              <form method="post" action="#">
-                @csrf
-                <input type="hidden" name="product_variant_id" value="{{ $variant?->id }}">
-                <button type="button" class="px-4 py-2 bg-primary/10 text-primary font-semibold rounded-lg">Add to Cart</button>
-              </form>
+          </div>
+
+          {{-- Product Info --}}
+          <div class="p-3 lg:p-4">
+            <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}">
+              <h3 class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-2 mb-2 min-h-[2.5rem] lg:min-h-[2.8rem] group-hover:text-primary transition-colors">
+                {{ $name }}
+              </h3>
+            </a>
+
+            {{-- Rating --}}
+            <div class="flex items-center mb-2 lg:mb-3">
+              <div class="flex items-center text-yellow-400 text-xs lg:text-sm">
+                ★★★★☆
+              </div>
+              <span class="ml-1.5 text-xs text-gray-500">({{ rand(10, 100) }})</span>
             </div>
+
+            {{-- Price --}}
+            <div class="flex items-baseline gap-2 mb-3">
+              <span class="text-base lg:text-lg font-bold text-primary">
+                ${{ number_format($price, 2) }}
+              </span>
+              @if($originalPrice && $originalPrice > $price)
+                <span class="text-xs lg:text-sm text-gray-400 line-through">
+                  ${{ number_format($originalPrice, 2) }}
+                </span>
+              @endif
+            </div>
+
+            {{-- Add to Cart Button --}}
+            <form method="post" action="#" class="w-full">
+              @csrf
+              <input type="hidden" name="product_variant_id" value="{{ $variant?->id }}">
+              <button
+                type="button"
+                class="w-full px-3 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all text-xs lg:text-sm flex items-center justify-center gap-2 group/btn"
+              >
+                <svg class="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Add to Cart
+              </button>
+            </form>
           </div>
         </div>
       @endforeach
     </div>
+
+    {{-- Pagination --}}
+    @if(method_exists($wishlist, 'hasPages') && $wishlist->hasPages())
+      <div class="mt-6 flex justify-center">
+        {{ $wishlist->links() }}
+      </div>
+    @endif
+
+    {{-- Quick Actions --}}
+    <div class="mt-6 flex flex-col sm:flex-row gap-3 p-4 lg:p-6 bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100">
+      <button class="flex-1 px-4 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors text-sm lg:text-base">
+        Add All to Cart
+      </button>
+      <button class="flex-1 px-4 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm lg:text-base">
+        Clear Wishlist
+      </button>
+    </div>
+
   @else
-    <div class="flex items-center justify-center py-20 bg-white rounded-2xl border-2 border-gray-100">
-      <div class="text-center max-w-md">
-        <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
-          <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+    {{-- Empty Wishlist State --}}
+    <div class="flex items-center justify-center py-16 lg:py-24 bg-white rounded-xl lg:rounded-2xl border-2 border-gray-100">
+      <div class="text-center max-w-md px-6">
+        {{-- Animated Heart Icon --}}
+        <div class="relative w-32 h-32 lg:w-40 lg:h-40 mx-auto mb-6 lg:mb-8">
+          <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-pink-50 animate-pulse"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <svg class="w-16 h-16 lg:w-20 lg:h-20 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
         </div>
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Your Wishlist is Empty</h2>
-        <p class="text-gray-600 mb-8">Looks like you haven't added anything to your wishlist yet. Browse products and click the heart to save them.</p>
-        <a href="{{-- route('products') --}}" class="inline-flex items-center px-8 py-4 bg-primary text-white ...">
-          Start Shopping
-        </a>
+
+        <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 lg:mb-4">
+          Your Wishlist is Empty
+        </h2>
+        <p class="text-sm lg:text-base text-gray-600 mb-6 lg:mb-8 leading-relaxed">
+          Save your favorite items here so you can easily find them later. Start exploring and add products you love!
+        </p>
+
+        {{-- CTA Buttons --}}
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a
+            href="{{-- route('products') --}}"
+            class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-primary text-white font-semibold rounded-xl shadow-lg hover:bg-primary/90 hover:shadow-xl transition-all text-sm lg:text-base group"
+          >
+            <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            Discover Products
+          </a>
+          <a
+            href="{{-- route('categories') --}}"
+            class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm lg:text-base"
+          >
+            Browse Categories
+          </a>
+        </div>
       </div>
     </div>
   @endif
