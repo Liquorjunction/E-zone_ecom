@@ -160,4 +160,22 @@ class OrderController extends Controller
     }
 
     // success() removed — success is handled via the multi-step `checkout` page (step=3)
+
+    /**
+     * Return a printable invoice view for an order.
+     */
+    public function invoice($id)
+    {
+        if (! Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $order = OrderModel::with(['items.product', 'items.variant'])->findOrFail($id);
+
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('client.pages.order-invoice', ['order' => $order]);
+    }
 }

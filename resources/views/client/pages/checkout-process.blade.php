@@ -1,5 +1,9 @@
 @extends('client.layouts.app')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/checkout-process.css') }}">
+@endpush
+
 @section('content')
 @php
   $step = $step ?? (int) request()->get('step', 1);
@@ -7,7 +11,7 @@
 @endphp
 
 <div class="bg-gradient-to-br from-gray-50 via-blue-50/30 to-white min-h-screen py-12">
-  <div class="container mx-auto px-4 max-w-7xl">
+  <div id="checkout-root" class="container mx-auto px-4 max-w-7xl" data-remove-url="{{ route('cart.remove') }}" data-update-url="">
 
     <div class="mb-10">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -146,9 +150,12 @@
                             <h3 class="text-xl font-bold text-gray-900 mb-2">{{ optional($item->variant)->variant_name ?? optional($item->product)->name ?? 'Product' }}</h3>
                             <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700">{{ optional($item->product)->brand->name ?? '' }}</span>
                           </div>
-                          <button type="button" class="text-gray-400 hover:text-red-500 transition-all duration-300 p-2 hover:bg-red-50 rounded-lg group" onclick="document.getElementById('remove-item-{{ $item->id }}').submit();">
-                             <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                          </button>
+
+                            {{-- The Remove Button (AJAX) --}}
+                            <button type="button" class="text-gray-400 hover:text-red-500 transition-all duration-300 p-2 hover:bg-red-50 rounded-lg group remove-item-ajax" data-item-id="{{ $item->id }}" aria-label="Remove item">
+                              <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+
                         </div>
                         <div class="space-y-2 text-sm text-gray-600 mb-5">
                           <p class="flex items-center">
@@ -416,20 +423,6 @@
                   </div>
                 </div>
               </div>
-              <script>
-                (function(){
-                  const radios = document.querySelectorAll('input[name="payment_method"]');
-                  const cardDetails = document.getElementById('cardDetails');
-                  function update() {
-                    const sel = document.querySelector('input[name="payment_method"]:checked')?.value;
-                    if (sel === 'card') cardDetails.style.display = '';
-                    else cardDetails.style.display = 'none';
-                  }
-                  radios.forEach(r => r.addEventListener('change', update));
-                  // init
-                  update();
-                })();
-              </script>
             </div>
           </div>
 
@@ -605,111 +598,8 @@
     </form>
   </div>
 </div>
-
-<style>
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-bounce-slow {
-  animation: bounce-slow 2s ease-in-out infinite;
-}
-
-/* Smooth transitions for all interactive elements */
-input:focus,
-button:focus {
-  outline: none;
-}
-
-/* Add smooth loading states */
-.cart-item-row {
-  transition: all 0.3s ease;
-}
-
-.cart-item-row:hover {
-  transform: translateY(-2px);
-}
-
-/* Radio button styling */
-input[type="radio"]:checked + span {
-  color: var(--primary-color);
-}
-
-input[type="radio"]:focus {
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-/* Custom scrollbar for summary items */
-.max-h-64::-webkit-scrollbar {
-  width: 6px;
-}
-
-.max-h-64::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.max-h-64::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-.max-h-64::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-</style>
-
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/checkout-process.js') }}"></script>
-<script>
-// Handle saved address selection
-document.addEventListener('DOMContentLoaded', function() {
-  const addressSelect = document.getElementById('savedAddressSelect');
-  if (addressSelect) {
-    addressSelect.addEventListener('change', function() {
-      const selectedOption = this.options[this.selectedIndex];
-      if (this.value && selectedOption.dataset.addr) {
-        const addr = JSON.parse(selectedOption.dataset.addr);
-
-        // Populate form fields with saved address data
-        if (addr.first_name) document.getElementById('firstName').value = addr.first_name;
-        if (addr.last_name) document.getElementById('lastName').value = addr.last_name;
-        if (addr.street || addr.address) document.getElementById('address').value = addr.street || addr.address;
-        if (addr.city) document.getElementById('city').value = addr.city;
-        if (addr.state || addr.region) document.getElementById('state').value = addr.state || addr.region;
-        if (addr.postal_code || addr.zip) document.getElementById('zip').value = addr.postal_code || addr.zip;
-
-        // Add subtle animation to show fields were updated
-        const inputs = ['firstName', 'lastName', 'address', 'city', 'state', 'zip'];
-        inputs.forEach(id => {
-          const input = document.getElementById(id);
-          if (input && input.value) {
-            input.style.transition = 'all 0.3s ease';
-            input.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
-            setTimeout(() => {
-              input.style.backgroundColor = '';
-            }, 1000);
-          }
-        });
-      } else {
-        // Clear fields if "Use a new address" is selected
-        document.getElementById('firstName').value = '';
-        document.getElementById('lastName').value = '';
-        document.getElementById('address').value = '';
-        document.getElementById('city').value = '';
-        document.getElementById('state').value = '';
-        document.getElementById('zip').value = '';
-      }
-    });
-  }
-});
-</script>
+    <script src="{{ asset('js/checkout-process.js') }}"></script>
 @endpush

@@ -16,8 +16,7 @@
         <thead>
           <tr class="text-left text-sm font-semibold text-gray-600 ...">
             <th class="p-4">Order ID</th>
-            <th class="p-4">Date</th>
-            <th class="p-4">Status</th>
+            <th class="p-4">Items</th>
             <th class="p-4">Total</th>
             <th class="p-4">Actions</th>
           </tr>
@@ -27,16 +26,26 @@
             @foreach($orders as $order)
               <tr class="border-b-2 border-gray-100">
                 <td class="p-4 font-semibold text-primary">{{ $order->order_number ?? ('#'.$order->id) }}</td>
-                <td class="p-4 text-gray-700">{{ optional($order->created_at)->format('M d, Y') }}</td>
                 <td class="p-4">
                   @php
+                    // product summary: first product name + " + x more" if multiple
+                    $firstItem = $order->items->first();
+                    $itemsCount = $order->items->count();
+                    $firstName = null;
+                    if ($firstItem) {
+                      $firstName = $firstItem->variant->name ?? $firstItem->product->name ?? 'Product';
+                    }
+                    $itemsLabel = $firstName ? ($itemsCount > 1 ? $firstName.' + '.($itemsCount - 1).' more' : $firstName) : ($itemsCount.' item'.($itemsCount>1?'s':''));
                     $status = strtolower($order->status ?? 'pending');
                     $statusClass = 'bg-gray-100 text-gray-700';
                     if($status === 'delivered') { $statusClass = 'bg-green-100 text-green-700'; }
                     elseif(in_array($status, ['processing','shipped'])) { $statusClass = 'bg-yellow-100 text-yellow-700'; }
                     elseif(in_array($status, ['cancelled','refunded'])) { $statusClass = 'bg-red-100 text-red-700'; }
                   @endphp
-                  <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">{{ ucfirst($order->status ?? 'Pending') }}</span>
+                  <div class="text-sm text-gray-800">{{ $itemsLabel }}</div>
+                  <div class="mt-2">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">{{ ucfirst($order->status ?? 'Pending') }}</span>
+                  </div>
                 </td>
                 <td class="p-4 font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</td>
                 <td class="p-4">

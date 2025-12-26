@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
@@ -31,6 +32,12 @@ class AuthController extends Controller
         // Auto-login after registration
         Auth::login($user);
 
+        $request->session()->regenerate();
+        if (config('session.driver') === 'database') {
+            DB::table('sessions')
+                ->where('id', $request->session()->getId())
+                ->update(['user_id' => $user->id]);
+        }
         return redirect()->route('home')->with('success', 'Account created successfully!');
     }
 
@@ -47,6 +54,11 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'is_active' => 1], $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+                if (config('session.driver') === 'database') {
+                    DB::table('sessions')
+                        ->where('id', $request->session()->getId())
+                        ->update(['user_id' => Auth::id()]);
+                }
             return redirect()->intended(route('dashboard.overview'));
         }
 

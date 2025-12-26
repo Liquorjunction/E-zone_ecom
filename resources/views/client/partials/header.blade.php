@@ -1,4 +1,5 @@
-<header class="bg-white shadow-md sticky top-0 z-50 container-query after:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-primary after:z-40 lg:after:block">
+<header
+    class="bg-white shadow-md sticky top-0 z-50 container-query after:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-primary after:z-40 lg:after:block">
 
     <div class="bg-gradient-to-r from-primary to-primary-dark text-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,12 +50,12 @@
     <div class="container max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div class="flex items-center justify-between gap-4 z-50">
 
-                <div class="flex items-center space-x-3 sm:space-x-4">
-                    <a href="{{ route('home') }}" class="flex items-center group">
-                        <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
-                            class="w-24 h-14 xs:w-28 xs:h-16 sm:w-32 sm:h-18 lg:w-36 lg:h-20 object-contain transition-transform duration-300 group-hover:scale-105">
-                    </a>
-                </div>
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <a href="{{ route('home') }}" class="flex items-center group">
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                        class="w-24 h-14 xs:w-28 xs:h-16 sm:w-32 sm:h-18 lg:w-36 lg:h-20 object-contain transition-transform duration-300 group-hover:scale-105">
+                </a>
+            </div>
 
             <div class="hidden md:flex flex-1 max-w-xl mx-4">
                 <div class="relative w-full group">
@@ -164,8 +165,12 @@
                         @mouseleave="accountCloseTimeout = setTimeout(function(){ accountOpen = false }, 150)">
                         <button @click="accountOpen = !accountOpen"
                             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <img src="https://via.placeholder.com/32x32" alt="User Avatar"
-                                class="w-8 h-8 rounded-full ring-2 ring-gray-200">
+                            @if (Auth::user()->avatar)
+                                <img src="{{ Auth::user()->avatar }}" alt="User Avatar" class="w-8 h-8 rounded-full ring-2 ring-gray-200">
+                            @else
+                                <img src="{{ asset('images/avatar-placeholder.png') }}" alt="User Avatar"
+                                    class="w-8 h-8 rounded-full ring-2 ring-gray-200">
+                            @endif
                             <svg class="w-4 h-4 text-gray-700 transition-transform" :class="{ 'rotate-180': accountOpen }"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
@@ -182,8 +187,8 @@
                             class="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-3 z-50"
                             x-cloak>
                             <div class="px-4 pb-3 mb-3 border-b border-gray-100">
-                                <p class="font-semibold text-gray-900">John Doe</p>
-                                <p class="text-sm text-gray-600">john.doe@example.com</p>
+                                <p class="font-semibold text-gray-900">{{ auth()->user()->name }}</p>
+                                <p class="text-sm text-gray-600">{{ auth()->user()->email }}</p>
                             </div>
                             <nav class="px-2 space-y-1">
                                 <a href="{{ route('dashboard.overview') }}"
@@ -223,15 +228,18 @@
                                     <span>{{ gtrans('My Wishlist') }}</span>
                                 </a>
                                 <div class="border-t border-gray-100 mt-2 pt-2">
-                                    <a href="#"
-                                        class="flex items-center gap-3 px-3 py-2.5 text-red-500 hover:bg-red-50 font-medium rounded-lg transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        <span>{{ gtrans('Logout') }}</span>
-                                    </a>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit"
+                                            class="flex items-center gap-3 px-3 py-2.5 text-red-500 hover:bg-red-50 font-medium rounded-lg transition-colors w-full text-left">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            <span>{{ gtrans('Logout') }}</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </nav>
                         </div>
@@ -328,15 +336,18 @@
                                     <span>{{ gtrans('My Profile') }}</span>
                                 </a>
                                 <div class="border-t border-gray-100 mt-2 pt-2">
-                                    <a href="#"
-                                        class="flex items-center gap-3 px-3 py-2.5 text-red-500 hover:bg-red-50 font-medium rounded-lg transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        <span>{{ gtrans('Logout') }}</span>
-                                    </a>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit"
+                                            class="flex items-center gap-3 px-3 py-2.5 text-red-500 hover:bg-red-50 font-medium rounded-lg transition-colors w-full text-left">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            <span>{{ gtrans('Logout') }}</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         @else

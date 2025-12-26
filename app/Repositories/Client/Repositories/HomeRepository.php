@@ -76,7 +76,8 @@ class HomeRepository implements HomeRepositoryInterface
 
         $ordersQuery = Order::where('user_id', $userId)->orderBy('created_at', 'desc');
 
-        $orders = $ordersQuery->with('items')->take(5)->get();
+        // eager-load order items and their products/variants to avoid N+1 queries
+        $orders = $ordersQuery->with(['items.product', 'items.variant'])->take(5)->get();
 
         $ordersCount = $ordersQuery->count();
 
@@ -92,7 +93,7 @@ class HomeRepository implements HomeRepositoryInterface
         $userId = Auth::id();
 
         return Order::where('user_id', $userId)
-            ->with('items')
+            ->with(['items.product', 'items.variant'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }

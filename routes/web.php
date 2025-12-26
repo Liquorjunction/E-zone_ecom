@@ -17,6 +17,7 @@ use App\Http\Controllers\Client\VerificationController;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Client\SecurityController;
 // Locale switch (public)
 Route::get('lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'fr', 'ar'])) {
@@ -57,7 +58,17 @@ Route::group([], function () {
     })->name('brand-products');
 
     Route::get('/order-detail/{id}', function ($id) {
-        return view('client.pages.order-detail', ['order_id' => $id]);
+        if (! auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $order = \App\Models\Order::with(['items.product', 'items.variant'])->findOrFail($id);
+
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('client.pages.order-detail', ['order' => $order]);
     })->name('order-detail');
 });
 
@@ -92,7 +103,10 @@ Route::middleware('auth')->group(function () {
         Route::view('/profile', 'client.pages.dashboard.profile')->name('profile');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
-        Route::view('/security', 'client.pages.dashboard.security')->name('security');
+        Route::get('/security', [SecurityController::class, 'index'])->name('security');
+        Route::post('/security/password', [SecurityController::class, 'updatePassword'])->name('security.update-password');
+        Route::post('/security/logout-all', [SecurityController::class, 'logoutAllSessions'])->name('security.logout-all');
+        Route::post('/security/revoke-session', [SecurityController::class, 'revokeSession'])->name('security.revoke-session');
         Route::view('/payment-methods', 'client.pages.dashboard.payments')->name('payments');
         Route::view('/rewards', 'client.pages.dashboard.rewards')->name('rewards');
     });
@@ -100,6 +114,8 @@ Route::middleware('auth')->group(function () {
     // Checkout (requires auth)
     Route::get('/checkout', [OrderController::class, 'show'])->name('checkout');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
+    // Invoice download / printable view
+    Route::get('/client/orders/{id}/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
 });
 
 // Cart endpoints: keep `GET /cart` public but require auth for modifications

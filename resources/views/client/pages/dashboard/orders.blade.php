@@ -56,8 +56,20 @@
               <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ ucfirst($status) }}</span>
             @endif
           </div>
+          @php
+            $firstItem = $order->items->first();
+            $itemsCount = $order->items->count();
+            $firstName = null;
+            if ($firstItem) {
+              $firstName = $firstItem->variant->name ?? $firstItem->product->name ?? 'Product';
+            }
+            $itemsLabel = $firstName ? ($itemsCount > 1 ? $firstName.' + '.($itemsCount - 1).' more' : $firstName) : ($itemsCount.' item'.($itemsCount>1?'s':''));
+          @endphp
           <div class="flex items-center justify-between">
-            <p class="text-lg font-bold text-gray-900">{{ money_format_number($order->total ?? 0) }}</p>
+            <div>
+              <div class="text-sm text-gray-800 font-medium">{{ $itemsLabel }}</div>
+              <div class="text-lg font-bold text-gray-900 mt-1">{{ money_format_number($order->total ?? 0) }}</div>
+            </div>
             <a href="{{ route('order-detail', ['id' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
               View Details
             </a>
@@ -84,6 +96,7 @@
             <th class="p-4">Order ID</th>
             <th class="p-4">Date</th>
             <th class="p-4">Status</th>
+            <th class="p-4">Items</th>
             <th class="p-4">Total</th>
             <th class="p-4">Actions</th>
           </tr>
@@ -105,6 +118,16 @@
                 <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ ucfirst($status) }}</span>
               @endif
             </td>
+            @php
+              $firstItem = $order->items->first();
+              $itemsCount = $order->items->count();
+              $firstName = null;
+              if ($firstItem) {
+                $firstName = $firstItem->variant->name ?? $firstItem->product->name ?? 'Product';
+              }
+              $itemsLabel = $firstName ? ($itemsCount > 1 ? $firstName.' + '.($itemsCount - 1).' more' : $firstName) : ($itemsCount.' item'.($itemsCount>1?'s':''));
+            @endphp
+            <td class="p-4 text-gray-700">{{ $itemsLabel }}</td>
             <td class="p-4 font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</td>
             <td class="p-4">
               <a href="{{ route('order-detail', ['id' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">

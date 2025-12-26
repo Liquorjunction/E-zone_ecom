@@ -89,6 +89,33 @@
     </main>
 
     {{-- Stack for Page Specific Scripts --}}
+    {{-- Global toast container (mobile bottom-center, desktop top-right) --}}
+    <div id="global-toasts" aria-live="polite" aria-atomic="true" class="pointer-events-none fixed inset-0 z-50">
+        {{-- Mobile: bottom center (visible on small screens) --}}
+        <div id="global-toasts-mobile" class="sm:hidden pointer-events-none fixed inset-x-0 bottom-4 px-4 flex justify-center items-end">
+            <div id="global-toasts-mobile-inner" class="w-full max-w-lg flex flex-col items-center space-y-3"></div>
+        </div>
+
+        {{-- Desktop: top-right (visible on sm and up) --}}
+        <div id="global-toasts-desktop" class="hidden sm:flex pointer-events-none fixed top-4 right-4 items-start justify-end">
+            <div id="global-toasts-inner" class="w-full flex flex-col items-end space-y-3 max-w-xs"></div>
+        </div>
+    </div>
+
+    {{-- Server-side flash -> toast bridge --}}
+    @if(session('success'))
+        <script>document.addEventListener('DOMContentLoaded',()=>{ Toast && Toast.success({ title: 'Success', message: {!! json_encode(session('success')) !!} }); });</script>
+    @endif
+    @if(session('error'))
+        <script>document.addEventListener('DOMContentLoaded',()=>{ Toast && Toast.error({ title: 'Error', message: {!! json_encode(session('error')) !!} }); });</script>
+    @endif
+    @if(session('info'))
+        <script>document.addEventListener('DOMContentLoaded',()=>{ Toast && Toast.info({ title: '', message: {!! json_encode(session('info')) !!} }); });</script>
+    @endif
+    @if(session('warning'))
+        <script>document.addEventListener('DOMContentLoaded',()=>{ Toast && Toast.warning({ title: 'Warning', message: {!! json_encode(session('warning')) !!} }); });</script>
+    @endif
+
     @stack('scripts')
 </body>
 
