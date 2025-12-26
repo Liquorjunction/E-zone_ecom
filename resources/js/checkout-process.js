@@ -126,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const resp = await fetch(updateUrl, {
                 method: "POST",
+                credentials: 'same-origin',
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": csrf,
@@ -161,6 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const resp = await fetch(removeUrl, {
                 method: "POST",
+                credentials: 'same-origin',
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": csrf,
@@ -176,12 +178,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
                 if (row && row.parentNode) row.parentNode.removeChild(row);
                 updateSummary(data.summary);
+                if (window.Toast && typeof window.Toast.success === 'function') {
+                    window.Toast.success({ title: 'Success', message: (data && data.message) ? data.message : 'Item removed from cart.' });
+                }
             } else {
                 submitFallback(itemId);
             }
         } catch (e) {
             // fallback to form submit
             submitFallback(itemId);
+            if (window.Toast && typeof window.Toast.error === 'function') {
+                window.Toast.error({ title: 'Error', message: 'Failed to remove item.' });
+            }
         }
     }
 

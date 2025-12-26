@@ -46,15 +46,15 @@ axios.interceptors.response.use(function (response) {
 
 // Click-delegate: elements can include data-toast, data-toast-title, data-toast-message, data-toast-action
 document.addEventListener('click', function (ev) {
-	const btn = ev.target.closest && ev.target.closest('[data-toast]');
-	if (!btn) return;
-	// opt-out when element or ancestor has data-toast-ignore or class 'no-toast'
-	if (btn.closest && btn.closest('[data-toast-ignore], .no-toast')) return;
-	const type = btn.getAttribute('data-toast') || 'info';
-	const title = btn.getAttribute('data-toast-title') || '';
-	const message = btn.getAttribute('data-toast-message') || '';
-	const actionText = btn.getAttribute('data-toast-action') || null;
-	try {
-		window.Toast && window.Toast.show({ type, title, message, actionText });
-	} catch (e) {}
+    const btn = ev.target.closest && ev.target.closest('[data-toast]');
+    if (!btn) return;
+    // opt-out when element or ancestor has data-toast-ignore or class 'no-toast'
+    if (btn.closest && btn.closest('[data-toast-ignore], .no-toast')) return;
+    const type = btn.getAttribute('data-toast') || 'info';
+    const title = btn.getAttribute('data-toast-title') || '';
+    const message = btn.getAttribute('data-toast-message') || '';
+    const actionText = btn.getAttribute('data-toast-action') || null;
+    try {
+        window.Toast && window.Toast.show({ type, title, message, actionText });
+    } catch (e) {}
 });

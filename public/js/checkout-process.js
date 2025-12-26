@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     return fetch(url, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Accept': 'application/json',
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     return fetch(url, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Accept': 'application/json',
@@ -243,66 +245,105 @@ document.addEventListener('DOMContentLoaded', function() {
       const action = this.getAttribute('action');
       const row = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
 
-      // Confirm removal
-      if (!confirm('Are you sure you want to remove this item from your cart?')) {
-        return;
-      }
+      const proceedWithRemoval = () => {
+        if (row) {
+          row.style.transition = 'all 0.4s ease';
+          row.style.opacity = '0.5';
+          row.style.transform = 'translateX(-20px)';
+        }
+        removeCartItem(itemId, action).then(handleRemoveResponse.bind(null, row)).catch(handleRemoveError.bind(null, row));
+      };
 
-      // Add removing animation
+      // use custom modal if available
+      showConfirmModal('Remove this item from your cart?', 'Remove', 'Confirm').then(confirmed => { if (confirmed) proceedWithRemoval(); });
+      return;
+    });
+  });
+
+  // Also support standalone remove buttons (used on checkout list)
+  document.querySelectorAll('.remove-item-ajax, .remove-item-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const itemId = this.getAttribute('data-item-id') || this.dataset.itemId;
+      if (!itemId) return;
+
+      const row = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
+
+      const proceed = () => {
+        if (row) {
+          row.style.transition = 'all 0.4s ease';
+          row.style.opacity = '0.5';
+          row.style.transform = 'translateX(-20px)';
+        }
+        removeCartItem(itemId).then(handleRemoveResponse.bind(null, row)).catch(handleRemoveError.bind(null, row));
+      };
+
+      // use custom modal confirmation
+      showConfirmModal('Remove this item from your cart?', 'Remove', 'Confirm').then(confirmed => { if (confirmed) proceed(); });
+      return;
+
       if (row) {
         row.style.transition = 'all 0.4s ease';
         row.style.opacity = '0.5';
         row.style.transform = 'translateX(-20px)';
       }
 
-      removeCartItem(itemId, action).then(resp => {
-        if (!resp || !resp.success) {
-          console.error('Remove failed', resp);
-          if (row) {
-            row.style.opacity = '1';
-            row.style.transform = 'translateX(0)';
-          }
-          return;
-        }
-
-        // Smooth remove animation
-        if (row) {
-          row.style.opacity = '0';
-          row.style.transform = 'translateX(-100%)';
-          row.style.maxHeight = row.offsetHeight + 'px';
-
-          setTimeout(() => {
-            row.style.maxHeight = '0';
-            row.style.padding = '0';
-            row.style.margin = '0';
-            row.style.border = 'none';
-          }, 400);
-
-          setTimeout(() => {
-            row.remove();
-          }, 800);
-        }
-
-        // Update summary
-        if (resp.summary) {
-          updateSummary(resp.summary);
-        }
-
-        // If cart empty, reload to show empty state
-        if (resp.summary && parseInt(resp.summary.itemCount, 10) === 0) {
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        }
-      }).catch(err => {
-        console.error(err);
-        if (row) {
-          row.style.opacity = '1';
-          row.style.transform = 'translateX(0)';
-        }
-      });
+      removeCartItem(itemId).then(handleRemoveResponse.bind(null, row)).catch(handleRemoveError.bind(null, row));
     });
   });
+
+  // centralized handlers to reuse in both flows
+  function handleRemoveResponse(row, resp) {
+    if (!resp || !resp.success) {
+      console.error('Remove failed', resp);
+      if (row) {
+        row.style.opacity = '1';
+        row.style.transform = 'translateX(0)';
+      }
+      if (window.Toast && typeof window.Toast.error === 'function') {
+        window.Toast.error({ title: 'Error', message: (resp && resp.message) ? resp.message : 'Failed to remove item.' });
+      }
+      return;
+    }
+
+    if (row) {
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(-100%)';
+      row.style.maxHeight = row.offsetHeight + 'px';
+
+      setTimeout(() => {
+        row.style.maxHeight = '0';
+        row.style.padding = '0';
+        row.style.margin = '0';
+        row.style.border = 'none';
+      }, 400);
+
+      setTimeout(() => {
+        row.remove();
+      }, 800);
+    }
+
+    if (resp.summary) updateSummary(resp.summary);
+
+    if (window.Toast && typeof window.Toast.success === 'function') {
+      window.Toast.success({ title: 'Success', message: (resp && resp.message) ? resp.message : 'Item removed from cart.' });
+    }
+
+    if (resp.summary && parseInt(resp.summary.itemCount, 10) === 0) {
+      setTimeout(() => window.location.reload(), 1000);
+    }
+  }
+
+  function handleRemoveError(row, err) {
+    console.error(err);
+    if (row) {
+      row.style.opacity = '1';
+      row.style.transform = 'translateX(0)';
+    }
+    if (window.Toast && typeof window.Toast.error === 'function') {
+      window.Toast.error({ title: 'Error', message: 'Failed to remove item.' });
+    }
+  }
 
   // Add smooth scroll to top on step change
   const urlParams = new URLSearchParams(window.location.search);
@@ -388,4 +429,55 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   `;
   document.head.appendChild(style);
+
+  // Small in-page confirmation modal matching app style
+  function showConfirmModal(message, confirmText = 'Remove', title = 'Confirm') {
+    return new Promise((resolve) => {
+      // create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'cp-confirm-overlay fixed inset-0 z-60 flex items-center justify-center p-4';
+      overlay.style.background = 'rgba(15,23,42,0.6)';
+
+      const modal = document.createElement('div');
+      modal.className = 'cp-confirm-modal bg-white rounded-2xl shadow-2xl max-w-md w-full p-6';
+      modal.style.boxShadow = '0 10px 30px rgba(2,6,23,0.2)';
+
+      modal.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,#06b6d4,#0ea5a3);display:flex;align-items:center;justify-content:center;color:white;font-weight:700">!</div>
+          <div>
+            <div style="font-weight:700;color:#0f172a;margin-bottom:4px">${escapeHtml(title)}</div>
+            <div style="color:#475569;font-size:14px">${escapeHtml(message)}</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px">
+          <button class="cp-cancel-btn" style="padding:10px 16px;border-radius:12px;border:1px solid #e6edf3;background:#fff;color:#334155">Cancel</button>
+          <button class="cp-confirm-btn" style="padding:10px 16px;border-radius:12px;background:linear-gradient(90deg,#0ea5a3,#06b6d4);color:#fff;font-weight:700">${escapeHtml(confirmText)}</button>
+        </div>`;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      // helpers to cleanup
+      function cleanup() {
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) { cleanup(); resolve(false); }
+      });
+
+      modal.querySelector('.cp-cancel-btn').addEventListener('click', function () { cleanup(); resolve(false); });
+      modal.querySelector('.cp-confirm-btn').addEventListener('click', function () { cleanup(); resolve(true); });
+    });
+  }
+
+  function escapeHtml(unsafe){
+    return String(unsafe)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 });

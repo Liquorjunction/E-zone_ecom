@@ -58,7 +58,7 @@ Route::group([], function () {
     })->name('brand-products');
 
     Route::get('/order-detail/{id}', function ($id) {
-        if (! auth()->check()) {
+        if (! \Illuminate\Support\Facades\Auth::check()) {
             return redirect()->route('login');
         }
 

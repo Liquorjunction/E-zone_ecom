@@ -5,27 +5,20 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Security\UpdatePasswordRequest;
 use App\Http\Requests\Client\Security\RevokeSessionRequest;
-use App\Repositories\Client\Interfaces\SecurityRepositoryInterface;
+use App\Repositories\Client\Interfaces\SecurityRepositoryInterface as SecurityRepo;
 use Illuminate\Http\Request;
 
 class SecurityController extends Controller
 {
-    protected SecurityRepositoryInterface $securityRepo;
-
-    public function __construct(SecurityRepositoryInterface $securityRepo)
-    {
-        $this->securityRepo = $securityRepo;
-    }
-
-    public function index(Request $request)
+    public function index(Request $request, SecurityRepo $securityRepo)
     {
         $user = $request->user();
-        $sessions = $this->securityRepo->getSessions($user->id);
+        $sessions = $securityRepo->getSessions($user->id);
 
         return view('client.pages.dashboard.security', compact('sessions'));
     }
 
-    public function updatePassword(UpdatePasswordRequest $request)
+    public function updatePassword(UpdatePasswordRequest $request, SecurityRepo $securityRepo)
     {
         $user = $request->user();
 
@@ -33,17 +26,17 @@ class SecurityController extends Controller
             return back()->withErrors(['current_password' => 'The current password is incorrect.']);
         }
 
-        $this->securityRepo->updatePassword($user, $request->new_password);
+        $securityRepo->updatePassword($user, $request->new_password);
 
         $request->session()->regenerate();
 
         return back()->with('status', 'Password updated successfully.');
     }
 
-    public function logoutAllSessions(Request $request)
+    public function logoutAllSessions(Request $request, SecurityRepo $securityRepo)
     {
         $user = $request->user();
-        $this->securityRepo->logoutAllSessions($user->id);
+        $securityRepo->logoutAllSessions($user->id);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -51,10 +44,10 @@ class SecurityController extends Controller
         return redirect()->route('login');
     }
 
-    public function revokeSession(RevokeSessionRequest $request)
+    public function revokeSession(RevokeSessionRequest $request, SecurityRepo $securityRepo)
     {
         $user = $request->user();
-        $this->securityRepo->revokeSession($request->session_id, $user->id);
+        $securityRepo->revokeSession($request->session_id, $user->id);
 
         return back()->with('status', 'Session revoked.');
     }
