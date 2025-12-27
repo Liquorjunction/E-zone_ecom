@@ -1,4 +1,4 @@
-<link rel="shortcut icon" href="{{ asset('admin_assets/images/favicon.ico') }}">
+<link rel="shortcut icon" href="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/core/libs.min.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/vendor/aos/dist/aos.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/hope-ui.min.css') }}">
