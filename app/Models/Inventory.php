@@ -22,6 +22,7 @@ class Inventory extends Model
         'warehouse_id',
         'cost_price',
         'quantity',
+        'reserved_quantity',
         'batch_no',
         'status',
         'notes',
@@ -29,6 +30,7 @@ class Inventory extends Model
 
     protected $casts = [
         'quantity' => 'decimal:3',
+        'reserved_quantity' => 'decimal:3',
     ];
 
     protected $hidden = [

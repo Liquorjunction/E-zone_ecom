@@ -14,6 +14,7 @@ use App\Http\Controllers\Client\WishlistController;
 use App\Http\Controllers\Client\ShippingandReturnsController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
+use App\Http\Controllers\Client\InventoryController;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -72,6 +73,16 @@ Route::group([], function () {
     })->name('order-detail');
 });
 
+// Inventory AJAX for client (transactions)
+Route::post('/inventory/transactions', [InventoryController::class, 'transactions'])->name('inventory.transactions');
+
+// Reservation / Return endpoints (auth required)
+Route::middleware('auth')->group(function () {
+    Route::post('/inventory/reserve', [InventoryController::class, 'reserve'])->name('inventory.reserve');
+    Route::post('/inventory/release', [InventoryController::class, 'release'])->name('inventory.release');
+    Route::post('/inventory/return', [InventoryController::class, 'processReturn'])->name('inventory.return');
+});
+
 // Products
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
@@ -116,6 +127,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
     // Invoice download / printable view
     Route::get('/client/orders/{id}/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
+    Route::post('/client/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
 });
 
 // Cart endpoints: keep `GET /cart` public but require auth for modifications

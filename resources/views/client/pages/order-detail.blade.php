@@ -52,6 +52,17 @@
                                 Reorder
                             </span>
                         </a>
+                        @if(Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled','shipped','delivered']))
+                            <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');" class="inline-block">
+                                @csrf
+                                <button type="submit" class="px-4 py-2.5 border-2 border-red-200 text-red-700 font-semibold rounded-lg hover:bg-red-50 transition-colors text-sm">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        Cancel Order
+                                    </span>
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>

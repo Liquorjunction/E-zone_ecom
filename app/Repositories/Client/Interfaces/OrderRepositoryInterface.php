@@ -11,4 +11,9 @@ interface OrderRepositoryInterface
      * Returns the created Order instance.
      */
     public function createOrderFromCart(Cart $cart, array $data);
+    /**
+     * Cancel an order by id. Should restore inventory and log transactions.
+     * Returns true on success.
+     */
+    public function cancelOrder(int $orderId, ?string $reason = null);
 }

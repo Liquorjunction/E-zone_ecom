@@ -16,7 +16,13 @@ class InventoryTransaction extends Model
         'rate',
         'batch_no',
         'created_by',
-        'description'
+        'description',
+        // fields added by later migrations
+        'reference_type',
+        'reference_id',
+        'before_quantity',
+        'after_quantity',
+        'quantity_change'
     ];
 
     public function inventory()

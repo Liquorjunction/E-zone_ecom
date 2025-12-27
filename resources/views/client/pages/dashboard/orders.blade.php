@@ -70,9 +70,19 @@
               <div class="text-sm text-gray-800 font-medium">{{ $itemsLabel }}</div>
               <div class="text-lg font-bold text-gray-900 mt-1">{{ money_format_number($order->total ?? 0) }}</div>
             </div>
-            <a href="{{ route('order-detail', ['id' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
-              View Details
-            </a>
+            <div class="flex items-center gap-2">
+              <a href="{{ route('order-detail', ['id' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                View Details
+              </a>
+              @if(Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled','shipped','delivered']))
+                <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                  @csrf
+                  <button type="submit" class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                    Cancel
+                  </button>
+                </form>
+              @endif
+            </div>
           </div>
         </div>
       @empty
@@ -130,9 +140,19 @@
             <td class="p-4 text-gray-700">{{ $itemsLabel }}</td>
             <td class="p-4 font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</td>
             <td class="p-4">
-              <a href="{{ route('order-detail', ['id' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
-                View Details
-              </a>
+              <div class="flex items-center gap-2">
+                <a href="{{ route('order-detail', ['id' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                  View Details
+                </a>
+                @if(Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled','shipped','delivered']))
+                  <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                    @csrf
+                    <button type="submit" class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                      Cancel
+                    </button>
+                  </form>
+                @endif
+              </div>
             </td>
           </tr>
           @empty

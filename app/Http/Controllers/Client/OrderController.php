@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Address;
 use App\Models\Order as OrderModel;
+use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepositoryInterface;
 
 class OrderController extends Controller
 {
@@ -177,5 +178,29 @@ class OrderController extends Controller
         }
 
         return view('client.pages.order-invoice', ['order' => $order]);
+    }
+
+    /**
+     * Cancel an order (client initiated).
+     */
+    public function cancel(Request $request, $id, OrderRepositoryInterface $orders)
+    {
+        if (! Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $order = OrderModel::findOrFail($id);
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $reason = $request->input('reason');
+        $ok = $orders->cancelOrder($order->id, $reason);
+
+        if ($ok) {
+            return back()->with('success', 'Order cancelled successfully.');
+        }
+
+        return back()->withErrors(['cancel' => 'Unable to cancel the order.']);
     }
 }

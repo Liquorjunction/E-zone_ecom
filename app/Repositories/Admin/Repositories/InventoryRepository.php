@@ -34,8 +34,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                 if (empty($item['product_id']) || !isset($item['quantity'])) {
                     continue;
                 }
-
-                $createdItems[] = Inventory::create([
+                $inventory = Inventory::create([
                     'product_id' => $item['product_id'],
                     'product_variant_id' => $item['product_variant_id'] ?? null,
                     'location_type' => $locationType,
@@ -47,6 +46,26 @@ class InventoryRepository implements InventoryRepositoryInterface
                     'status' => $status,
                     'notes' => $notes,
                 ]);
+
+                $createdItems[] = $inventory;
+
+                // Record an inward transaction for this created inventory row
+                try {
+                    InventoryTransaction::create([
+                        'inventory_id' => $inventory->id,
+                        'type' => 'inward',
+                        'quantity' => $inventory->quantity,
+                        'rate' => $inventory->cost_price ?? 0,
+                        'batch_no' => $batchNo,
+                        'created_by' => Auth::id(),
+                        'description' => 'Batch import: ' . $batchNo,
+                        'before_quantity' => null,
+                        'after_quantity' => $inventory->quantity,
+                        'quantity_change' => $inventory->quantity,
+                    ]);
+                } catch (\Throwable $e) {
+                    // swallow to avoid failing whole transaction if txn table isn't present yet
+                }
             }
 
             return $createdItems;
@@ -132,7 +151,34 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $inventory = Inventory::find($id);
         if ($inventory) {
-            return $inventory->update($data);
+            $oldQuantity = $inventory->quantity;
+            $inventory->update($data);
+            $inventory->refresh();
+
+            // If quantity changed, record an adjustment transaction
+            if (array_key_exists('quantity', $data)) {
+                $delta = $inventory->quantity - $oldQuantity;
+                if ($delta != 0) {
+                    try {
+                        InventoryTransaction::create([
+                            'inventory_id' => $inventory->id,
+                            'type' => 'adjustment',
+                            'quantity' => $inventory->quantity,
+                            'rate' => $data['cost_price'] ?? $inventory->cost_price ?? 0,
+                            'batch_no' => $inventory->batch_no,
+                            'created_by' => Auth::id(),
+                            'description' => 'Manual quantity update',
+                            'before_quantity' => $oldQuantity,
+                            'after_quantity' => $inventory->quantity,
+                            'quantity_change' => $delta,
+                        ]);
+                    } catch (\Throwable $e) {
+                        // ignore transaction creation errors
+                    }
+                }
+            }
+
+            return true;
         }
         return false;
     }
@@ -157,9 +203,206 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $inventory = Inventory::find($id);
         if ($inventory) {
+            // Record an outward transaction representing removal of remaining qty
+            if ($inventory->quantity > 0) {
+                try {
+                    InventoryTransaction::create([
+                        'inventory_id' => $inventory->id,
+                        'type' => 'outward',
+                        'quantity' => -1 * $inventory->quantity,
+                        'rate' => $inventory->cost_price ?? 0,
+                        'batch_no' => $inventory->batch_no,
+                        'created_by' => Auth::id(),
+                        'description' => 'Inventory record deleted',
+                        'before_quantity' => $inventory->quantity,
+                        'after_quantity' => 0,
+                        'quantity_change' => -1 * $inventory->quantity,
+                    ]);
+                } catch (\Throwable $e) {
+                    // ignore
+                }
+            }
+
             return $inventory->delete();
         }
         return false;
+    }
+
+    /**
+     * Create a transaction record.
+     */
+    public function recordTransaction(array $data)
+    {
+        return InventoryTransaction::create($data);
+    }
+
+    /**
+     * Get transactions for an inventory record.
+     */
+    public function getTransactions(int $inventoryId)
+    {
+        return InventoryTransaction::where('inventory_id', $inventoryId)->orderBy('created_at', 'desc')->get();
+    }
+
+    /**
+     * Reserve stock across inventory rows (FIFO-style). Increases `reserved_quantity` and logs transactions.
+     * Returns total reserved amount.
+     */
+    public function reserveStock(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null)
+    {
+        $remaining = $quantity;
+
+        $query = Inventory::query();
+        if ($variantId) {
+            $query->where('product_variant_id', $variantId);
+        } else {
+            $query->where('product_id', $productId);
+        }
+
+        $rows = $query->orderBy('created_at', 'asc')->get();
+
+        foreach ($rows as $inv) {
+            if ($remaining <= 0) break;
+
+            $availableToReserve = max(0, $inv->quantity - $inv->reserved_quantity);
+            if ($availableToReserve <= 0) continue;
+
+            $take = min($availableToReserve, $remaining);
+            $before = $inv->reserved_quantity;
+            $inv->reserved_quantity = $before + $take;
+            $inv->save();
+
+            try {
+                InventoryTransaction::create([
+                    'inventory_id' => $inv->id,
+                    'type' => 'reserve',
+                    'quantity' => $take,
+                    'rate' => $inv->cost_price ?? 0,
+                    'batch_no' => $inv->batch_no,
+                    'created_by' => Auth::id(),
+                    'description' => 'Reserved for '.$referenceType,
+                    'reference_type' => $referenceType,
+                    'reference_id' => $referenceId,
+                    'before_quantity' => $before,
+                    'after_quantity' => $inv->reserved_quantity,
+                    'quantity_change' => $take,
+                ]);
+            } catch (\Throwable $e) {
+                // ignore transactional logging failures
+            }
+
+            $remaining -= $take;
+        }
+
+        return $quantity - $remaining;
+    }
+
+    /**
+     * Release previously reserved stock. Decreases `reserved_quantity` and logs transactions.
+     */
+    public function releaseReservation(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null)
+    {
+        $remaining = $quantity;
+
+        $query = Inventory::query();
+        if ($variantId) {
+            $query->where('product_variant_id', $variantId);
+        } else {
+            $query->where('product_id', $productId);
+        }
+
+        // release from latest reserved rows first (LIFO for release)
+        $rows = $query->orderBy('created_at', 'desc')->get();
+
+        foreach ($rows as $inv) {
+            if ($remaining <= 0) break;
+
+            $reserved = max(0, $inv->reserved_quantity);
+            if ($reserved <= 0) continue;
+
+            $take = min($reserved, $remaining);
+            $before = $inv->reserved_quantity;
+            $inv->reserved_quantity = max(0, $before - $take);
+            $inv->save();
+
+            try {
+                InventoryTransaction::create([
+                    'inventory_id' => $inv->id,
+                    'type' => 'release',
+                    'quantity' => $take,
+                    'rate' => $inv->cost_price ?? 0,
+                    'batch_no' => $inv->batch_no,
+                    'created_by' => Auth::id(),
+                    'description' => 'Reservation released for '.$referenceType,
+                    'reference_type' => $referenceType,
+                    'reference_id' => $referenceId,
+                    'before_quantity' => $before,
+                    'after_quantity' => $inv->reserved_quantity,
+                    'quantity_change' => -1 * $take,
+                ]);
+            } catch (\Throwable $e) {
+                // ignore
+            }
+
+            $remaining -= $take;
+        }
+
+        return $quantity - $remaining;
+    }
+
+    /**
+     * Process a return/inward: increment inventory quantity and log a return txn.
+     */
+    public function processReturn(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null)
+    {
+        // Prefer to add to existing inventory row for the variant/product (latest inward batch) else create new
+        $query = Inventory::query();
+        if ($variantId) {
+            $query->where('product_variant_id', $variantId);
+        } else {
+            $query->where('product_id', $productId);
+        }
+
+        $inv = $query->orderBy('created_at', 'desc')->first();
+
+        if (! $inv) {
+            $inv = Inventory::create([
+                'product_id' => $productId,
+                'product_variant_id' => $variantId,
+                'location_type' => 'warehouse',
+                'warehouse_id' => null,
+                'store_id' => null,
+                'quantity' => 0,
+                'cost_price' => 0,
+                'batch_no' => 'RET-'.date('Ymd').'-'.strtoupper(Str::random(4)),
+                'status' => 'active',
+            ]);
+        }
+
+        $before = $inv->quantity;
+        $inv->quantity = $inv->quantity + $quantity;
+        $inv->save();
+
+        try {
+            InventoryTransaction::create([
+                'inventory_id' => $inv->id,
+                'type' => 'return',
+                'quantity' => $quantity,
+                'rate' => $inv->cost_price ?? 0,
+                'batch_no' => $inv->batch_no,
+                'created_by' => Auth::id(),
+                'description' => 'Customer return',
+                'reference_type' => $referenceType,
+                'reference_id' => $referenceId,
+                'before_quantity' => $before,
+                'after_quantity' => $inv->quantity,
+                'quantity_change' => $quantity,
+            ]);
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        return $inv;
     }
 
     /**
