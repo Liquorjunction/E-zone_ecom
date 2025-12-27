@@ -1,187 +1,146 @@
 <?php
 
+use App\Http\Controllers\Client\AboutUsController;
 use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\Client\BrandController;
+use App\Http\Controllers\Client\CartController;
+use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\Client\AddressController;
+use App\Http\Controllers\Client\PrivacyPolicyController;
+use App\Http\Controllers\Client\ProductController;
+use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\Client\ShippingandReturnsController;
+use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
-use App\Models\Card;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-
+use App\Http\Controllers\Client\SecurityController;
+// Locale switch (public)
 Route::get('lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'fr', 'ar'])) {
         Session::put('locale', $locale);
     }
+
     return Redirect::back();
 })->name('lang.switch');
 
-Route::get('/test-cards', function () {
-    $cards = \App\Models\Card::all();
-    return view('client.pages.test-cards', compact('cards'));
+// Public routes: home, content pages, misc views
+Route::group([], function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+
+    Route::get('/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy-policy');
+    Route::get('/faq', [FaqController::class, 'index'])->name('faq');
+    Route::get('/terms', [TermsController::class, 'index'])->name('terms');
+    Route::get('/shipping-returns', [ShippingandReturnsController::class, 'index'])->name('shipping-returns');
+    Route::get('/about-us', [AboutUsController::class, 'index'])->name('about');
+    Route::get('/brands', [BrandController::class, 'index'])->name('brands');
+
+    // Remove legacy `/checkout-success` route — use multi-step checkout `checkout?step=3`
+    Route::view('/search', 'client.pages.search-results')->name('search');
+    Route::view('/checkout-process', 'client.pages.checkout-process')->name('checkout-process');
+    Route::view('/checkout-demo', 'client.pages.checkout')->name('checkout.demo');
+    Route::view('/product-compare', 'client.pages.compare')->name('product-compare');
+
+    Route::view('/contact', 'client.pages.contact')->name('contact');
+    Route::view('/showrooms', 'client.pages.showrooms')->name('showrooms');
+    Route::view('/sitemap', 'client.pages.sitemap')->name('sitemap');
+    Route::view('/support', 'client.pages.support')->name('support');
+    Route::view('/new-arrivals', 'client.pages.new-arrivals')->name('new-arrivals');
+    Route::view('/best-sellers', 'client.pages.best-sellers')->name('best-sellers');
+    Route::view('/deals', 'client.pages.deals')->name('deals');
+    Route::view('/order-tracking', 'client.pages.order-tracking')->name('order-tracking');
+
+    Route::get('/brand/{slug}', function ($slug) {
+        return view('client.pages.brand-products', ['brand_slug' => $slug]);
+    })->name('brand-products');
+
+    Route::get('/order-detail/{id}', function ($id) {
+        if (! \Illuminate\Support\Facades\Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $order = \App\Models\Order::with(['items.product', 'items.variant'])->findOrFail($id);
+
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('client.pages.order-detail', ['order' => $order]);
+    })->name('order-detail');
 });
 
+// Products
+Route::prefix('products')->name('products.')->group(function () {
+    Route::get('/', [ProductController::class, 'index'])->name('index');
+    Route::get('/{slug}', [ProductController::class, 'productDetail'])->name('detail');
+});
+
+// Guest-only auth pages (login / register views + submit actions)
 Route::middleware('guest')->group(function () {
-    // Actions
+    Route::view('/login', 'client.auth.login')->name('login');
+    Route::view('/register', 'client.auth.register')->name('register');
+
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
 });
 
-Route::middleware(['auth'])->group(function () {
-    // Actions
+// Authentication-required routes
+Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Show Notice Page
+    // Email verification
     Route::get('/email/verify', [VerificationController::class, 'notice'])->name('verification.notice');
-    // Handle Link Click (Laravel automatically validates signature)
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
-    // Resend Email
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])->middleware(['throttle:6,1'])->name('verification.send');
+
+    // Dashboard (authenticated)
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [HomeController::class, 'dashboard'])->name('overview');
+        Route::get('/orders', [HomeController::class, 'orders'])->name('orders');
+        Route::view('/profile', 'client.pages.dashboard.profile')->name('profile');
+        Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
+        Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
+        Route::get('/security', [SecurityController::class, 'index'])->name('security');
+        Route::post('/security/password', [SecurityController::class, 'updatePassword'])->name('security.update-password');
+        Route::post('/security/logout-all', [SecurityController::class, 'logoutAllSessions'])->name('security.logout-all');
+        Route::post('/security/revoke-session', [SecurityController::class, 'revokeSession'])->name('security.revoke-session');
+        Route::view('/payment-methods', 'client.pages.dashboard.payments')->name('payments');
+        Route::view('/rewards', 'client.pages.dashboard.rewards')->name('rewards');
+    });
+
+    // Checkout (requires auth)
+    Route::get('/checkout', [OrderController::class, 'show'])->name('checkout');
+    Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
+    // Invoice download / printable view
+    Route::get('/client/orders/{id}/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
 });
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
-
-Route::get('/products', function () {
-    return view('client.pages.products');
-})->name('products');
-
-Route::get('/cart', function () {
-    return view('client.pages.cart');
-})->name('cart');
-
-Route::get('/checkout', function () {
-    return view('client.pages.checkout');
-})->name('checkout');
-
-Route::get('/login', function () {
-    return view('client.auth.login');
-})->name('login');
-
-Route::get('/register', function () {
-    return view('client.auth.register');
-})->name('register');
-
-Route::get('/product-detail', function () {
-    return view('client.pages.product-detail');
-})->name('product-detail');
-
-Route::get('/checkout-success', function () {
-    return view('client.pages.checkout-success');
-})->name('checkout-success');
-
-Route::get('/search', function () {
-    return view('client.pages.search-results');
-})->name('search');
-
-Route::get('/checkout-process', function () {
-    return view('client.pages.checkout-process');
-})->name('checkout-process');
-
-Route::get('/product-compare', function () {
-    return view('client.pages.compare');
-})->name('product-compare');
-
-Route::prefix('dashboard')->name('dashboard.')->group(function () {
-
-    // /dashboard (The main overview)
-    Route::get('/', function () {
-        // Points to /client/pages/dashboard/dashboard.blade.php
-        return view('client.pages.dashboard.dashboard');
-    })->name('overview');
-
-    // /dashboard/orders
-    Route::get('/orders', function () {
-        return view('client.pages.dashboard.orders');
-    })->name('orders');
-
-    // /dashboard/profile
-    Route::get('/profile', function () {
-        return view('client.pages.dashboard.profile');
-    })->name('profile');
-
-    // /dashboard/addresses
-    Route::get('/addresses', function () {
-        return view('client.pages.dashboard.addresses');
-    })->name('addresses');
-
-    // /dashboard/wishlist
-    Route::get('/wishlist', function () {
-        return view('client.pages.dashboard.wishlist');
-    })->name('wishlist');
-
-    // /dashboard/security
-    Route::get('/security', function () {
-        return view('client.pages.dashboard.security');
-    })->name('security');
-
-    // /dashboard/payments
-    Route::get('/payment-methods', function () {
-        return view('client.pages.dashboard.payments');
-    })->name('payments');
-
-    // /dashboard/rewards
-    Route::get('/rewards', function () {
-        return view('client.pages.dashboard.rewards');
-    })->name('rewards');
+// Cart endpoints: keep `GET /cart` public but require auth for modifications
+Route::get('/cart', [CartController::class, 'show'])->name('cart');
+Route::get('/cart/add', function () {
+    return redirect()->route('cart');
+})->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 });
 
-Route::get('/contact', function () {
-    return view('client.pages.contact');
-})->name('contact');
-
-Route::get('/about', function () {
-    return view('client.pages.about');
-})->name('about');
-
-Route::get('/faq', function () {
-    return view('client.pages.faq');
-})->name('faq');
-
-Route::get('/terms', function () {
-    return view('client.pages.terms');
-})->name('terms');
-
-Route::get('/privacy', function () {
-    return view('client.pages.privacy');
-})->name('privacy');
-
-Route::get('/shipping-returns', function () {
-    return view('client.pages.shipping-returns');
-})->name('shipping-returns');
-
-Route::get('/showrooms', function () {
-    return view('client.pages.showrooms');
-})->name('showrooms');
-
-Route::get('/sitemap', function () {
-    return view('client.pages.sitemap');
-})->name('sitemap');
-
-Route::get('/support', function () {
-    return view('client.pages.support');
-})->name('support');
-
-Route::get('/new-arrivals', function () {
-    return view('client.pages.new-arrivals');
-})->name('new-arrivals');
-
-Route::get('/best-sellers', function () {
-    return view('client.pages.best-sellers');
-})->name('best-sellers');
-
-Route::get('/deals', function () {
-    return view('client.pages.deals');
-})->name('deals');
-
-Route::get('/brand/{slug}', function ($slug) {
-    return view('client.pages.brand-products', ['brand_slug' => $slug]);
-})->name('brand-products');
-
-Route::get('/order-tracking', function () {
-    return view('client.pages.order-tracking');
-})->name('order-tracking');
-
-Route::get('/order-detail/{id}', function ($id) {
-    return view('client.pages.order-detail', ['order_id' => $id]);
-})->name('order-detail');
-
-
+// Client addresses endpoints (AJAX-driven from dashboard)
+Route::prefix('client')->middleware('auth')->group(function () {
+    Route::post('/addresses', [AddressController::class, 'store']);
+    // AJAX endpoints without URL parameters: id is passed in request body
+    Route::post('/addresses/show', [AddressController::class, 'show']);
+    Route::post('/addresses/update', [AddressController::class, 'update']);
+    Route::post('/addresses/delete', [AddressController::class, 'destroy']);
+    Route::post('/addresses/default', [AddressController::class, 'setDefault']);
+    // Wishlist AJAX endpoints
+    Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
+    Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
+    Route::post('/wishlist/get', [WishlistController::class, 'getWishlist']);
+    Route::post('/wishlist/count', [WishlistController::class, 'countWishlist']);
+    Route::post('/wishlist/clear', [WishlistController::class, 'clearWishlist']);
+});

@@ -49,7 +49,6 @@ $(document).ready(function() {
                 // FIXED: Changed data from 'category.name' to 'category_name'
                 { data: 'category_name', name: 'category.category-name', orderable: false, searchable: false },
 
-                { data: 'image', name: 'image', orderable: false, searchable: false },
                 { data: 'is_active', name: 'status', orderable: true, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
             ]

@@ -1,28 +1,7 @@
-@extends('client.layouts.app')
-
-@section('content')
-<div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
-  <div class="container mx-auto px-4">
-
-    <div class="mb-8">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 class="text-4xl font-extrabold text-gray-900 mb-2">
-            Order Confirmed
-          </h1>
-          <p class="text-gray-600">Thank you for your purchase! Your order has been successfully placed.</p>
-        </div>
-        <div class="mt-4 md:mt-0">
-          <div class="flex items-center space-x-2 text-sm text-gray-500">
-            <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Home</a>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-            <a href="{{ route('cart') }}" class="hover:text-primary transition-colors">Cart</a>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-            <a href="{{ route('checkout') }}" class="hover:text-primary transition-colors">Checkout</a>
+@php
+  // Legacy view removed — always use the multi-step checkout (step=3)
+  abort(404);
+@endphp
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -76,30 +55,39 @@
             </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900 mb-4">Order Successfully Placed!</h2>
-          <p class="text-lg text-gray-600 mb-6">Your order #<span class="font-bold text-primary">EZ-2024-001</span> has been confirmed and is being processed.</p>
+          <p class="text-lg text-gray-600 mb-6">Your order #<span class="font-bold text-primary">{{ $order->order_number ?? ('#' . ($order->id ?? 'N/A')) }}</span> has been confirmed and is being processed.</p>
 
           <div class="bg-gray-50 rounded-xl p-6 text-left">
             <h3 class="text-xl font-bold text-gray-900 mb-4">Order Details</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span class="font-semibold text-gray-700">Order Number:</span>
-                <span class="text-gray-900">EZ-2024-001</span>
+                <span class="text-gray-900">{{ $order->order_number ?? ('#' . ($order->id ?? 'N/A')) }}</span>
               </div>
               <div>
                 <span class="font-semibold text-gray-700">Order Date:</span>
-                <span class="text-gray-900">{{ date('M d, Y') }}</span>
+                <span class="text-gray-900">{{ $order && $order->created_at ? $order->created_at->format('M d, Y') : date('M d, Y') }}</span>
               </div>
               <div>
                 <span class="font-semibold text-gray-700">Payment Method:</span>
-                <span class="text-gray-900">Credit Card (**** **** **** 3456)</span>
+                <span class="text-gray-900">{{ $order->payment_method ?? 'Credit Card' }}</span>
               </div>
               <div>
                 <span class="font-semibold text-gray-700">Shipping Method:</span>
-                <span class="text-gray-900">Standard Shipping (FREE)</span>
+                <span class="text-gray-900">{{ $order->shipping_method ?? 'Standard Shipping (FREE)' }}</span>
               </div>
               <div class="md:col-span-2">
                 <span class="font-semibold text-gray-700">Shipping Address:</span>
-                <span class="text-gray-900 block mt-1">John Doe<br>123 Main Street, Apt 4B<br>New York, NY 10001<br>United States</span>
+                <span class="text-gray-900 block mt-1">
+                  @if($order && is_array($order->shipping_address))
+                    {{ $order->shipping_address['name'] ?? '' }}<br>
+                    {{ $order->shipping_address['street'] ?? '' }}<br>
+                    {{ ($order->shipping_address['city'] ?? '') }}{{ ($order->shipping_address['state'] ?? '') ? ', ' . $order->shipping_address['state'] : '' }} {{ $order->shipping_address['postal_code'] ?? '' }}<br>
+                    {{ $order->shipping_address['country'] ?? '' }}
+                  @else
+                    N/A
+                  @endif
+                </span>
               </div>
             </div>
           </div>
@@ -168,44 +156,50 @@
             Order Summary
           </h2>
 
-          <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100">
-            <div class="flex gap-3">
-              <img src="https://via.placeholder.com/80x80?text=Product+1" alt="Product" class="w-20 h-20 object-cover rounded-lg">
-              <div class="flex-1">
-                <h3 class="font-semibold text-gray-900 text-sm mb-1">Premium Wireless Headphones</h3>
-                <p class="text-xs text-gray-500 mb-2">Qty: 1</p>
-                <p class="font-bold text-primary">$199.99</p>
-              </div>
-            </div>
+          @php
+            $itemsForSummary = (isset($order) && $order && $order->items->isNotEmpty()) ? $order->items : collect();
+            if($itemsForSummary->isEmpty() && isset($order) && $order && $order->total) {
+              // leave empty
+            }
+            $subtotal = $itemsForSummary->sum(function($i){ return ($i->quantity * ($i->unit_price ?? ($i->price ?? 0))); });
+            $tax = round($subtotal * 0.08, 2);
+            $shipping = 0.00;
+            $total = $order && $order->total ? $order->total : ($subtotal + $tax + $shipping);
+          @endphp
 
-            <div class="flex gap-3">
-              <img src="https://via.placeholder.com/80x80?text=Product+2" alt="Product" class="w-20 h-20 object-cover rounded-lg">
-              <div class="flex-1">
-                <h3 class="font-semibold text-gray-900 text-sm mb-1">Smart Watch Series 8</h3>
-                <p class="text-xs text-gray-500 mb-2">Qty: 2</p>
-                <p class="font-bold text-primary">$399.00</p>
+          <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100">
+            @forelse($itemsForSummary as $it)
+              <div class="flex gap-3">
+                <img src="{{ $it->product->image_url ?? ($it->image ?? 'https://via.placeholder.com/80x80') }}" alt="{{ $it->product->name ?? ($it->name ?? 'Product') }}" class="w-20 h-20 object-cover rounded-lg">
+                <div class="flex-1">
+                  <h3 class="font-semibold text-gray-900 text-sm mb-1">{{ $it->product->name ?? ($it->name ?? 'Product') }}</h3>
+                  <p class="text-xs text-gray-500 mb-2">Qty: {{ $it->quantity }}</p>
+                  <p class="font-bold text-primary">${{ number_format(($it->unit_price ?? ($it->price ?? 0)) * $it->quantity, 2) }}</p>
+                </div>
               </div>
-            </div>
+            @empty
+              <div class="text-sm text-gray-500">No items found for this order.</div>
+            @endforelse
           </div>
 
           <div class="space-y-3 mb-6">
             <div class="flex justify-between text-gray-600">
               <span>Subtotal</span>
-              <span class="font-semibold">$798.99</span>
+              <span class="font-semibold">${{ number_format($subtotal, 2) }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
               <span>Shipping</span>
-              <span class="font-semibold text-green-600">FREE</span>
+              <span class="font-semibold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
               <span>Tax (8%)</span>
-              <span class="font-semibold">$63.92</span>
+              <span class="font-semibold">${{ number_format($tax, 2) }}</span>
             </div>
 
             <div class="border-t-2 border-gray-100 pt-3">
               <div class="flex justify-between items-center">
                 <span class="text-xl font-bold text-gray-900">Total</span>
-                <span class="text-3xl font-bold text-primary">$862.91</span>
+                <span class="text-3xl font-bold text-primary">${{ number_format($total, 2) }}</span>
               </div>
             </div>
           </div>

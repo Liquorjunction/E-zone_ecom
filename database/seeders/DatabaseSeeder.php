@@ -24,13 +24,19 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // Seed admin data
+        // Seed all data
         $this->call([
             AdminSeeder::class,
+            BrandSeeder::class,
+            CategorySeeder::class,
+            ContentSeeder::class,
+            ShowroomSeeder::class,
+            StoreAndWarehouseSeeder::class,
+            SubCategorySeeder::class,
         ]);
 
         // Assign super-admin role to the first admin user
-        $admin = admin::first();
+        $admin = Admin::first();
         if ($admin) {
             $admin->assignRole('super-admin');
         }

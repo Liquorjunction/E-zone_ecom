@@ -1,20 +1,40 @@
 {{-- Data injected via App\View\Composers\SidebarComposer --}}
-<aside class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white shadow-xl border-r-2 border-primary z-40 transition-all duration-300 container-query"
-       style="top: 88px; max-height: calc(100vh - 88px);"
+<aside class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white shadow-xl border-r-2 border-primary z-30 transition-all duration-300 container-query"
+    style="top: var(--header-height); max-height: calc(100vh - var(--header-height));"
        :class="{ 'w-16': sidebarCollapsed, 'w-72': !sidebarCollapsed }"
-       @mouseenter="sidebarCollapsed = false"
-       @mouseleave="sidebarCollapsed = true">
+       @mouseenter="if(!pinned) sidebarCollapsed = false"
+       @mouseleave="if(!pinned) sidebarCollapsed = true">
 
-    <div class="shrink-0 bg-white z-10 py-5 px-5 border-b-2 border-gray-100 transition-all duration-300"
-         :class="{ 'px-3 hidden': sidebarCollapsed }">
-        <h2 class="text-xl font-bold text-gray-900 flex items-center transition-all duration-300"
-            :class="{ 'justify-center': sidebarCollapsed }">
-            <span class="w-1.5 h-7 rounded-full mr-3 bg-primary transition-all duration-300"
-                  :class="{ 'mr-0': sidebarCollapsed }"></span>
-            <span x-show="!sidebarCollapsed" class="transition-all duration-300">
+    <div x-show="!sidebarCollapsed" x-cloak class="shrink-0 bg-white z-10 py-5 px-5 border-b-2 border-gray-100 transition-all duration-300 flex items-center justify-between">
+
+        <h2 class="text-xl font-bold text-gray-900 flex items-center transition-all duration-300">
+            <span class="w-1.5 h-7 rounded-full mr-3 bg-primary transition-all duration-300"></span>
+            <span class="transition-all duration-300">
                 {{ gtrans('Shop by Category') }}
             </span>
         </h2>
+
+        <div class="ml-2 flex items-center">
+            <button @click.prevent="pinned = !pinned"
+                    :title="pinned ? 'Unpin sidebar' : 'Pin sidebar'"
+                    :class="pinned ? 'bg-primary text-white hover:bg-primary-700' : 'bg-white text-gray-600 hover:bg-gray-100'"
+                    class="flex items-center justify-center p-2 rounded-md border border-transparent shadow-sm transition-all duration-200 focus:outline-none">
+
+                <!-- Unpin (mirrored) - shown when not pinned -->
+                <svg x-show="!pinned" x-cloak class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="translate(16 0) scale(-1 1)">
+                        <path d="m10.25 10.25 4 4m-12.5-7.5 5-5s1 2 2 3 4.5 2 4.5 2l-6.5 6.5s-1-3.5-2-4.5-3-2-3-2z"/>
+                    </g>
+                </svg>
+
+                <!-- Pin (provided) - shown when pinned -->
+                <svg x-show="pinned" x-cloak class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m10.25 10.25 4 4m-12.5-7.5 5-5s1 2 2 3 4.5 2 4.5 2l-6.5 6.5s-1-3.5-2-4.5-3-2-3-2z"/>
+                </svg>
+
+            </button>
+        </div>
+
     </div>
 
     <nav class="flex-1 overflow-y-auto mt-2 pb-6 transition-all duration-300 custom-scrollbar"
@@ -23,7 +43,7 @@
             @foreach ($sidebarCategories as $category)
                 <li x-data="{ open: false }" class="group">
                     <div class="relative">
-                        <a href="{{ route('products', ['category' => $category->slug]) }}"
+                        <a href="{{ route('products.index', ['category' => $category->slug]) }}"
                            class="flex items-center py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-all duration-300 hover:bg-gray-50 group-hover:shadow-md"
                            :class="{ 'px-2 justify-center': sidebarCollapsed, 'px-4': !sidebarCollapsed }">
 
@@ -62,7 +82,7 @@
                              x-collapse
                              class="ml-9 mt-1.5 space-y-0.5 pl-4 border-l-2 border-gray-100">
                             @foreach ($category->subcategories as $subcategory)
-                                <a href="{{ route('products', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
                                    class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:pl-4 hover:font-medium hover:text-primary">
                                     <span class="flex items-center">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-2.5 group-hover:bg-primary transition-colors"></span>
@@ -78,7 +98,7 @@
     </nav>
 
     <div x-show="!sidebarCollapsed" class="shrink-0 bg-white p-4 border-t-2 border-gray-100 shadow-lg mt-auto">
-        <a href="{{ route('products') }}"
+        <a href="{{ route('products.index') }}"
            class="flex items-center justify-center w-full px-5 py-3 text-sm font-semibold text-white bg-primary rounded-xl transition-all duration-300 hover:shadow-xl transform hover:-translate-y-0.5">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -89,7 +109,7 @@
 </aside>
 
 <button @click="mobileSidebarOpen = true"
-        class="lg:hidden fixed bottom-6 left-6 z-50 p-4 text-white bg-primary rounded-full shadow-2xl transition-all duration-300 hover:shadow-3xl transform hover:scale-110">
+        class="lg:hidden fixed bottom-6 left-6 z-40 p-4 text-white bg-primary rounded-full shadow-2xl transition-all duration-300 hover:shadow-3xl transform hover:scale-110">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
     </svg>
@@ -134,7 +154,7 @@
             @foreach ($sidebarCategories as $category)
                 <li x-data="{ open: false }" class="group">
                     <div class="relative">
-                        <a href="{{ route('products', ['category' => $category->slug]) }}"
+                        <a href="{{ route('products.index', ['category' => $category->slug]) }}"
                            class="flex items-center px-4 py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-all duration-300 hover:bg-gray-50">
                             <span class="shrink-0 text-primary w-6 h-6 flex items-center justify-center">
                                 @if($category->{'category-icon'} && \Illuminate\Support\Facades\Storage::disk('public')->exists($category->{'category-icon'}))
@@ -166,7 +186,7 @@
                              x-collapse
                              class="ml-9 mt-1.5 space-y-0.5 pl-4 border-l-2 border-gray-100">
                             @foreach ($category->subcategories as $subcategory)
-                                <a href="{{ route('products', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
                                    class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-all duration-200 hover:bg-gray-50">
                                     <span class="flex items-center">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-2.5"></span>
@@ -181,15 +201,3 @@
         </ul>
     </nav>
 </aside>
-
-@push('scripts')
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('sidebar', () => ({
-            mobileSidebarOpen: false,
-            sidebarCollapsed: true
-        }))
-    })
-</script>
-@endpush

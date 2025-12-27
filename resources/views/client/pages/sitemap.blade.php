@@ -28,7 +28,7 @@
                             </svg>
                             <span>Home</span>
                         </a>
-                        <a href="{{ route('products') }}"
+                        <a href="{{ route('products.index') }}"
                             class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary font-medium rounded-xl transition-colors border-2 border-gray-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -36,7 +36,7 @@
                             </svg>
                             <span>All Products (Category)</span>
                         </a>
-                        <a href="{{ route('product-detail') }}"
+                        <a href="{{ route('products.index') }}"
                             class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary font-medium rounded-xl transition-colors border-2 border-gray-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

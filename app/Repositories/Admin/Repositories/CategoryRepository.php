@@ -3,6 +3,7 @@
 namespace App\Repositories\Admin\Repositories;
 
 use App\Models\Categories;
+use Illuminate\Validation\ValidationException;
 use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,6 +12,11 @@ class CategoryRepository implements CategoryRepositoryInterface
     public function getAllCategories()
     {
         return Categories::all();
+    }
+
+    public function getActiveCategories()
+    {
+        return Categories::where('status', 'active')->get();
     }
 
     public function getCategoryById($id)
@@ -22,6 +28,15 @@ class CategoryRepository implements CategoryRepositoryInterface
     {
         // Use passed data (with translations) or fallback
         $data = $data ?? $request->validated();
+
+        // Duplicate check for English name
+        $english = data_get($data, 'category-name.en');
+        if ($english) {
+            $exists = Categories::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`category-name`, '$.en')) = ?", [$english])->exists();
+            if ($exists) {
+                throw ValidationException::withMessages(['category-name.en' => 'The English category name has already been taken.']);
+            }
+        }
 
         // Handle Image Upload
         if ($request->hasFile('category-icon')) {
@@ -39,6 +54,16 @@ class CategoryRepository implements CategoryRepositoryInterface
     {
         $category = Categories::findOrFail($id);
         $data = $data ?? $request->validated();
+
+        // Duplicate check for English name (exclude current)
+        $english = data_get($data, 'category-name.en');
+        if ($english) {
+            $query = Categories::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`category-name`, '$.en')) = ?", [$english]);
+            $query->where('id', '!=', $id);
+            if ($query->exists()) {
+                throw ValidationException::withMessages(['category-name.en' => 'The English category name has already been taken.']);
+            }
+        }
 
         // Handle Image Update
         if ($request->hasFile('category-icon')) {

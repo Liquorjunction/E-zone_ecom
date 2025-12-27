@@ -23,7 +23,7 @@ class UpdateCategoryRequest extends FormRequest
             'category-name.fr' => 'nullable|string|max:255',
             'category-name.ar' => 'nullable|string|max:255',
 
-            'category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
             'status' => 'nullable',
         ];
     }
@@ -32,6 +32,9 @@ class UpdateCategoryRequest extends FormRequest
     {
         return [
             'category-name.en.required' => 'The English category name is required.',
+            'category-icon.image' => 'The category icon must be an image file.',
+            'category-icon.mimes' => 'The category icon must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
+            'category-icon.max' => 'The category icon must not be greater than 2MB.',
         ];
     }
 }

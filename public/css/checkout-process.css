@@ -1,0 +1,56 @@
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+input:focus,
+button:focus {
+  outline: none;
+}
+
+/* Add smooth loading states */
+.cart-item-row {
+  transition: all 0.3s ease;
+}
+
+.cart-item-row:hover {
+  transform: translateY(-2px);
+}
+
+/* Radio button styling */
+input[type="radio"]:checked + span {
+  color: var(--primary-color);
+}
+
+input[type="radio"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Custom scrollbar for summary items */
+.max-h-64::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-64::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.max-h-64::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.max-h-64::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

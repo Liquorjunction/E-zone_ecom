@@ -30,14 +30,10 @@ class PrivacyPolicyRespository implements PrivacyPolicyRespositoryInterface
         return $privacyPolicy;
     }
 
-    public function destroyPrivacyPolicy($request)
+    public function destroyPrivacyPolicy($id)
     {
-        $privacyPolicy = PrivacyPolicy::find($request->input('id'));
-        if ($privacyPolicy) {
-            $privacyPolicy->delete();
-        }
-
-        return $privacyPolicy;
+        $privacyPolicy = PrivacyPolicy::findOrFail($id);
+        $privacyPolicy->delete();
     }
 
     public function getDataForDataTable()

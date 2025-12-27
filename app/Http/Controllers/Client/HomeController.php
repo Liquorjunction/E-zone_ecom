@@ -3,27 +3,29 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\HeroSlider;
-use App\Models\Categories;
-use App\Models\Card;
+use App\Repositories\Client\Interfaces\HomeRepositoryInterface as HomeRepo;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(HomeRepo $homeRepo)
     {
-        // 1. Hero Sliders
-        $sliders = HeroSlider::orderBy('sort_order', 'asc')->where('is_active', '1')->get();
+        $data = $homeRepo->getHomePageData();
 
-        // 2. Categories (For the Main Grid)
-        $categories = Categories::where('status', 'active')
-                                ->withCount('subcategories')
-                                ->get();
+        return view('client.pages.home', $data);
+    }
 
-        // 3. Promo Cards (Replacing the static Gaming/Smart Home section)
-        $cards = Card::where('status', 'active')
-                     ->orderBy('sort_order', 'asc')
-                     ->get();
 
-        return view('client.pages.home', compact('sliders', 'categories', 'cards'));
+    public function dashboard(HomeRepo $homeRepo)
+    {
+        $data = $homeRepo->getDashboardData();
+
+        return view('client.pages.dashboard.dashboard', $data);
+    }
+
+    public function orders(HomeRepo $homeRepo)
+    {
+        $orders = $homeRepo->getUserOrders(10);
+
+        return view('client.pages.dashboard.orders', compact('orders'));
     }
 }

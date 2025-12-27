@@ -1,0 +1,555 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Refactored product-form.js
+    // Responsibilities:
+    // - Initialize Quill editors and keep hidden inputs in-sync
+    // - Controlled tab navigation + validation on steps
+    // - Select2 initialization and subcategory filtering
+    // - Dynamic specs table (add/remove rows)
+    // - Dynamic variants table (add/remove, handle existing rows)
+    // - Variant translation & attributes modal
+    // - Ensure quill contents flushed on submit
+
+    // ---------------------------
+    // Utilities
+    // ---------------------------
+    const select = (s, ctx = document) => ctx.querySelector(s);
+    const selectAll = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
+    const isEmpty = v => v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
+
+    // ---------------------------
+    // QUILL: initialization and sync
+    // ---------------------------
+    const quillEditors = {};
+    function initQuill(id, hiddenId) {
+        const container = select(`#${id}`);
+        if (!container) return;
+        if (container.classList.contains('ql-container')) return; // already initialized
+
+        const quill = new Quill(`#${id}`, {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ font: [] }],
+                    [{ size: ['small', false, 'large', 'huge'] }],
+                    [{ header: [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    ['link', 'image', 'clean']
+                ]
+            }
+        });
+
+        quillEditors[id] = { quill, hiddenId };
+        const hidden = select(`#${hiddenId}`);
+        if (hidden) hidden.__quill = quill;
+        if (hidden && hidden.value) quill.root.innerHTML = hidden.value;
+
+        // Sync hidden input with initial content from div if no hidden value
+        if (hidden && !hidden.value && container.innerHTML.trim()) {
+            hidden.value = container.innerHTML;
+        }
+
+        quill.on('text-change', () => {
+            if (hidden) {
+                hidden.value = quill.getText().trim().length === 0 ? '' : quill.root.innerHTML;
+                hidden.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+
+    ['en', 'fr', 'ar'].forEach(lang => initQuill(`quill-description-${lang}`, `description_${lang}`));
+
+    function saveAllQuillContents() {
+        Object.values(quillEditors).forEach(info => {
+            const hidden = select(`#${info.hiddenId}`);
+            if (hidden && hidden.__quill) {
+                hidden.value = hidden.__quill.getText().trim().length === 0 ? '' : hidden.__quill.root.innerHTML;
+                hidden.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+
+    // ---------------------------
+    // Translate All (fallback copy EN -> FR/AR for nested fields)
+    // ---------------------------
+    selectAll('.btn-translate-all').forEach(btn => btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Copy top-level simple fields
+        const langs = ['fr', 'ar'];
+        const copyIfEmpty = (selector, value) => {
+            if (!value) return;
+            langs.forEach(lang => {
+                const el = select(`${selector.replace('{lang}', lang)}`);
+                if (el && isEmpty(el.value)) el.value = value;
+            });
+        };
+
+        // Names
+        const enName = select('input[name="name[en]"]')?.value || '';
+        copyIfEmpty('input[name="name[{lang}]"]', enName);
+
+        // Descriptions (hidden inputs)
+        const descEn = select('#description_en')?.value || '';
+        copyIfEmpty('input[name="description[{lang}]"]', descEn);
+
+        // Dimensions & Warranty
+        const dimEn = select('input[name="dimensions[en]"]')?.value || '';
+        copyIfEmpty('input[name="dimensions[{lang}]"]', dimEn);
+        const warEn = select('input[name="warranty[en]"]')?.value || '';
+        copyIfEmpty('input[name="warranty[{lang}]"]', warEn);
+
+        // Specifications tables: copy each row title/value as plain JSON if target empty
+        ['en'].forEach(srcLang => {
+            langs.forEach(tLang => {
+                const srcRows = selectAll(`#spec-table-${srcLang} tbody tr`);
+                const tgtBody = select(`#spec-table-${tLang} tbody`);
+                if (!tgtBody) return;
+                if (tgtBody.children.length <= 0) {
+                    // replicate rows (best-effort)
+                    srcRows.forEach(r => {
+                        const title = r.querySelector('input')?.value || '';
+                        const value = r.querySelectorAll('input')[1]?.value || '';
+                        if (title || value) {
+                            tgtBody.insertAdjacentHTML('beforeend', `<tr><td><input type="text" name="specifications[${tLang}][${Date.now()}][title]" class="form-control form-control-sm" value="${title}"></td><td><input type="text" name="specifications[${tLang}][${Date.now()}][value]" class="form-control form-control-sm" value="${value}"></td><td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-spec-row">&times;</button></td></tr>`);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Variants: copy name[en] -> name[fr|ar] and attributes en->fr/ar if empty
+        const variantRows = selectAll('#variants-table tbody tr');
+        variantRows.forEach(row => {
+            if (row.id === 'no-variants-row') return;
+            const enInput = row.querySelector('input[name*="[name][en]"]');
+            if (!enInput) return;
+            const nameAttr = enInput.getAttribute('name') || '';
+            const idxMatch = nameAttr.match(/^variants\[(.+?)\]/);
+            const idx = idxMatch ? idxMatch[1] : null;
+            if (!idx) return;
+
+            langs.forEach(lang => {
+                const targetName = row.querySelector(`input[name="variants[${idx}][name][${lang}]"]`);
+                if (targetName && isEmpty(targetName.value)) targetName.value = enInput.value;
+
+                const aEn = row.querySelector(`input[name="variants[${idx}][attributes][en]"]`);
+                const aTarget = row.querySelector(`input[name="variants[${idx}][attributes][${lang}]"]`);
+                if (aEn && aTarget && (isEmpty(aTarget.value) || aTarget.value === '[]')) {
+                    aTarget.value = aEn.value || '[]';
+                }
+            });
+        });
+
+        // Quick UX feedback
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i> Done';
+        setTimeout(() => btn.innerHTML = original, 1500);
+    }));
+
+    // ---------------------------
+    // TAB NAVIGATION + VALIDATION
+    // ---------------------------
+    function activatePane(targetId) {
+        // Prefer using Bootstrap Tab API for proper activation
+        const allNavLinks = selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]');
+        const targetLink = allNavLinks.find(link => {
+            const href = (link.getAttribute('href') || '').split('#')[1];
+            const dataTarget = (link.getAttribute('data-bs-target') || '').replace('#', '');
+            return (href || dataTarget) === targetId;
+        });
+
+        if (targetLink) {
+            // enable the target and show via bootstrap API
+            targetLink.classList.remove('disabled');
+            try {
+                new bootstrap.Tab(targetLink).show();
+            } catch (e) {
+                // fallback to manual activation
+                const pane = document.getElementById(targetId);
+                if (pane) {
+                    const container = pane.closest('.tab-content');
+                    if (container) container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+                    pane.classList.add('show', 'active');
+                }
+            }
+        } else {
+            // simple fallback if no nav link found
+            const pane = document.getElementById(targetId);
+            if (!pane) return;
+            const container = pane.closest('.tab-content');
+            if (container) container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+            pane.classList.add('show', 'active');
+        }
+
+        // ensure nav links reflect active state
+        allNavLinks.forEach(link => {
+            const href = (link.getAttribute('href') || '').split('#')[1];
+            const dataTarget = (link.getAttribute('data-bs-target') || '').replace('#', '');
+            const linkTarget = href || dataTarget;
+            if (linkTarget === targetId) {
+                link.classList.remove('disabled');
+                link.classList.add('active');
+                link.setAttribute('aria-selected', 'true');
+            } else {
+                link.classList.remove('active');
+                link.setAttribute('aria-selected', 'false');
+            }
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateAndGo(nextId, currentPane) {
+        saveAllQuillContents();
+        let valid = true;
+        let firstInvalid = null;
+
+        // Simple required field check inside current pane
+        selectAll('[required]', currentPane).forEach(input => {
+            const val = (input.type === 'file') ? (input.files && input.files.length > 0) : input.value;
+            if (isEmpty(val)) {
+                valid = false;
+                input.classList.add('is-invalid');
+                if (!firstInvalid) firstInvalid = input;
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+
+        // Step-specific checks
+        if (currentPane && currentPane.id === 'step1') {
+            const descEn = select('#description_en');
+            if (!descEn || isEmpty(descEn.value)) {
+                valid = false;
+                const qu = select('#quill-description-en');
+                if (qu) qu.classList.add('is-invalid');
+                if (!firstInvalid) firstInvalid = qu || descEn;
+            }
+        }
+
+        if (currentPane && currentPane.id === 'step3') {
+            const variantsTable = select('#variants-table');
+            const rows = variantsTable ? Array.from(variantsTable.querySelectorAll('tbody tr')).filter(tr => !tr.id || tr.id !== 'no-variants-row') : [];
+            if (rows.length === 0) {
+                alert('Please add at least one product variant.');
+                return false;
+            }
+            rows.forEach(row => {
+                const name = row.querySelector('input[name*="[name][en]"]');
+                const price = row.querySelector('input[name*="[price]"]');
+                if (name && isEmpty(name.value)) { valid = false; name.classList.add('is-invalid'); if (!firstInvalid) firstInvalid = name; }
+                if (price && isEmpty(price.value)) { valid = false; price.classList.add('is-invalid'); if (!firstInvalid) firstInvalid = price; }
+            });
+        }
+
+        if (!valid) {
+            if (firstInvalid) {
+                try { firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' }); firstInvalid.focus(); } catch (e) {}
+            }
+            return false;
+        }
+
+        if (nextId) activatePane(nextId);
+        return true;
+    }
+
+    // wired next/prev
+    selectAll('.next-step').forEach(btn => btn.addEventListener('click', e => {
+        e.preventDefault();
+        const pane = btn.closest('.tab-pane');
+        const nextId = btn.getAttribute('data-next');
+        validateAndGo(nextId, pane);
+    }));
+    selectAll('.prev-step').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); activatePane(btn.getAttribute('data-prev')); }));
+
+    // ---------------------------
+    // Select2 & subcategory filtering
+    // ---------------------------
+    if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
+        // Initialize brand and category select2 with their own placeholder so allowClear shows correctly
+        $('#brand-select, #category-select, #subcategory-select').each(function () {
+            const $el = $(this);
+            const placeholder = $el.data('placeholder') || $el.attr('placeholder') || $el.find('option[value=""]').text() || '';
+            const options = { width: '100%', allowClear: true };
+            if (placeholder) options.placeholder = placeholder;
+            $el.select2(options);
+        });
+
+        // capture all options for subcategory and rebuild on category change
+        const cfg = { allowClear: true, width: '100%' };
+        // Prefer full list provided by server in edit mode (window.__ALL_SUBCATEGORIES)
+        const allOpts = (window.__ALL_SUBCATEGORIES && Array.isArray(window.__ALL_SUBCATEGORIES))
+            ? window.__ALL_SUBCATEGORIES
+            : (function(){ const tmp = []; $('#subcategory-select option').each(function () { tmp.push({ id: $(this).val(), text: $(this).text(), categoryId: $(this).attr('data-category') }); }); return tmp; })();
+        const $sub = $('#subcategory-select');
+
+        function setSubDisabled(disabled) {
+            $sub.prop('disabled', !!disabled);
+            try { $sub.trigger('change.select2'); } catch (e) { $sub.trigger('change'); }
+        }
+
+        function rebuildSub() {
+            const selCat = $('#category-select').val();
+            const curVal = $sub.val();
+
+            // Rebuild DOM options from original snapshot
+            const fragment = document.createDocumentFragment();
+            const placeholderOpt = new Option('Select Sub Category', '');
+            fragment.appendChild(placeholderOpt);
+            allOpts.forEach(o => {
+                if (selCat && o.categoryId && (String(o.categoryId) === String(selCat))) {
+                    const opt = new Option(o.text, o.id);
+                    opt.setAttribute('data-category', o.categoryId);
+                    fragment.appendChild(opt);
+                }
+            });
+
+            // destroy select2 instance if present, replace options, then re-init
+            const hadSelect2 = !!($sub.data('select2'));
+            if (hadSelect2) {
+                try { $sub.select2('destroy'); } catch (e) { /* ignore */ }
+            }
+
+            $sub.empty();
+            $sub[0].appendChild(fragment);
+
+            // Restore value if still available
+            if (curVal && $sub.find(`option[value="${curVal}"]`).length) $sub.val(curVal);
+            else $sub.val('');
+
+            // re-init select2 if it was present before
+            if (hadSelect2 && $.fn && $.fn.select2) {
+                $sub.select2({ ...cfg, placeholder: $sub.data('placeholder') || 'Select Sub Category' });
+            }
+
+            setSubDisabled(!selCat);
+        }
+
+        // Initially disable subcategory if no category selected
+        setSubDisabled(!$('#category-select').val());
+        $('#category-select').on('change', function () {
+            const has = !!$(this).val();
+            setSubDisabled(!has);
+            rebuildSub();
+        });
+        setTimeout(rebuildSub, 200);
+    } else {
+        // Fallback: basic select functionality without Select2
+        const categorySelect = select('#category-select');
+        const subcategorySelect = select('#subcategory-select');
+
+        if (categorySelect && subcategorySelect) {
+            // Store original options
+            const allSubOptions = Array.from(subcategorySelect.options).map(opt => ({
+                value: opt.value,
+                text: opt.text,
+                categoryId: opt.getAttribute('data-category')
+            }));
+
+            function rebuildSub() {
+                const selCat = categorySelect.value;
+                subcategorySelect.innerHTML = '<option value="">Select Sub Category</option>';
+                allSubOptions.forEach(opt => {
+                    if (selCat && opt.categoryId && String(opt.categoryId) === String(selCat)) {
+                        const newOpt = new Option(opt.text, opt.value);
+                        if (opt.categoryId) newOpt.setAttribute('data-category', opt.categoryId);
+                        subcategorySelect.appendChild(newOpt);
+                    }
+                });
+                // toggle disabled state
+                subcategorySelect.disabled = !categorySelect.value;
+            }
+
+            categorySelect.addEventListener('change', () => { rebuildSub(); });
+            // initial state
+            setTimeout(rebuildSub, 200);
+        }
+    }
+
+    // ---------------------------
+    // Specifications dynamic rows
+    // ---------------------------
+    document.body.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-spec-row')) e.target.closest('tr')?.remove();
+        if (e.target.classList.contains('add-spec-btn')) {
+            const lang = e.target.getAttribute('data-lang');
+            const idx = Date.now();
+            const tbody = select(`#spec-table-${lang} tbody`);
+            if (!tbody) return;
+            tbody.insertAdjacentHTML('beforeend', `<tr><td><input type="text" name="specifications[${lang}][${idx}][title]" class="form-control form-control-sm"></td><td><input type="text" name="specifications[${lang}][${idx}][value]" class="form-control form-control-sm"></td><td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-spec-row">&times;</button></td></tr>`);
+        }
+    });
+
+    // ---------------------------
+    // Variants: add/remove and name sync
+    // ---------------------------
+    const variantsTbody = select('#variants-table tbody');
+    const noVariantsRow = select('#no-variants-row');
+
+    if (variantsTbody) {
+        // delegated remove
+        variantsTbody.addEventListener('click', (e) => {
+            const rem = e.target.closest('.remove-variant');
+            if (!rem) return;
+            if (!confirm('Delete this variant?')) return;
+            const tr = rem.closest('tr'); tr?.remove();
+            if (variantsTbody.querySelectorAll('tr').length === (noVariantsRow ? 1 : 0)) { if (noVariantsRow) noVariantsRow.style.display = 'table-row'; }
+        });
+    }
+
+    const addVariantBtn = select('#add-variant-btn');
+    function makeVariantRow(index) {
+        return `
+            <tr>
+                <td style="vertical-align: top;">
+                    <input type="text" name="variants[${index}][name][en]" class="form-control form-control-sm mb-2 variant-name-input" placeholder="Name (e.g. Blue / Small)" required>
+                    <input type="hidden" name="variants[${index}][name][fr]" value="" />
+                    <input type="hidden" name="variants[${index}][name][ar]" value="" />
+                    <div class="mt-2"><label class="small text-muted">Upload Images</label><input type="file" name="variants[${index}][images][]" class="form-control form-control-sm" multiple accept="image/*"></div>
+                </td>
+                <td style="vertical-align: top;"><div class="input-group input-group-sm"><span class="input-group-text">$</span><input type="number" name="variants[${index}][price]" step="0.01" min="0" class="form-control" required></div></td>
+                <td style="vertical-align: top;"><button type="button" class="btn btn-sm btn-outline-primary edit-variant-attributes" data-index="${index}">Edit Attributes</button>
+                    <input type="hidden" name="variants[${index}][attributes][en]" value="[]"><input type="hidden" name="variants[${index}][attributes][fr]" value="[]"><input type="hidden" name="variants[${index}][attributes][ar]" value="[]"></td>
+                <td style="vertical-align: top;"><span class="badge bg-secondary">Auto-Gen</span></td>
+                <td class="text-end"><button type="button" class="btn btn-danger btn-sm remove-variant"><i class="fas fa-trash"></i></button></td>
+            </tr>`;
+    }
+
+    if (addVariantBtn) addVariantBtn.addEventListener('click', () => {
+        if (noVariantsRow) noVariantsRow.style.display = 'none';
+        const idx = 'new_' + Date.now();
+        variantsTbody.insertAdjacentHTML('beforeend', makeVariantRow(idx));
+        const newRow = variantsTbody.lastElementChild;
+        // sync name -> fr/ar only when empty
+        const en = newRow.querySelector('.variant-name-input');
+        en.addEventListener('input', function () {
+            const fr = newRow.querySelector('input[name*="[name][fr]"]');
+            const ar = newRow.querySelector('input[name*="[name][ar]"]');
+            if (fr && isEmpty(fr.value)) fr.value = this.value;
+            if (ar && isEmpty(ar.value)) ar.value = this.value;
+        });
+    });
+
+    // Delegated handler: keep FR/AR hidden fields in sync only when they are empty
+    document.body.addEventListener('input', (e) => {
+        if (e.target && e.target.classList && e.target.classList.contains('variant-name-input')) {
+            const row = e.target.closest('tr');
+            if (!row) return;
+            const fr = row.querySelector('input[name*="[name][fr]"]');
+            const ar = row.querySelector('input[name*="[name][ar]"]');
+            if (fr && isEmpty(fr.value)) fr.value = e.target.value;
+            if (ar && isEmpty(ar.value)) ar.value = e.target.value;
+        }
+    });
+
+    // ---------------------------
+    // Variant attributes modal
+    // ---------------------------
+    const variantModal = select('#variantTranslationModal');
+    const modalIndex = select('#modal-variant-index');
+    const modalNameEn = select('#modal-variant-name-en');
+    const modalNameFr = select('#modal-variant-name-fr');
+    const modalNameAr = select('#modal-variant-name-ar');
+
+    function parseAttributesValue(val) {
+        // Accept JSON array [{key,value}] or object map {k:v} or empty string
+        if (isEmpty(val)) return [];
+        try {
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed)) return parsed.map(it => ({ key: it.key ?? it[0] ?? '', value: it.value ?? it[1] ?? '' }));
+            if (typeof parsed === 'object') return Object.keys(parsed).map(k => ({ key: k, value: parsed[k] }));
+        } catch (e) { return []; }
+        return [];
+    }
+
+    function populateAttributesTable(lang, jsonVal) {
+        const tbody = select(`#variant-attr-table-${lang} tbody`);
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const attrs = parseAttributesValue(jsonVal || '[]');
+        attrs.forEach(a => tbody.insertAdjacentHTML('beforeend', `<tr><td><input class="form-control form-control-sm attr-key" value="${a.key || ''}"></td><td><input class="form-control form-control-sm attr-value" value="${a.value || ''}"></td><td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-attr-row">&times;</button></td></tr>`));
+    }
+
+    function getAttributesFromTable(lang) {
+        const tbody = select(`#variant-attr-table-${lang} tbody`);
+        if (!tbody) return [];
+        const out = [];
+        tbody.querySelectorAll('tr').forEach(tr => {
+            const k = tr.querySelector('.attr-key')?.value.trim();
+            const v = tr.querySelector('.attr-value')?.value.trim();
+            if (!isEmpty(k) && !isEmpty(v)) out.push({ key: k, value: v });
+        });
+        return out;
+    }
+
+    document.body.addEventListener('click', (e) => {
+        // open modal
+        const editBtn = e.target.closest('.edit-variant-attributes');
+        if (editBtn) {
+            const idx = editBtn.getAttribute('data-index');
+            modalIndex.value = idx;
+            const row = editBtn.closest('tr');
+            modalNameEn.value = row.querySelector(`input[name="variants[${idx}][name][en]"]`)?.value || '';
+            modalNameFr.value = row.querySelector(`input[name="variants[${idx}][name][fr]"]`)?.value || '';
+            modalNameAr.value = row.querySelector(`input[name="variants[${idx}][name][ar]"]`)?.value || '';
+            populateAttributesTable('en', row.querySelector(`input[name="variants[${idx}][attributes][en]"]`)?.value || '[]');
+            populateAttributesTable('fr', row.querySelector(`input[name="variants[${idx}][attributes][fr]"]`)?.value || '[]');
+            populateAttributesTable('ar', row.querySelector(`input[name="variants[${idx}][attributes][ar]"]`)?.value || '[]');
+            new bootstrap.Modal(variantModal).show();
+        }
+
+        // add attr
+        if (e.target.classList.contains('add-variant-attr-btn')) {
+            const lang = e.target.getAttribute('data-lang');
+            const tbody = select(`#variant-attr-table-${lang} tbody`);
+            tbody.insertAdjacentHTML('beforeend', `<tr><td><input class="form-control form-control-sm attr-key"></td><td><input class="form-control form-control-sm attr-value"></td><td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-attr-row">&times;</button></td></tr>`);
+        }
+
+        // remove attr
+        if (e.target.classList.contains('remove-attr-row')) e.target.closest('tr')?.remove();
+    });
+
+    // Save modal
+    const saveModalBtn = select('#save-variant-translation');
+    if (saveModalBtn) saveModalBtn.addEventListener('click', () => {
+        const idx = modalIndex.value;
+        let targetRow = null;
+
+        // Try multiple ways to find the row
+        if (idx.startsWith('new_')) {
+            // For new variants, find by data-index on the edit button
+            targetRow = select(`button[data-index="${idx}"]`)?.closest('tr');
+        } else {
+            // For existing variants, find by input name
+            targetRow = [...selectAll('#variants-table tbody tr')].find(r => r.querySelector(`input[name="variants[${idx}][name][en]"]`));
+        }
+
+        if (targetRow) {
+            const en = targetRow.querySelector(`input[name="variants[${idx}][name][en]"]`);
+            const fr = targetRow.querySelector(`input[name="variants[${idx}][name][fr]"]`);
+            const ar = targetRow.querySelector(`input[name="variants[${idx}][name][ar]"]`);
+            if (en) en.value = modalNameEn.value;
+            if (fr) fr.value = modalNameFr.value;
+            if (ar) ar.value = modalNameAr.value;
+
+            const display = targetRow.querySelector('.variant-name-input');
+            if (display) display.value = modalNameEn.value || modalNameFr.value || modalNameAr.value || '';
+
+            const aen = targetRow.querySelector(`input[name="variants[${idx}][attributes][en]"]`);
+            const afr = targetRow.querySelector(`input[name="variants[${idx}][attributes][fr]"]`);
+            const aar = targetRow.querySelector(`input[name="variants[${idx}][attributes][ar]"]`);
+            if (aen) aen.value = JSON.stringify(getAttributesFromTable('en'));
+            if (afr) afr.value = JSON.stringify(getAttributesFromTable('fr'));
+            if (aar) aar.value = JSON.stringify(getAttributesFromTable('ar'));
+        } else {
+            console.warn('Could not find target row for variant index:', idx);
+        }
+        bootstrap.Modal.getInstance(variantModal).hide();
+    });
+
+    // ---------------------------
+    // Ensure Quill contents are flushed before final submit
+    // ---------------------------
+    const form = select('#product-form'); if (form) form.addEventListener('submit', () => saveAllQuillContents());
+
+});

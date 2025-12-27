@@ -1,0 +1,15 @@
+/* Minimal custom styles for toast progress and transitions.
+   Most visual styling is done with Tailwind utility classes in the JS markup.
+*/
+
+.toast-progress {
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.toast-enter { opacity: 0; transform: translateY(6px); }
+.toast-enter-active { opacity: 1; transform: translateY(0); transition: transform 240ms cubic-bezier(.2,.8,.2,1), opacity 240ms; }
+.toast-leave-active { opacity: 0; transform: translateY(-8px); transition: transform 200ms ease, opacity 200ms; }
+
+/* Mobile card transform while swiping is set inline by JS; keep backface hidden for smoother animation */
+.toast-card { backface-visibility: hidden; }
