@@ -294,7 +294,7 @@
                     @endif
 
                     <!-- Add to Cart Form -->
-                    <form id="addToCartForm" method="POST" action="{{ url('/cart/add') }}" class="space-y-4">
+                    <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" class="space-y-4">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="variant_id" id="cart-variant-id" value="">

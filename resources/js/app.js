@@ -11,16 +11,24 @@ Alpine.plugin(collapse);
 window.Alpine = Alpine;
 Alpine.start();
 
+// Global toast notifications
+import './toast';
 // Wishlist interactions
 import './wishlist';
 // Security page behaviors
 import './pages/security';
 
-// Global toast notifications
-import './toast';
+// AJAX add-to-cart for homepage/product cards
+import './ajax-cart';
 
 // Automatically show toast for axios responses and errors
 axios.interceptors.response.use(function (response) {
+	// Skip global toasts for requests that set the X-SKIP-TOAST header
+	try {
+		if (response && response.config && response.config.headers && (response.config.headers['X-SKIP-TOAST'] || response.config.headers['x-skip-toast'])) {
+			return response;
+		}
+	} catch (e) {}
 	try {
 		const data = response && response.data;
 		if (data && data.toast) {

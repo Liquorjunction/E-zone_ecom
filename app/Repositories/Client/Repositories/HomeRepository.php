@@ -58,7 +58,14 @@ class HomeRepository implements HomeRepositoryInterface
             ->orderBy('name', 'asc')
             ->get();
 
-        return compact('sliders', 'categories', 'cards', 'newArrivals', 'bestSellers', 'brands');
+        // 7. Wishlist variant ids for current user (optional, used to mark wishlisted items)
+        $wishlistVariantIds = collect([]);
+        $userId = Auth::id();
+        if ($userId) {
+            $wishlistVariantIds = Wishlist::where('user_id', $userId)->pluck('product_variant_id')->filter()->values();
+        }
+
+        return compact('sliders', 'categories', 'cards', 'newArrivals', 'bestSellers', 'brands', 'wishlistVariantIds');
     }
 
     public function getDashboardData()

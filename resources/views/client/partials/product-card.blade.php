@@ -33,8 +33,8 @@
   }
 @endphp
 
-<div class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100">
-  <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}" class="block relative aspect-square bg-gray-100 overflow-hidden">
+<div class="bg-white rounded-2xl shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 relative">
+  <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}" class="block aspect-square bg-gray-100 overflow-hidden">
   <img src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}" alt="{{ $name }}" class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
 
     <!-- Badges -->
@@ -47,17 +47,6 @@
       </span>
     </div>
 
-    <!-- Wishlist Button -->
-    @php
-      $variantId = $isVariant ? ($product->id ?? null) : ($master->productVariants()->ordered()->pluck('id')->first() ?? null);
-      $isWishlisted = isset($wishlistVariantIds) && $variantId ? in_array($variantId, $wishlistVariantIds) : false;
-    @endphp
-    <button type="button" data-product-variant-id="{{ $variantId }}" data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}" class="wishlist-btn absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 {{ $isWishlisted ? 'is-wishlisted' : '' }}" @if(!$variantId) disabled @endif>
-      <svg class="w-5 h-5 {{ $isWishlisted ? 'text-red-500' : 'text-gray-600' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    </button>
-
     <!-- Quick View -->
     <div class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/50 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
       <button class="w-full px-4 py-2 bg-white text-gray-900 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors">
@@ -65,6 +54,17 @@
       </button>
     </div>
   </a>
+
+  <!-- Wishlist Button (moved outside anchor to avoid navigation) -->
+  @php
+    $variantId = $isVariant ? ($product->id ?? null) : ($master->productVariants()->ordered()->pluck('id')->first() ?? null);
+    $isWishlisted = isset($wishlistVariantIds) && $variantId ? in_array($variantId, $wishlistVariantIds) : false;
+  @endphp
+  <button type="button" data-product-variant-id="{{ $variantId }}" data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}" data-toast-ignore class="wishlist-btn no-toast absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-red-50 {{ $isWishlisted ? 'opacity-100 is-wishlisted' : 'opacity-0 group-hover:opacity-100' }}" @if(!$variantId) disabled @endif>
+    <svg class="w-5 h-5 {{ $isWishlisted ? 'text-red-500' : 'text-gray-600' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    </svg>
+  </button>
 
   <div class="p-5">
     <!-- Category Badge -->

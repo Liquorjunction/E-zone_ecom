@@ -18,7 +18,17 @@ class CartController extends Controller
 
         // If request expects JSON (AJAX), return JSON response
         if ($request->wantsJson() || $request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Item added to cart.', 'item_id' => $item->id ?? null]);
+            // return updated cart summary including item count
+            $cart = $cartService->getCart($request);
+            $itemCount = $cart ? (int) $cart->items->sum('quantity') : 0;
+            return response()->json([
+                'success' => true,
+                'message' => 'Item added to cart.',
+                'item_id' => $item->id ?? null,
+                'summary' => [
+                    'itemCount' => $itemCount,
+                ],
+            ]);
         }
 
         // If the user clicked "Buy Now" (submit button with name=buy_now), redirect to checkout flow
@@ -73,7 +83,7 @@ class CartController extends Controller
             ]);
         }
 
-        return redirect()->route('cart')->with('success', 'Cart updated.');
+        return redirect()->back()->with('success', 'Cart updated.');
     }
 
     public function remove(Request $request, CartService $cartService, LoggerInterface $logger)

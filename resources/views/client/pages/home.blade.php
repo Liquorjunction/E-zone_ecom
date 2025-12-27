@@ -532,7 +532,9 @@
                                 'category' => $category,
                                 'title' => $title,
                                 'price' => $price,
-                                'url' => route('products.detail', $master->slug ?? $master->id)
+                                'url' => route('products.detail', $master->slug ?? $master->id),
+                                'product_id' => $master->id,
+                                'variant_id' => $isVariant ? $productVariant->id : null,
                             ])
                         @endforeach
                     </div>
@@ -647,7 +649,9 @@
                                 'category' => $category,
                                 'title' => $title,
                                 'price' => $price,
-                                'url' => route('products.detail', $master->slug ?? $master->id)
+                                'url' => route('products.detail', $master->slug ?? $master->id),
+                                'product_id' => $master->id,
+                                'variant_id' => $isVariant ? $productVariant->id : null,
                             ])
                         @endforeach
                     </div>

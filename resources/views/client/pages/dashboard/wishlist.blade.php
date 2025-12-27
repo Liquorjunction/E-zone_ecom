@@ -8,7 +8,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 lg:mb-6 p-4 lg:p-6 bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100">
       <div>
         <h2 class="text-xl lg:text-2xl font-bold text-gray-900">Your Wishlist</h2>
-        <p class="text-sm text-gray-600 mt-1">{{ $wishlist->count() }} {{ Str::plural('item', $wishlist->count()) }} saved</p>
+        <p class="text-sm text-gray-600 mt-1"><span id="wishlist-count">{{ $wishlist->count() }}</span> {{ Str::plural('item', $wishlist->count()) }} saved</p>
       </div>
       <button class="mt-3 sm:mt-0 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5 rounded-lg transition-colors">
         Share Wishlist
@@ -16,7 +16,7 @@
     </div>
 
     {{-- Wishlist Grid --}}
-    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
+    <div id="wishlist-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
       @foreach($wishlist as $item)
         @php
           $variant = $item->productVariant ?? null;
@@ -31,7 +31,7 @@
           $originalPrice = ($master?->price ?? 0) > $price ? $master?->price : null;
         @endphp
 
-        <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm overflow-hidden group border-2 border-gray-100 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+        <div data-wishlist-item="{{ $variant?->id }}" class="bg-white rounded-xl lg:rounded-2xl shadow-sm overflow-hidden group border-2 border-gray-100 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
           {{-- Product Image with Wishlist Button --}}
           <div class="relative aspect-square bg-gray-50 overflow-hidden">
             <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}">
@@ -47,7 +47,9 @@
               type="button"
               data-product-variant-id="{{ $variant?->id }}"
               data-init-wishlisted="1"
-              class="wishlist-btn absolute top-2 right-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
+              data-toast-ignore
+              aria-pressed="true"
+              class="wishlist-btn no-toast is-wishlisted opacity-100 absolute top-2 right-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
               title="Remove from wishlist"
             >
               <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -105,11 +107,11 @@
             </div>
 
             {{-- Add to Cart Button --}}
-            <form method="post" action="#" class="w-full">
+            <form method="post" action="#" class="w-full ajax-add-to-cart">
               @csrf
               <input type="hidden" name="product_variant_id" value="{{ $variant?->id }}">
               <button
-                type="button"
+                type="submit"
                 class="w-full px-3 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all text-xs lg:text-sm flex items-center justify-center gap-2 group/btn"
               >
                 <svg class="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,6 +141,47 @@
         Clear Wishlist
       </button>
     </div>
+
+    {{-- Hidden empty-template for client-side replacement when last item removed --}}
+    <template id="wishlist-empty-template">
+      <div class="flex items-center justify-center py-16 lg:py-24 bg-white rounded-xl lg:rounded-2xl border-2 border-gray-100">
+        <div class="text-center max-w-md px-6">
+          <div class="relative w-32 h-32 lg:w-40 lg:h-40 mx-auto mb-6 lg:mb-8">
+            <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-pink-50 animate-pulse"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <svg class="w-16 h-16 lg:w-20 lg:h-20 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+          </div>
+
+          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 lg:mb-4">
+            Your Wishlist is Empty
+          </h2>
+          <p class="text-sm lg:text-base text-gray-600 mb-6 lg:mb-8 leading-relaxed">
+            Save your favorite items here so you can easily find them later. Start exploring and add products you love!
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="#"
+              class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-primary text-white font-semibold rounded-xl shadow-lg hover:bg-primary/90 hover:shadow-xl transition-all text-sm lg:text-base group"
+            >
+              <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              Discover Products
+            </a>
+            <a
+              href="#"
+              class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm lg:text-base"
+            >
+              Browse Categories
+            </a>
+          </div>
+        </div>
+      </div>
+    </template>
 
   @else
     {{-- Empty Wishlist State --}}

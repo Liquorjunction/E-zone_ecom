@@ -96,6 +96,12 @@
 
         const progress = toast.el.querySelector('.toast-progress');
         if(progress){
+            // ensure origin at left and start from 0 so transition animates
+            progress.style.transformOrigin = 'left';
+            progress.style.transform = 'scaleX(0)';
+            // force layout so the initial transform is applied before transition
+            // eslint-disable-next-line no-unused-expressions
+            progress.getBoundingClientRect();
             // animate progress via transform
             progress.style.transition = `transform ${toast.duration}ms linear`;
             requestAnimationFrame(()=>{
