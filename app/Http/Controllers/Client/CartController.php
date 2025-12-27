@@ -78,10 +78,17 @@ class CartController extends Controller
 
     public function remove(Request $request, CartService $cartService, LoggerInterface $logger)
     {
-        $itemId = (int) $request->input('item_id');
+        // FIX: Check for 'id' (sent by JS) OR 'item_id'
+        $itemId = (int) ($request->input('id') ?? $request->input('item_id'));
+
+        if (!$itemId) {
+            return response()->json(['success' => false, 'message' => 'Item ID is missing.']);
+        }
+
         $ok = $cartService->removeItem($request, $itemId);
         $logger->info('Removed cart item via controller', ['item_id' => $itemId, 'success' => $ok]);
 
+        // Recalculate totals for the response
         $cart = $cartService->getCart($request);
         $subtotal = $cart ? $cart->items->sum(function($i){ return ($i->quantity * $i->unit_price); }) : 0;
         $tax = round($subtotal * 0.08, 2);

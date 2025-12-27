@@ -11,7 +11,7 @@
 @endphp
 
 <div class="bg-gradient-to-br from-gray-50 via-blue-50/30 to-white min-h-screen py-12">
-  <div id="checkout-root" class="container mx-auto px-4 max-w-7xl" data-remove-url="{{ route('cart.remove') }}" data-update-url="">
+  <div id="checkout-root" class="container mx-auto px-4 max-w-7xl" data-remove-url="{{ route('cart.remove') }}" data-update-url="{{ route('cart.update') }}">
 
     <div class="mb-10">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -152,9 +152,16 @@
                           </div>
 
                             {{-- The Remove Button (AJAX) --}}
-                            <button type="button" class="text-gray-400 hover:text-red-500 transition-all duration-300 p-2 hover:bg-red-50 rounded-lg group remove-item-ajax" data-item-id="{{ $item->id }}" aria-label="Remove item">
-                              <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
+                            <button
+    type="button"
+    class="remove-item-btn flex items-center text-red-500 hover:text-red-700 transition-colors duration-200"
+    data-item-id="{{ $item->id }}"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+    Remove
+</button>
 
                         </div>
                         <div class="space-y-2 text-sm text-gray-600 mb-5">
@@ -218,7 +225,7 @@
               <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
                 @if($cart && $cart->items->count() > 0)
                   @foreach($cart->items as $item)
-                    <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                    <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 summary-item-row" data-summary-item-id="{{ $item->id }}">
                       <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}" alt="{{ optional($item->product)->name ?? 'Product' }}" class="w-20 h-20 rounded-lg object-cover shadow-sm">
                       <div class="flex-1 min-w-0">
                         <h4 class="font-semibold text-gray-900 text-sm mb-1 truncate">{{ optional($item->variant)->variant_name ?? optional($item->product)->name ?? 'Product' }}</h4>
