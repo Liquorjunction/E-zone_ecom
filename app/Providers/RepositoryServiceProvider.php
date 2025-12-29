@@ -12,6 +12,7 @@ use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface;
+use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
 use App\Repositories\Admin\Interfaces\ProductRepositoryInterface;
@@ -32,6 +33,7 @@ use App\Repositories\Admin\Repositories\CategoryRepository;
 use App\Repositories\Admin\Repositories\FaqCategoryRepository;
 use App\Repositories\Admin\Repositories\FaqRepository;
 use App\Repositories\Admin\Repositories\InventoryRepository;
+use App\Repositories\Admin\Repositories\InventoryTransactionsRepository;
 use App\Repositories\Admin\Repositories\OrderRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
 use App\Repositories\Admin\Repositories\ProductRepository;
@@ -78,6 +80,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(WarehouseRepositoryInterface::class, WarehouseRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
+        $this->app->bind(InventoryTransactionsRepositoryInterface::class, InventoryTransactionsRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);

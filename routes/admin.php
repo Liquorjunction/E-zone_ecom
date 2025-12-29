@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\Admin\InventoryTransactionsController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
@@ -271,6 +272,12 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [InventoryController::class, 'update'])->name('update')->middleware('can:inventories.update,admin');
             Route::get('/show', [InventoryController::class, 'show'])->name('show')->middleware('can:inventories.read,admin');
             Route::delete('/destroy', [InventoryController::class, 'destroy'])->name('destroy')->middleware('can:inventories.delete,admin');
+        });
+
+        // Inventory Transactions Routes
+        Route::prefix('inventory-transactions')->name('inventory-transactions.')->middleware('can:inventory-transaction.read,admin')->group(function () {
+            Route::get('/', [InventoryTransactionsController::class, 'index'])->name('index');
+            Route::get('/data', [InventoryTransactionsController::class, 'getDataTable'])->name('data');
         });
 
         // Order Routes
