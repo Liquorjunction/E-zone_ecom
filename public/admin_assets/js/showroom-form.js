@@ -1,3 +1,41 @@
+// --- Translate All Fields Button Handler (Shipping Return style, with DOM IDs) ---
+$(document).on("click", "#btn-translate-all", function (e) {
+    e.preventDefault();
+    var btn = $(this);
+    var url = btn.data("url");
+    var fields = btn.data("fields");
+    if (typeof fields === 'string') fields = JSON.parse(fields);
+    var data = {};
+    // Collect English values using DOM IDs for consistency
+    fields.forEach(function(field) {
+        var input = document.getElementById(field + '_en');
+        data[field] = input ? input.value : '';
+    });
+    btn.prop("disabled", true).text("Translating...");
+    axios.post(url, {
+        fields: data,
+        from: 'en',
+        to: ['fr', 'ar']
+    }).then(function (resp) {
+        var result = resp.data;
+        fields.forEach(function(field) {
+            // French
+            if (result.fr && result.fr[field] !== undefined) {
+                var inputFr = document.getElementById(field + '_fr');
+                if (inputFr) inputFr.value = result.fr[field];
+            }
+            // Arabic
+            if (result.ar && result.ar[field] !== undefined) {
+                var inputAr = document.getElementById(field + '_ar');
+                if (inputAr) inputAr.value = result.ar[field];
+            }
+        });
+        btn.prop("disabled", false).text("Translate All Fields");
+    }).catch(function (err) {
+        alert("Translation failed. Please try again.");
+        btn.prop("disabled", false).text("Translate All Fields");
+    });
+});
 // showroom-form.js - Handles Quill editors for create and edit forms
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -42,8 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         ["link", "image", "video", "formula"], // embeds
 
-                        ["clean"], // remove formatting
-                        ["undo", "redo"], // requires custom handler
+                        ["clean"] // remove formatting
                     ],
                 },
             });
@@ -97,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Step navigation (existing functionality)
+    // Step navigation (improved for Bootstrap 5)
     const nextBtns = document.querySelectorAll(".next-step");
     const prevBtns = document.querySelectorAll(".prev-step");
 
@@ -107,8 +144,20 @@ document.addEventListener("DOMContentLoaded", function () {
             const triggerEl = document.querySelector(`#${nextTabId}-tab`);
             if (triggerEl) {
                 triggerEl.classList.remove("disabled");
-                const tab = new bootstrap.Tab(triggerEl);
-                tab.show();
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+                    const tab = bootstrap.Tab.getOrCreateInstance(triggerEl);
+                    tab.show();
+                } else {
+                    // Fallback: always use the main step tab-content
+                    const tabContent = document.getElementById('pills-tabContent-edit');
+                    if (tabContent) {
+                        Array.from(tabContent.children).forEach(pane => pane.classList.remove('show', 'active'));
+                        const nextPane = tabContent.querySelector(`#${nextTabId}`);
+                        if (nextPane) {
+                            nextPane.classList.add('show', 'active');
+                        }
+                    }
+                }
             }
         });
     });
@@ -118,8 +167,19 @@ document.addEventListener("DOMContentLoaded", function () {
             const prevTabId = this.getAttribute("data-prev");
             const triggerEl = document.querySelector(`#${prevTabId}-tab`);
             if (triggerEl) {
-                const tab = new bootstrap.Tab(triggerEl);
-                tab.show();
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+                    const tab = bootstrap.Tab.getOrCreateInstance(triggerEl);
+                    tab.show();
+                } else {
+                    const tabContent = document.getElementById('pills-tabContent-edit');
+                    if (tabContent) {
+                        Array.from(tabContent.children).forEach(pane => pane.classList.remove('show', 'active'));
+                        const prevPane = tabContent.querySelector(`#${prevTabId}`);
+                        if (prevPane) {
+                            prevPane.classList.add('show', 'active');
+                        }
+                    }
+                }
             }
         });
     });

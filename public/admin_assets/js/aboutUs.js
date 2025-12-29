@@ -114,6 +114,59 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // --- Translate to Others Button Handler ---
+    $(document).on("click", ".btn-translate-auto", function (e) {
+        e.preventDefault();
+        var btn = $(this);
+        var url = btn.data("url");
+        var sourceId = btn.data("source");
+        var targetBase = btn.data("target-base");
+        var isQuill = btn.data("quill");
+        var $source = document.getElementById(sourceId);
+        var html = "";
+        if (isQuill && $source && $source.__quill) {
+            html = $source.__quill.root.innerHTML;
+        } else if ($source) {
+            html = $source.value || $source.innerHTML;
+        }
+        if (!html) {
+            alert("No content to translate.");
+            return;
+        }
+        btn.prop("disabled", true).text("Translating...");
+        axios.post(url, {
+            html: html,
+            from: 'en',
+            to: ['fr', 'ar']
+        }).then(function (resp) {
+            var data = resp.data;
+            // French
+            if (data.fr && document.getElementById(targetBase + '_fr')) {
+                var frEditor = document.getElementById(targetBase + '_fr');
+                if (frEditor.__quill) {
+                    frEditor.__quill.root.innerHTML = data.fr;
+                    document.getElementById('hidden_description_fr').value = data.fr;
+                } else {
+                    frEditor.innerHTML = data.fr;
+                }
+            }
+            // Arabic
+            if (data.ar && document.getElementById(targetBase + '_ar')) {
+                var arEditor = document.getElementById(targetBase + '_ar');
+                if (arEditor.__quill) {
+                    arEditor.__quill.root.innerHTML = data.ar;
+                    document.getElementById('hidden_description_ar').value = data.ar;
+                } else {
+                    arEditor.innerHTML = data.ar;
+                }
+            }
+            btn.prop("disabled", false).text("Translate to Others");
+        }).catch(function (err) {
+            alert("Translation failed. Please try again.");
+            btn.prop("disabled", false).text("Translate to Others");
+        });
+    });
+
     // Form Submission Handler (To ensure empty editors don't block submission if optional)
     const form = document.getElementById("aboutUsForm");
     if (form) {
