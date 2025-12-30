@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\InventoryController;
@@ -287,7 +288,27 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [OrderController::class, 'show'])->name('show')->middleware('can:order.read,admin');
             Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
+        });
 
+        // Discount Routes
+        Route::prefix('discounts')->name('discounts.')->middleware('can:discount.read,admin')->group(function () {
+
+            Route::get('/', [DiscountController::class, 'index'])->name('index');
+            Route::get('/datatable', [DiscountController::class, 'datatable'])->name('datatable');
+            Route::get('/create', [DiscountController::class, 'create'])->name('create')->middleware('can:discount.create,admin');
+            Route::post('/', [DiscountController::class, 'store'])->name('store')->middleware('can:discount.create,admin');
+            Route::get('/edit', [DiscountController::class, 'edit'])->name('edit')->middleware('can:discount.update,admin');
+            Route::put('/update', [DiscountController::class, 'update'])->name('update')->middleware('can:discount.update,admin');
+            Route::delete('/destroy', [DiscountController::class, 'destroy'])->name('destroy')->middleware('can:discount.delete,admin');
+            Route::patch('/toggle-status', [DiscountController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:discount.update,admin');
+            Route::prefix('targets')->name('targets.')->group(function () {
+                Route::get('/create/{discount}', [DiscountController::class, 'createTarget'])->name('create')->middleware('can:discount.create,admin');
+                Route::post('/', [DiscountController::class, 'storeTarget'])->name('store')->middleware('can:discount.create,admin');
+                Route::get('/edit/{id}', [DiscountController::class, 'editTarget'])->name('edit')->middleware('can:discount.update,admin');
+                Route::put('/update', [DiscountController::class, 'updateTarget'])->name('update')->middleware('can:discount.update,admin');
+                Route::delete('/destroy', [DiscountController::class, 'destroyTarget'])->name('destroy')->middleware('can:discount.delete,admin');
+                Route::patch('/toggle-status', [DiscountController::class, 'toggleChildStatus'])->name('toggleStatus')->middleware('can:discount.update,admin');
+            });
         });
     });
 });

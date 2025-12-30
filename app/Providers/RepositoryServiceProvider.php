@@ -9,6 +9,8 @@ use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Admin\Interfaces\BrandRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CardRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Admin\Interfaces\DiscountRepositoryInterface;
+use App\Repositories\Admin\Interfaces\DiscountTargetRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface;
@@ -30,6 +32,8 @@ use App\Repositories\Admin\Repositories\AdminRepository;
 use App\Repositories\Admin\Repositories\BrandRepository;
 use App\Repositories\Admin\Repositories\CardRepository;
 use App\Repositories\Admin\Repositories\CategoryRepository;
+use App\Repositories\Admin\Repositories\DiscountRepository;
+use App\Repositories\Admin\Repositories\DiscountTargetRepository;
 use App\Repositories\Admin\Repositories\FaqCategoryRepository;
 use App\Repositories\Admin\Repositories\FaqRepository;
 use App\Repositories\Admin\Repositories\InventoryRepository;
@@ -50,6 +54,7 @@ use App\Repositories\Client\Interfaces\PrivacyPolicyRepositoryInterface;
 use App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface;
 use App\Repositories\Client\Repositories\PrivacyPolicyRepository;
 use App\Repositories\Client\Repositories\ShippingAndReturnsRepository;
+use Illuminate\Container\Attributes\DB;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Commands\Show;
 
@@ -81,6 +86,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
         $this->app->bind(InventoryTransactionsRepositoryInterface::class, InventoryTransactionsRepository::class);
+        $this->app->bind(DiscountTargetRepositoryInterface::class, DiscountTargetRepository::class);
+        $this->app->bind(DiscountRepositoryInterface::class, DiscountRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);

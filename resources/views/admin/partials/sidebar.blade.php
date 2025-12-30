@@ -81,8 +81,54 @@
                     </ul>
                 </li>
 
+
                 <li>
                     <hr class="hr-horizontal">
+                </li>
+
+                @php
+                    $isDiscountSectionActive = request()->routeIs('admin.discounts.*');
+                @endphp
+                <li class="nav-item">
+                    <a class="nav-link {{ $isDiscountSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
+                        href="#sidebar-discounts" role="button"
+                        aria-expanded="{{ $isDiscountSectionActive ? 'true' : 'false' }}"
+                        aria-controls="sidebar-discounts">
+                        <i class="icon" style="display: inline-flex;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M7 12l5 5 5-10" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </i>
+                        <span class="item-name">Discounts & Promotions</span>
+                        <i class="right-icon">
+                            <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" width="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </i>
+                    </a>
+                    <ul class="sub-nav collapse {{ $isDiscountSectionActive ? 'show' : '' }}" id="sidebar-discounts" data-bs-parent="#sidebar-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.discounts.index') ? 'active' : '' }}" href="{{ route('admin.discounts.index') }}">
+                                <i class="icon" style="display: inline-flex;">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    </svg>
+                                </i>
+                                <span class="item-name">All Discounts</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.discounts.create') ? 'active' : '' }}" href="{{ route('admin.discounts.create') }}">
+                                <i class="icon" style="display: inline-flex;">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                </i>
+                                <span class="item-name">Create Discount</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
                 @php
@@ -246,6 +292,22 @@
                                         </svg>
                                     </i>
                                     <span class="item-name">Inventory</span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('inventory-transaction.read')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.inventory-transactions.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.inventory-transactions.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                        </svg>
+                                    </i>
+                                    <span class="item-name">Inventory Transactions</span>
                                 </a>
                             </li>
                         @endcan
