@@ -12,4 +12,7 @@ interface DiscountRepositoryInterface
     public function getDiscountById($id);
     public function updateStatus($id);
     public function getDiscountsForDataTable(array $filters = []);
+    public function getProductVariants();
+    public function formatTargetsCollection($items);
+    public function getSelectLists();
 }

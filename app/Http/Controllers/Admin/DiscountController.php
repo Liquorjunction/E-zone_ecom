@@ -28,110 +28,17 @@ class DiscountController extends Controller
         return view('admin.pages.discounts.index');
     }
 
-    /**
-     * Format a collection (or array) of DiscountTarget models into a std array
-     * containing target_type, target_id, name and status. Handles product variants.
-     */
-    private function formatTargetsCollection($items)
-    {
-        $collection = collect($items);
-
-        if ($collection->isEmpty()) {
-            return [];
-        }
-
-        $result = $collection->map(function ($t) {
-            $related = $t->target ?? null;
-            $name = null;
-
-            if ($related) {
-                switch (strtolower($t->target_type)) {
-                    case 'category':
-                        if (method_exists($related, 'getTranslation')) {
-                            try { $name = $related->getTranslation('category-name', 'en'); } catch (\Throwable $e) { }
-                        }
-                        break;
-                    case 'subcategory':
-                        if (method_exists($related, 'getTranslation')) {
-                            try { $name = $related->getTranslation('sub-category-name', 'en'); } catch (\Throwable $e) { }
-                        }
-                        break;
-                    case 'product':
-                        try {
-                            $product = \App\Models\Product::find($t->target_id);
-                            if (!$product) {
-                                $variant = ProductVariant::find($t->target_id);
-                                if ($variant && $variant->product) {
-                                    $product = $variant->product;
-                                }
-                            }
-                            if ($product && method_exists($product, 'getTranslation')) {
-                                try { $name = $product->getTranslation('name', 'en'); } catch (\Throwable $ex) { }
-                            }
-                        } catch (\Throwable $e) { }
-                        break;
-                    default:
-                        if (method_exists($related, 'getTranslation')) {
-                            try { $name = $related->getTranslation('name', 'en'); } catch (\Throwable $e) { }
-                        }
-                        break;
-                }
-
-                if (empty($name) && isset($related->name)) {
-                    $name = $related->name;
-                }
-                if (empty($name) && isset($related->title)) {
-                    $name = $related->title;
-                }
-            }
-
-            if (!empty($name) && is_string($name)) {
-                $name = html_entity_decode($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            }
-
-            return [
-                'target_type' => $t->target_type,
-                'target_id' => $t->target_id ?? null,
-                'name' => $name,
-                'status' => isset($t->status) ? (bool) $t->status : null,
-            ];
-        })->values()->all();
-
-        return $result;
-    }
+    // Target formatting moved to repository; controller should use repository methods.
 
     /**
      * Show the unified create form.
      */
-    public function create()
+    public function create(DiscountRepo $discountRepo)
     {
-        // Load small reference lists for selects (id + name)
-        $categories = Categories::all()->map(function ($c) {
-            return (object)['id' => $c->id, 'name' => $c->getTranslation('category-name', 'en')];
-        })->values();
-
-        $subcategories = SubCategories::all()->map(function ($s) {
-            return (object)['id' => $s->id, 'name' => $s->getTranslation('sub-category-name', 'en')];
-        })->values();
-
-        $brands = Brand::all()->map(function ($b) {
-            return (object)['id' => $b->id, 'name' => $b->getTranslation('name', 'en')];
-        })->values();
-
-        $products = Product::all()->map(function ($p) {
-            return (object)['id' => $p->id, 'name' => $p->getTranslation('name', 'en')];
-        })->values();
-
-        // Product variants (sellable items) - show as Variant Label (Product / Variant)
-        $productVariants = ProductVariant::with('product')->get()->map(function ($v) {
-            $productName = $v->product ? $v->product->getTranslation('name', 'en') : null;
-            $variantName = method_exists($v, 'getTranslation') ? $v->getTranslation('variant_name', 'en') : ($v->variant_name ?? null);
-            $label = $productName ? ($productName . ' / ' . ($variantName ?: $v->sku)) : ($variantName ?: $v->sku ?: ('Variant ' . $v->id));
-            return (object)['id' => $v->id, 'name' => $label];
-        })->values();
-
+        $lists = $discountRepo->getSelectLists();
+        $productVariants = $discountRepo->getProductVariants();
         $resolvedTargets = [];
-        return view('admin.pages.discounts.create', compact('categories', 'subcategories', 'brands', 'products', 'productVariants', 'resolvedTargets'));
+        return view('admin.pages.discounts.create', array_merge($lists, compact('productVariants', 'resolvedTargets')));
     }
 
     /**
@@ -214,37 +121,21 @@ class DiscountController extends Controller
         $id = $request->input('id');
         $discount = $discountRepo->getDiscountById($id);
 
-        // Load small reference lists for selects (id + name)
-        $categories = Categories::all()->map(function ($c) {
-            return (object)['id' => $c->id, 'name' => $c->getTranslation('category-name', 'en')];
-        })->values();
-
-        $subcategories = SubCategories::all()->map(function ($s) {
-            return (object)['id' => $s->id, 'name' => $s->getTranslation('sub-category-name', 'en')];
-        })->values();
-
-        $brands = Brand::all()->map(function ($b) {
-            return (object)['id' => $b->id, 'name' => $b->getTranslation('name', 'en')];
-        })->values();
-
-        $products = Product::all()->map(function ($p) {
-            return (object)['id' => $p->id, 'name' => $p->getTranslation('name', 'en')];
-        })->values();
+        // Use repository to fetch select lists and variants
+        $lists = $discountRepo->getSelectLists();
+        $categories = $lists['categories'] ?? collect();
+        $subcategories = $lists['subcategories'] ?? collect();
+        $brands = $lists['brands'] ?? collect();
+        $products = $lists['products'] ?? collect();
 
         if (!$discount) {
             return redirect()->route('admin.discounts.index')->with('error', 'Discount not found.');
         }
 
-        // Resolve target names for the edit view (handle product variants)
-        $resolvedTargets = $this->formatTargetsCollection($discount->targets);
-
-        // Also pass variants for selection
-        $productVariants = ProductVariant::with('product')->get()->map(function ($v) {
-            $productName = $v->product ? $v->product->getTranslation('name', 'en') : null;
-            $variantName = method_exists($v, 'getTranslation') ? $v->getTranslation('variant_name', 'en') : ($v->variant_name ?? null);
-            $label = $productName ? ($productName . ' / ' . ($variantName ?: $v->sku)) : ($variantName ?: $v->sku ?: ('Variant ' . $v->id));
-            return (object)['id' => $v->id, 'name' => $label];
-        })->values();
+        // Resolve target names via repository
+        $resolvedTargets = $discountRepo->formatTargetsCollection($discount->targets);
+        // Also pass variants for selection from repository
+        $productVariants = $discountRepo->getProductVariants();
 
         return view('admin.pages.discounts.edit', compact('discount', 'categories', 'subcategories', 'brands', 'products', 'productVariants', 'resolvedTargets'));
     }
@@ -326,9 +217,9 @@ class DiscountController extends Controller
             ->addColumn('ends_at', function ($discount) {
                 return $discount->ends_at ? $discount->ends_at->format('Y-m-d') : '';
             })
-            ->addColumn('targets', function ($discount) {
+            ->addColumn('targets', function ($discount) use ($discountRepo) {
                 $items = $discount->targets()->with('target')->get();
-                return $this->formatTargetsCollection($items);
+                return $discountRepo->formatTargetsCollection($items);
             })
             ->addColumn('status', function ($discount) use ($request) {
                 $data['toggle_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.toggleStatus', ['id' => $discount->id]) : '';
