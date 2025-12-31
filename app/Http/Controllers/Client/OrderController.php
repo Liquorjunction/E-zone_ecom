@@ -160,6 +160,24 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * Show order detail for a specific order (client view).
+     */
+    public function detail(OrderModel $order)
+    {
+        if (! Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $order->load(['items.product', 'items.variant']);
+
+        return view('client.pages.order-detail', ['order' => $order]);
+    }
+
     // success() removed — success is handled via the multi-step `checkout` page (step=3)
 
     /**

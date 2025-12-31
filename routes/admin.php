@@ -302,9 +302,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::delete('/destroy', [DiscountController::class, 'destroy'])->name('destroy')->middleware('can:discount.delete,admin');
             Route::patch('/toggle-status', [DiscountController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:discount.update,admin');
             Route::prefix('targets')->name('targets.')->group(function () {
-                Route::get('/create/{discount}', [DiscountController::class, 'createTarget'])->name('create')->middleware('can:discount.create,admin');
                 Route::post('/', [DiscountController::class, 'storeTarget'])->name('store')->middleware('can:discount.create,admin');
-                Route::get('/edit/{id}', [DiscountController::class, 'editTarget'])->name('edit')->middleware('can:discount.update,admin');
                 Route::put('/update', [DiscountController::class, 'updateTarget'])->name('update')->middleware('can:discount.update,admin');
                 Route::delete('/destroy', [DiscountController::class, 'destroyTarget'])->name('destroy')->middleware('can:discount.delete,admin');
                 Route::patch('/toggle-status', [DiscountController::class, 'toggleChildStatus'])->name('toggleStatus')->middleware('can:discount.update,admin');

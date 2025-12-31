@@ -509,7 +509,7 @@
                                 } elseif (!empty($master->cover_image)) {
                                     $img = 'storage/' . $master->cover_image;
                                 } else {
-                                    $img = 'images/mouse.png';
+                                    $img = 'images/no-image.png';
                                 }
 
                                 $locale = app()->getLocale() ?? 'en';

@@ -179,6 +179,7 @@
 /* Base nav-link layout */
 .sidebar .nav-item {
     width: 100%;
+    padding-left: 0px !important;
 }
 .sidebar .nav-link {
     display: flex;

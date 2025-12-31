@@ -58,19 +58,7 @@ Route::group([], function () {
         return view('client.pages.brand-products', ['brand_slug' => $slug]);
     })->name('brand-products');
 
-    Route::get('/order-detail/{id}', function ($id) {
-        if (! \Illuminate\Support\Facades\Auth::check()) {
-            return redirect()->route('login');
-        }
 
-        $order = \App\Models\Order::with(['items.product', 'items.variant'])->findOrFail($id);
-
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        return view('client.pages.order-detail', ['order' => $order]);
-    })->name('order-detail');
 });
 
 // Inventory AJAX for client (transactions)
@@ -122,12 +110,11 @@ Route::middleware('auth')->group(function () {
         Route::view('/rewards', 'client.pages.dashboard.rewards')->name('rewards');
     });
 
-    // Checkout (requires auth)
     Route::get('/checkout', [OrderController::class, 'show'])->name('checkout');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
-    // Invoice download / printable view
     Route::get('/client/orders/{id}/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
     Route::post('/client/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
+    Route::get('/order-detail/{order}', [OrderController::class, 'detail'])->name('order-detail');
 });
 
 // Cart endpoints: keep `GET /cart` public but require auth for modifications
