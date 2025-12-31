@@ -55,7 +55,7 @@ class Discount extends Model
 
     public function usages(): HasMany
     {
-        return $this->hasMany(CouponsUsage::class);
+        return $this->hasMany(CouponUsage::class);
     }
 
     // HELPER
