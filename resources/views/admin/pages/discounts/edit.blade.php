@@ -259,7 +259,7 @@
                                                 <td>
                                                     @if ($oldTarget['target_type'] == 'category')
                                                         <select name="targets[{{ $index }}][target_id]"
-                                                            class="form-select">
+                                                            class="form-select target-id-select">
                                                             <option value="">Select Category</option>
                                                             @foreach ($categories ?? [] as $cat)
                                                                 <option value="{{ $cat->id }}"
@@ -323,21 +323,21 @@
                                                 </td>
                                                 <td>
                                                     @if($t['target_type'] == 'category')
-                                                        <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                        <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
                                                             <option value="">Select Category</option>
                                                             @foreach ($categories ?? [] as $cat)
                                                                 <option value="{{ $cat->id }}" {{ $t['target_id'] == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                                                             @endforeach
                                                         </select>
                                                     @elseif($t['target_type'] == 'brand')
-                                                        <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                        <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
                                                             <option value="">Select Brand</option>
                                                             @foreach ($brands ?? [] as $br)
                                                                 <option value="{{ $br->id }}" {{ $t['target_id'] == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
                                                             @endforeach
                                                         </select>
                                                     @elseif($t['target_type'] == 'subcategory')
-                                                        <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                        <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
                                                             <option value="">Select Subcategory</option>
                                                             @foreach ($subcategories ?? [] as $sc)
                                                                 <option value="{{ $sc->id }}" {{ $t['target_id'] == $sc->id ? 'selected' : '' }}>{{ $sc->name }}</option>
@@ -348,7 +348,7 @@
                                                             $variantIds = collect($productVariants ?? [])->pluck('id')->all();
                                                         @endphp
                                                         @if(in_array($t['target_id'], $variantIds))
-                                                            <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                            <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
                                                                 <option value="">Select Variant</option>
                                                                 @foreach ($productVariants ?? [] as $p)
                                                                     <option value="{{ $p->id }}" {{ $t['target_id'] == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>

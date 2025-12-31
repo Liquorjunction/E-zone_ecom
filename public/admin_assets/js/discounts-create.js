@@ -13,28 +13,28 @@ $(document).ready(function() {
                 let selected = (value == cat.id) ? 'selected' : '';
                 options += `<option value="${cat.id}" ${selected}>${cat.name}</option>`;
             });
-            return `<select name="targets[${index}][target_id]" class="form-select">${options}</select>`;
+            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
         } else if (type === 'brand') {
             let options = '<option value="">Select Brand</option>';
             brands.forEach(function(br) {
                 let selected = (value == br.id) ? 'selected' : '';
                 options += `<option value="${br.id}" ${selected}>${br.name}</option>`;
             });
-            return `<select name="targets[${index}][target_id]" class="form-select">${options}</select>`;
+            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
         } else if (type === 'subcategory') {
             let options = '<option value="">Select Subcategory</option>';
             subcategories.forEach(function(sc) {
                 let selected = (value == sc.id) ? 'selected' : '';
                 options += `<option value="${sc.id}" ${selected}>${sc.name}</option>`;
             });
-            return `<select name="targets[${index}][target_id]" class="form-select">${options}</select>`;
+            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
         } else if (type === 'product') {
             let options = '<option value="">Select Variant</option>';
             productVariants.forEach(function(p) {
                 let selected = (value == p.id) ? 'selected' : '';
                 options += `<option value="${p.id}" ${selected}>${p.name}</option>`;
             });
-            return `<select name="targets[${index}][target_id]" class="form-select">${options}</select>`;
+            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
         } else {
             return `<input type="number" name="targets[${index}][target_id]" class="form-control" placeholder="Enter ID (e.g., 105)" value="${value}" required>`;
         }
@@ -65,6 +65,8 @@ $(document).ready(function() {
                 </tr>
             `;
         $('#target-rows').append(html);
+        // initialize select2 on new selects
+        initializeSelect2($('#target-rows').find('tr').last());
         rowIdx++;
     });
 
@@ -83,6 +85,8 @@ $(document).ready(function() {
             currentVal = $existing.val();
         }
         $secondTd.html(makeTargetIdFieldHtml(index, val, currentVal));
+        // initialize select2 for replaced field
+        initializeSelect2($secondTd);
         // re-validate all rows after replacing the field
         validateAllRows();
     });
@@ -192,6 +196,24 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Initialize Select2 for target id selects within a context (or whole document)
+    function initializeSelect2($context) {
+        $context = $context && $($context).length ? $($context) : $(document);
+        $context.find('.target-id-select').each(function() {
+            let $el = $(this);
+            if ($el.data('select2')) return; // already initialized
+            $el.select2({
+                width: '100%',
+                placeholder: $el.find('option[value=""]').first().text() || 'Select',
+                allowClear: true,
+                dropdownParent: $el.closest('.modal, form, .card')
+            });
+        });
+    }
+
+    // initialize Select2 on page load for existing selects
+    initializeSelect2(document);
 
     // form submit validation
     let $form = $('#target-rows').closest('form');
