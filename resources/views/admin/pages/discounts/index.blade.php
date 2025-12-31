@@ -12,9 +12,10 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table id="discounts-table" class="table table-bordered table-striped">
+            <table id="discounts-table" class="table table-bordered table-striped" style="width:100%;" data-source="{{ route('admin.discounts.datatable') }}">
                 <thead>
                     <tr>
+                        <th></th> <!-- For the expand icon -->
                         <th>ID</th>
                         <th>Name (EN)</th>
                         <th>Type</th>
@@ -23,7 +24,6 @@
                         <th>End Date</th>
                         <th>Status</th>
                         <th>Actions</th>
-                        <th>Targets</th>
                     </tr>
                 </thead>
             </table>
@@ -33,25 +33,5 @@
 @endsection
 
 @push('scripts')
-<script>
-    $(document).ready(function() {
-        $('#discounts-table').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: "{{ route('admin.discounts.datatable') }}",
-            columns: [
-                { data: 'id', name: 'id' },
-                { data: 'name', name: 'name' },
-                { data: 'type', name: 'type' },
-                { data: 'value', name: 'value' },
-                { data: 'starts_at', name: 'starts_at' },
-                { data: 'ends_at', name: 'ends_at' },
-                { data: 'status', name: 'status', orderable: false, searchable: false },
-                { data: 'action', name: 'action', orderable: false, searchable: false },
-                { data: 'targets', name: 'targets', orderable: false, searchable: false },
-            ]
-        });
-
-    });
-</script>
+<script src="{{ asset('admin_assets/js/datatableJs/discounts.js') }}"></script>
 @endpush

@@ -17,9 +17,6 @@ class DiscountTarget extends Model
         'target_id',
     ];
 
-    protected $casts = [
-        'status' => 'boolean',
-    ];
 
     public function discount(): BelongsTo
     {

@@ -15,9 +15,15 @@ class DiscountTargetRepository implements DiscountTargetRepositoryInterface
         $dataToInsert = [];
 
         foreach ($targets as $target) {
+            // Normalize the target_type coming from forms (e.g., "Sub_Category", "subcategory")
+            $rawType = isset($target['target_type']) ? $target['target_type'] : '';
+            $type = strtolower(trim($rawType));
+            // replace common separators to match morphMap keys like 'subcategory'
+            $type = str_replace([' ', '_', '-'], '', $type);
+
             $dataToInsert[] = [
                 'discount_id' => $discountId,
-                'target_type' => $target['target_type'],
+                'target_type' => $type,
                 'target_id'   => $target['target_id'],
                 'created_at'  => $now,
                 'updated_at'  => $now,
@@ -30,7 +36,7 @@ class DiscountTargetRepository implements DiscountTargetRepositoryInterface
             }
             return true;
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            Log::error('DiscountTargetRepository.addTargets: ' . $e->getMessage(), ['targets' => $targets]);
             return false;
         }
     }
@@ -53,10 +59,6 @@ class DiscountTargetRepository implements DiscountTargetRepositoryInterface
     public function getAll(array $filters = [])
     {
         $query = DiscountTarget::query()->with('target');
-
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
         if (isset($filters['discount_id'])) {
             $query->where('discount_id', $filters['discount_id']);
         }
@@ -90,37 +92,15 @@ class DiscountTargetRepository implements DiscountTargetRepositoryInterface
             ->delete();
     }
 
-    public function updateStatus($id): bool
-    {
-        $discountTarget = DiscountTarget::find($id);
-        if ($discountTarget) {
-            $discountTarget->status = !$discountTarget->status;
-            return $discountTarget->save();
-        }
-        return false;
-    }
-
-    /**
-     * Set status for all targets of a specific discount
-     */
-    public function setStatusByDiscountId($discountId, $status)
-    {
-        return DiscountTarget::where('discount_id', $discountId)
-            ->update(['status' => $status]);
-    }
-
-    public function getActiveDiscountTargets()
-    {
-        return DiscountTarget::where('status', 1)->get();
-    }
+    // status-related methods removed because `discount_targets` table has no `status` column
 
     public function getDiscountTargetsForDataTable(array $filters = [])
     {
         // Eager load 'target' to get Product/Brand names
         $query = DiscountTarget::query()->with(['target', 'discount']);
 
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+        if (isset($filters['discount_id'])) {
+            $query->where('discount_id', $filters['discount_id']);
         }
 
         return $query;

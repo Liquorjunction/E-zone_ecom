@@ -14,7 +14,7 @@ class EditDiscountRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::guard('admin')->user()->can('discount.edit');
+        return Auth::guard('admin')->user()->can('discount.update');
     }
 
     /**

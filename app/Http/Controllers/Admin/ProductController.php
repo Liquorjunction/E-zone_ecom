@@ -50,6 +50,10 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
+            // Temporarily increase max execution time for this request to avoid
+            // PHP's default 60s limit during heavy operations (translation, image handling).
+            @set_time_limit(300);
+            @ini_set('max_execution_time', '300');
             $data = $request->validated();
             $data = $this->translationService->prepareProductData($data);
             $product = $productRepo->createProduct($request, $data);
@@ -90,6 +94,10 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
+            // Temporarily increase max execution time for this request to avoid
+            // PHP's default 60s limit during heavy operations (translation, image handling).
+            @set_time_limit(300);
+            @ini_set('max_execution_time', '300');
             $data = $request->validated();
             $id = $data['id'];
             $data = $this->translationService->prepareProductData($data);

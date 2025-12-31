@@ -3,187 +3,372 @@
 @section('title', 'Create New Discount')
 
 @section('content')
-<form action="{{ route('admin.discounts.store') }}" method="POST">
-    @csrf
-
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-tag me-2"></i> Discount Details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Discount Name <span class="text-danger">*</span></label>
-                            <div class="input-group mb-2">
-                                <span class="input-group-text">EN</span>
-                                <input type="text" name="name[en]" class="form-control" placeholder="Summer Sale" required value="{{ old('name.en') }}">
-                            </div>
-                            <div class="input-group mb-2">
-                                <span class="input-group-text">AR</span>
-                                <input type="text" name="name[ar]" class="form-control" placeholder="Translation will be auto-generated if empty" value="{{ old('name.ar') }}">
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-text">FR</span>
-                                <input type="text" name="name[fr]" class="form-control" placeholder="Translation will be auto-generated if empty" value="{{ old('name.fr') }}">
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Type <span class="text-danger">*</span></label>
-                            <select name="type" class="form-select" required>
-                                <option value="percentage" {{ old('type') == 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
-                                <option value="flat" {{ old('type') == 'flat' ? 'selected' : '' }}>Flat Amount</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Value <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" name="value" class="form-control" required value="{{ old('value') }}">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Max Discount Cap</label>
-                            <input type="number" step="0.01" name="max_discount" class="form-control" placeholder="Optional" value="{{ old('max_discount') }}">
-                            <small class="text-muted">Useful for percentage discounts (e.g. 50% off up to $100)</small>
-                        </div>
-
-                        <div class="col-md-6 mb-3 d-flex align-items-center">
-                            <div class="form-check form-switch fs-5">
-                                <input class="form-check-input" type="checkbox" name="status" id="statusSwitch" checked value="1">
-                                <label class="form-check-label" for="statusSwitch">Active</label>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Start Date</label>
-                            <input type="datetime-local" name="starts_at" class="form-control" value="{{ old('starts_at') }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">End Date</label>
-                            <input type="datetime-local" name="ends_at" class="form-control" value="{{ old('ends_at') }}">
-                        </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1">Create New Discount</h4>
+                        <p class="text-muted mb-0">Set up discount rules and apply them to products or categories</p>
                     </div>
+                    <a href="{{ route('admin.discounts.index') }}" class="btn btn-soft-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Discounts
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-bullseye me-2"></i> Apply To Targets</h5>
-                    <button type="button" class="btn btn-sm btn-light text-dark fw-bold" id="add-target-row">
-                        <i class="fas fa-plus"></i> Add Target
-                    </button>
+        <form action="{{ route('admin.discounts.store') }}" method="POST">
+            @csrf
+
+            <div class="row">
+                <!-- Discount Details Card -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-soft-primary border-0">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tag text-primary me-2"></i>Discount Information
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Discount Name -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    Discount Name <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-soft-primary text-primary fw-semibold">EN</span>
+                                    <input type="text" name="name[en]" class="form-control"
+                                        placeholder="e.g., Summer Sale 2025" required value="{{ old('name.en') }}">
+                                </div>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="fas fa-info-circle me-1"></i>AR and FR translations will be auto-generated if
+                                    left empty
+                                </small>
+                            </div>
+
+                            <div class="row">
+                                <!-- Type -->
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-semibold">
+                                        Discount Type <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="type" class="form-select" required>
+                                        <option value="percentage" {{ old('type') == 'percentage' ? 'selected' : '' }}>
+                                            Percentage (%)
+                                        </option>
+                                        <option value="flat" {{ old('type') == 'flat' ? 'selected' : '' }}>
+                                            Flat Amount
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Value -->
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-semibold">
+                                        Discount Value <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" step="0.01" name="value" class="form-control"
+                                        placeholder="e.g., 20" required value="{{ old('value') }}">
+                                </div>
+
+                                <!-- Max Discount -->
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-label fw-semibold">
+                                        Maximum Discount Cap
+                                        <span class="badge bg-soft-warning text-warning ms-2">Optional</span>
+                                    </label>
+                                    <input type="number" step="0.01" name="max_discount" class="form-control"
+                                        placeholder="e.g., 100" value="{{ old('max_discount') }}">
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="fas fa-lightbulb me-1"></i>Useful for percentage discounts (e.g., 50% off
+                                        up to $100 max)
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Date Range -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Start Date & Time</label>
+                                    <input type="datetime-local" name="starts_at" class="form-control"
+                                        value="{{ old('starts_at') }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">End Date & Time</label>
+                                    <input type="datetime-local" name="ends_at" class="form-control"
+                                        value="{{ old('ends_at') }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover mb-0" id="targets-table">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="30%">Target Type</th>
-                                    <th width="50%">Target ID / Name</th>
-                                    <th width="10%" class="text-center">Active</th>
-                                    <th width="10%" class="text-center">Remove</th>
-                                </tr>
-                            </thead>
-                            <tbody id="target-rows">
-                                @if(old('targets'))
-                                    @foreach(old('targets') as $index => $oldTarget)
+
+                <!-- Status & Summary Card -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-soft-info border-0">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cog text-info me-2"></i>Settings
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between p-3 bg-soft-light rounded-3">
+                                <div>
+                                    <h6 class="mb-1">Discount Status</h6>
+                                    <small class="text-muted">Enable or disable this discount</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="status" id="statusSwitch"
+                                        style="width: 3rem; height: 1.5rem;" checked value="1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tips -->
+                    <div class="card shadow-sm border-0 border-start border-primary">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">
+                                <i class="fas fa-question-circle text-primary me-2"></i>Quick Tips
+                            </h6>
+                            <ul class="list-unstyled mb-0 small text-muted">
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Use clear, descriptive names
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Set date ranges for seasonal sales
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Add targets to specific products
+                                </li>
+                                <li>
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Test before activating
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Targets Section -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm border-0">
+                        <div
+                            class="card-header bg-soft-warning border-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">
+                                    <i class="fas fa-bullseye text-warning me-2"></i>Discount Targets
+                                </h5>
+                                <small class="text-muted">Specify which products, categories, or brands this discount
+                                    applies to</small>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="add-target-row">
+                                <i class="fas fa-plus me-2"></i>Add Target
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0" id="targets-table">
+                                    <thead class="bg-light">
                                         <tr>
-                                            <td>
-                                                <select name="targets[{{$index}}][target_type]" class="form-select">
-                                                    <option value="product" {{ $oldTarget['target_type'] == 'product' ? 'selected' : '' }}>Product</option>
-                                                    <option value="category" {{ $oldTarget['target_type'] == 'category' ? 'selected' : '' }}>Category</option>
-                                                    <option value="subcategory" {{ $oldTarget['target_type'] == 'subcategory' ? 'selected' : '' }}>Subcategory</option>
-                                                    <option value="brand" {{ $oldTarget['target_type'] == 'brand' ? 'selected' : '' }}>Brand</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <input type="number" name="targets[{{$index}}][target_id]" class="form-control" value="{{ $oldTarget['target_id'] }}" placeholder="ID" required>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="form-check form-switch d-inline-block">
-                                                    <input class="form-check-input" type="checkbox" name="targets[{{$index}}][status]" value="1" {{ isset($oldTarget['status']) ? 'checked' : '' }}>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fas fa-trash"></i></button>
-                                            </td>
+                                            <th class="ps-4" width="30%">Target Type</th>
+                                            <th width="40%">Target ID</th>
+                                            <th width="15%" class="text-center">Action</th>
                                         </tr>
-                                    @endforeach
-                                @else
-                                    <tr class="empty-message">
-                                        <td colspan="4" class="text-center text-muted py-4">
-                                            No targets added yet. Click "Add Target" to apply this discount to specific products or categories.
-                                        </td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody id="target-rows">
+                                        @if (old('targets'))
+                                            @foreach (old('targets') as $index => $oldTarget)
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <select name="targets[{{ $index }}][target_type]"
+                                                            class="form-select target-type-select">
+                                                            <option value="product"
+                                                                {{ $oldTarget['target_type'] == 'product' ? 'selected' : '' }}>
+                                                                Product
+                                                            </option>
+                                                            <option value="category"
+                                                                {{ $oldTarget['target_type'] == 'category' ? 'selected' : '' }}>
+                                                                Category
+                                                            </option>
+                                                            <option value="subcategory"
+                                                                {{ $oldTarget['target_type'] == 'subcategory' ? 'selected' : '' }}>
+                                                                Subcategory
+                                                            </option>
+                                                            <option value="brand"
+                                                                {{ $oldTarget['target_type'] == 'brand' ? 'selected' : '' }}>
+                                                                Brand
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        @if ($oldTarget['target_type'] == 'category')
+                                                            <select name="targets[{{ $index }}][target_id]"
+                                                                class="form-select">
+                                                                <option value="">Select Category</option>
+                                                                @foreach ($categories ?? [] as $cat)
+                                                                    <option value="{{ $cat->id }}"
+                                                                        {{ $oldTarget['target_id'] == $cat->id ? 'selected' : '' }}>
+                                                                        {{ $cat->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @elseif($oldTarget['target_type'] == 'brand')
+                                                            <select name="targets[{{ $index }}][target_id]"
+                                                                class="form-select">
+                                                                <option value="">Select Brand</option>
+                                                                @foreach ($brands ?? [] as $br)
+                                                                    <option value="{{ $br->id }}"
+                                                                        {{ $oldTarget['target_id'] == $br->id ? 'selected' : '' }}>
+                                                                        {{ $br->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @elseif($oldTarget['target_type'] == 'subcategory')
+                                                            <select name="targets[{{ $index }}][target_id]"
+                                                                class="form-select">
+                                                                <option value="">Select Subcategory</option>
+                                                                @foreach ($subcategories ?? [] as $sc)
+                                                                    <option value="{{ $sc->id }}"
+                                                                        {{ $oldTarget['target_id'] == $sc->id ? 'selected' : '' }}>
+                                                                        {{ $sc->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @elseif($oldTarget['target_type'] == 'product')
+                                                            <select name="targets[{{ $index }}][target_id]"
+                                                                class="form-select">
+                                                                <option value="">Select Product</option>
+                                                                @foreach ($products ?? [] as $p)
+                                                                    <option value="{{ $p->id }}"
+                                                                        {{ $oldTarget['target_id'] == $p->id ? 'selected' : '' }}>
+                                                                        {{ $p->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @else
+                                                            <input type="number"
+                                                                name="targets[{{ $index }}][target_id]"
+                                                                class="form-control" placeholder="Enter ID (e.g., 105)"
+                                                                value="{{ $oldTarget['target_id'] }}" required>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button"
+                                                            class="btn btn-soft-danger btn-sm remove-row">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @elseif(isset($resolvedTargets) && count($resolvedTargets))
+                                            @foreach($resolvedTargets as $index => $t)
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <select name="targets[{{ $index }}][target_type]" class="form-select target-type-select">
+                                                            <option value="product" {{ $t['target_type'] == 'product' ? 'selected' : '' }}>Product</option>
+                                                            <option value="category" {{ $t['target_type'] == 'category' ? 'selected' : '' }}>Category</option>
+                                                            <option value="subcategory" {{ $t['target_type'] == 'subcategory' ? 'selected' : '' }}>Subcategory</option>
+                                                            <option value="brand" {{ $t['target_type'] == 'brand' ? 'selected' : '' }}>Brand</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        @if($t['target_type'] == 'category')
+                                                            <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                                <option value="">Select Category</option>
+                                                                @foreach ($categories ?? [] as $cat)
+                                                                    <option value="{{ $cat->id }}" {{ $t['target_id'] == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @elseif($t['target_type'] == 'brand')
+                                                            <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                                <option value="">Select Brand</option>
+                                                                @foreach ($brands ?? [] as $br)
+                                                                    <option value="{{ $br->id }}" {{ $t['target_id'] == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @elseif($t['target_type'] == 'subcategory')
+                                                            <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                                <option value="">Select Subcategory</option>
+                                                                @foreach ($subcategories ?? [] as $sc)
+                                                                    <option value="{{ $sc->id }}" {{ $t['target_id'] == $sc->id ? 'selected' : '' }}>{{ $sc->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @elseif($t['target_type'] == 'product')
+                                                            @php
+                                                                $variantIds = collect($productVariants ?? [])->pluck('id')->all();
+                                                            @endphp
+                                                            @if(in_array($t['target_id'], $variantIds))
+                                                                <select name="targets[{{ $index }}][target_id]" class="form-select">
+                                                                    <option value="">Select Variant</option>
+                                                                    @foreach ($productVariants ?? [] as $p)
+                                                                        <option value="{{ $p->id }}" {{ $t['target_id'] == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            @else
+                                                                <div class="d-flex">
+                                                                    <input type="number" name="targets[{{ $index }}][target_id]" class="form-control me-2" value="{{ $t['target_id'] }}" readonly>
+                                                                    <input type="text" class="form-control" value="{{ $t['name'] ?? 'Unknown' }}" readonly>
+                                                                </div>
+                                                            @endif
+                                                        @else
+                                                            <input type="number" name="targets[{{ $index }}][target_id]" class="form-control" placeholder="Enter ID (e.g., 105)" value="{{ $t['target_id'] }}" required>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-soft-danger btn-sm remove-row">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr class="empty-message">
+                                                <td colspan="4" class="text-center py-5">
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                                        <p class="mb-0">No targets added yet</p>
+                                                        <small>Click "Add Target" to apply this discount to specific
+                                                            items</small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div
+                            class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>Leave targets empty to apply discount site-wide
+                            </small>
+                            <div>
+                                <a href="{{ route('admin.discounts.index') }}" class="btn btn-soft-secondary me-2">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-success px-4">
+                                    <i class="fas fa-check me-2"></i>Create Discount
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-footer bg-light text-end">
-                    <a href="{{ route('admin.discounts.index') }}" class="btn btn-secondary me-2">Cancel</a>
-                    <button type="submit" class="btn btn-success btn-lg px-4"><i class="fas fa-save me-2"></i> Create Discount</button>
-                </div>
             </div>
-        </div>
+        </form>
     </div>
-</form>
 @endsection
-
 @push('scripts')
-<script>
-    $(document).ready(function() {
-        let rowIdx = {{ old('targets') ? count(old('targets')) : 0 }};
-
-        $('#add-target-row').on('click', function() {
-            // Remove empty message if it exists
-            $('.empty-message').remove();
-
-            let html = `
-                <tr>
-                    <td>
-                        <select name="targets[${rowIdx}][target_type]" class="form-select">
-                            <option value="product">Product</option>
-                            <option value="category">Category</option>
-                            <option value="subcategory">Subcategory</option>
-                            <option value="brand">Brand</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="number" name="targets[${rowIdx}][target_id]" class="form-control" placeholder="Enter ID (e.g., 105)" required>
-                    </td>
-                    <td class="text-center">
-                        <div class="form-check form-switch d-inline-block">
-                            <input class="form-check-input" type="checkbox" name="targets[${rowIdx}][status]" value="1" checked>
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-            $('#target-rows').append(html);
-            rowIdx++;
-        });
-
-        $(document).on('click', '.remove-row', function() {
-            $(this).closest('tr').remove();
-
-            // If no rows left, show empty message
-            if ($('#target-rows tr').length === 0) {
-                $('#target-rows').html(`
-                    <tr class="empty-message">
-                        <td colspan="4" class="text-center text-muted py-4">
-                            No targets added yet. Click "Add Target" to apply this discount to specific products or categories.
-                        </td>
-                    </tr>
-                `);
-            }
-        });
-    });
-</script>
+    <script>
+        window._discountData = {
+            categories: @json($categories ?? []),
+            brands: @json($brands ?? []),
+            subcategories: @json($subcategories ?? []),
+            productVariants: @json($productVariants ?? []),
+            rowIdx: {{ old('targets') ? count(old('targets')) : 0 }}
+        };
+    </script>
+    <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
 @endpush
