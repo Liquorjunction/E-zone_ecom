@@ -122,14 +122,34 @@
                             <div class="flex items-baseline gap-3">
                                 @php
                                     $variantCount = $product->productVariants ? $product->productVariants->count() : 0;
-                                    $minPrice = $variantCount ? $product->productVariants->min('price') : $product->price;
-                                    $maxPrice = $variantCount ? $product->productVariants->max('price') : $product->price;
+                                    $discountInfo = $product->getDiscountInfo();
                                 @endphp
 
-                                @if($variantCount > 1 && $minPrice != $maxPrice)
+                                @if($variantCount > 1)
+                                    {{-- Multiple variants - show price range --}}
+                                    @php
+                                        $minPrice = $product->productVariants->min('price');
+                                        $maxPrice = $product->productVariants->max('price');
+                                    @endphp
                                     <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }} - ${{ number_format($maxPrice, 2) }}</span>
                                 @else
-                                    <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }}</span>
+                                    {{-- Single product/variant - show discount if applicable --}}
+                                    @if($discountInfo['has_discount'])
+                                        <div class="flex flex-col gap-2">
+                                            <span class="text-2xl text-gray-400 line-through">${{ number_format($discountInfo['original_price'], 2) }}</span>
+                                            <span id="product-price" class="text-4xl font-bold text-red-600">${{ number_format($discountInfo['final_price'], 2) }}</span>
+                                            @if($discountInfo['discount_percentage'] > 0)
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                                                    </svg>
+                                                    Save {{ number_format($discountInfo['discount_percentage'], 0) }}%
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($discountInfo['final_price'], 2) }}</span>
+                                    @endif
                                 @endif
 
                                 <span class="text-sm text-gray-500 font-medium">incl. taxes</span>
@@ -141,6 +161,14 @@
                                 Fast dispatch
                             </span>
                         </div>
+                        @if($discountInfo['has_discount'])
+                            <div class="mt-4 flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg border border-green-200">
+                                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm font-semibold text-green-800">{{ $discountInfo['discount_name'] }} applied!</span>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Category & Brand -->

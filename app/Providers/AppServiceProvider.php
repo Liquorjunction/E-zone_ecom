@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Brand;
+use App\Models\Categories;
+use App\Models\Product;
+use App\Models\SubCategories;
 use App\View\Composers\ClientComposer;
 use App\View\Composers\SidebarComposer;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -33,10 +37,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Map the database ENUM values to actual Model classes
         Relation::morphMap([
-            'product'     => \App\Models\Product::class,
-            'category'    => \App\Models\Categories::class, // Check if your model is Category or Categories
-            'subcategory' => \App\Models\SubCategories::class,
-            'brand'       => \App\Models\Brand::class,
+            'brand'       => Brand::class,
+            'category'    => Categories::class,
+            'subcategory' => SubCategories::class,
+            'product'     => Product::class,
         ]);
     }
 }

@@ -192,7 +192,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success) {
                 // Update Line Total specific to this row
                 const lineTotalEl = document.querySelector(`#item-line-total-${id}`);
-                if (lineTotalEl && data.item?.line_total) {
+                if (lineTotalEl && data.item?.discount) {
+                    // If item has discount, update with discount info
+                    if (data.item.discount.has_discount) {
+                        lineTotalEl.textContent = formatMoney(data.item.discount.line_total_after_discount);
+                    } else {
+                        lineTotalEl.textContent = formatMoney(data.item.line_total);
+                    }
+                } else if (lineTotalEl && data.item?.line_total) {
                     lineTotalEl.textContent = formatMoney(data.item.line_total);
                 }
                 // Update Global Summaries
@@ -281,6 +288,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const map = {
             'subtotal': ['.order-subtotal', 'order-subtotal'],
+            'total_discount': ['.order-discount', 'order-discount'],
+            'subtotal_after_discount': ['.order-subtotal-after-discount', 'order-subtotal-after-discount'],
             'tax': ['.order-tax', 'order-tax'],
             'total': ['.order-total', 'order-total', 'summary-total'],
             'itemCount': ['.order-item-count', 'order-item-count'],
@@ -301,6 +310,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         el.textContent = summary[key] > 0 ? formatMoney(summary[key]) : 'FREE';
                     } else if (key === 'itemCount') {
                         el.textContent = summary[key];
+                    } else if (key === 'total_discount') {
+                        el.textContent = '-' + formatMoney(summary[key]);
                     } else {
                         el.textContent = formatMoney(summary[key]);
                     }

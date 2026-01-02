@@ -39,12 +39,25 @@
 
     <!-- Badges -->
     <div class="absolute top-3 left-3 flex flex-col gap-2">
-      <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-        -20%
-      </span>
-      <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-        NEW
-      </span>
+      @php
+        $productDiscountInfo = $master->getDiscountInfo();
+      @endphp
+      @if($productDiscountInfo['has_discount'])
+        @if($productDiscountInfo['discount_percentage'] > 0)
+          <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            -{{ number_format($productDiscountInfo['discount_percentage'], 0) }}%
+          </span>
+        @else
+          <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            ${{ number_format($productDiscountInfo['discount_amount'], 2) }} OFF
+          </span>
+        @endif
+      @endif
+      @if($master->created_at > now()->subDays(30))
+        <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+          NEW
+        </span>
+      @endif
     </div>
 
     <!-- Quick View -->
@@ -106,13 +119,18 @@
     <div class="mt-4 flex items-center justify-between">
       <div>
         @php
-          // Price: prefer variant price if available
+          // Get discount info
           $real = $isVariant ? ($product->price ?? $master->real_price ?? $master->price ?? 0) : ($master->real_price ?? $master->price ?? 0);
-          $orig = $isVariant ? ($master->price ?? null) : ($master->price ?? null);
+          $itemDiscountInfo = $isVariant ? $product->getDiscountInfo() : $master->getDiscountInfo();
         @endphp
-        <p class="text-2xl font-bold text-primary">${{ number_format($real, 2) }}</p>
-        @if($orig && $orig > $real)
-          <p class="text-sm text-gray-400 line-through">${{ number_format($orig, 2) }}</p>
+
+        @if($itemDiscountInfo['has_discount'])
+          <div class="flex flex-col">
+            <p class="text-sm text-gray-400 line-through">${{ number_format($itemDiscountInfo['original_price'], 2) }}</p>
+            <p class="text-2xl font-bold text-red-600">${{ number_format($itemDiscountInfo['final_price'], 2) }}</p>
+          </div>
+        @else
+          <p class="text-2xl font-bold text-primary">${{ number_format($itemDiscountInfo['final_price'], 2) }}</p>
         @endif
       </div>
       <button class="p-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-110 bg-primary/10 group-hover:bg-primary">

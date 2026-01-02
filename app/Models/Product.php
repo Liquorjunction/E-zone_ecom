@@ -106,4 +106,63 @@ class Product extends Model
         }
         return $this->price;
     }
+
+    public function getPriceDataAttribute()
+    {
+        return $this->getDiscountInfo();
+    }
+
+    /**
+     * Get discount information using DiscountService
+     * "Best Discount Wins" logic applied
+     *
+     * @return array
+     */
+    public function getDiscountInfo(): array
+    {
+        $discountService = app(\App\Services\DiscountService::class);
+        return $discountService->calculateProductDiscount($this);
+    }
+
+    /**
+     * Get the final price after discount
+     *
+     * @return float
+     */
+    public function getFinalPrice(): float
+    {
+        $discountInfo = $this->getDiscountInfo();
+        return $discountInfo['final_price'];
+    }
+
+    /**
+     * Check if product has active discount
+     *
+     * @return bool
+     */
+    public function hasDiscount(): bool
+    {
+        $discountInfo = $this->getDiscountInfo();
+        return $discountInfo['has_discount'];
+    }
+
+    /**
+     * Core Logic: Find best discount among Brand, Category, SubCategory, and Product rules.
+     * @deprecated Use DiscountService instead for better caching and separation of concerns
+     */
+    public function calculateBestPrice()
+    {
+        // Keep for backward compatibility, but delegate to service
+        return $this->getDiscountInfo();
+    }
+
+    /**
+     * Query to find the single winning discount model.
+     * @deprecated Use DiscountService instead
+     */
+    public function findBestDiscount()
+    {
+        $discountService = app(\App\Services\DiscountService::class);
+        return $discountService->findBestDiscountForProduct($this);
+    }
 }

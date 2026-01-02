@@ -45,7 +45,16 @@ class CartController extends Controller
         $cart = $cartService->getCart($request);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
         $step = (int) $request->get('step', 1);
-        return view('client.pages.checkout-process', compact('cart', 'step'));
+
+        // Calculate totals with discounts
+        $totals = $cart ? $cart->calculateTotals() : [
+            'subtotal' => 0,
+            'total_discount' => 0,
+            'total' => 0,
+            'items' => []
+        ];
+
+        return view('client.pages.checkout-process', compact('cart', 'step', 'totals'));
     }
 
     public function update(Request $request, CartService $cartService, LoggerInterface $logger)
@@ -55,12 +64,30 @@ class CartController extends Controller
         $item = $cartService->updateItem($request, $itemId, $data);
         $logger->info('Updated cart item via controller', ['item_id' => $item->id ?? null]);
 
-        // Prepare updated cart summary
+        // Prepare updated cart summary with discounts
         $cart = $cartService->getCart($request);
-        $subtotal = $cart ? $cart->items->sum(function($i){ return ($i->quantity * $i->unit_price); }) : 0;
-        $tax = round($subtotal * 0.08, 2);
+        $totals = $cart ? $cart->calculateTotals() : [
+            'subtotal' => 0,
+            'total_discount' => 0,
+            'total' => 0,
+            'items' => []
+        ];
+
+        // Calculate tax and shipping
+        $tax = round($totals['total'] * 0.08, 2);
         $shipping = 0.00;
-        $total = $subtotal + $tax + $shipping;
+        $finalTotal = $totals['total'] + $tax + $shipping;
+
+        // Get discount info for this specific item
+        $itemDiscount = null;
+        if ($item && isset($totals['items'][$item->id])) {
+            $itemInfo = $totals['items'][$item->id];
+            $itemDiscount = [
+                'has_discount' => $itemInfo['discount_amount'] > 0,
+                'discount_amount' => $itemInfo['discount_amount'],
+                'line_total_after_discount' => $itemInfo['line_total_after_discount'],
+            ];
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -71,13 +98,16 @@ class CartController extends Controller
                     'quantity' => $item->quantity ?? null,
                     'unit_price' => $item->unit_price ?? null,
                     'line_total' => isset($item->quantity, $item->unit_price) ? ($item->quantity * $item->unit_price) : null,
+                    'discount' => $itemDiscount,
                 ],
                 'summary' => [
                     // numeric values (raw) for accurate JS math
-                    'subtotal' => round($subtotal, 2),
+                    'subtotal' => round($totals['subtotal'], 2),
+                    'total_discount' => round($totals['total_discount'], 2),
+                    'subtotal_after_discount' => round($totals['total'], 2),
                     'tax' => round($tax, 2),
                     'shipping' => round($shipping, 2),
-                    'total' => round($total, 2),
+                    'total' => round($finalTotal, 2),
                     'itemCount' => $cart ? (int) $cart->items->sum('quantity') : 0,
                 ],
             ]);

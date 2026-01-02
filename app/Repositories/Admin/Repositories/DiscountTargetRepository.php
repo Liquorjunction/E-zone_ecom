@@ -73,15 +73,14 @@ class DiscountTargetRepository implements DiscountTargetRepositoryInterface
 
     public function assignTargetsToDiscount($discountId, array $targets): bool
     {
-        DB::beginTransaction();
         try {
             DiscountTarget::where('discount_id', $discountId)->delete();
             $this->addTargets($discountId, $targets);
-            DB::commit();
+            Log::info('DiscountTargetRepository.assignTargetsToDiscount: Successfully assigned targets to discount', ['discount_id' => $discountId, 'targets' => $targets]);
             return true;
         } catch (\Exception $e) {
-            DB::rollBack();
-            return false;
+            Log::error('DiscountTargetRepository.assignTargetsToDiscount: ' . $e->getMessage(), ['discount_id' => $discountId, 'targets' => $targets]);
+            throw $e; // Re-throw to let controller transaction handle it
         }
     }
 

@@ -39,7 +39,8 @@
             "app/Helpers/AdminHelper.php",
             "app/Helpers/ClientHelper.php",
             "app/Helpers/TranslationHelper.php",
-            "app/Helpers/helpers.php"
+            "app/Helpers/helpers.php",
+            "app/Helpers/discount_helpers.php"
         ]
     },
     "autoload-dev": {

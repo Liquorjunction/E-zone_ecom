@@ -152,11 +152,20 @@ class OrderController extends Controller
             }
         }
 
+        // Calculate totals with discounts
+        $totals = $cart ? $cart->calculateTotals() : [
+            'subtotal' => 0,
+            'total_discount' => 0,
+            'total' => 0,
+            'items' => []
+        ];
+
         return view('client.pages.checkout-process', [
             'cart' => $cart,
             'step' => $step,
             'addresses' => $addresses,
             'order' => $order,
+            'totals' => $totals,
         ]);
     }
 

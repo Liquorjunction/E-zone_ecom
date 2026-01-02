@@ -12,7 +12,7 @@ if (! function_exists('money_format_number')) {
     function money_format_number($amount, $decimals = 2, $symbol = null)
     {
         $amount = $amount ?? 0;
-        $symbol = $symbol ?? env('CURRENCY_SYMBOL', config('app.currency_symbol', '$'));
+        $symbol = $symbol ?? env('CURRENCY_SYMBOL', config('app.CURRENCY_SYMBOL', '$'));
 
         return $symbol . number_format((float) $amount, $decimals, '.', ',');
     }

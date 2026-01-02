@@ -13,4 +13,10 @@ class BrandController extends Controller
         $brands = $brandRepo->getActiveBrandsData();
         return view('client.pages.allbrands', compact('brands'));
     }
+
+    public function discountedProductsByBrand(ReadBrandRequest $request, string $slug, BrandRepo $brandRepo)
+    {
+        $products = $brandRepo->getDiscountedProductsByBrandSlug($slug, 12);
+        return view('client.pages.products', compact('products'));
+    }
 }

@@ -30,11 +30,25 @@ class StoreDiscountRequest extends FormRequest
             'name.fr' => 'nullable|string|max:255',
             'name.ar' => 'nullable|string|max:255',
             'type' => 'required|in:flat,percentage',
-            'value' => 'required|numeric|min:0',
+            'value' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('type') === 'percentage' && $value > 100) {
+                        $fail('The percentage discount value cannot exceed 100.');
+                    }
+                },
+            ],
             'max_discount' => 'nullable|numeric|min:0',
             'starts_at' => 'nullable|date',
             'ends_at' => 'nullable|date|after_or_equal:starts_at',
             'status' => 'nullable|boolean',
+
+            // Validate Targets Array - Fixed field names to match controller
+            'targets' => 'nullable|array',
+            'targets.*.target_type' => 'required_with:targets|in:brand,category,subcategory,product',
+            'targets.*.target_id' => 'required_with:targets|integer|min:1',
         ];
     }
 

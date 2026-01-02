@@ -7,19 +7,14 @@ use App\Http\Requests\Admin\Discounts\DestroyDiscountRequest;
 use App\Http\Requests\Admin\Discounts\EditDiscountRequest;
 use App\Http\Requests\Admin\Discounts\ReadDiscountRequest;
 use App\Http\Requests\Admin\Discounts\StoreDiscountRequest;
-use App\Http\Requests\Admin\Discounts\UpdateDiscountRequest; // FIXED
-use App\Http\Requests\Admin\Discounts\UpdateDiscountTargetRequest;
+use App\Http\Requests\Admin\Discounts\UpdateDiscountRequest;
 use App\Repositories\Admin\Interfaces\DiscountRepositoryInterface as DiscountRepo;
 use App\Repositories\Admin\Interfaces\DiscountTargetRepositoryInterface as DiscountTargetRepo;
+use App\Services\DiscountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
-use App\Models\Categories;
-use App\Models\SubCategories;
-use App\Models\Brand;
-use App\Models\Product;
-use App\Models\ProductVariant;
 
 class DiscountController extends Controller
 {
@@ -27,8 +22,6 @@ class DiscountController extends Controller
     {
         return view('admin.pages.discounts.index');
     }
-
-    // Target formatting moved to repository; controller should use repository methods.
 
     /**
      * Show the unified create form.
@@ -44,7 +37,7 @@ class DiscountController extends Controller
     /**
      * Store discount and targets in one transaction.
      */
-    public function store(StoreDiscountRequest $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo)
+    public function store(StoreDiscountRequest $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo, DiscountService $discountService)
     {
         DB::beginTransaction();
         try {
@@ -80,16 +73,21 @@ class DiscountController extends Controller
             }
 
             DB::commit();
+            
+            // Clear discount caches after successful creation
+            $discountService->clearAllDiscountCaches();
+            
             return redirect()->route('admin.discounts.index')->with('success', 'Discount created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error($e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
+            Log::error('DiscountController.store: ' . $e->getMessage(), ['data' => $data ?? []]);
+            return redirect()->back()->with('error', 'Failed to create discount. Please try again.')->withInput();
         }
     }
 
     public function storeTarget(Request $request, DiscountTargetRepo $discountTargetRepo)
     {
+        DB::beginTransaction();
         try {
             $discountId = $request->input('discount_id');
             $targets = $request->input('targets', []);
@@ -100,19 +98,21 @@ class DiscountController extends Controller
                     $toAssign[] = [
                         'target_type' => $target['target_type'],
                         'target_id'   => $target['target_id'],
-                        'status'      => $target['status'] ?? true,
                     ];
                 }
             }
 
             if ($discountId && count($toAssign)) {
                 $discountTargetRepo->addTargets($discountId, $toAssign);
+                DB::commit();
                 return redirect()->route('admin.discounts.index')->with('success', 'Targets added successfully.');
             }
+            DB::rollBack();
             return redirect()->back()->with('error', 'No valid targets provided.');
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred.');
+            DB::rollBack();
+            Log::error('DiscountController.storeTarget: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add targets. Please try again.');
         }
     }
 
@@ -141,8 +141,9 @@ class DiscountController extends Controller
     }
 
     // FIXED: Used UpdateDiscountRequest to validate data, not just ID
-    public function update(UpdateDiscountRequest $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo)
+    public function update(UpdateDiscountRequest $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo, DiscountService $discountService)
     {
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $data = $request->validated();
@@ -162,27 +163,43 @@ class DiscountController extends Controller
             // Avoid using `has()` which can return true after prepareForValidation merges the key.
             $data['status'] = (bool) ($data['status'] ?? 0);
             $discountRepo->update($id, $data);
-            if ($request->has('targets')) {
+            
+            // Only update targets if explicitly provided and has items
+            if ($request->has('targets') && is_array($request->input('targets')) && count($request->input('targets')) > 0) {
                 $discountTargetRepo->assignTargetsToDiscount($id, $request->input('targets', []));
             }
-            return redirect()->route('admin.discounts.index')->with('success', 'Discount updated successfully.');
+            
+            DB::commit();
+            
+            // Clear discount caches after successful update
+            $discountService->clearAllDiscountCaches();
+            
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return redirect()->back()->with('error', 'Error updating discount.');
+            DB::rollBack();
+            Log::error('DiscountController.update: ' . $e->getMessage(), ['discount_id' => $id ?? null]);
+            return redirect()->back()->with('error', 'Failed to update discount. Please try again.')->withInput();
         }
     }
 
-    public function destroy(DestroyDiscountRequest $request, DiscountRepo $discountRepo)
+    public function destroy(DestroyDiscountRequest $request, DiscountRepo $discountRepo, DiscountService $discountService)
     {
         $discountRepo->delete($request->input('id'));
+        
+        // Clear discount caches after deletion
+        $discountService->clearAllDiscountCaches();
+        
         return redirect()->route('admin.discounts.index')->with('success', 'Discount deleted.');
     }
 
-    public function toggleStatus(Request $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo)
+    public function toggleStatus(Request $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo, DiscountService $discountService)
     {
         try {
             $id = $request->input('id');
             $discount = $discountRepo->updateStatus($id);
+            
+            // Clear discount caches after status change
+            $discountService->clearAllDiscountCaches();
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Status updated',
@@ -206,6 +223,9 @@ class DiscountController extends Controller
     {
         $query = $discountRepo->getDiscountsForDataTable();
 
+        // Eager load targets to prevent N+1 query
+        $query->with(['targets.target']);
+
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('name', function ($discount) {
@@ -218,8 +238,8 @@ class DiscountController extends Controller
                 return $discount->ends_at ? $discount->ends_at->format('Y-m-d') : '';
             })
             ->addColumn('targets', function ($discount) use ($discountRepo) {
-                $items = $discount->targets()->with('target')->get();
-                return $discountRepo->formatTargetsCollection($items);
+                // Use already loaded targets instead of querying again
+                return $discountRepo->formatTargetsCollection($discount->targets);
             })
             ->addColumn('status', function ($discount) use ($request) {
                 $data['toggle_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.toggleStatus', ['id' => $discount->id]) : '';

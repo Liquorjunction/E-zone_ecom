@@ -82,4 +82,38 @@ class ProductVariant extends Model
     {
         return $this->inventory()->sum('quantity');
     }
+
+    /**
+     * Get discount information for this variant
+     * Uses DiscountService with "Best Discount Wins" logic
+     *
+     * @return array
+     */
+    public function getDiscountInfo(): array
+    {
+        $discountService = app(\App\Services\DiscountService::class);
+        return $discountService->calculateVariantDiscount($this);
+    }
+
+    /**
+     * Get the final price after discount
+     *
+     * @return float
+     */
+    public function getFinalPrice(): float
+    {
+        $discountInfo = $this->getDiscountInfo();
+        return $discountInfo['final_price'];
+    }
+
+    /**
+     * Check if variant has active discount
+     *
+     * @return bool
+     */
+    public function hasDiscount(): bool
+    {
+        $discountInfo = $this->getDiscountInfo();
+        return $discountInfo['has_discount'];
+    }
 }

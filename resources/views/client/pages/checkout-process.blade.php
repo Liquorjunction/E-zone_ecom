@@ -153,15 +153,15 @@
 
                             {{-- The Remove Button (AJAX) --}}
                             <button
-    type="button"
-    class="remove-item-btn flex items-center text-red-500 hover:text-red-700 transition-colors duration-200"
-    data-item-id="{{ $item->id }}"
->
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-    Remove
-</button>
+                                type="button"
+                                class="remove-item-btn flex items-center text-red-500 hover:text-red-700 transition-colors duration-200"
+                                data-item-id="{{ $item->id }}"
+                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                                Remove
+                            </button>
 
                         </div>
                         <div class="space-y-2 text-sm text-gray-600 mb-5">
@@ -181,7 +181,35 @@
                           </div>
                           <div class="text-right">
                             <div class="text-sm text-gray-500 mb-1">Unit: ${{ number_format($item->unit_price, 2) }}</div>
-                            <p class="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent item-line-total" id="item-line-total-{{ $item->id }}">${{ number_format($item->quantity * $item->unit_price, 2) }}</p>
+
+                            @if($item->hasDiscount())
+                              @php
+                                $discountInfo = $item->getDiscountInfo();
+                                $lineTotal = $item->getLineTotal();
+                                $lineDiscount = $item->getLineDiscount();
+                                $lineFinal = $item->getLineFinal();
+                              @endphp
+
+                              {{-- Original line total with strikethrough --}}
+                              <div class="text-lg text-gray-400 line-through mb-1">${{ number_format($lineTotal, 2) }}</div>
+
+                              {{-- Discount badge --}}
+                              @if($discountInfo['discount_name'])
+                                <div class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1">
+                                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                  </svg>
+                                  Save ${{ number_format($lineDiscount, 2) }}
+                                </div>
+                              @endif
+
+                              {{-- Final price after discount --}}
+                              <p class="text-3xl font-bold text-red-600 item-line-total" id="item-line-total-{{ $item->id }}">${{ number_format($lineFinal, 2) }}</p>
+                            @else
+                              {{-- No discount - show regular price --}}
+                              <p class="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent item-line-total" id="item-line-total-{{ $item->id }}">${{ number_format($item->quantity * $item->unit_price, 2) }}</p>
+                            @endif
                           </div>
                         </div>
                       </div>
@@ -206,10 +234,12 @@
                 Order Summary
               </h2>
               @php
-                $subtotal = $cart ? $cart->items->sum(function($i){ return ($i->quantity * $i->unit_price); }) : 0;
-                $tax = round($subtotal * 0.08, 2);
+                $subtotal = $totals['subtotal'] ?? 0;
+                $totalDiscount = $totals['total_discount'] ?? 0;
+                $subtotalAfterDiscount = $totals['total'] ?? 0;
+                $tax = round($subtotalAfterDiscount * 0.08, 2);
                 $shipping = 0.00;
-                $total = $subtotal + $tax + $shipping;
+                $finalTotal = $subtotalAfterDiscount + $tax + $shipping;
                 $itemCount = $cart ? $cart->items->sum('quantity') : 0;
               @endphp
 
@@ -233,6 +263,25 @@
                   <span>Subtotal (<span id="order-item-count">{{ $itemCount }}</span> item{{ $itemCount !== 1 ? 's' : '' }})</span>
                   <span id="order-subtotal" class="font-bold">${{ number_format($subtotal, 2) }}</span>
                 </div>
+
+                @if($totalDiscount > 0)
+                  <div class="flex justify-between text-green-600 text-lg bg-green-50 px-4 py-3 rounded-xl">
+                    <span class="flex items-center">
+                      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      Discount Savings
+                    </span>
+                    <span id="order-discount" class="font-bold">-${{ number_format($totalDiscount, 2) }}</span>
+                  </div>
+
+                  <div class="flex justify-between text-gray-900 text-lg font-semibold border-t border-b border-gray-200 py-3">
+                    <span>Subtotal After Discount</span>
+                    <span id="order-subtotal-after-discount">${{ number_format($subtotalAfterDiscount, 2) }}</span>
+                  </div>
+                @endif
+
                 <div class="flex justify-between text-gray-600 text-lg">
                   <span>Shipping</span>
                   <span id="order-shipping" class="font-bold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
@@ -244,8 +293,19 @@
                 <div class="border-t-2 border-gray-100 pt-5">
                   <div class="flex justify-between items-center">
                     <span class="text-xl font-bold text-gray-900">Total</span>
-                    <span id="order-total" class="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">${{ number_format($total, 2) }}</span>
+                    <span id="order-total" class="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">${{ number_format($finalTotal, 2) }}</span>
                   </div>
+
+                  @if($totalDiscount > 0)
+                    <div class="mt-3 text-center">
+                      <span class="inline-flex items-center text-sm font-semibold text-green-700 bg-green-100 px-4 py-2 rounded-full">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        You save ${{ number_format($totalDiscount, 2) }} today!
+                      </span>
+                    </div>
+                  @endif
                 </div>
               </div>
               <a href="{{ route('checkout', ['step' => 2]) }}" class="block w-full px-6 py-5 bg-gradient-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
