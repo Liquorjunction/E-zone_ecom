@@ -325,7 +325,7 @@
                                                                     <span class="badge bg-secondary">Auto-Gen</span>
                                                                 </td>
                                                                 <td class="text-end">
-                                                                    <button type="button" class="btn btn-danger btn-sm remove-variant"><i class="fas fa-trash"></i></button>
+                                                                    <button type="button" class="btn btn-danger btn-sm remove-variant"><i class="bi bi-trash"></i></button>
                                                                 </td>
                                                             </tr>
                                                             @endforeach

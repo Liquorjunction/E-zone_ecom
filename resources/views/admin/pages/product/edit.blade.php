@@ -399,7 +399,7 @@
                                                                     <button type="button"
                                                                         class="btn btn-danger btn-sm remove-variant"
                                                                         title="Delete Variant">
-                                                                        <i class="fas fa-trash"></i>
+                                                                        <i class="bi bi-trash"></i>
                                                                     </button>
                                                                 </td>
                                                             </tr>

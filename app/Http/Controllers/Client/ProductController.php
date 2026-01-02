@@ -35,15 +35,16 @@ class ProductController extends Controller
     {
         try {
             $product = $productRepository->findActiveBySlug($slug);
-            $relatedProducts = $productRepository->getRelatedProducts($product);
-            $discount = $this->discountService->getDiscount($product);
-            dd($discount);
 
             if (!$product) {
                 return response()->json(['message' => 'Product not found'], 404);
             }
 
-            return $this->show($slug, $productRepository, $relatedProducts, $discount);
+            $relatedProducts = $productRepository->getRelatedProducts($product);
+            $discount = $this->discountService->getDiscount($product);
+
+
+            return $this->show($slug, $productRepository , compact('product', 'relatedProducts', 'discount'));
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred while fetching product details: ' . $e->getMessage()], 500);
         }

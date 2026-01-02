@@ -86,10 +86,7 @@ class DiscountService
             $variantIds = $product->productVariants()->pluck('id')->toArray();
 
             // Fetch all active discounts that target this product or its parents
-            $applicableDiscounts = Discount::where('status', true)
-                ->where(function($q) use ($now) {
-                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
-                })
+            $query = Discount::where('status', true)
                 ->where(function($q) use ($now) {
                     $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
                 })
@@ -130,7 +127,7 @@ class DiscountService
                 })
                 ->get();
 
-            if ($applicableDiscounts->isEmpty()) {
+            if ($query->isEmpty()) {
                 return null;
             }
 
@@ -138,7 +135,7 @@ class DiscountService
             $bestDiscount = null;
             $maxReductionAmount = 0;
 
-            foreach ($applicableDiscounts as $discount) {
+            foreach ($query as $discount) {
                 $reduction = $this->calculateReduction($discount, $product->price);
 
                 if ($reduction > $maxReductionAmount) {
@@ -186,15 +183,19 @@ class DiscountService
 
         return Discount::where('status', true)
             ->where(function($q) use ($now) {
-                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
-            })
-            ->where(function($q) use ($now) {
                 $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
             })
             ->with(['targets.target'])
             ->get();
     }
 
+    /**
+     * Get the best discount for a product (wrapper for findBestDiscountForProduct)
+     * This method exists for backward compatibility
+     *
+     * @param Product $product
+     * @return Discount|null
+     */
     public function getDiscount(Product $product)
     {
         $now = now();
@@ -202,25 +203,15 @@ class DiscountService
         // Get product variants
         $variantIds = $product->productVariants()->pluck('id')->toArray();
 
-        // Debug: Check what target_types exist in database
-        $allTargets = DB::table('discount_targets')->get();
-        Log::info('All discount targets in DB', [
-            'targets' => $allTargets->toArray()
-        ]);
-
         // Debug logging
-        Log::info('getDiscount called', [
-            'product_id' => $product->id,
-            'product_name' => $product->name,
-            'variant_ids' => $variantIds,
-            'brand_id' => $product->brand_id,
-            'category_id' => $product->category_id,
-            'sub_category_id' => $product->sub_category_id,
-            'current_time' => $now,
-        ]);
+        Log::info('DiscountService.GetDiscount Start');
 
         // Check if This product has any active discounts
         $query = Discount::where('status', true)
+            ->where(function ($q) {
+                $q->whereNull('ends_at')
+                  ->orWhere('ends_at', '>=', now());
+            })
             ->whereHas('targets', function ($q) use ($product, $variantIds) {
                 $q->where(function ($query) use ($product, $variantIds) {
                     $query->where('target_type', 'product')
@@ -252,39 +243,32 @@ class DiscountService
                 });
             });
 
-        Log::info('Discount query SQL', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
-
         $discount = $query->orderByDesc('value')
             ->first();
 
 
-        Log::info('getDiscount result', [
-            'product_id' => $product->id,
-            'variant_ids' => $variantIds,
-            'discount_found' => $discount ? true : false,
-            'discount_id' => $discount?->id,
-            'discount_name' => $discount?->name,
+        Log::info('Discount fetched', [
+            'discount' => $discount ? $discount->toArray() : null,
         ]);
 
         return $discount;
     }
 
+    /**
+     * Get all active discounts with proper date validation
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
     public function getAllDiscounts()
     {
         $now = now();
 
-        $discounted_products = Discount::where('status', true)
-            ->where(function($q) use ($now) {
-                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
-            })
+        return Discount::where('status', true)
             ->where(function($q) use ($now) {
                 $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
             })
             ->with(['targets.target'])
             ->get();
-            dd($discounted_products);
-
-        return $discounted_products;
     }
 
     /**
