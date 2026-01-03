@@ -49,7 +49,7 @@
                 </td>
                 <td class="p-4 font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</td>
                 <td class="p-4">
-                  <a href="{{ route('order-detail', ['id' => $order->id]) }}" class="px-4 py-2 border-2 border-gray-200 ...">View Details</a>
+                  <a href="{{ route('order-detail', ['order' => $order->id]) }}" class="px-4 py-2 border-2 border-gray-200 ...">View Details</a>
                 </td>
               </tr>
             @endforeach

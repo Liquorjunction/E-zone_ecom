@@ -41,7 +41,19 @@ class ProductController extends Controller
             }
 
             $relatedProducts = $productRepository->getRelatedProducts($product);
-            $discount = $this->discountService->getDiscount($product);
+            $discount = $this->discountService->getActiveDiscounts($product);
+            // checkApplicableDiscounts retutn true/false
+            if ($this->discountService->checkApplicableDiscounts($product)) {
+                $discount = $this->discountService->checkApplicableDiscounts($product);
+                dd($discount);
+            } else {
+                $discount = null;
+                dd('Fuck');
+            }
+
+            $bestDiscount = $this->discountService->getActiveDiscounts($product);
+
+            dd(compact('product', 'relatedProducts', 'discount', 'bestDiscount'));
 
 
             return $this->show($slug, $productRepository , compact('product', 'relatedProducts', 'discount'));

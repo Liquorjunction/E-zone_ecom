@@ -73,11 +73,11 @@ class DiscountController extends Controller
             }
 
             DB::commit();
-            
+
             // Clear discount caches after successful creation
             $discountService->clearAllDiscountCaches();
-            
-            return redirect()->route('admin.discounts.index')->with('success', 'Discount created successfully.');
+
+            return redirect()->back()->with('success', 'Discount created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('DiscountController.store: ' . $e->getMessage(), ['data' => $data ?? []]);
@@ -163,17 +163,17 @@ class DiscountController extends Controller
             // Avoid using `has()` which can return true after prepareForValidation merges the key.
             $data['status'] = (bool) ($data['status'] ?? 0);
             $discountRepo->update($id, $data);
-            
+
             // Only update targets if explicitly provided and has items
             if ($request->has('targets') && is_array($request->input('targets')) && count($request->input('targets')) > 0) {
                 $discountTargetRepo->assignTargetsToDiscount($id, $request->input('targets', []));
             }
-            
+
             DB::commit();
-            
+
             // Clear discount caches after successful update
             $discountService->clearAllDiscountCaches();
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('DiscountController.update: ' . $e->getMessage(), ['discount_id' => $id ?? null]);
@@ -184,10 +184,10 @@ class DiscountController extends Controller
     public function destroy(DestroyDiscountRequest $request, DiscountRepo $discountRepo, DiscountService $discountService)
     {
         $discountRepo->delete($request->input('id'));
-        
+
         // Clear discount caches after deletion
         $discountService->clearAllDiscountCaches();
-        
+
         return redirect()->route('admin.discounts.index')->with('success', 'Discount deleted.');
     }
 
@@ -196,10 +196,10 @@ class DiscountController extends Controller
         try {
             $id = $request->input('id');
             $discount = $discountRepo->updateStatus($id);
-            
+
             // Clear discount caches after status change
             $discountService->clearAllDiscountCaches();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Status updated',
