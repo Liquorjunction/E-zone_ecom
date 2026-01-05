@@ -1,243 +1,256 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // --- Mobile Filter Modal Logic ---
-    const filterBtn = document.getElementById('mobile-filter-btn');
-    const filterModal = document.getElementById('mobile-filter-modal');
-    const closeModalBtn = document.getElementById('close-modal');
-    const closeModalBtnAlt = document.getElementById('close-modal-btn');
-    const applyFiltersBtn = document.getElementById('apply-mobile-filters');
+// Client products page: AJAX filters, search, sort, view toggle
+const filterForm = document.getElementById('filter-form');
+const resultsContainer = document.getElementById('products-results');
+const paginationContainer = document.getElementById('products-pagination');
+const loadingOverlay = document.getElementById('filter-loading');
+const searchInput = document.getElementById('products-search');
+const sortSelect = document.getElementById('products-sort');
+const viewGridBtn = document.getElementById('view-grid-btn');
+const viewListBtn = document.getElementById('view-list-btn');
+const viewInput = document.getElementById('view-input');
+const clearFiltersBtn = document.getElementById('clear-filters');
+const applyFiltersBtn = document.getElementById('apply-mobile-filters');
+const filterBtn = document.getElementById('mobile-filter-btn');
+const filterModal = document.getElementById('mobile-filter-modal');
+const closeModalBtn = document.getElementById('close-modal');
+const closeModalBtnAlt = document.getElementById('close-modal-btn');
 
-    function openModal() {
-        if(filterModal) {
-            const modalContent = document.getElementById('modal-content');
-            filterModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
-            if (modalContent) {
-                requestAnimationFrame(() => {
-                    modalContent.classList.remove('translate-y-full');
-                });
-            }
+const debounce = (fn, delay = 300) => {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+};
+
+const showLoading = () => {
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+    } else if (resultsContainer) {
+        resultsContainer.classList.add('opacity-50', 'pointer-events-none');
+    }
+};
+
+const hideLoading = () => {
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('hidden');
+    } else if (resultsContainer) {
+        resultsContainer.classList.remove('opacity-50', 'pointer-events-none');
+    }
+};
+
+const serializeForm = (form) => {
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+        if (value === null || value === undefined || value === '') continue;
+        params.append(key, value);
+    }
+    return params;
+};
+
+const fetchAndRender = async (url) => {
+    if (!resultsContainer) return;
+    try {
+        showLoading();
+        const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+        const html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newResults = doc.getElementById('products-results');
+        const newPagination = doc.getElementById('products-pagination');
+
+        if (newResults && resultsContainer) {
+            resultsContainer.innerHTML = newResults.innerHTML;
+        }
+        if (newPagination && paginationContainer) {
+            paginationContainer.innerHTML = newPagination.innerHTML;
+        }
+
+        history.pushState({}, '', url);
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (error) {
+        console.error('Filter AJAX error:', error);
+        window.location.href = url; // fallback to full navigation
+    } finally {
+        hideLoading();
+    }
+};
+
+const submitFilters = (event) => {
+    if (!filterForm) return;
+    if (event) event.preventDefault();
+    const params = serializeForm(filterForm);
+    const url = `${filterForm.action}?${params.toString()}`;
+    fetchAndRender(url);
+};
+
+const setActiveView = (view) => {
+    if (!viewInput) return;
+    viewInput.value = view;
+    if (view === 'list') {
+        if (viewListBtn) {
+            viewListBtn.classList.add('bg-primary', 'text-white');
+            viewListBtn.classList.remove('hover:bg-gray-100');
+        }
+        if (viewGridBtn) {
+            viewGridBtn.classList.remove('bg-primary', 'text-white');
+            viewGridBtn.classList.add('hover:bg-gray-100');
+        }
+    } else {
+        if (viewGridBtn) {
+            viewGridBtn.classList.add('bg-primary', 'text-white');
+            viewGridBtn.classList.remove('hover:bg-gray-100');
+        }
+        if (viewListBtn) {
+            viewListBtn.classList.remove('bg-primary', 'text-white');
+            viewListBtn.classList.add('hover:bg-gray-100');
         }
     }
+};
 
-    function closeModal() {
-        if(filterModal) {
-            const modalContent = document.getElementById('modal-content');
-            if (modalContent) {
-                modalContent.classList.add('translate-y-full');
-                const onEnd = function() {
-                    filterModal.classList.add('hidden');
-                    document.body.classList.remove('overflow-hidden');
-                    modalContent.removeEventListener('transitionend', onEnd);
-                };
-                modalContent.addEventListener('transitionend', onEnd);
-            } else {
-                filterModal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
+// Bind events
+if (filterForm) {
+    filterForm.addEventListener('submit', submitFilters);
+
+    // Auto-submit when any filter input changes
+    filterForm.addEventListener('change', (e) => {
+        const target = e.target;
+        if (!target) return;
+        if (target.matches('input, select')) {
+            submitFilters();
         }
-    }
+    });
+}
 
-    if (filterBtn) {
-        filterBtn.addEventListener('click', openModal);
+// Mobile filter modal controls
+const openModal = () => {
+    if (!filterModal) return;
+    const modalContent = document.getElementById('modal-content');
+    filterModal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    if (modalContent) {
+        requestAnimationFrame(() => modalContent.classList.remove('translate-y-full'));
     }
+};
 
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', closeModal);
+const closeModal = () => {
+    if (!filterModal) return;
+    const modalContent = document.getElementById('modal-content');
+    if (modalContent) {
+        modalContent.classList.add('translate-y-full');
+        const onEnd = () => {
+            filterModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            modalContent.removeEventListener('transitionend', onEnd);
+        };
+        modalContent.addEventListener('transitionend', onEnd);
+    } else {
+        filterModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
     }
+};
 
-    if (closeModalBtnAlt) {
-        closeModalBtnAlt.addEventListener('click', closeModal);
-    }
-
-    // Close on backdrop click
-    if (filterModal) {
-        filterModal.addEventListener('click', function(e) {
-            if (e.target === filterModal || e.target.closest('.fixed.inset-0.bg-gray-500')) {
-                closeModal();
-            }
-        });
-    }
-
-    // Apply Filters (Simulate form submission if wrapped in form, or standard submit)
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', function() {
-            const form = document.querySelector('aside form') || document.querySelector('#mobile-filter-modal form');
-            if (form) {
-                // Trigger AJAX submit if handler present
-                const event = new Event('submit', { cancelable: true });
-                form.dispatchEvent(event);
-            }
+if (filterBtn) {
+    filterBtn.addEventListener('click', openModal);
+}
+if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', closeModal);
+}
+if (closeModalBtnAlt) {
+    closeModalBtnAlt.addEventListener('click', closeModal);
+}
+if (filterModal) {
+    filterModal.addEventListener('click', (e) => {
+        if (e.target === filterModal) {
             closeModal();
-        });
-    }
-
-    // --- View Toggle (Grid / List) ---
-    const viewGridBtn = document.getElementById('view-grid-btn');
-    const viewListBtn = document.getElementById('view-list-btn');
-    const viewInput = document.getElementById('view-input');
-
-    function setActiveView(view) {
-        if (viewInput) viewInput.value = view;
-        if (view === 'list') {
-            if (viewGridBtn) { viewGridBtn.classList.remove('bg-primary','text-white'); viewGridBtn.classList.add('hover:bg-gray-100'); }
-            if (viewListBtn) { viewListBtn.classList.add('bg-primary','text-white'); }
-        } else {
-            if (viewListBtn) { viewListBtn.classList.remove('bg-primary','text-white'); viewListBtn.classList.add('hover:bg-gray-100'); }
-            if (viewGridBtn) { viewGridBtn.classList.add('bg-primary','text-white'); }
         }
-    }
+    });
+}
 
-    // Initialize view buttons based on hidden input or URL
-    if (viewInput) {
-        setActiveView(viewInput.value || 'grid');
-    }
+if (searchInput) {
+    searchInput.addEventListener('input', debounce(() => submitFilters(), 350));
+}
 
-    if (viewGridBtn) {
-        viewGridBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            setActiveView('grid');
-            // submit filters form (AJAX will handle)
-            if (filterForm) filterForm.dispatchEvent(new Event('submit', { cancelable: true }));
-        });
-    }
+if (sortSelect) {
+    sortSelect.addEventListener('change', submitFilters);
+}
 
-    if (viewListBtn) {
-        viewListBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            setActiveView('list');
-            if (filterForm) filterForm.dispatchEvent(new Event('submit', { cancelable: true }));
-        });
-    }
+if (clearFiltersBtn && filterForm) {
+    clearFiltersBtn.addEventListener('click', () => {
+        filterForm.reset();
+        if (searchInput) searchInput.value = '';
+        if (sortSelect) sortSelect.value = 'newest';
+        const min = filterForm.querySelector('input[name="min_price"]');
+        const max = filterForm.querySelector('input[name="max_price"]');
+        if (min) min.value = '';
+        if (max) max.value = '';
+        submitFilters();
+    });
+}
 
-    // --- Category / Subcategory Checkbox Logic ---
+if (applyFiltersBtn && filterForm) {
+    applyFiltersBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        submitFilters();
+        closeModal();
+    });
+}
 
-    // Auto-check parent category if a subcategory is checked
-    const subCategoryCheckboxes = document.querySelectorAll('.subcategory-checkbox');
-    subCategoryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const categoryId = this.dataset.categoryId;
-            const parentCheckbox = document.querySelector(`.category-checkbox[value="${categoryId}"]`);
+if (viewGridBtn) {
+    viewGridBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveView('grid');
+        submitFilters();
+    });
+}
 
-            if (this.checked && parentCheckbox && !parentCheckbox.checked) {
-                parentCheckbox.checked = true;
-            }
+if (viewListBtn) {
+    viewListBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveView('list');
+        submitFilters();
+    });
+}
+
+// Initialize view state from hidden input
+if (viewInput) {
+    setActiveView(viewInput.value || 'grid');
+}
+
+// Category/subcategory helpers
+const subCategoryCheckboxes = document.querySelectorAll('.subcategory-checkbox');
+subCategoryCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', function () {
+        const categoryId = this.dataset.categoryId;
+        const parentCheckbox = document.querySelector(`.category-checkbox[value="${categoryId}"]`);
+        if (this.checked && parentCheckbox && !parentCheckbox.checked) {
+            parentCheckbox.checked = true;
+        }
+    });
+});
+
+const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+categoryCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', function () {
+        const categoryId = this.value;
+        const relatedSubCheckboxes = document.querySelectorAll(`.subcategory-checkbox[data-category-id="${categoryId}"]`);
+        relatedSubCheckboxes.forEach((sub) => {
+            sub.checked = this.checked;
         });
     });
+});
 
-    // Auto-check/uncheck all subcategories if parent is toggled
-    const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
-    categoryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const categoryId = this.value;
-            const relatedSubCheckboxes = document.querySelectorAll(`.subcategory-checkbox[data-category-id="${categoryId}"]`);
-
-            relatedSubCheckboxes.forEach(sub => {
-                sub.checked = this.checked;
-            });
-        });
+const toggleButtons = document.querySelectorAll('.toggle-subcategories');
+toggleButtons.forEach((btn) => {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const cid = this.dataset.categoryId;
+        const container = document.querySelector(`.subcategories-container[data-category-id="${cid}"]`);
+        if (!container) return;
+        container.classList.toggle('hidden');
+        const svg = this.querySelector('svg');
+        if (svg) svg.classList.toggle('rotate-180');
     });
-
-    // Toggle subcategories dropdown when chevron/button is clicked
-    const toggleButtons = document.querySelectorAll('.toggle-subcategories');
-    toggleButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const cid = this.dataset.categoryId;
-            const container = document.querySelector(`.subcategories-container[data-category-id="${cid}"]`);
-            if (!container) return;
-            container.classList.toggle('hidden');
-            // rotate chevron
-            const svg = this.querySelector('svg');
-            if (svg) svg.classList.toggle('rotate-180');
-        });
-    });
-
-    // --- AJAX Filter Submit ---
-    const filterForm = document.getElementById('filter-form');
-    const resultsContainer = document.getElementById('products-results');
-
-    async function submitFiltersAjax(e) {
-        if (!filterForm) return;
-        // Allow normal non-AJAX submission if user disables JS, but intercept here
-        if (e) e.preventDefault();
-        // show spinner overlay
-        const spinner = document.getElementById('filter-loading');
-        if (spinner) spinner.classList.remove('hidden');
-
-        const formData = new FormData(filterForm);
-        const params = new URLSearchParams();
-        for (const [key, value] of formData.entries()) {
-            // Skip empty values so we don't submit blank query params (eg. min_price=)
-            if (value === null || value === undefined || value === '') continue;
-            params.append(key, value);
-        }
-
-        const url = `${filterForm.action}?${params.toString()}`;
-
-        try {
-            const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (!res.ok) throw new Error('Network response was not ok');
-            const html = await res.text();
-
-            // Parse response and extract new results container
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newResults = doc.getElementById('products-results');
-            if (newResults && resultsContainer) {
-                resultsContainer.innerHTML = newResults.innerHTML;
-
-                // Update pagination links to submit via AJAX instead of full page loads
-                document.querySelectorAll('#products-results .pagination a').forEach(a => {
-                    a.addEventListener('click', function(ev) {
-                        ev.preventDefault();
-                        const pUrl = this.href;
-                        // show spinner for pagination fetch
-                        const spinnerPag = document.getElementById('filter-loading');
-                        if (spinnerPag) spinnerPag.classList.remove('hidden');
-                        fetch(pUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                            .then(r => r.text())
-                            .then(t => {
-                                const d = parser.parseFromString(t, 'text/html');
-                                const nr = d.getElementById('products-results');
-                                if (nr) resultsContainer.innerHTML = nr.innerHTML;
-                                history.pushState({}, '', pUrl);
-                            })
-                            .catch(err => console.error(err))
-                            .finally(() => { if (spinnerPag) spinnerPag.classList.add('hidden'); });
-                    });
-                });
-
-                // Update browser URL
-                history.pushState({}, '', url);
-            }
-        } catch (err) {
-            console.error('Filter AJAX error:', err);
-            // fallback to normal submit
-            filterForm.submit();
-        } finally {
-            // hide spinner
-            const spinnerFinal = document.getElementById('filter-loading');
-            if (spinnerFinal) spinnerFinal.classList.add('hidden');
-        }
-    }
-
-    if (filterForm) {
-        filterForm.addEventListener('submit', submitFiltersAjax);
-    }
-
-    // Clear filters button behaviour
-    const clearBtn = document.getElementById('clear-filters');
-    if (clearBtn && filterForm) {
-        clearBtn.addEventListener('click', function() {
-            // reset all inputs inside the form
-            filterForm.reset();
-            // explicitly clear min/max so they don't submit as empty strings
-            const min = filterForm.querySelector('input[name="min_price"]');
-            const max = filterForm.querySelector('input[name="max_price"]');
-            if (min) min.value = '';
-            if (max) max.value = '';
-            // fetch fresh results (AJAX) — submitFiltersAjax will update history
-            submitFiltersAjax();
-        });
-    }
 });

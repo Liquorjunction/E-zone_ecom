@@ -3,7 +3,13 @@
         <!-- Search Bar -->
         <div class="flex-1">
             <div class="relative">
-                <input type="text" placeholder="Search for products, brands, or categories..."
+                <input
+                    type="text"
+                    name="search"
+                    id="products-search"
+                    form="filter-form"
+                    value="{{ request('search') }}"
+                    placeholder="Search for products, brands, or categories..."
                     class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
                 <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -16,13 +22,14 @@
         <!-- Sort Dropdown -->
         <div class="lg:w-64">
             <select
+                name="sort"
+                id="products-sort"
+                form="filter-form"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
-                <option>Sort by: Featured</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest First</option>
-                <option>Best Selling</option>
-                <option>Top Rated</option>
+                <option value="newest" @selected(request('sort') === 'newest' || !request('sort'))>Sort by: Newest</option>
+                <option value="price_asc" @selected(request('sort') === 'price_asc')>Price: Low to High</option>
+                <option value="price_desc" @selected(request('sort') === 'price_desc')>Price: High to Low</option>
+                <option value="featured" @selected(request('sort') === 'featured')>Featured</option>
             </select>
         </div>
 

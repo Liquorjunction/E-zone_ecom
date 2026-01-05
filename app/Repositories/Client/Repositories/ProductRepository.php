@@ -74,6 +74,20 @@ class ProductRepository implements ProductRepositoryInterface
                 $q->where('status', 'active');
             });
 
+        // Text search across variant and parent product
+        if ($request->filled('search')) {
+            $keyword = $request->get('search');
+            $query->where(function (Builder $q) use ($keyword) {
+                $like = '%' . $keyword . '%';
+                $q->where('variant_name', 'LIKE', $like)
+                  ->orWhere('sku', 'LIKE', $like)
+                  ->orWhereHas('product', function (Builder $productQuery) use ($like) {
+                      $productQuery->where('name', 'LIKE', $like)
+                                   ->orWhere('description', 'LIKE', $like);
+                  });
+            });
+        }
+
         // Filters applied on parent product
         if ($request->filled('category')) {
             $categories = is_array($request->category) ? $request->category : [$request->category];
@@ -106,9 +120,17 @@ class ProductRepository implements ProductRepositoryInterface
 
         // Sorting
         switch ($request->get('sort')) {
-            case 'price_asc': $query->orderBy('price', 'asc'); break;
-            case 'price_desc': $query->orderBy('price', 'desc'); break;
-            case 'newest': default: $query->latest(); break;
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'featured':
+            case 'newest':
+            default:
+                $query->latest();
+                break;
         }
 
         $paginator = $query->paginate($perPage)->withQueryString();

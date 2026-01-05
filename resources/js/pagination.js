@@ -1,39 +1,65 @@
 class AjaxPagination {
-    constructor(options = {}) {
-        this.container = options.container || '#products-container';
-        this.paginationContainer = options.paginationContainer || '.pagination-container';
-        this.loadingClass = options.loadingClass || 'opacity-50 pointer-events-none';
-        this.url = options.url || window.location.href;
-        this.method = options.method || 'GET';
+    constructor(root) {
+        this.root = root;
+        this.resultsSelector = root.dataset.resultsTarget || '#products-results';
+        this.paginationSelector = root.dataset.paginationTarget || '#products-pagination';
+        this.loadingSelector = root.dataset.loadingTarget || '';
+        this.method = root.dataset.method || 'GET';
         this.headers = {
             'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            ...options.headers
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         };
 
+        this.handleClick = this.handleClick.bind(this);
         this.init();
     }
 
+    get resultsEl() {
+        return document.querySelector(this.resultsSelector);
+    }
+
+    get paginationEl() {
+        return document.querySelector(this.paginationSelector);
+    }
+
+    get loadingEl() {
+        return this.loadingSelector ? document.querySelector(this.loadingSelector) : null;
+    }
+
     init() {
-        this.bindEvents();
+        document.addEventListener('click', this.handleClick);
     }
 
-    bindEvents() {
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.pagination-link')) {
-                e.preventDefault();
-                const page = e.target.closest('.pagination-link').dataset.page;
-                this.loadPage(page);
-            }
-        });
+    handleClick(e) {
+        const trigger = e.target.closest('.pagination-link, .pagination a');
+        if (!trigger || !this.root.contains(trigger)) {
+            return;
+        }
+
+        const page = trigger.dataset.page || this.extractPageFromHref(trigger.getAttribute('href'));
+        if (!page) {
+            return;
+        }
+
+        e.preventDefault();
+        this.loadPage(page, trigger.getAttribute('href'));
     }
 
-    async loadPage(page) {
+    extractPageFromHref(href) {
+        if (!href) return null;
         try {
-            // Show loading state
+            return new URL(href, window.location.origin).searchParams.get('page');
+        } catch (err) {
+            console.error('Failed to parse pagination href', err);
+            return null;
+        }
+    }
+
+    async loadPage(page, href = '') {
+        try {
             this.showLoading();
 
-            const url = new URL(this.url);
+            const url = new URL(href || window.location.href);
             url.searchParams.set('page', page);
 
             const response = await fetch(url.toString(), {
@@ -50,27 +76,22 @@ class AjaxPagination {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
 
-            // Update content
-            const newContainer = doc.querySelector(this.container);
-            const newPagination = doc.querySelector(this.paginationContainer);
+            const newResults = doc.querySelector(this.resultsSelector);
+            const newPagination = doc.querySelector(this.paginationSelector);
 
-            if (newContainer) {
-                document.querySelector(this.container).innerHTML = newContainer.innerHTML;
+            if (newResults && this.resultsEl) {
+                this.resultsEl.innerHTML = newResults.innerHTML;
             }
 
-            if (newPagination) {
-                document.querySelector(this.paginationContainer).innerHTML = newPagination.innerHTML;
+            if (newPagination && this.paginationEl) {
+                this.paginationEl.innerHTML = newPagination.innerHTML;
             }
 
-            // Update URL without reload
             window.history.pushState({}, '', url.toString());
 
-            // Scroll to top of container
-            document.querySelector(this.container).scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-
+            if (this.resultsEl) {
+                this.resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         } catch (error) {
             console.error('Pagination error:', error);
             this.showError();
@@ -80,31 +101,40 @@ class AjaxPagination {
     }
 
     showLoading() {
-        const container = document.querySelector(this.container);
-        if (container) {
-            container.classList.add(this.loadingClass);
+        if (this.loadingEl) {
+            this.loadingEl.classList.remove('hidden');
+            return;
+        }
+
+        if (this.resultsEl) {
+            this.resultsEl.classList.add('opacity-50', 'pointer-events-none');
         }
     }
 
     hideLoading() {
-        const container = document.querySelector(this.container);
-        if (container) {
-            container.classList.remove(this.loadingClass);
+        if (this.loadingEl) {
+            this.loadingEl.classList.add('hidden');
+            return;
+        }
+
+        if (this.resultsEl) {
+            this.resultsEl.classList.remove('opacity-50', 'pointer-events-none');
         }
     }
 
     showError() {
-        // Simple error handling - you can customize this
-        alert('Failed to load page. Please try again.');
+        if (window.Toast && typeof window.Toast.error === 'function') {
+            window.Toast.error({ title: 'Error', message: 'Failed to load page. Please try again.', duration: 4000 });
+        } else {
+            alert('Failed to load page. Please try again.');
+        }
     }
 }
 
-// Auto-initialize if elements exist
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('.pagination-link')) {
-        window.ajaxPagination = new AjaxPagination();
-    }
+    document.querySelectorAll('[data-ajax-pagination]').forEach((root) => {
+        root.__ajaxPagination = new AjaxPagination(root);
+    });
 });
 
-// Export for manual initialization
 window.AjaxPagination = AjaxPagination;

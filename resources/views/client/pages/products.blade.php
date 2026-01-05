@@ -60,7 +60,7 @@
                     </div>
 
                     <!-- Products Grid + Spinner -->
-                    <div class="relative">
+                    <div class="relative" data-ajax-pagination data-results-target="#products-results" data-pagination-target="#products-pagination" data-loading-target="#filter-loading">
                         <div id="filter-loading" class="hidden absolute inset-0 bg-white/70 z-50 flex items-center justify-center">
                             <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -97,7 +97,7 @@
                                     </div>
                                 @endif
 
-                                <div class="mt-10">
+                                <div class="mt-10" id="products-pagination">
                                     {{ $products->withQueryString()->links('client.components.pagination') }}
                                 </div>
                             @endif

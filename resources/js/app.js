@@ -17,6 +17,8 @@ import './toast';
 import './wishlist';
 // Security page behaviors
 import './pages/security';
+// Shared AJAX pagination handler
+import './pagination';
 
 // AJAX add-to-cart for homepage/product cards
 import './ajax-cart';
