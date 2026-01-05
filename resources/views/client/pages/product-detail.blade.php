@@ -157,11 +157,11 @@
                                         $variantDiscounts = [];
                                     }
 
-                                    // Ensure discountInfo has required keys
-                                    $hasDiscount = isset($discountInfo['has_discount']) && $discountInfo['has_discount'] === true;
+                                    // Ensure discountInfo has required keys and only flag discount when price actually drops
+                                    $hasDiscount = isset($discountInfo['has_discount']) && $discountInfo['has_discount'] === true && ($discountInfo['original_price'] ?? 0) > ($discountInfo['final_price'] ?? 0);
                                     $originalPrice = $discountInfo['original_price'] ?? 0;
                                     $finalPrice = $discountInfo['final_price'] ?? 0;
-                                    $discountPercentage = $discountInfo['discount_percentage'] ?? 0;
+                                    $discountPercentage = $hasDiscount ? ($discountInfo['discount_percentage'] ?? 0) : 0;
                                     $discountName = $discountInfo['discount_name'] ?? '';
                                 @endphp
 
@@ -364,8 +364,9 @@
                                                 ? $variant->attributes
                                                 : json_encode([]));
 
-                                        // Get discount info for this variant
+                                        // Get discount info for this variant and ensure it represents a real discount
                                         $variantDiscount = isset($variantDiscounts[$variant->id]) ? $variantDiscounts[$variant->id] : null;
+                                        $variantHasDiscount = $variantDiscount && ($variantDiscount['has_discount'] ?? false) && ($variantDiscount['original_price'] ?? 0) > ($variantDiscount['final_price'] ?? 0);
                                     @endphp
                                     <button type="button"
                                         class="variant-button group border-2 border-gray-200 hover:border-primary rounded-xl px-4 py-3 bg-white hover:shadow-md transition-all duration-200 cursor-pointer text-left"
@@ -390,12 +391,12 @@
                                             {{ is_string($variant->attributes) ? $variant->attributes : (is_array($variant->attributes) ? json_encode($variant->attributes) : '') }}
                                         </div>
                                         <div class="flex items-center justify-between">
-                                            @if ($variantDiscount && $variantDiscount['has_discount'])
+                                            @if ($variantHasDiscount)
                                                 <div class="flex flex-col">
                                                     <span class="text-xs text-gray-400 line-through">${{ number_format($variantDiscount['original_price'], 2) }}</span>
                                                     <div class="flex items-center gap-2">
                                                         <span class="text-lg font-bold text-red-600">${{ number_format($variantDiscount['final_price'], 2) }}</span>
-                                                        @if ($variantDiscount['discount_percentage'] > 0)
+                                                        @if (($variantDiscount['discount_percentage'] ?? 0) > 0)
                                                             <span class="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
                                                                 -{{ number_format($variantDiscount['discount_percentage'], 0) }}%
                                                             </span>
