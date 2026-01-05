@@ -1,12 +1,15 @@
 @props(['cartItem'])
 
 @php
-    $discountInfo = $cartItem->getDiscountInfo();
-    $hasDiscount = $discountInfo['has_discount'];
-    $lineTotal = $cartItem->getLineTotal();
-    $lineDiscount = $cartItem->getLineDiscount();
-    $lineFinal = $cartItem->getLineFinal();
+    // Use stored discount data from cart_items table
+    $hasDiscount = ($cartItem->discount_amount ?? 0) > 0;
+    $unitPrice = $cartItem->unit_price ?? 0;
+    $unitFinal = $cartItem->final_price ?? $unitPrice;
+    $lineTotal = $unitPrice * $cartItem->quantity;
+    $lineDiscount = ($cartItem->discount_amount ?? 0) * $cartItem->quantity;
+    $lineFinal = $unitFinal * $cartItem->quantity;
     $quantity = $cartItem->quantity;
+    $discountName = $hasDiscount && $cartItem->discount ? $cartItem->discount->getTranslation('name', app()->getLocale()) : null;
 @endphp
 
 <div class="cart-item-price-wrapper" {{ $attributes }}>
@@ -14,20 +17,22 @@
         <div class="price-breakdown">
             <div class="d-flex justify-content-between align-items-center">
                 <span class="text-muted small">
-                    {{ $quantity }} × {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($discountInfo['original_price'], 2) }}
+                    {{ $quantity }} × {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($unitPrice, 2) }}
                 </span>
                 <span class="text-muted text-decoration-line-through">
                     {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineTotal, 2) }}
                 </span>
             </div>
+            @if($discountName)
             <div class="d-flex justify-content-between align-items-center mt-1">
                 <small class="text-success">
-                    <i class="fas fa-tag"></i> {{ $discountInfo['discount_name'] }}
+                    <i class="fas fa-tag"></i> {{ $discountName }}
                 </small>
                 <span class="text-success">
                     -{{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineDiscount, 2) }}
                 </span>
             </div>
+            @endif
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="fw-bold">Total:</span>
                 <span class="fw-bold text-danger fs-5">
@@ -39,7 +44,7 @@
         <div class="price-no-discount">
             <div class="d-flex justify-content-between align-items-center">
                 <span class="text-muted">
-                    {{ $quantity }} × {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($cartItem->getApplicablePrice(), 2) }}
+                    {{ $quantity }} × {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($unitPrice, 2) }}
                 </span>
                 <span class="fw-bold fs-5">
                     {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineTotal, 2) }}

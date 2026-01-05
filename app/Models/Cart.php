@@ -26,14 +26,43 @@ class Cart extends Model
 
     /**
      * Calculate cart totals with discounts applied
-     * Uses DiscountService with "Best Discount Wins" logic
+     * Uses stored discount data from cart_items table
      *
      * @return array
      */
     public function calculateTotals(): array
     {
-        $discountService = app(\App\Services\DiscountService::class);
-        return $discountService->calculateCartTotals($this->items()->with(['product', 'variant'])->get());
+        $items = $this->items()->with(['product', 'variant'])->get();
+
+        $subtotal = 0;
+        $totalDiscount = 0;
+        $itemsData = [];
+
+        foreach ($items as $item) {
+            $lineTotal = $item->unit_price * $item->quantity;
+            $lineDiscount = $item->discount_amount * $item->quantity;
+            $lineFinal = $item->final_price * $item->quantity;
+
+            $subtotal += $lineTotal;
+            $totalDiscount += $lineDiscount;
+
+            $itemsData[$item->id] = [
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'discount_amount' => $item->discount_amount,
+                'final_price' => $item->final_price,
+                'line_total' => round($lineTotal, 2),
+                'line_discount' => round($lineDiscount, 2),
+                'line_total_after_discount' => round($lineFinal, 2),
+            ];
+        }
+
+        return [
+            'subtotal' => round($subtotal, 2),
+            'total_discount' => round($totalDiscount, 2),
+            'total' => round($subtotal - $totalDiscount, 2),
+            'items' => $itemsData,
+        ];
     }
 
     /**

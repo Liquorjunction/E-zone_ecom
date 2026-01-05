@@ -120,8 +120,25 @@ class Product extends Model
      */
     public function getDiscountInfo(): array
     {
+        // Get the first variant's ID, or use 0 if no variants exist
+        $firstVariant = $this->productVariants()->first();
+        $variantId = $firstVariant ? $firstVariant->id : 0;
+
+        if (!$firstVariant) {
+            // Return default no-discount structure if no variants
+            return [
+                'has_discount' => false,
+                'original_price' => $this->price ?? 0,
+                'final_price' => $this->price ?? 0,
+                'discount_amount' => 0,
+                'discount_percentage' => 0,
+                'discount_name' => null,
+                'discount_id' => null,
+            ];
+        }
+
         $discountService = app(\App\Services\DiscountService::class);
-        return $discountService->calculateProductDiscount($this);
+        return $discountService->calculateProductDiscount($this, $variantId);
     }
 
     /**

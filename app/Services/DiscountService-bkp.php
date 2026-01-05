@@ -6,35 +6,55 @@ use App\Models\Discount;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 
 /**
  * DiscountService
  *
  * Implements "Best Discount Wins" strategy
- * - Fetches all applicable discounts (brand, category, subcategory, product)
- * - Returns the discount that gives maximum savings to the customer
+ *
+ * IMPORTANT: In discount_targets table, target_type enum values:
+ * - 'brand' => stores Brand ID
+ * - 'category' => stores Category ID
+ * - 'subcategory' => stores SubCategory ID
+ * - 'product' => stores ProductVariant ID (NOT Product container ID!)
+ *
+ * Returns the discount that gives maximum savings to the customer
  */
 class DiscountService
 {
 
+    protected function makeCacheKey(int $productId, float $price): string
+    {
+        return "best_discount_product_{$productId}_" . md5((string) $price);
+    }
+
+    protected function rememberCacheKey(int $productId, string $cacheKey): void
+    {
+        $listKey = "best_discount_product_{$productId}_keys";
+        $keys = Cache::get($listKey, []);
+
+        if (!in_array($cacheKey, $keys, true)) {
+            $keys[] = $cacheKey;
+            Cache::put($listKey, $keys, now()->addHours(12));
+        }
+    }
+
     public function getPriceforProductVariant(ProductVariant $productVariant): float
     {
-        // Get the price associated with the variant
         return $productVariant->price;
     }
 
-    /**
-     * Calculate the best discount for a product
-     *
-     * @param Product $product
-     * @param float|null $priceOverride Optional price override (for variants)
-     * @return array Discount calculation result
-     */
     public function calculateProductDiscount(Product $product, ?float $priceOverride = null): array
     {
         $originalPrice = $priceOverride ?? $product->price;
+
+        // Fallback: If price is 0 (container product), use minimum variant price
+        if ($originalPrice <= 0) {
+            $originalPrice = $product->productVariants()->min('price') ?? 0;
+        }
+
         $bestDiscount = $this->findBestDiscountForProduct($product, $originalPrice);
 
         if (!$bestDiscount) {
@@ -63,140 +83,76 @@ class DiscountService
         ];
     }
 
-    /**
-     * Calculate discount for a product variant
-     *
-     * @param ProductVariant $variant
-     * @return array Discount calculation result
-     */
-    public function calculateVariantDiscount(ProductVariant $variant): array
+    public function findBestDiscountAmongMultipleDiscountIds(array $discountIds, float $price): ?Discount
     {
-        $product = $variant->product;
-        return $this->calculateProductDiscount($product, $variant->price);
+        if (empty($discountIds)) {
+            return null;
+        }
+
+        // Get active discounts matching the provided IDs
+        $discounts = $this->getActiveDiscounts()->whereIn('id', $discountIds);
+
+        if ($discounts->isEmpty()) {
+            return null;
+        }
+
+        $bestDiscount = null;
+        $maxReduction = 0.0;
+
+        foreach ($discounts as $discount) {
+            $reduction = $this->calculateReduction($discount, $price);
+
+            if ($reduction > $maxReduction) {
+                $maxReduction = $reduction;
+                $bestDiscount = $discount;
+            }
+        }
+
+        return $bestDiscount;
     }
 
     /**
-     * Find the best discount for a product using "Best Discount Wins" logic
+     * Find best discount for a product considering all applicable targets
      *
-     * @param Product $product
-     * @param float|null $price The price to use for discount comparison
-     * @return Discount|null
+     * Checks for discounts targeting:
+     * - Product variants (target_type='product' contains variant IDs)
+     * - Brand (target_type='brand')
+     * - Category (target_type='category')
+     * - Subcategory (target_type='subcategory')
+     *
+     * @param Product $product The product to find discount for
+     * @param float|null $price Optional price override (e.g., for specific variant)
+     * @return Discount|null The best discount or null
      */
-    public function findBestDiscountForProduct(Product $product, ?float $price = null)
+    public function findBestDiscountForProduct(Product $product, ?float $price = null): ?Discount
     {
-        // Use provided price or fallback to product price
         $comparisonPrice = $price ?? $product->price;
+        $cacheKey = $this->makeCacheKey($product->id, $comparisonPrice);
 
-        // Cache key includes price to handle different variant prices
-        $cacheKey = "best_discount_product_{$product->id}_" . md5((string)$comparisonPrice);
-
-        // Logging for debugging
-        Log::info('Finding best discount for product', [
-            'product_id' => $product->id,
-            'comparison_price' => $comparisonPrice
-        ]);
-
-        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($product, $comparisonPrice) {
-            $now = now();
-
-            // Get product variants
+        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($product, $comparisonPrice, $cacheKey) {
+            // Get all variant IDs for this product
             $variantIds = $product->productVariants()->pluck('id')->toArray();
+            Log::debug("Variant IDs for product {$product->id}: " . implode(', ', $variantIds));
 
-            // Fetch all active discounts that target this product or its parents
-            $query = Discount::where('status', true)
-                ->where(function($q) use ($now) {
-                    $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
-                })
-                ->whereHas('targets', function ($q) use ($product, $variantIds) {
-                    $q->where(function ($query) use ($product) {
-                        // 1. Direct Product Target (highest priority conceptually, but we compare actual savings)
-                        $query->where('target_type', 'product')
-                              ->where('target_id', $product->id);
-                    })
-                    ->orWhere(function ($query) use ($variantIds) {
-                        // 2. Variant Target
-                        if (!empty($variantIds)) {
-                            $query->where('target_type', 'variant')
-                                  ->whereIn('target_id', $variantIds);
-                        }
-                    })
-                    ->orWhere(function ($query) use ($product) {
-                        // 3. Brand Target
-                        if ($product->brand_id) {
-                            $query->where('target_type', 'brand')
-                                  ->where('target_id', $product->brand_id);
-                        }
-                    })
-                    ->orWhere(function ($query) use ($product) {
-                        // 4. Category Target
-                        if ($product->category_id) {
-                            $query->where('target_type', 'category')
-                                  ->where('target_id', $product->category_id);
-                        }
-                    })
-                    ->orWhere(function ($query) use ($product) {
-                        // 5. SubCategory Target
-                        if ($product->sub_category_id) {
-                            $query->where('target_type', 'subcategory')
-                                  ->where('target_id', $product->sub_category_id);
-                        }
-                    });
-                })
+            // Get all active discounts with their targets
+            $allDiscounts = $this->getActiveDiscounts();
+            Log::debug("Total active discounts retrieved: " . $allDiscounts->count());
 
-                // Log the generated SQL for debugging
-                ->tap(function ($q) {
-                    Log::info('Discount Query SQL', ['sql' => $q->toSql(), 'bindings' => $q->getBindings()]);
-                })
-                ->get();
+            // Filter applicable discounts based on targets
+            $applicableDiscounts = $allDiscounts->filter(function ($discount) use ($product, $variantIds) {
+                return $this->isDiscountApplicableToProduct($discount, $product, $variantIds);
+                Log::debug("Discount {$discount->id} is applicable to product {$product->id}");
+            });
 
-                // Logging for debugging
-                Log::info('Finding best discount for product', [
-                    'product_id' => $product->id,
-                    'applicable_discounts' => $query->pluck('id')->toArray(),
-                    'applicable_discounts_count' => $query->count(),
-                    'applicable_discounts_type' => $query->pluck('type')->toArray(),
-                    'applicable_discounts_name' => $query->pluck('name')->toArray(),
-                    'applicable_discounts_value' => $query->pluck('value')->toArray(),
-                    'applicable_discounts_starts_at' => $query->pluck('starts_at')->toArray(),
-                    'applicable_discounts_ends_at' => $query->pluck('ends_at')->toArray(),
-                    'applicable_discounts_targets' => $query->pluck('targets')->toArray(),
-                    'applicable_discounts_targets_count' => $query->pluck('targets')->count(),
-                ]);
-
-                // Log the Query Results
-                foreach ($query as $discount) {
-                    Log::info('Applicable discount', [
-                        'discount_id' => $discount->id,
-                        'discount_name' => $discount->getTranslation('name', app()->getLocale()),
-                        'discount_type' => $discount->type,
-                        'discount_value' => $discount->value,
-                    ]);
-                }
-
-            if ($query->isEmpty()) {
+            if ($applicableDiscounts->isEmpty()) {
                 return null;
             }
 
-            // "Best Discount Wins" - Compare all and return the one with maximum savings
-            $bestDiscount = null;
-            $maxReductionAmount = 0;
+            // Find the discount that gives maximum savings
+            $bestDiscount = $this->selectBestDiscount($applicableDiscounts, $comparisonPrice);
 
-            foreach ($query as $discount) {
-                $reduction = $this->calculateReduction($discount, $comparisonPrice);
-
-                // Logging for debugging
-                Log::info('Applicable discount - reduction', [
-                    'discount_id' => $discount->id,
-                    'discount_name' => $discount->getTranslation('name', app()->getLocale()),
-                    'discount_type' => $discount->type,
-                    'discount_value' => $discount->value,
-                    'discount_reduction' => $reduction,
-                ]);
-
-                if ($reduction > $maxReductionAmount) {
-                    $maxReductionAmount = $reduction;
-                    $bestDiscount = $discount;
-                }
+            if ($bestDiscount) {
+                $this->rememberCacheKey($product->id, $cacheKey);
             }
 
             return $bestDiscount;
@@ -204,156 +160,193 @@ class DiscountService
     }
 
     /**
-     * Calculate the reduction amount for a discount
+     * Check if a discount is applicable to a product
      *
      * @param Discount $discount
-     * @param float $price
-     * @return float
+     * @param Product $product
+     * @param array $variantIds
+     * @return bool
      */
-    protected function calculateReduction(Discount $discount, float $price): float
+    protected function isDiscountApplicableToProduct(Discount $discount, Product $product, array $variantIds): bool
     {
-        $value = (float) $discount->value;
-        $reduction = 0;
+        foreach ($discount->targets as $target) {
+            // target_type='product' actually stores ProductVariant IDs
+            if ($target->target_type === 'product' && in_array($target->target_id, $variantIds, true)) {
+                return true;
+            }
 
-        // Debug logging
-        Log::info('Calculating reduction', [
-            'discount_id' => $discount->id,
-            'discount_type' => $discount->type,
-            'discount_value' => $discount->value,
-            'price' => $price,
-        ]);
+            // target_type='brand' stores Brand ID
+            if ($target->target_type === 'brand' && $product->brand_id && $target->target_id === $product->brand_id) {
+                return true;
+            }
 
-        // Calculate the base reduction based on discount type
-        if ($discount->type === 'flat') {
-            // Flat discount - direct amount off
-            $reduction = $value;
-        } else {
-            // Percentage discount - calculate percentage of price
-            $reduction = ($value / 100) * $price;
+            // target_type='category' stores Category ID
+            if ($target->target_type === 'category' && $product->category_id && $target->target_id === $product->category_id) {
+                return true;
+            }
+
+            // target_type='subcategory' stores SubCategory ID
+            if ($target->target_type === 'subcategory' && $product->sub_category_id && $target->target_id === $product->sub_category_id) {
+                return true;
+            }
         }
 
-        // Apply max_discount cap if set (upper limit on discount)
-        $maxDiscount = (float) ($discount->max_discount ?? 0);
-        if ($maxDiscount > 0) {
-            $reduction = min($reduction, $maxDiscount);
-        }
-
-        // Apply min_discount cap if set (ensure minimum discount is applied)
-        $minDiscount = (float) ($discount->min_discount ?? 0);
-        if ($minDiscount > 0) {
-            $reduction = max($reduction, $minDiscount);
-        }
-
-        return $reduction;
+        return false;
     }
 
     /**
-     * Get all active discounts for display purposes
+     * Select the best discount from a collection based on maximum reduction
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param Collection $discounts
+     * @param float $price
+     * @return Discount|null
      */
-    public function getActiveDiscounts()
+    protected function selectBestDiscount(Collection $discounts, float $price): ?Discount
+    {
+        $bestDiscount = null;
+        $maxReduction = 0.0;
+
+        foreach ($discounts as $discount) {
+            $reduction = $this->calculateReduction($discount, $price);
+
+            if ($reduction > $maxReduction) {
+                $maxReduction = $reduction;
+                $bestDiscount = $discount;
+            }
+        }
+
+        return $bestDiscount;
+    }
+
+    /**
+     * Calculate the reduction amount for a discount on a given price
+     *
+     * @param Discount $discount
+     * @param float $price
+     * @return float The reduction amount
+     */
+    public function calculateVariantDiscount(ProductVariant $variant): array
+    {
+        // Ensure we get the associated price with the product variant
+        $price = $variant->price; // Get the price from the variant
+        $product = $variant->product; // Get the associated product
+
+        // Check if the product has a discount
+        $discount = $this->getDiscount($product);
+
+        if ($discount) {
+            // Apply the discount to the price
+            $discountedPrice = $price - ($price * ($discount->percentage / 100));
+            return ['original_price' => $price, 'discounted_price' => $discountedPrice];
+        }
+
+        return ['original_price' => $price, 'discounted_price' => $price];
+    }
+
+    /**
+     * Get all active discounts with their targets eagerly loaded
+     *
+     * @return Collection
+     */
+    public function getActiveDiscounts(): Collection
     {
         $now = now();
 
         return Discount::where('status', true)
-            ->where(function($q) use ($now) {
+            ->where(function ($q) use ($now) {
+                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
                 $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
             })
-            ->with(['targets.target'])
+            ->with(['targets'])
             ->get();
     }
 
     /**
-     * Get the best discount for a product (wrapper for findBestDiscountForProduct)
-     * This method exists for backward compatibility
+     * Get a single applicable discount for a product (legacy method)
+     * Note: Use findBestDiscountForProduct for "Best Discount Wins" logic
      *
      * @param Product $product
      * @return Discount|null
      */
-    public function getDiscount(Product $product)
+    public function getDiscount(Product $product): ?Discount
     {
-        $now = now();
-
         // Get product variants
         $variantIds = $product->productVariants()->pluck('id')->toArray();
 
-        // Debug logging
-        Log::info('DiscountService.GetDiscount Start');
-
-        // Check if This product has any active discounts
-        $query = Discount::where('status', true)
+        // Query for active discounts that target this product's variants, brand, category, or subcategory
+        $discount = Discount::where('status', true)
+            ->where(function ($q) {
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', now());
+            })
             ->where(function ($q) {
                 $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                    ->orWhere('ends_at', '>=', now());
             })
             ->whereHas('targets', function ($q) use ($product, $variantIds) {
-                $q->where(function ($query) use ($product, $variantIds) {
-                    $query->where('target_type', 'product')
-                          ->where('target_id', $product->id);
-                })
-                ->orWhere(function ($query) use ($variantIds) {
+                $q->where(function ($query) use ($variantIds) {
+                    // target_type='product' contains ProductVariant IDs
                     if (!empty($variantIds)) {
-                        $query->where('target_type', 'variant')
-                              ->whereIn('target_id', $variantIds);
+                        $query->where('target_type', 'product')
+                            ->whereIn('target_id', $variantIds);
                     }
                 })
-                ->orWhere(function ($query) use ($product) {
-                    if ($product->brand_id) {
-                        $query->where('target_type', 'brand')
-                              ->where('target_id', $product->brand_id);
-                    }
-                })
-                ->orWhere(function ($query) use ($product) {
-                    if ($product->category_id) {
-                        $query->where('target_type', 'category')
-                              ->where('target_id', $product->category_id);
-                    }
-                })
-                ->orWhere(function ($query) use ($product) {
-                    if ($product->sub_category_id) {
-                        $query->where('target_type', 'subcategory')
-                              ->where('target_id', $product->sub_category_id);
-                    }
-                });
-            });
-
-        $discount = $query->orderByDesc('value')
+                    ->orWhere(function ($query) use ($product) {
+                        // target_type='brand' contains Brand IDs
+                        if ($product->brand_id) {
+                            $query->where('target_type', 'brand')
+                                ->where('target_id', $product->brand_id);
+                        }
+                    })
+                    ->orWhere(function ($query) use ($product) {
+                        // target_type='category' contains Category IDs
+                        if ($product->category_id) {
+                            $query->where('target_type', 'category')
+                                ->where('target_id', $product->category_id);
+                        }
+                    })
+                    ->orWhere(function ($query) use ($product) {
+                        // target_type='subcategory' contains SubCategory IDs
+                        if ($product->sub_category_id) {
+                            $query->where('target_type', 'subcategory')
+                                ->where('target_id', $product->sub_category_id);
+                        }
+                    });
+            })
+            ->orderByDesc('value')
             ->first();
-
-
-        Log::info('Discount fetched', [
-            'discount' => $discount ? $discount->toArray() : null,
-        ]);
 
         return $discount;
     }
 
     /**
-     * Get all active discounts with proper date validation
+     * Get all active discounts (alias for compatibility)
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
-    public function getAllDiscounts()
+    public function getAllDiscounts(): Collection
     {
-        $now = now();
-
-        return Discount::where('status', true)
-            ->where(function($q) use ($now) {
-                $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
-            })
-            ->with(['targets.target'])
-            ->get();
+        return $this->getActiveDiscounts();
     }
 
     /**
-     * Clear discount cache for a product
+     * Clear discount cache for a specific product
      *
      * @param int $productId
      * @return void
      */
     public function clearProductDiscountCache(int $productId): void
     {
+        $listKey = "best_discount_product_{$productId}_keys";
+        $keys = Cache::get($listKey, []);
+
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
+
+        Cache::forget($listKey);
         Cache::forget("best_discount_product_{$productId}");
     }
 
@@ -364,17 +357,15 @@ class DiscountService
      */
     public function clearAllDiscountCaches(): void
     {
-        // You might want to implement a more sophisticated cache clearing strategy
-        // For now, this is a placeholder
         Cache::flush();
         Log::info('All discount caches cleared');
     }
 
     /**
-     * Calculate cart total with discounts applied
+     * Calculate cart totals with discounts applied
      *
-     * @param \Illuminate\Database\Eloquent\Collection $cartItems
-     * @return array
+     * @param Collection $cartItems Collection of cart items with product/variant relationships
+     * @return array Cart totals with discount details
      */
     public function calculateCartTotals($cartItems): array
     {
@@ -423,6 +414,12 @@ class DiscountService
         ];
     }
 
+    /**
+     * Get simplified discount information for a product
+     *
+     * @param Product $product
+     * @return array
+     */
     public function getDiscountInfoForProduct(Product $product): array
     {
         $discount = $this->findBestDiscountForProduct($product, $product->price);
@@ -440,5 +437,42 @@ class DiscountService
             'discount_name' => $discount->getTranslation('name', app()->getLocale()),
             'discount_id' => $discount->id,
         ];
+    }
+
+    protected function calculateReduction(Discount $discount, float $price): float
+    {
+        $value = (float) $discount->value;
+        $reduction = 0;
+
+        // Debug logging
+        Log::info('Calculating reduction', [
+            'discount_id' => $discount->id,
+            'discount_type' => $discount->type,
+            'discount_value' => $discount->value,
+            'price' => $price,
+        ]);
+
+        // Calculate the base reduction based on discount type
+        if ($discount->type === 'flat') {
+            // Flat discount - direct amount off
+            $reduction = $value;
+        } else {
+            // Percentage discount - calculate percentage of price
+            $reduction = ($value / 100) * $price;
+        }
+
+        // Apply max_discount cap if set (upper limit on discount)
+        $maxDiscount = (float) ($discount->max_discount ?? 0);
+        if ($maxDiscount > 0) {
+            $reduction = min($reduction, $maxDiscount);
+        }
+
+        // Apply min_discount cap if set (ensure minimum discount is applied)
+        $minDiscount = (float) ($discount->min_discount ?? 0);
+        if ($minDiscount > 0) {
+            $reduction = max($reduction, $minDiscount);
+        }
+
+        return $reduction;
     }
 }

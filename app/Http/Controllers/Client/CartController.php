@@ -128,22 +128,30 @@ class CartController extends Controller
         $ok = $cartService->removeItem($request, $itemId);
         $logger->info('Removed cart item via controller', ['item_id' => $itemId, 'success' => $ok]);
 
-        // Recalculate totals for the response
+        // Recalculate totals using stored discount data
         $cart = $cartService->getCart($request);
-        $subtotal = $cart ? $cart->items->sum(function($i){ return ($i->quantity * $i->unit_price); }) : 0;
-        $tax = round($subtotal * 0.08, 2);
+        $totals = $cart ? $cart->calculateTotals() : [
+            'subtotal' => 0,
+            'total_discount' => 0,
+            'total' => 0,
+            'items' => []
+        ];
+
+        $tax = round($totals['total'] * 0.08, 2);
         $shipping = 0.00;
-        $total = $subtotal + $tax + $shipping;
+        $finalTotal = $totals['total'] + $tax + $shipping;
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => (bool) $ok,
                 'message' => $ok ? 'Item removed from cart.' : 'Failed to remove item.',
                 'summary' => [
-                    'subtotal' => round($subtotal, 2),
+                    'subtotal' => round($totals['subtotal'], 2),
+                    'total_discount' => round($totals['total_discount'], 2),
+                    'subtotal_after_discount' => round($totals['total'], 2),
                     'tax' => round($tax, 2),
                     'shipping' => round($shipping, 2),
-                    'total' => round($total, 2),
+                    'total' => round($finalTotal, 2),
                     'itemCount' => $cart ? (int) $cart->items->sum('quantity') : 0,
                 ],
             ]);

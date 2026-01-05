@@ -21,22 +21,39 @@ class CartService
     {
         $cart = $this->repo->getCartForUserOrSession($request);
 
-        // compute unit price from product/variant if not provided
+        // Resolve product and variant (include soft-deleted) to ensure we always have a price source
+        $productId = $payload['product_id'] ?? null;
+        $variantId = $payload['variant_id'] ?? null;
+
+        $product = $productId ? \App\Models\Product::with(['productVariants' => function ($q) {
+            $q->withTrashed();
+        }])->withTrashed()->find($productId) : null;
+
+        $variant = $variantId && $product
+            ? $product->productVariants->firstWhere('id', $variantId)
+            : null;
+
+        // If variant not provided, pick the first available (even soft-deleted) for pricing consistency
+        if (!$variant && $product && $product->productVariants->count() > 0) {
+            $variant = $product->productVariants->first();
+            $payload['variant_id'] = $variant->id;
+        }
+
+        // Compute unit price: prefer variant price, then provided unit_price, then product price, fallback to 0
         $unitPrice = $payload['unit_price'] ?? null;
-        if (!$unitPrice) {
-            // best-effort lookup, avoid heavy coupling
-            try {
-                $variant = \App\Models\ProductVariant::find($payload['variant_id'] ?? null);
-                $unitPrice = $variant->price ?? $variant->sale_price ?? null;
-            } catch (\Throwable $e) {
-                $unitPrice = $payload['unit_price'] ?? null;
-            }
+        if ($unitPrice === null) {
+            $unitPrice = $variant->price ?? $variant->sale_price ?? $product->price ?? 0;
         }
 
         $payload['unit_price'] = $unitPrice;
 
         $item = $this->repo->addItem($cart, $payload);
-        $this->logger->info('Cart item added', ['cart_id' => $cart->id ?? null, 'item_id' => $item->id]);
+        $this->logger->info('Cart item added', [
+            'cart_id' => $cart->id ?? null,
+            'item_id' => $item->id,
+            'variant_id' => $payload['variant_id'] ?? null,
+            'unit_price' => $unitPrice,
+        ]);
         return $item;
     }
 

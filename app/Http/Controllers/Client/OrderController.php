@@ -144,21 +144,39 @@ class OrderController extends Controller
         if ($step === 3) {
             $orderId = $request->session()->get('order_id');
             if ($orderId) {
-                $order = OrderModel::with('items')->find($orderId);
+                $order = OrderModel::with(['items.product','items.variant'])->find($orderId);
             }
 
             if (!$order && Auth::check()) {
-                $order = OrderModel::with('items')->where('user_id', Auth::id())->latest()->first();
+                $order = OrderModel::with(['items.product','items.variant'])->where('user_id', Auth::id())->latest()->first();
             }
         }
 
-        // Calculate totals with discounts
-        $totals = $cart ? $cart->calculateTotals() : [
-            'subtotal' => 0,
-            'total_discount' => 0,
-            'total' => 0,
-            'items' => []
-        ];
+        // Calculate totals with discounts (cart-first, fallback to order items for step 3)
+        if ($cart) {
+            $totals = $cart->calculateTotals();
+        } elseif ($order && $order->relationLoaded('items')) {
+            $subtotal = 0;
+            foreach ($order->items as $it) {
+                $subtotal += ($it->total_price ?? 0);
+            }
+            $totals = [
+                'subtotal' => round($subtotal, 2),
+                'total_discount' => 0, // discount already baked into order item price
+                'total' => round($subtotal, 2),
+                'items' => [],
+            ];
+        } else {
+            $totals = [
+                'subtotal' => 0,
+                'total_discount' => 0,
+                'total' => 0,
+                'items' => []
+            ];
+        }
+
+        // Items to render in the view (cart items if available, otherwise order items)
+        $itemsForView = $cart ? $cart->items : ($order ? $order->items : collect());
 
         return view('client.pages.checkout-process', [
             'cart' => $cart,
@@ -166,6 +184,7 @@ class OrderController extends Controller
             'addresses' => $addresses,
             'order' => $order,
             'totals' => $totals,
+            'itemsForView' => $itemsForView,
         ]);
     }
 

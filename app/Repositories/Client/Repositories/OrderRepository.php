@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Inventory;
 use App\Models\InventoryTransaction;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ class OrderRepository implements OrderRepositoryInterface
     public function createOrderFromCart(Cart $cart, array $data)
     {
         $order = null;
+
         DB::transaction(function() use ($cart, $data, &$order) {
             // Create order first to get its real auto-increment ID, then build a stable order_number
             // Provide a temporary unique order_number so the DB insert doesn't fail
@@ -31,13 +33,20 @@ class OrderRepository implements OrderRepositoryInterface
 
             $total = 0;
             foreach ($cart->items as $item) {
-                $lineTotal = ($item->unit_price ?? 0) * $item->quantity;
+                // Use stored discount data from cart_items table
+                $variant = $item->variant ?: ProductVariant::withTrashed()->find($item->variant_id);
+                $product = $item->product; // expect eager-loaded in cart
+
+                // Use final_price (after discount) stored in cart_items
+                $unitFinal = $item->final_price ?? $item->unit_price ?? 0;
+                $lineTotal = $unitFinal * $item->quantity;
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'variant_id' => $item->variant_id,
                     'quantity' => $item->quantity,
-                    'unit_price' => $item->unit_price,
+                    'unit_price' => $unitFinal,
                     'total_price' => $lineTotal,
                 ]);
                 $total += $lineTotal;

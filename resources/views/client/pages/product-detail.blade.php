@@ -148,40 +148,67 @@
                             <div class="flex items-baseline gap-3">
                                 @php
                                     $variantCount = $product->productVariants ? $product->productVariants->count() : 0;
-                                    $discountInfo = $product->getDiscountInfo();
+                                    // Use discount info passed from controller, or fetch it if not available
+                                    if (!isset($discountInfo) || !is_array($discountInfo)) {
+                                        $discountInfo = $product->getDiscountInfo();
+                                    }
+                                    // Ensure variantDiscounts is set
+                                    if (!isset($variantDiscounts)) {
+                                        $variantDiscounts = [];
+                                    }
+
+                                    // Ensure discountInfo has required keys
+                                    $hasDiscount = isset($discountInfo['has_discount']) && $discountInfo['has_discount'] === true;
+                                    $originalPrice = $discountInfo['original_price'] ?? 0;
+                                    $finalPrice = $discountInfo['final_price'] ?? 0;
+                                    $discountPercentage = $discountInfo['discount_percentage'] ?? 0;
+                                    $discountName = $discountInfo['discount_name'] ?? '';
                                 @endphp
 
                                 @if ($variantCount > 1)
-                                    {{-- Multiple variants - show price range --}}
-                                    @php
-                                        $minPrice = $product->productVariants->min('price');
-                                        $maxPrice = $product->productVariants->max('price');
-                                    @endphp
-                                    <span id="product-price"
-                                        class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }} -
-                                        ${{ number_format($maxPrice, 2) }}</span>
-                                @else
-                                    {{-- Single product/variant - show discount if applicable --}}
-                                    @if ($discountInfo['has_discount'])
+                                    {{-- Multiple variants - show "From" price with discount if applicable --}}
+                                    @if ($hasDiscount)
                                         <div class="flex flex-col gap-2">
-                                            <span
-                                                class="text-2xl text-gray-400 line-through">${{ number_format($discountInfo['original_price'], 2) }}</span>
-                                            <span id="product-price"
-                                                class="text-4xl font-bold text-red-600">${{ number_format($discountInfo['final_price'], 2) }}</span>
-                                            @if ($discountInfo['discount_percentage'] > 0)
-                                                <span
-                                                    class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
+                                            <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-sm text-gray-600 font-medium">From</span>
+                                                <span id="product-price" class="text-4xl font-bold text-red-600">${{ number_format($finalPrice, 2) }}</span>
+                                            </div>
+                                            @if ($discountPercentage > 0)
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
                                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path
-                                                            d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
                                                     </svg>
-                                                    Save {{ number_format($discountInfo['discount_percentage'], 0) }}%
+                                                    Save {{ number_format($discountPercentage, 0) }}%
                                                 </span>
                                             @endif
                                         </div>
                                     @else
-                                        <span id="product-price"
-                                            class="text-4xl font-bold text-primary">${{ number_format($discountInfo['final_price'], 2) }}</span>
+                                        @php
+                                            $minPrice = $product->productVariants->min('price');
+                                        @endphp
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-sm text-gray-600 font-medium">From</span>
+                                            <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }}</span>
+                                        </div>
+                                    @endif
+                                @else
+                                    {{-- Single product/variant - show discount if applicable --}}
+                                    @if ($hasDiscount)
+                                        <div class="flex flex-col gap-2">
+                                            <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
+                                            <span id="product-price" class="text-4xl font-bold text-red-600">${{ number_format($finalPrice, 2) }}</span>
+                                            @if ($discountPercentage > 0)
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                                                    </svg>
+                                                    Save {{ number_format($discountPercentage, 0) }}%
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
                                     @endif
                                 @endif
 
@@ -196,7 +223,7 @@
                                 Fast dispatch
                             </span>
                         </div>
-                        @if ($discountInfo['has_discount'])
+                        @if ($hasDiscount && !empty($discountName))
                             <div
                                 class="mt-4 flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg border border-green-200">
                                 <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -204,8 +231,7 @@
                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                         clip-rule="evenodd" />
                                 </svg>
-                                <span class="text-sm font-semibold text-green-800">{{ $discountInfo['discount_name'] }}
-                                    applied!</span>
+                                <span class="text-sm font-semibold text-green-800">{{ $discountName }} applied!</span>
                             </div>
                         @endif
                     </div>
@@ -337,6 +363,9 @@
                                             : (is_string($variant->attributes)
                                                 ? $variant->attributes
                                                 : json_encode([]));
+
+                                        // Get discount info for this variant
+                                        $variantDiscount = isset($variantDiscounts[$variant->id]) ? $variantDiscounts[$variant->id] : null;
                                     @endphp
                                     <button type="button"
                                         class="variant-button group border-2 border-gray-200 hover:border-primary rounded-xl px-4 py-3 bg-white hover:shadow-md transition-all duration-200 cursor-pointer text-left"
@@ -346,7 +375,8 @@
                                         data-attributes='{{ $variantAttributesJson }}'
                                         data-price="{{ is_null($variant->price) ? '' : $variant->price }}"
                                         data-sku="{{ is_array($variant->sku) ? $variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku)) : $variant->sku ?? '' }}"
-                                        data-qty="{{ $qty }}">
+                                        data-qty="{{ $qty }}"
+                                        data-discount='@json($variantDiscount)'>
                                         <div class="flex items-start justify-between gap-2 mb-2">
                                             <div class="text-sm font-bold text-gray-900 line-clamp-1">
                                                 {{ is_array($variant->variant_name) ? $variant->variant_name[app()->getLocale()] ?? ($variant->variant_name['en'] ?? reset($variant->variant_name)) : (is_array($variant->name) ? $variant->name[app()->getLocale()] ?? ($variant->name['en'] ?? reset($variant->name)) : $variant->variant_name ?? ($variant->name ?? 'Variant')) }}
@@ -360,8 +390,23 @@
                                             {{ is_string($variant->attributes) ? $variant->attributes : (is_array($variant->attributes) ? json_encode($variant->attributes) : '') }}
                                         </div>
                                         <div class="flex items-center justify-between">
-                                            <div class="text-lg font-bold text-primary">
-                                                ${{ number_format($variant->price, 2) }}</div>
+                                            @if ($variantDiscount && $variantDiscount['has_discount'])
+                                                <div class="flex flex-col">
+                                                    <span class="text-xs text-gray-400 line-through">${{ number_format($variantDiscount['original_price'], 2) }}</span>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-lg font-bold text-red-600">${{ number_format($variantDiscount['final_price'], 2) }}</span>
+                                                        @if ($variantDiscount['discount_percentage'] > 0)
+                                                            <span class="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
+                                                                -{{ number_format($variantDiscount['discount_percentage'], 0) }}%
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div class="text-lg font-bold text-primary">
+                                                    ${{ number_format($variant->price, 2) }}
+                                                </div>
+                                            @endif
                                             @if ($qty > 0)
                                                 <span
                                                     class="text-[10px] font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-md stock-badge border border-green-200">
@@ -885,9 +930,26 @@
                                         <span class="ml-2 text-sm text-gray-500">(0)</span>
                                     </div>
 
+                                    @php
+                                        $relatedDiscount = isset($relatedProduct->discountInfo) ? $relatedProduct->discountInfo : null;
+                                    @endphp
+
                                     <div class="flex items-center justify-between">
-                                        <span
-                                            class="text-xl font-bold text-primary">${{ number_format($relatedProduct->price, 2) }}</span>
+                                        @if ($relatedDiscount && $relatedDiscount['has_discount'])
+                                            <div class="flex flex-col">
+                                                <span class="text-sm text-gray-400 line-through">${{ number_format($relatedDiscount['original_price'], 2) }}</span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xl font-bold text-red-600">${{ number_format($relatedDiscount['final_price'], 2) }}</span>
+                                                    @if ($relatedDiscount['discount_percentage'] > 0)
+                                                        <span class="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
+                                                            -{{ number_format($relatedDiscount['discount_percentage'], 0) }}%
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @else
+                                            <span class="text-xl font-bold text-primary">${{ number_format($relatedProduct->price, 2) }}</span>
+                                        @endif
                                         <button
                                             class="bg-primary hover:bg-primary-dark text-white p-2 rounded-lg transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"

@@ -137,9 +137,12 @@
           <div class="lg:col-span-2 space-y-6">
 
             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 transition-all duration-300 hover:shadow-xl">
-              @if($cart && $cart->items->count() > 0)
+              @php
+                $itemsCollection = $itemsForView ?? ($cart?->items ?? collect());
+              @endphp
+              @if($itemsCollection && $itemsCollection->count() > 0)
                 <div class="space-y-6">
-                  @foreach($cart->items as $item)
+                  @foreach($itemsCollection as $item)
                     <div class="cart-item-row flex flex-col sm:flex-row gap-6 p-6 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-md" data-item-id="{{ $item->id }}">
                       <div class="shrink-0">
                         <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/150x150?text=Product' }}" alt="{{ optional($item->product)->name ?? 'Product' }}" class="w-full sm:w-36 h-36 object-cover rounded-2xl shadow-md">
@@ -180,21 +183,25 @@
                             </div>
                           </div>
                           <div class="text-right">
-                            <div class="text-sm text-gray-500 mb-1">Unit: ${{ number_format($item->unit_price, 2) }}</div>
+                            @php
+                              // Use stored discount data from cart_items table
+                              $unitPrice = $item->unit_price ?? 0;
+                              $unitFinal = $item->final_price ?? $unitPrice;
+                              $lineTotal = $unitPrice * $item->quantity;
+                              $lineDiscount = ($item->discount_amount ?? 0) * $item->quantity;
+                              $lineFinal = $unitFinal * $item->quantity;
+                              $hasDiscount = ($item->discount_amount ?? 0) > 0;
+                              $discountName = $hasDiscount && $item->discount ? $item->discount->getTranslation('name', app()->getLocale()) : null;
+                            @endphp
 
-                            @if($item->hasDiscount())
-                              @php
-                                $discountInfo = $item->getDiscountInfo();
-                                $lineTotal = $item->getLineTotal();
-                                $lineDiscount = $item->getLineDiscount();
-                                $lineFinal = $item->getLineFinal();
-                              @endphp
+                            <div class="text-sm text-gray-500 mb-1">Unit: ${{ number_format($unitPrice, 2) }}</div>
 
+                            @if($hasDiscount)
                               {{-- Original line total with strikethrough --}}
                               <div class="text-lg text-gray-400 line-through mb-1">${{ number_format($lineTotal, 2) }}</div>
 
                               {{-- Discount badge --}}
-                              @if($discountInfo['discount_name'])
+                                  @if($lineDiscount > 0)
                                 <div class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1">
                                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
@@ -208,7 +215,7 @@
                               <p class="text-3xl font-bold text-red-600 item-line-total" id="item-line-total-{{ $item->id }}">${{ number_format($lineFinal, 2) }}</p>
                             @else
                               {{-- No discount - show regular price --}}
-                              <p class="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent item-line-total" id="item-line-total-{{ $item->id }}">${{ number_format($item->quantity * $item->unit_price, 2) }}</p>
+                              <p class="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent item-line-total" id="item-line-total-{{ $item->id }}">${{ number_format($lineFinal, 2) }}</p>
                             @endif
                           </div>
                         </div>
@@ -244,14 +251,22 @@
               @endphp
 
               <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
-                @if($cart && $cart->items->count() > 0)
-                  @foreach($cart->items as $item)
+              @php
+                $summaryItems = $itemsForView ?? ($cart?->items ?? collect());
+              @endphp
+                @if($summaryItems && $summaryItems->count() > 0)
+                  @foreach($summaryItems as $item)
                     <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 summary-item-row" data-summary-item-id="{{ $item->id }}">
                       <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}" alt="{{ optional($item->product)->name ?? 'Product' }}" class="w-20 h-20 rounded-lg object-cover shadow-sm">
                       <div class="flex-1 min-w-0">
                         <h4 class="font-semibold text-gray-900 text-sm mb-1 truncate">{{ optional($item->variant)->variant_name ?? optional($item->product)->name ?? 'Product' }}</h4>
                         <p class="text-xs text-gray-600">Qty: {{ $item->quantity }}</p>
-                        <p class="text-sm font-bold text-primary mt-1">${{ number_format($item->unit_price * $item->quantity, 2) }}</p>
+                        @php
+                          // Use stored discount data
+                          $summaryUnit = $item->final_price ?? $item->unit_price ?? 0;
+                          $summaryLine = $summaryUnit * $item->quantity;
+                        @endphp
+                        <p class="text-sm font-bold text-primary mt-1">${{ number_format($summaryLine, 2) }}</p>
                       </div>
                     </div>
                   @endforeach

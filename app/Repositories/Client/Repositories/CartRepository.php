@@ -22,9 +22,26 @@ class CartRepository implements CartRepositoryInterface
     public function addItem($cart, array $data)
     {
         $existing = $cart->items()->where('product_id', $data['product_id'])->where('variant_id', $data['variant_id'] ?? null)->first();
+
+        // Calculate discount information
+        $discountService = app(\App\Services\DiscountService::class);
+        $product = \App\Models\Product::find($data['product_id']);
+        $variantId = $data['variant_id'] ?? null;
+
+        $discountData = [];
+        if ($product && $variantId) {
+            $discountData = $discountService->calculateProductDiscount($product, $variantId, $data['unit_price'] ?? null);
+        }
+
         if ($existing) {
             $existing->quantity = max(1, $existing->quantity + ($data['quantity'] ?? 1));
             $existing->unit_price = $data['unit_price'] ?? $existing->unit_price;
+
+            // Update discount fields
+            $existing->discount_id = $discountData['discount_id'] ?? null;
+            $existing->discount_amount = $discountData['discount_amount'] ?? 0;
+            $existing->final_price = $discountData['final_price'] ?? $existing->unit_price;
+
             $existing->save();
             return $existing;
         }
@@ -35,6 +52,9 @@ class CartRepository implements CartRepositoryInterface
             'variant_id' => $data['variant_id'] ?? null,
             'quantity' => $data['quantity'] ?? 1,
             'unit_price' => $data['unit_price'] ?? null,
+            'discount_id' => $discountData['discount_id'] ?? null,
+            'discount_amount' => $discountData['discount_amount'] ?? 0,
+            'final_price' => $discountData['final_price'] ?? ($data['unit_price'] ?? 0),
         ]);
     }
 
@@ -55,6 +75,18 @@ class CartRepository implements CartRepositoryInterface
         }
         if (isset($data['unit_price'])) {
             $item->unit_price = $data['unit_price'];
+        }
+
+        // Recalculate discount when item is updated
+        $discountService = app(\App\Services\DiscountService::class);
+        $product = $item->product;
+        $variantId = $item->variant_id;
+
+        if ($product && $variantId) {
+            $discountData = $discountService->calculateProductDiscount($product, $variantId, $item->unit_price);
+            $item->discount_id = $discountData['discount_id'] ?? null;
+            $item->discount_amount = $discountData['discount_amount'] ?? 0;
+            $item->final_price = $discountData['final_price'] ?? $item->unit_price;
         }
 
         $item->save();

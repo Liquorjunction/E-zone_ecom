@@ -1,4 +1,81 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to format price with commas
+    function formatPrice(price) {
+        return parseFloat(price).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // Function to update price display with discount information
+    function updatePriceDisplay(discountInfo) {
+        if (!discountInfo) return;
+
+        const priceContainer = document.querySelector('.bg-gradient-to-r.from-primary\\/5');
+        if (!priceContainer) return;
+
+        const priceEl = document.getElementById('product-price');
+        if (!priceEl) return;
+
+        // Get the parent flex container
+        const flexContainer = priceEl.closest('.flex.items-baseline');
+        if (!flexContainer) return;
+
+        // Get or create price wrapper
+        let priceWrapper = flexContainer.querySelector('.flex-col, .flex.flex-col');
+        if (!priceWrapper) {
+            // If no wrapper exists, create one and wrap the price element
+            priceWrapper = document.createElement('div');
+            priceWrapper.className = 'flex flex-col gap-2';
+            priceEl.parentNode.insertBefore(priceWrapper, priceEl);
+            priceWrapper.appendChild(priceEl);
+        }
+
+        if (discountInfo.has_discount) {
+            // Show discounted price
+            priceWrapper.innerHTML = `
+                <span class="text-2xl text-gray-400 line-through">$${formatPrice(discountInfo.original_price)}</span>
+                <span id="product-price" class="text-4xl font-bold text-red-600">$${formatPrice(discountInfo.final_price)}</span>
+                ${discountInfo.discount_percentage > 0 ? `
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                    </svg>
+                    Save ${discountInfo.discount_percentage.toFixed(0)}%
+                </span>` : ''}
+            `;
+
+            // Show or update discount badge
+            let discountBadge = priceContainer.querySelector('.bg-green-50');
+            if (!discountBadge) {
+                const discountBadgeContainer = priceContainer.querySelector('.flex.items-center.justify-between');
+                if (discountBadgeContainer && discountBadgeContainer.parentElement) {
+                    discountBadge = document.createElement('div');
+                    discountBadge.className = 'mt-4 flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg border border-green-200';
+                    discountBadgeContainer.parentElement.appendChild(discountBadge);
+                }
+            }
+            if (discountBadge && discountInfo.discount_name) {
+                discountBadge.innerHTML = `
+                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-sm font-semibold text-green-800">${discountInfo.discount_name} applied!</span>
+                `;
+            }
+        } else {
+            // Show regular price
+            priceWrapper.innerHTML = `
+                <span id="product-price" class="text-4xl font-bold text-primary">$${formatPrice(discountInfo.final_price)}</span>
+
+            // Remove discount badge if exists
+            const discountBadge = priceContainer.querySelector('.bg-green-50');
+            if (discountBadge) {
+                discountBadge.remove();
+            }
+        }
+    }
+
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -82,10 +159,45 @@ document.addEventListener('DOMContentLoaded', function() {
         const variantName = btn.getAttribute('data-variant-name');
         const variantAttributes = btn.getAttribute('data-attributes');
         const variantId = btn.getAttribute('data-variant-id');
+        const discountData = btn.getAttribute('data-discount');
 
-        if (priceEl && price) {
-            priceEl.textContent = '$' + parseFloat(price).toFixed(2);
+        // Parse and update discount information
+        let discountInfo = null;
+        if (discountData) {
+            try {
+                discountInfo = JSON.parse(discountData);
+                updatePriceDisplay(discountInfo);
+            } catch (e) {
+                console.error('Error parsing discount data:', e);
+                // Fallback to simple price display
+                if (priceEl && price) {
+                    priceEl.textContent = '$' + formatPrice(price);
+                }
+            }
+        } else {
+            // No discount data, show regular price
+            if (priceEl && price) {
+                const priceContainer = document.querySelector('.bg-gradient-to-r.from-primary\\/5');
+                const flexContainer = priceEl.closest('.flex.items-baseline');
+                if (flexContainer) {
+                    let priceWrapper = flexContainer.querySelector('.flex-col, .flex.flex-col');
+                    if (priceWrapper) {
+                        priceWrapper.innerHTML = `<span id="product-price" class="text-4xl font-bold text-primary">$${formatPrice(price)}</span>`;
+                    } else {
+                        priceEl.textContent = '$' + formatPrice(price);
+                    }
+                }
+
+                // Remove discount badge if exists
+                if (priceContainer) {
+                    const discountBadge = priceContainer.querySelector('.bg-green-50');
+                    if (discountBadge) {
+                        discountBadge.remove();
+                    }
+                }
+            }
         }
+
         if (skuEl && sku) {
             skuEl.textContent = 'SKU: ' + sku;
         }

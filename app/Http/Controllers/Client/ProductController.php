@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Repositories\Client\Interfaces\ProductRepositoryInterface as ProductRepo;
 use App\Services\DiscountService;
 use Illuminate\Http\Request;
@@ -26,9 +27,30 @@ class ProductController extends Controller
     {
         $product = $productRepository->findActiveBySlug($slug);
         $relatedProducts = $productRepository->getRelatedProducts($product);
-        $discount = $this->discountService->getDiscount($product);
 
-        return view('client.pages.product-detail', compact('product', 'relatedProducts', 'discount'));
+        // Calculate discount information for ALL product variants
+        $variantDiscounts = [];
+        if ($product->productVariants && $product->productVariants->count() > 0) {
+            foreach ($product->productVariants as $variant) {
+                $variantDiscounts[$variant->id] = $this->discountService->calculateProductDiscount($product, $variant->id);
+            }
+        }
+
+        // Get discount info for the first variant for initial display
+        $firstVariant = $product->productVariants->first();
+        $discountInfo = $firstVariant && isset($variantDiscounts[$firstVariant->id])
+            ? $variantDiscounts[$firstVariant->id]
+            : null;
+
+        // Calculate discount for related products
+        foreach ($relatedProducts as $relatedProduct) {
+            $relatedVariant = $relatedProduct->productVariants->first();
+            if ($relatedVariant) {
+                $relatedProduct->discountInfo = $this->discountService->calculateProductDiscount($relatedProduct, $relatedVariant->id);
+            }
+        }
+
+        return view('client.pages.product-detail', compact('product', 'relatedProducts', 'discountInfo', 'variantDiscounts'));
     }
 
     public function productDetail($slug, ProductRepo $productRepository)
@@ -42,23 +64,53 @@ class ProductController extends Controller
 
             $relatedProducts = $productRepository->getRelatedProducts($product);
             $discount = $this->discountService->getActiveDiscounts($product);
-            // checkApplicableDiscounts retutn true/false
-            if ($this->discountService->checkApplicableDiscounts($product)) {
-                $discount = $this->discountService->checkApplicableDiscounts($product);
-                dd($discount);
-            } else {
-                $discount = null;
-                dd('Fuck');
-            }
+            $bestDiscount = $this->discountService->findBestDiscountForProduct($product, $product->productVariants->first()->id ?? null);
 
-            $bestDiscount = $this->discountService->getActiveDiscounts($product);
-
-            dd(compact('product', 'relatedProducts', 'discount', 'bestDiscount'));
+            // dd(compact('product', 'relatedProducts', 'bestDiscount'));
 
 
-            return $this->show($slug, $productRepository , compact('product', 'relatedProducts', 'discount'));
+            return $this->show($slug, $productRepository , compact('product', 'relatedProducts', 'bestDiscount'));
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred while fetching product details: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get discount information for a specific product variant
+     */
+    public function getVariantDiscount(Request $request)
+    {
+        try {
+            $productId = $request->input('product_id');
+            $variantId = $request->input('variant_id');
+
+            if (!$productId || !$variantId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product ID and Variant ID are required'
+                ], 400);
+            }
+
+            $product = Product::with('productVariants')->find($productId);
+
+            if (!$product) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product not found'
+                ], 404);
+            }
+
+            $discountInfo = $this->discountService->calculateProductDiscount($product, $variantId);
+
+            return response()->json([
+                'success' => true,
+                'discount' => $discountInfo
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

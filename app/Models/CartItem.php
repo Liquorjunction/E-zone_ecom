@@ -14,7 +14,16 @@ class CartItem extends Model
         'product_id',
         'variant_id',
         'quantity',
-        'unit_price'
+        'unit_price',
+        'discount_id',
+        'discount_amount',
+        'final_price'
+    ];
+
+    protected $casts = [
+        'unit_price' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'final_price' => 'decimal:2',
     ];
 
     public function cart()
@@ -30,6 +39,11 @@ class CartItem extends Model
     public function variant()
     {
         return $this->belongsTo(ProductVariant::class, 'variant_id');
+    }
+
+    public function discount()
+    {
+        return $this->belongsTo(Discount::class);
     }
 
     /**
@@ -55,10 +69,25 @@ class CartItem extends Model
         $discountService = app(\App\Services\DiscountService::class);
 
         if ($this->variant) {
-            return $discountService->calculateVariantDiscount($this->variant);
+            return $discountService->calculateProductDiscount($this->product, $this->variant_id);
         }
 
-        return $discountService->calculateProductDiscount($this->product);
+        // No variant selected, get first available variant
+        $firstVariant = $this->product->productVariants()->first();
+
+        if (!$firstVariant) {
+            return [
+                'has_discount' => false,
+                'original_price' => $this->product->price,
+                'final_price' => $this->product->price,
+                'discount_amount' => 0,
+                'discount_percentage' => 0,
+                'discount_name' => null,
+                'discount_id' => null,
+            ];
+        }
+
+        return $discountService->calculateProductDiscount($this->product, $firstVariant->id);
     }
 
     /**
