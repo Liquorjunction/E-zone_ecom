@@ -65,8 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             // Show regular price
+            // --- FIX START ---
             priceWrapper.innerHTML = `
                 <span id="product-price" class="text-4xl font-bold text-primary">$${formatPrice(discountInfo.final_price)}</span>
+            `;
+            // --- FIX END ---
 
             // Remove discount badge if exists
             const discountBadge = priceContainer.querySelector('.bg-green-50');
@@ -107,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const thumbButtons = document.querySelectorAll('.thumb-button');
     const mainImage = document.getElementById('main-product-image');
     thumbButtons.forEach(btn => {
+        button = btn; // Scope fix if strictly needed, but 'btn' usage below is fine
         btn.addEventListener('click', () => {
             const src = btn.getAttribute('data-image');
             if (src && mainImage) {
@@ -315,7 +319,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         variantSpecsEl.innerHTML = '';
                         return;
                     }
-                    try { specData = JSON.parse(decoded); } catch(e) { specData = decoded; }
+                    try {
+                        specData = JSON.parse(decoded);
+                    } catch (e) {
+                        specData = decoded;
+                    }
                 }
 
                 function renderRowsFromObject(obj) {
@@ -332,7 +340,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (Array.isArray(o[lang])) arr = o[lang];
                         else if (Array.isArray(o.en)) arr = o.en;
                         else {
-                            for (const v of Object.values(o)) { if (Array.isArray(v)) { arr = v; break; } }
+                            for (const v of Object.values(o)) {
+                                if (Array.isArray(v)) {
+                                    arr = v;
+                                    break;
+                                }
+                            }
                         }
                         if (!arr) return null;
                         const pairs = [];
@@ -340,7 +353,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (item && typeof item === 'object') {
                                 const k = item.key || item.title || item.label || '';
                                 const v = item.value || item.description || '';
-                                pairs.push({k: k || '', v: v});
+                                pairs.push({
+                                    k: k || '',
+                                    v: v
+                                });
                             }
                         });
                         return pairs;
@@ -351,25 +367,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (!spec && spec !== 0) return pairs;
                         if (typeof spec === 'string') {
                             // assume already parsed string handled elsewhere
-                            pairs.push({k: '', v: spec});
+                            pairs.push({
+                                k: '',
+                                v: spec
+                            });
                             return pairs;
                         }
                         if (Array.isArray(spec)) {
                             spec.forEach((item, idx) => {
                                 if (item && typeof item === 'object') {
                                     if ('key' in item && 'value' in item) {
-                                        pairs.push({k: item.key || ('Spec ' + (idx+1)), v: item.value});
+                                        pairs.push({
+                                            k: item.key || ('Spec ' + (idx + 1)),
+                                            v: item.value
+                                        });
                                     } else if ('title' in item && 'value' in item) {
-                                        pairs.push({k: item.title, v: item.value});
+                                        pairs.push({
+                                            k: item.title,
+                                            v: item.value
+                                        });
                                     } else {
                                         // flatten object properties as separate rows
-                                        Object.entries(item).forEach(([kk,vv]) => {
+                                        Object.entries(item).forEach(([kk, vv]) => {
                                             const val = typeof vv === 'object' ? getLocaleText(vv) : vv;
-                                            pairs.push({k: kk, v: val});
+                                            pairs.push({
+                                                k: kk,
+                                                v: val
+                                            });
                                         });
                                     }
                                 } else {
-                                    pairs.push({k: 'Spec ' + (idx+1), v: String(item)});
+                                    pairs.push({
+                                        k: 'Spec ' + (idx + 1),
+                                        v: String(item)
+                                    });
                                 }
                             });
                             return pairs;
@@ -379,14 +410,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             const localized = rowsFromLocalizedArray(spec);
                             if (localized && localized.length) return localized;
                             // otherwise key->value map
-                            Object.entries(spec).forEach(([k,v]) => {
+                            Object.entries(spec).forEach(([k, v]) => {
                                 const val = typeof v === 'object' ? getLocaleText(v) : v;
-                                pairs.push({k: k, v: val});
+                                pairs.push({
+                                    k: k,
+                                    v: val
+                                });
                             });
                             return pairs;
                         }
                         // fallback
-                        pairs.push({k: '', v: String(spec)});
+                        pairs.push({
+                            k: '',
+                            v: String(spec)
+                        });
                         return pairs;
                     }
 
