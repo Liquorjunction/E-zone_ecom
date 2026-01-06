@@ -14,68 +14,74 @@ document.addEventListener('DOMContentLoaded', function() {
         const priceContainer = document.querySelector('.bg-gradient-to-r.from-primary\\/5');
         if (!priceContainer) return;
 
-        const priceEl = document.getElementById('product-price');
-        if (!priceEl) return;
-
-        // Get the parent flex container
-        const flexContainer = priceEl.closest('.flex.items-baseline');
+        // Find the inner flex container (items-baseline) that holds the price
+        const flexContainer = priceContainer.querySelector('.flex.items-baseline');
         if (!flexContainer) return;
 
-        // Get or create price wrapper
-        let priceWrapper = flexContainer.querySelector('.flex-col, .flex.flex-col');
+        // Find existing price wrapper (flex-col div), or create one
+        let priceWrapper = flexContainer.querySelector('.flex.flex-col');
+
         if (!priceWrapper) {
-            // If no wrapper exists, create one and wrap the price element
+            // Create price wrapper if it doesn't exist
             priceWrapper = document.createElement('div');
             priceWrapper.className = 'flex flex-col gap-2';
-            priceEl.parentNode.insertBefore(priceWrapper, priceEl);
-            priceWrapper.appendChild(priceEl);
+            // Insert it at the beginning of flexContainer
+            flexContainer.insertBefore(priceWrapper, flexContainer.firstChild);
         }
 
-        if (discountInfo.has_discount) {
+        // Determine if there's an actual discount
+        const originalPrice = parseFloat(discountInfo.original_price) || 0;
+        const finalPrice = parseFloat(discountInfo.final_price) || 0;
+        const hasActualDiscount = discountInfo.has_discount === true && originalPrice > finalPrice;
+        const discountPercentage = parseFloat(discountInfo.discount_percentage) || 0;
+
+        console.log('Discount Info:', {
+            has_discount: discountInfo.has_discount,
+            original_price: originalPrice,
+            final_price: finalPrice,
+            hasActualDiscount: hasActualDiscount,
+            discount_percentage: discountPercentage,
+            discount_name: discountInfo.discount_name
+        });
+
+        // Now update only the price wrapper content
+        if (hasActualDiscount) {
             // Show discounted price
             priceWrapper.innerHTML = `
-                <span class="text-2xl text-gray-400 line-through">$${formatPrice(discountInfo.original_price)}</span>
-                <span id="product-price" class="text-4xl font-bold text-red-600">$${formatPrice(discountInfo.final_price)}</span>
-                ${discountInfo.discount_percentage > 0 ? `
+                <span class="text-2xl text-gray-400 line-through">$${formatPrice(originalPrice)}</span>
+                <span class="text-4xl font-bold text-red-600">$${formatPrice(finalPrice)}</span>
+                ${discountPercentage > 0 ? `
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
                     </svg>
-                    Save ${discountInfo.discount_percentage.toFixed(0)}%
+                    Save ${discountPercentage.toFixed(0)}%
                 </span>` : ''}
             `;
-
-            // Show or update discount badge
-            let discountBadge = priceContainer.querySelector('.bg-green-50');
-            if (!discountBadge) {
-                const discountBadgeContainer = priceContainer.querySelector('.flex.items-center.justify-between');
-                if (discountBadgeContainer && discountBadgeContainer.parentElement) {
-                    discountBadge = document.createElement('div');
-                    discountBadge.className = 'mt-4 flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg border border-green-200';
-                    discountBadgeContainer.parentElement.appendChild(discountBadge);
-                }
-            }
-            if (discountBadge && discountInfo.discount_name) {
-                discountBadge.innerHTML = `
-                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-sm font-semibold text-green-800">${discountInfo.discount_name} applied!</span>
-                `;
-            }
         } else {
-            // Show regular price
-            // --- FIX START ---
+            // Show regular price (no discount)
             priceWrapper.innerHTML = `
-                <span id="product-price" class="text-4xl font-bold text-primary">$${formatPrice(discountInfo.final_price)}</span>
+                <span class="text-4xl font-bold text-primary">$${formatPrice(finalPrice)}</span>
             `;
-            // --- FIX END ---
+        }
 
-            // Remove discount badge if exists
-            const discountBadge = priceContainer.querySelector('.bg-green-50');
-            if (discountBadge) {
-                discountBadge.remove();
+        // Handle discount badge (separate from price area)
+        let discountBadge = priceContainer.querySelector('.mt-4.flex.items-center.gap-2.px-4.py-3.bg-green-50');
+        if (hasActualDiscount && discountInfo.discount_name) {
+            if (!discountBadge) {
+                discountBadge = document.createElement('div');
+                discountBadge.className = 'mt-4 flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg border border-green-200';
+                priceContainer.appendChild(discountBadge);
             }
+            discountBadge.innerHTML = `
+                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm font-semibold text-green-800">${discountInfo.discount_name} applied!</span>
+            `;
+        } else if (discountBadge) {
+            // Remove discount badge if no discount
+            discountBadge.remove();
         }
     }
 
@@ -170,36 +176,33 @@ document.addEventListener('DOMContentLoaded', function() {
         if (discountData) {
             try {
                 discountInfo = JSON.parse(discountData);
+                console.log('Raw Parsed Discount Data:', discountInfo);
+                // Ensure has_discount is a boolean
+                discountInfo.has_discount = discountInfo.has_discount === true || discountInfo.has_discount === 1 || discountInfo.has_discount === '1' || discountInfo.has_discount === 'true';
+                console.log('Processed Discount Info:', discountInfo);
                 updatePriceDisplay(discountInfo);
             } catch (e) {
-                console.error('Error parsing discount data:', e);
-                // Fallback to simple price display
-                if (priceEl && price) {
-                    priceEl.textContent = '$' + formatPrice(price);
-                }
+                console.error('Error parsing discount data:', e, 'Raw data:', discountData);
+                // Fallback: create a basic discount info object with just the price
+                discountInfo = {
+                    has_discount: false,
+                    original_price: price,
+                    final_price: price,
+                    discount_percentage: 0,
+                    discount_name: null
+                };
+                updatePriceDisplay(discountInfo);
             }
         } else {
-            // No discount data, show regular price
-            if (priceEl && price) {
-                const priceContainer = document.querySelector('.bg-gradient-to-r.from-primary\\/5');
-                const flexContainer = priceEl.closest('.flex.items-baseline');
-                if (flexContainer) {
-                    let priceWrapper = flexContainer.querySelector('.flex-col, .flex.flex-col');
-                    if (priceWrapper) {
-                        priceWrapper.innerHTML = `<span id="product-price" class="text-4xl font-bold text-primary">$${formatPrice(price)}</span>`;
-                    } else {
-                        priceEl.textContent = '$' + formatPrice(price);
-                    }
-                }
-
-                // Remove discount badge if exists
-                if (priceContainer) {
-                    const discountBadge = priceContainer.querySelector('.bg-green-50');
-                    if (discountBadge) {
-                        discountBadge.remove();
-                    }
-                }
-            }
+            // No discount data, create empty discount info and show regular price
+            discountInfo = {
+                has_discount: false,
+                original_price: price,
+                final_price: price,
+                discount_percentage: 0,
+                discount_name: null
+            };
+            updatePriceDisplay(discountInfo);
         }
 
         if (skuEl && sku) {

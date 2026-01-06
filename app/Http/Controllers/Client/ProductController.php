@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Repositories\Client\Interfaces\ProductRepositoryInterface as ProductRepo;
 use App\Services\DiscountService;
 use Illuminate\Http\Request;
@@ -32,7 +33,12 @@ class ProductController extends Controller
         $variantDiscounts = [];
         if ($product->productVariants && $product->productVariants->count() > 0) {
             foreach ($product->productVariants as $variant) {
-                $variantDiscounts[$variant->id] = $this->discountService->calculateProductDiscount($product, $variant->id);
+                // Fix: Pass the variant object directly to ensure precise targeting
+                // Ensure parent is linked for category checks
+                if (!$variant->relationLoaded('product')) {
+                    $variant->setRelation('product', $product);
+                }
+                $variantDiscounts[$variant->id] = $this->discountService->calculateProductDiscount($variant);
             }
         }
 
@@ -42,37 +48,25 @@ class ProductController extends Controller
             ? $variantDiscounts[$firstVariant->id]
             : null;
 
-        // Calculate discount for related products
-        foreach ($relatedProducts as $relatedProduct) {
-            $relatedVariant = $relatedProduct->productVariants->first();
-            if ($relatedVariant) {
-                $relatedProduct->discountInfo = $this->discountService->calculateProductDiscount($relatedProduct, $relatedVariant->id);
+        // If specific variant requested via query param
+        if (request()->has('variant')) {
+            $requestedSlug = request()->get('variant');
+            $requestedVariant = $product->productVariants->where('slug', $requestedSlug)->first();
+            if ($requestedVariant && isset($variantDiscounts[$requestedVariant->id])) {
+                $discountInfo = $variantDiscounts[$requestedVariant->id];
             }
+        }
+
+        // Check if request expects JSON (AJAX for variant switching)
+        if (request()->wantsJson()) {
+            return response()->json([
+                'product' => $product,
+                'discount_info' => $discountInfo,
+                'variant_discounts' => $variantDiscounts
+            ]);
         }
 
         return view('client.pages.product-detail', compact('product', 'relatedProducts', 'discountInfo', 'variantDiscounts'));
-    }
-
-    public function productDetail($slug, ProductRepo $productRepository)
-    {
-        try {
-            $product = $productRepository->findActiveBySlug($slug);
-
-            if (!$product) {
-                return response()->json(['message' => 'Product not found'], 404);
-            }
-
-            $relatedProducts = $productRepository->getRelatedProducts($product);
-            $discount = $this->discountService->getActiveDiscounts($product);
-            $bestDiscount = $this->discountService->findBestDiscountForProduct($product, $product->productVariants->first()->id ?? null);
-
-            // dd(compact('product', 'relatedProducts', 'bestDiscount'));
-
-
-            return $this->show($slug, $productRepository , compact('product', 'relatedProducts', 'bestDiscount'));
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while fetching product details: ' . $e->getMessage()], 500);
-        }
     }
 
     /**
@@ -81,26 +75,29 @@ class ProductController extends Controller
     public function getVariantDiscount(Request $request)
     {
         try {
-            $productId = $request->input('product_id');
+            // We prioritize variant_id as it uniquely identifies the sellable item
             $variantId = $request->input('variant_id');
 
-            if (!$productId || !$variantId) {
+            if (!$variantId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Product ID and Variant ID are required'
+                    'message' => 'Variant ID is required'
                 ], 400);
             }
 
-            $product = Product::with('productVariants')->find($productId);
+            // Find the variant directly (Sellable Item)
+            // Eager load product (Container) for Category/Brand discount checks
+            $variant = ProductVariant::with('product')->find($variantId);
 
-            if (!$product) {
+            if (!$variant) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Product not found'
+                    'message' => 'Product variant not found'
                 ], 404);
             }
 
-            $discountInfo = $this->discountService->calculateProductDiscount($product, $variantId);
+            // Calculate discount using the Variant object
+            $discountInfo = $this->discountService->calculateProductDiscount($variant);
 
             return response()->json([
                 'success' => true,

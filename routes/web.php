@@ -75,7 +75,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
     Route::post('/variant-discount', [ProductController::class, 'getVariantDiscount'])->name('variant-discount');
-    Route::get('/{slug}', [ProductController::class, 'productDetail'])->name('detail');
+    Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
 });
 
 // Guest-only auth pages (login / register views + submit actions)

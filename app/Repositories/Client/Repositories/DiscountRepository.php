@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Support\Carbon;
 use App\Models\Categories;
 use App\Models\Brand;
+use App\Models\ProductVariant;
 
 class DiscountRepository implements DiscountRepositoryInterface
 {
@@ -17,11 +18,11 @@ class DiscountRepository implements DiscountRepositoryInterface
         $query = Discount::where('status', true)
             ->where(function ($q) {
                 $q->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                    ->orWhere('ends_at', '>=', now());
             });
 
         if (!empty($filters['type'])) {
@@ -41,26 +42,49 @@ class DiscountRepository implements DiscountRepositoryInterface
         return DiscountTarget::where('discount_id', $discountId)->get();
     }
 
-    public function getApplicableDiscountsForProduct(int $productId, array $context = [])
+    public function getApplicableDiscountsForProduct(int $variantId, array $context = [])
     {
-        // Logic to determine applicable discounts for a product
+        // 1. Resolve the Variant and its Parent Product (Container)
+        $variant = ProductVariant::with('product')->find($variantId);
+
+        if (!$variant || !$variant->product) {
+            return collect([]);
+        }
+
+        $product = $variant->product;
+
+        // 2. Query discounts that match either the Variant ID specifically OR the Parent Product's attributes
         $discounts = Discount::where('status', true)
             ->where(function ($q) {
                 $q->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                    ->orWhere('ends_at', '>=', now());
             })
-            ->whereHas('targets', function ($query) use ($productId) {
-                $query->where(function ($q) use ($productId) {
-                    $q->where('target_id', $productId)
-                      ->where(function ($t) {
-                          $t->where('target_type', Product::class)
-                            ->orWhere('target_type', 'product');
-                      });
-                });
+            ->whereHas('targets', function ($q) use ($variant, $product) {
+                $q->where(function ($query) use ($variant) {
+                    // Check for direct Variant discount
+                    // 'product' target type stores the Variant ID
+                    $query->where('target_type', 'product')
+                        ->where('target_id', $variant->id);
+                })
+                    ->orWhere(function ($query) use ($product) {
+                        // Check for Category/Subcategory/Brand discounts using the Parent Product
+                        $query->where(function ($t) use ($product) {
+                            $t->where('target_type', 'category')
+                                ->where('target_id', $product->category_id);
+                        })
+                            ->orWhere(function ($t) use ($product) {
+                                $t->where('target_type', 'subcategory')
+                                    ->where('target_id', $product->sub_category_id);
+                            })
+                            ->orWhere(function ($t) use ($product) {
+                                $t->where('target_type', 'brand')
+                                    ->where('target_id', $product->brand_id);
+                            });
+                    });
             })->get();
 
         return $discounts;
@@ -71,19 +95,19 @@ class DiscountRepository implements DiscountRepositoryInterface
         $discounts = Discount::where('status', true)
             ->where(function ($q) {
                 $q->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                    ->orWhere('ends_at', '>=', now());
             })
             ->whereHas('targets', function ($query) use ($categoryId) {
                 $query->where(function ($q) use ($categoryId) {
                     $q->where('target_id', $categoryId)
-                      ->where(function ($t) {
-                          $t->where('target_type', Categories::class)
-                            ->orWhere('target_type', 'category');
-                      });
+                        ->where(function ($t) {
+                            $t->where('target_type', Categories::class)
+                                ->orWhere('target_type', 'category');
+                        });
                 });
             })->get();
 
@@ -95,19 +119,19 @@ class DiscountRepository implements DiscountRepositoryInterface
         $discounts = Discount::where('status', true)
             ->where(function ($q) {
                 $q->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                    ->orWhere('ends_at', '>=', now());
             })
             ->whereHas('targets', function ($query) use ($subcategoryId) {
                 $query->where(function ($q) use ($subcategoryId) {
                     $q->where('target_id', $subcategoryId)
-                      ->where(function ($t) {
-                          $t->where('target_type', 'subcategory')
-                            ->orWhere('target_type', Categories::class);
-                      });
+                        ->where(function ($t) {
+                            $t->where('target_type', 'subcategory')
+                                ->orWhere('target_type', Categories::class);
+                        });
                 });
             })->get();
 
@@ -119,19 +143,19 @@ class DiscountRepository implements DiscountRepositoryInterface
         $discounts = Discount::where('status', true)
             ->where(function ($q) {
                 $q->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                    ->orWhere('ends_at', '>=', now());
             })
             ->whereHas('targets', function ($query) use ($brandId) {
                 $query->where(function ($q) use ($brandId) {
                     $q->where('target_id', $brandId)
-                      ->where(function ($t) {
-                          $t->where('target_type', Brand::class)
-                            ->orWhere('target_type', 'brand');
-                      });
+                        ->where(function ($t) {
+                            $t->where('target_type', Brand::class)
+                                ->orWhere('target_type', 'brand');
+                        });
                 });
             })->get();
 

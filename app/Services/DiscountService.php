@@ -40,26 +40,46 @@ class DiscountService
             ->get();
     }
 
-    protected function isDiscountApplicableToProduct(Discount $discount, Product $product, int $variantId): bool
+    protected function isDiscountApplicableToProduct(Discount $discount, $productOrVariant, $variantId = null): bool
     {
+        // Resolve Variant and Product
+        $variant = null;
+        $product = null;
+
+        if ($productOrVariant instanceof ProductVariant) {
+            $variant = $productOrVariant;
+            $product = $variant->product;
+        } elseif ($productOrVariant instanceof Product) {
+            $product = $productOrVariant;
+            if ($variantId) {
+                $variant = $product->productVariants->find($variantId);
+            } else {
+                // If no variant specified, try to find first or default
+                $variant = $product->productVariants->first();
+            }
+        }
+
+        if (!$product || !$variant) {
+            return false;
+        }
+
+        // Logic: specific variant match OR parent category/brand match
         foreach ($discount->targets as $target) {
-            // target_type='product' actually stores ProductVariant IDs
-            if ($target->target_type === 'product' && $target->target_id === $variantId) {
+            // target_type='product' actually stores ProductVariant IDs (Sellable Item)
+            if ($target->target_type === 'product' && $target->target_id == $variant->id) {
                 return true;
             }
 
-            // target_type='brand' stores Brand ID
-            if ($target->target_type === 'brand' && $product->brand_id && $target->target_id === $product->brand_id) {
+            // Check Parent Product attributes (Container)
+            if ($target->target_type === 'category' && $target->target_id == $product->category_id) {
                 return true;
             }
 
-            // target_type='category' stores Category ID
-            if ($target->target_type === 'category' && $product->category_id && $target->target_id === $product->category_id) {
+            if ($target->target_type === 'subcategory' && $target->target_id == $product->sub_category_id) {
                 return true;
             }
 
-            // target_type='subcategory' stores SubCategory ID
-            if ($target->target_type === 'subcategory' && $product->sub_category_id && $target->target_id === $product->sub_category_id) {
+            if ($target->target_type === 'brand' && $target->target_id == $product->brand_id) {
                 return true;
             }
         }
@@ -85,91 +105,102 @@ class DiscountService
     }
 
     // Helpers -----------------------------------------------------------------
-    public function calculateProductDiscount(Product $product, int $variantId, ?float $priceOverride = null): array
+    public function calculateProductDiscount($product, $variantId = null): array
     {
-        // Include soft-deleted variants so carts keep their historical price
-        $variant = $product->productVariants()->withTrashed()->find($variantId);
-        Log::debug("Variant IDs for product {$product->id}: " . $product->productVariants()->pluck('id')->join(', '));
+        // Normalize input: If passed a ProductVariant, extract ID and Parent
+        if ($product instanceof ProductVariant) {
+            $variant = $product;
+            $variantId = $variant->id;
+            // Ensure product relation is loaded
+            if (!$variant->relationLoaded('product')) {
+                $variant->load('product');
+            }
+            $parentProduct = $variant->product;
+            $price = $variant->price;
+        } else {
+            // It is a Product model, we need the variant
+            $parentProduct = $product;
+            $variant = null;
 
-        if (!$variant) {
-            return [
-                'has_discount' => false,
-                'original_price' => 0,
-                'final_price' => 0,
-                'discount_amount' => 0,
-                'discount_percentage' => 0,
-                'discount_name' => null,
-                'discount_id' => null,
-            ];
+            if ($variantId) {
+                $variant = $parentProduct->productVariants->find($variantId);
+            }
+
+            if (!$variant) {
+                // Fallback or error handling if variant not found
+                // For safety, return no discount if we can't identify the sellable item
+                 return [
+                    'has_discount' => false,
+                    'original_price' => 0,
+                    'final_price' => 0,
+                    'discount_amount' => 0,
+                    'discount_percentage' => 0,
+                    'discount_name' => null,
+                    'discount_id' => null,
+                ];
+            }
+            $price = $variant->price;
         }
 
-        $originalPrice = $priceOverride ?? $variant->price;
+        // Check if the product/variant has a discount
+        // We pass the object effectively to findBestDiscountForProduct
+        $discount = $this->findBestDiscountForProduct($parentProduct, $variantId, $price);
 
-        $bestDiscount = $this->findBestDiscountForProduct($product, $variantId, $originalPrice);
+        if ($discount) {
+            // Apply the discount to the price
+            $reduction = $this->calculateReduction($discount, $price);
+            $finalPrice = max($price - $reduction, 0);
 
-        if (!$bestDiscount) {
             return [
-                'has_discount' => false,
-                'original_price' => $originalPrice,
-                'final_price' => $originalPrice,
-                'discount_amount' => 0,
-                'discount_percentage' => 0,
-                'discount_name' => null,
-                'discount_id' => null,
+                'has_discount' => true,
+                'original_price' => $price,
+                'final_price' => round($finalPrice, 2),
+                'discount_amount' => round($reduction, 2),
+                'discount_percentage' => $discount->type === 'percentage' ? $discount->value : 0,
+                'discount_name' => $discount->name ?? 'Discount', // Fallback if translation fails
+                'discount_id' => $discount->id,
             ];
         }
-
-        $reduction = $this->calculateReduction($bestDiscount, $originalPrice);
-        $finalPrice = max($originalPrice - $reduction, 0);
 
         return [
-            'has_discount' => true,
-            'original_price' => $originalPrice,
-            'final_price' => round($finalPrice, 2),
-            'discount_amount' => round($reduction, 2),
-            'discount_percentage' => $bestDiscount->type === 'percentage' ? $bestDiscount->value : 0,
-            'discount_name' => $bestDiscount->getTranslation('name', app()->getLocale()),
-            'discount_id' => $bestDiscount->id,
+            'has_discount' => false,
+            'original_price' => $price,
+            'final_price' => $price,
+            'discount_amount' => 0,
+            'discount_percentage' => 0,
+            'discount_name' => null,
+            'discount_id' => null,
         ];
     }
 
-    public function findBestDiscountForProduct(Product $product, int $variantId, ?float $price = null): ?Discount
+    public function findBestDiscountForProduct($product, $variantId = null, $price = null): ?Discount
     {
-        // Include soft-deleted variants so we can still compute pricing for cart lines
-        $variant = $product->productVariants()->withTrashed()->find($variantId);
+        $discounts = $this->getActiveDiscounts();
+        $bestDiscount = null;
+        $maxSavings = 0;
 
-        if (!$variant) {
-            return null;
+        // Resolve price if not provided
+        if (is_null($price)) {
+            if ($product instanceof ProductVariant) {
+                $price = $product->price;
+            } elseif ($product instanceof Product && $variantId) {
+                $variant = $product->productVariants->find($variantId);
+                $price = $variant ? $variant->price : 0;
+            }
         }
 
-        $comparisonPrice = $price ?? $variant->price;
-        $cacheKey = $this->makeCacheKey($variantId, $comparisonPrice);
+        foreach ($discounts as $discount) {
+            if ($this->isDiscountApplicableToProduct($discount, $product, $variantId)) {
+                $savings = $this->calculateReduction($discount, $price);
 
-        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($product, $variantId, $comparisonPrice, $cacheKey) {
-            Log::debug("Looking for discounts for variant {$variantId}");
-
-            // Get all active discounts with their targets
-            $allDiscounts = $this->getActiveDiscounts();
-            Log::debug("Total active discounts retrieved: " . $allDiscounts->count());
-
-            // Filter applicable discounts based on targets
-            $applicableDiscounts = $allDiscounts->filter(function ($discount) use ($product, $variantId) {
-                return $this->isDiscountApplicableToProduct($discount, $product, $variantId);
-            });
-
-            if ($applicableDiscounts->isEmpty()) {
-                return null;
+                if ($savings > $maxSavings) {
+                    $maxSavings = $savings;
+                    $bestDiscount = $discount;
+                }
             }
+        }
 
-            // Find the discount that gives maximum savings
-            $bestDiscount = $this->selectBestDiscount($applicableDiscounts, $comparisonPrice);
-
-            if ($bestDiscount) {
-                $this->rememberCacheKey($variantId, $cacheKey);
-            }
-
-            return $bestDiscount;
-        });
+        return $bestDiscount;
     }
 
     protected function makeCacheKey(int $variantId, float $price): string
@@ -189,39 +220,18 @@ class DiscountService
         }
     }
 
-    protected function calculateReduction(Discount $discount, float $price): float
+    public function calculateReduction(Discount $discount, float $price): float
     {
-        $value = (float) $discount->value;
-        $reduction = 0;
-
-        Log::info('Calculating reduction', [
-            'discount_id' => $discount->id,
-            'discount_type' => $discount->type,
-            'discount_value' => $discount->value,
-            'price' => $price,
-        ]);
-
         if ($discount->type === 'flat') {
-            $reduction = $value;
-            Log::info('Flat discount applied', ['reduction' => $reduction]);
-        } else {
-            $reduction = ($value / 100) * $price;
-            Log::info('Percentage discount applied', ['reduction' => $reduction]);
+            return min($discount->value, $price);
+        } elseif ($discount->type === 'percentage') {
+            $reduction = $price * ($discount->value / 100);
+            if ($discount->max_discount > 0) {
+                $reduction = min($reduction, $discount->max_discount);
+            }
+            return $reduction;
         }
-
-        $maxDiscount = (float) ($discount->max_discount ?? 0);
-        if ($maxDiscount > 0) {
-            $reduction = min($reduction, $maxDiscount);
-            Log::info('Max discount applied', ['reduction' => $reduction]);
-        }
-
-        $minDiscount = (float) ($discount->min_discount ?? 0);
-        if ($minDiscount > 0) {
-            $reduction = max($reduction, $minDiscount);
-            Log::info('Min discount applied', ['reduction' => $reduction]);
-        }
-
-        return $reduction;
+        return 0;
     }
 
     public function calculateCartTotals($cartItems): array
@@ -236,13 +246,13 @@ class DiscountService
             $variant = $item->variant ?? ProductVariant::find($item->variant_id);
 
             // Get price (variant price takes precedence)
-                // If variant is missing, try first variant (include soft-deleted) before falling back to product price
-                $firstVariant = null;
-                if (!$variant) {
-                    $firstVariant = $product->productVariants()->first();
-                    $variant = $firstVariant;
-                }
-                $itemPrice = $variant?->price ?? ($item->unit_price ?? $product->price ?? 0);
+            // Get the Prices associated with the Product Variant
+            $firstVariant = null;
+            if (!$variant) {
+                $firstVariant = $product->productVariants()->first();
+                $variant = $firstVariant;
+            }
+            $itemPrice = $variant?->price ?? ($item->unit_price ?? $product->price ?? 0);
             $quantity = $item->quantity;
 
             // Calculate discount
@@ -251,8 +261,8 @@ class DiscountService
                 $discountData = $this->calculateVariantDiscount($variant);
             } else {
                 // Get the first variant ID for products without a specific variant
-                    $variantId = $variant?->id ?? ($firstVariant?->id ?? 0);
-                    $discountData = $this->calculateProductDiscount($product, $variantId, $itemPrice);
+                $variantId = $variant?->id ?? ($firstVariant?->id ?? 0);
+                $discountData = $this->calculateProductDiscount($product, $variantId, $itemPrice);
             }
 
             $lineTotal = $itemPrice * $quantity;
@@ -296,6 +306,7 @@ class DiscountService
             // Apply the discount to the price
             $reduction = $this->calculateReduction($discount, $price);
             $finalPrice = max($price - $reduction, 0);
+
 
             return [
                 'has_discount' => true,

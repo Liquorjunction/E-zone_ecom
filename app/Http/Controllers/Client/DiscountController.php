@@ -30,12 +30,15 @@ class DiscountController extends Controller
 
     public function applicableForProduct(ReadDiscountRequest $request, DiscountRepo $discountRepo)
     {
-        $productId = $request->input('product_id');
-        if (is_null($productId)) {
-            return response()->json(['message' => 'product_id is required'], 422);
+        $variantId = $request->input('variant_id');
+
+        if (is_null($variantId)) {
+            return response()->json(['message' => 'variant_id is required'], 422);
         }
+
         $context = $request->all();
-        $discounts = $discountRepo->getApplicableDiscountsForProduct($productId, $context);
+        $discounts = $discountRepo->getApplicableDiscountsForProduct($variantId, $context);
+
         return response()->json(['data' => $discounts]);
     }
 

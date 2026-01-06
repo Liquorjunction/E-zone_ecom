@@ -214,14 +214,6 @@
 
                                 <span class="text-sm text-gray-500 font-medium">incl. taxes</span>
                             </div>
-                            <span
-                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-primary text-sm font-semibold shadow-sm border border-primary/30">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                                Fast dispatch
-                            </span>
                         </div>
                         @if ($hasDiscount && !empty($discountName))
                             <div
@@ -364,9 +356,15 @@
                                                 ? $variant->attributes
                                                 : json_encode([]));
 
-                                        // Get discount info for this variant and ensure it represents a real discount
+                                        // Get discount info for this variant and normalize to always include price fields
                                         $variantDiscount = isset($variantDiscounts[$variant->id]) ? $variantDiscounts[$variant->id] : null;
-                                        $variantHasDiscount = $variantDiscount && ($variantDiscount['has_discount'] ?? false) && ($variantDiscount['original_price'] ?? 0) > ($variantDiscount['final_price'] ?? 0);
+                                        $variantDiscountPayload = is_array($variantDiscount) ? $variantDiscount : [];
+                                        $variantDiscountPayload['has_discount'] = $variantDiscountPayload['has_discount'] ?? false;
+                                        $variantDiscountPayload['original_price'] = $variantDiscountPayload['original_price'] ?? ($variant->price ?? 0);
+                                        $variantDiscountPayload['final_price'] = $variantDiscountPayload['final_price'] ?? ($variant->price ?? 0);
+                                        $variantDiscountPayload['discount_percentage'] = $variantDiscountPayload['discount_percentage'] ?? 0;
+                                        $variantDiscountPayload['discount_name'] = $variantDiscountPayload['discount_name'] ?? null;
+                                        $variantHasDiscount = ($variantDiscountPayload['has_discount'] ?? false) && ($variantDiscountPayload['original_price'] ?? 0) > ($variantDiscountPayload['final_price'] ?? 0);
                                     @endphp
                                     <button type="button"
                                         class="variant-button group border-2 border-gray-200 hover:border-primary rounded-xl px-4 py-3 bg-white hover:shadow-md transition-all duration-200 cursor-pointer text-left"
@@ -377,7 +375,7 @@
                                         data-price="{{ is_null($variant->price) ? '' : $variant->price }}"
                                         data-sku="{{ is_array($variant->sku) ? $variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku)) : $variant->sku ?? '' }}"
                                         data-qty="{{ $qty }}"
-                                        data-discount='@json($variantDiscount)'>
+                                        data-discount='@json($variantDiscountPayload)'>
                                         <div class="flex items-start justify-between gap-2 mb-2">
                                             <div class="text-sm font-bold text-gray-900 line-clamp-1">
                                                 {{ is_array($variant->variant_name) ? $variant->variant_name[app()->getLocale()] ?? ($variant->variant_name['en'] ?? reset($variant->variant_name)) : (is_array($variant->name) ? $variant->name[app()->getLocale()] ?? ($variant->name['en'] ?? reset($variant->name)) : $variant->variant_name ?? ($variant->name ?? 'Variant')) }}
