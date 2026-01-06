@@ -6,17 +6,21 @@ use App\Models\Cart;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use App\Services\PaymentService;
+use App\Services\CouponService;
+use Illuminate\Support\Facades\Auth;
 
 class OrderService
 {
     protected $orders;
     protected $logger;
     protected $paymentService;
+    protected $couponService;
 
-    public function __construct(OrderRepositoryInterface $orders, PaymentService $paymentService, LoggerInterface $logger)
+    public function __construct(OrderRepositoryInterface $orders, PaymentService $paymentService, CouponService $couponService, LoggerInterface $logger)
     {
         $this->orders = $orders;
         $this->paymentService = $paymentService;
+        $this->couponService = $couponService;
         $this->logger = $logger;
     }
 
@@ -27,6 +31,27 @@ class OrderService
         $order = $this->orders->createOrderFromCart($cart, $data);
 
         $this->logger->info('Order created', ['order_id' => $order->id]);
+
+        // Record coupon usage if a coupon was applied
+        if ($cart->coupon_id) {
+            try {
+                $this->couponService->recordUsage(
+                    $cart->coupon_id,
+                    $order->id,
+                    Auth::id()
+                );
+                $this->logger->info('Coupon usage recorded', [
+                    'coupon_id' => $cart->coupon_id,
+                    'order_id' => $order->id,
+                ]);
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to record coupon usage', [
+                    'coupon_id' => $cart->coupon_id,
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         // Attempt payment processing (stub). Real integration should be implemented here.
         try {

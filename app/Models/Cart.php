@@ -11,7 +11,10 @@ class Cart extends Model
 
     protected $fillable = [
         'user_id',
-        'session_id'
+        'session_id',
+        'coupon_id',
+        'coupon_code',
+        'coupon_discount_amount'
     ];
 
     public function items()
@@ -22,6 +25,11 @@ class Cart extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     /**
@@ -107,5 +115,19 @@ class Cart extends Model
     {
         $totals = $this->calculateTotals();
         return $totals['total_discount'] > 0;
+    }
+
+    /**
+     * Get final total after applying coupon discount
+     *
+     * @return float
+     */
+    public function getFinalTotal(): float
+    {
+        $totals = $this->calculateTotals();
+        $subtotalAfterItemDiscounts = $totals['total'];
+        $couponDiscount = $this->coupon_discount_amount ?? 0;
+
+        return max(0, $subtotalAfterItemDiscounts - $couponDiscount);
     }
 }
