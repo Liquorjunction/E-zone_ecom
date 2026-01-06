@@ -120,6 +120,7 @@ class CouponController extends Controller
                  return view('admin.partials.datatable-status', $data)->render();
             })
             ->addColumn('action', function ($coupon) use ($request) {
+                $data['id'] = $coupon->id; // Ensure coupon id is passed to actions/status partials
                 $data['edit_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.edit', ['id' => $coupon->id]) : '';
                 $data['delete_url'] = $request->user() && $request->user()->can('coupon.delete') ? route('admin.coupons.destroy', ['id' => $coupon->id]) : '';
                 return view('admin.partials.datatable-actions', $data)->render();
