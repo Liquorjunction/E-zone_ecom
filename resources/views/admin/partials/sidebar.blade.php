@@ -510,7 +510,7 @@
                 </li>
 
                 @php
-                    $isDiscountSectionActive = request()->routeIs('admin.discounts.*') || request()->routeIs('admin.coupons.*');
+                    $isDiscountSectionActive = request()->routeIs('admin.discounts.*') || request()->routeIs('admin.coupons.*') || request()->routeIs('admin.coupon-usage.*');
                 @endphp
                 <li class="nav-item">
                     <a class="nav-link {{ $isDiscountSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
@@ -544,6 +544,15 @@
                                         <i class="bi bi-ticket-perforated" style="font-size:20px;"></i>
                                     </i>
                                     <span class="item-name">Coupons</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.coupon-usage.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.coupon-usage.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <i class="bi bi-graph-up" style="font-size:20px;"></i>
+                                    </i>
+                                    <span class="item-name">Coupon Usage</span>
                                 </a>
                             </li>
                         @endcan

@@ -8,6 +8,7 @@ use App\Repositories\Admin\Interfaces\AboutUsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Admin\Interfaces\BrandRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CouponRepositoryInterface;
+use App\Repositories\Admin\Interfaces\CouponUsageRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CardRepositoryInterface;
 use App\Repositories\Admin\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\DiscountRepositoryInterface;
@@ -32,6 +33,7 @@ use App\Repositories\Admin\Repositories\AboutUsRepository;
 use App\Repositories\Admin\Repositories\AdminRepository;
 use App\Repositories\Admin\Repositories\BrandRepository;
 use App\Repositories\Admin\Repositories\CouponRepository;
+use App\Repositories\Admin\Repositories\CouponUsageRepository;
 use App\Repositories\Admin\Repositories\CardRepository;
 use App\Repositories\Admin\Repositories\CategoryRepository;
 use App\Repositories\Admin\Repositories\DiscountRepository;
@@ -91,6 +93,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(DiscountTargetRepositoryInterface::class, DiscountTargetRepository::class);
         $this->app->bind(DiscountRepositoryInterface::class, DiscountRepository::class);
         $this->app->bind(CouponRepositoryInterface::class, CouponRepository::class);
+        $this->app->bind(CouponUsageRepositoryInterface::class, CouponUsageRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);

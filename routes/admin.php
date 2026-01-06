@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CouponUsageController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
@@ -320,6 +321,11 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [CouponController::class, 'update'])->name('update')->middleware('can:coupon.update,admin');
             Route::delete('/destroy', [CouponController::class, 'destroy'])->name('destroy')->middleware('can:coupon.delete,admin');
             Route::patch('/update-status', [CouponController::class, 'updateStatus'])->name('updateStatus')->middleware('can:coupon.update,admin');
+        });
+
+        Route::prefix('coupon-usage')->name('coupon-usage.')->middleware('can:coupon.read,admin')->group(function () {
+            Route::get('/', [CouponUsageController::class, 'index'])->name('index');
+            Route::get('/data', [CouponUsageController::class, 'data'])->name('data');
         });
     });
 });
