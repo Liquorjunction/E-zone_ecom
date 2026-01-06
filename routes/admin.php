@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
@@ -307,6 +308,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
                 Route::delete('/destroy', [DiscountController::class, 'destroyTarget'])->name('destroy')->middleware('can:discount.delete,admin');
                 Route::patch('/toggle-status', [DiscountController::class, 'toggleChildStatus'])->name('toggleStatus')->middleware('can:discount.update,admin');
             });
+        });
+
+        // Coupon Routes
+        Route::prefix('coupons')->name('coupons.')->middleware('can:coupon.read,admin')->group(function () {
+            Route::get('/', [CouponController::class, 'index'])->name('index'); // permission: coupon.read
+            Route::get('/data', [CouponController::class, 'data'])->name('data');
+            Route::get('/create', [CouponController::class, 'create'])->name('create')->middleware('can:coupon.create,admin');
+            Route::post('/', [CouponController::class, 'store'])->name('store')->middleware('can:coupon.create,admin');
+            Route::get('/edit', [CouponController::class, 'edit'])->name('edit')->middleware('can:coupon.update,admin');
+            Route::put('/update', [CouponController::class, 'update'])->name('update')->middleware('can:coupon.update,admin');
+            Route::delete('/destroy', [CouponController::class, 'destroy'])->name('destroy')->middleware('can:coupon.delete,admin');
+            Route::patch('/update-status', [CouponController::class, 'updateStatus'])->name('updateStatus')->middleware('can:coupon.update,admin');
         });
     });
 });
