@@ -3,26 +3,19 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Faq;
-use App\Models\FaqCategory;
+use App\Repositories\Client\Interfaces\FaqRepositoryInterface as FaqRepo;
 use Illuminate\Http\Request;
 
 class FaqController extends Controller
 {
-   public function index()
+
+    public function index(FaqRepo $faqRepository)
     {
         try {
-            // Fetch Active Categories that have Active FAQs
-            $categories = FaqCategory::with(['faqs' => function($query) {
-                    $query->where('status', 1);
-                }])
-                ->where('status', 1)
-                ->whereHas('faqs', function($query) {
-                    $query->where('status', 1); // Only get categories that actually have FAQs
-                })
-                ->get();
+            // Fetch Active Categories with Active FAQs using Repository
+            $faqcategories = $faqRepository->getActiveFaqCategoriesWithFaqs();
 
-            return view('client.pages.faq', compact('categories'));
+            return view('client.pages.faq', compact('faqcategories'));
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Unable to fetch FAQs.']);
         }

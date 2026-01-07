@@ -12,6 +12,7 @@ use App\Models\Faq;
 use App\Models\FaqCategory;
 use App\Repositories\Admin\Interfaces\FaqRepositoryInterface as FaqRepo;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class FaqController extends Controller
@@ -171,8 +172,8 @@ class FaqController extends Controller
                     return $faq->getTranslation('question', 'en');
                 })
                 ->addColumn('answer', function ($faq) {
-                    // Helper to show English title in the list using strip_tags
-                    return strip_tags($faq->getTranslation('answer', 'en'));
+                    // Helper to show English answer in the list, limited to 50 chars
+                    return Str::limit(strip_tags($faq->getTranslation('answer', 'en')), 40);
                 })
                 ->addColumn('category', function ($faq) {
                     return $faq->category ? $faq->category->getTranslation('name', 'en') : 'Uncategorized';

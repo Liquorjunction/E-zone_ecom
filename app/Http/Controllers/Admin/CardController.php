@@ -147,6 +147,13 @@ class CardController extends Controller
                     // Limit the title to 50 characters
                     return strlen($title) > 50 ? substr($title, 0, 50).'...' : $title;
                 })
+                ->addColumn('description', function ($card) {
+                    // Fetch the description in english
+                    $description = $card->getTranslation('description', 'en');
+
+                    // Limit the description to 50 characters
+                    return strlen($description) > 50 ? substr($description, 0, 50).'...' : $description;
+                })
                 ->addColumn('image', function ($card) {
                     if ($card->image && Storage::disk('public')->exists($card->image)) {
                         $url = asset('storage/'.$card->image);
