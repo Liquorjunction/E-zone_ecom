@@ -153,6 +153,7 @@ class SliderController extends Controller
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($slider) use ($request) {
+                    $data['id'] = $slider->id;
                     $data['edit_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.edit', ['id' => $slider->id]) : '';
                     $data['delete_url'] = $request->user()->can('slider.delete') ? route('admin.hero-slider.destroy', ['id' => $slider->id]) : '';
 
