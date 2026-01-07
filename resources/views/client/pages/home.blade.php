@@ -7,59 +7,37 @@
 {{-- Quick Stats Bar --}}
 <section class="bg-white border-b border-gray-100">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 py-6 sm:py-8">
-            <div
-                class="flex items-center justify-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
-                <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Quality</p>
-                    <p class="text-sm sm:text-base font-bold text-gray-900">Guaranteed</p>
-                </div>
+        @php
+            $stats = isset($quickStats) ? $quickStats->take(4) : collect();
+            $locale = app()->getLocale();
+        @endphp
+
+        @if ($stats->isNotEmpty())
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 py-6 sm:py-8">
+                @foreach ($stats as $stat)
+                    @php
+                        $icon = $stat->icon ? asset('storage/' . ltrim($stat->icon, '/')) : null;
+                        $text1 = $stat->getTranslation('text1', $locale, false) ?? $stat->getTranslation('text1', 'en', false);
+                        $text2 = $stat->getTranslation('text2', $locale, false) ?? $stat->getTranslation('text2', 'en', false);
+                    @endphp
+                    <div class="flex items-center justify-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
+                        <div class="flex-shrink-0">
+                            @if ($icon)
+                                <img src="{{ $icon }}" alt="{{ $text1 ?? 'Stat' }}" class="w-10 h-10 object-contain">
+                            @else
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                                    {{ $text1 ? substr($text1, 0, 1) : 'Q' }}
+                                </div>
+                            @endif
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">{{ $text1 ?? '' }}</p>
+                            <p class="text-sm sm:text-base font-bold text-gray-900">{{ $text2 ?? '' }}</p>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-            <div
-                class="flex items-center justify-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
-                <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Fast</p>
-                    <p class="text-sm sm:text-base font-bold text-gray-900">Delivery</p>
-                </div>
-            </div>
-            <div
-                class="flex items-center justify-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
-                <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Secure</p>
-                    <p class="text-sm sm:text-base font-bold text-gray-900">Payment</p>
-                </div>
-            </div>
-            <div
-                class="flex items-center justify-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-primary/5 transition-colors">
-                <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Easy</p>
-                    <p class="text-sm sm:text-base font-bold text-gray-900">Returns</p>
-                </div>
-            </div>
-        </div>
+        @endif
     </div>
 </section>
 

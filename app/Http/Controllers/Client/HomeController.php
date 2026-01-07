@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\Client\Interfaces\HomeRepositoryInterface as HomeRepo;
+use App\Repositories\Admin\Interfaces\QuickStatRepositoryInterface as QuickStatRepo;
 
 class HomeController extends Controller
 {
-    public function index(HomeRepo $homeRepo)
+    public function index(HomeRepo $homeRepo, QuickStatRepo $quickStatRepo)
     {
         $data = $homeRepo->getHomePageData();
+        $data['quickStats'] = $quickStatRepo->getActiveQuickStats();
 
         return view('client.pages.home', $data);
     }

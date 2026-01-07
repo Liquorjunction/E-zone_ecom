@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\QuickStatController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingAndReturnController;
 use App\Http\Controllers\Admin\ShowroomController;
@@ -326,6 +327,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('coupon-usage')->name('coupon-usage.')->middleware('can:coupon.read,admin')->group(function () {
             Route::get('/', [CouponUsageController::class, 'index'])->name('index');
             Route::get('/data', [CouponUsageController::class, 'data'])->name('data');
+        });
+
+        // Quick Stats Routes
+        Route::prefix('quick-stats')->name('quick-stats.')->middleware('can:quick_stats.read,admin')->group(function () {
+            Route::get('/', [QuickStatController::class, 'index'])->name('index'); // permission: quick_stats.read
+            Route::get('/data', [QuickStatController::class, 'data'])->name('data');
+            Route::get('/create', [QuickStatController::class, 'create'])->name('create')->middleware('can:quick_stats.create,admin');
+            Route::post('/', [QuickStatController::class, 'store'])->name('store')->middleware('can:quick_stats.create,admin');
+            Route::get('/edit', [QuickStatController::class, 'edit'])->name('edit')->middleware('can:quick_stats.update,admin');
+            Route::put('/update', [QuickStatController::class, 'update'])->name('update')->middleware('can:quick_stats.update,admin');
+            Route::delete('/destroy', [QuickStatController::class, 'destroy'])->name('destroy')->middleware('can:quick_stats.delete,admin');
+            Route::patch('/update-status', [QuickStatController::class, 'updateStatus'])->name('updateStatus')->middleware('can:quick_stats.update,admin');
         });
     });
 });

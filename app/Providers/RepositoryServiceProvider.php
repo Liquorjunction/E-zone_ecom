@@ -20,6 +20,7 @@ use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
 use App\Repositories\Admin\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Admin\Interfaces\QuickStatRepositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShippingAndReturnRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface;
@@ -45,6 +46,7 @@ use App\Repositories\Admin\Repositories\InventoryTransactionsRepository;
 use App\Repositories\Admin\Repositories\OrderRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
 use App\Repositories\Admin\Repositories\ProductRepository;
+use App\Repositories\Admin\Repositories\QuickStatRepository;
 use App\Repositories\Admin\Repositories\RoleRepository;
 use App\Repositories\Admin\Repositories\ShippingAndReturnRepository;
 use App\Repositories\Admin\Repositories\ShowroomRepository;
@@ -94,6 +96,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(DiscountRepositoryInterface::class, DiscountRepository::class);
         $this->app->bind(CouponRepositoryInterface::class, CouponRepository::class);
         $this->app->bind(CouponUsageRepositoryInterface::class, CouponUsageRepository::class);
+        $this->app->bind(QuickStatRepositoryInterface::class, QuickStatRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);
