@@ -52,7 +52,7 @@
                                     @error('description.en') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Link Text (EN)</label>
+                                    <label class="form-label">Link Text (EN) <span class="text-danger">*</span></label>
                                     <input type="text" name="link_text[en]" id="link_text_en" class="form-control"
                                            value="{{ old('link_text.en') }}" placeholder="e.g. Shop Now">
                                 </div>
@@ -97,7 +97,7 @@
 
                         {{-- Common Fields --}}
                         <div class="mb-3">
-                            <label class="form-label">Link URL</label>
+                            <label class="form-label">Link URL <span class="text-danger">*</span></label>
                             <input type="url" name="link" class="form-control"
                                    value="{{ old('link') }}" placeholder="https://example.com">
                             @error('link') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror

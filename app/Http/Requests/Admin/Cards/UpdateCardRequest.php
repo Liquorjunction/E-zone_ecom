@@ -38,14 +38,14 @@ class UpdateCardRequest extends FormRequest
             'description.fr' => 'nullable|string',
             'description.ar' => 'nullable|string',
 
-            'link_text' => 'nullable|array',
-            'link_text.en' => 'nullable|string|max:50',
+            'link_text' => 'required|array',
+            'link_text.en' => 'required|string|max:50',
             'link_text.fr' => 'nullable|string|max:50',
             'link_text.ar' => 'nullable|string|max:50',
 
             // Standard Fields
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:5120',
-            'link'        => 'nullable|url|max:255',
+            'link'        => 'required|url|max:255',
             'tags'        => 'nullable|json',
             'status'      => 'required|in:active,inactive',
             'sort_order'  => 'nullable|integer|min:0|max:999',
@@ -71,8 +71,10 @@ class UpdateCardRequest extends FormRequest
             'link.url' => 'The link must be a valid URL.',
             'link.max' => 'The link may not be greater than 255 characters.',
             'link_text.max' => 'The link text may not be greater than 50 characters.',
+            'link_text.en.required' => 'The English link text is required.',
+            'link_text.en.max' => 'The English link text may not be greater than 50 characters.',
+            'link.required' => 'Please enter a link.',
             'tags.json' => 'The tags must be a valid JSON.',
-
         ];
     }
 

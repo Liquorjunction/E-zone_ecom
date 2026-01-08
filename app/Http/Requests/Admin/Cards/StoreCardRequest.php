@@ -28,12 +28,12 @@ class StoreCardRequest extends FormRequest
             'description.ar' => 'nullable|string',
 
             // Link Text validation
-            'link_text' => 'nullable|array',
-            'link_text.en' => 'nullable|string|max:50',
+            'link_text' => 'required|array',
+            'link_text.en' => 'required|string|max:50',
 
             // Common Fields
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:5120',
-            'link' => 'nullable|url|max:255',
+            'link' => 'required|url|max:255',
             'tags' => 'nullable|json',
 
             // Status accepts 'active' via checkbox value or 'inactive' if not present
@@ -50,6 +50,10 @@ class StoreCardRequest extends FormRequest
             'image.required' => 'Please upload a card image.',
             'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
             'image.max' => 'The image may not be greater than 5MB.',
+            'link_text.required' => 'Please enter the link text.',
+            'link_text.en.required' => 'The English link text is required.',
+            'link_text.en.max' => 'The English link text may not be greater than 50 characters.',
+            'link.required' => 'Please enter a link.',
             'link.url' => 'The link must be a valid URL.',
             'link.max' => 'The link may not be greater than 255 characters.',
             'link_text.max' => 'The link text may not be greater than 50 characters.',
