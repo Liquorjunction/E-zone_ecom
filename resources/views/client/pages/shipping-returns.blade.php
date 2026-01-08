@@ -46,23 +46,7 @@
                             </div>
 
                              {{-- Dynamic Content (Prose) --}}
-                            <div class="prose prose-lg max-w-none
-                                {{-- Headings --}}
-                                prose-headings:font-bold prose-headings:text-gray-900 prose-headings:scroll-mt-24
-                                prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100
-                                prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-gray-800
-
-                                {{-- Text & Links --}}
-                                prose-p:text-gray-600 prose-p:leading-8 prose-p:mb-6
-                                prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline hover:prose-a:text-primary-dark
-                                prose-strong:text-gray-900 prose-strong:font-bold
-
-                                {{-- Lists --}}
-                                prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-gray-300 prose-li:pl-2
-                                prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6
-
-                                {{-- Blockquotes --}}
-                                prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:italic prose-blockquote:text-gray-700">
+                            <div class="prose-content">
 
                                 {!! $policy->description ?? $policy->content !!}
                             </div>

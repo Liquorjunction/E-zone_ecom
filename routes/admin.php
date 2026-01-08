@@ -135,6 +135,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/edit', [PrivacyPolicyController::class, 'edit'])->name('edit')->middleware('can:privacy_policies.update,admin');
             Route::put('/update', [PrivacyPolicyController::class, 'update'])->name('update')->middleware('can:privacy_policies.update,admin');
             Route::delete('/destroy', [PrivacyPolicyController::class, 'destroy'])->name('destroy')->middleware('can:privacy_policies.delete,admin');
+            Route::patch('/toggle-status', [PrivacyPolicyController::class, 'updateStatus'])->name('toggleStatus')->middleware('can:privacy_policies.update,admin');
         });
 
         // FAQ Category Routes

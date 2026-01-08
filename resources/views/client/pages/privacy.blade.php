@@ -59,7 +59,7 @@
 
                             {{-- Dynamic Content Loop --}}
                             @foreach ($privacyPolicy as $index => $content)
-                                <div id="section-{{ $index }}" class="scroll-mt-24 mb-12">
+                                <div id="section-{{ $index }}" class="scroll-mt-24 mb-12 prose-content">
                                     <h2>{{ $content->title }}</h2>
 
                                     <div class="text-justify">

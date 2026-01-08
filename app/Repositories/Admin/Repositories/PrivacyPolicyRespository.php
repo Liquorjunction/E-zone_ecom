@@ -12,6 +12,11 @@ class PrivacyPolicyRespository implements PrivacyPolicyRespositoryInterface
         return PrivacyPolicy::first();
     }
 
+    public function getActivePrivacyPolicy()
+    {
+        return PrivacyPolicy::where('status', 'active')->first();
+    }
+
     public function storePrivacyPolicy($request, $data = null)
     {
         $data = $data ?? $request->validated();
@@ -36,8 +41,17 @@ class PrivacyPolicyRespository implements PrivacyPolicyRespositoryInterface
         $privacyPolicy->delete();
     }
 
+    public function updatePrivacyPolicyStatus($id)
+    {
+        $privacyPolicy = PrivacyPolicy::findOrFail($id);
+        $privacyPolicy->status = $privacyPolicy->status === 'active' ? 'inactive' : 'active';
+        $privacyPolicy->save();
+
+        return $privacyPolicy;
+    }
+
     public function getDataForDataTable()
     {
-        return PrivacyPolicy::select(['id', 'description', 'created_at', 'updated_at'])->get();
+        return PrivacyPolicy::select(['id', 'description', 'status', 'created_at', 'updated_at'])->get();
     }
 }

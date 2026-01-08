@@ -19,15 +19,45 @@ class OrderRepository implements OrderRepositoryInterface
         $order = null;
 
         DB::transaction(function() use ($cart, $data, &$order) {
-            // Create order first to get its real auto-increment ID, then build a stable order_number
-            // Provide a temporary unique order_number so the DB insert doesn't fail
+            // Calculate cart totals and discounts
+            $cartTotals = $cart->calculateTotals();
+            $subtotal = $cartTotals['subtotal'] ?? 0;
+            $totalItemDiscount = $cartTotals['total_discount'] ?? 0;
+            $subtotalAfterItemDiscount = $cartTotals['total'] ?? 0;
+
+            // Coupon data
+            $couponDiscount = $cart->coupon_discount_amount ?? 0;
+            $totalAfterCoupon = max(0, $subtotalAfterItemDiscount - $couponDiscount);
+
+            // Tax calculation (8% on amount after all discounts)
+            $taxPercentage = 8.00;
+            $taxAmount = round($totalAfterCoupon * ($taxPercentage / 100), 2);
+
+            // Shipping data
+            $shippingMethod = $data['shipping_method'] ?? 'standard';
+            $shippingCost = $shippingMethod === 'express' ? 12.99 : 0.00;
+
+            // Final total
+            $finalTotal = round($totalAfterCoupon + $taxAmount + $shippingCost, 2);
+
+            // Create order with complete discount and payment tracking
             $order = Order::create([
                 'user_id' => $cart->user_id ?? null,
-                'total' => 0,
+                'subtotal' => round($subtotal, 2),
+                'discount_amount' => round($totalItemDiscount, 2),
+                'coupon_id' => $cart->coupon_id ?? null,
+                'coupon_code' => $cart->coupon_code ?? null,
+                'coupon_discount_amount' => round($couponDiscount, 2),
+                'shipping_method' => $shippingMethod,
+                'shipping_cost' => round($shippingCost, 2),
+                'tax_amount' => round($taxAmount, 2),
+                'tax_percentage' => $taxPercentage,
+                'total' => $finalTotal,
                 'status' => 'pending',
                 'shipping_address' => $data['shipping_address'] ?? null,
-                'payment_method' => $data['payment_method'] ?? null,
                 'phone_no' => $data['phone_no'] ?? null,
+                'email' => $data['email'] ?? Auth::user()?->email ?? null,
+                'payment_method' => $data['payment_method'] ?? null,
                 'order_number' => 'EZ-ORD-'.uniqid(),
             ]);
 
@@ -37,19 +67,30 @@ class OrderRepository implements OrderRepositoryInterface
                 $variant = $item->variant ?: ProductVariant::withTrashed()->find($item->variant_id);
                 $product = $item->product; // expect eager-loaded in cart
 
-                // Use final_price (after discount) stored in cart_items
-                $unitFinal = $item->final_price ?? $item->unit_price ?? 0;
-                $lineTotal = $unitFinal * $item->quantity;
+                // Get original price and stored discount
+                $unitPriceOriginal = $item->unit_price ?? 0;
+                $discountPerUnit = $item->discount_amount ?? 0;
+                $unitPriceFinal = $item->final_price ?? 0;
+
+                // Calculate line totals
+                $lineSubtotal = round($unitPriceOriginal * $item->quantity, 2);
+                $lineDiscount = round($discountPerUnit * $item->quantity, 2);
+                $lineFinal = round($unitPriceFinal * $item->quantity, 2);
 
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'variant_id' => $item->variant_id,
                     'quantity' => $item->quantity,
-                    'unit_price' => $unitFinal,
-                    'total_price' => $lineTotal,
+                    'unit_price' => $unitPriceFinal,  // Final price (for compatibility)
+                    'unit_price_original' => round($unitPriceOriginal, 2),
+                    'discount_amount' => round($discountPerUnit, 2),
+                    'line_subtotal' => $lineSubtotal,
+                    'line_discount' => $lineDiscount,
+                    'total_price' => $lineFinal,  // For compatibility
+                    'line_total' => $lineFinal,
                 ]);
-                $total += $lineTotal;
+                $total += $lineFinal;
 
                 // Deduct stock and record inventory transactions
                 $remaining = $item->quantity;

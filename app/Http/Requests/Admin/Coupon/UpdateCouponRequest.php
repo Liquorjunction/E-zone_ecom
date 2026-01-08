@@ -14,7 +14,7 @@ class UpdateCouponRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::guard('admin')->user()->can('coupon.edit');
+        return Auth::guard('admin')->user()->can('coupon.update');
     }
 
     /**
@@ -24,7 +24,7 @@ class UpdateCouponRequest extends FormRequest
      */
     public function rules()
     {
-        $couponId = $this->route('coupon');
+        $couponId = $this->input('id');
 
         return [
             'id' => 'required|exists:coupons,id',

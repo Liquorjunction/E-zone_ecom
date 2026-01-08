@@ -29,13 +29,16 @@ class InventoryTransactionsRepository implements InventoryTransactionsRepository
             ->select([
                 'inventory_transactions.*',
                 'products.name as product_name', // Get name from products table
+                'product_variants.variant_name as variant_name', // Get variant name
                 'inventories.batch_no as inventory_batch_no',
                 'inventories.location_type as location_type' // <-- Add this line
             ])
             // 1. Link Transaction to Inventory
             ->join('inventories', 'inventory_transactions.inventory_id', '=', 'inventories.id')
             // 2. Link Inventory to Product
-            ->join('products', 'inventories.product_id', '=', 'products.id');
+            ->join('products', 'inventories.product_id', '=', 'products.id')
+            // 3. Link Inventory to Product Variant (left join in case no variant)
+            ->leftJoin('product_variants', 'inventories.product_variant_id', '=', 'product_variants.id');
 
         // Apply Filters if needed
         if (isset($filters['type'])) {

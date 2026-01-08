@@ -56,7 +56,6 @@ class DiscountController extends Controller
 
             $discount = $discountRepo->create($data);
 
-            // Process & Add Targets (if any)
             if ($request->has('targets') && !empty($request->targets)) {
                 $targetsToInsert = [];
                 foreach ($request->targets as $target) {
@@ -74,7 +73,6 @@ class DiscountController extends Controller
 
             DB::commit();
 
-            // Clear discount caches after successful creation
             $discountService->clearAllDiscountCaches();
 
             return redirect()->back()->with('success', 'Discount created successfully.');
@@ -121,7 +119,6 @@ class DiscountController extends Controller
         $id = $request->input('id');
         $discount = $discountRepo->getDiscountById($id);
 
-        // Use repository to fetch select lists and variants
         $lists = $discountRepo->getSelectLists();
         $categories = $lists['categories'] ?? collect();
         $subcategories = $lists['subcategories'] ?? collect();
@@ -132,15 +129,12 @@ class DiscountController extends Controller
             return redirect()->route('admin.discounts.index')->with('error', 'Discount not found.');
         }
 
-        // Resolve target names via repository
         $resolvedTargets = $discountRepo->formatTargetsCollection($discount->targets);
-        // Also pass variants for selection from repository
         $productVariants = $discountRepo->getProductVariants();
 
         return view('admin.pages.discounts.edit', compact('discount', 'categories', 'subcategories', 'brands', 'products', 'productVariants', 'resolvedTargets'));
     }
 
-    // FIXED: Used UpdateDiscountRequest to validate data, not just ID
     public function update(UpdateDiscountRequest $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo, DiscountService $discountService)
     {
         DB::beginTransaction();
@@ -148,7 +142,6 @@ class DiscountController extends Controller
             $id = $request->input('id');
             $data = $request->validated();
 
-            // --- Smart Fill for 'name' translation ---
             if (isset($data['name']['en'])) {
                 if (empty($data['name']['fr'])) {
                     $data['name']['fr'] = gtrans($data['name']['en'], 'fr');
@@ -157,21 +150,16 @@ class DiscountController extends Controller
                     $data['name']['ar'] = gtrans($data['name']['en'], 'ar');
                 }
             }
-            // ----------------------------------------
 
-            // Use the validated value for status (prepareForValidation sets 0/1).
-            // Avoid using `has()` which can return true after prepareForValidation merges the key.
             $data['status'] = (bool) ($data['status'] ?? 0);
             $discountRepo->update($id, $data);
 
-            // Only update targets if explicitly provided and has items
             if ($request->has('targets') && is_array($request->input('targets')) && count($request->input('targets')) > 0) {
                 $discountTargetRepo->assignTargetsToDiscount($id, $request->input('targets', []));
             }
 
             DB::commit();
 
-            // Clear discount caches after successful update
             $discountService->clearAllDiscountCaches();
 
         } catch (\Exception $e) {
@@ -185,7 +173,6 @@ class DiscountController extends Controller
     {
         $discountRepo->delete($request->input('id'));
 
-        // Clear discount caches after deletion
         $discountService->clearAllDiscountCaches();
 
         return redirect()->route('admin.discounts.index')->with('success', 'Discount deleted.');
@@ -197,7 +184,6 @@ class DiscountController extends Controller
             $id = $request->input('id');
             $discount = $discountRepo->updateStatus($id);
 
-            // Clear discount caches after status change
             $discountService->clearAllDiscountCaches();
 
             return response()->json([
@@ -216,14 +202,10 @@ class DiscountController extends Controller
         }
     }
 
-    /**
-     * Yajra DataTable
-     */
     public function datatable(ReadDiscountRequest $request, DiscountRepo $discountRepo)
     {
         $query = $discountRepo->getDiscountsForDataTable();
 
-        // Eager load targets to prevent N+1 query
         $query->with(['targets.target']);
 
         return DataTables::of($query)
@@ -238,7 +220,6 @@ class DiscountController extends Controller
                 return $discount->ends_at ? $discount->ends_at->format('Y-m-d') : '';
             })
             ->addColumn('targets', function ($discount) use ($discountRepo) {
-                // Use already loaded targets instead of querying again
                 return $discountRepo->formatTargetsCollection($discount->targets);
             })
             ->addColumn('status', function ($discount) use ($request) {

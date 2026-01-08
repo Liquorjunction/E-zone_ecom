@@ -9,9 +9,7 @@ class PrivacyPolicyRepository implements PrivacyPolicyRepositoryInterface
 {
     public function getActivePrivacyPolicyData()
     {
-        // Fetch only the privicy policy that are not soft deleted
-        return PrivacyPolicy::withoutTrashed()->get();
-
-
+        $privacyPolicy = PrivacyPolicy::where('status', 'active')->get();
+        return $privacyPolicy;
     }
 }

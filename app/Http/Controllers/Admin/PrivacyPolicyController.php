@@ -98,6 +98,24 @@ class PrivacyPolicyController extends Controller
         }
     }
 
+    public function updateStatus(EditPrivacyRequest $request, PrivacyPolicyRepo $privacyPolicyRepo)
+    {
+        try {
+            $id = $request->input('id');
+            $privacyPolicyRepo->updatePrivacyPolicyStatus($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Privacy Policy status updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function data(ReadPrivacyRequest $request, PrivacyPolicyRepo $privacyPolicyRepo)
     {
         $privacyPolicies = $privacyPolicyRepo->getDataForDataTable($request->all());
@@ -110,6 +128,15 @@ class PrivacyPolicyController extends Controller
                 // Limit the description to 50 characters and its in html
                 return strlen(strip_tags($description)) > 50 ? substr(strip_tags($description), 0, 50) . '...' : strip_tags($description);
             })
+            ->addColumn('updated_at', function ($privacyPolicy) {
+                return $privacyPolicy->updated_at->format('Y-m-d H:i:s');
+            })
+            ->addColumn('status', function ($privacyPolicy) use ($request) {
+                $data['toggle_url'] = $request->user()->can('privacy_policies.update') ? route('admin.privacy-policy.toggleStatus', ['id' => $privacyPolicy->id]) : null;
+                $data['status'] = $privacyPolicy->status;
+                $data['id'] = $privacyPolicy->id;
+                return view('admin.partials.datatable-status', $data)->render();
+            })
             ->addColumn('action', function ($privacyPolicy) use ($request) {
             $data['delete_url'] = $request->user()->can('privacy_policies.delete') ? route('admin.privacy-policy.destroy', ['id' => $privacyPolicy->id]) : '';
                 $data['edit_url'] = $request->user()->can('privacy_policies.update') ? route('admin.privacy-policy.edit', ['id' => $privacyPolicy->id]) : '';
@@ -117,7 +144,7 @@ class PrivacyPolicyController extends Controller
 
                 return view('admin.partials.datatable-actions', $data)->render();
             })
-            ->rawColumns(['action'])
+            ->rawColumns([ 'description', 'updated_at', 'status', 'action'])
             ->make(true);
     }
 }

@@ -245,14 +245,13 @@
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Order Summary</h3>
                         @php
-                            // Compute subtotal from items (prefer stored total_price)
-                            $subtotal = $order->items->sum(function($it) {
-                                return $it->total_price ?? ($it->unit_price * ($it->quantity ?? 1));
-                            });
-                            $shipping = $order->shipping_cost ?? $order->shipping ?? 0;
-                            $tax = $order->tax ?? 0;
-                            $discount = $order->discount ?? $order->discount_amount ?? 0;
-                            $total = $order->total ?? ($subtotal + $shipping + $tax - $discount);
+                            // Use stored order data (new fields added via migration)
+                            $subtotal = $order->subtotal ?? 0;
+                            $itemDiscount = $order->discount_amount ?? 0;
+                            $couponDiscount = $order->coupon_discount_amount ?? 0;
+                            $shipping = $order->shipping_cost ?? 0;
+                            $tax = $order->tax_amount ?? 0;
+                            $total = $order->total ?? 0;
                         @endphp
 
                         <div class="space-y-3 mb-4 pb-4 border-b-2 border-gray-100">
@@ -260,17 +259,52 @@
                                 <span class="text-gray-600">Subtotal</span>
                                 <span class="font-semibold text-gray-900">${{ number_format($subtotal, 2) }}</span>
                             </div>
+
+                            @if($itemDiscount > 0)
+                                <div class="flex items-center justify-between text-sm bg-green-50 px-3 py-2 rounded-lg">
+                                    <span class="text-gray-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        Item Discounts
+                    </span>
+                    <span class="font-semibold text-green-600">-${{ number_format($itemDiscount, 2) }}</span>
+                </div>
+                            @endif
+
+                            @if($couponDiscount > 0)
+                                <div class="flex items-center justify-between text-sm bg-purple-50 px-3 py-2 rounded-lg">
+                                    <span class="text-gray-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                                        </svg>
+                                        Coupon Discount
+                                    </span>
+                                    <span class="font-semibold text-purple-600">-${{ number_format($couponDiscount, 2) }}</span>
+                                </div>
+                                @if($order->coupon_code)
+                                    <p class="text-xs text-purple-600 px-3">Code: <span class="font-semibold">{{ $order->coupon_code }}</span></p>
+                                @endif
+                            @endif
+
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">Shipping</span>
-                                <span class="font-semibold text-green-600">{{ $shipping == 0 ? 'Free' : ('$' . number_format($shipping,2)) }}</span>
+                                <span class="font-semibold text-gray-900">
+                                    @if($shipping == 0)
+                                        <span class="text-green-600">Free</span>
+                                    @else
+                                        <span>${{ number_format($shipping, 2) }}</span>
+                                        @if($order->shipping_method)
+                                            <span class="text-xs text-gray-500">({{ ucfirst($order->shipping_method) }})</span>
+                                        @endif
+                                    @endif
+                                </span>
                             </div>
+
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Tax</span>
+                                <span class="text-gray-600">Tax ({{ $order->tax_percentage ?? 8 }}%)</span>
                                 <span class="font-semibold text-gray-900">${{ number_format($tax, 2) }}</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Discount</span>
-                                <span class="font-semibold text-red-600">- ${{ number_format($discount, 2) }}</span>
                             </div>
                         </div>
 
@@ -279,14 +313,28 @@
                             <span class="text-xl lg:text-2xl font-bold text-primary">${{ number_format($total, 2) }}</span>
                         </div>
 
-                        <div class="p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center gap-2 mb-1">
-                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                                <span class="text-xs font-semibold text-gray-700">Payment Method</span>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    </svg>
+                                    <span class="text-xs font-semibold text-gray-700">Payment Method</span>
+                                </div>
+                                <p class="text-sm text-gray-900 font-medium">{{ $order->payment_method ?? ($order->payment ?? '—') }}</p>
                             </div>
-                            <p class="text-sm text-gray-900 font-medium">{{ $order->payment_method ?? ($order->payment ?? '—') }}</p>
+
+                            @if($order->email)
+                                <div class="p-3 bg-blue-50 rounded-lg">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        <span class="text-xs font-semibold text-blue-700">Email</span>
+                                    </div>
+                                    <p class="text-sm text-blue-900 font-medium">{{ $order->email }}</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
 

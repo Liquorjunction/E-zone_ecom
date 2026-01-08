@@ -402,6 +402,41 @@ body, html, main {
     }
 }
 
+/* Fix for prose content - ensure HTML from rich text editor renders properly */
+.prose-content h2,
+.prose-content h3,
+.prose-content h4,
+.prose-content h5,
+.prose-content h6 {
+    font-size: revert !important;
+    font-weight: revert !important;
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+    line-height: revert !important;
+}
+
+.prose-content p {
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+
+.prose-content ol,
+.prose-content ul {
+    list-style: revert !important;
+    padding-left: revert !important;
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+
+.prose-content li {
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+
+.prose-content strong {
+    font-weight: revert !important;
+}
+
 /* Fixed header styles moved from inline Blade file */
 header {
     position: fixed;

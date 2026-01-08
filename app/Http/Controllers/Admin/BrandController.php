@@ -33,26 +33,20 @@ class BrandController extends Controller
 
             // --- Smart Auto-Translate Logic ---
             foreach (['name'] as $field) {
-                // Skip if English value is missing (should be caught by validation, but safe check)
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
 
-                // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
                     $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
 
-                // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
             // ----------------------------------
 
-            // Pass modified data (with translations) to Repository
-            // We merge it back into request or pass explicitly depending on repo design.
-            // Since we updated the Repo to accept a second $data argument:
             $brandRepo->createBrand($request, $data);
 
             return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully.');
@@ -65,7 +59,6 @@ class BrandController extends Controller
 
     public function edit(EditBrandRequest $request)
     {
-        // Validated ID comes from request (merged via prepareForValidation)
         $id = $request->validated()['id'];
         $brand = Brand::findOrFail($id);
 
@@ -80,26 +73,20 @@ class BrandController extends Controller
 
             // --- Smart Auto-Translate Logic ---
             foreach (['name'] as $field) {
-                // Skip if English value is missing (should be caught by validation, but safe check)
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
 
-                // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
                     $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
 
-                // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
             // ----------------------------------
 
-            // Pass modified data (with translations) to Repository
-            // We merge it back into request or pass explicitly depending on repo design.
-            // Since we updated the Repo to accept a second $data argument:
             $brandRepo->updateBrand($request, $id, $data);
 
             return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully.');
@@ -161,14 +148,14 @@ class BrandController extends Controller
                 ->addColumn('status', function ($brand) use ($request) {
                     $data['toggle_url'] = $request->user()->can('brands.update') ? route('admin.brands.toggleStatus', ['id' => $brand->id]) : '';
                     $data['status'] = $brand->status;
-                    $data['id'] = $brand->id; // Ensure ID is passed for toggle
+                    $data['id'] = $brand->id;
 
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($brand) use ($request) {
                     $data['edit_url'] = $request->user()->can('brands.update') ? route('admin.brands.edit', ['id' => $brand->id]) : '';
                     $data['delete_url'] = $request->user()->can('brands.delete') ? route('admin.brands.destroy', ['id' => $brand->id]) : '';
-                    $data['id'] = $brand->id; // Ensure ID is passed for delete
+                    $data['id'] = $brand->id;
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })

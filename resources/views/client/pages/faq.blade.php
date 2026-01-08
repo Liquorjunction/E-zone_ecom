@@ -90,7 +90,7 @@
                                                     {{-- Answer Content --}}
                                                     {{-- The animation for this div is now handled in app.css by details[open] summary ~ * --}}
                                                     <div class="px-4 pb-4 pt-0 text-gray-600 leading-relaxed">
-                                                        <div class="pt-2 border-t border-gray-100 mt-2">
+                                                        <div class="pt-2 border-t border-gray-100 mt-2 prose-content">
                                                             {!! $faq->answer !!}
                                                         </div>
                                                     </div>

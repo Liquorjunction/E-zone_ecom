@@ -21,20 +21,48 @@ class InventoryTransactionsController extends Controller
             return DataTables::of($inventoryTransactionsRepo->getdataforDataTable())
                 ->addIndexColumn()
                 ->addColumn('product_name', function ($transaction) {
-                    $name = $transaction->product_name;
-                    if (is_string($name)) {
-                        $decoded = json_decode($name, true);
+                    $product_name = $transaction->product_name;
+                    $varient_name = $transaction->variant_name;
+
+                    // Extract English product name
+                    $product_en = 'N/A';
+                    if (is_string($product_name)) {
+                        $decoded = json_decode($product_name, true);
                         if (is_array($decoded) && isset($decoded['en'])) {
-                            return $decoded['en'];
+                            $product_en = $decoded['en'];
+                        } else {
+                            $product_en = $product_name;
                         }
+                    } elseif (is_array($product_name) && isset($product_name['en'])) {
+                        $product_en = $product_name['en'];
+                    } elseif (is_object($product_name) && isset($product_name->en)) {
+                        $product_en = $product_name->en;
+                    } elseif ($product_name) {
+                        $product_en = $product_name;
                     }
-                    if (is_array($name) && isset($name['en'])) {
-                        return $name['en'];
+
+                    // Extract English variant name
+                    $variant_en = null;
+                    if (is_string($varient_name)) {
+                        $decoded = json_decode($varient_name, true);
+                        if (is_array($decoded) && isset($decoded['en'])) {
+                            $variant_en = $decoded['en'];
+                        } else {
+                            $variant_en = $varient_name;
+                        }
+                    } elseif (is_array($varient_name) && isset($varient_name['en'])) {
+                        $variant_en = $varient_name['en'];
+                    } elseif (is_object($varient_name) && isset($varient_name->en)) {
+                        $variant_en = $varient_name->en;
+                    } elseif ($varient_name) {
+                        $variant_en = $varient_name;
                     }
-                    if (is_object($name) && isset($name->en)) {
-                        return $name->en;
+
+                    // Combine product name and variant name
+                    if ($variant_en) {
+                        return $product_en . ' - ' . $variant_en;
                     }
-                    return $name ?? 'N/A';
+                    return $product_en;
                 })
                 ->addColumn('batch_no', function ($transaction) {
                     return $transaction->batch_no ?? 'N/A';

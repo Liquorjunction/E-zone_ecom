@@ -26,6 +26,7 @@
                                         <th>#</th>
                                         <th>Description (Preview)</th>
                                         <th>Last Updated</th>
+                                        <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>

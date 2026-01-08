@@ -45,4 +45,9 @@ export default defineConfig({
             }
         }),
     ],
+    server: {
+        host: '192.168.176.80',
+        cors: true,
+        secure: true,
+    },
 });

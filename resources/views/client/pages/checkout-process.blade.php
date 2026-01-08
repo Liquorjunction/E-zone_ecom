@@ -235,6 +235,39 @@
           </div>
 
           <div class="lg:col-span-1">
+            <div class="mb-6 bg-gradient-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6" id="coupon-container">
+              <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                Have a Coupon Code?
+              </h3>
+              @if($cart && $cart->coupon_code)
+                <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="font-bold text-gray-900 text-sm">{{ $cart->coupon_code }}</p>
+                        <p class="text-xs text-gray-600">Coupon Applied</p>
+                      </div>
+                    </div>
+                    <button type="button" id="remove-coupon-btn" class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              @else
+                <div class="flex gap-3" id="coupon-input-form">
+                  <input type="text" id="coupon-code-input" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                  <button type="button" id="apply-coupon-btn" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
+                </div>
+              @endif
+              <div id="coupon-message" class="mt-3 text-sm hidden"></div>
+            </div>
+
             <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sticky top-24">
               <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
                 <span class="w-1.5 h-8 rounded-full bg-gradient-to-b from-primary to-primary/60 mr-3"></span>
@@ -346,39 +379,6 @@
                 Proceed to Checkout
                 <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </a>
-            </div>
-
-            <div class="mt-6 bg-gradient-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6" id="coupon-container">
-              <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                Have a Coupon Code?
-              </h3>
-              @if($cart && $cart->coupon_code)
-                <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                        <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p class="font-bold text-gray-900 text-sm">{{ $cart->coupon_code }}</p>
-                        <p class="text-xs text-gray-600">Coupon Applied</p>
-                      </div>
-                    </div>
-                    <button type="button" id="remove-coupon-btn" class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              @else
-                <div class="flex gap-3" id="coupon-input-form">
-                  <input type="text" id="coupon-code-input" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
-                  <button type="button" id="apply-coupon-btn" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
-                </div>
-              @endif
-              <div id="coupon-message" class="mt-3 text-sm hidden"></div>
             </div>
           </div>
         </div>
@@ -559,10 +559,14 @@
               </h2>
 
               @php
-                $subtotal = $cart ? $cart->items->sum(function($i){ return ($i->quantity * $i->unit_price); }) : 0;
-                $tax = round($subtotal * 0.08, 2);
-                $shipping = 0.00; // You should likely grab this from JS or session if possible, defaulting to 0
-                $total = $subtotal + $tax + $shipping;
+                $subtotal = $totals['subtotal'] ?? 0;
+                $totalDiscount = $totals['total_discount'] ?? 0;
+                $subtotalAfterDiscount = $totals['total'] ?? 0;
+                $couponDiscount = $cart->coupon_discount_amount ?? 0;
+                $totalAfterCoupon = max(0, $subtotalAfterDiscount - $couponDiscount);
+                $tax = round($totalAfterCoupon * 0.08, 2);
+                $shipping = 0.00;
+                $finalTotal = $totalAfterCoupon + $tax + $shipping;
               @endphp
 
               <div class="space-y-4 mb-6">
@@ -570,6 +574,42 @@
                   <span>Subtotal</span>
                   <span class="font-bold">${{ number_format($subtotal, 2) }}</span>
                 </div>
+
+                @if($totalDiscount > 0)
+                  <div class="flex justify-between text-green-600 text-base bg-green-50 px-4 py-3 rounded-xl">
+                    <span class="flex items-center">
+                      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      Discount Savings
+                    </span>
+                    <span class="font-bold">-${{ number_format($totalDiscount, 2) }}</span>
+                  </div>
+
+                  <div class="flex justify-between text-gray-900 text-base font-semibold border-t border-b border-gray-200 py-3">
+                    <span>Subtotal After Discount</span>
+                    <span>${{ number_format($subtotalAfterDiscount, 2) }}</span>
+                  </div>
+                @endif
+
+                @if($couponDiscount > 0)
+                  <div class="flex justify-between items-center text-purple-600 text-base bg-purple-50 px-4 py-3 rounded-xl">
+                    <div class="flex items-center">
+                      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                      </svg>
+                      <div>
+                        <span class="font-semibold">Coupon Discount</span>
+                        @if($cart && $cart->coupon_code)
+                          <span class="text-xs block text-purple-500">{{ $cart->coupon_code }}</span>
+                        @endif
+                      </div>
+                    </div>
+                    <span class="font-bold">-${{ number_format($couponDiscount, 2) }}</span>
+                  </div>
+                @endif
+
                 <div class="flex justify-between text-gray-600 text-base">
                   <span>Shipping</span>
                   <span class="font-bold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
@@ -581,7 +621,7 @@
                 <div class="border-t-2 border-gray-100 pt-4">
                   <div class="flex justify-between items-center">
                     <span class="text-xl font-bold text-gray-900">Total</span>
-                    <span id="summary-total" class="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">${{ number_format($total, 2) }}</span>
+                    <span id="summary-total" class="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">${{ number_format($finalTotal, 2) }}</span>
                   </div>
                 </div>
               </div>
@@ -596,15 +636,37 @@
               </p>
             </div>
 
-            <div class="mt-6 bg-gradient-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6">
+            <div class="mt-6 bg-gradient-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6" id="coupon-container-step2">
               <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center">
                 <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
                 Have a Coupon Code?
               </h3>
-              <div class="flex gap-3">
-                <input type="text" name="coupon_code" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm">
-                <button type="button" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
-              </div>
+              @if($cart && $cart->coupon_code)
+                <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display-step2">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="font-bold text-gray-900 text-sm">{{ $cart->coupon_code }}</p>
+                        <p class="text-xs text-gray-600">Coupon Applied</p>
+                      </div>
+                    </div>
+                    <button type="button" id="remove-coupon-btn-step2" class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              @else
+                <div class="flex gap-3" id="coupon-input-form-step2">
+                  <input type="text" id="coupon-code-input-step2" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                  <button type="button" id="apply-coupon-btn-step2" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
+                </div>
+              @endif
+              <div id="coupon-message-step2" class="mt-3 text-sm hidden"></div>
             </div>
           </div>
         </div>
@@ -663,7 +725,7 @@
                   Continue Shopping
                   <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                 </a>
-                <a href="{{ isset($order) ? route('order-detail', $order->id) : '#' }}" class="flex-1 px-8 py-5 border-2 border-primary text-primary text-center font-bold rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105">
+                <a href="{{ isset($order) ? route('order-detail', ['order' => $order->id]) : '#' }}" class="flex-1 px-8 py-5 border-2 border-primary text-primary text-center font-bold rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105">
                   View Order Details
                   <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </a>
@@ -680,10 +742,26 @@
 
               @php
                 $itemsForSummary = isset($order) && $order->items->isNotEmpty() ? $order->items : ($cart ? $cart->items : collect());
-                $subtotal = $itemsForSummary->sum(function($i){ return ($i->quantity * ($i->unit_price ?? ($i->price ?? 0))); });
-                $tax = round($subtotal * 0.08, 2);
-                $shipping = 0.00;
-                $total = isset($order) && $order->total ? $order->total : ($subtotal + $tax + $shipping);
+
+                // Use stored order data if available, otherwise fallback to cart/totals
+                if (isset($order) && $order->id) {
+                    $subtotalStep3 = $order->subtotal ?? 0;
+                    $totalDiscountStep3 = $order->discount_amount ?? 0;
+                    $subtotalAfterDiscountStep3 = $subtotalStep3 - $totalDiscountStep3;
+                    $couponDiscountStep3 = $order->coupon_discount_amount ?? 0;
+                    $taxStep3 = $order->tax_amount ?? 0;
+                    $shippingStep3 = $order->shipping_cost ?? 0;
+                    $totalStep3 = $order->total ?? 0;
+                } else {
+                    $subtotalStep3 = $totals['subtotal'] ?? ($itemsForSummary->sum(function($i){ return ($i->quantity * ($i->unit_price ?? ($i->price ?? 0))); }));
+                    $totalDiscountStep3 = $totals['total_discount'] ?? 0;
+                    $subtotalAfterDiscountStep3 = $subtotalStep3 - $totalDiscountStep3;
+                    $couponDiscountStep3 = $totals['coupon_discount'] ?? ($cart ? ($cart->coupon_discount_amount ?? 0) : 0);
+                    $totalAfterCouponStep3 = max(0, $subtotalAfterDiscountStep3 - $couponDiscountStep3);
+                    $taxStep3 = $totals['tax'] ?? round($totalAfterCouponStep3 * 0.08, 2);
+                    $shippingStep3 = $totals['shipping'] ?? 0.00;
+                    $totalStep3 = $totals['total'] ?? ($totalAfterCouponStep3 + $taxStep3 + $shippingStep3);
+                }
               @endphp
 
               <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
@@ -693,7 +771,7 @@
                     <div class="flex-1 min-w-0">
                       <h4 class="font-semibold text-gray-900 text-sm mb-1 truncate">{{ optional($itm->variant)->variant_name ?? optional($itm->product)->name ?? 'Product' }}</h4>
                       <p class="text-xs text-gray-600">Qty: {{ $itm->quantity }}</p>
-                      <p class="text-sm font-bold text-primary mt-1">${{ number_format(($itm->unit_price ?? ($itm->price ?? 0)) * $itm->quantity, 2) }}</p>
+                      <p class="text-sm font-bold text-primary mt-1">${{ number_format(($itm->final_price ?? ($itm->unit_price ?? ($itm->price ?? 0))) * $itm->quantity, 2) }}</p>
                     </div>
                   </div>
                 @endforeach
@@ -702,20 +780,56 @@
               <div class="space-y-4 mb-6">
                 <div class="flex justify-between text-gray-600 text-base">
                   <span>Subtotal</span>
-                  <span class="font-bold">${{ number_format($subtotal, 2) }}</span>
+                  <span class="font-bold">${{ number_format($subtotalStep3, 2) }}</span>
                 </div>
+
+                @if($totalDiscountStep3 > 0)
+                  <div class="flex justify-between text-green-600 text-base bg-green-50 px-4 py-3 rounded-xl">
+                    <span class="flex items-center">
+                      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      Discount Savings
+                    </span>
+                    <span class="font-bold">-${{ number_format($totalDiscountStep3, 2) }}</span>
+                  </div>
+
+                  <div class="flex justify-between text-gray-900 text-base font-semibold border-t border-b border-gray-200 py-3">
+                    <span>Subtotal After Discount</span>
+                    <span>${{ number_format($subtotalAfterDiscountStep3, 2) }}</span>
+                  </div>
+                @endif
+
+                @if($couponDiscountStep3 > 0)
+                  <div class="flex justify-between items-center text-purple-600 text-base bg-purple-50 px-4 py-3 rounded-xl">
+                    <div class="flex items-center">
+                      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                      </svg>
+                      <div>
+                        <span class="font-semibold">Coupon Discount</span>
+                        @if($cart && $cart->coupon_code)
+                          <span class="text-xs block text-purple-500">{{ $cart->coupon_code }}</span>
+                        @endif
+                      </div>
+                    </div>
+                    <span class="font-bold">-${{ number_format($couponDiscountStep3, 2) }}</span>
+                  </div>
+                @endif
+
                 <div class="flex justify-between text-gray-600 text-base">
                   <span>Shipping</span>
-                  <span class="font-bold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
+                  <span class="font-bold text-green-600">{{ $shippingStep3 > 0 ? '$'.number_format($shippingStep3,2) : 'FREE' }}</span>
                 </div>
                 <div class="flex justify-between text-gray-600 text-base">
                   <span>Tax (8%)</span>
-                  <span class="font-bold">${{ number_format($tax, 2) }}</span>
+                  <span class="font-bold">${{ number_format($taxStep3, 2) }}</span>
                 </div>
                 <div class="border-t-2 border-gray-100 pt-4">
                   <div class="flex justify-between items-center">
                     <span class="text-xl font-bold text-gray-900">Total</span>
-                    <span class="text-4xl font-bold bg-gradient-to-r from-green-500 to-green-400 bg-clip-text text-transparent">${{ number_format($total, 2) }}</span>
+                    <span class="text-4xl font-bold bg-gradient-to-r from-green-500 to-green-400 bg-clip-text text-transparent">${{ number_format($totalStep3, 2) }}</span>
                   </div>
                 </div>
               </div>
@@ -726,17 +840,81 @@
                   <span class="text-sm font-semibold">Payment Successful</span>
                 </div>
               </div>
+
+              @if(isset($order) && $order->shipping_address)
+                <div class="mt-6 bg-blue-50 rounded-2xl p-6 border border-blue-200">
+                  <h3 class="font-bold text-gray-900 text-lg mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Shipping Address
+                  </h3>
+                  <div class="bg-white rounded-xl p-4 space-y-2 text-sm text-gray-700">
+                    @php
+                      $addr = is_array($order->shipping_address) ? $order->shipping_address : json_decode($order->shipping_address, true);
+                    @endphp
+                    @if($addr && isset($addr['name']))
+                      <p><span class="font-semibold text-gray-900">{{ $addr['name'] }}</span></p>
+                      @if(isset($addr['street']))<p>{{ $addr['street'] }}</p>@endif
+                      @if(isset($addr['city']) || isset($addr['state']) || isset($addr['postal_code']))
+                        <p>{{ collect([$addr['city'] ?? null, $addr['state'] ?? null, $addr['postal_code'] ?? null])->filter()->implode(', ') }}</p>
+                      @endif
+                      @if(isset($addr['country']))<p>{{ $addr['country'] }}</p>@endif
+                    @else
+                      <p class="text-gray-600">No shipping address available</p>
+                    @endif
+                  </div>
+                </div>
+
+                <div class="mt-6 bg-amber-50 rounded-2xl p-6 border border-amber-200">
+                  <h3 class="font-bold text-gray-900 text-lg mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-amber-600" fill="currentColor" viewBox="0 0 24 24"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/></svg>
+                    Shipping Method
+                  </h3>
+                  <div class="bg-white rounded-xl p-4">
+                    <p class="text-lg font-semibold text-gray-900 capitalize">
+                      {{ $order->shipping_method ?? 'Standard Shipping' }}
+                      @if($order->shipping_method === 'express')
+                        <span class="text-amber-600 text-sm font-normal">(Expedited)</span>
+                      @else
+                        <span class="text-green-600 text-sm font-normal">(Free)</span>
+                      @endif
+                    </p>
+                  </div>
+                </div>
+              @endif
+
             </div>
 
-            <div class="mt-6 bg-gradient-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6">
+            <div class="mt-6 bg-gradient-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6" id="coupon-container-step3">
               <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center">
                 <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
                 Have a Coupon Code?
               </h3>
-              <div class="flex gap-3">
-                <input type="text" name="coupon_code" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm">
-                <button type="button" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
-              </div>
+              @if((isset($order) && $order->coupon_code) || ($cart && $cart->coupon_code))
+                <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display-step3">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="font-bold text-gray-900 text-sm">{{ isset($order) ? ($order->coupon_code ?? ($cart->coupon_code ?? 'Applied')) : ($cart->coupon_code ?? 'Applied') }}</p>
+                        <p class="text-xs text-gray-600">Coupon Applied</p>
+                      </div>
+                    </div>
+                    <button type="button" id="remove-coupon-btn-step3" class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              @else
+                <div class="flex gap-3" id="coupon-input-form-step3">
+                  <input type="text" id="coupon-code-input-step3" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                  <button type="button" id="apply-coupon-btn-step3" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
+                </div>
+              @endif
+              <div id="coupon-message-step3" class="mt-3 text-sm hidden"></div>
             </div>
           </div>
         </div>

@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Cart\CartAddRequest;
 use App\Http\Requests\Client\Coupon\ApplyCouponRequest;
+use App\Models\Address;
 use App\Services\CartService;
 use App\Services\CouponService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Psr\Log\LoggerInterface;
 
 class CartController extends Controller
@@ -56,7 +58,13 @@ class CartController extends Controller
             'items' => []
         ];
 
-        return view('client.pages.checkout-process', compact('cart', 'step', 'totals'));
+        // Fetch user addresses if authenticated
+        $addresses = collect();
+        if (Auth::check()) {
+            $addresses = Address::where('user_id', Auth::id())->get();
+        }
+
+        return view('client.pages.checkout-process', compact('cart', 'step', 'totals', 'addresses'));
     }
 
     public function update(Request $request, CartService $cartService, LoggerInterface $logger)

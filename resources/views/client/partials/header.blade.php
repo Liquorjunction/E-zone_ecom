@@ -118,11 +118,6 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('support') }}"
-                        class="hidden lg:inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 {{ request()->routeIs('support') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        Support
-                    </a>
-
                     <a href="{{ route('product-compare') }}"
                         class="p-2.5 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors group"
                         title="Compare Products">

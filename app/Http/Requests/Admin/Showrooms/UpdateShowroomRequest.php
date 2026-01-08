@@ -57,7 +57,7 @@ class UpdateShowroomRequest extends FormRequest
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
             'pincode' => 'nullable|string|max:255',
-            'mapIframe' => 'nullable|string',
+            'map_iframe' => 'nullable|string',
 
             // FIX: Changed 'json' to 'array'
             'opening_hours' => 'nullable|array',

@@ -33,7 +33,6 @@ class AdminAuthController extends Controller
     public function index()
     {
         try {
-            // This view is for your user list
             return view('admin.pages.userManagement.index');
         } catch (\Exception $e) {
             Log::error('Error in AdminAuthController@index: '.$e->getMessage());
@@ -55,18 +54,14 @@ class AdminAuthController extends Controller
                 })
                 ->addColumn('status', function ($admin) use ($request) {
                     $data['status'] = $admin->status;
-                    // FIX: Pass ID in array ['id' => $id]
                     $data['toggle_url'] = $request->user()->can('user management.update')
-                        ? route('admin.user-management.toggleStatus', ['id' => $admin->id])
-                        : '';
+                        ? route('admin.user-management.toggleStatus', ['id' => $admin->id]): '';
 
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($admin) use ($request) {
-                    // FIX: Pass ID in array ['id' => $id]
                     $data['edit_url'] = $request->user()->can('user management.update')
-                        ? route('admin.user-management.edit', ['id' => $admin->id])
-                        : '';
+                        ? route('admin.user-management.edit', ['id' => $admin->id]): '';
                     $data['model'] = $admin;
                     $data['routePrefix'] = 'admin.user-management';
 
@@ -101,22 +96,14 @@ class AdminAuthController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new admin.
-     */
     public function create()
     {
-        // This method doesn't need the repository
         $roles = Role::where('guard_name', 'admin')->get();
         $roles = Role::where('guard_name', 'admin')->get();
 
         return view('admin.pages.userManagement.create', compact('roles'));
     }
 
-    /**
-     * Store a newly created admin in storage.
-     * Uses superadminCreateAdmin()
-     */
     public function store(StoreAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         try {
@@ -129,13 +116,9 @@ class AdminAuthController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified admin.
-     */
     public function edit(EditAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         try {
-            // Get ID from request input
             $id = $request->input('id');
             $admin = $adminRepository->edit($id);
 
@@ -152,10 +135,6 @@ class AdminAuthController extends Controller
         }
     }
 
-    /**
-     * Update the specified admin in storage.
-     * Uses superadminUpdateAdmin()
-     */
     public function update(UpdateAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         try {
@@ -169,10 +148,6 @@ class AdminAuthController extends Controller
         }
     }
 
-    /**
-     * Toggles the status of the admin.
-     * Uses superadminToggleAdminStatus()
-     */
     public function toggleStatus(EditAdminRequest $request, AdminRepositoryInterface $adminRepository)
     {
         try {

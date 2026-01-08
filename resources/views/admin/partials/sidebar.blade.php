@@ -292,6 +292,18 @@
                                     </li>
                                 @endcan
 
+                                @can('quick_stats.read')
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.quick-stats.*') ? 'active' : '' }}"
+                                            href="{{ route('admin.quick-stats.index') }}">
+                                            <i class="icon" style="display: inline-flex;">
+                                                <i class="bi bi-bar-chart-line" style="font-size:20px;"></i>
+                                            </i>
+                                            <span class="item-name">Quick Stats</span>
+                                        </a>
+                                    </li>
+                                @endcan
+
                                 @can('card.read')
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.cards.*') ? 'active' : '' }}"

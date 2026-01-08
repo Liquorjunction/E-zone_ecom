@@ -33,6 +33,14 @@ class OrderController extends Controller
         // Normalize payment input: form uses `payment_method` (radio) — accept `payment` too.
         $data['payment_method'] = $request->input('payment_method') ?? $request->input('payment') ?? ($data['payment_method'] ?? null);
 
+        // Add shipping method (default to standard if not provided)
+        $data['shipping_method'] = $request->input('shipping_method') ?? 'standard';
+
+        // Add email (use authenticated user's email if available)
+        if (!isset($data['email']) || empty($data['email'])) {
+            $data['email'] = Auth::user()?->email ?? $request->input('email') ?? null;
+        }
+
         // Attach raw card fields so PaymentService can use them (if using card)
         $data['cardNumber'] = $request->input('cardNumber');
         $data['expiry'] = $request->input('expiry');
@@ -156,20 +164,23 @@ class OrderController extends Controller
         if ($cart) {
             $totals = $cart->calculateTotals();
         } elseif ($order && $order->relationLoaded('items')) {
-            $subtotal = 0;
-            foreach ($order->items as $it) {
-                $subtotal += ($it->total_price ?? 0);
-            }
+            // Use stored order data instead of recalculating
             $totals = [
-                'subtotal' => round($subtotal, 2),
-                'total_discount' => 0, // discount already baked into order item price
-                'total' => round($subtotal, 2),
+                'subtotal' => $order->subtotal ?? 0,
+                'total_discount' => $order->discount_amount ?? 0,
+                'coupon_discount' => $order->coupon_discount_amount ?? 0,
+                'tax' => $order->tax_amount ?? 0,
+                'shipping' => $order->shipping_cost ?? 0,
+                'total' => $order->total ?? 0,
                 'items' => [],
             ];
         } else {
             $totals = [
                 'subtotal' => 0,
                 'total_discount' => 0,
+                'coupon_discount' => 0,
+                'tax' => 0,
+                'shipping' => 0,
                 'total' => 0,
                 'items' => []
             ];

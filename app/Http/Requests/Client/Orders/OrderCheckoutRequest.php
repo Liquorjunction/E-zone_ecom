@@ -16,6 +16,9 @@ class OrderCheckoutRequest extends FormRequest
     {
         return [
             'shipping_address' => ['nullable','array'],
+            'shipping_method' => ['nullable','string','in:standard,express'],
+            'email' => ['nullable','email'],
+
             // Payment
             'payment_method' => ['required','string','in:card,paypal,cod,cash,bank_transfer,other'],
 

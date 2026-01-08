@@ -1,5 +1,3 @@
-// store.js - Handles DataTable for store index
-
 $(function () {
     var table = $('#store-table').DataTable({
         processing: true,

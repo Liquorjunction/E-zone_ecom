@@ -60,11 +60,11 @@
 
                             {{-- Dynamic Content Loop --}}
                             @foreach ($aboutUs as $index => $content)
-                                <div id="section-{{ $index }}" class="scroll-mt-24 mb-12">
-                                    <h2>{{ $content->title }}</h2>
+                                <div id="section-{{ $index }}" class="scroll-mt-24 mb-12 prose-content">
+                                    <h2>{{ $content->getTranslation('title', app()->getLocale()) }}</h2>
 
                                     <div class="text-justify">
-                                        {!! $content->description !!}
+                                        {!! $content->getTranslation('description', app()->getLocale()) !!}
                                     </div>
                                 </div>
                                 @if (!$loop->last)

@@ -251,7 +251,7 @@
                     </div>
 
                     <!-- Short Description -->
-                    <div class="prose prose-sm max-w-none">
+                    <div class="prose prose-sm max-w-none prose-content">
                         <div class="text-gray-600 leading-relaxed line-clamp-3">
                             {!! is_array($product->description)
                                 ? $product->description[app()->getLocale()] ?? ($product->description['en'] ?? '')
@@ -567,7 +567,7 @@
 
                 <div class="p-6 lg:p-8">
                     <!-- Description Tab -->
-                    <div id="description-tab" class="tab-content active">
+                    <div id="description-tab" class="tab-content active prose-content">
                         <div class="prose prose-lg max-w-none">
                             <h3 class="text-2xl font-bold text-gray-900 mb-4">About This Product</h3>
                             <div class="text-gray-700 leading-relaxed">

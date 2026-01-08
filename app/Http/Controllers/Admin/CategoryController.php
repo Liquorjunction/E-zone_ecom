@@ -66,7 +66,6 @@ class CategoryController extends Controller
             $id = $request->input('id');
             $data = $request->validated();
 
-            // --- Smart Fill ---
             if (! empty($data['category-name']['en'])) {
                 if (empty($data['category-name']['fr'])) {
                     $data['category-name']['fr'] = gtrans($data['category-name']['en'], 'fr');
@@ -75,7 +74,6 @@ class CategoryController extends Controller
                     $data['category-name']['ar'] = gtrans($data['category-name']['en'], 'ar');
                 }
             }
-            // ------------------
 
             $categoryRepo->updateCategory($request, $id, $data);
 
@@ -113,7 +111,6 @@ class CategoryController extends Controller
                 return 'N/A';
             })
             ->editColumn('category-name', function ($category) {
-                // Display English name in Datatable
                 return $category->getTranslation('category-name', 'en');
             })
             ->addColumn('is_active', function ($category) use ($request) {

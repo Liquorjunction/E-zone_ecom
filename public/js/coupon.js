@@ -1,6 +1,7 @@
 /**
  * Client-side coupon functionality
  * Uses vanilla JavaScript and axios (no jQuery dependency)
+ * Supports multiple coupon forms on different checkout steps
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -10,18 +11,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    // Apply coupon
+    // Ensure axios is available
+    if (typeof axios === 'undefined') {
+        console.error('Coupon JS: axios is not loaded');
+        return;
+    }
+
+    // Define coupon form variants (for different checkout steps)
+    // const couponForms = [
+    //     { prefix: '', container: 'coupon-container' },           // Step 1
+    //     { prefix: '-step2', container: 'coupon-container-step2' }, // Step 2
+    //     { prefix: '-step3', container: 'coupon-container-step3' }  // Step 3
+    // ];
+
+    // Apply coupon - handle all variants
     document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'apply-coupon-btn') {
+        if (e.target && (e.target.id === 'apply-coupon-btn' || e.target.id === 'apply-coupon-btn-step2' || e.target.id === 'apply-coupon-btn-step3')) {
             e.preventDefault();
 
+            // Determine which form variant we're dealing with
+            let prefix = '';
+            if (e.target.id === 'apply-coupon-btn-step2') prefix = '-step2';
+            if (e.target.id === 'apply-coupon-btn-step3') prefix = '-step3';
+
             const btn = e.target;
-            const input = document.getElementById('coupon-code-input');
+            const input = document.getElementById('coupon-code-input' + prefix);
             const code = input?.value.trim().toUpperCase();
-            const messageEl = document.getElementById('coupon-message');
+            const messageEl = document.getElementById('coupon-message' + prefix);
 
             if (!code) {
-                showMessage('Please enter a coupon code.', 'error');
+                showMessage('Please enter a coupon code.', 'error', messageEl);
                 return;
             }
 
@@ -40,13 +59,13 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(function(response) {
                 if (response.data.success) {
-                    showMessage(response.data.message, 'success');
+                    showMessage(response.data.message, 'success', messageEl);
                     updateOrderSummary(response.data.summary);
 
                     // Replace input form with applied coupon display
                     setTimeout(function() {
                         const appliedHtml = `
-                            <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display">
+                            <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display${prefix}">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
@@ -59,19 +78,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <p class="text-xs text-gray-600">Coupon Applied</p>
                                         </div>
                                     </div>
-                                    <button type="button" id="remove-coupon-btn" class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
+                                    <button type="button" id="remove-coupon-btn${prefix}" class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
                                         Remove
                                     </button>
                                 </div>
                             </div>
                         `;
-                        const inputForm = document.getElementById('coupon-input-form');
+                        const inputForm = document.getElementById('coupon-input-form' + prefix);
                         if (inputForm) {
                             inputForm.outerHTML = appliedHtml;
                         }
                     }, 1000);
                 } else {
-                    showMessage(response.data.message, 'error');
+                    showMessage(response.data.message, 'error', messageEl);
                     btn.disabled = false;
                     btn.textContent = 'Apply';
                 }
@@ -81,17 +100,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (error.response && error.response.data && error.response.data.message) {
                     message = error.response.data.message;
                 }
-                showMessage(message, 'error');
+                showMessage(message, 'error', messageEl);
                 btn.disabled = false;
                 btn.textContent = 'Apply';
             });
         }
     });
 
-    // Remove coupon
+    // Remove coupon - handle all variants
     document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'remove-coupon-btn') {
+        const btnId = e.target?.id || '';
+        if (btnId === 'remove-coupon-btn' || btnId === 'remove-coupon-btn-step2' || btnId === 'remove-coupon-btn-step3') {
             e.preventDefault();
+
+            // Determine which form variant we're dealing with
+            let prefix = '';
+            if (btnId === 'remove-coupon-btn-step2') prefix = '-step2';
+            if (btnId === 'remove-coupon-btn-step3') prefix = '-step3';
 
             const btn = e.target;
             btn.disabled = true;
@@ -105,48 +130,53 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(function(response) {
                 if (response.data.success) {
-                    showMessage(response.data.message, 'success');
+                    const messageEl = document.getElementById('coupon-message' + prefix);
+                    showMessage(response.data.message, 'success', messageEl);
                     updateOrderSummary(response.data.summary);
 
                     // Replace applied coupon display with input form
                     setTimeout(function() {
                         const inputHtml = `
-                            <div class="flex gap-3" id="coupon-input-form">
-                                <input type="text" id="coupon-code-input" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
-                                <button type="button" id="apply-coupon-btn" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
+                            <div class="flex gap-3" id="coupon-input-form${prefix}">
+                                <input type="text" id="coupon-code-input${prefix}" placeholder="Enter coupon code" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                                <button type="button" id="apply-coupon-btn${prefix}" class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
                             </div>
                         `;
-                        const appliedDisplay = document.getElementById('applied-coupon-display');
+                        const appliedDisplay = document.getElementById('applied-coupon-display' + prefix);
                         if (appliedDisplay) {
                             appliedDisplay.outerHTML = inputHtml;
                         }
                     }, 1000);
                 } else {
-                    showMessage(response.data.message, 'error');
+                    const messageEl = document.getElementById('coupon-message' + prefix);
+                    showMessage(response.data.message, 'error', messageEl);
                     btn.disabled = false;
                     btn.textContent = 'Remove';
                 }
             })
             .catch(function() {
-                showMessage('Failed to remove coupon. Please try again.', 'error');
+                const messageEl = document.getElementById('coupon-message' + prefix);
+                showMessage('Failed to remove coupon. Please try again.', 'error', messageEl);
                 btn.disabled = false;
                 btn.textContent = 'Remove';
             });
         }
     });
 
-    // Enter key support for coupon input
+    // Enter key support for coupon input (all variants)
     document.addEventListener('keypress', function(e) {
-        if (e.target && e.target.id === 'coupon-code-input' && e.key === 'Enter') {
+        if (e.target && (e.target.id === 'coupon-code-input' || e.target.id === 'coupon-code-input-step2' || e.target.id === 'coupon-code-input-step3') && e.key === 'Enter') {
             e.preventDefault();
-            const btn = document.getElementById('apply-coupon-btn');
+            let btnId = 'apply-coupon-btn';
+            if (e.target.id === 'coupon-code-input-step2') btnId = 'apply-coupon-btn-step2';
+            if (e.target.id === 'coupon-code-input-step3') btnId = 'apply-coupon-btn-step3';
+            const btn = document.getElementById(btnId);
             if (btn) btn.click();
         }
     });
 
     // Helper: Show message
-    function showMessage(text, type) {
-        const messageEl = document.getElementById('coupon-message');
+    function showMessage(text, type, messageEl) {
         if (!messageEl) return;
 
         messageEl.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-gray-600');
