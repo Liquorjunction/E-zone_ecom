@@ -11,6 +11,7 @@ use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderRepository implements OrderRepositoryInterface
 {
@@ -29,18 +30,17 @@ class OrderRepository implements OrderRepositoryInterface
             $couponDiscount = $cart->coupon_discount_amount ?? 0;
             $totalAfterCoupon = max(0, $subtotalAfterItemDiscount - $couponDiscount);
 
-            // Tax calculation (8% on amount after all discounts)
-            $taxPercentage = 8.00;
-            $taxAmount = round($totalAfterCoupon * ($taxPercentage / 100), 2);
+            $taxRate = config('tax.rate', 20.0);
+            $taxAmount = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
+            $taxableAmount = round($totalAfterCoupon - $taxAmount, 2);
 
             // Shipping data
             $shippingMethod = $data['shipping_method'] ?? 'standard';
             $shippingCost = $shippingMethod === 'express' ? 12.99 : 0.00;
 
             // Final total
-            $finalTotal = round($totalAfterCoupon + $taxAmount + $shippingCost, 2);
+            $finalTotal = round($totalAfterCoupon + $shippingCost, 2);
 
-            // Create order with complete discount and payment tracking
             $order = Order::create([
                 'user_id' => $cart->user_id ?? null,
                 'subtotal' => round($subtotal, 2),
@@ -51,7 +51,8 @@ class OrderRepository implements OrderRepositoryInterface
                 'shipping_method' => $shippingMethod,
                 'shipping_cost' => round($shippingCost, 2),
                 'tax_amount' => round($taxAmount, 2),
-                'tax_percentage' => $taxPercentage,
+                'tax_percentage' => $taxRate,
+                'taxable_amount' => $taxableAmount,
                 'total' => $finalTotal,
                 'status' => 'pending',
                 'shipping_address' => $data['shipping_address'] ?? null,
@@ -63,16 +64,13 @@ class OrderRepository implements OrderRepositoryInterface
 
             $total = 0;
             foreach ($cart->items as $item) {
-                // Use stored discount data from cart_items table
                 $variant = $item->variant ?: ProductVariant::withTrashed()->find($item->variant_id);
-                $product = $item->product; // expect eager-loaded in cart
+                $product = $item->product;
 
-                // Get original price and stored discount
                 $unitPriceOriginal = $item->unit_price ?? 0;
                 $discountPerUnit = $item->discount_amount ?? 0;
                 $unitPriceFinal = $item->final_price ?? 0;
 
-                // Calculate line totals
                 $lineSubtotal = round($unitPriceOriginal * $item->quantity, 2);
                 $lineDiscount = round($discountPerUnit * $item->quantity, 2);
                 $lineFinal = round($unitPriceFinal * $item->quantity, 2);
@@ -82,25 +80,22 @@ class OrderRepository implements OrderRepositoryInterface
                     'product_id' => $item->product_id,
                     'variant_id' => $item->variant_id,
                     'quantity' => $item->quantity,
-                    'unit_price' => $unitPriceFinal,  // Final price (for compatibility)
+                    'unit_price' => $unitPriceFinal,
                     'unit_price_original' => round($unitPriceOriginal, 2),
                     'discount_amount' => round($discountPerUnit, 2),
                     'line_subtotal' => $lineSubtotal,
                     'line_discount' => $lineDiscount,
-                    'total_price' => $lineFinal,  // For compatibility
+                    'total_price' => $lineFinal,
                     'line_total' => $lineFinal,
                 ]);
                 $total += $lineFinal;
 
-                // Deduct stock and record inventory transactions
                 $remaining = $item->quantity;
 
-                // Prefer variant-level inventory rows (FIFO)
                 $inventories = Inventory::where('product_variant_id', $item->variant_id)
                     ->orderBy('created_at', 'asc')
                     ->get();
 
-                // Fallback to product-level rows if no variant rows found
                 if ($inventories->isEmpty()) {
                     $inventories = Inventory::where('product_id', $item->product_id)
                         ->orderBy('created_at', 'asc')
@@ -136,13 +131,12 @@ class OrderRepository implements OrderRepositoryInterface
                             'quantity_change' => -1 * $deduct,
                         ]);
                     } catch (\Throwable $e) {
-                        // don't fail order creation for transaction logging issues
+                        Log::error($e->getMessage());
                     }
 
                     $remaining -= $deduct;
                 }
 
-                // If still remaining, create/adjust a placeholder inventory row (allow negative stock)
                 if ($remaining > 0) {
                     $placeholder = Inventory::firstOrCreate([
                         'product_id' => $item->product_id,
@@ -176,17 +170,15 @@ class OrderRepository implements OrderRepositoryInterface
                             'quantity_change' => -1 * $remaining,
                         ]);
                     } catch (\Throwable $e) {
-                        // ignore
+                        Log::error($e->getMessage());
                     }
                 }
             }
 
-            // Use the created order's ID to build a unique order number (avoids race conditions)
             $order->total = $total;
             $order->order_number = 'EZ-ORD-'.str_pad($order->id, 4, '0', STR_PAD_LEFT);
             $order->save();
 
-            // clear cart
             $cart->items()->delete();
             $cart->delete();
         });
@@ -194,20 +186,16 @@ class OrderRepository implements OrderRepositoryInterface
         return $order;
     }
 
-    /**
-     * Cancel an order, restore inventory and record transactions.
-     */
     public function cancelOrder(int $orderId, ?string $reason = null)
     {
         $order = Order::with('items')->find($orderId);
         if (! $order) return false;
 
         if (in_array($order->status, ['cancelled', 'refunded'])) {
-            return false; // already cancelled/refunded
+            return false;
         }
 
         DB::transaction(function() use ($order, $reason) {
-            // Find related sale transactions for this order
             $txns = InventoryTransaction::where('reference_type', 'order')
                 ->where('reference_id', $order->id)
                 ->where('type', 'sale')
@@ -239,11 +227,9 @@ class OrderRepository implements OrderRepositoryInterface
                         'quantity_change' => $sum,
                     ]);
                 } catch (\Throwable $e) {
-                    // ignore logging failures
+                    Log::error($e->getMessage());
                 }
             }
-
-            // Mark order as cancelled
             $order->status = 'cancelled';
             $order->save();
         });

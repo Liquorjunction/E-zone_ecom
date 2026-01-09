@@ -10,13 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class CouponService
 {
-    /**
-     * Validate and apply a coupon code to the cart
-     *
-     * @param string $code
-     * @param Cart $cart
-     * @return array ['success' => bool, 'message' => string, 'discount' => float|null]
-     */
     public function validateAndApplyCoupon(string $code, Cart $cart): array
     {
         $coupon = Coupon::where('code', strtoupper($code))
@@ -31,7 +24,6 @@ class CouponService
             ];
         }
 
-        // Check if coupon is within valid date range
         $now = Carbon::now();
         if ($coupon->starts_at && $now->lt($coupon->starts_at)) {
             return [
@@ -49,7 +41,6 @@ class CouponService
             ];
         }
 
-        // Check usage limit
         if ($coupon->usage_limit && $coupon->usages()->count() >= $coupon->usage_limit) {
             return [
                 'success' => false,
@@ -73,11 +64,19 @@ class CouponService
             }
         }
 
-        // Calculate cart subtotal
-        $totals = $cart->calculateTotals();
-        $subtotal = $totals['total']; // Use total after item discounts
+        $hasDiscountedItems = $cart->items()->where('discount_amount', '>', 0)->exists();
 
-        // Check minimum order amount
+        if ($hasDiscountedItems) {
+            return [
+                'success' => false,
+                'message' => 'Coupon cannot be applied to cart with discounted items. Please remove discounted products to use this coupon.',
+                'discount' => null,
+            ];
+        }
+
+        $totals = $cart->calculateTotals();
+        $subtotal = $totals['total'];
+
         if ($coupon->min_order_amount && $subtotal < $coupon->min_order_amount) {
             return [
                 'success' => false,
@@ -89,10 +88,9 @@ class CouponService
             ];
         }
 
-        // Calculate discount amount
+
         $discountAmount = $this->calculateDiscountAmount($coupon, $subtotal);
 
-        // Apply coupon to cart
         $cart->coupon_id = $coupon->id;
         $cart->coupon_code = $coupon->code;
         $cart->coupon_discount_amount = $discountAmount;
@@ -110,13 +108,6 @@ class CouponService
         ];
     }
 
-    /**
-     * Calculate the discount amount based on coupon type
-     *
-     * @param Coupon $coupon
-     * @param float $subtotal
-     * @return float
-     */
     protected function calculateDiscountAmount(Coupon $coupon, float $subtotal): float
     {
         $discount = 0;
@@ -129,7 +120,6 @@ class CouponService
             $discount = min($coupon->value, $subtotal);
         }
 
-        // Apply max discount cap if set
         if ($coupon->max_discount && $discount > $coupon->max_discount) {
             $discount = $coupon->max_discount;
         }
@@ -140,12 +130,6 @@ class CouponService
         return round($discount, 2);
     }
 
-    /**
-     * Remove coupon from cart
-     *
-     * @param Cart $cart
-     * @return bool
-     */
     public function removeCoupon(Cart $cart): bool
     {
         $cart->coupon_id = null;
@@ -155,14 +139,6 @@ class CouponService
         return $cart->save();
     }
 
-    /**
-     * Record coupon usage after order is placed
-     *
-     * @param int $couponId
-     * @param int $orderId
-     * @param int|null $userId
-     * @return CouponUsage
-     */
     public function recordUsage(int $couponId, int $orderId, ?int $userId = null): CouponUsage
     {
         return CouponUsage::create([
@@ -173,12 +149,6 @@ class CouponService
         ]);
     }
 
-    /**
-     * Get coupon by code
-     *
-     * @param string $code
-     * @return Coupon|null
-     */
     public function getCouponByCode(string $code): ?Coupon
     {
         return Coupon::where('code', strtoupper($code))

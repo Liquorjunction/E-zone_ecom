@@ -21,6 +21,7 @@ class Order extends Model
         'shipping_cost',
         'tax_amount',
         'tax_percentage',
+        'taxable_amount',
         'total',
         'status',
         'shipping_address',
@@ -38,6 +39,7 @@ class Order extends Model
         'shipping_cost' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'tax_percentage' => 'decimal:2',
+        'taxable_amount' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 

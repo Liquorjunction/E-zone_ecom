@@ -279,9 +279,11 @@
                 $subtotalAfterDiscount = $totals['total'] ?? 0;
                 $couponDiscount = $cart->coupon_discount_amount ?? 0;
                 $totalAfterCoupon = max(0, $subtotalAfterDiscount - $couponDiscount);
-                $tax = round($totalAfterCoupon * 0.08, 2);
+                // Tax is included in price (Morocco 20% VAT)
+                $taxRate = config('tax.rate', 20.0);
+                $tax = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
                 $shipping = 0.00;
-                $finalTotal = $totalAfterCoupon + $tax + $shipping;
+                $finalTotal = $totalAfterCoupon + $shipping;
                 $itemCount = $cart ? $cart->items->sum('quantity') : 0;
               @endphp
 
@@ -354,7 +356,7 @@
                   <span id="order-shipping" class="font-bold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
                 </div>
                 <div class="flex justify-between text-gray-600 text-lg">
-                  <span>Tax (8%)</span>
+                  <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}% included)</span>
                   <span id="order-tax" class="font-bold">${{ number_format($tax, 2) }}</span>
                 </div>
                 <div class="border-t-2 border-gray-100 pt-5">
@@ -564,9 +566,11 @@
                 $subtotalAfterDiscount = $totals['total'] ?? 0;
                 $couponDiscount = $cart->coupon_discount_amount ?? 0;
                 $totalAfterCoupon = max(0, $subtotalAfterDiscount - $couponDiscount);
-                $tax = round($totalAfterCoupon * 0.08, 2);
+                // Tax is included in price (Morocco 20% VAT)
+                $taxRate = config('tax.rate', 20.0);
+                $tax = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
                 $shipping = 0.00;
-                $finalTotal = $totalAfterCoupon + $tax + $shipping;
+                $finalTotal = $totalAfterCoupon + $shipping;
               @endphp
 
               <div class="space-y-4 mb-6">
@@ -615,7 +619,7 @@
                   <span class="font-bold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
                 </div>
                 <div class="flex justify-between text-gray-600 text-base">
-                  <span>Tax (8%)</span>
+                  <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}% included)</span>
                   <span class="font-bold">${{ number_format($tax, 2) }}</span>
                 </div>
                 <div class="border-t-2 border-gray-100 pt-4">

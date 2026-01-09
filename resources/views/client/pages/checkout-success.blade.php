@@ -162,9 +162,11 @@
               // leave empty
             }
             $subtotal = $itemsForSummary->sum(function($i){ return ($i->quantity * ($i->unit_price ?? ($i->price ?? 0))); });
-            $tax = round($subtotal * 0.08, 2);
+            // Tax is included in price (Morocco 20% VAT)
+            $taxRate = config('tax.rate', 20.0);
+            $tax = round($subtotal * ($taxRate / (100 + $taxRate)), 2);
             $shipping = 0.00;
-            $total = $order && $order->total ? $order->total : ($subtotal + $tax + $shipping);
+            $total = $order && $order->total ? $order->total : ($subtotal + $shipping);
           @endphp
 
           <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100">
@@ -192,7 +194,7 @@
               <span class="font-semibold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
-              <span>Tax (8%)</span>
+              <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}% included)</span>
               <span class="font-semibold">${{ number_format($tax, 2) }}</span>
             </div>
 

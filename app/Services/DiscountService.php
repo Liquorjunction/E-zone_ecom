@@ -9,22 +9,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 
-/**
- * DiscountService
- *
- * Implements "Best Discount Wins" strategy
- *
- * IMPORTANT: In discount_targets table, target_type enum values:
- * - 'brand' => stores Brand ID
- * - 'category' => stores Category ID
- * - 'subcategory' => stores SubCategory ID
- * - 'product' => stores ProductVariant ID (NOT Product container ID!)
- *
- * Returns the discount that gives maximum savings to the customer
- */
 class DiscountService
 {
-    // --- Discount Retrieval -----------------------------------------------------------------
     public function getActiveDiscounts(): Collection
     {
         $now = now();
@@ -42,7 +28,6 @@ class DiscountService
 
     protected function isDiscountApplicableToProduct(Discount $discount, $productOrVariant, $variantId = null): bool
     {
-        // Resolve Variant and Product
         $variant = null;
         $product = null;
 
@@ -54,7 +39,6 @@ class DiscountService
             if ($variantId) {
                 $variant = $product->productVariants->find($variantId);
             } else {
-                // If no variant specified, try to find first or default
                 $variant = $product->productVariants->first();
             }
         }
@@ -63,14 +47,11 @@ class DiscountService
             return false;
         }
 
-        // Logic: specific variant match OR parent category/brand match
         foreach ($discount->targets as $target) {
-            // target_type='product' actually stores ProductVariant IDs (Sellable Item)
             if ($target->target_type === 'product' && $target->target_id == $variant->id) {
                 return true;
             }
 
-            // Check Parent Product attributes (Container)
             if ($target->target_type === 'category' && $target->target_id == $product->category_id) {
                 return true;
             }
@@ -104,21 +85,17 @@ class DiscountService
         return $bestDiscount;
     }
 
-    // Helpers -----------------------------------------------------------------
     public function calculateProductDiscount($product, $variantId = null): array
     {
-        // Normalize input: If passed a ProductVariant, extract ID and Parent
         if ($product instanceof ProductVariant) {
             $variant = $product;
             $variantId = $variant->id;
-            // Ensure product relation is loaded
             if (!$variant->relationLoaded('product')) {
                 $variant->load('product');
             }
             $parentProduct = $variant->product;
             $price = $variant->price;
         } else {
-            // It is a Product model, we need the variant
             $parentProduct = $product;
             $variant = null;
 
@@ -127,9 +104,7 @@ class DiscountService
             }
 
             if (!$variant) {
-                // Fallback or error handling if variant not found
-                // For safety, return no discount if we can't identify the sellable item
-                 return [
+                return [
                     'has_discount' => false,
                     'original_price' => 0,
                     'final_price' => 0,
@@ -142,12 +117,9 @@ class DiscountService
             $price = $variant->price;
         }
 
-        // Check if the product/variant has a discount
-        // We pass the object effectively to findBestDiscountForProduct
         $discount = $this->findBestDiscountForProduct($parentProduct, $variantId, $price);
 
         if ($discount) {
-            // Apply the discount to the price
             $reduction = $this->calculateReduction($discount, $price);
             $finalPrice = max($price - $reduction, 0);
 
@@ -157,7 +129,7 @@ class DiscountService
                 'final_price' => round($finalPrice, 2),
                 'discount_amount' => round($reduction, 2),
                 'discount_percentage' => $discount->type === 'percentage' ? $discount->value : 0,
-                'discount_name' => $discount->name ?? 'Discount', // Fallback if translation fails
+                'discount_name' => $discount->name ?? 'Discount',
                 'discount_id' => $discount->id,
             ];
         }
@@ -179,7 +151,6 @@ class DiscountService
         $bestDiscount = null;
         $maxSavings = 0;
 
-        // Resolve price if not provided
         if (is_null($price)) {
             if ($product instanceof ProductVariant) {
                 $price = $product->price;
@@ -210,7 +181,6 @@ class DiscountService
 
     protected function rememberCacheKey(int $variantId, string $cacheKey): void
     {
-        // Retrieve and update the list of cache keys for this product
         $listKey = "best_discount_product_{$variantId}_keys";
         $keys = Cache::get($listKey, []);
 
@@ -242,11 +212,8 @@ class DiscountService
 
         foreach ($cartItems as $item) {
             $product = $item->product;
-            // Make sure we have the variant instance even if the relation isn't eager-loaded
             $variant = $item->variant ?? ProductVariant::find($item->variant_id);
 
-            // Get price (variant price takes precedence)
-            // Get the Prices associated with the Product Variant
             $firstVariant = null;
             if (!$variant) {
                 $firstVariant = $product->productVariants()->first();
@@ -255,12 +222,9 @@ class DiscountService
             $itemPrice = $variant?->price ?? ($item->unit_price ?? $product->price ?? 0);
             $quantity = $item->quantity;
 
-            // Calculate discount
             if ($variant) {
-                // Pass the resolved variant for accurate pricing
                 $discountData = $this->calculateVariantDiscount($variant);
             } else {
-                // Get the first variant ID for products without a specific variant
                 $variantId = $variant?->id ?? ($firstVariant?->id ?? 0);
                 $discountData = $this->calculateProductDiscount($product, $variantId, $itemPrice);
             }
@@ -295,18 +259,14 @@ class DiscountService
 
     public function calculateVariantDiscount(ProductVariant $variant): array
     {
-        // Ensure we get the associated price with the product variant
-        $price = $variant->price; // Get the price from the variant
-        $product = $variant->product; // Get the associated product
+        $price = $variant->price;
+        $product = $variant->product;
 
-        // Check if the product has a discount
         $discount = $this->findBestDiscountForProduct($product, $variant->id, $price);
 
         if ($discount) {
-            // Apply the discount to the price
             $reduction = $this->calculateReduction($discount, $price);
             $finalPrice = max($price - $reduction, 0);
-
 
             return [
                 'has_discount' => true,
