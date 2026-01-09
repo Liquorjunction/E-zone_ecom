@@ -1,5 +1,5 @@
 <footer class="bg-gray-900 text-gray-400">
-    <div class="container mx-auto px-4 py-16">
+    <div class="container mx-auto px-4 py-8">
 
         <div class="flex flex-col lg:flex-row justify-between items-center gap-8 border-b border-gray-700 pb-10 mb-10">
 
@@ -29,47 +29,35 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-
-            <div>
-                <h4 class="text-lg font-semibold text-white mb-5">Company</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+            <div class="space-y-4">
+                <h4 class="text-lg font-semibold text-white">Company</h4>
                 <ul class="space-y-3">
                     <li><a href="{{ route('about') }}" class="hover:text-white transition-colors">About Us</a></li>
-                    <li><a href="{{ route('showrooms') }}" class="hover:text-white transition-colors">Our Showrooms</a>
-                    </li>
-                    <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                    <li><a href="{{ route('showrooms') }}" class="hover:text-white transition-colors">Showrooms</a></li>
                     <li><a href="{{ route('sitemap') }}" class="hover:text-white transition-colors">Sitemap</a></li>
                 </ul>
             </div>
 
-            <div>
-                <h4 class="text-lg font-semibold text-white mb-5">Support</h4>
+            <div class="space-y-4">
+                <h4 class="text-lg font-semibold text-white">Support</h4>
                 <ul class="space-y-3">
-                    <li><a href="{{ route('contact') }}" class="hover:text-white transition-colors">Contact Us</a></li>
+                    <li><a href="{{ route('contact') }}" class="hover:text-white transition-colors">Contact</a></li>
                     <li><a href="{{ route('faq') }}" class="hover:text-white transition-colors">FAQ</a></li>
-                    <li><a href="{{ route('shipping-returns') }}" class="hover:text-white transition-colors">Shipping &
-                            Returns</a></li>
-                    <li><a href="{{ route('support') }}" class="hover:text-white transition-colors">Customer Support</a>
-                    </li>
-                    <li><a href="{{ route('terms') }}" class="hover:text-white transition-colors">Terms & Conditions</a>
-                    </li>
                 </ul>
             </div>
 
-            <div>
-                <h4 class="text-lg font-semibold text-white mb-5">Categories</h4>
+            <div class="space-y-4">
+                <h4 class="text-lg font-semibold text-white">Useful Links</h4>
                 <ul class="space-y-3">
-                    <li><a href="#" class="hover:text-white transition-colors">Computers</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Smartphones</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Cameras & Drones</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Gaming</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Headphones</a></li>
+                    <li><a href="{{ route('terms') }}" class="hover:text-white transition-colors">Terms & Conditions</a></li>
+                    <li><a href="{{ route('privacy-policy') }}" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="{{ route('shipping-returns') }}" class="hover:text-white transition-colors">Shipping & Returns</a></li>
                 </ul>
             </div>
 
-            <div>
-                <h4 class="text-lg font-semibold text-white mb-5">Contact Us</h4>
+            <div class="space-y-4">
+                <h4 class="text-lg font-semibold text-white">Contact</h4>
                 <address class="not-italic space-y-4">
                     <div class="flex items-start gap-3">
                         <svg class="w-5 h-5 text-primary shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg"
@@ -102,7 +90,6 @@
                     </div>
                 </address>
             </div>
-
         </div>
 
         <div class="border-t border-gray-700 pt-8">

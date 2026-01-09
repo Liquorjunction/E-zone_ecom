@@ -241,14 +241,10 @@
                         </div>
                     </div>
                 @else
-                    <div class="hidden md:flex items-center space-x-2">
+                    <div class="hidden md:flex items-center space-x-3">
                         <a href="{{ route('login') }}"
-                            class="px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-gray-100 text-gray-700">
-                            Login
-                        </a>
-                        <a href="{{ route('register') }}"
-                            class="px-5 py-2 rounded-lg font-medium text-sm text-white bg-primary hover:bg-primary-dark shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
-                            Register
+                            class="px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-dark shadow-md hover:shadow-lg transform hover:scale-105">
+                            {{ gtrans('Login') }}
                         </a>
                     </div>
                 @endauth
