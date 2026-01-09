@@ -11,7 +11,7 @@ use App\Http\Controllers\Client\AddressController;
 use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\WishlistController;
-use App\Http\Controllers\Client\ShippingandReturnsController;
+use App\Http\Controllers\Client\ShippingAndReturnsController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
 use App\Http\Controllers\Client\InventoryController;
@@ -35,7 +35,7 @@ Route::group([], function () {
     Route::get('/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy-policy');
     Route::get('/faq', [FaqController::class, 'index'])->name('faq');
     Route::get('/terms', [TermsController::class, 'index'])->name('terms');
-    Route::get('/shipping-returns', [ShippingandReturnsController::class, 'index'])->name('shipping-returns');
+    Route::get('/shipping-returns', [ShippingAndReturnsController::class, 'index'])->name('shipping-returns');
     Route::get('/about-us', [AboutUsController::class, 'index'])->name('about');
     Route::get('/brands', [BrandController::class, 'index'])->name('brands');
 

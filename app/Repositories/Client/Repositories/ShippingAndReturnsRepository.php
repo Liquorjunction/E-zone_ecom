@@ -3,14 +3,14 @@
 namespace App\Repositories\Client\Repositories;
 
 use App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface;
-use App\Models\ShippingandReturns;
+use App\Models\ShippingAndReturns;
 
 class ShippingAndReturnsRepository implements ShippingAndReturnsRepositoryInterface
 {
     public function getActiveShippingAndReturnsData()
     {
-        return ShippingandReturns::query()
-            ->when(method_exists(ShippingandReturns::class, 'scopeActive'), function ($q) {
+        return ShippingAndReturns::query()
+            ->when(method_exists(ShippingAndReturns::class, 'scopeActive'), function ($q) {
                 $q->active();
             })
             ->orderByDesc('updated_at')

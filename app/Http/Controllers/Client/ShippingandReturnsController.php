@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\ShippingAndReturns\ReadShippingAndReturnsRequest;
 use App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface as ShippingAndReturnsRepo;
 
-class ShippingandReturnsController extends Controller
+class ShippingAndReturnsController extends Controller
 {
     public function index(ReadShippingAndReturnsRequest $request, ShippingAndReturnsRepo $shippingAndReturnsRepo)
     {
