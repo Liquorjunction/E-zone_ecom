@@ -295,4 +295,27 @@ class DiscountService
         Cache::flush();
         Log::info('All discount caches cleared');
     }
+
+    public function clearProductDiscountCache(int $productId): void
+    {
+        $product = Product::with('productVariants')->find($productId);
+
+        if (!$product) {
+            Log::warning("Product with ID {$productId} not found for cache clearing.");
+            return;
+        }
+
+        foreach ($product->productVariants as $variant) {
+            $listKey = "best_discount_product_{$variant->id}_keys";
+            $keys = Cache::get($listKey, []);
+
+            foreach ($keys as $key) {
+                Cache::forget($key);
+            }
+
+            Cache::forget($listKey);
+        }
+
+        Log::info("Cleared discount cache for product ID {$productId}");
+    }
 }
