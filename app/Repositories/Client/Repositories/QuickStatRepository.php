@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Client\Interfaces;
+namespace App\Repositories\Client\Repositories;
 
 use App\Models\QuickStat;
 use App\Repositories\Client\Interfaces\QuickStatRepositoryInterface;
