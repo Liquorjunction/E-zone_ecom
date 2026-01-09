@@ -13,19 +13,30 @@
                         </div>
                         <div class="card-action">
                             @can('shipping_return.create')
-                                <a href="{{ route('admin.shipping-return.create') }}" class="btn btn-sm btn-primary add-button">
-                                    <i class="fa fa-plus mr-2"></i>Add New
-                                </a>
+                                @if ($shippingReturnCount == 0)
+                                    {
+                                    <a href="{{ route('admin.shipping-return.create') }}"
+                                        class="btn btn-sm btn-primary add-button">
+                                        <i class="fa fa-plus mr-2"></i>Add New
+                                    </a>
+                                    }
+                                @else
+                                    <div>
+                                        <small class="text-muted">Only one Shipping & Returns entry is allowed.</small>
+                                    </div>
+                                @endif
                             @endcan
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="shipping-return-table" class="table table-striped" data-route="{{ route('admin.shipping-return.data') }}">
+                            <table id="shipping-return-table" class="table table-striped"
+                                data-route="{{ route('admin.shipping-return.data') }}">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Title (EN)</th>
+                                        <th>Description (EN)</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>

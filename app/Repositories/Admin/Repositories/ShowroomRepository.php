@@ -26,26 +26,23 @@ class ShowroomRepository implements ShowroomRepositoryInterface
 
     public function storeShowroom($request, array $data)
     {
-        // We use the $data passed from controller because it contains the auto-translations.
 
-        // 1. Handle Status default
         $data['status'] = $request->input('status', 'inactive');
 
-        // 2. Handle Cover Image upload BEFORE creating logic to get path, but do not use $data['id'] yet.
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] = $request->file('cover_image')->store('showrooms', 'public');
         }
 
         $showroom = Showrooms::create($data);
 
-        // 4. Handle Gallery Images (Now we have $showroom->id)
+
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $image) {
                 $imagePath = $image->store('showrooms', 'public');
                 ShowroomImages::create([
-                    'showroom_id' => $showroom->id, // Use the ID from the created instance
+                    'showroom_id' => $showroom->id,
                     'image' => $imagePath,
-                    'status' => 'active' // Assuming default status
+                    'status' => 'active'
                 ]);
             }
         }
@@ -57,21 +54,14 @@ class ShowroomRepository implements ShowroomRepositoryInterface
     {
         $showroom = Showrooms::findOrFail($id);
 
-        // Use $data passed from controller (contains translations)
-
-        // Handle Cover Image Upload
         if ($request->hasFile('cover_image')) {
-            // Delete old image if exists
             if ($showroom->cover_image && Storage::disk('public')->exists($showroom->cover_image)) {
                 Storage::disk('public')->delete($showroom->cover_image);
             }
             $data['cover_image'] = $request->file('cover_image')->store('showrooms', 'public');
         }
 
-        // Handle Gallery Images
         if ($request->hasFile('gallery_images')) {
-            // Optional: You might want to delete physical files too, not just DB records
-            // For now, we keep your logic of replacing entries.
             ShowroomImages::where('showroom_id', $showroom->id)->delete();
 
             foreach ($request->file('gallery_images') as $image) {
@@ -84,9 +74,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface
             }
         }
 
-        // Handle Status
         $data['status'] = $request->input('status', 'inactive');
-
         $showroom->update($data);
 
         return $showroom;
@@ -101,7 +89,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface
             Storage::disk('public')->delete($showroom->cover_image);
         }
 
-        // Ideally, delete physical gallery images here too before deleting DB records
+        // Delete gallery images
         $galleryImages = ShowroomImages::where('showroom_id', $showroom->id)->get();
         foreach($galleryImages as $img) {
              if (Storage::disk('public')->exists($img->image)) {
@@ -131,6 +119,6 @@ class ShowroomRepository implements ShowroomRepositoryInterface
 
     public function getDataForDataTable()
     {
-        return Showrooms::select('id', 'name', 'status', 'cover_image')->get();
+        return Showrooms::select('id', 'name', 'description', 'status', 'cover_image')->get();
     }
 }

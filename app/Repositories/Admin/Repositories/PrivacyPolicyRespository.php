@@ -52,6 +52,6 @@ class PrivacyPolicyRespository implements PrivacyPolicyRespositoryInterface
 
     public function getDataForDataTable()
     {
-        return PrivacyPolicy::select(['id', 'description', 'status', 'created_at', 'updated_at'])->get();
+        return PrivacyPolicy::select(['id', 'title', 'description', 'status', 'created_at', 'updated_at'])->get();
     }
 }

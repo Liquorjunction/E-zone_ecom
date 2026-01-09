@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\Showrooms\ReadShowroomRequest;
 use App\Http\Requests\Admin\Showrooms\EditShowroomRequest;
 use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface as ShowroomRepo;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class ShowroomController extends Controller
@@ -161,6 +162,9 @@ class ShowroomController extends Controller
                 })
                 ->addColumn('name', function ($showroom) {
                     return $showroom->getTranslation('name', 'en');
+                })
+                ->addColumn('description', function ($showroom) {
+                    return Str::limit($showroom->getTranslation('description', 'en'), 50, '...');
                 })
                 ->addColumn('action', function ($showroom) use ($request) {
                     $data['view_url'] = $request->user()->can('showrooms.read') ? route('admin.showrooms.show', ['id' => $showroom->id]) : '';

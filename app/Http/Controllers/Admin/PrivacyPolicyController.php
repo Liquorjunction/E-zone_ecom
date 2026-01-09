@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\PrivacyPolicy\UpdatePrivacyRequest;
 use App\Models\PrivacyPolicy;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface as PrivacyPolicyRepo;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class PrivacyPolicyController extends Controller
@@ -122,11 +123,11 @@ class PrivacyPolicyController extends Controller
 
         return DataTables::of($privacyPolicies)
             ->addIndexColumn()
+            ->addColumn('title', function ($privacyPolicy) {
+                return $privacyPolicy->title;
+            })
             ->addColumn('description', function ($privacyPolicy) {
-                // Fetch the description in english
-                $description = $privacyPolicy->getTranslation('description', 'en');
-                // Limit the description to 50 characters and its in html
-                return strlen(strip_tags($description)) > 50 ? substr(strip_tags($description), 0, 50) . '...' : strip_tags($description);
+                return Str::limit(strip_tags($privacyPolicy->description), 50, '...');
             })
             ->addColumn('updated_at', function ($privacyPolicy) {
                 return $privacyPolicy->updated_at->format('Y-m-d H:i:s');

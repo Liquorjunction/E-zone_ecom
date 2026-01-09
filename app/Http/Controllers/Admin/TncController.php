@@ -17,7 +17,8 @@ class TncController extends Controller
 {
     public function index()
     {
-        return view('admin.pages.tnc.index');
+        $tncCount = TermsAndCondition::count();
+        return view('admin.pages.tnc.index', compact('tncCount'));
     }
 
     public function create()
@@ -46,7 +47,7 @@ class TncController extends Controller
             }
             // ---------------------------------
 
-            $tncRepo->createTnc($request, $data); // Pass request and data array
+            $tncRepo->createTnc($request, $data);
 
             return redirect()->route('admin.tncs.index')->with('success', 'T&C created successfully.');
         } catch (\Exception $e) {
@@ -140,6 +141,9 @@ class TncController extends Controller
                 ->addIndexColumn()
                 ->addColumn('title', function ($tnc) {
                     return $tnc->getTranslation('title', 'en');
+                })
+                ->addColumn('content', function ($tnc) {
+                    return \Illuminate\Support\Str::limit(strip_tags($tnc->getTranslation('content', 'en')), 50, '...');
                 })
                 ->addColumn('status', function ($tnc) use ($request) {
                     $data['toggle_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.toggleStatus', ['id' => $tnc->id]) : '';

@@ -5,6 +5,7 @@ $(document).ready(function () {
         ajax: $('#privacy-policy-table').data('route'),
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'title', name: 'title' },
             { data: 'description', name: 'description' },
             { data: 'updated_at', name: 'updated_at' },
             { data: 'status', name: 'status', orderable: false, searchable: false },

@@ -30,6 +30,7 @@ use App\Repositories\Admin\Interfaces\SubCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\TncRepositoryInterface;
 use App\Repositories\Admin\Interfaces\TranslationRepositoryInterface;
 use App\Repositories\Admin\Interfaces\WarehouseRepositoryInterface;
+use App\Repositories\Admin\Interfaces\WhyShopWithUsRepositoryInterface;
 use App\Repositories\Admin\Repositories\AboutUsRepository;
 use App\Repositories\Admin\Repositories\AdminRepository;
 use App\Repositories\Admin\Repositories\BrandRepository;
@@ -56,6 +57,7 @@ use App\Repositories\Admin\Repositories\SubCategoryRepository;
 use App\Repositories\Admin\Repositories\TncRepository;
 use App\Repositories\Admin\Repositories\TranslationRepository;
 use App\Repositories\Admin\Repositories\WarehouseRepository;
+use App\Repositories\Admin\Repositories\WhyShopWithUsRepository;
 use App\Repositories\Client\Interfaces\PrivacyPolicyRepositoryInterface;
 use App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface;
 use App\Repositories\Client\Repositories\PrivacyPolicyRepository;
@@ -97,6 +99,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(CouponRepositoryInterface::class, CouponRepository::class);
         $this->app->bind(CouponUsageRepositoryInterface::class, CouponUsageRepository::class);
         $this->app->bind(QuickStatRepositoryInterface::class, QuickStatRepository::class);
+        $this->app->bind(WhyShopWithUsRepositoryInterface::class, WhyShopWithUsRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);

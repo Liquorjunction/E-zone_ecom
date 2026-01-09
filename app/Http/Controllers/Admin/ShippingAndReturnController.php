@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\ShippingAndReturns\UpdateShippingAndReturnRequest;
 use App\Models\ShippingAndReturns;
 use App\Repositories\Admin\Interfaces\ShippingAndReturnRepositoryInterface as ShippingRepo;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class ShippingAndReturnController extends Controller
@@ -20,7 +21,8 @@ class ShippingAndReturnController extends Controller
      */
     public function index()
     {
-        return view('admin.pages.shipping-return.index');
+        $shippingReturnCount = ShippingAndReturns::count();
+        return view('admin.pages.shipping-return.index', compact('shippingReturnCount'));
     }
 
     /**
@@ -168,8 +170,10 @@ class ShippingAndReturnController extends Controller
             return DataTables::of($records)
                 ->addIndexColumn()
                 ->addColumn('title', function ($record) {
-                    // Display English Title in List
                     return $record->getTranslation('title', 'en');
+                })
+                ->addColumn('content', function ($record) {
+                    return Str::limit(strip_tags($record->getTranslation('content', 'en')), 50, '...');
                 })
                 ->addColumn('status', function ($record) use ($request) {
                     $data['toggle_url'] = $request->user()->can('shipping_return.update')

@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\TncController;
 use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\WarehouseController;
+use App\Http\Controllers\Admin\WhyShopWithUsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
@@ -340,6 +341,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [QuickStatController::class, 'update'])->name('update')->middleware('can:quick_stats.update,admin');
             Route::delete('/destroy', [QuickStatController::class, 'destroy'])->name('destroy')->middleware('can:quick_stats.delete,admin');
             Route::patch('/update-status', [QuickStatController::class, 'updateStatus'])->name('updateStatus')->middleware('can:quick_stats.update,admin');
+        });
+
+        // Why Shop With Us Routes
+        Route::prefix('whyshopwithus')->name('whyshopwithus.')->middleware('can:why_choose_us.read,admin')->group(function () {
+            Route::get('/', [WhyShopWithUsController::class, 'index'])->name('index'); // permission: why_choose_us.read
+            Route::get('/data', [WhyShopWithUsController::class, 'dataTable'])->name('data');
+            Route::get('/create', [WhyShopWithUsController::class, 'create'])->name('create')->middleware('can:why_choose_us.create,admin');
+            Route::post('/', [WhyShopWithUsController::class, 'store'])->name('store')->middleware('can:why_choose_us.create,admin');
+            Route::get('/edit', [WhyShopWithUsController::class, 'edit'])->name('edit')->middleware('can:why_choose_us.update,admin');
+            Route::put('/update', [WhyShopWithUsController::class, 'update'])->name('update')->middleware('can:why_choose_us.update,admin');
+            Route::delete('/destroy', [WhyShopWithUsController::class, 'destroy'])->name('destroy')->middleware('can:why_choose_us.delete,admin');
+            Route::patch('/toggle-status', [WhyShopWithUsController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:why_choose_us.update,admin');
         });
     });
 });

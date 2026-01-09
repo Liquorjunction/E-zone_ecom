@@ -11,6 +11,7 @@ $(function () {
                 return '<img src="'+data+'" height="50" width="50" style="object-fit:cover; border-radius:5px;">';
             }},
             {data: 'name', name: 'name'},
+            {data: 'description', name: 'description'},
             {data: 'is_active', name: 'status'},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ]

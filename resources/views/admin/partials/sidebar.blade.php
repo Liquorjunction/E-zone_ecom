@@ -315,6 +315,18 @@
                                         </a>
                                     </li>
                                 @endcan
+
+                                @can('why_choose_us.read')
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.whyshopwithus.*') ? 'active' : '' }}"
+                                            href="{{ route('admin.whyshopwithus.index') }}">
+                                            <i class="icon" style="display: inline-flex;">
+                                                <i class="bi bi-question-circle" style="font-size:20px;"></i>
+                                            </i>
+                                            <span class="item-name">Why Shop With Us</span>
+                                        </a>
+                                    </li>
+                                @endcan
                             </ul>
                         </li>
 

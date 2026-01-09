@@ -33,12 +33,12 @@
                             @endif
 
                             <h5 class="mt-4">Opening Hours</h5>
-                            @if($showroom->opening_hours)
+                            @if($showroom->opening_hours && is_array($showroom->opening_hours))
                             <ul class="list-group list-group-flush mb-3">
                                 @foreach($showroom->opening_hours as $day => $times)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span class="text-capitalize">{{ $day }}</span>
-                                    <span>{{ $times['open'] }} - {{ $times['close'] }}</span>
+                                    <span>{{ is_array($times) ? ($times['open'] ?? 'N/A') . ' - ' . ($times['close'] ?? 'N/A') : $times }}</span>
                                 </li>
                                 @endforeach
                             </ul>
