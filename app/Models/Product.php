@@ -17,12 +17,11 @@ class Product extends Model
     public $guard_name = 'admin';
     protected $guarded = [];
 
-    // Spatie Translatable Fields
     public $translatable = [
         'name',
         'description',
         'dimensions',
-        'specifications', // Stores as JSON, handled by Spatie
+        'specifications',
         'warranty'
     ];
 
@@ -40,15 +39,10 @@ class Product extends Model
         'specifications',
         'warranty',
         'status',
-        'is_bestseller',
     ];
 
-    // Standard Casts
-    // Note: Do NOT cast 'translatable' fields to 'array' here if using HasTranslations.
-    // Spatie handles the serialization automatically.
     protected $casts = [
         'price' => 'decimal:2',
-        'is_bestseller' => 'boolean',
     ];
 
     public function getSlugOptions() : SlugOptions
@@ -95,10 +89,6 @@ class Product extends Model
 
 
     // --- Helpers ---
-
-    /**
-     * Get the actual selling price range or starting price
-     */
     public function getRealPriceAttribute()
     {
         if ($this->relationLoaded('productVariants')) {
@@ -112,20 +102,12 @@ class Product extends Model
         return $this->getDiscountInfo();
     }
 
-    /**
-     * Get discount information using DiscountService
-     * "Best Discount Wins" logic applied
-     *
-     * @return array
-     */
     public function getDiscountInfo(): array
     {
-        // Get the first variant's ID, or use 0 if no variants exist
         $firstVariant = $this->productVariants()->first();
         $variantId = $firstVariant ? $firstVariant->id : 0;
 
         if (!$firstVariant) {
-            // Return default no-discount structure if no variants
             return [
                 'has_discount' => false,
                 'original_price' => $this->price ?? 0,
@@ -141,42 +123,23 @@ class Product extends Model
         return $discountService->calculateProductDiscount($this, $variantId);
     }
 
-    /**
-     * Get the final price after discount
-     *
-     * @return float
-     */
     public function getFinalPrice(): float
     {
         $discountInfo = $this->getDiscountInfo();
         return $discountInfo['final_price'];
     }
 
-    /**
-     * Check if product has active discount
-     *
-     * @return bool
-     */
     public function hasDiscount(): bool
     {
         $discountInfo = $this->getDiscountInfo();
         return $discountInfo['has_discount'];
     }
 
-    /**
-     * Core Logic: Find best discount among Brand, Category, SubCategory, and Product rules.
-     * @deprecated Use DiscountService instead for better caching and separation of concerns
-     */
     public function calculateBestPrice()
     {
-        // Keep for backward compatibility, but delegate to service
         return $this->getDiscountInfo();
     }
 
-    /**
-     * Query to find the single winning discount model.
-     * @deprecated Use DiscountService instead
-     */
     public function findBestDiscount()
     {
         $discountService = app(\App\Services\DiscountService::class);

@@ -13,7 +13,6 @@ class ProductVariant extends Model
 {
     use HasSlug, SoftDeletes, HasTranslations, HasFactory;
 
-    // Fixed: Matches migration table name
     protected $table = 'product_variants';
     public $guard_name = 'admin';
     protected $guarded = [];
@@ -25,25 +24,25 @@ class ProductVariant extends Model
 
     protected $fillable = [
         'product_id',
-        'variant_name', // e.g. "Red / Large"
-        'sku',          // Unique Transactional SKU
+        'variant_name',
+        'sku',
         'slug',
-        'price',        // The actual selling price
-        'attributes',   // JSON: {"Color": "Red", "Size": "L"}
+        'price',
+        'attributes',
+        'is_bestseller',
         'status'
     ];
 
-    // Casts: price as decimal and attributes as array to avoid double-encoded JSON issues
     protected $casts = [
         'price' => 'decimal:2',
         'attributes' => 'array',
+        'is_bestseller' => 'boolean',
     ];
 
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
             ->generateSlugsFrom(function($model) {
-                // If variant name is empty, fallback to parent product name + sku suffix
                 $name = $model->getTranslation('variant_name', 'en');
                 return !empty($name) ? $name : $model->sku;
             })
@@ -60,7 +59,6 @@ class ProductVariant extends Model
 
     public function images()
     {
-        // Images specific to this variant
         return $this->hasMany(ProductImage::class, 'product_variant_id');
     }
 
@@ -69,48 +67,28 @@ class ProductVariant extends Model
         return $this->hasMany(Inventory::class);
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
     }
 
-    /**
-     * Get Total Stock across all warehouses
-     */
     public function getTotalStockAttribute()
     {
         return $this->inventory()->sum('quantity');
     }
 
-    /**
-     * Get discount information for this variant
-     * Uses DiscountService with "Best Discount Wins" logic
-     *
-     * @return array
-     */
     public function getDiscountInfo(): array
     {
         $discountService = app(\App\Services\DiscountService::class);
         return $discountService->calculateVariantDiscount($this);
     }
 
-    /**
-     * Get the final price after discount
-     *
-     * @return float
-     */
     public function getFinalPrice(): float
     {
         $discountInfo = $this->getDiscountInfo();
         return $discountInfo['final_price'];
     }
 
-    /**
-     * Check if variant has active discount
-     *
-     * @return bool
-     */
     public function hasDiscount(): bool
     {
         $discountInfo = $this->getDiscountInfo();
