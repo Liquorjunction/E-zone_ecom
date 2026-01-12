@@ -58,13 +58,7 @@ use App\Repositories\Admin\Repositories\TncRepository;
 use App\Repositories\Admin\Repositories\TranslationRepository;
 use App\Repositories\Admin\Repositories\WarehouseRepository;
 use App\Repositories\Admin\Repositories\WhyShopWithUsRepository;
-use App\Repositories\Client\Interfaces\PrivacyPolicyRepositoryInterface;
-use App\Repositories\Client\Interfaces\ShippingAndReturnsRepositoryInterface;
-use App\Repositories\Client\Repositories\PrivacyPolicyRepository;
-use App\Repositories\Client\Repositories\ShippingAndReturnsRepository;
-use Illuminate\Container\Attributes\DB;
 use Illuminate\Support\ServiceProvider;
-use Spatie\Permission\Commands\Show;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -115,6 +109,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\Client\Interfaces\SecurityRepositoryInterface::class, \App\Repositories\Client\Repositories\SecurityRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\DiscountRepositoryInterface::class, \App\Repositories\Client\Repositories\DiscountRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\FaqRepositoryInterface::class, \App\Repositories\Client\Repositories\FaqRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\WhyShopWithUsRepositoryInterface::class, \App\Repositories\Client\Repositories\WhyShopWithUsRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\QuickStatRepositoryInterface::class, \App\Repositories\Client\Repositories\QuickStatRepository::class);
     }
 
     /**

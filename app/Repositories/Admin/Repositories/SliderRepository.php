@@ -52,12 +52,10 @@ class SliderRepository implements SliderRepositoryInterface
         $slider = HeroSlider::findOrFail($id);
         $data = $data ?? $request->validated();
 
-        // Ensure status is properly formatted
         if (!isset($data['is_active'])) {
             $data['is_active'] = $request->has('status') && $request->status == 'active' ? 1 : 0;
         }
 
-        // Guard: Do not allow deactivating the last active slider
         if ($slider->is_active && isset($data['is_active']) && (int) $data['is_active'] === 0) {
             $activeCount = HeroSlider::where('is_active', 1)->count();
             if ($activeCount <= 1) {
@@ -72,11 +70,9 @@ class SliderRepository implements SliderRepositoryInterface
                 Storage::disk('public')->delete($slider->image);
             }
 
-            // Store new image
             $imagePath = $request->file('image')->store('sliders', 'public');
             $data['image'] = $imagePath;
         } else {
-            // Prevent null override if no image is uploaded
             unset($data['image']);
         }
 
@@ -104,6 +100,28 @@ class SliderRepository implements SliderRepositoryInterface
         return $slider->delete();
     }
 
+    public function batchDeleteSliders(array $ids)
+    {
+        // Check if we're trying to delete all active sliders
+        $activeSliders = HeroSlider::whereIn('id', $ids)->where('is_active', 1)->get();
+        $totalActive = HeroSlider::where('is_active', 1)->count();
+
+        // If all active sliders are being deleted, prevent it
+        if ($activeSliders->count() > 0 && $activeSliders->count() >= $totalActive) {
+            throw new \RuntimeException('Cannot delete all active sliders. At least one slider must remain active.');
+        }
+
+        $sliders = HeroSlider::whereIn('id', $ids)->get();
+        foreach ($sliders as $slider) {
+            if ($slider->image && Storage::disk('public')->exists($slider->image)) {
+                Storage::disk('public')->delete($slider->image);
+            }
+            $slider->delete();
+        }
+
+        return true;
+    }
+
     public function updateStatus($id)
     {
         $slider = HeroSlider::findOrFail($id);
@@ -121,7 +139,24 @@ class SliderRepository implements SliderRepositoryInterface
         return $slider;
     }
 
-    public function getDataForDataTable()
+    public function batchUpdateStatus(array $ids, bool $isActive)
+    {
+        // If deactivating, ensure at least one slider remains active
+        if (!$isActive) {
+            $activeCount = HeroSlider::where('is_active', 1)->count();
+            $deactivatingCount = HeroSlider::whereIn('id', $ids)->where('is_active', 1)->count();
+
+            if ($activeCount - $deactivatingCount < 1) {
+                throw new \RuntimeException('At least one hero slider must remain active.');
+            }
+        }
+
+        HeroSlider::whereIn('id', $ids)->update(['is_active' => $isActive]);
+
+        return true;
+    }
+
+    public function getDataForDataTable($params = null)
     {
         return HeroSlider::query()->latest();
     }

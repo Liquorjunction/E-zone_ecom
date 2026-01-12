@@ -82,7 +82,9 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/edit', [SliderController::class, 'edit'])->name('edit')->middleware('can:slider.update,admin');
             Route::put('/update', [SliderController::class, 'update'])->name('update')->middleware('can:slider.update,admin');
             Route::delete('/destroy', [SliderController::class, 'destroy'])->name('destroy')->middleware('can:slider.delete,admin');
+            Route::post('/batch-destroy', [SliderController::class, 'batchDestroy'])->name('batchDestroy')->middleware('can:slider.delete,admin');
             Route::patch('/toggle-status', [SliderController::class, 'updateStatus'])->name('toggleStatus')->middleware('can:slider.update,admin');
+            Route::post('/batch-update-status', [SliderController::class, 'batchUpdateStatus'])->name('batchUpdateStatus')->middleware('can:slider.update,admin');
         });
 
         // Categories & Subcategories routes

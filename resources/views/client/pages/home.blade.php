@@ -712,49 +712,43 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            <div class="bg-white rounded-2xl p-6 lg:p-8 text-center hover:shadow-lg transition-all border border-gray-100">
-                <div class="w-14 h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <svg class="w-7 h-7 lg:w-8 lg:h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg lg:text-xl font-bold text-gray-900 mb-3">
-                    {{ gtrans('Free Shipping') }}
-                </h3>
-                <p class="text-sm text-gray-600 leading-relaxed">
-                    {{ gtrans('Get free delivery on all orders over $50. Fast and reliable shipping to your doorstep.') }}
-                </p>
-            </div>
+        @php
+            $whyShopWithUs = isset($whyShopWithUs) ? $whyShopWithUs : collect();
+            $locale = app()->getLocale();
+        @endphp
 
-            <div class="bg-white rounded-2xl p-6 lg:p-8 text-center hover:shadow-lg transition-all border border-gray-100">
-                <div class="w-14 h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <svg class="w-7 h-7 lg:w-8 lg:h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.040A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg lg:text-xl font-bold text-gray-900 mb-3">
-                    {{ gtrans('Secure Payment') }}
-                </h3>
-                <p class="text-sm text-gray-600 leading-relaxed">
-                    {{ gtrans('Your transactions are protected with bank-level encryption and security protocols.') }}
-                </p>
+        @if ($whyShopWithUs->isNotEmpty())
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                @foreach ($whyShopWithUs as $item)
+                    @php
+                        $title = $item->getTranslation('title', $locale, false) ?? $item->getTranslation('title', 'en', false);
+                        $description = $item->getTranslation('description', $locale, false) ?? $item->getTranslation('description', 'en', false);
+                        $icon = $item->icon ? asset('storage/' . ltrim($item->icon, '/')) : null;
+                    @endphp
+                    <div class="bg-white rounded-2xl p-6 lg:p-8 text-center hover:shadow-lg transition-all border border-gray-100">
+                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                            @if ($icon)
+                                <img src="{{ $icon }}" alt="{{ $title ?? 'Icon' }}" class="w-7 h-7 lg:w-8 lg:h-8 object-contain">
+                            @else
+                                <svg class="w-7 h-7 lg:w-8 lg:h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            @endif
+                        </div>
+                        <h3 class="text-lg lg:text-xl font-bold text-gray-900 mb-3">
+                            {{ $title ?? 'Feature' }}
+                        </h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            {{ $description ?? '' }}
+                        </p>
+                    </div>
+                @endforeach
             </div>
-
-            <div class="bg-white rounded-2xl p-6 lg:p-8 text-center hover:shadow-lg transition-all border border-gray-100">
-                <div class="w-14 h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <svg class="w-7 h-7 lg:w-8 lg:h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg lg:text-xl font-bold text-gray-900 mb-3">
-                    {{ gtrans('24/7 Support') }}
-                </h3>
-                <p class="text-sm text-gray-600 leading-relaxed">
-                    {{ gtrans('Our expert team is always ready to help you with any questions or concerns.') }}
-                </p>
+        @else
+            <div class="text-center text-gray-500">
+                {{ gtrans('No features available at the moment.') }}
             </div>
-        </div>
+        @endif
     </div>
 </section>
 @endsection

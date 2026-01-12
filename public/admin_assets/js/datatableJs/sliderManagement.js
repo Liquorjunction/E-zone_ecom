@@ -1,9 +1,10 @@
 $(document).ready(function () {
-    $('#slider-list-table').DataTable({
+    var table = $('#slider-list-table').DataTable({
         processing: true,
         serverSide: true,
         ajax: $('#slider-list-table').data('url'),
         columns: [
+            { data: 'batch_checkbox', name: 'batch_checkbox', orderable: false, searchable: false },
             { data: 'title', name: 'title' },
             {
                 data: 'image',
@@ -31,8 +32,21 @@ $(document).ready(function () {
                 searchable: false
             }
         ],
-        order: [[4, 'asc']], // Default sort by sort_order
+        order: [[4, 'asc']],
         pageLength: 10,
-        responsive: true
+        responsive: true,
+        drawCallback: function() {
+            // Reset select-all checkbox after table redraw
+            $('#select-all-sliders').prop('checked', false);
+        }
+    });
+
+    // Initialize batch operations
+    initBatchOperations({
+        tableId: 'slider-list-table',
+        selectAllCheckboxId: 'select-all-sliders',
+        itemCheckboxClass: 'slider-checkbox',
+        itemName: 'slider'
     });
 });
+

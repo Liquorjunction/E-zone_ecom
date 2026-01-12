@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Slider\BatchDestroySliderRequest;
+use App\Http\Requests\Admin\Slider\BatchUpdateStatusSliderRequest;
 use App\Http\Requests\Admin\Slider\DestroySliderRequest;
 use App\Http\Requests\Admin\Slider\EditSliderRequest;
 use App\Http\Requests\Admin\Slider\ReadSliderRequest;
@@ -115,6 +117,34 @@ class SliderController extends Controller
         }
     }
 
+    public function batchDestroy(BatchDestroySliderRequest $request, SliderRepo $sliderRepo)
+    {
+        try {
+            $ids = $request->input('ids');
+            $sliderRepo->batchDeleteSliders($ids);
+
+            // Check if it's an AJAX request
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Selected sliders deleted successfully.',
+                ]);
+            }
+
+            return redirect()->route('admin.hero-slider.index')->with('success', 'Selected sliders deleted successfully.');
+        } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return redirect()->route('admin.hero-slider.index')
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
     public function updateStatus(EditSliderRequest $request, SliderRepo $sliderRepo)
     {
         try {
@@ -133,6 +163,25 @@ class SliderController extends Controller
         }
     }
 
+    public function batchUpdateStatus(BatchUpdateStatusSliderRequest $request, SliderRepo $sliderRepo)
+    {
+        try {
+            $ids = $request->input('ids');
+            $isActive = (bool) $request->input('is_active');
+            $sliderRepo->batchUpdateStatus($ids, $isActive);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Selected sliders status updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function data(ReadSliderRequest $request, SliderRepo $sliderRepo)
     {
         try {
@@ -141,6 +190,9 @@ class SliderController extends Controller
 
             return DataTables::of($sliders)
                 ->addIndexColumn()
+                ->addColumn('batch_checkbox', function ($slider) {
+                    return '<input type="checkbox" class="slider-checkbox" value="'.$slider->id.'">';
+                })
                 ->addColumn('image', function ($slider) {
                     if ($slider->image && Storage::disk('public')->exists($slider->image)) {
                         return asset('storage/'.$slider->image);
@@ -160,12 +212,13 @@ class SliderController extends Controller
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($slider) use ($request) {
+                    $data = ['id' => $slider->id];
                     $data['edit_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.edit', ['id' => $slider->id]) : '';
                     $data['delete_url'] = $request->user()->can('slider.delete') ? route('admin.hero-slider.destroy', ['id' => $slider->id]) : '';
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['action', 'image', 'is_active'])
+                ->rawColumns(['batch_checkbox', 'action', 'image', 'is_active'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error('Error in SliderController@getDataForDataTable: '.$e->getMessage());

@@ -4,14 +4,16 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\Client\Interfaces\HomeRepositoryInterface as HomeRepo;
-use App\Repositories\Admin\Interfaces\QuickStatRepositoryInterface as QuickStatRepo;
+use App\Repositories\Client\Interfaces\QuickStatRepositoryInterface as QuickStatRepo;
+use App\Repositories\Client\Interfaces\WhyShopWithUsRepositoryInterface as WhyShopWithUsRepo;
 
 class HomeController extends Controller
 {
-    public function index(HomeRepo $homeRepo, QuickStatRepo $quickStatRepo)
+    public function index(HomeRepo $homeRepo, QuickStatRepo $quickStatRepo, WhyShopWithUsRepo $whyShopWithUsRepo)
     {
         $data = $homeRepo->getHomePageData();
         $data['quickStats'] = $quickStatRepo->getActiveQuickStats();
+        $data['whyShopWithUs'] = $whyShopWithUsRepo->getAllActiveWhyShopWithUs();
 
         return view('client.pages.home', $data);
     }
