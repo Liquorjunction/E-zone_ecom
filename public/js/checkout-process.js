@@ -62,6 +62,49 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             return;
         }
+
+        // D. Summary Increase Quantity Button (+)
+        const summaryIncreaseBtn = target.closest(".summary-qty-increase");
+        if (summaryIncreaseBtn) {
+            e.preventDefault();
+            const id = summaryIncreaseBtn.dataset.itemId;
+            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
+            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+
+            if (mainInput) {
+                let newVal = Number(mainInput.value || 0) + 1;
+                mainInput.value = newVal;
+                if (quantityDisplay) quantityDisplay.textContent = newVal;
+                debounceUpdate(id, newVal);
+            }
+            return;
+        }
+
+        // E. Summary Decrease Quantity Button (-)
+        const summaryDecreaseBtn = target.closest(".summary-qty-decrease");
+        if (summaryDecreaseBtn) {
+            e.preventDefault();
+            const id = summaryDecreaseBtn.dataset.itemId;
+            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
+            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+
+            if (mainInput) {
+                let newVal = Math.max(1, Number(mainInput.value || 1) - 1);
+                mainInput.value = newVal;
+                if (quantityDisplay) quantityDisplay.textContent = newVal;
+                debounceUpdate(id, newVal);
+            }
+            return;
+        }
+
+        // F. Summary Remove Item Button
+        const summaryRemoveBtn = target.closest(".summary-remove-item-btn");
+        if (summaryRemoveBtn) {
+            e.preventDefault();
+            const id = summaryRemoveBtn.dataset.itemId;
+            if (id) removeItem(id);
+            return;
+        }
     });
 
     // Handle Manual Input Changes (Typing quantity)
@@ -202,6 +245,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (lineTotalEl && data.item?.line_total) {
                     lineTotalEl.textContent = formatMoney(data.item.line_total);
                 }
+
+                // Sync summary item quantity display with cart quantity
+                const summaryQtyDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
+                const cartInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+                if (summaryQtyDisplay && cartInput) {
+                    summaryQtyDisplay.textContent = cartInput.value;
+                }
+
                 // Update Global Summaries
                 updateSummary(data.summary);
             } else {
@@ -235,16 +286,24 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await resp.json();
 
             if (data.success) {
-                // Remove row from DOM
+                // Remove main cart row from DOM
                 const row = document.querySelector(`.cart-item-row[data-item-id="${id}"]`);
                 if (row) {
                     row.remove();
-                    // Check if cart is now empty
-                    if (document.querySelectorAll('.cart-item-row').length === 0) {
-                        location.reload();
-                        return;
-                    }
                 }
+
+                // Remove summary row from DOM
+                const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
+                if (summaryRow) {
+                    summaryRow.remove();
+                }
+
+                // Check if cart is now empty
+                if (document.querySelectorAll('.cart-item-row').length === 0) {
+                    location.reload();
+                    return;
+                }
+
                 updateSummary(data.summary);
 
                 // Show toast if available
@@ -318,5 +377,45 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
         }
+
+        // Update summary items in order summary section
+        updateOrderSummaryItems(summary);
+    }
+
+    // Helper: Update order summary items with quantity controls
+    function updateOrderSummaryItems(summary) {
+        if (!summary || !summary.items) {
+            console.warn('updateOrderSummaryItems: No summary or items data received', summary);
+            return;
+        }
+
+        console.log('Updating order summary items:', summary.items);
+
+        // Update each summary item row
+        Object.entries(summary.items).forEach(([itemId, itemData]) => {
+            const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${itemId}"]`);
+            if (!summaryRow) {
+                console.warn(`Summary row not found for item ${itemId}`);
+                return;
+            }
+
+            // Update quantity display
+            const qtyDisplay = summaryRow.querySelector('.summary-quantity');
+            if (qtyDisplay) {
+                qtyDisplay.textContent = itemData.quantity;
+                console.log(`Updated quantity for item ${itemId}: ${itemData.quantity}`);
+            }
+
+            // Update price - use specific class selector for reliable targeting
+            const priceElement = summaryRow.querySelector('.summary-item-price');
+            if (priceElement && (itemData.final_price !== undefined || itemData.unit_price !== undefined)) {
+                const unitPrice = itemData.final_price ?? itemData.unit_price ?? 0;
+                const lineTotal = unitPrice * itemData.quantity;
+                priceElement.textContent = formatMoney(lineTotal);
+                console.log(`Updated price for item ${itemId}: ${formatMoney(lineTotal)} (unit: ${formatMoney(unitPrice)}, qty: ${itemData.quantity})`);
+            } else {
+                console.warn(`Price element or price data not found for item ${itemId}`, itemData);
+            }
+        });
     }
 });

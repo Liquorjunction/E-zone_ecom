@@ -104,10 +104,15 @@ class SliderController extends Controller
 
     public function destroy(DestroySliderRequest $request, SliderRepo $sliderRepo)
     {
-        $id = $request->input('id');
-        $sliderRepo->deleteSlider($id);
+        try {
+            $id = $request->input('id');
+            $sliderRepo->deleteSlider($id);
 
-        return redirect()->route('admin.hero-slider.index')->with('success', 'Slider deleted successfully.');
+            return redirect()->route('admin.hero-slider.index')->with('success', 'Slider deleted successfully.');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.hero-slider.index')
+                ->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     public function updateStatus(EditSliderRequest $request, SliderRepo $sliderRepo)
@@ -132,6 +137,7 @@ class SliderController extends Controller
     {
         try {
             $sliders = $sliderRepo->getDataForDataTable($request->all());
+            $activeCount = HeroSlider::where('is_active', true)->count();
 
             return DataTables::of($sliders)
                 ->addIndexColumn()
@@ -146,9 +152,10 @@ class SliderController extends Controller
                     // Helper to show English title in the list
                     return $slider->getTranslation('title', 'en');
                 })
-                ->addColumn('is_active', function ($slider) use ($request) {
+                ->addColumn('is_active', function ($slider) use ($request, $activeCount) {
                     $data['toggle_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.toggleStatus', ['id' => $slider->id]) : '';
-                    $data['status'] = $slider->is_active;
+                    $data['status'] = (bool) $slider->is_active;
+                    $data['is_only_active'] = ($activeCount === 1 && (bool) $slider->is_active);
 
                     return view('admin.partials.datatable-status', $data)->render();
                 })

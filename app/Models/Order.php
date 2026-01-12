@@ -25,6 +25,7 @@ class Order extends Model
         'total',
         'status',
         'shipping_address',
+        'billing_address',
         'phone_no',
         'email',
         'payment_method',
@@ -33,6 +34,7 @@ class Order extends Model
 
     protected $casts = [
         'shipping_address' => 'array',
+        'billing_address' => 'array',
         'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'coupon_discount_amount' => 'decimal:2',

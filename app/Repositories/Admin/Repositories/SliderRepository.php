@@ -33,6 +33,11 @@ class SliderRepository implements SliderRepositoryInterface
             $data['is_active'] = $request->has('status') && $request->status == 'active' ? 1 : 0;
         }
 
+        // Ensure at least one active slider always exists: if none active yet, make this one active
+        if (!HeroSlider::where('is_active', 1)->exists()) {
+            $data['is_active'] = 1;
+        }
+
         // Handle Image Upload
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('sliders', 'public');
@@ -50,6 +55,14 @@ class SliderRepository implements SliderRepositoryInterface
         // Ensure status is properly formatted
         if (!isset($data['is_active'])) {
             $data['is_active'] = $request->has('status') && $request->status == 'active' ? 1 : 0;
+        }
+
+        // Guard: Do not allow deactivating the last active slider
+        if ($slider->is_active && isset($data['is_active']) && (int) $data['is_active'] === 0) {
+            $activeCount = HeroSlider::where('is_active', 1)->count();
+            if ($activeCount <= 1) {
+                throw new \RuntimeException('At least one hero slider must remain active.');
+            }
         }
 
         // Handle Image Update
@@ -76,6 +89,14 @@ class SliderRepository implements SliderRepositoryInterface
     {
         $slider = HeroSlider::findOrFail($id);
 
+        // Guard: Do not allow deleting the last active slider
+        if ($slider->is_active) {
+            $activeCount = HeroSlider::where('is_active', 1)->count();
+            if ($activeCount <= 1) {
+                throw new \RuntimeException('Cannot delete the last active hero slider. Activate another slider first.');
+            }
+        }
+
         if ($slider->image && Storage::disk('public')->exists($slider->image)) {
             Storage::disk('public')->delete($slider->image);
         }
@@ -86,6 +107,14 @@ class SliderRepository implements SliderRepositoryInterface
     public function updateStatus($id)
     {
         $slider = HeroSlider::findOrFail($id);
+        // Guard: Do not allow turning off the last active slider
+        if ($slider->is_active) {
+            $activeCount = HeroSlider::where('is_active', 1)->count();
+            if ($activeCount <= 1) {
+                throw new \RuntimeException('At least one hero slider must remain active.');
+            }
+        }
+
         $slider->is_active = !$slider->is_active;
         $slider->save();
 

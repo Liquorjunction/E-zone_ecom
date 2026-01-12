@@ -1,9 +1,9 @@
 /* Import the font */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
-@import 'tailwindcss';
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
 
 /* Toast-specific styles (small, kept separate) */
-@import './toast.css';
+@import "./toast.css";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -11,14 +11,27 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 
     /* Adjusted OKLCH for better contrast and vibrancy */
     --color-primary: oklch(0.69 0.14 232.2);
     --color-background: oklch(0.69 0.14 232.2 / 0.05);
-    --color-primary-dark: oklch(0.50 0.12 232.2);
-    --color-foreground: oklch(0.20 0.05 232.2);
+    --color-primary-dark: oklch(0.5 0.12 232.2);
+    --color-foreground: oklch(0.2 0.05 232.2);
+}
+
+/* Hide the spin buttons in WebKit browsers */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide spin buttons in Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 
 /* Alpine.js Cloak - Hide elements until Alpine loads */
@@ -41,32 +54,70 @@
     }
 
     /* Responsive text scaling */
-    .text-responsive-xs { font-size: clamp(0.75rem, 2vw, 0.875rem); }
-    .text-responsive-sm { font-size: clamp(0.875rem, 2.5vw, 1rem); }
-    .text-responsive-base { font-size: clamp(1rem, 3vw, 1.125rem); }
-    .text-responsive-lg { font-size: clamp(1.125rem, 3.5vw, 1.25rem); }
-    .text-responsive-xl { font-size: clamp(1.25rem, 4vw, 1.5rem); }
-    .text-responsive-2xl { font-size: clamp(1.5rem, 5vw, 2rem); }
-    .text-responsive-3xl { font-size: clamp(2rem, 6vw, 3rem); }
-    .text-responsive-4xl { font-size: clamp(3rem, 8vw, 4rem); }
-
-    /* Responsive spacing */
-    .space-responsive-x { margin-left: clamp(0.5rem, 2vw, 1rem); margin-right: clamp(0.5rem, 2vw, 1rem); }
-    .space-responsive-y { margin-top: clamp(0.5rem, 2vw, 1rem); margin-bottom: clamp(0.5rem, 2vw, 1rem); }
-
-/* Ensure pointer-events layering works (kept minimal) */
-#global-toasts, #global-toasts-mobile, #global-toasts-desktop { pointer-events: none }
-#global-toasts-inner > .toast, #global-toasts-mobile-inner > .toast { pointer-events: auto }
-        .print\:hidden { display: none !important; }
-        .print\:block { display: block !important; }
-        .print\:text-black { color: black !important; }
+    .text-responsive-xs {
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+    }
+    .text-responsive-sm {
+        font-size: clamp(0.875rem, 2.5vw, 1rem);
+    }
+    .text-responsive-base {
+        font-size: clamp(1rem, 3vw, 1.125rem);
+    }
+    .text-responsive-lg {
+        font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+    }
+    .text-responsive-xl {
+        font-size: clamp(1.25rem, 4vw, 1.5rem);
+    }
+    .text-responsive-2xl {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+    .text-responsive-3xl {
+        font-size: clamp(2rem, 6vw, 3rem);
+    }
+    .text-responsive-4xl {
+        font-size: clamp(3rem, 8vw, 4rem);
     }
 
-@keyframes infinite-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
+    /* Responsive spacing */
+    .space-responsive-x {
+        margin-left: clamp(0.5rem, 2vw, 1rem);
+        margin-right: clamp(0.5rem, 2vw, 1rem);
+    }
+    .space-responsive-y {
+        margin-top: clamp(0.5rem, 2vw, 1rem);
+        margin-bottom: clamp(0.5rem, 2vw, 1rem);
+    }
+
+    /* Ensure pointer-events layering works (kept minimal) */
+    #global-toasts,
+    #global-toasts-mobile,
+    #global-toasts-desktop {
+        pointer-events: none;
+    }
+    #global-toasts-inner > .toast,
+    #global-toasts-mobile-inner > .toast {
+        pointer-events: auto;
+    }
+    .print\:hidden {
+        display: none !important;
+    }
+    .print\:block {
+        display: block !important;
+    }
+    .print\:text-black {
+        color: black !important;
+    }
 }
 
+@keyframes infinite-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
 
 /* ---- */
 
@@ -84,7 +135,8 @@ html {
 
 /* Wishlist button pulse animation */
 @keyframes pulse-heart {
-    0%, 100% {
+    0%,
+    100% {
         transform: scale(1);
     }
     50% {
@@ -98,7 +150,8 @@ html {
 
 /* Category icon hover effect */
 @keyframes bounce-gentle {
-    0%, 100% {
+    0%,
+    100% {
         transform: translateY(0);
     }
     50% {
@@ -113,7 +166,8 @@ html {
 
 /* Badge animations */
 @keyframes badge-pulse {
-    0%, 100% {
+    0%,
+    100% {
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
     }
     50% {
@@ -155,7 +209,8 @@ html {
 }
 
 .sticky-shadow.scrolled {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Product grid responsive improvements */
@@ -166,7 +221,9 @@ html {
 }
 
 /* Smooth transitions for interactive elements */
-button, a, .transition-all {
+button,
+a,
+.transition-all {
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
@@ -234,7 +291,7 @@ input[type="email"]:focus {
 }
 
 .line-through::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     top: 50%;
@@ -277,10 +334,18 @@ input[type="email"]:focus {
     animation: count-up 0.5s ease-out forwards;
 }
 
-.stat-item:nth-child(1) { animation-delay: 0.1s; }
-.stat-item:nth-child(2) { animation-delay: 0.2s; }
-.stat-item:nth-child(3) { animation-delay: 0.3s; }
-.stat-item:nth-child(4) { animation-delay: 0.4s; }
+.stat-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.stat-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+.stat-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+.stat-item:nth-child(4) {
+    animation-delay: 0.4s;
+}
 
 /* Brand logo hover effect */
 .brand-logo {
@@ -352,12 +417,18 @@ body {
 /* Toast styles have been migrated to resources/css/toast.css and are imported at the top.
    Keep only minimal interaction layering here so toasts don't block page interactions. */
 
-#global-toasts, #global-toasts-mobile, #global-toasts-desktop { pointer-events: none }
-#global-toasts-inner > .toast, #global-toasts-mobile-inner > .toast { pointer-events: auto }
+#global-toasts,
+#global-toasts-mobile,
+#global-toasts-desktop {
+    pointer-events: none;
+}
+#global-toasts-inner > .toast,
+#global-toasts-mobile-inner > .toast {
+    pointer-events: auto;
+}
 
 /* small helper to color action by type (fallback to blue)
    Specific colors are set inline in the SVG/inline styles generated by JS */
-
 
 /* Responsive font scaling */
 @media (max-width: 640px) {
@@ -374,7 +445,9 @@ body {
 
 /* Print styles */
 @media print {
-    header, footer, .no-print {
+    header,
+    footer,
+    .no-print {
         display: none;
     }
 }
@@ -385,7 +458,9 @@ main > div[style*="margin-left"] {
     will-change: margin-left;
 }
 
-body, html, main {
+body,
+html,
+main {
     overflow-x: hidden;
     width: 100%;
 }

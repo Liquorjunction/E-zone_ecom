@@ -56,6 +56,7 @@ class OrderRepository implements OrderRepositoryInterface
                 'total' => $finalTotal,
                 'status' => 'pending',
                 'shipping_address' => $data['shipping_address'] ?? null,
+                'billing_address' => $data['billing_address'] ?? ($data['shipping_address'] ?? null),
                 'phone_no' => $data['phone_no'] ?? null,
                 'email' => $data['email'] ?? Auth::user()?->email ?? null,
                 'payment_method' => $data['payment_method'] ?? null,

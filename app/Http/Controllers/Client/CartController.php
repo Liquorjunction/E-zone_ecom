@@ -93,6 +93,20 @@ class CartController extends Controller
         }
 
         if ($request->wantsJson() || $request->ajax()) {
+            // Build items array for summary update
+            $items = [];
+            if ($cart) {
+                foreach ($cart->items as $cartItem) {
+                    $items[$cartItem->id] = [
+                        'id' => $cartItem->id,
+                        'quantity' => $cartItem->quantity,
+                        'unit_price' => $cartItem->unit_price,
+                        'final_price' => $cartItem->final_price ?? $cartItem->unit_price,
+                        'discount_amount' => $cartItem->discount_amount ?? 0,
+                    ];
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cart updated.',
@@ -111,6 +125,7 @@ class CartController extends Controller
                     'shipping' => round($shipping, 2),
                     'total' => round($finalTotal, 2),
                     'itemCount' => $cart ? (int) $cart->items->sum('quantity') : 0,
+                    'items' => $items,
                 ],
             ]);
         }
@@ -144,6 +159,20 @@ class CartController extends Controller
         $finalTotal = $totalWithTax + $shipping;
 
         if ($request->wantsJson() || $request->ajax()) {
+            // Build items array for summary update
+            $items = [];
+            if ($cart) {
+                foreach ($cart->items as $cartItem) {
+                    $items[$cartItem->id] = [
+                        'id' => $cartItem->id,
+                        'quantity' => $cartItem->quantity,
+                        'unit_price' => $cartItem->unit_price,
+                        'final_price' => $cartItem->final_price ?? $cartItem->unit_price,
+                        'discount_amount' => $cartItem->discount_amount ?? 0,
+                    ];
+                }
+            }
+
             return response()->json([
                 'success' => (bool) $ok,
                 'message' => $ok ? 'Item removed from cart.' : 'Failed to remove item.',
@@ -155,6 +184,7 @@ class CartController extends Controller
                     'shipping' => round($shipping, 2),
                     'total' => round($finalTotal, 2),
                     'itemCount' => $cart ? (int) $cart->items->sum('quantity') : 0,
+                    'items' => $items,
                 ],
             ]);
         }

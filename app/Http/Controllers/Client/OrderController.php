@@ -10,6 +10,7 @@ use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 use App\Models\Address;
 use App\Models\Order as OrderModel;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepositoryInterface;
@@ -30,36 +31,82 @@ class OrderController extends Controller
         }
 
         $data = $request->validated();
-        $data['payment_method'] = $request->input('payment_method') ?? $request->input('payment') ?? ($data['payment_method'] ?? null);
-        $data['shipping_method'] = $request->input('shipping_method') ?? 'standard';
+        $data['payment_method'] = $data['payment_method'] ?? $data['payment'] ?? null;
+        $data['shipping_method'] = $data['shipping_method'] ?? 'standard';
 
         if (!isset($data['email']) || empty($data['email'])) {
-            $data['email'] = Auth::user()?->email ?? $request->input('email') ?? null;
+            $data['email'] = Auth::user()?->email ?? null;
         }
 
-        $data['cardNumber'] = $request->input('cardNumber');
-        $data['expiry'] = $request->input('expiry');
-        $data['cvv'] = $request->input('cvv');
+        $data['cardNumber'] = $data['cardNumber'] ?? null;
+        $data['expiry'] = $data['expiry'] ?? null;
+        $data['cvv'] = $data['cvv'] ?? null;
 
         if (empty($data['shipping_address']) || !is_array($data['shipping_address'])) {
             $data['shipping_address'] = [
-                'name' => trim(($request->input('firstName') ?? '') . ' ' . ($request->input('lastName') ?? '')) ?: null,
-                'street' => $request->input('address') ?? null,
-                'city' => $request->input('city') ?? null,
-                'state' => $request->input('state') ?? null,
-                'postal_code' => $request->input('zip') ?? $request->input('postal_code') ?? null,
-                'country' => $request->input('country') ?? null,
+                'name' => trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) ?: null,
+                'street' => $data['address'] ?? null,
+                'city' => $data['city'] ?? null,
+                'state' => $data['state'] ?? null,
+                'postal_code' => $data['zip'] ?? $data['postal_code'] ?? null,
+                'country' => $data['country'] ?? null,
             ];
         }
 
-        $phone = $request->input('phone') ?? $data['shipping_address']['phone'] ?? null;
+        $phone = $data['phone'] ?? Arr::get($data, 'shipping_address.phone');
         if ($phone) {
             $data['shipping_address']['phone'] = $phone;
         }
         $data['phone_no'] = $phone ?? ($data['phone_no'] ?? null);
 
+        // Billing address: allow separate entry or fall back to shipping
+        $billingSame = (bool) ($data['billing_same_as_shipping'] ?? false);
+        if ($billingSame) {
+            $data['billing_address'] = $data['shipping_address'] ?? null;
+        } else {
+            // Check for saved billing address
+            if (Auth::check()) {
+                $savedBillingAddressId = $data['saved_billing_address_id'] ?? null;
+
+                if (!empty($savedBillingAddressId)) {
+                    $savedBilling = Address::where('id', $savedBillingAddressId)
+                        ->where('user_id', Auth::id())
+                        ->first();
+                    if ($savedBilling) {
+                        $data['billing_address'] = [
+                            'name' => $savedBilling->name,
+                            'street' => $savedBilling->street,
+                            'city' => $savedBilling->city,
+                            'state' => $savedBilling->state,
+                            'postal_code' => $savedBilling->postal_code,
+                            'country' => $savedBilling->country,
+                            'phone' => $savedBilling->phone,
+                        ];
+                    }
+                }
+            }
+        }
+
+        if (empty($data['billing_address']) || !is_array($data['billing_address'])) {
+            $billingName = trim(($data['billing_firstName'] ?? '') . ' ' . ($data['billing_lastName'] ?? '')) ?: null;
+
+            $data['billing_address'] = [
+                'name' => $billingName ?: ($data['shipping_address']['name'] ?? null),
+                'street' => $data['billing_address_line'] ?? $data['billing_address'] ?? null,
+                'city' => $data['billing_city'] ?? null,
+                'state' => $data['billing_state'] ?? null,
+                'postal_code' => $data['billing_zip'] ?? $data['billing_postal_code'] ?? null,
+                'country' => $data['billing_country'] ?? null,
+            ];
+        }
+
+        $billingPhone = $data['billing_phone'] ?? Arr::get($data, 'billing_address.phone') ?? Arr::get($data, 'shipping_address.phone');
+        if ($billingPhone) {
+            $data['billing_address']['phone'] = $billingPhone;
+        }
+
         if (Auth::check()) {
-            $savedAddressId = $request->input('saved_address_id');
+            $savedAddressId = $data['saved_address_id'] ?? null;
 
             if (!empty($savedAddressId)) {
                 $saved = Address::where('id', $savedAddressId)->where('user_id', Auth::id())->first();
@@ -74,9 +121,11 @@ class OrderController extends Controller
                     ];
                 }
             } else {
-                if (!empty($data['shipping_address']) && is_array($data['shipping_address']) && $request->filled('save_address')) {
+                $shouldSaveAddress = (bool) ($data['save_address'] ?? false);
+
+                if (!empty($data['shipping_address']) && is_array($data['shipping_address']) && $shouldSaveAddress) {
                     $addrData = $data['shipping_address'];
-                    $country = $addrData['country'] ?? $request->input('country') ?? '';
+                    $country = $addrData['country'] ?? $data['country'] ?? '';
 
                     $exists = Address::where('user_id', Auth::id())
                         ->where('street', $addrData['street'] ?? '')
@@ -124,8 +173,19 @@ class OrderController extends Controller
         }
 
         $addresses = collect();
+        $billingAddresses = collect();
         if (Auth::check()) {
-            $addresses = Address::where('user_id', Auth::id())->get();
+            // Fetch all addresses for shipping
+            $addresses = Address::where('user_id', Auth::id())
+                ->where('type', 'shipping')
+                ->orWhereNull('type')
+                ->get();
+
+            // Fetch billing addresses separately
+            $billingAddresses = Address::where('user_id', Auth::id())
+                ->where('type', 'billing')
+                ->orWhereNull('type')
+                ->get();
         }
 
         $order = null;
@@ -170,6 +230,7 @@ class OrderController extends Controller
             'cart' => $cart,
             'step' => $step,
             'addresses' => $addresses,
+            'billingAddresses' => $billingAddresses,
             'order' => $order,
             'totals' => $totals,
             'itemsForView' => $itemsForView,
