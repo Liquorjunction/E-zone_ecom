@@ -12,6 +12,7 @@ use App\Jobs\ProcessProductImport;
 use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\SubCategories;
 use App\Repositories\Admin\Interfaces\ProductRepositoryInterface as ProductRepo;
 use App\Services\AutoTranslationService;
@@ -50,8 +51,6 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Temporarily increase max execution time for this request to avoid
-            // PHP's default 60s limit during heavy operations (translation, image handling).
             @set_time_limit(300);
             @ini_set('max_execution_time', '300');
             $data = $request->validated();
@@ -72,7 +71,6 @@ class ProductController extends Controller
     {
         try {
             $id = $request->input('id');
-            // Eager load variants (and their inventory) + images
             $product = Product::with(['productVariants.inventory', 'images'])->findOrFail($id);
 
             $brands = Brand::where('status', 'active')->get();
@@ -82,7 +80,6 @@ class ProductController extends Controller
                 ->get();
 
             return view('admin.pages.product.edit', compact('product', 'brands', 'categories', 'subCategories'));
-
         } catch (\Exception $e) {
             Log::error('ProductController.edit: Failed to fetch product for edit', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
@@ -94,8 +91,6 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Temporarily increase max execution time for this request to avoid
-            // PHP's default 60s limit during heavy operations (translation, image handling).
             @set_time_limit(300);
             @ini_set('max_execution_time', '300');
             $data = $request->validated();
@@ -127,12 +122,23 @@ class ProductController extends Controller
             'id' => 'required|exists:products,id',
         ]);
 
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
-            $productRepo->updateProductStatus($id);
+            $product = $productRepo->updateProductStatus($id);
 
-            return response()->json(['success' => true, 'message' => 'Product status updated successfully.']);
+            // Sync all variants with product status
+            $newStatus = $product->status;
+            ProductVariant::where('product_id', $id)->update(['status' => $newStatus]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Product and variants status updated successfully.',
+                'status' => $newStatus
+            ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('ProductController.toggleStatus: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['success' => false, 'message' => 'Failed to update product status.'], 500);
         }
@@ -144,18 +150,65 @@ class ProductController extends Controller
             'id' => 'required|exists:products,id',
         ]);
 
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $product = $productRepo->updateProductBestseller($id);
 
+            // Sync all variants with product bestseller status
+            $newBestseller = $product->is_bestseller;
+            ProductVariant::where('product_id', $id)->update(['is_bestseller' => $newBestseller]);
+
+            DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => 'Product bestseller status updated successfully.',
-                'is_bestseller' => $product->is_bestseller,
+                'message' => 'Product and variants bestseller status updated successfully.',
+                'is_bestseller' => $newBestseller,
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('ProductController.toggleBestseller: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['success' => false, 'message' => 'Failed to update bestseller status.'], 500);
+        }
+    }
+
+    public function toggleVariantStatus(EditProductRequest $request, ProductRepo $productRepo)
+    {
+        $request->validate([
+            'variant_id' => 'required|exists:product_variants,id',
+            'id' => 'required|exists:products,id',
+        ]);
+
+        try {
+            $variantId = $request->input('variant_id');
+            $productRepo->updateProductVariantStatus($variantId);
+
+            return response()->json(['success' => true, 'message' => 'Product variant status updated successfully.']);
+        } catch (\Exception $e) {
+            Log::error('ProductController.toggleVariantStatus: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update product variant status.'], 500);
+        }
+    }
+
+    public function toggleVariantBestseller(EditProductRequest $request, ProductRepo $productRepo)
+    {
+        $request->validate([
+            'variant_id' => 'required|exists:product_variants,id',
+            'id' => 'required|exists:products,id',
+        ]);
+
+        try {
+            $variantId = $request->input('variant_id');
+            $variant = $productRepo->updateProductVariantBestseller($variantId);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product variant bestseller status updated successfully.',
+                'is_bestseller' => $variant->is_bestseller,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('ProductController.toggleVariantBestseller: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update product variant bestseller status.'], 500);
         }
     }
 
@@ -172,12 +225,33 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Return active variants for a given product as JSON.
-     */
-    // Variants endpoint moved to InventoryController to centralize inventory-related APIs.
+    public function destroyVariant(Request $request)
+    {
+        $request->validate([
+            'variant_id' => 'required|exists:product_variants,id',
+        ]);
 
-    // --- IMPORT FUNCTIONALITY ---
+        try {
+            $variantId = $request->input('variant_id');
+            $variant = \App\Models\ProductVariant::findOrFail($variantId);
+
+            foreach ($variant->images as $img) {
+                if ($img->image_path && Storage::disk('public')->exists($img->image_path)) {
+                    Storage::disk('public')->delete($img->image_path);
+                }
+                $img->delete();
+            }
+
+            $variant->inventory()->delete();
+            $variant->delete();
+
+            Log::info('ProductController.destroyVariant: Variant deleted', ['variant_id' => $variantId]);
+            return response()->json(['success' => true, 'message' => 'Variant deleted successfully']);
+        } catch (\Exception $e) {
+            Log::error('ProductController.destroyVariant: Failed to delete variant', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to delete variant.'], 500);
+        }
+    }
 
     public function import(Request $request)
     {
@@ -188,7 +262,7 @@ class ProductController extends Controller
 
         try {
             $file = $request->file('file');
-            $filename = 'import_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+            $filename = 'import_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
             $relativePath = $file->storeAs('temp_imports', $filename, 'local');
             $fullPath = Storage::disk('local')->path($relativePath);
 
@@ -202,7 +276,6 @@ class ProductController extends Controller
                 'batch_id' => $batchId,
                 'message' => 'File uploaded. Processing started in background.',
             ]);
-
         } catch (\Exception $e) {
             Log::error('Import Start Error: Failed to start import', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
@@ -212,15 +285,14 @@ class ProductController extends Controller
 
     public function importProgress($batchId)
     {
-        $progress = Cache::get('import_progress_'.$batchId);
+        $progress = Cache::get('import_progress_' . $batchId);
 
         if (! $progress) {
             return response()->json(['status' => 'not_found'], 404);
         }
 
         if ($progress['status'] === 'completed') {
-            // Clean up cache entries after completion
-            Cache::forget('import_progress_'.$batchId);
+            Cache::forget('import_progress_' . $batchId);
 
             session()->flash('import_status', [
                 'type' => 'import_summary',
@@ -243,7 +315,7 @@ class ProductController extends Controller
 
     public function importReport($batchId)
     {
-        $importData = Cache::get('import_details_'.$batchId);
+        $importData = Cache::get('import_details_' . $batchId);
 
         if (! $importData) {
             return response()->json(['successful' => [], 'failed' => [], 'skipped' => []]);
@@ -260,46 +332,84 @@ class ProductController extends Controller
 
     public function downloadTemplate()
     {
-        // Updated Headers for Variant-Centric Model
-            $headers = [
-                'name_en', 'description_en', 'brand', 'category', 'sub_category',
-                'price', 'is_bestseller', 'warranty_en', 'dimensions_en',
-                'spec_title', 'spec_value',
-                'variant_name_en', 'variant_price',
-                'attributes_en_key', 'attributes_en_value',
-            ];
+        $headers = [
+            'name_en',
+            'description_en',
+            'brand',
+            'category',
+            'sub_category',
+            'price',
+            'is_bestseller',
+            'warranty_en',
+            'dimensions_en',
+            'spec_title',
+            'spec_value',
+            'variant_name_en',
+            'variant_price',
+            'attributes_en_key',
+            'attributes_en_value',
+        ];
 
         $callback = function () use ($headers) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
 
-            // Example 1: Simple Product (Price on Main Row)
             fputcsv($file, [
-                'iPhone 15', 'Latest Apple Phone', 'Apple', 'Mobile', 'Smartphones',
-                '999', '1', '1 Year', '6.1 inch',
-                'Color', 'Black',
-                '', '',
-                '', '',
+                'iPhone 15',
+                'Latest Apple Phone',
+                'Apple',
+                'Mobile',
+                'Smartphones',
+                '999',
+                '1',
+                '1 Year',
+                '6.1 inch',
+                'Color',
+                'Black',
+                '',
+                '',
+                '',
+                '',
             ]);
 
-            // Example 2: Complex Product (Grouped Rows)
-            // Row 1: Main Data + First Variant (Titanium Gray)
             fputcsv($file, [
-                'Galaxy S24', 'AI Phone', 'Samsung', 'Mobile', 'Smartphones',
-                '0', '0', '1 Year', '6.2 inch',
-                'Processor', 'Snapdragon 8 Gen 3',
-                'Titanium Gray', '899',
-                'color', 'Titanium Gray',
-                'couleur', 'Gris',
+                'Galaxy S24',
+                'AI Phone',
+                'Samsung',
+                'Mobile',
+                'Smartphones',
+                '0',
+                '0',
+                '1 Year',
+                '6.2 inch',
+                'Processor',
+                'Snapdragon 8 Gen 3',
+                'Titanium Gray',
+                '899',
+                'color',
+                'Titanium Gray',
+                'couleur',
+                'Gris',
             ]);
-            // Row 2: Second Variant (Titanium Black) - Empty main cols
+
             fputcsv($file, [
-                '', '', '', '', '',
-                '', '', '', '',
-                'Memory', '256GB',
-                'Titanium Black', '899',
-                'memory', '256GB',
-                '', '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                'Memory',
+                '256GB',
+                'Titanium Black',
+                '899',
+                'memory',
+                '256GB',
+                '',
+                '',
             ]);
 
             fclose($file);
@@ -319,11 +429,15 @@ class ProductController extends Controller
         try {
             $products = $productRepo->getDataforDataTable($request);
 
+            if ($products instanceof \Illuminate\Pagination\Paginator || $products instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+                $products->load('productVariants');
+            }
+
             return DataTables::of($products)
                 ->addIndexColumn()
                 ->addColumn('image', function ($product) {
                     if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
-                        return '<img src="'.asset('storage/'.$product->cover_image).'" alt="Product Image" class="img-thumbnail" width="60" height="60">';
+                        return '<img src="' . asset('storage/' . $product->cover_image) . '" alt="Product Image" class="img-thumbnail" width="60" height="60">';
                     }
 
                     return '<span class="text-muted">No Image</span>';
@@ -331,14 +445,13 @@ class ProductController extends Controller
                 ->addColumn('name', function ($product) {
                     $name = $product->getTranslation('name', 'en');
 
-                    // Simple Translation Check
                     $hasTranslations = true;
                     if (! $product->hasTranslation('name', 'ar') && ! $product->hasTranslation('name', 'fr')) {
                         $hasTranslations = false;
                     }
 
                     if (! $hasTranslations) {
-                        return $name.' <span class="badge bg-warning text-dark ms-2" title="Missing Translations">Not Translated</span>';
+                        return $name . ' <span class="badge bg-warning text-dark ms-2" title="Missing Translations">Not Translated</span>';
                     }
 
                     return $name;
@@ -348,13 +461,6 @@ class ProductController extends Controller
                 })
                 ->addColumn('category', function ($product) {
                     return $product->category ? $product->category->getTranslation('category-name', 'en') : 'N/A';
-                })
-                // NEW: Show Variant Price Range
-                ->editColumn('price', function ($product) {
-                    // Use the min_price from the repository query to avoid N+1 queries
-                    $price = $product->min_price ?? 0;
-
-                    return $price > 0 ? '$'.number_format($price, 2) : '<span class="text-muted">No Stock</span>';
                 })
                 ->addColumn('is_bestseller', function ($product) use ($request) {
                     $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleBestseller', ['id' => $product->id]) : '';
@@ -378,11 +484,33 @@ class ProductController extends Controller
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['image', 'name', 'brand', 'category', 'is_bestseller', 'status', 'action', 'price'])
+                ->addColumn('variants', function ($product) {
+                    return $product->productVariants->count();
+                })
+                ->addColumn('variants_data', function ($product) use ($request) {
+                    $variantsData = [];
+                    foreach ($product->productVariants as $variant) {
+                        $variantName = is_array($variant->variant_name) ? ($variant->variant_name['en'] ?? 'N/A') : $variant->variant_name;
+                        $variantsData[] = [
+                            'id' => $variant->id,
+                            'product_id' => $product->id,
+                            'name' => $variantName,
+                            'sku' => $variant->sku,
+                            'price' => number_format($variant->price, 2),
+                            'status' => $variant->status,
+                            'is_bestseller' => $variant->is_bestseller,
+                            'can_update' => $request->user()->can('products.update'),
+                            'can_delete' => $request->user()->can('products.delete'),
+                            'status_toggle_url' => route('admin.products.variantToggleStatus', ['variant_id' => $variant->id]),
+                            'bestseller_toggle_url' => route('admin.products.variantToggleBestseller', ['variant_id' => $variant->id]),
+                        ];
+                    }
+                    return json_encode($variantsData);
+                })
+                ->rawColumns(['image', 'name', 'brand', 'category', 'is_bestseller', 'status', 'action', 'price', 'variants_data'])
                 ->make(true);
-
         } catch (\Exception $e) {
-            Log::error('ProductController.dataTable: '.$e->getMessage());
+            Log::error('ProductController.dataTable: ' . $e->getMessage());
             throw $e;
         }
     }

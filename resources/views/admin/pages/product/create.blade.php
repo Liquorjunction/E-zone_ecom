@@ -36,20 +36,18 @@
                                 {{-- STEP 1: BASIC INFO --}}
                                 <div class="tab-pane fade show active" id="step1" role="tabpanel">
                                     <div class="row">
-                                        {{-- Translatable Details --}}
                                         <div class="col-md-12 mb-3">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <label class="form-label mb-0"><strong>Product Details</strong> <span
-                                                        class="text-danger">*</span></label>
+                                                <label class="form-label mb-0"><strong>Product Details</strong> <span class="text-danger">*</span></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabBasic" role="tablist">
-                                                    <li class="nav-item" role="presentation"><button class="nav-link active py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-en" type="button" role="tab" aria-controls="basic-en" aria-selected="true">English</button></li>
-                                                    <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-fr" type="button" role="tab" aria-controls="basic-fr" aria-selected="false">French</button></li>
-                                                    <li class="nav-item" role="presentation"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-ar" type="button" role="tab" aria-controls="basic-ar" aria-selected="false">Arabic</button></li>
+                                                    <li class="nav-item"><button class="nav-link active py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-en" type="button">English</button></li>
+                                                    <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-fr" type="button">French</button></li>
+                                                    <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-ar" type="button">Arabic</button></li>
                                                 </ul>
                                             </div>
 
                                             <div class="tab-content border p-3 rounded">
-                                                {{-- English --}}
+                                                {{-- EN --}}
                                                 <div class="tab-pane fade show active" id="basic-en">
                                                     <div class="d-flex justify-content-end mb-3">
                                                         <button type="button" class="btn btn-primary btn-translate-all"
@@ -59,123 +57,110 @@
                                                         </button>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label">Product Name (EN) <span
-                                                                class="text-danger">*</span></label>
-                                                        <input type="text" name="name[en]" class="form-control" required
-                                                            value="{{ old('name.en') }}">
+                                                        <label class="form-label">Product Name (EN) <span class="text-danger">*</span></label>
+                                                        <input type="text" name="name[en]" class="form-control"
+                                                            value="{{ old('name.en') }}" required>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label">Description (EN) <span
-                                                                class="text-danger">*</span></label>
-                                                        <div id="quill-description-en" class="quill-editor"
-                                                            style="height: 200px;">{!! old('description.en') !!}</div>
-                                                        <input type="hidden" name="description[en]"
-                                                            id="description_en" required>
+                                                        <label class="form-label">Description (EN)</label>
+                                                        <div id="quill-description-en" class="quill-editor" style="height: 200px;">
+                                                            {!! old('description.en') !!}
+                                                        </div>
+                                                        <input type="hidden" name="description[en]" id="description_en" value="{{ old('description.en') }}">
                                                     </div>
                                                 </div>
-                                                {{-- French --}}
+                                                {{-- FR --}}
                                                 <div class="tab-pane fade" id="basic-fr">
                                                     <div class="mb-3">
                                                         <label class="form-label">Product Name (FR)</label>
-                                                        <input type="text" name="name[fr]" class="form-control"
-                                                            value="{{ old('name.fr') }}">
+                                                        <input type="text" name="name[fr]" class="form-control" value="{{ old('name.fr') }}">
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Description (FR)</label>
-                                                        <div id="quill-description-fr" class="quill-editor"
-                                                            style="height: 200px;">{!! old('description.fr') !!}</div>
-                                                        <input type="hidden" name="description[fr]"
-                                                            id="description_fr">
+                                                        <div id="quill-description-fr" class="quill-editor" style="height: 200px;">
+                                                            {!! old('description.fr') !!}
+                                                        </div>
+                                                        <input type="hidden" name="description[fr]" id="description_fr" value="{{ old('description.fr') }}">
                                                     </div>
                                                 </div>
-                                                {{-- Arabic --}}
+                                                {{-- AR --}}
                                                 <div class="tab-pane fade" id="basic-ar">
                                                     <div class="mb-3 text-end" dir="rtl">
                                                         <label class="form-label">Product Name (AR)</label>
-                                                        <input type="text" name="name[ar]" class="form-control"
-                                                            value="{{ old('name.ar') }}">
+                                                        <input type="text" name="name[ar]" class="form-control" value="{{ old('name.ar') }}">
                                                     </div>
                                                     <div class="mb-3 text-end" dir="rtl">
                                                         <label class="form-label">Description (AR)</label>
-                                                        <div id="quill-description-ar" class="quill-editor"
-                                                            style="height: 200px;">{!! old('description.ar') !!}</div>
-                                                        <input type="hidden" name="description[ar]"
-                                                            id="description_ar">
+                                                        <div id="quill-description-ar" class="quill-editor" style="height: 200px;">
+                                                            {!! old('description.ar') !!}
+                                                        </div>
+                                                        <input type="hidden" name="description[ar]" id="description_ar" value="{{ old('description.ar') }}">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {{-- Dropdowns --}}
+                                        {{-- Relations --}}
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Brand <span class="text-danger">*</span></label>
+                                            <label class="form-label">Brand</label>
                                             <select name="brand_id" id="brand-select" class="form-select select2-dropdown" required>
-                                                <option value="">Select Brand</option>
+                                                <option value="" disabled {{ old('brand_id') ? '' : 'selected' }}>Select Brand</option>
                                                 @foreach ($brands as $brand)
-                                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                                    <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
+                                                        {{ $brand->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                                            <label class="form-label">Category</label>
                                             <select name="category_id" id="category-select" class="form-select select2-dropdown" required>
-                                                <option value="">Select Category</option>
+                                                <option value="" disabled {{ old('category_id') ? '' : 'selected' }}>Select Category</option>
                                                 @foreach ($categories as $category)
-                                                    <option value="{{ $category->id }}">
-                                                        {{ $category->getTranslation('category-name', 'en') }}</option>
+                                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                        {{ $category->getTranslation('category-name', 'en') }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Sub Category <span
-                                                    class="text-danger">*</span></label>
+                                            <label class="form-label">Sub Category</label>
                                             <select name="sub_category_id" id="subcategory-select" class="form-select select2-dropdown" required>
-                                                <option value="">Select Sub Category</option>
+                                                <option value="" disabled {{ old('sub_category_id') ? '' : 'selected' }}>Select Sub Category</option>
                                                 @foreach ($subCategories as $subCategory)
-                                                    <option value="{{ $subCategory->id }}"
-                                                        data-category="{{ $subCategory->category_id }}">
+                                                    <option value="{{ $subCategory->id }}" data-category="{{ $subCategory->category_id }}" {{ old('sub_category_id') == $subCategory->id ? 'selected' : '' }}>
                                                         {{ $subCategory->getTranslation('sub-category-name', 'en') }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </div>
 
-                                        {{-- Pricing & Cover --}}
-                                        <div class="col-md-4 mb-3">
+                                        {{-- Parent Fields --}}
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">Display Price (Starts From)</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text">$</span>
-                                                <input type="text" class="form-control" disabled
-                                                    placeholder="Calculated from variants">
-                                            </div>
-                                            <small class="text-muted">Actual prices are set in Step 3.</small>
+                                            <input type="text" class="form-control" disabled value="Calculated from Variants">
+                                            <small class="text-muted">Actual prices are managed in Step 3.</small>
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">
-                                                Cover Image <span class="text-muted">(Recommended: 800x800px)</span>
-                                                <span class="text-danger">*</span></label>
-                                            <input type="file" name="cover_image" class="form-control"
-                                                accept="image/*" required>
-                                                <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
-                                                <span class="text-danger d-block">Max size: 2MB.</span>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Cover Image <span class="text-muted">(Recommended: 800x800px)</span> <span class="text-danger">*</span></label>
+                                            <input type="file" name="cover_image" class="form-control" accept="image/*" required>
+                                            <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
+                                            <span class="text-danger d-block">Max size: 2MB.</span>
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label">Status</label>
                                             <select name="status" class="form-select">
-                                                <option value="active" selected>Active</option>
-                                                <option value="inactive">Inactive</option>
+                                                <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
+                                                <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-12 mb-3">
-                                            <div class="form-check mt-2">
-                                                <input class="form-check-input" type="checkbox" name="is_bestseller"
-                                                    value="1" id="is_bestseller" {{ old('is_bestseller') ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="is_bestseller">
-                                                    Mark as Bestseller
-                                                </label>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check mt-4">
+                                                <input class="form-check-input" type="checkbox" name="is_bestseller" value="1" id="is_bestseller" {{ old('is_bestseller') ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="is_bestseller">Mark as Bestseller</label>
                                             </div>
                                         </div>
                                     </div>
@@ -274,10 +259,12 @@
                                                 <table class="table table-striped mb-0" id="variants-table">
                                                     <thead>
                                                         <tr>
-                                                            <th style="width: 40%">Variant Details & Images <span class="text-danger">*</span></th>
-                                                            <th style="width: 20%">Selling Price ($) <span class="text-danger">*</span></th>
-                                                            <th style="width: 15%">Attributes</th>
-                                                            <th style="width: 15%">SKU (Auto)</th>
+                                                            <th style="width: 30%">Variant Details & Images <span class="text-danger">*</span></th>
+                                                            <th style="width: 12%">Selling Price ($) <span class="text-danger">*</span></th>
+                                                            <th style="width: 12%">Bestseller</th>
+                                                            <th style="width: 12%">Status</th>
+                                                            <th style="width: 12%">Attributes</th>
+                                                            <th style="width: 12%">SKU (Auto)</th>
                                                             <th class="text-end">Action</th>
                                                         </tr>
                                                     </thead>
@@ -288,7 +275,7 @@
                                                         @endphp
                                                         @if(!$hasVariants)
                                                         <tr id="no-variants-row">
-                                                            <td colspan="5" class="text-center text-muted py-4">
+                                                            <td colspan="7" class="text-center text-muted py-4">
                                                                 No variants added. Click "Add Variant" to create one.
                                                             </td>
                                                         </tr>
@@ -313,6 +300,18 @@
                                                                     <div class="input-group input-group-sm">
                                                                         <span class="input-group-text">$</span>
                                                                         <input type="number" name="variants[{{ $index }}][price]" step="0.01" min="0" class="form-control" placeholder="0.00" value="{{ $variant['price'] ?? '' }}" required>
+                                                                    </div>
+                                                                </td>
+                                                                <td style="vertical-align: top;">
+                                                                    <div class="form-check form-switch form-check-inline pe-0">
+                                                                        <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][is_bestseller]" value="1" id="variant-bestseller-{{ $index }}" {{ isset($variant['is_bestseller']) && $variant['is_bestseller'] ? 'checked' : '' }}>
+                                                                        <label class="form-check-label" for="variant-bestseller-{{ $index }}"></label>
+                                                                    </div>
+                                                                </td>
+                                                                <td style="vertical-align: top;">
+                                                                    <div class="form-check form-switch form-check-inline pe-0">
+                                                                        <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][status]" value="active" id="variant-status-{{ $index }}" {{ isset($variant['status']) && $variant['status'] === 'active' ? 'checked' : 'checked' }}>
+                                                                        <label class="form-check-label" for="variant-status-{{ $index }}"></label>
                                                                     </div>
                                                                 </td>
                                                                 <td style="vertical-align: top;">

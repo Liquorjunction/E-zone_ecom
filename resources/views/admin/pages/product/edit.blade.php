@@ -297,108 +297,87 @@
                                     </div>
                                 </div>
 
-                                {{-- STEP 3: VARIANTS (Fixed Stock Logic) --}}
+                                {{-- STEP 3: VARIANTS --}}
                                 <div class="tab-pane fade" id="step3" role="tabpanel">
                                     <div class="row">
-                                        <div class="col-md-12 mb-4">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <label class="form-label mb-0"><strong>Product Variants</strong></label>
-                                                <button type="button" class="btn btn-sm btn-success"
-                                                    id="add-variant-btn">
-                                                    <i class="bi bi-plus"></i> Add New Variant
+                                        <div class="col-md-12">
+                                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                                <div>
+                                                    <h5 class="mb-1"><strong>Product Variants</strong></h5>
+                                                    <p class="text-muted small mb-0">Manage variant details, pricing, and images</p>
+                                                </div>
+                                                <button type="button" class="btn btn-success" id="add-variant-btn">
+                                                    <i class="bi bi-plus-circle me-2"></i> Add Variant
                                                 </button>
                                             </div>
-                                            <div class="alert alert-light border small">
-                                                <i class="fas fa-info-circle me-1"></i>
-                                                Images and Prices are managed per variant.
-                                                <strong>Stock is read-only here. Please use the Inventory module to update
-                                                    quantities.</strong>
-                                            </div>
-                                            <div class="table-responsive border rounded p-2">
-                                                <table class="table table-striped mb-0" id="variants-table">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-sm mb-4" id="variants-table">
                                                     <thead>
-                                                        <tr>
-                                                            <th style="width: 40%">Variant Details & Images <span
-                                                                    class="text-danger">*</span></th>
-                                                            <th style="width: 20%">Selling Price ($) <span
-                                                                    class="text-danger">*</span></th>
-                                                            <th style="width: 15%">Attributes</th>
-                                                            <th style="width: 15%">SKU</th>
-                                                            <th class="text-end">Action</th>
+                                                        <tr class="border-bottom">
+                                                            <th style="width: 28%" class="text-uppercase small fw-semibold">Details & Images</th>
+                                                            <th style="width: 14%" class="text-uppercase small fw-semibold">Price</th>
+                                                            <th style="width: 10%" class="text-center text-uppercase small fw-semibold">Bestseller</th>
+                                                            <th style="width: 10%" class="text-center text-uppercase small fw-semibold">Status</th>
+                                                            <th style="width: 12%" class="text-uppercase small fw-semibold">Attributes</th>
+                                                            <th style="width: 14%" class="text-uppercase small fw-semibold">SKU</th>
+                                                            <th style="width: 8%" class="text-center text-uppercase small fw-semibold">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($product->productVariants as $index => $variant)
-                                                            <tr>
-                                                                <td style="vertical-align: top;">
-                                                                    {{-- Hidden ID for Update --}}
-                                                                    <input type="hidden"
-                                                                        name="variants[{{ $index }}][id]"
-                                                                        value="{{ $variant->id }}">
-
-                                                                    <label class="small text-muted mb-1">Variant Name
-                                                                        (EN)</label>
-                                                                    <input type="text"
-                                                                        name="variants[{{ $index }}][name][en]"
-                                                                        class="form-control form-control-sm mb-2"
-                                                                        value="{{ $variant->getTranslation('variant_name', 'en', false) }}"
-                                                                        required>
-
-                                                                    {{-- Hidden Locales --}}
-                                                                    <input type="hidden"
-                                                                        name="variants[{{ $index }}][name][fr]"
-                                                                        value="{{ $variant->getTranslation('variant_name', 'fr', false) }}">
-                                                                    <input type="hidden"
-                                                                        name="variants[{{ $index }}][name][ar]"
-                                                                        value="{{ $variant->getTranslation('variant_name', 'ar', false) }}">
-
-                                                                    {{-- Existing Images --}}
+                                                            <tr class="align-middle">
+                                                                <td>
+                                                                    <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant->id }}">
+                                                                    <div class="mb-2">
+                                                                        <label class="form-label small fw-semibold mb-1">Variant Name</label>
+                                                                        <input type="text" name="variants[{{ $index }}][name][en]" class="form-control form-control-sm" placeholder="e.g. Red / Large" value="{{ $variant->getTranslation('variant_name', 'en', false) }}" required>
+                                                                        <input type="hidden" name="variants[{{ $index }}][name][fr]" value="{{ $variant->getTranslation('variant_name', 'fr', false) }}">
+                                                                        <input type="hidden" name="variants[{{ $index }}][name][ar]" value="{{ $variant->getTranslation('variant_name', 'ar', false) }}">
+                                                                    </div>
                                                                     @if ($variant->images->count() > 0)
-                                                                        <div
-                                                                            class="d-flex gap-1 mb-2 overflow-auto p-1 bg-white border rounded">
-                                                                            @foreach ($variant->images as $img)
-                                                                                <div class="position-relative"
-                                                                                    title="Existing Image">
-                                                                                    <img src="{{ asset('storage/' . $img->image_path) }}"
-                                                                                        class="rounded"
-                                                                                        style="width: 40px; height: 40px; object-fit: cover;">
-                                                                                </div>
-                                                                            @endforeach
+                                                                        <div class="mb-2">
+                                                                            <small class="d-block text-muted mb-1">Current Images:</small>
+                                                                            <div class="d-flex gap-2 flex-wrap">
+                                                                                @foreach ($variant->images as $img)
+                                                                                    <img src="{{ asset('storage/' . $img->image_path) }}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;" title="Image">
+                                                                                @endforeach
+                                                                            </div>
                                                                         </div>
                                                                     @endif
-
-                                                                    <label class="small text-muted"><i
-                                                                            class="fas fa-plus-circle"></i> Add New
-                                                                        Images</label>
-                                                                    <input type="file"
-                                                                        name="variants[{{ $index }}][images][]"
-                                                                        multiple class="form-control form-control-sm"
-                                                                        accept="image/*">
+                                                                    <label class="form-label small fw-semibold mb-1">Add Images</label>
+                                                                    <input type="file" name="variants[{{ $index }}][images][]" multiple class="form-control form-control-sm" accept="image/*">
                                                                 </td>
-                                                                <td style="vertical-align: top;">
+                                                                <td>
+                                                                    <label class="form-label small fw-semibold mb-1">Price</label>
                                                                     <div class="input-group input-group-sm">
                                                                         <span class="input-group-text">$</span>
-                                                                        <input type="number"
-                                                                            name="variants[{{ $index }}][price]"
-                                                                            step="0.01" min="0"
-                                                                            class="form-control"
-                                                                            value="{{ $variant->price }}" required>
+                                                                        <input type="number" name="variants[{{ $index }}][price]" step="0.01" min="0" class="form-control" value="{{ $variant->price }}" required>
                                                                     </div>
                                                                 </td>
-                                                                <td style="vertical-align: top;">
-                                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-variant-attributes" data-index="{{ $index }}">Edit Attributes</button>
+                                                                <td class="text-center">
+                                                                    <div class="form-check form-switch justify-content-center d-flex">
+                                                                        <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][is_bestseller]" value="1" id="bestseller-{{ $index }}" {{ $variant->is_bestseller ? 'checked' : '' }}>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <div class="form-check form-switch justify-content-center d-flex">
+                                                                        <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][status]" value="active" id="status-{{ $index }}" {{ $variant->status === 'active' ? 'checked' : '' }}>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-variant-attributes" data-index="{{ $index }}">
+                                                                        <i class="bi bi-pencil"></i> Edit
+                                                                    </button>
                                                                     <input type="hidden" name="variants[{{ $index }}][attributes][en]" value="{{ json_encode($variant->getTranslation('attributes', 'en', false) ?? []) }}">
                                                                     <input type="hidden" name="variants[{{ $index }}][attributes][fr]" value="{{ json_encode($variant->getTranslation('attributes', 'fr', false) ?? []) }}">
                                                                     <input type="hidden" name="variants[{{ $index }}][attributes][ar]" value="{{ json_encode($variant->getTranslation('attributes', 'ar', false) ?? []) }}">
                                                                 </td>
-                                                                <td style="vertical-align: top;">
-                                                                    <span
-                                                                        class="badge bg-secondary">{{ $variant->sku }}</span>
+                                                                <td>
+                                                                    <span class="badge bg-light text-dark border">{{ $variant->sku }}</span>
                                                                 </td>
-                                                                <td class="text-end" style="vertical-align: top;">
-                                                                    <button type="button"
-                                                                        class="btn btn-danger btn-sm remove-variant"
-                                                                        title="Delete Variant">
+                                                                <td class="text-center">
+                                                                    <button type="button" class="btn btn-sm btn-danger remove-variant" title="Delete Variant">
                                                                         <i class="bi bi-trash"></i>
                                                                     </button>
                                                                 </td>

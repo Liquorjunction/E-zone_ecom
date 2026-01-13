@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">All Products</h4>
+                        <h3 class="card-title">Products</h3>
                         @can('products.create')
                             <div>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
@@ -20,25 +20,25 @@
                         @endcan
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="product-table" class="table table-striped table-bordered w-100"
-                                data-route="{{ route('admin.products.data') }}">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Image</th>
-                                        <th>Name</th>
-                                        <th>Brand</th>
-                                        <th>Category</th>
-                                        <th>Price</th> {{-- ADDED PRICE --}}
-                                        <th>Bestseller</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                        <table id="product-table" class="table table-bordered table-striped" style="width:100%;"
+                            data-source="{{ route('admin.products.data') }}">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>#</th>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Brand</th>
+                                    <th>Category</th>
+                                    <th>Bestseller</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- DataTables will populate this -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -56,6 +56,8 @@ class StoreProductRequest extends FormRequest
             'variants.*.attributes.fr' => 'nullable|string',
             'variants.*.attributes.ar' => 'nullable|string',
             'variants.*.images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'variants.*.status' => 'nullable|in:active,inactive',
+            'variants.*.is_bestseller' => 'nullable|boolean',
         ];
     }
 
@@ -69,10 +71,6 @@ class StoreProductRequest extends FormRequest
         ];
     }
 
-    /**
-     * Normalize incoming variant attributes after validation.
-     * Converts JSON strings to arrays and ensures consistent ['key','value'] entries.
-     */
     protected function passedValidation()
     {
         $data = $this->validated();

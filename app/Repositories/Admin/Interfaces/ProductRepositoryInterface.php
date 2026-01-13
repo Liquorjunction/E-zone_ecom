@@ -16,4 +16,7 @@ interface ProductRepositoryInterface
 
     public function updateProductStatus($id);
     public function updateProductBestseller($id);
+
+    public function updateProductVariantStatus($variantId);
+    public function updateProductVariantBestseller($variantId);
 }

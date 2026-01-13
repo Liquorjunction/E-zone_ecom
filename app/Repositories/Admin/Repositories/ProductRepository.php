@@ -14,8 +14,6 @@ use Illuminate\Support\Str;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-    // --- Interface Implementation Methods ---
-
     public function getAllProducts()
     {
         return Product::all();
@@ -33,13 +31,12 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getProductById($id)
     {
-        // Eager load inventory and images for editing
         return Product::with(['productVariants.images', 'productVariants.inventory'])->findOrFail($id);
     }
 
     public function getDataforDataTable($request = null)
     {
-        return Product::with(['brand', 'category'])
+        return Product::with(['brand', 'category', 'productVariants'])
             ->select('id', 'name', 'status', 'is_bestseller', 'cover_image', 'brand_id', 'category_id', 'sku')
             ->selectRaw('COALESCE((
                 SELECT MIN(price)
@@ -51,12 +48,9 @@ class ProductRepository implements ProductRepositoryInterface
             ->get();
     }
 
-    // --- Core CRUD Operations ---
-
     public function createProduct($request, $data = null)
     {
         try {
-            // 1. Prepare Data
             $data = $data ?? $request->validated();
             $data['status'] = $data['status'] ?? 'inactive';
             $data['is_bestseller'] = $request->has('is_bestseller') ? 1 : 0;
@@ -66,13 +60,13 @@ class ProductRepository implements ProductRepositoryInterface
             if (empty($data['sku'])) {
                 $data['sku'] = 'TEMP-' . uniqid();
             }
-            // Handle Cover Image
+
             if ($request instanceof \Illuminate\Http\Request && $request->hasFile('cover_image')) {
                 $data['cover_image'] = $request->file('cover_image')->store('products/covers', 'public');
             } elseif (isset($data['cover_image']) && is_string($data['cover_image'])) {
                 $data['cover_image'] = $this->handleImportedFile($data['cover_image'], 'products/covers');
             }
-            // Handle Gallery Images uploads (collect paths; will persist to product_images table after creating product)
+
             $galleryPaths = [];
             if ($request instanceof \Illuminate\Http\Request && $request->hasFile('gallery_images')) {
                 foreach ($request->file('gallery_images') as $file) {
@@ -80,12 +74,9 @@ class ProductRepository implements ProductRepositoryInterface
                 }
             }
 
-            // 2. Create Product
             $product = Product::create($data);
             $this->generateAndSaveSku($product, $data);
-            // 3. Handle Variants
-            // 3. Handle Variants
-            // Map uploaded files for variants into the $data['variants'] array so syncVariants can process them
+
             if ($request instanceof \Illuminate\Http\Request && $request->hasFile('variants')) {
                 $variantFiles = $request->file('variants');
                 if (!empty($variantFiles) && is_array($variantFiles)) {
@@ -100,22 +91,19 @@ class ProductRepository implements ProductRepositoryInterface
             if (!empty($data['variants']) && is_array($data['variants'])) {
                 $this->syncVariants($product, $data['variants']);
             }
-            // 4. Persist gallery images into product_images table (main product images)
+
             if (!empty($galleryPaths)) {
-                // Prefer explicit variant id from request/data if provided
                 $preferredVariantId = null;
                 if ($request instanceof \Illuminate\Http\Request) {
                     $pref = $request->input('gallery_images_variant_id');
                     if (!empty($pref) && is_numeric($pref)) {
                         $preferredVariantId = (int)$pref;
-                        // verify belongs to this product
                         if (!ProductVariant::where('id', $preferredVariantId)->where('product_id', $product->id)->exists()) {
                             $preferredVariantId = null;
                         }
                     }
                 }
 
-                // If no explicit variant requested, attach to first variant if any
                 if (is_null($preferredVariantId)) {
                     $firstVariant = $product->productVariants()->first();
                     $preferredVariantId = $firstVariant ? $firstVariant->id : null;
@@ -130,9 +118,9 @@ class ProductRepository implements ProductRepositoryInterface
                     ]);
                 }
             }
-            // 5. Ensure at least one sellable variant exists
+
             if ($product->productVariants()->count() === 0) {
-                $defaultVariant = ProductVariant::create([
+                ProductVariant::create([
                     'product_id' => $product->id,
                     'variant_name' => ['en' => 'Default'],
                     'sku' => $product->sku . '-V-DEF',
@@ -140,7 +128,6 @@ class ProductRepository implements ProductRepositoryInterface
                     'attributes' => ['en' => []],
                     'status' => 'active',
                 ]);
-                // Inventory creation removed. User will manually enter inventory in the inventory module.
             }
             return $product;
         } catch (\Exception $e) {
@@ -162,9 +149,8 @@ class ProductRepository implements ProductRepositoryInterface
             $data = $data ?? $request->validated();
             unset($data['sku'], $data['id']);
             $this->normalizeForeignKeys($data);
-            // Update Cover Image (Delete old if new uploaded)
+
             if ($request instanceof \Illuminate\Http\Request && $request->hasFile('cover_image')) {
-                // Delete old cover image
                 if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
                     Storage::disk('public')->delete($product->cover_image);
                 }
@@ -173,25 +159,19 @@ class ProductRepository implements ProductRepositoryInterface
                 $data['cover_image'] = $this->handleImportedFile($data['cover_image'], 'products/covers');
             }
 
-            // Handle Gallery Images: add new, keep existing, remove deleted
             if ($request instanceof \Illuminate\Http\Request) {
-                // Use ProductImage DB entries for gallery images rather than a non-existent product->gallery_images property
                 $existingImages = ProductImage::forProduct($product->id)->pluck('image_path')->toArray();
                 $newImages = [];
 
-                // Handle new uploads
                 if ($request->hasFile('gallery_images')) {
-                    // Optionally remove previous product-level images if client expects replacement
                     foreach ($request->file('gallery_images') as $file) {
                         $newImages[] = $file->store('products/gallery', 'public');
                     }
                 }
 
-                // The request should send `gallery_images_existing` paths to keep
                 $imagesToKeep = $request->input('gallery_images_existing', []);
                 $imagesToDelete = array_diff($existingImages, $imagesToKeep);
 
-                // Delete removed images from storage and DB
                 if (!empty($imagesToDelete)) {
                     $images = ProductImage::where('product_id', $product->id)->whereIn('image_path', $imagesToDelete)->get();
                     foreach ($images as $oldImg) {
@@ -202,7 +182,6 @@ class ProductRepository implements ProductRepositoryInterface
                     }
                 }
 
-                // Persist newly uploaded images — attach to requested variant or default to first variant
                 $preferredVariantId = null;
                 if ($request instanceof \Illuminate\Http\Request) {
                     $pref = $request->input('gallery_images_variant_id');
@@ -229,8 +208,7 @@ class ProductRepository implements ProductRepositoryInterface
             }
 
             $product->update($data);
-            // Sync Variants
-            // Map uploaded files for variants into the $data['variants'] array so syncVariants can process them
+
             if ($request instanceof \Illuminate\Http\Request && $request->hasFile('variants')) {
                 $variantFiles = $request->file('variants');
                 if (!empty($variantFiles) && is_array($variantFiles)) {
@@ -245,7 +223,7 @@ class ProductRepository implements ProductRepositoryInterface
             if (isset($data['variants']) && is_array($data['variants'])) {
                 $this->syncVariants($product, $data['variants']);
             }
-            // Ensure at least one sellable variant exists after update
+
             if ($product->productVariants()->count() === 0) {
                 $defaultVariant = ProductVariant::create([
                     'product_id' => $product->id,
@@ -274,7 +252,6 @@ class ProductRepository implements ProductRepositoryInterface
         try {
             $product = Product::findOrFail($id);
 
-            // Delete all associated images (both product images and variant images)
             $images = ProductImage::where('product_id', $id)->get();
             foreach ($images as $image) {
                 if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
@@ -283,12 +260,10 @@ class ProductRepository implements ProductRepositoryInterface
                 $image->delete();
             }
 
-            // Delete cover image
             if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
                 Storage::disk('public')->delete($product->cover_image);
             }
 
-            // Delete variants and their inventories (cascade delete will handle this)
             $product->productVariants()->delete();
 
             $product->delete();
@@ -314,7 +289,21 @@ class ProductRepository implements ProductRepositoryInterface
         return $product;
     }
 
-    // --- Variant Logic ---
+    public function updateProductVariantStatus($variantId)
+    {
+        $variant = ProductVariant::findOrFail($variantId);
+        $variant->status = $variant->status == 'active' ? 'inactive' : 'active';
+        $variant->save();
+        return $variant;
+    }
+
+    public function updateProductVariantBestseller($variantId)
+    {
+        $variant = ProductVariant::findOrFail($variantId);
+        $variant->is_bestseller = !$variant->is_bestseller;
+        $variant->save();
+        return $variant;
+    }
 
     private function syncVariants(Product $product, array $variantsData)
     {
@@ -329,7 +318,6 @@ class ProductRepository implements ProductRepositoryInterface
             }
             $data = $this->normalizeVariantData($data, is_numeric($key) ? (int)$key : 0);
 
-            // Ensure attributes locales are arrays (decode JSON strings submitted from frontend)
             if (isset($data['attributes']) && is_array($data['attributes'])) {
                 foreach (['en','fr','ar'] as $ln) {
                     if (isset($data['attributes'][$ln]) && is_string($data['attributes'][$ln])) {
@@ -337,18 +325,15 @@ class ProductRepository implements ProductRepositoryInterface
                         if (is_array($decoded)) {
                             $data['attributes'][$ln] = $decoded;
                         } else {
-                            // keep as single item array
                             $data['attributes'][$ln] = [['key' => 'value', 'value' => $data['attributes'][$ln]]];
                         }
                     }
                 }
             }
 
-            // Update
             if (isset($data['id']) && in_array($data['id'], $existingIds)) {
                 $variant = ProductVariant::find($data['id']);
                     if ($variant) {
-                        // Log sanitized variant payload before update (no sensitive/full dumps)
                         $logPayload = [
                             'action' => 'update_variant',
                             'variant_id' => $variant->id,
@@ -372,24 +357,22 @@ class ProductRepository implements ProductRepositoryInterface
                             'attributes'   => $data['attributes'] ?? null,
                             'status'       => $data['status'] ?? 'active',
                         ]);
-                    // Inventory management is now handled via batch process, not product CRUD
+
                     $processedIds[] = $variant->id;
-                    // Images
+
                     if (!empty($data['images'])) {
                         $this->processVariantImages($product, $variant, $data['images']);
                     }
                 }
             } else {
-                // Create
                 if (empty($data['sku'])) {
                     $suffix = strtoupper(Str::random(4));
                     $data['sku'] = $product->sku . '-V-' . $suffix . '-' . $variantCounter;
                 }
-                // If target locales for attributes are missing, attempt a quick server-side translation
+
                 if (isset($data['attributes']['en']) && (empty($data['attributes']['fr']) || empty($data['attributes']['ar']))) {
                     try {
                         $translator = app(\App\Services\AutoTranslationService::class);
-                        // Prepare minimal payload shape expected by the service
                         $mini = ['variants' => [$data]];
                         $miniTranslated = $translator->prepareProductData($mini);
                         if (!empty($miniTranslated['variants'][0]['attributes'])) {
@@ -400,7 +383,6 @@ class ProductRepository implements ProductRepositoryInterface
                     }
                 }
 
-                // Log sanitized variant payload before create
                 $logPayload = [
                     'action' => 'create_variant',
                     'product_id' => $product->id,
@@ -433,19 +415,18 @@ class ProductRepository implements ProductRepositoryInterface
                 $variantCounter++;
             }
         }
-        // Delete removed variants
+
         $idsToDelete = array_diff($existingIds, $processedIds);
         if (!empty($idsToDelete)) {
             foreach ($existingVariants as $variant) {
                 if (in_array($variant->id, $idsToDelete)) {
-                    // Delete images
                     foreach ($variant->images as $img) {
                         if ($img->image_path && Storage::disk('public')->exists($img->image_path)) {
                             Storage::disk('public')->delete($img->image_path);
                         }
                         $img->delete();
                     }
-                    // Delete inventory
+
                     foreach ($variant->inventory as $inv) {
                         $inv->delete();
                     }
@@ -481,9 +462,6 @@ class ProductRepository implements ProductRepositoryInterface
         }
     }
 
-    /**
-     * Extract a short sample string from attributes array for safe logging.
-     */
     private function extractSampleAttribute(array $attrs): ?string
     {
         if (empty($attrs)) return null;
@@ -492,7 +470,6 @@ class ProductRepository implements ProductRepositoryInterface
         $val = $first['value'] ?? (is_string($first) ? $first : null);
         if (is_array($val)) $val = json_encode($val, JSON_UNESCAPED_UNICODE);
         if (!is_string($val)) $val = (string)$val;
-        // Trim and shorten
         $val = trim($val);
         if (mb_strlen($val) > 60) {
             return mb_substr($val, 0, 57) . '...';
@@ -506,7 +483,6 @@ class ProductRepository implements ProductRepositoryInterface
             return $sourcePath;
         }
 
-        // Only allow copying from a controlled import temporary directory to avoid arbitrary file reads.
         if (file_exists($sourcePath)) {
             $realSource = realpath($sourcePath);
             $allowedBase = realpath(storage_path('app/temp_imports')) ?: null;
@@ -536,7 +512,7 @@ class ProductRepository implements ProductRepositoryInterface
         if (!is_array($data['variant_name'])) {
             $data['variant_name'] = ['en' => $data['variant_name']];
         }
-        // Ensure all language keys exist for variant_name
+
         foreach (['en', 'fr', 'ar'] as $lang) {
             if (!isset($data['variant_name'][$lang])) {
                 $data['variant_name'][$lang] = '';
@@ -545,21 +521,18 @@ class ProductRepository implements ProductRepositoryInterface
 
         if (isset($data['attributes'])) {
             $cleanAttributes = [];
-            // Handle translatable attributes structure
             foreach (['en', 'fr', 'ar'] as $lang) {
                 if (isset($data['attributes'][$lang])) {
                     $attrs = $data['attributes'][$lang];
                     if (is_string($attrs)) {
-                        // Decode JSON string from form
                         $decoded = json_decode($attrs, true);
                         if (is_array($decoded)) {
                             $attrs = $decoded;
                         } else {
-                            // Maybe it's a single serialized entry
                             $attrs = [$attrs];
                         }
                     }
-                    // Normalize to array of ['key'=>..., 'value'=>...]
+
                     $normalized = [];
                     foreach ($attrs as $k => $item) {
                         if (is_array($item) && (isset($item['key']) || isset($item['value']))) {
@@ -578,7 +551,7 @@ class ProductRepository implements ProductRepositoryInterface
                     $cleanAttributes[$lang] = array_values($normalized);
                 }
             }
-            // Ensure attributes have keys for each language (empty arrays if missing)
+
             foreach (['en', 'fr', 'ar'] as $lang) {
                 if (!isset($cleanAttributes[$lang])) {
                     $cleanAttributes[$lang] = [];
@@ -590,14 +563,9 @@ class ProductRepository implements ProductRepositoryInterface
         return $data;
     }
 
-    /**
-     * Ensure translatable fields have entries for each supported language.
-     * Leaves existing values intact but adds missing keys with default value.
-     */
     private function ensureTranslatableKeys(array &$field, $default = ''): void
     {
         if (!is_array($field)) {
-            // If it's a string, assume English content
             $value = $field;
             $field = ['en' => $value];
         }
@@ -636,10 +604,9 @@ class ProductRepository implements ProductRepositoryInterface
         $fields = ['description', 'warranty', 'dimensions', 'specifications'];
         foreach ($fields as $field) {
             if (!isset($data[$field])) $data[$field] = [];
-            // Ensure each translatable field has en, fr, ar keys
             $this->ensureTranslatableKeys($data[$field], "");
         }
-        // Ensure name has all language keys as well
+
         if (isset($data['name'])) {
             $this->ensureTranslatableKeys($data['name'], '');
         }

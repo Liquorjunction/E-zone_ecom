@@ -13,7 +13,7 @@
                             data-source="{{ route('admin.inventory-transactions.data') }}">
                             <thead>
                                 <tr>
-                                    <th></th> <!-- For the plus icon -->
+                                    <th></th>
                                     <th>ID</th>
                                     <th>Product Name</th>
                                     <th>Quantity</th>

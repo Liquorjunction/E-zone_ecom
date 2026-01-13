@@ -89,12 +89,9 @@ class InventoryTransactionsController extends Controller
                     return $transaction->created_at ? $transaction->created_at->format('d M Y, h:i A') : 'N/A';
                 })
                 ->addColumn('location_type', function ($transaction) {
-                    // Adjust the field name as per your actual data structure
                     if (isset($transaction->location_type)) {
-                        return ucfirst($transaction->location_type); // e.g., 'Store' or 'Warehouse'
+                        return ucfirst($transaction->location_type);
                     }
-                    // Example: if you use a boolean or another field
-                    // return $transaction->is_store ? 'Store' : 'Warehouse';
                     return 'N/A';
                 })
                 ->make(true);

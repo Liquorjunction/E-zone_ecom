@@ -237,6 +237,9 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::delete('/destroy', [ProductController::class, 'destroy'])->name('destroy')->middleware('can:products.delete,admin');
             Route::patch('/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:products.update,admin');
             Route::patch('/toggle-bestseller', [ProductController::class, 'toggleBestseller'])->name('toggleBestseller')->middleware('can:products.update,admin');
+            Route::patch('/variant-toggle-status', [ProductController::class, 'toggleVariantStatus'])->name('variantToggleStatus')->middleware('can:products.update,admin');
+            Route::patch('/variant-toggle-bestseller', [ProductController::class, 'toggleVariantBestseller'])->name('variantToggleBestseller')->middleware('can:products.update,admin');
+            Route::patch('/variant-destroy', [ProductController::class, 'destroyVariant'])->name('variantDestroy')->middleware('can:products.delete,admin');
             Route::get('/show', [ProductController::class, 'show'])->name('show')->middleware('can:products.read,admin');
             Route::post('/import', [ProductController::class, 'import'])->name('import')->middleware('can:products.create,admin');
             Route::get('/template', [ProductController::class, 'downloadTemplate'])->name('template');
