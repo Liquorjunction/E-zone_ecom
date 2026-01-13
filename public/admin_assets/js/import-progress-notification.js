@@ -118,18 +118,18 @@ class ImportProgressNotification {
                 <div class="notification-header">
                     <div class="header-left">
                         <button class="btn-collapse" title="Toggle">
-                            <i class="fas fa-minus"></i>
+                            <i class="bi bi-dash"></i>
                         </button>
                         <div class="header-title">
                             <h6 class="mb-0">
-                                <i class="fas fa-file-import text-primary"></i>
+                                <i class="bi bi-file-import text-primary"></i>
                                 ${this.escapeHtml(this.fileName)}
                             </h6>
                             <small class="text-muted">Batch ID: ${this.batchId.substring(0, 8)}</small>
                         </div>
                     </div>
                     <button class="btn-close" title="Close">
-                        <i class="fas fa-times"></i>
+                        <i class="bi bi-x"></i>
                     </button>
                 </div>
 
@@ -138,7 +138,7 @@ class ImportProgressNotification {
                     <!-- Status Badge -->
                     <div class="status-badge">
                         <span class="badge-text">
-                            <i class="fas fa-spinner fa-spin"></i>
+                            <i class="bi bi-spinner bi-spin"></i>
                             <span class="status-label">Processing</span>
                         </span>
                     </div>
@@ -177,7 +177,7 @@ class ImportProgressNotification {
                     <!-- Estimated Time -->
                     <div class="estimated-time">
                         <small class="text-muted">
-                            <i class="fas fa-clock"></i>
+                            <i class="bi bi-clock"></i>
                             <span class="time-text">Calculating...</span>
                         </small>
                     </div>
@@ -185,10 +185,10 @@ class ImportProgressNotification {
                     <!-- Action Buttons -->
                     <div class="notification-actions">
                         <button class="btn btn-sm btn-outline-secondary btn-view-details" title="View Details">
-                            <i class="fas fa-list"></i> Details
+                            <i class="bi bi-list"></i> Details
                         </button>
                         <button class="btn btn-sm btn-outline-danger btn-cancel" title="Cancel Import">
-                            <i class="fas fa-ban"></i> Cancel
+                            <i class="bi bi-ban"></i> Cancel
                         </button>
                     </div>
                 </div>
@@ -209,7 +209,7 @@ class ImportProgressNotification {
             <!-- Floating Action Menu -->
             <div class="floating-menu">
                 <button class="btn-expand" title="Expand">
-                    <i class="fas fa-chevron-up"></i>
+                    <i class="bi bi-chevron-up"></i>
                 </button>
             </div>
         `;
@@ -330,7 +330,7 @@ class ImportProgressNotification {
 
         if (statusBadge) {
             statusBadge.className = 'badge-text completed';
-            statusBadge.innerHTML = '<i class="fas fa-check"></i><span class="status-label">Completed</span>';
+            statusBadge.innerHTML = '<i class="bi bi-check"></i><span class="status-label">Completed</span>';
         }
 
         statusLabel.textContent = 'Completed';
@@ -340,10 +340,10 @@ class ImportProgressNotification {
         if (actionsDiv) {
             actionsDiv.innerHTML = `
                 <button class="btn btn-sm btn-success btn-view-report" title="View Detailed Report">
-                    <i class="fas fa-file-pdf"></i> View Report
+                    <i class="bi bi-file-pdf"></i> View Report
                 </button>
                 <button class="btn btn-sm btn-outline-secondary btn-close-notif" title="Close">
-                    <i class="fas fa-times"></i> Close
+                    <i class="bi bi-x"></i> Close
                 </button>
             `;
 
@@ -376,7 +376,7 @@ class ImportProgressNotification {
 
         if (statusBadge) {
             statusBadge.className = 'badge-text failed';
-            statusBadge.innerHTML = '<i class="fas fa-exclamation-circle"></i><span class="status-label">Failed</span>';
+            statusBadge.innerHTML = '<i class="bi bi-exclamation-circle"></i><span class="status-label">Failed</span>';
         }
 
         statusLabel.textContent = 'Failed';
@@ -402,7 +402,7 @@ class ImportProgressNotification {
 
         body.style.display = 'none';
         collapsed.style.display = 'flex';
-        collapseBtn.className = 'fas fa-plus';
+        collapseBtn.className = 'bi bi-plus';
 
         this.container.classList.add('collapsed');
     }
@@ -415,7 +415,7 @@ class ImportProgressNotification {
 
         body.style.display = 'block';
         collapsed.style.display = 'none';
-        collapseBtn.className = 'fas fa-minus';
+        collapseBtn.className = 'bi bi-minus';
 
         this.container.classList.remove('collapsed');
     }

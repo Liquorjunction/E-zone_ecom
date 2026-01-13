@@ -58,6 +58,20 @@
           NEW
         </span>
       @endif
+      @php
+        $isBestseller = false;
+        if ($isVariant) {
+          $isBestseller = (bool) $product->is_bestseller;
+        } else {
+          $firstVariant = $master->productVariants?->first();
+          $isBestseller = $firstVariant && (bool) $firstVariant->is_bestseller;
+        }
+      @endphp
+      @if($isBestseller)
+        <span class="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+          BESTSELLER
+        </span>
+      @endif
     </div>
 
     <!-- Quick View -->

@@ -16,8 +16,6 @@ class SidebarComposer
      */
     public function compose(View $view)
     {
-        // Fetch Active Categories with their Active Subcategories
-        // Cache for 60 minutes to improve performance since menu structure rarely changes
         $sidebarCategories = Cache::remember('sidebar_categories', 60, function () {
             return Categories::with(['subcategories' => function($query) {
                                 $query->where('status', 'active');

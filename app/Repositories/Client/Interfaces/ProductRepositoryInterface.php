@@ -15,4 +15,6 @@ interface ProductRepositoryInterface
     public function getRelatedProducts(Product $product, int $limit = 4): Collection;
     public function searchProducts(string $keyword, int $limit = 10): Collection;
     public function getDataforproductlisting(int $productId): Collection;
+    public function getBestsellerProducts(int $limit = 12): Collection;
+    public function getBestsellerVariants(int $limit = 12): Collection;
 }

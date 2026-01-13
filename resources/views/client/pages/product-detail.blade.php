@@ -1,7 +1,7 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-gradient-to-br from-gray-50 to-white min-h-screen py-8">
+    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
 
             {!! Breadcrumbs::render('products.detail', $product) !!}
@@ -19,6 +19,16 @@
                                 decoding="async">
 
                             <!-- Badges -->
+                            @php
+                                $currentVariant = null;
+                                if (request()->has('variant')) {
+                                    $requestedSlug = request()->get('variant');
+                                    $currentVariant = $product->productVariants->where('slug', $requestedSlug)->first();
+                                }
+                                if (!$currentVariant && $product->productVariants && $product->productVariants->count() > 0) {
+                                    $currentVariant = $product->productVariants->first();
+                                }
+                            @endphp
                             <div class="absolute top-4 left-4 flex flex-col gap-2 z-10">
                                 @if ($product->created_at > now()->subDays(30))
                                     <span
@@ -26,7 +36,7 @@
                                         NEW
                                     </span>
                                 @endif
-                                @if ($product->is_bestseller)
+                                @if ($currentVariant && $currentVariant->is_bestseller)
                                     <span
                                         class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">
                                         BESTSELLER
@@ -143,7 +153,7 @@
 
                     <!-- Price Box -->
                     <div
-                        class="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
+                        class="bg-linear-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
                         <div class="flex items-center justify-between flex-wrap gap-4">
                             <div class="flex items-baseline gap-3">
                                 @php
@@ -152,12 +162,10 @@
                                     if (!isset($discountInfo) || !is_array($discountInfo)) {
                                         $discountInfo = $product->getDiscountInfo();
                                     }
-                                    // Ensure variantDiscounts is set
                                     if (!isset($variantDiscounts)) {
                                         $variantDiscounts = [];
                                     }
 
-                                    // Ensure discountInfo has required keys and only flag discount when price actually drops
                                     $hasDiscount = isset($discountInfo['has_discount']) && $discountInfo['has_discount'] === true && ($discountInfo['original_price'] ?? 0) > ($discountInfo['final_price'] ?? 0);
                                     $originalPrice = $discountInfo['original_price'] ?? 0;
                                     $finalPrice = $discountInfo['final_price'] ?? 0;
@@ -166,7 +174,6 @@
                                 @endphp
 
                                 @if ($variantCount > 1)
-                                    {{-- Multiple variants - show "From" price with discount if applicable --}}
                                     @if ($hasDiscount)
                                         <div class="flex flex-col gap-2">
                                             <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
@@ -193,7 +200,6 @@
                                         </div>
                                     @endif
                                 @else
-                                    {{-- Single product/variant - show discount if applicable --}}
                                     @if ($hasDiscount)
                                         <div class="flex flex-col gap-2">
                                             <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
@@ -380,10 +386,15 @@
                                             <div class="text-sm font-bold text-gray-900 line-clamp-1">
                                                 {{ is_array($variant->variant_name) ? $variant->variant_name[app()->getLocale()] ?? ($variant->variant_name['en'] ?? reset($variant->variant_name)) : (is_array($variant->name) ? $variant->name[app()->getLocale()] ?? ($variant->name['en'] ?? reset($variant->name)) : $variant->variant_name ?? ($variant->name ?? 'Variant')) }}
                                             </div>
-                                            <span
-                                                class="text-[10px] px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 font-medium">
-                                                {{ is_array($variant->sku) ? $variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku)) : $variant->sku ?? '' }}
-                                            </span>
+                                            <div class="flex flex-col items-end gap-1">
+                                                <span
+                                                    class="text-[10px] px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 font-medium">
+                                                    {{ is_array($variant->sku) ? $variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku)) : $variant->sku ?? '' }}
+                                                </span>
+                                                @if ($variant->is_bestseller)
+                                                    <span class="text-[9px] px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 font-bold">BESTSELLER</span>
+                                                @endif
+                                            </div>
                                         </div>
                                         <div class="text-xs text-gray-500 mb-2 line-clamp-1">
                                             {{ is_string($variant->attributes) ? $variant->attributes : (is_array($variant->attributes) ? json_encode($variant->attributes) : '') }}
@@ -459,7 +470,7 @@
                             <!-- Action Buttons -->
                             <div class="flex-1 flex gap-3">
                                 <button id="add-to-cart-btn" type="submit"
-                                    class="flex-1 bg-gradient-to-r from-primary to-primary-dark text-white text-base font-bold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                    class="flex-1 bg-linear-to-r from-primary to-primary-dark text-white text-base font-bold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -605,7 +616,7 @@
                                         <div class="space-y-6">
                                             @if (!empty($specifications))
                                                 <div
-                                                    class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                                    class="bg-linear-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                                                     <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                                                         <svg class="w-6 h-6 text-primary mr-2" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24">
@@ -631,7 +642,7 @@
 
                                             @if (!empty($dimensions))
                                                 <div
-                                                    class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                                    class="bg-linear-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                                                     <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                                                         <svg class="w-6 h-6 text-primary mr-2" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24">
@@ -678,7 +689,7 @@
                     <div id="reviews-tab" class="tab-content hidden">
                         <div class="space-y-8">
                             <div
-                                class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                class="bg-linear-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                                 <div class="flex items-center justify-between mb-6">
                                     <h4 class="text-2xl font-bold text-gray-900">Customer Reviews</h4>
                                     <button
@@ -718,7 +729,7 @@
                                         <div class="flex items-start justify-between mb-4">
                                             <div class="flex items-center space-x-3">
                                                 <div
-                                                    class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                                                    class="w-12 h-12 bg-linear-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
                                                     {{ substr(['John D.', 'Sarah M.', 'Mike R.', 'Emma L.', 'Alex K.'][$i - 1], 0, 1) }}
                                                 </div>
                                                 <div>
@@ -776,7 +787,7 @@
                     <div id="shipping-tab" class="tab-content hidden">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div
-                                class="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-xl p-6 shadow-sm">
+                                class="bg-linear-to-br from-blue-50 to-white border border-blue-200 rounded-xl p-6 shadow-sm">
                                 <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                                     <svg class="w-7 h-7 mr-3 text-primary" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
@@ -832,7 +843,7 @@
                                 </div>
                             </div>
                             <div
-                                class="bg-gradient-to-br from-green-50 to-white border border-green-200 rounded-xl p-6 shadow-sm">
+                                class="bg-linear-to-br from-green-50 to-white border border-green-200 rounded-xl p-6 shadow-sm">
                                 <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                                     <svg class="w-7 h-7 mr-3 text-primary" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
@@ -917,7 +928,7 @@
                                 <div class="p-4">
                                     <a href="{{ route('products.detail', $relatedProduct->slug) }}">
                                         <h3
-                                            class="font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary mb-2 min-h-[3rem]">
+                                            class="font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary mb-2 min-h-12">
                                             {{ is_array($relatedProduct->name) ? $relatedProduct->name[app()->getLocale()] ?? ($relatedProduct->name['en'] ?? '') : $relatedProduct->name }}
                                         </h3>
                                     </a>

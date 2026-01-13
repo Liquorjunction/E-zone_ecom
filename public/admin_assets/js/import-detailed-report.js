@@ -30,7 +30,7 @@ if (typeof ImportProgressNotification !== 'undefined') {
                     <!-- Header -->
                     <div class="modal-header bg-success text-white">
                         <h5 class="modal-title">
-                            <i class="fas fa-check-circle"></i> Import Report - ${this.escapeHtml(this.fileName)}
+                            <i class="bi bi-check-circle"></i> Import Report - ${this.escapeHtml(this.fileName)}
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
@@ -69,12 +69,12 @@ if (typeof ImportProgressNotification !== 'undefined') {
                         <ul class="nav nav-tabs mb-3" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="successful-tab" data-bs-toggle="tab" data-bs-target="#successful-content" type="button" role="tab">
-                                    <i class="fas fa-check text-success"></i> Successful (${reportData.successful?.length || 0})
+                                    <i class="bi bi-check text-success"></i> Successful (${reportData.successful?.length || 0})
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="failed-tab" data-bs-toggle="tab" data-bs-target="#failed-content" type="button" role="tab">
-                                    <i class="fas fa-times text-danger"></i> Failed / Skipped (${reportData.failed?.length || 0})
+                                    <i class="bi bi-times text-danger"></i> Failed / Skipped (${reportData.failed?.length || 0})
                                 </button>
                             </li>
                         </ul>

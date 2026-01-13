@@ -98,7 +98,7 @@ $(document).ready(function() {
                     <tr class="empty-message">
                         <td colspan="4" class="text-center py-5">
                             <div class="text-muted">
-                                <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                <i class="bi bi-inbox fa-3x mb-3 opacity-50"></i>
                                 <p class="mb-0">No targets added yet</p>
                                 <small>Click "Add Target" to apply this discount to specific items</small>
                             </div>

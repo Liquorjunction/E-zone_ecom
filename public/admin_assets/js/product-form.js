@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Quick UX feedback
         const original = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check me-2"></i> Done';
+        btn.innerHTML = '<i class="bi bi-check me-2"></i> Done';
         setTimeout(() => btn.innerHTML = original, 1500);
     }));
 

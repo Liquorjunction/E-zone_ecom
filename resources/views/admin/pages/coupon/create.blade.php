@@ -14,7 +14,7 @@
                         </div>
                     @endcan
                     <a href="{{ route('admin.coupons.index') }}" class="btn btn-soft-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Coupons
+                        <i class="bi bi-arrow-left me-2"></i>Back to Coupons
                     </a>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                 <div class="col-lg-8">
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-soft-primary border-0">
-                            <h5 class="mb-0"><i class="fas fa-ticket-alt text-primary me-2"></i>Coupon Details</h5>
+                            <h5 class="mb-0"><i class="bi bi-ticket-alt text-primary me-2"></i>Coupon Details</h5>
                         </div>
                         <div class="card-body p-4">
                             <div class="mb-4">
@@ -127,10 +127,10 @@
                         <div
                             class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3">
                             <a href="{{ route('admin.coupons.index') }}" class="btn btn-soft-secondary">
-                                <i class="fas fa-times me-2"></i>Cancel
+                                <i class="bi bi-x me-2"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-success px-4">
-                                <i class="fas fa-check me-2"></i>Create Coupon
+                                <i class="bi bi-check me-2"></i>Create Coupon
                             </button>
                         </div>
                     </div>
@@ -138,17 +138,17 @@
                 <div class="col-lg-4">
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-soft-info border-0">
-                            <h6 class="mb-0"><i class="fas fa-lightbulb text-info me-2"></i>Tips</h6>
+                            <h6 class="mb-0"><i class="bi bi-lightbulb text-info me-2"></i>Tips</h6>
                         </div>
                         <div class="card-body p-4">
                             <ul class="list-unstyled mb-0 small text-muted">
-                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Use short,
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Use short,
                                     memorable codes</li>
-                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Set limits to
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Set limits to
                                     prevent misuse</li>
-                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Use date range for
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Use date range for
                                     seasonal sales</li>
-                                <li><i class="fas fa-check-circle text-success me-2"></i>Enable when ready to launch</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Enable when ready to launch</li>
                             </ul>
                         </div>
                     </div>

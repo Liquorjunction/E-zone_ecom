@@ -7,7 +7,7 @@ use App\Models\Categories;
 use App\Models\Card;
 use App\Models\ProductVariant;
 use App\Models\Brand;
-use App\Repositories\Client\Interfaces\HomeRepositoryInterface;
+use App\Repositories\Client\Interfaces\HomeRepositoryInterface as HomeRepositoryInterface;
 use App\Models\Order;
 use App\Models\Wishlist;
 use App\Models\Address;
@@ -18,21 +18,16 @@ class HomeRepository implements HomeRepositoryInterface
 {
     public function getHomePageData()
     {
-        // 1. Hero Sliders
         $sliders = HeroSlider::orderBy('sort_order', 'asc')->where('is_active', '1')->get();
 
-        // 2. Categories (For the Main Grid)
         $categories = Categories::where('status', 'active')
                                 ->withCount('subcategories')
                                 ->get();
 
-        // 3. Promo Cards (Replacing the static Gaming/Smart Home section)
         $cards = Card::where('status', 'active')
                      ->orderBy('sort_order', 'asc')
                      ->get();
 
-        // 4. New Arrivals: fetch latest product variants tied to recently created products
-        // We join products to order variants by parent product creation date and take 8
         $newArrivals = ProductVariant::select('product_variants.*')
             ->join('products', 'products.id', '=', 'product_variants.product_id')
             ->where('products.status', 'active')
@@ -42,23 +37,20 @@ class HomeRepository implements HomeRepositoryInterface
             ->take(8)
             ->get();
 
-        // 5. Bestsellers: fetch product variants for products flagged as bestseller
         $bestSellers = ProductVariant::select('product_variants.*')
             ->join('products', 'products.id', '=', 'product_variants.product_id')
             ->where('products.status', 'active')
-            ->where('products.is_bestseller', 1)
+            ->where('product_variants.is_bestseller', 1)
             ->where('product_variants.status', 'active')
             ->with(['product', 'images'])
-            ->orderBy('products.updated_at', 'desc')
+            ->orderBy('product_variants.updated_at', 'desc')
             ->take(8)
             ->get();
 
-        // 6. Brands
         $brands = Brand::where('status', 'active')
             ->orderBy('name', 'asc')
             ->get();
 
-        // 7. Wishlist variant ids for current user (optional, used to mark wishlisted items)
         $wishlistVariantIds = collect([]);
         $userId = Auth::id();
         if ($userId) {
@@ -83,7 +75,6 @@ class HomeRepository implements HomeRepositoryInterface
 
         $ordersQuery = Order::where('user_id', $userId)->orderBy('created_at', 'desc');
 
-        // eager-load order items and their products/variants to avoid N+1 queries
         $orders = $ordersQuery->with(['items.product', 'items.variant'])->take(5)->get();
 
         $ordersCount = $ordersQuery->count();

@@ -1,10 +1,41 @@
+@php
+    // Check if we have product/variant data to calculate discounts
+    $productDiscountInfo = null;
+    if (isset($product_id) || isset($variant_id)) {
+        // Retrieve the product or variant model
+        if (isset($variant_id)) {
+            $product = \App\Models\ProductVariant::find($variant_id);
+            if ($product) {
+                $productDiscountInfo = $product->product->getDiscountInfo();
+            }
+        } elseif (isset($product_id)) {
+            $product = \App\Models\Product::find($product_id);
+            if ($product) {
+                $productDiscountInfo = $product->getDiscountInfo();
+            }
+        }
+    }
+@endphp
+
 <div class="group bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary/30 block relative">
     <a href="{{ $url ?? 'javascript:void(0);' }}" class="block">
         <div class="aspect-square overflow-hidden bg-gray-50">
             <img src="{{ asset($image) }}" alt="{{ $title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-            <div class="absolute top-3 right-3 {{ $badgeColor }} text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
-                {{ $badge }}
-            </div>
+
+            <!-- Discount Badge -->
+            @if($productDiscountInfo && $productDiscountInfo['has_discount'])
+                <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
+                    @if($productDiscountInfo['discount_percentage'] > 0)
+                        -{{ number_format($productDiscountInfo['discount_percentage'], 0) }}%
+                    @else
+                        ${{ number_format($productDiscountInfo['discount_amount'], 2) }} OFF
+                    @endif
+                </div>
+            @else
+                <div class="absolute top-3 right-3 {{ $badgeColor ?? 'bg-green-500' }} text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
+                    {{ $badge ?? 'NEW' }}
+                </div>
+            @endif
         </div>
     </a>
     {{-- Wishlist button moved outside anchor to prevent navigation on click --}}
@@ -40,6 +71,8 @@
             <span class="text-lg font-bold text-gray-900">{{ $price }}</span>
             @if(isset($oldPrice))
                 <span class="text-sm text-gray-400 line-through">{{ $oldPrice }}</span>
+            @elseif($productDiscountInfo && $productDiscountInfo['has_discount'] && isset($productDiscountInfo['original_price']))
+                <span class="text-sm text-gray-400 line-through">${{ number_format($productDiscountInfo['original_price'], 2) }}</span>
             @endif
         </div>
 

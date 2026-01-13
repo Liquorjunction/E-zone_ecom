@@ -16,7 +16,6 @@ class ClientComposer
      */
     public function compose(View $view)
     {
-        // Fetch active brands and categories (with subcategories) and pass to all client views
         $activeBrands = ClientHelper::getActiveBrands();
         $categories = \App\Models\Categories::where('status', 'active')->with(['subcategories' => function($q) {
             $q->where('status', 'active');
@@ -28,14 +27,12 @@ class ClientComposer
             'subCategories' => $categories->flatMap->subcategories,
         ]);
 
-        // Provide wishlist variant ids for the authenticated user to avoid per-item queries
         $wishlistVariantIds = [];
         if (Auth::check()) {
             $wishlistVariantIds = \App\Models\Wishlist::where('user_id', Auth::id())->pluck('product_variant_id')->toArray();
         }
 
         $view->with('wishlistVariantIds', $wishlistVariantIds);
-            // Provide cart item count (sum of quantities) for current session/user
             $cartItemCount = 0;
             try {
                 $cartService = app(\App\Services\CartService::class);

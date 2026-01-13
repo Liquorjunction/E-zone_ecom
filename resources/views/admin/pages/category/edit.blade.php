@@ -122,7 +122,7 @@
                             </div>
 
                             <div class="alert alert-soft-info font-size-12 mb-0 p-2">
-                                <i class="fas fa-info-circle me-1"></i> Tip: Use a square image (1:1 ratio) for the best appearance on the website.
+                                <i class="bi bi-info-circle me-1"></i> Tip: Use a square image (1:1 ratio) for the best appearance on the website.
                             </div>
                         </div>
                     </div>

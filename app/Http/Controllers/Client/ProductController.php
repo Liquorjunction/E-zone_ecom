@@ -21,20 +21,22 @@ class ProductController extends Controller
     public function index(Request $request, ProductRepo $productRepository)
     {
         $products = $productRepository->getAllActiveVariants($request);
-        return view('client.pages.products', compact('products'));
+        $bestsellers = $productRepository->getBestsellerVariants(12);
+        $bestsellersIds = $bestsellers->pluck('id')->toArray();
+
+        return view('client.pages.products', compact('products', 'bestsellers', 'bestsellersIds'));
     }
 
     public function show($slug, ProductRepo $productRepository)
     {
         $product = $productRepository->findActiveBySlug($slug);
         $relatedProducts = $productRepository->getRelatedProducts($product);
+        $bestsellers = $productRepository->getBestsellerVariants(8);
+        $bestsellersIds = $bestsellers->pluck('id')->toArray();
 
-        // Calculate discount information for ALL product variants
         $variantDiscounts = [];
         if ($product->productVariants && $product->productVariants->count() > 0) {
             foreach ($product->productVariants as $variant) {
-                // Fix: Pass the variant object directly to ensure precise targeting
-                // Ensure parent is linked for category checks
                 if (!$variant->relationLoaded('product')) {
                     $variant->setRelation('product', $product);
                 }
@@ -42,13 +44,11 @@ class ProductController extends Controller
             }
         }
 
-        // Get discount info for the first variant for initial display
         $firstVariant = $product->productVariants->first();
         $discountInfo = $firstVariant && isset($variantDiscounts[$firstVariant->id])
             ? $variantDiscounts[$firstVariant->id]
             : null;
 
-        // If specific variant requested via query param
         if (request()->has('variant')) {
             $requestedSlug = request()->get('variant');
             $requestedVariant = $product->productVariants->where('slug', $requestedSlug)->first();
@@ -57,25 +57,21 @@ class ProductController extends Controller
             }
         }
 
-        // Check if request expects JSON (AJAX for variant switching)
         if (request()->wantsJson()) {
             return response()->json([
                 'product' => $product,
                 'discount_info' => $discountInfo,
-                'variant_discounts' => $variantDiscounts
+                'variant_discounts' => $variantDiscounts,
+                'bestsellers_ids' => $bestsellersIds
             ]);
         }
 
-        return view('client.pages.product-detail', compact('product', 'relatedProducts', 'discountInfo', 'variantDiscounts'));
+        return view('client.pages.product-detail', compact('product', 'relatedProducts', 'discountInfo', 'variantDiscounts', 'bestsellers', 'bestsellersIds'));
     }
 
-    /**
-     * Get discount information for a specific product variant
-     */
     public function getVariantDiscount(Request $request)
     {
         try {
-            // We prioritize variant_id as it uniquely identifies the sellable item
             $variantId = $request->input('variant_id');
 
             if (!$variantId) {
@@ -85,8 +81,6 @@ class ProductController extends Controller
                 ], 400);
             }
 
-            // Find the variant directly (Sellable Item)
-            // Eager load product (Container) for Category/Brand discount checks
             $variant = ProductVariant::with('product')->find($variantId);
 
             if (!$variant) {
@@ -96,7 +90,6 @@ class ProductController extends Controller
                 ], 404);
             }
 
-            // Calculate discount using the Variant object
             $discountInfo = $this->discountService->calculateProductDiscount($variant);
 
             return response()->json([

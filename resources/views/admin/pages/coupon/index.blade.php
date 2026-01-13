@@ -8,7 +8,7 @@
         <h5 class="mb-0">Coupons List</h5>
         @can('coupon.create')
             <a href="{{ route('admin.coupons.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Create Coupon
+                <i class="bi bi-plus"></i> Create Coupon
             </a>
         @endcan
     </div>

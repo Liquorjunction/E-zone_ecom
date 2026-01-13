@@ -494,7 +494,9 @@
                                 $category = $master->category?->name ?? 'General';
                                 if (is_array($category)) { $category = implode(' ', $category); }
 
-                                $price = $isVariant ? ('$' . number_format($productVariant->price ?? 0, 2)) : ('$' . number_format($master->real_price ?? $master->price ?? 0, 2));
+                                // Get discount info and use final price
+                                $discountInfo = $isVariant ? $productVariant->getDiscountInfo() : $master->getDiscountInfo();
+                                $price = '$' . number_format($discountInfo['final_price'] ?? ($isVariant ? ($productVariant->price ?? 0) : ($master->real_price ?? $master->price ?? 0)), 2);
                             @endphp
 
                             @include('client.components.product-card', [
@@ -616,7 +618,9 @@
                                 $category = $master->category?->name ?? 'General';
                                 if (is_array($category)) { $category = implode(' ', $category); }
 
-                                $price = $isVariant ? ('$' . number_format($productVariant->price ?? 0, 2)) : ('$' . number_format($master->real_price ?? $master->price ?? 0, 2));
+                                // Get discount info and use final price
+                                $discountInfo = $isVariant ? $productVariant->getDiscountInfo() : $master->getDiscountInfo();
+                                $price = '$' . number_format($discountInfo['final_price'] ?? ($isVariant ? ($productVariant->price ?? 0) : ($master->real_price ?? $master->price ?? 0)), 2);
                             @endphp
 
                             @include('client.components.product-card', [

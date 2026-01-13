@@ -12,7 +12,7 @@
                     <p class="text-muted mb-0">{{ $coupon->name }} ({{ strtoupper($coupon->code) }})</p>
                 </div>
                 <a href="{{ route('admin.coupons.index') }}" class="btn btn-soft-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Coupons
+                    <i class="bi bi-arrow-left me-2"></i>Back to Coupons
                 </a>
             </div>
         </div>
@@ -38,7 +38,7 @@
             <div class="col-lg-8">
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-soft-primary border-0">
-                        <h5 class="mb-0"><i class="fas fa-ticket-alt text-primary me-2"></i>Coupon Details</h5>
+                        <h5 class="mb-0"><i class="bi bi-ticket-alt text-primary me-2"></i>Coupon Details</h5>
                     </div>
                     <div class="card-body p-4">
                         <div class="mb-4">
@@ -112,10 +112,10 @@
                     </div>
                     <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3">
                         <a href="{{ route('admin.coupons.index') }}" class="btn btn-soft-secondary">
-                            <i class="fas fa-times me-2"></i>Cancel
+                            <i class="bi bi-times me-2"></i>Cancel
                         </a>
                         <button type="submit" class="btn btn-success px-4">
-                            <i class="fas fa-check me-2"></i>Update Coupon
+                            <i class="bi bi-check me-2"></i>Update Coupon
                         </button>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
             <div class="col-lg-4">
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-soft-info border-0">
-                        <h6 class="mb-0"><i class="fas fa-info-circle text-info me-2"></i>Coupon Summary</h6>
+                        <h6 class="mb-0"><i class="bi bi-info-circle text-info me-2"></i>Coupon Summary</h6>
                     </div>
                     <div class="card-body p-4">
                         <div class="mb-3">

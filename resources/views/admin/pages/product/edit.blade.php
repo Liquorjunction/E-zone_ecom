@@ -53,7 +53,7 @@
                                                 {{-- EN --}}
                                                 <div class="tab-pane fade show active" id="basic-en">
                                                     <div class="d-flex justify-content-end mb-3">
-                                                        <button type="button" class="btn btn-primary btn-translate-all"
+                                                        <button type="button" class="btn btn-sm btn-primary btn-translate-all"
                                                             data-url="{{ route('admin.translate.batch') }}"
                                                             data-fields='["name","description","dimensions","warranty","specifications"]'>
                                                             <i class="bi bi-translate me-2"></i> Translate All Fields
