@@ -38,7 +38,7 @@
                                     <button type="button" class="btn btn-primary btn-translate-all"
                                         data-url="{{ route('admin.translate.batch') }}"
                                         data-fields='["question", "answer"]'>
-                                        <i class="fas fa-language me-2"></i> Translate All Fields
+                                        <i class="bi bi-translate me-2"></i> Translate All Fields
                                     </button>
                                 </div>
                                 <div class="form-group">

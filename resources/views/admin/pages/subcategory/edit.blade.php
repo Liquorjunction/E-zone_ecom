@@ -54,7 +54,7 @@
                             <button type="button" class="btn btn-sm btn-outline-primary btn-translate-all"
                                 data-url="{{ route('admin.translate.batch') }}"
                                 data-fields='["sub-category-name"]'>
-                                <i class="fas fa-language me-1"></i> Auto Translate
+                                <i class="bi bi-translate me-1"></i> Auto Translate
                             </button>
                         </div>
 

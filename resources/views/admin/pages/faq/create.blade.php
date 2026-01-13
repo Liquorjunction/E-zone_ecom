@@ -44,7 +44,7 @@
                                             data-url="{{ route('admin.translate.content') }}"
                                             data-source="editor_answer_en"
                                             data-target-base="answer"
-                                            data-quill="true"><i class="fas fa-language"></i> Translate</button>
+                                            data-quill="true"><i class="bi bi-translate"></i> Translate</button>
                                     </div>
                                     <div id="editor_answer_en" style="height: 200px;"></div>
                                     {{-- ID CHANGED HERE to match 'answer_en' pattern --}}

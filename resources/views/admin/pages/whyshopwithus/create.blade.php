@@ -34,7 +34,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary btn-translate-all"
                                             data-url="{{ route('admin.translate.batch') }}"
                                             data-fields='["title", "description"]'>
-                                        <i class="fas fa-language me-1"></i> Auto Translate
+                                        <i class="bi bi-translate me-1"></i> Auto Translate
                                     </button>
                                 </div>
 
@@ -52,7 +52,7 @@
                                                         data-url="{{ route('admin.translate.content') }}"
                                                         data-source="editor_description_en"
                                                         data-target-base="description"
-                                                        data-quill="true"><i class="fas fa-language"></i> Translate</button>
+                                                        data-quill="true"><i class="bi bi-translate"></i> Translate</button>
                                             </div>
                                             <div id="editor_description_en" style="height: 200px;"></div>
                                             <textarea name="description[en]" id="description_en" class="d-none">{{ old('description.en') }}</textarea>

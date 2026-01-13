@@ -23,31 +23,33 @@
                             @method('PUT')
                             <input type="hidden" name="id" value="{{ $shippingAndReturn->id }}">
 
-                            {{-- Language Tabs --}}
-                            <ul class="nav nav-tabs mb-3" id="langTab" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en"
-                                        type="button" role="tab">English</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr"
-                                        type="button" role="tab">French</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar"
-                                        type="button" role="tab">Arabic</button>
-                                </li>
-                            </ul>
+                            {{-- Language Tabs with Translate Button --}}
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <ul class="nav nav-tabs mb-0" id="langTab" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="en-tab" data-bs-toggle="tab" data-bs-target="#en"
+                                            type="button" role="tab">English</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="fr-tab" data-bs-toggle="tab" data-bs-target="#fr"
+                                            type="button" role="tab">French</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="ar-tab" data-bs-toggle="tab" data-bs-target="#ar"
+                                            type="button" role="tab">Arabic</button>
+                                    </li>
+                                </ul>
+
+                                <button type="button" class="btn btn-sm btn-primary btn-translate-all"
+                                    data-url="{{ route('admin.translate.batch') }}"
+                                    data-fields='["title", "content"]'>
+                                    <i class="bi bi-translate me-2"></i> Translate All Fields
+                                </button>
+                            </div>
 
                             <div class="tab-content" id="langTabContent">
                                 {{-- English Tab --}}
                                 <div class="tab-pane fade show active" id="en" role="tabpanel">
-                                    <button type="button" class="btn btn-primary btn-translate-all"
-                                        data-url="{{ route('admin.translate.batch') }}"
-                                        data-fields='["title", "content"]'>
-                                        <i class="fas fa-language me-2"></i> Translate All Fields
-                                    </button>
-
                                     <div class="form-group mb-3">
                                         <label>Title (EN) <span class="text-danger">*</span></label>
                                         <input type="text" name="title[en]" id="title_en" class="form-control"

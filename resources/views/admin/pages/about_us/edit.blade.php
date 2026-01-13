@@ -11,6 +11,11 @@
                             <h4 class="card-title">Edit About Us</h4>
                         </div>
                         <div class="card-action">
+                            <button type="button" class="btn btn-sm btn-primary btn-translate-all" id="btn-translate-all"
+                                data-url="{{ route('admin.translate.batch') }}"
+                                data-fields='["title","description"]'>
+                                <i class="bi bi-translate me-2"></i> Translate All Fields
+                            </button>
                             <a href="{{ route('admin.about_us.index') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-arrow-left mr-2"></i>Back
                             </a>
@@ -50,8 +55,11 @@
                                     aria-labelledby="en-tab">
                                     <div class="form-group">
                                         <label class="form-label">Title (EN) <span class="text-danger">*</span></label>
-                                        <input type="text" name="title[en]" id="title_en" class="form-control" value="{{ old('title.en', $aboutUs->getTranslation('title', 'en')) }}" required>
-                                        @error('title.en') <span class="text-danger">{{ $message }}</span> @enderror
+                                        <input type="text" name="title[en]" id="title_en" class="form-control"
+                                            value="{{ old('title.en', $aboutUs->getTranslation('title', 'en')) }}" required>
+                                        @error('title.en')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                     <div class="form-group">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -63,7 +71,7 @@
                                                 data-url="{{ route('admin.translate.content') }}" data-source="editor_en"
                                                 {{-- ID of English Source --}} data-target-base="editor" {{-- Prefix for targets (editor_fr, editor_ar) --}}
                                                 data-quill="true"> {{-- Flag identifying this as Quill --}}
-                                                <i class="fas fa-language mr-1"></i> Translate to Others
+                                                <i class="bi bi-translate mr-1"></i> Translate to Others
                                             </button>
                                         </div>
 
@@ -79,8 +87,11 @@
                                 <div class="tab-pane fade" id="fr" role="tabpanel" aria-labelledby="fr-tab">
                                     <div class="form-group">
                                         <label>Title (FR)</label>
-                                        <input type="text" name="title[fr]" id="title_fr" class="form-control" value="{{ old('title.fr', $aboutUs->getTranslation('title', 'fr')) }}">
-                                         @error('title.fr') <span class="text-danger">{{ $message }}</span> @enderror
+                                        <input type="text" name="title[fr]" id="title_fr" class="form-control"
+                                            value="{{ old('title.fr', $aboutUs->getTranslation('title', 'fr')) }}">
+                                        @error('title.fr')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                     <div class="form-group">
                                         <label>Description (FR)</label>
@@ -97,8 +108,11 @@
                                 <div class="tab-pane fade" id="ar" role="tabpanel" aria-labelledby="ar-tab">
                                     <div class="form-group">
                                         <label>Title (AR)</label>
-                                        <input type="text" name="title[ar]" id="title_ar" class="form-control" value="{{ old('title.ar', $aboutUs->getTranslation('title', 'ar')) }}">
-                                        @error('title.ar') <span class="text-danger">{{ $message }}</span> @enderror
+                                        <input type="text" name="title[ar]" id="title_ar" class="form-control"
+                                            value="{{ old('title.ar', $aboutUs->getTranslation('title', 'ar')) }}">
+                                        @error('title.ar')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                     <div class="form-group">
                                         <label>Description (AR)</label>

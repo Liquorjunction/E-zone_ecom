@@ -25,7 +25,7 @@
                         <button type="button" class="btn btn-sm btn-primary btn-translate-all"
                             data-url="{{ route('admin.translate.batch') }}"
                             data-fields='["dimensions", "warranty"]'>
-                            <i class="fas fa-language me-2"></i> Translate Fields
+                            <i class="bi bi-translate me-2"></i> Translate Fields
                         </button>
                     </div>
                     @endif

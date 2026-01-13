@@ -39,10 +39,12 @@ class Product extends Model
         'specifications',
         'warranty',
         'status',
+        'is_bestseller'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'is_bestseller' => 'boolean',
     ];
 
     public function getSlugOptions() : SlugOptions

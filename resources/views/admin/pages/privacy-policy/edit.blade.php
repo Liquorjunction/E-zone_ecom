@@ -10,6 +10,11 @@
                             <h4 class="card-title">Edit Privacy Policy</h4>
                         </div>
                         <div class="card-action">
+                            <button type="button" class="btn btn-sm btn-primary btn-translate-all" id="btn-translate-all"
+                                data-url="{{ route('admin.translate.batch') }}"
+                                data-fields='["title","description"]'>
+                                <i class="bi bi-translate me-2"></i> Translate All Fields
+                            </button>
                             <a href="{{ route('admin.privacy-policy.index') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-arrow-left mr-2"></i>Back
                             </a>
@@ -63,7 +68,7 @@
                                                 data-url="{{ route('admin.translate.content') }}" data-source="editor_en"
                                                 {{-- ID of English Source --}} data-target-base="editor" {{-- Prefix for targets (editor_fr, editor_ar) --}}
                                                 data-quill="true"> {{-- Flag identifying this as Quill --}}
-                                                <i class="fas fa-language mr-1"></i> Translate to Others
+                                                <i class="bi bi-translate mr-1"></i> Translate to Others
                                             </button>
                                         </div>
 

@@ -43,7 +43,7 @@
                                                         id="btn-translate-all"
                                                         data-url="{{ route('admin.translate.batch') }}"
                                                         data-fields='["name", "address", "description", "city", "state", "country"]'>
-                                                        <i class="fas fa-language me-2"></i> Translate All Fields
+                                                        <i class="bi bi-translate me-2"></i> Translate All Fields
                                                     </button>
                                                     <ul class="nav nav-pills nav-pills-sm mb-0 ms-2" id="langTabEdit"
                                                         role="tablist">

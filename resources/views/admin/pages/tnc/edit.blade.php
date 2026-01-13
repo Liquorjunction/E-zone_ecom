@@ -20,33 +20,34 @@
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="id" value="{{ $tnc->id }}">
-                                    {{-- Language Tabs --}}
-                                    <ul class="nav nav-tabs" id="langTab" role="tablist">
-                                        <li class="nav-item"><button class="nav-link active" id="en-tab"
-                                                data-bs-toggle="tab" data-bs-target="#en" type="button">English</button>
-                                        </li>
-                                        <li class="nav-item"><button class="nav-link" id="fr-tab" data-bs-toggle="tab"
-                                                data-bs-target="#fr" type="button">French</button>
-                                        </li>
-                                        <li class="nav-item"><button class="nav-link" id="ar-tab" data-bs-toggle="tab"
-                                                data-bs-target="#ar" type="button">Arabic</button>
-                                        </li>
-                                    </ul>
+
+                                    {{-- Language Tabs with Translate Button --}}
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <ul class="nav nav-tabs mb-0" id="langTab" role="tablist">
+                                            <li class="nav-item"><button class="nav-link active" id="en-tab"
+                                                    data-bs-toggle="tab" data-bs-target="#en" type="button">English</button>
+                                            </li>
+                                            <li class="nav-item"><button class="nav-link" id="fr-tab" data-bs-toggle="tab"
+                                                    data-bs-target="#fr" type="button">French</button>
+                                            </li>
+                                            <li class="nav-item"><button class="nav-link" id="ar-tab" data-bs-toggle="tab"
+                                                    data-bs-target="#ar" type="button">Arabic</button>
+                                            </li>
+                                        </ul>
+
+                                        <button type="button" class="btn btn-sm btn-primary btn-translate-all"
+                                            id="btn-translate-all" data-url="{{ route('admin.translate.batch') }}"
+                                            data-fields='["title","content"]'>
+                                            <i class="bi bi-translate me-2"></i> Translate All Fields
+                                        </button>
+                                    </div>
 
                                     {{-- Language Tabs Content --}}
                                     <div class="tab-content mt-3">
                                         {{-- English --}}
                                         <div class="tab-pane fade show active" id="en">
                                             <div class="form-group">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <button type="button" class="btn btn-primary btn-translate-all"
-                                                        data-url="{{ route('admin.translate.batch') }}"
-                                                        data-fields='["title", "content"]'>
-                                                        <i class="fas fa-language me-2"></i> Translate All Fields
-                                                    </button>
-                                                    <label class="mb-0">Title (EN) <span
-                                                            class="text-danger">*</span></label>
-                                                </div>
+                                                <label class="form-label">Title (EN)<span class="text-danger">*</span></label>
                                                 <input type="text" name="title[en]" id="title_en" class="form-control"
                                                     value="{{ old('title.en', $tnc->getTranslation('title', 'en')) }}">
                                                 @error('title.en')
@@ -57,10 +58,12 @@
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <label class="mb-0">Content (EN) <span
                                                             class="text-danger">*</span></label>
-                                                    <button type="button" class="btn btn-sm btn-info text-white btn-translate-auto"
-                                                        data-url="{{ route('admin.translate.content') }}" data-source="editor_content_en"
-                                                        data-target-base="editor_content" data-quill="true">
-                                                        <i class="fas fa-language mr-1"></i> Translate Content
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-info text-white btn-translate-auto"
+                                                        data-url="{{ route('admin.translate.content') }}"
+                                                        data-source="editor_content_en" data-target-base="editor_content"
+                                                        data-quill="true">
+                                                        <i class="bi bi-translate mr-1"></i> Translate Content
                                                     </button>
                                                 </div>
                                                 <div id="editor_content_en" style="height: 300px;"></div>
@@ -99,7 +102,8 @@
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <label class="mb-0">Title (AR)</label>
                                                 </div>
-                                                <input type="text" name="title[ar]" id="title_ar" class="form-control"
+                                                <input type="text" name="title[ar]" id="title_ar"
+                                                    class="form-control"
                                                     value="{{ old('title.ar', $tnc->getTranslation('title', 'ar')) }}"
                                                     dir="rtl">
                                                 @error('title.ar')
