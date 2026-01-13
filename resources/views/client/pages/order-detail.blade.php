@@ -176,7 +176,7 @@
                                     @php
                                         $variant = $item->variant;
                                         $product = $item->product;
-                                        $img = optional(optional($variant)->images()->first())->image_path ?? optional($product)->cover_image ?? optional(optional($product)->images()->first())->image_path;
+                                        $img = optional(optional(optional($variant)?->images())?->first())->image_path ?? optional($product)->cover_image ?? optional(optional(optional($product)?->images())?->first())->image_path;
                                         $imgUrl = $img ? (\Illuminate\Support\Str::startsWith($img, ['http','https','/']) ? $img : asset('storage/' . ltrim($img, '/'))) : 'https://via.placeholder.com/100x100';
                                         $title = $variant && $variant->variant_name ? $variant->variant_name : ($product->name ?? 'Product');
                                         if (is_array($title)) {
