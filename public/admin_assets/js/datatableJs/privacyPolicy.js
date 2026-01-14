@@ -8,7 +8,7 @@ $(document).ready(function () {
             { data: 'title', name: 'title' },
             { data: 'description', name: 'description' },
             { data: 'updated_at', name: 'updated_at' },
-            { data: 'status', name: 'status', orderable: false, searchable: false },
+            // { data: 'status', name: 'status', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ]
     });

@@ -37,7 +37,7 @@
                                         <th>#</th>
                                         <th>Title (EN)</th>
                                         <th>Description (EN)</th>
-                                        <th>Status</th>
+                                        {{-- <th>Status</th> --}}
                                         <th>Action</th>
                                     </tr>
                                 </thead>

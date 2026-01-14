@@ -27,7 +27,7 @@
                                         <th>Title</th>
                                         <th>Description</th>
                                         <th>Last Updated</th>
-                                        <th>Status</th>
+                                        {{-- <th>Status</th> --}}
                                         <th>Action</th>
                                     </tr>
                                 </thead>
