@@ -10,7 +10,7 @@
         <div class="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
             <div class="container mx-auto px-4 py-6">
                 <x-breadcrumbs>
-                    <x-slot:title>Terms of Service</x-slot:title>
+                    <x-slot:title>Terms and Conditions</x-slot:title>
                     <x-slot:content>Please read our terms and conditions carefully.</x-slot:content>
                 </x-breadcrumbs>
             </div>
@@ -31,7 +31,7 @@
                             {{-- Header Section --}}
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-8 border-b border-gray-100">
                                 <div>
-                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Terms of Service</h1>
+                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Terms and Conditions</h1>
                                     <p class="text-gray-500">Agreement between User and {{ config('app.name') }}</p>
                                 </div>
 
@@ -56,7 +56,7 @@
                                     </svg>
                                 </div>
                                 <h3 class="text-lg font-bold text-gray-900">Terms Unavailable</h3>
-                                <p class="text-gray-500 mt-2 max-w-sm mx-auto">We are currently updating our terms of service. Please check back later.</p>
+                                <p class="text-gray-500 mt-2 max-w-sm mx-auto">We are currently updating our terms and conditions. Please check back later.</p>
                             </div>
                         @endif
                     </div>

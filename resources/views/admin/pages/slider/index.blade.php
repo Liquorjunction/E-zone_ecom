@@ -43,6 +43,7 @@
                                     <thead>
                                         <tr class="light">
                                             <th><input type="checkbox" id="select-all-sliders"></th>
+                                            <th>#</th>
                                             <th>Title</th>
                                             <th>Image</th>
                                             <th>Status</th>

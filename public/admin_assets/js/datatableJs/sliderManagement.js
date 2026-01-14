@@ -5,6 +5,7 @@ $(document).ready(function () {
         ajax: $('#slider-list-table').data('url'),
         columns: [
             { data: 'batch_checkbox', name: 'batch_checkbox', orderable: false, searchable: false },
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'title', name: 'title' },
             {
                 data: 'image',
