@@ -23,7 +23,7 @@ class StoreFaqCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|array',
+            'name' => 'required|array|unique:faq_categories,name',
             'name.en' => 'required|string|max:255',
             'name.ar' => 'nullable|string|max:255',
             'name.fr' => 'nullable|string|max:255',
@@ -34,6 +34,8 @@ class StoreFaqCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.required' => 'The name is required.',
+            'name.unique' => 'The name must be unique.',
             'name.en.required' => 'The English name is required.',
             'name.ar.required' => 'The Arabic name is required.',
             'name.fr.required' => 'The French name is required.',

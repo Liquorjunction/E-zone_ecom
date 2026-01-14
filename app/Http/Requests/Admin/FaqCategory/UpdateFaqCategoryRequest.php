@@ -26,7 +26,7 @@ class UpdateFaqCategoryRequest extends FormRequest
         return [
             'id' => 'required|exists:faq_categories,id',
 
-            'name' => 'required|array',
+            'name' => 'required|array|unique:faq_categories,name,' . $this->id,
             'name.en' => 'required|string',
             'name.fr' => 'nullable|string',
             'name.ar' => 'nullable|string',
@@ -37,6 +37,8 @@ class UpdateFaqCategoryRequest extends FormRequest
     public function messages()
     {
         return [
+            'name.required' => 'The name is required.',
+            'name.unique' => 'The name must be unique.',
             'name.en.required' => 'The English name is required.',
             'name.fr.required' => 'The French name is required.',
             'name.ar.required' => 'The Arabic name is required.',
