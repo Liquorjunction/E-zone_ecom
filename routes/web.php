@@ -15,6 +15,7 @@ use App\Http\Controllers\Client\ShippingAndReturnsController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
 use App\Http\Controllers\Client\InventoryController;
+use App\Http\Controllers\Client\ReviewController;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -116,6 +117,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/client/orders/{id}/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
     Route::post('/client/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
     Route::get('/order-detail/{order}', [OrderController::class, 'detail'])->name('order-detail');
+
+    // Reviews
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
 // Cart endpoints: keep `GET /cart` public but require auth for modifications

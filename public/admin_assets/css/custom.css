@@ -76,6 +76,10 @@ label {
     font-size: 1rem;
 }
 
+.form-check-input {
+  border: var(--bs-border-width) solid var(--input-border-default);
+}
+
 :focus {
   outline: none;
 }
@@ -104,11 +108,11 @@ hr {
   opacity: 0.25;
 }
 
-.iq-scroller-effect {
-  /* Scroll Track */
-  /* Scroll Handle */
-  /* Scroll Handle on hover */
-}
+/* .iq-scroller-effect {
+  Scroll Track
+  Scroll Handle
+  Scroll Handle on hover
+} */
 .iq-scroller-effect ::-webkit-scrollbar {
   width: 5px;
   height: 5px;

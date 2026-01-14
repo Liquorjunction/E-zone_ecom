@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Client\Reviews;
 
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,8 +19,9 @@ class StoreReviewRequest extends FormRequest
     {
         return [
             'product_id' => 'required|exists:products,id',
-            'order_id' => 'nullable|exists:orders,id',
-            'order_item_id' => 'nullable|exists:order_items,id',
+            'product_variant_id' => 'required|exists:product_variants,id',
+            'order_id' => 'required|exists:orders,id',
+            'order_item_id' => 'required|exists:order_items,id',
             'rating' => 'required|numeric|min:1|max:5',
             'title' => 'nullable|string|max:255',
             'review_text' => 'nullable|string',
@@ -33,7 +36,11 @@ class StoreReviewRequest extends FormRequest
         return [
             'product_id.required' => 'Product ID is required.',
             'product_id.exists' => 'The selected product does not exist.',
+            'product_variant_id.required' => 'Product Variant ID is required.',
+            'product_variant_id.exists' => 'The selected product variant does not exist.',
+            'order_id.required' => 'Order ID is required to verify delivery.',
             'order_id.exists' => 'The selected order does not exist.',
+            'order_item_id.required' => 'Order Item ID is required to verify delivery.',
             'order_item_id.exists' => 'The selected order item does not exist.',
             'rating.required' => 'Rating is required.',
             'rating.numeric' => 'Rating must be a number.',
@@ -49,10 +56,50 @@ class StoreReviewRequest extends FormRequest
         ];
     }
 
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $userId = $this->user()?->id;
+            $orderId = $this->input('order_id');
+            $orderItemId = $this->input('order_item_id');
+            $productId = $this->input('product_id');
+            $variantId = $this->input('product_variant_id');
+
+            if (! $userId || ! $orderId || ! $orderItemId || ! $productId) {
+                return;
+            }
+
+            $deliveredStatuses = ['delivered', 'completed'];
+
+            $order = Order::where('id', $orderId)
+                ->where('user_id', $userId)
+                ->whereIn('status', $deliveredStatuses)
+                ->first();
+
+            if (! $order) {
+                $validator->errors()->add('order_id', 'You can only review products from delivered orders.');
+                return;
+            }
+
+            $orderItem = OrderItem::where('id', $orderItemId)
+                ->where('order_id', $orderId)
+                ->where('product_id', $productId)
+                ->when($variantId, function ($query) use ($variantId) {
+                    $query->where('variant_id', $variantId);
+                })
+                ->first();
+
+            if (! $orderItem) {
+                $validator->errors()->add('order_item_id', 'The selected order item does not match the product or variant.');
+            }
+        });
+    }
+
     public function attributes()
     {
         return [
             'product_id' => 'Product ID',
+            'product_variant_id' => 'Product Variant ID',
             'order_id' => 'Order ID',
             'order_item_id' => 'Order Item ID',
             'rating' => 'Rating',
