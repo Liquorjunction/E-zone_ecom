@@ -13,7 +13,7 @@ trait ImportProgress
         Cache::put($key, [
             'status' => $status,
             'percent' => $percent,
-            'progress' => $percent, // Keep both for frontend compatibility
+            'progress' => $percent,
             'total' => $total,
             'processed' => $processed,
             'success' => $success,

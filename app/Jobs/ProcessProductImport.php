@@ -28,21 +28,13 @@ class ProcessProductImport implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     use ImportFileLoader, ImportProgress, ImportReporting, ProductGrouper, ProductProcessing;
 
-    public $timeout = 3600; // 1 hour timeout
-
+    public $timeout = 3600;
     public $tries = 1;
-
     protected $filePath;
-
     protected $batchId;
-
     protected $skipTranslation;
-
-    // Lookup Maps
     protected $brandsMap = [];
-
     protected $catsMap = [];
-
     protected $subCatsMap = [];
 
     public function __construct($filePath, $batchId, $skipTranslation = false)
@@ -95,19 +87,15 @@ class ProcessProductImport implements ShouldQueue
         }
     }
 
-    /**
-     * Import a single product DTO using Variant-Centric Logic
-     */
     private function importSingleProduct(ProductImportDTO $dto, $repo, $transService)
     {
         $row = $dto->mainData;
         $rowNum = $dto->rowNum;
 
-        // 1. Validation
         if (empty($row['name_en']) || empty($row['brand']) || empty($row['category'])) {
             return ['status' => 'error', 'message' => "Row $rowNum: Missing required fields (Name, Brand, Category)"];
         }
-        // Price is required only for simple products (no variants provided in DTO)
+
         if (empty($dto->variants) && ! isset($row['price'])) {
             return ['status' => 'error', 'message' => "Row $rowNum: Missing required field: Price (required when no variants are provided)"];
         }
@@ -116,7 +104,6 @@ class ProcessProductImport implements ShouldQueue
             return ['status' => 'error', 'message' => "Row $rowNum: ".$dto->getErrorsAsString()];
         }
 
-        // 2. Resolve IDs (Case Insensitive)
         $brandId = $this->brandsMap[strtolower(trim($row['brand']))] ?? null;
         $catId = $this->catsMap[strtolower(trim($row['category']))] ?? null;
 
@@ -131,15 +118,12 @@ class ProcessProductImport implements ShouldQueue
         if (! empty($row['sub_category'])) {
             $subId = $this->subCatsMap[strtolower(trim($row['sub_category']))] ?? null;
             if (! $subId) {
-                // Log warning but don't fail hard? Or fail? Usually better to fail or allow nullable.
-                // Keeping strict per your existing logic
                 return ['status' => 'error', 'message' => "Row $rowNum: SubCategory '{$row['sub_category']}' not found."];
             }
         }
 
         DB::beginTransaction();
         try {
-            // 3. Check Duplicates (Active products only)
             $exists = Product::whereRaw('LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, "$.en"))) = ?', [strtolower($row['name_en'])])->exists();
             if ($exists) {
                 DB::rollBack();
@@ -147,19 +131,15 @@ class ProcessProductImport implements ShouldQueue
                 return ['status' => 'error', 'message' => "Row $rowNum: Product '{$row['name_en']}' already exists."];
             }
 
-            // 4. Prepare Parent Product Data (Container)
             $data = [
                 'brand_id' => $brandId,
                 'category_id' => $catId,
                 'sub_category_id' => $subId,
-                'price' => 0, // FIXED: Parent price is 0 in variant-centric model
-                'status' => 'active',
-                'is_bestseller' => $dto->isBestseller,
+                'price' => 0,
                 'name' => ['en' => trim($row['name_en'])],
                 'specifications' => ['en' => $dto->specs],
             ];
 
-            // Optional Fields
             if (! empty($row['description_en'])) {
                 $data['description'] = ['en' => $this->ensureUtf8($row['description_en'])];
             }
@@ -171,46 +151,36 @@ class ProcessProductImport implements ShouldQueue
             }
             if (! empty($row['cover_image'])) {
                 $data['cover_image'] = $row['cover_image'];
-            } // Repo will handle file path/copy
+            }
 
-            // 5. Prepare Variants & Inventory
             $variantsData = [];
 
             if (! empty($dto->variants)) {
-                // CASE A: Complex Product (Variants defined in CSV details)
                 foreach ($dto->variants as $v) {
                     $entry = [
                         'variant_name' => ['en' => $v['name_en']],
                         'price' => $v['price'],
-                        // Do not accept SKU or quantity from import; repository will handle SKU and inventory
-                        'status' => 'active',
+                        'is_bestseller' => (bool)($v['is_bestseller'] ?? false),
                     ];
-                    // Normalize attributes to ensure we always pass a translatable shape with 'en' key
                     if (! empty($v['attributes']) && is_array($v['attributes'])) {
                         if (isset($v['attributes']['en'])) {
                             $entry['attributes'] = ['en' => $v['attributes']['en']];
                         } else {
-                            // If attributes were collected as a flat list, wrap under 'en'
                             $entry['attributes'] = ['en' => $v['attributes']];
                         }
                     }
                     $variantsData[] = $entry;
                 }
             } else {
-                // CASE B: Simple Product (No variants defined in CSV)
-                // We MUST create a default variant to hold the Price and Inventory
                 $variantsData[] = [
-                    'variant_name' => ['en' => trim($row['name_en'])], // Same name as parent
-                    'price' => $row['price'], // The price from main row
-                    // Repo will auto-generate SKU; do not include quantity in variant payload
+                    'variant_name' => ['en' => trim($row['name_en'])],
+                    'price' => $row['price'],
                     'attributes' => ['en' => []],
-                    'status' => 'active',
+                    'is_bestseller' => false,
                 ];
             }
 
             $data['variants'] = $variantsData;
-
-            // Log a concise, safe sample of the variant payloads before translation
             $variantSamples = [];
             foreach ($variantsData as $vd) {
                 $variantSamples[] = [
@@ -220,7 +190,6 @@ class ProcessProductImport implements ShouldQueue
             }
             Log::info("Row $rowNum: Prepared variants for import", ['variants' => count($variantsData), 'samples' => $variantSamples]);
 
-            // 6. Auto Translate & Save
             $data = $transService->prepareProductData($data);
             $product = $repo->createProduct(new Request, $data);
 
@@ -289,7 +258,6 @@ class ProcessProductImport implements ShouldQueue
             return $string;
         }
 
-        // Remove null bytes which can cause JSON errors
         $string = str_replace("\x00", '', $string);
 
         if (mb_check_encoding($string, 'UTF-8')) {

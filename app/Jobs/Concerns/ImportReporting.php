@@ -11,6 +11,6 @@ trait ImportReporting
         Cache::put('import_details_' . $batchId, [
             'successful' => $successfulProducts,
             'failed' => $failedProducts,
-        ], 86400); // Keep report for 24 hours
+        ], 86400);
     }
 }

@@ -19,7 +19,6 @@ trait ProductProcessing
         foreach ($groupedProducts as $dto) {
             $processed++;
 
-            // Calls the method defined in the main ProcessProductImport class
             $result = $this->importSingleProduct($dto, $productRepo, $translationService);
 
             if ($result['status'] === 'success') {
@@ -33,13 +32,11 @@ trait ProductProcessing
                 $failedProducts[] = $this->buildFailedRecord($dto, $result['message']);
             }
 
-            // Update progress every 5 items or at the end
             if ($processed % 5 === 0 || $processed === $totalProducts) {
                 $this->updateProgress($cacheKey, 'processing', $totalProducts, $processed, $success, $failed, $errors);
             }
         }
 
-        // Add skipped rows to the failed list
         foreach ($skippedRows as $skipMsg) {
             $failedProducts[] = [
                 'name_en' => 'N/A',

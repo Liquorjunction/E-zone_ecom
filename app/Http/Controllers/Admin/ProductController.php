@@ -339,13 +339,13 @@ class ProductController extends Controller
             'category',
             'sub_category',
             'price',
-            'is_bestseller',
             'warranty_en',
             'dimensions_en',
             'spec_title',
             'spec_value',
             'variant_name_en',
             'variant_price',
+            'variant_is_bestseller',
             'attributes_en_key',
             'attributes_en_value',
         ];
@@ -354,6 +354,7 @@ class ProductController extends Controller
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
 
+            // Sample 1: Simple product (no explicit variant row); price provided at product-level
             fputcsv($file, [
                 'iPhone 15',
                 'Latest Apple Phone',
@@ -361,7 +362,6 @@ class ProductController extends Controller
                 'Mobile',
                 'Smartphones',
                 '999',
-                '1',
                 '1 Year',
                 '6.1 inch',
                 'Color',
@@ -372,6 +372,7 @@ class ProductController extends Controller
                 '',
             ]);
 
+            // Sample 2: Product with explicit variant row (price at variant-level)
             fputcsv($file, [
                 'Galaxy S24',
                 'AI Phone',
@@ -379,21 +380,19 @@ class ProductController extends Controller
                 'Mobile',
                 'Smartphones',
                 '0',
-                '0',
                 '1 Year',
                 '6.2 inch',
                 'Processor',
                 'Snapdragon 8 Gen 3',
                 'Titanium Gray',
                 '899',
+                '1',
                 'color',
                 'Titanium Gray',
-                'couleur',
-                'Gris',
             ]);
 
+            // Sample 3: Continuation row for Sample 2 with additional variant and attributes
             fputcsv($file, [
-                '',
                 '',
                 '',
                 '',
@@ -406,10 +405,9 @@ class ProductController extends Controller
                 '256GB',
                 'Titanium Black',
                 '899',
+                '0',
                 'memory',
                 '256GB',
-                '',
-                '',
             ]);
 
             fclose($file);

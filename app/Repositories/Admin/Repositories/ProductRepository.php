@@ -352,10 +352,11 @@ class ProductRepository implements ProductRepositoryInterface
                         Log::info('ProductRepository.syncVariants variant payload before update', $logPayload);
 
                         $variant->update([
-                            'variant_name' => $data['variant_name'],
-                            'price'        => $data['price'],
-                            'attributes'   => $data['attributes'] ?? null,
-                            'status'       => $data['status'] ?? 'active',
+                            'variant_name'  => $data['variant_name'],
+                            'price'         => $data['price'],
+                            'attributes'    => $data['attributes'] ?? null,
+                            'status'        => $data['status'] ?? 'active',
+                            'is_bestseller' => (bool)($data['is_bestseller'] ?? $variant->is_bestseller ?? false),
                         ]);
 
                     $processedIds[] = $variant->id;
@@ -401,12 +402,13 @@ class ProductRepository implements ProductRepositoryInterface
                 Log::info('ProductRepository.syncVariants variant payload before create', $logPayload);
 
                 $variant = ProductVariant::create([
-                    'product_id'   => $product->id,
-                    'variant_name' => $data['variant_name'],
-                    'sku'          => $data['sku'],
-                    'price'        => $data['price'],
-                    'attributes'   => $data['attributes'] ?? null,
-                    'status'       => $data['status'] ?? 'active',
+                    'product_id'     => $product->id,
+                    'variant_name'   => $data['variant_name'],
+                    'sku'            => $data['sku'],
+                    'price'          => $data['price'],
+                    'attributes'     => $data['attributes'] ?? null,
+                    'status'         => $data['status'] ?? 'active',
+                    'is_bestseller'  => (bool)($data['is_bestseller'] ?? false),
                 ]);
                 $processedIds[] = $variant->id;
                 if (!empty($data['images'])) {

@@ -52,21 +52,20 @@ if (!function_exists('gtrans_html')) {
     {
         $locale = $targetLocale ?? App::getLocale();
 
-        // 1. If English or empty, return original
+        // If English or empty, return original
         if ($locale === 'en' || empty($html)) {
             Log::info("Translation Skipped: '$html' -> ($locale)");
             return $html;
         }
 
-        // 2. Create a cache key
+        // Create a cache key
         $cacheKey = "trans_html_{$locale}_" . md5($html);
 
-        // 3. Attempt Translation
+        // Attempt Translation
         return Cache::remember($cacheKey, 60 * 24 * 30, function () use ($html, $locale) {
             try {
-                // Parse HTML and translate text nodes only
                 $dom = new DOMDocument();
-                libxml_use_internal_errors(true); // Suppress warnings for malformed HTML
+                libxml_use_internal_errors(true);
                 $dom->loadHTML('<div>' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
                 $xpath = new DOMXPath($dom);
@@ -81,20 +80,17 @@ if (!function_exists('gtrans_html')) {
                     }
                 }
 
-                // Extract inner HTML
                 $body = $dom->getElementsByTagName('div')->item(0);
                 $innerHTML = '';
                 foreach ($body->childNodes as $child) {
                     $innerHTML .= $dom->saveHTML($child);
                 }
 
-                // Log Success
                 Log::info("HTML Translation Success: length " . strlen($html) . " -> ($locale)");
 
                 return $innerHTML;
 
             } catch (\Throwable $e) {
-                // Log Error
                 Log::error("HTML Translation Failed for ($locale): " . $e->getMessage());
 
                 // Return original HTML as fallback
