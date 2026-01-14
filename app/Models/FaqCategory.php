@@ -16,11 +16,10 @@ class FaqCategory extends Model
     public $guard_name = 'admin';
     protected $guarded = [];
 
-    public $translatable = ['name', 'description'];
+    public $translatable = ['name'];
 
     protected $fillable = [
         'name',
-        'description',
         'status',
     ];
 

@@ -31,7 +31,7 @@ class FaqCategoryController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            foreach (['name', 'description'] as $field) {
+            foreach (['name'] as $field) {
                 // Skip if English value is missing (should be caught by validation, but safe check)
                 if (! isset($data[$field]['en'])) {
                     continue;
@@ -73,7 +73,7 @@ class FaqCategoryController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            foreach (['name', 'description'] as $field) {
+            foreach (['name'] as $field) {
                 // Skip if English value is missing (should be caught by validation, but safe check)
                 if (! isset($data[$field]['en'])) {
                     continue;
@@ -138,10 +138,6 @@ class FaqCategoryController extends Controller
                 ->addColumn('name', function ($faqCategory) {
                     // Helper to show English title in the list
                     return $faqCategory->getTranslation('name', 'en');
-                })
-                ->addColumn('description', function ($faqCategory) {
-                    // Helper to show English description in the list
-                    return $faqCategory->getTranslation('description', 'en');
                 })
                 ->addColumn('status', function ($faqCategory) use ($request) {
                     $data['toggle_url'] = $request->user()->can('faqs.update') ? route('admin.faq-categories.toggleStatus', ['id' => $faqCategory->id]) : '';

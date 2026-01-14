@@ -48,7 +48,7 @@
                                     <div class="d-flex justify-content-end mb-3">
                                         <button type="button" class="btn btn-primary btn-translate-all"
                                             data-url="{{ route('admin.translate.batch') }}"
-                                            data-fields='["name", "description"]'>
+                                            data-fields='["name"]'>
                                             <i class="bi bi-translate me-2"></i> Translate All Fields
                                         </button>
                                     </div>
@@ -59,16 +59,6 @@
                                             placeholder="Enter Name in English">
 
                                         @error('name.en')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="description_en">Description (EN) <span
-                                                class="text-danger">*</span></label>
-                                        <textarea name="description[en]" class="form-control" id="description_en" rows="4"
-                                            placeholder="Enter Description in English">{{ old('description.en', $faqCategory->getTranslation('description', 'en')) }}</textarea>
-
-                                        @error('description.en')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
@@ -85,16 +75,6 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                    <div class="form-group">
-                                        <label for="description_fr">Description (FR) <span
-                                                class="text-danger">*</span></label>
-                                        <textarea name="description[fr]" class="form-control" id="description_fr" rows="4"
-                                            placeholder="Enter Description in French">{{ old('description.fr', $faqCategory->getTranslation('description', 'fr')) }}</textarea>
-
-                                        @error('description.fr')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
                                 </div>
                                 {{-- Arabic Tab --}}
                                 <div class="tab-pane fade p-3" id="ar" role="tabpanel" aria-labelledby="ar-tab">
@@ -105,16 +85,6 @@
                                             placeholder="Enter Name in Arabic">
 
                                         @error('name.ar')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="description_ar">Description (AR) <span
-                                                class="text-danger">*</span></label>
-                                        <textarea name="description[ar]" class="form-control" id="description_ar" rows="4"
-                                            placeholder="Enter Description in Arabic">{{ old('description.ar', $faqCategory->getTranslation('description', 'ar')) }}</textarea>
-
-                                        @error('description.ar')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>

@@ -46,16 +46,6 @@
                                         @enderror
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="description_en">Description (EN) <span
-                                                class="text-danger">*</span></label>
-                                        <textarea name="description[en]" class="form-control" id="description_en" rows="4"
-                                            placeholder="Enter Description in English">{{ old('description.en', isset($faqCategory) ? $faqCategory->getTranslation('description', 'en') : '') }}</textarea>
-
-                                        @error('description.en')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
                                 </div>
                                 {{-- French Tab --}}
                                 <div class="tab-pane fade" id="fr" role="tabpanel" aria-labelledby="fr-tab">
@@ -69,15 +59,6 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                    <div class="form-group">
-                                        <label for="description_fr">Description (FR)</label>
-                                        <textarea name="description[fr]" class="form-control" id="description_fr" rows="4"
-                                            placeholder="Enter Description in French">{{ old('description.fr', isset($faqCategory) ? $faqCategory->getTranslation('description', 'fr') : '') }}</textarea>
-
-                                        @error('description.fr')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
                                 </div>
                                 {{-- Arabic Tab --}}
                                 <div class="tab-pane fade" id="ar" role="tabpanel" aria-labelledby="ar-tab">
@@ -88,15 +69,6 @@
                                             placeholder="Enter Name in Arabic">
 
                                         @error('name.ar')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="description_ar">Description (AR)</label>
-                                        <textarea name="description[ar]" class="form-control" id="description_ar" rows="4"
-                                            placeholder="Enter Description in Arabic">{{ old('description.ar', isset($faqCategory) ? $faqCategory->getTranslation('description', 'ar') : '') }}</textarea>
-
-                                        @error('description.ar')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>

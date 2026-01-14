@@ -30,10 +30,6 @@ class UpdateFaqCategoryRequest extends FormRequest
             'name.en' => 'required|string',
             'name.fr' => 'nullable|string',
             'name.ar' => 'nullable|string',
-            'description' => 'nullable|array',
-            'description.en' => 'nullable|string',
-            'description.fr' => 'nullable|string',
-            'description.ar' => 'nullable|string',
             'status' => 'required|in:active,inactive',
         ];
     }
@@ -47,9 +43,6 @@ class UpdateFaqCategoryRequest extends FormRequest
             'name.en.string' => 'The English name must be a string.',
             'name.fr.string' => 'The French name must be a string.',
             'name.ar.string' => 'The Arabic name must be a string.',
-            'description.en.string' => 'The English description must be a string.',
-            'description.fr.string' => 'The French description must be a string.',
-            'description.ar.string' => 'The Arabic description must be a string.',
             'status.in' => 'The status must be either active or inactive.',
         ];
     }
@@ -60,9 +53,6 @@ class UpdateFaqCategoryRequest extends FormRequest
             'name.en' => 'name (English)',
             'name.fr' => 'name (French)',
             'name.ar' => 'name (Arabic)',
-            'description.en' => 'description (English)',
-            'description.fr' => 'description (French)',
-            'description.ar' => 'description (Arabic)',
             'status' => 'status',
         ];
     }
