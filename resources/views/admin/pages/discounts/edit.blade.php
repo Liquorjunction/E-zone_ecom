@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <a href="{{ route('admin.discounts.index') }}" class="btn btn-soft-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Discounts
+                        <i class="bi bi-arrow-left me-2"></i>Back to Discounts
                     </a>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-soft-primary border-0">
                         <h5 class="mb-0">
-                            <i class="fas fa-tag text-primary me-2"></i>Discount Information
+                            <i class="bi bi-tag text-primary me-2"></i>Discount Information
                         </h5>
                     </div>
                     <div class="card-body p-4">
@@ -96,7 +96,7 @@
                                        value="{{ $discount->max_discount }}"
                                        class="form-control" placeholder="e.g., 100">
                                 <small class="text-muted mt-2 d-block">
-                                    <i class="fas fa-lightbulb me-1"></i>Useful for percentage discounts (e.g., 50% off up to $100 max)
+                                    <i class="bi bi-lightbulb me-1"></i>Useful for percentage discounts (e.g., 50% off up to $100 max)
                                 </small>
                             </div>
                         </div>
@@ -126,7 +126,7 @@
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-soft-info border-0">
                         <h6 class="mb-0">
-                            <i class="fas fa-cog text-info me-2"></i>Settings
+                            <i class="bi bi-gear text-info me-2"></i>Settings
                         </h6>
                     </div>
                     <div class="card-body p-4">
@@ -151,7 +151,7 @@
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-soft-success border-0">
                         <h6 class="mb-0">
-                            <i class="fas fa-info-circle text-success me-2"></i>Discount Details
+                            <i class="bi bi-info-circle text-success me-2"></i>Discount Details
                         </h6>
                     </div>
                     <div class="card-body p-4">
@@ -185,7 +185,7 @@
                 <div class="card shadow-sm border-0 border-start border-warning">
                     <div class="card-body p-4">
                         <h6 class="mb-3">
-                            <i class="fas fa-calendar-alt text-warning me-2"></i>Schedule
+                            <i class="bi bi-calendar text-warning me-2"></i>Schedule
                         </h6>
                         @if($discount->starts_at)
                         <div class="mb-3">
@@ -212,13 +212,13 @@
                         class="card-header bg-soft-warning border-0 d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-1">
-                                <i class="fas fa-bullseye text-warning me-2"></i>Discount Targets
+                                <i class="bi bi-bullseye text-warning me-2"></i>Discount Targets
                             </h5>
                             <small class="text-muted">Specify which products, categories, or brands this discount
                                 applies to</small>
                         </div>
                         <button type="button" class="btn btn-primary" id="add-target-row">
-                            <i class="fas fa-plus me-2"></i>Add Target
+                            <i class="bi bi-plus me-2"></i>Add Target
                         </button>
                     </div>
                     <div class="card-body p-0">
@@ -375,7 +375,7 @@
                                         <tr class="empty-message">
                                             <td colspan="4" class="text-center py-5">
                                                 <div class="text-muted">
-                                                    <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                                    <i class="bi bi-inbox fa-3x mb-3 opacity-50"></i>
                                                     <p class="mb-0">No targets added yet</p>
                                                     <small>Click "Add Target" to apply this discount to specific
                                                         items</small>
@@ -389,15 +389,12 @@
                     </div>
                     <div
                         class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>Leave targets empty to apply discount site-wide
-                        </small>
                         <div>
                             <a href="{{ route('admin.discounts.index') }}" class="btn btn-soft-secondary me-2">
-                                <i class="fas fa-times me-2"></i>Cancel
+                                <i class="bi bi-times me-2"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-success px-4">
-                                <i class="fas fa-check me-2"></i>Update Discount
+                                <i class="bi bi-check me-2"></i>Update Discount
                             </button>
                         </div>
                     </div>

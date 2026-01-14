@@ -57,7 +57,7 @@
                             <label class="form-label d-flex justify-content-between align-items-center">
                                 <span>Detailed Specifications ({{ strtoupper($lang) }})</span>
                                 <button type="button" class="btn btn-sm btn-info add-spec-btn" data-lang="{{ $lang }}">
-                                    <i class="fas fa-plus-circle"></i> Add Field
+                                    <i class="bi bi-plus-circle"></i> Add Field
                                 </button>
                             </label>
 
@@ -66,7 +66,7 @@
                                     <tr>
                                         <th>Title / Feature</th>
                                         <th>Value / Description</th>
-                                        <th style="width: 50px;" class="text-center"><i class="fas fa-trash-alt"></i></th>
+                                        <th style="width: 50px;" class="text-center"><i class="bi bi-trash"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody>

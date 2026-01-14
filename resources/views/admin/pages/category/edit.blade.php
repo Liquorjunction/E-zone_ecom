@@ -99,7 +99,7 @@
 
                     {{-- Right Column: Preview & Status --}}
                     <div class="col-lg-4 col-md-12">
-                        <div class="card border-1 p-3 shadow-sm">
+                        <div class="card border p-3 shadow-sm">
                             <div class="text-center mb-3">
                                 <label class="form-label fw-bold small text-uppercase text-muted">Icon Preview</label>
                                 <div class="bg-light p-2 rounded">

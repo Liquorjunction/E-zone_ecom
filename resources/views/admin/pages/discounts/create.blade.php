@@ -12,7 +12,7 @@
                         <p class="text-muted mb-0">Set up discount rules and apply them to products or categories</p>
                     </div>
                     <a href="{{ route('admin.discounts.index') }}" class="btn btn-soft-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Discounts
+                        <i class="bi bi-arrow-left me-2"></i>Back to Discounts
                     </a>
                 </div>
             </div>
@@ -27,7 +27,7 @@
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-soft-primary border-0">
                             <h5 class="mb-0">
-                                <i class="fas fa-tag text-primary me-2"></i>Discount Information
+                                <i class="bi bi-tag text-primary me-2"></i>Discount Information
                             </h5>
                         </div>
                         <div class="card-body p-4">
@@ -42,7 +42,7 @@
                                         placeholder="e.g., Summer Sale 2025" required value="{{ old('name.en') }}">
                                 </div>
                                 <small class="text-muted mt-2 d-block">
-                                    <i class="fas fa-info-circle me-1"></i>AR and FR translations will be auto-generated if
+                                    <i class="bi bi-info-circle me-1"></i>AR and FR translations will be auto-generated if
                                     left empty
                                 </small>
                             </div>
@@ -81,7 +81,7 @@
                                     <input type="number" step="0.01" name="max_discount" class="form-control"
                                         placeholder="e.g., 100" value="{{ old('max_discount') }}">
                                     <small class="text-muted mt-2 d-block">
-                                        <i class="fas fa-lightbulb me-1"></i>Useful for percentage discounts (e.g., 50% off
+                                        <i class="bi bi-lightbulb me-1"></i>Useful for percentage discounts (e.g., 50% off
                                         up to $100 max)
                                     </small>
                                 </div>
@@ -109,7 +109,7 @@
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-soft-info border-0">
                             <h6 class="mb-0">
-                                <i class="fas fa-cog text-info me-2"></i>Settings
+                                <i class="bi bi-gear text-info me-2"></i>Settings
                             </h6>
                         </div>
                         <div class="card-body p-4">
@@ -130,23 +130,23 @@
                     <div class="card shadow-sm border-0 border-start border-primary">
                         <div class="card-body p-4">
                             <h6 class="mb-3">
-                                <i class="fas fa-question-circle text-primary me-2"></i>Quick Tips
+                                <i class="bi bi-question-circle text-primary me-2"></i>Quick Tips
                             </h6>
                             <ul class="list-unstyled mb-0 small text-muted">
                                 <li class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <i class="bi bi-check-circle text-success me-2"></i>
                                     Use clear, descriptive names
                                 </li>
                                 <li class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <i class="bi bi-check-circle text-success me-2"></i>
                                     Set date ranges for seasonal sales
                                 </li>
                                 <li class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <i class="bi bi-check-circle text-success me-2"></i>
                                     Add targets to specific products
                                 </li>
                                 <li>
-                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <i class="bi bi-check-circle text-success me-2"></i>
                                     Test before activating
                                 </li>
                             </ul>
@@ -163,13 +163,13 @@
                             class="card-header bg-soft-warning border-0 d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="mb-1">
-                                    <i class="fas fa-bullseye text-warning me-2"></i>Discount Targets
+                                    <i class="bi bi-bullseye text-warning me-2"></i>Discount Targets
                                 </h5>
                                 <small class="text-muted">Specify which products, categories, or brands this discount
                                     applies to</small>
                             </div>
                             <button type="button" class="btn btn-primary" id="add-target-row">
-                                <i class="fas fa-plus me-2"></i>Add Target
+                                <i class="bi bi-plus me-2"></i>Add Target
                             </button>
                         </div>
                         <div class="card-body p-0">
@@ -328,7 +328,7 @@
                                             <tr class="empty-message">
                                                 <td colspan="4" class="text-center py-5">
                                                     <div class="text-muted">
-                                                        <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                                        <i class="bi bi-inbox fa-3x mb-3 opacity-50"></i>
                                                         <p class="mb-0">No targets added yet</p>
                                                         <small>Click "Add Target" to apply this discount to specific
                                                             items</small>
@@ -342,15 +342,12 @@
                         </div>
                         <div
                             class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>Leave targets empty to apply discount site-wide
-                            </small>
                             <div>
                                 <a href="{{ route('admin.discounts.index') }}" class="btn btn-soft-secondary me-2">
-                                    <i class="fas fa-times me-2"></i>Cancel
+                                    <i class="bi bi-x me-2"></i>Cancel
                                 </a>
                                 <button type="submit" class="btn btn-success px-4">
-                                    <i class="fas fa-check me-2"></i>Create Discount
+                                    <i class="bi bi-check me-2"></i>Create Discount
                                 </button>
                             </div>
                         </div>

@@ -245,7 +245,7 @@
                                                                     <button type="button"
                                                                         class="btn btn-sm btn-info add-spec-btn"
                                                                         data-lang="{{ $lang }}">
-                                                                        <i class="fas fa-plus-circle"></i> Add Field
+                                                                        <i class="bi bi-plus-circle"></i> Add Field
                                                                     </button>
                                                                 </label>
                                                                 <table class="table table-bordered table-sm"

@@ -156,11 +156,11 @@
                                         <strong>📐 Recommended Specifications:</strong>
                                     </small>
                                     <small class="d-block">
-                                        <i class="fas fa-check text-success me-1"></i>
+                                        <i class="bi bi-check text-success me-1"></i>
                                         <strong>Aspect Ratio:</strong> 16:9
                                     </small>
                                     <small class="d-block">
-                                        <i class="fas fa-check text-success me-1"></i>
+                                        <i class="bi bi-check text-success me-1"></i>
                                         <strong>Resolutions:</strong>
                                     </small>
                                     <small class="d-block ms-4">

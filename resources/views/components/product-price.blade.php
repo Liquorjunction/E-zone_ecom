@@ -37,7 +37,7 @@
             @endif
         </div>
         <small class="text-success d-block mt-1">
-            <i class="fas fa-tag"></i> {{ $discountInfo['discount_name'] }}
+            <i class="bi bi-tag"></i> {{ $discountInfo['discount_name'] }}
         </small>
     @else
         <div class="price-no-discount">

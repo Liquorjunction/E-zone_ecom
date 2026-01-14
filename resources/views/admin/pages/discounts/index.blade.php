@@ -7,7 +7,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Discounts List</h5>
         <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus"></i> Create Discount
+            <i class="bi bi-plus"></i> Create Discount
         </a>
     </div>
     <div class="card-body">

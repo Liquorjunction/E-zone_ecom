@@ -252,7 +252,7 @@
                                                 </button>
                                             </div>
                                             <div class="alert alert-light border small">
-                                                <i class="fas fa-info-circle me-1"></i>
+                                                <i class="bi bi-info-circle me-1"></i>
                                                 Upload images specific to each variant (e.g. Red Shirt). Define the selling price and initial stock here.
                                             </div>
                                             <div class="table-responsive border rounded p-2">

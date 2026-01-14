@@ -17,7 +17,7 @@
     @if($hasDiscounts)
         <div class="summary-line d-flex justify-content-between py-2 text-success">
             <span>
-                <i class="fas fa-tag"></i> {{ __('Discount') }}:
+                <i class="bi bi-tag"></i> {{ __('Discount') }}:
             </span>
             <span class="fw-semibold">-{{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($totalDiscount, 2) }}</span>
         </div>
@@ -30,7 +30,7 @@
 
     @if($hasDiscounts)
         <div class="savings-badge alert alert-success mt-3 py-2">
-            <i class="fas fa-check-circle"></i>
+            <i class="bi bi-check-circle"></i>
             {{ __('You save') }} {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($totalDiscount, 2) }} {{ __('with current discounts!') }}
         </div>
     @endif

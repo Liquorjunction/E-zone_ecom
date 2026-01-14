@@ -15,7 +15,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label for="importFile" class="form-label mb-0 fw-bold">Choose File</label>
                             <a href="{{ route('admin.products.template') }}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-download me-1"></i> Download Sample
+                                <i class="bi bi-download me-1"></i> Download Sample
                             </a>
                         </div>
 
@@ -44,7 +44,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-success" id="btnStartImport">
-                        <i class="fas fa-file-import me-1"></i> Start Import
+                        <i class="bi bi-upload me-1"></i> Start Import
                     </button>
                 </div>
             </form>

@@ -26,7 +26,7 @@
             @if($discountName)
             <div class="d-flex justify-content-between align-items-center mt-1">
                 <small class="text-success">
-                    <i class="fas fa-tag"></i> {{ $discountName }}
+                    <i class="bi bi-tag"></i> {{ $discountName }}
                 </small>
                 <span class="text-success">
                     -{{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineDiscount, 2) }}
