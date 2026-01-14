@@ -22,12 +22,13 @@ trait ProductGrouper
             $row = array_change_key_case($row, CASE_LOWER);
             $row = array_map(fn ($v) => is_string($v) ? trim($v) : $v, $row);
 
+            Log::warning("Processing row $rowNum - name_en: " . ($row['name_en'] ?? 'EMPTY'));
+
             // --- START NEW PRODUCT ---
             if (! empty($row['name_en'])) {
                 if ($currentDTO) {
                     if ($currentDTO->hasErrors()) {
                         $errorMsg = "Row {$currentDTO->rowNum}: " . $currentDTO->getErrorsAsString();
-                        Log::warning($errorMsg);
                         $skippedRows[] = $errorMsg;
                     } else {
                         $groupedProducts[] = $currentDTO;
@@ -38,7 +39,6 @@ trait ProductGrouper
 
                 if ($currentDTO->hasErrors()) {
                     $errorMsg = "Row {$currentDTO->rowNum}: " . $currentDTO->getErrorsAsString();
-                    Log::warning($errorMsg);
                     $skippedRows[] = $errorMsg;
                     $currentDTO = null;
                 }
@@ -52,6 +52,7 @@ trait ProductGrouper
                     $appendError = $this->appendDetailsToDTO($currentDTO, $row, $rowNum);
                     if ($appendError) {
                         $skippedRows[] = "Row $rowNum: $appendError";
+                        Log::warning("Row $rowNum: $appendError");
                     }
                 } else {
                     $skippedRows[] = "Row $rowNum: Orphan row (no parent product name_en found)";
@@ -63,7 +64,6 @@ trait ProductGrouper
         if ($currentDTO) {
             if ($currentDTO->hasErrors()) {
                 $errorMsg = "Row {$currentDTO->rowNum}: " . $currentDTO->getErrorsAsString();
-                Log::warning($errorMsg);
                 $skippedRows[] = $errorMsg;
             } else {
                 $groupedProducts[] = $currentDTO;
@@ -96,9 +96,18 @@ trait ProductGrouper
         }
 
         // Parse Variants
-        $varName  = $row['variant_name_en'] ?? $row['variant_1_name_en'] ?? null;
-        $varPrice = $row['variant_price'] ?? $row['variant_1_price'] ?? null;
-        $hasExplicitVariant = !empty($varName) || !empty($varPrice);
+        $varName  = $row['variant_name_en']
+            ?? $row['variant_name']
+            ?? $row['variant_1_name_en']
+            ?? $row['variant_1_name']
+            ?? null;
+        $varPrice = $row['variant_price']
+            ?? $row['variant_1_price']
+            ?? null;
+
+        Log::warning("Row $rowNum variant detection: varName='$varName', varPrice='$varPrice', keys=" . implode(',', array_filter(array_keys($row), fn($k) => strpos($k, 'variant') !== false || strpos($k, 'price') !== false)));
+
+        $hasExplicitVariant = (($varName !== null && $varName !== '') || ($varPrice !== null && $varPrice !== ''));
         $varBestRaw = $row['variant_is_bestseller']
             ?? $row['variant_1_is_bestseller']
             ?? $row['is_bestseller']
@@ -193,14 +202,18 @@ trait ProductGrouper
         if (count($attributes['en']) > 0) $attributesFound = true;
 
         if ($hasExplicitVariant) {
-            if (empty($varPrice) || !is_numeric($varPrice) || floatval($varPrice) < 0) {
+            // Strip commas from price (e.g., "1,18,800" -> "118800")
+            $cleanPrice = is_string($varPrice) ? str_replace(',', '', $varPrice) : $varPrice;
+
+            // Price must be provided and numeric (including 0)
+            if ($cleanPrice === null || $cleanPrice === '' || !is_numeric($cleanPrice) || floatval($cleanPrice) < 0) {
                 $errors[] = 'Variant missing valid price';
             } else {
                 $finalVarName = $varName ?: ($dto->mainData['name_en'] . ' - Option');
 
                 $variantEntry = [
                     'name_en'  => $finalVarName,
-                    'price'    => $varPrice,
+                    'price'    => $cleanPrice,
                 ];
                 $variantEntry['is_bestseller'] = $varIsBestseller;
                 if ($attributesFound) {
@@ -208,7 +221,7 @@ trait ProductGrouper
                 }
                 $dto->variants[] = $variantEntry;
             }
-        } elseif (!empty($varName)) {
+        } elseif ($varName !== null && $varName !== '') {
             $errors[] = 'Variant has name but missing price';
         }
 
