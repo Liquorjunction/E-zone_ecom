@@ -185,6 +185,7 @@ class FaqController extends Controller
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($faq) use ($request) {
+                    $data['id'] = $faq->id;
                     $data['edit_url'] = $request->user()->can('faqs.update') ? route('admin.faqs.edit', ['id' => $faq->id]) : '';
                     $data['delete_url'] = $request->user()->can('faqs.delete') ? route('admin.faqs.destroy', ['id' => $faq->id]) : '';
 
