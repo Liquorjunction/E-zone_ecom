@@ -61,7 +61,7 @@
 
                     <!-- Products Grid + Spinner -->
                     <div class="relative" data-ajax-pagination data-results-target="#products-results" data-pagination-target="#products-pagination" data-loading-target="#filter-loading">
-                        <div id="filter-loading" class="hidden absolute inset-0 bg-white/70 z-50 flex items-center justify-center">
+                        <div id="filter-loading" class="absolute inset-0 bg-white/70 z-50 flex items-center justify-center">
                             <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>

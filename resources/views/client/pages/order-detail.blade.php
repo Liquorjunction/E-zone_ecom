@@ -225,7 +225,7 @@
                                             @endif
                                             <div class="flex items-center justify-between flex-wrap gap-2">
                                                 <div class="flex items-baseline gap-2">
-                                                    <p class="text-base lg:text-lg font-bold text-primary">${{ number_format($item->unit_price, 2) }}</p>
+                                                    <p class="text-base lg:text-lg font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->unit_price, 2) }}</p>
                                                     <p class="text-xs text-gray-500">Qty: {{ $item->quantity }}</p>
                                                 </div>
                                                 <button class="text-xs lg:text-sm font-semibold text-primary hover:text-primary/80">Write Review</button>
@@ -257,7 +257,7 @@
                         <div class="space-y-3 mb-4 pb-4 border-b-2 border-gray-100">
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">Subtotal</span>
-                                <span class="font-semibold text-gray-900">${{ number_format($subtotal, 2) }}</span>
+                                <span class="font-semibold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotal, 2) }}</span>
                             </div>
 
                             @if($itemDiscount > 0)
@@ -269,7 +269,7 @@
                         </svg>
                         Item Discounts
                     </span>
-                    <span class="font-semibold text-green-600">-${{ number_format($itemDiscount, 2) }}</span>
+                    <span class="font-semibold text-green-600">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($itemDiscount, 2) }}</span>
                 </div>
                             @endif
 
@@ -281,7 +281,7 @@
                                         </svg>
                                         Coupon Discount
                                     </span>
-                                    <span class="font-semibold text-purple-600">-${{ number_format($couponDiscount, 2) }}</span>
+                                    <span class="font-semibold text-purple-600">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($couponDiscount, 2) }}</span>
                                 </div>
                                 @if($order->coupon_code)
                                     <p class="text-xs text-purple-600 px-3">Code: <span class="font-semibold">{{ $order->coupon_code }}</span></p>
@@ -294,7 +294,7 @@
                                     @if($shipping == 0)
                                         <span class="text-green-600">Free</span>
                                     @else
-                                        <span>${{ number_format($shipping, 2) }}</span>
+                                        <span>{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($shipping, 2) }}</span>
                                         @if($order->shipping_method)
                                             <span class="text-xs text-gray-500">({{ ucfirst($order->shipping_method) }})</span>
                                         @endif
@@ -304,13 +304,13 @@
 
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">Tax ({{ $order->tax_percentage ?? 8 }}%)</span>
-                                <span class="font-semibold text-gray-900">${{ number_format($tax, 2) }}</span>
+                                <span class="font-semibold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($tax, 2) }}</span>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-base lg:text-lg font-bold text-gray-900">Total</span>
-                            <span class="text-xl lg:text-2xl font-bold text-primary">${{ number_format($total, 2) }}</span>
+                            <span class="text-xl lg:text-2xl font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($total, 2) }}</span>
                         </div>
 
                         <div class="space-y-3">

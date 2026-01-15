@@ -402,9 +402,9 @@
                                         <div class="flex items-center justify-between">
                                             @if ($variantHasDiscount)
                                                 <div class="flex flex-col">
-                                                    <span class="text-xs text-gray-400 line-through">${{ number_format($variantDiscount['original_price'], 2) }}</span>
+                                                    <span class="text-xs text-gray-400 line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['original_price'], 2) }}</span>
                                                     <div class="flex items-center gap-2">
-                                                        <span class="text-lg font-bold text-red-600">${{ number_format($variantDiscount['final_price'], 2) }}</span>
+                                                        <span class="text-lg font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['final_price'], 2) }}</span>
                                                         @if (($variantDiscount['discount_percentage'] ?? 0) > 0)
                                                             <span class="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
                                                                 -{{ number_format($variantDiscount['discount_percentage'], 0) }}%
@@ -414,7 +414,7 @@
                                                 </div>
                                             @else
                                                 <div class="text-lg font-bold text-primary">
-                                                    ${{ number_format($variant->price, 2) }}
+                                                    {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variant->price, 2) }}
                                                 </div>
                                             @endif
                                             @if ($qty > 0)
@@ -947,9 +947,9 @@
                                     <div class="flex items-center justify-between">
                                         @if ($relatedDiscount && $relatedDiscount['has_discount'])
                                             <div class="flex flex-col">
-                                                <span class="text-sm text-gray-400 line-through">${{ number_format($relatedDiscount['original_price'], 2) }}</span>
+                                                <span class="text-sm text-gray-400 line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($relatedDiscount['original_price'], 2) }}</span>
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-xl font-bold text-red-600">${{ number_format($relatedDiscount['final_price'], 2) }}</span>
+                                                    <span class="text-xl font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($relatedDiscount['final_price'], 2) }}</span>
                                                     @if ($relatedDiscount['discount_percentage'] > 0)
                                                         <span class="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
                                                             -{{ number_format($relatedDiscount['discount_percentage'], 0) }}%
@@ -958,7 +958,7 @@
                                                 </div>
                                             </div>
                                         @else
-                                            <span class="text-xl font-bold text-primary">${{ number_format($relatedProduct->price, 2) }}</span>
+                                            <span class="text-xl font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($relatedProduct->price, 2) }}</span>
                                         @endif
                                         <button
                                             class="bg-primary hover:bg-primary-dark text-white p-2 rounded-lg transition-colors">

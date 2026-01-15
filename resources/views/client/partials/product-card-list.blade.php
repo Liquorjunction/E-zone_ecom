@@ -36,10 +36,19 @@
         $imagePath = 'https://via.placeholder.com/400x400?text=No+Image';
     }
 
-    // Price & Math
-    $price = (float) ($master->price ?? 0);
-    $realPrice = (float) ($isVariant ? ($product->price ?? $master->real_price ?? $price) : ($master->real_price ?? $price));
-    $discount = $price > $realPrice && $price > 0 ? round((($price - $realPrice) / $price) * 100) : 0;
+    // Get discount info
+    $real = $isVariant ? ($product->price ?? $master->real_price ?? $master->price ?? 0) : ($master->real_price ?? $master->price ?? 0);
+    $itemDiscountInfo = $isVariant ? $product->getDiscountInfo() : $master->getDiscountInfo();
+    $productDiscountInfo = $master->getDiscountInfo();
+
+    // Bestseller check
+    $isBestseller = false;
+    if ($isVariant) {
+        $isBestseller = (bool) $product->is_bestseller;
+    } else {
+        $firstVariant = $master->productVariants?->first();
+        $isBestseller = $firstVariant && (bool) $firstVariant->is_bestseller;
+    }
 
     // Category
     $catRaw = $master->category?->name ?? 'General';
@@ -57,14 +66,23 @@
             </a>
 
             <div class="absolute top-3 left-3 flex flex-col gap-2">
-                @if($discount > 0)
-                    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
-                        -{{ $discount }}%
+                @if($productDiscountInfo['has_discount'])
+                    <span class="inline-flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+                        @if($productDiscountInfo['discount_percentage'] > 0)
+                            -{{ number_format($productDiscountInfo['discount_percentage'], 0) }}% OFF
+                        @else
+                            ${{ number_format($productDiscountInfo['discount_amount'], 2) }} OFF
+                        @endif
                     </span>
                 @endif
-                @if($product->is_bestseller)
-                    <span class="bg-yellow-400 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
-                        HOT
+                @if($master->created_at > now()->subDays(30))
+                    <span class="inline-flex items-center gap-1 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+                        NEW
+                    </span>
+                @endif
+                @if($isBestseller)
+                    <span class="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+                        BESTSELLER
                     </span>
                 @endif
             </div>
@@ -97,12 +115,20 @@
         <div class="w-full md:w-56 bg-gray-50/50 p-5 md:p-6 flex flex-col justify-center items-center md:items-end gap-4 border-t md:border-t-0">
 
             <div class="text-center md:text-right">
-                @if($discount > 0)
-                    <div class="text-sm text-gray-400 line-through mb-0.5">${{ number_format($price, 2) }}</div>
+                @if($itemDiscountInfo['has_discount'])
+                    <div class="mb-1">
+                        <span class="inline-block text-xs text-gray-400 line-through opacity-75">
+                            {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($itemDiscountInfo['original_price'], 2) }}
+                        </span>
+                    </div>
+                    <div class="text-2xl font-bold text-red-600">
+                        {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($itemDiscountInfo['final_price'], 2) }}
+                    </div>
+                @else
+                    <div class="text-2xl font-bold text-primary">
+                        {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($itemDiscountInfo['final_price'], 2) }}
+                    </div>
                 @endif
-                <div class="text-2xl font-bold text-primary">
-                    ${{ number_format($realPrice, 2) }}
-                </div>
                 <div class="text-xs text-green-600 font-medium mt-1 flex items-center justify-end gap-1">
                     <span class="w-2 h-2 rounded-full bg-green-500"></span> In Stock
                 </div>

@@ -53,6 +53,15 @@
                                 placeholder="John Doe">
                         </div>
 
+                        <!-- Phone Number -->
+                        <div>
+                            <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone
+                                Number</label>
+                            <input type="text" name="phone" id="phone" value="{{ old('phone') }}" required
+                                class="appearance-none block w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
+                                placeholder="+1 234 567 8900">
+                        </div>
+
                         <!-- Email -->
                         <div>
                             <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email

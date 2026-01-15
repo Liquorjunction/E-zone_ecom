@@ -1,3 +1,9 @@
+// Move Modal to Body on Load (Fixes stacking context "under header" issue)
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('addAddressModal');
+    if(modal) document.body.appendChild(modal);
+});
+
 document.addEventListener("DOMContentLoaded", function () {
     const root = document.getElementById("checkout-root");
     if (!root) return;
@@ -5,13 +11,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- Configuration ---
     const updateUrl = root.dataset.updateUrl;
     const removeUrl = root.dataset.removeUrl;
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "";
+    const csrf =
+        document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute("content") || "";
 
     // Timer storage for debouncing (prevents rapid-fire server requests)
     let debounceTimers = {};
 
     function formatMoney(n) {
-        return "$" + Number(n).toFixed(2);
+        const symbol = window.env?.CURRENCY_SYMBOL || "$";
+        return symbol + Number(n).toFixed(2);
     }
 
     // ============================================================
@@ -40,7 +50,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (increaseBtn) {
             e.preventDefault();
             const id = increaseBtn.dataset.itemId;
-            const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+            const input = root.querySelector(
+                `.cart-quantity-input[data-item-id="${id}"]`
+            );
             if (input) {
                 let newVal = Number(input.value || 0) + 1;
                 input.value = newVal; // Update UI immediately
@@ -54,7 +66,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (decreaseBtn) {
             e.preventDefault();
             const id = decreaseBtn.dataset.itemId;
-            const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+            const input = root.querySelector(
+                `.cart-quantity-input[data-item-id="${id}"]`
+            );
             if (input) {
                 let newVal = Math.max(1, Number(input.value || 1) - 1);
                 input.value = newVal; // Update UI immediately
@@ -68,8 +82,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (summaryIncreaseBtn) {
             e.preventDefault();
             const id = summaryIncreaseBtn.dataset.itemId;
-            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
-            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+            const quantityDisplay = document.querySelector(
+                `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
+            );
+            const mainInput = root.querySelector(
+                `.cart-quantity-input[data-item-id="${id}"]`
+            );
 
             if (mainInput) {
                 let newVal = Number(mainInput.value || 0) + 1;
@@ -85,8 +103,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (summaryDecreaseBtn) {
             e.preventDefault();
             const id = summaryDecreaseBtn.dataset.itemId;
-            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
-            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+            const quantityDisplay = document.querySelector(
+                `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
+            );
+            const mainInput = root.querySelector(
+                `.cart-quantity-input[data-item-id="${id}"]`
+            );
 
             if (mainInput) {
                 let newVal = Math.max(1, Number(mainInput.value || 1) - 1);
@@ -108,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Handle Manual Input Changes (Typing quantity)
-    root.addEventListener("input", function(e) {
+    root.addEventListener("input", function (e) {
         if (e.target.classList.contains("cart-quantity-input")) {
             const id = e.target.dataset.itemId;
             const val = Math.max(1, Number(e.target.value || 1));
@@ -127,7 +149,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const opt = this.options[this.selectedIndex];
 
             // Fields to clear/fill
-            const fieldIds = ["firstName", "lastName", "address", "city", "state", "zip", "phone", "email"];
+            const fieldIds = [
+                "firstName",
+                "lastName",
+                "address",
+                "city",
+                "state",
+                "zip",
+                "phone",
+                "email",
+            ];
 
             // 1. Clear fields if "New Address" or invalid selection
             if (!opt || !opt.dataset || !opt.dataset.addr) {
@@ -149,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     state: addr.state || addr.region,
                     zip: addr.postal_code || addr.zip,
                     phone: addr.phone,
-                    email: addr.email
+                    email: addr.email,
                 };
 
                 for (const [id, val] of Object.entries(mapping)) {
@@ -159,7 +190,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Visual flash effect
                         el.style.transition = "background-color 0.3s ease";
                         el.style.backgroundColor = "rgba(34, 197, 94, 0.1)"; // Light green
-                        setTimeout(() => el.style.backgroundColor = "", 500);
+                        setTimeout(() => (el.style.backgroundColor = ""), 500);
                     }
                 }
             } catch (e) {
@@ -170,32 +201,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // B. Payment Method Toggle
     function updateCardDetailsVisibility() {
-        const selected = document.querySelector('input[name="payment_method"]:checked');
-        const cardWrapper = document.getElementById("card-details-wrapper") || document.getElementById("cardDetails");
+        const selected = document.querySelector(
+            'input[name="payment_method"]:checked'
+        );
+        const cardWrapper =
+            document.getElementById("card-details-wrapper") ||
+            document.getElementById("cardDetails");
 
         if (cardWrapper) {
             // Show if 'card' is selected
-            cardWrapper.style.display = (selected && selected.value === "card") ? "block" : "none";
+            cardWrapper.style.display =
+                selected && selected.value === "card" ? "block" : "none";
 
             // Toggle 'required' attribute for inputs inside to prevent validation errors on other methods
-            const inputs = cardWrapper.querySelectorAll('input, select');
-            inputs.forEach(input => {
+            const inputs = cardWrapper.querySelectorAll("input, select");
+            inputs.forEach((input) => {
                 if (selected && selected.value === "card") {
-                    input.setAttribute('required', 'required');
+                    input.setAttribute("required", "required");
                 } else {
-                    input.removeAttribute('required');
+                    input.removeAttribute("required");
                 }
             });
         }
     }
 
     // Attach listeners to payment radios
-    document.querySelectorAll('input[name="payment_method"]').forEach((radio) => {
-        radio.addEventListener("change", updateCardDetailsVisibility);
-    });
+    document
+        .querySelectorAll('input[name="payment_method"]')
+        .forEach((radio) => {
+            radio.addEventListener("change", updateCardDetailsVisibility);
+        });
     // Run once on load
     updateCardDetailsVisibility();
-
 
     // ============================================================
     //  SECTION 3: NETWORK / AJAX FUNCTIONS
@@ -219,12 +256,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": csrf,
-                    "Accept": "application/json" // Crucial fix for Laravel
+                    Accept: "application/json", // Crucial fix for Laravel
                 },
                 body: JSON.stringify({
                     id: id,
                     item_id: id, // Send both to be safe
-                    quantity: quantity
+                    quantity: quantity,
                 }),
             });
 
@@ -234,21 +271,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (data.success) {
                 // Update Line Total specific to this row
-                const lineTotalEl = document.querySelector(`#item-line-total-${id}`);
+                const lineTotalEl = document.querySelector(
+                    `#item-line-total-${id}`
+                );
                 if (lineTotalEl && data.item?.discount) {
                     // If item has discount, update with discount info
                     if (data.item.discount.has_discount) {
-                        lineTotalEl.textContent = formatMoney(data.item.discount.line_total_after_discount);
+                        lineTotalEl.textContent = formatMoney(
+                            data.item.discount.line_total_after_discount
+                        );
                     } else {
-                        lineTotalEl.textContent = formatMoney(data.item.line_total);
+                        lineTotalEl.textContent = formatMoney(
+                            data.item.line_total
+                        );
                     }
                 } else if (lineTotalEl && data.item?.line_total) {
                     lineTotalEl.textContent = formatMoney(data.item.line_total);
                 }
 
                 // Sync summary item quantity display with cart quantity
-                const summaryQtyDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
-                const cartInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+                const summaryQtyDisplay = document.querySelector(
+                    `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
+                );
+                const cartInput = root.querySelector(
+                    `.cart-quantity-input[data-item-id="${id}"]`
+                );
                 if (summaryQtyDisplay && cartInput) {
                     summaryQtyDisplay.textContent = cartInput.value;
                 }
@@ -273,11 +320,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": csrf,
-                    "Accept": "application/json"
+                    Accept: "application/json",
                 },
                 body: JSON.stringify({
                     id: id,
-                    item_id: id
+                    item_id: id,
                 }),
             });
 
@@ -287,19 +334,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (data.success) {
                 // Remove main cart row from DOM
-                const row = document.querySelector(`.cart-item-row[data-item-id="${id}"]`);
+                const row = document.querySelector(
+                    `.cart-item-row[data-item-id="${id}"]`
+                );
                 if (row) {
                     row.remove();
                 }
 
                 // Remove summary row from DOM
-                const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
+                const summaryRow = document.querySelector(
+                    `.summary-item-row[data-summary-item-id="${id}"]`
+                );
                 if (summaryRow) {
                     summaryRow.remove();
                 }
 
                 // Check if cart is now empty
-                if (document.querySelectorAll('.cart-item-row').length === 0) {
+                if (document.querySelectorAll(".cart-item-row").length === 0) {
                     location.reload();
                     return;
                 }
@@ -307,7 +358,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateSummary(data.summary);
 
                 // Show toast if available
-                if (window.Toast) window.Toast.success({ title: 'Removed', message: 'Item removed from cart' });
+                if (window.Toast)
+                    window.Toast.success({
+                        title: "Removed",
+                        message: "Item removed from cart",
+                    });
             } else {
                 // Fallback if JSON says failed
                 submitFallback(id);
@@ -346,31 +401,37 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!summary) return;
 
         const map = {
-            'subtotal': ['.order-subtotal', 'order-subtotal'],
-            'total_discount': ['.order-discount', 'order-discount'],
-            'subtotal_after_discount': ['.order-subtotal-after-discount', 'order-subtotal-after-discount'],
-            'tax': ['.order-tax', 'order-tax'],
-            'total': ['.order-total', 'order-total', 'summary-total'],
-            'itemCount': ['.order-item-count', 'order-item-count'],
-            'shipping': ['.order-shipping', 'order-shipping']
+            subtotal: [".order-subtotal", "order-subtotal"],
+            total_discount: [".order-discount", "order-discount"],
+            subtotal_after_discount: [
+                ".order-subtotal-after-discount",
+                "order-subtotal-after-discount",
+            ],
+            tax: [".order-tax", "order-tax"],
+            total: [".order-total", "order-total", "summary-total"],
+            itemCount: [".order-item-count", "order-item-count"],
+            shipping: [".order-shipping", "order-shipping"],
         };
 
         for (const [key, selectors] of Object.entries(map)) {
             if (summary[key] === undefined) continue;
 
-            selectors.forEach(sel => {
-                const els = sel.startsWith('.')
+            selectors.forEach((sel) => {
+                const els = sel.startsWith(".")
                     ? document.querySelectorAll(sel)
                     : [document.getElementById(sel)];
 
-                els.forEach(el => {
+                els.forEach((el) => {
                     if (!el) return;
-                    if (key === 'shipping') {
-                        el.textContent = summary[key] > 0 ? formatMoney(summary[key]) : 'FREE';
-                    } else if (key === 'itemCount') {
+                    if (key === "shipping") {
+                        el.textContent =
+                            summary[key] > 0
+                                ? formatMoney(summary[key])
+                                : "FREE";
+                    } else if (key === "itemCount") {
                         el.textContent = summary[key];
-                    } else if (key === 'total_discount') {
-                        el.textContent = '-' + formatMoney(summary[key]);
+                    } else if (key === "total_discount") {
+                        el.textContent = "-" + formatMoney(summary[key]);
                     } else {
                         el.textContent = formatMoney(summary[key]);
                     }
@@ -385,36 +446,59 @@ document.addEventListener("DOMContentLoaded", function () {
     // Helper: Update order summary items with quantity controls
     function updateOrderSummaryItems(summary) {
         if (!summary || !summary.items) {
-            console.warn('updateOrderSummaryItems: No summary or items data received', summary);
+            console.warn(
+                "updateOrderSummaryItems: No summary or items data received",
+                summary
+            );
             return;
         }
 
-        console.log('Updating order summary items:', summary.items);
+        console.log("Updating order summary items:", summary.items);
 
         // Update each summary item row
         Object.entries(summary.items).forEach(([itemId, itemData]) => {
-            const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${itemId}"]`);
+            const summaryRow = document.querySelector(
+                `.summary-item-row[data-summary-item-id="${itemId}"]`
+            );
             if (!summaryRow) {
                 console.warn(`Summary row not found for item ${itemId}`);
                 return;
             }
 
             // Update quantity display
-            const qtyDisplay = summaryRow.querySelector('.summary-quantity');
+            const qtyDisplay = summaryRow.querySelector(".summary-quantity");
             if (qtyDisplay) {
                 qtyDisplay.textContent = itemData.quantity;
-                console.log(`Updated quantity for item ${itemId}: ${itemData.quantity}`);
+                console.log(
+                    `Updated quantity for item ${itemId}: ${itemData.quantity}`
+                );
             }
 
             // Update price - use specific class selector for reliable targeting
-            const priceElement = summaryRow.querySelector('.summary-item-price');
-            if (priceElement && (itemData.final_price !== undefined || itemData.unit_price !== undefined)) {
-                const unitPrice = itemData.final_price ?? itemData.unit_price ?? 0;
+            const priceElement = summaryRow.querySelector(
+                ".summary-item-price"
+            );
+            if (
+                priceElement &&
+                (itemData.final_price !== undefined ||
+                    itemData.unit_price !== undefined)
+            ) {
+                const unitPrice =
+                    itemData.final_price ?? itemData.unit_price ?? 0;
                 const lineTotal = unitPrice * itemData.quantity;
                 priceElement.textContent = formatMoney(lineTotal);
-                console.log(`Updated price for item ${itemId}: ${formatMoney(lineTotal)} (unit: ${formatMoney(unitPrice)}, qty: ${itemData.quantity})`);
+                console.log(
+                    `Updated price for item ${itemId}: ${formatMoney(
+                        lineTotal
+                    )} (unit: ${formatMoney(unitPrice)}, qty: ${
+                        itemData.quantity
+                    })`
+                );
             } else {
-                console.warn(`Price element or price data not found for item ${itemId}`, itemData);
+                console.warn(
+                    `Price element or price data not found for item ${itemId}`,
+                    itemData
+                );
             }
         });
     }
