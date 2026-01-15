@@ -21,7 +21,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function formatMoney(n) {
         const symbol = window.env?.CURRENCY_SYMBOL || "$";
-        return symbol + Number(n).toFixed(2);
+        // Convert to number, handle commas and spaces
+        const num = typeof n === 'string' ? parseFloat(n.replace(/[,\s]/g, '')) : Number(n);
+        // Format with thousands separators and 2 decimal places
+        const formatted = num.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        return symbol + ' ' + formatted;
     }
 
     // ============================================================
@@ -81,6 +88,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const summaryIncreaseBtn = target.closest(".summary-qty-increase");
         if (summaryIncreaseBtn) {
             e.preventDefault();
+
+            // Check if we're on step 3 (order confirmation) - don't allow changes
+            const isStep3 = document.querySelector('.text-xl.font-extrabold.text-gray-900.mb-4')?.textContent.includes('Order Successfully Placed');
+            if (isStep3) {
+                return; // Order is complete, no changes allowed
+            }
+
             const id = summaryIncreaseBtn.dataset.itemId;
             const quantityDisplay = document.querySelector(
                 `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
@@ -90,9 +104,16 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             if (mainInput) {
+                // Step 1: Main cart exists, sync with it
                 let newVal = Number(mainInput.value || 0) + 1;
                 mainInput.value = newVal;
                 if (quantityDisplay) quantityDisplay.textContent = newVal;
+                debounceUpdate(id, newVal);
+            } else if (quantityDisplay) {
+                // Step 2: No main cart, update directly from summary
+                let currentQty = Number(quantityDisplay.textContent || 0);
+                let newVal = currentQty + 1;
+                quantityDisplay.textContent = newVal;
                 debounceUpdate(id, newVal);
             }
             return;
@@ -102,6 +123,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const summaryDecreaseBtn = target.closest(".summary-qty-decrease");
         if (summaryDecreaseBtn) {
             e.preventDefault();
+
+            // Check if we're on step 3 (order confirmation) - don't allow changes
+            const isStep3 = document.querySelector('.text-xl.font-extrabold.text-gray-900.mb-4')?.textContent.includes('Order Successfully Placed');
+            if (isStep3) {
+                return; // Order is complete, no changes allowed
+            }
+
             const id = summaryDecreaseBtn.dataset.itemId;
             const quantityDisplay = document.querySelector(
                 `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
@@ -111,9 +139,16 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             if (mainInput) {
+                // Step 1: Main cart exists, sync with it
                 let newVal = Math.max(1, Number(mainInput.value || 1) - 1);
                 mainInput.value = newVal;
                 if (quantityDisplay) quantityDisplay.textContent = newVal;
+                debounceUpdate(id, newVal);
+            } else if (quantityDisplay) {
+                // Step 2: No main cart, update directly from summary
+                let currentQty = Number(quantityDisplay.textContent || 1);
+                let newVal = Math.max(1, currentQty - 1);
+                quantityDisplay.textContent = newVal;
                 debounceUpdate(id, newVal);
             }
             return;

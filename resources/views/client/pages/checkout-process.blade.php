@@ -8,6 +8,7 @@
     @php
         $step = $step ?? (int) request()->get('step', 1);
         $cart = $cart ?? null;
+        $itemCount = $cart ? $cart->items->sum('quantity') : 0;
     @endphp
 
     <script>
@@ -262,12 +263,14 @@
                                                             @endphp
 
                                                             <div class="text-sm text-gray-500 mb-1">Unit:
-                                                                {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($unitPrice, 2) }}</div>
+                                                                {{ config('app.CURRENCY_SYMBOL') }}
+                                                                {{ number_format($unitPrice, 2) }}</div>
 
                                                             @if ($hasDiscount)
                                                                 {{-- Original line total with strikethrough --}}
                                                                 <div class="text-lg text-gray-400 line-through mb-1">
-                                                                    {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($lineTotal, 2) }}</div>
+                                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                                    {{ number_format($lineTotal, 2) }}</div>
 
                                                                 {{-- Discount badge --}}
                                                                 @if ($lineDiscount > 0)
@@ -280,19 +283,22 @@
                                                                                 d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                                                 clip-rule="evenodd" />
                                                                         </svg>
-                                                                        Save {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($lineDiscount, 2) }}
+                                                                        Save {{ config('app.CURRENCY_SYMBOL') }}
+                                                                        {{ number_format($lineDiscount, 2) }}
                                                                     </div>
                                                                 @endif
 
                                                                 {{-- Final price after discount --}}
                                                                 <p class="text-3xl font-bold text-red-600 item-line-total"
                                                                     id="item-line-total-{{ $item->id }}">
-                                                                    {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($lineFinal, 2) }}</p>
+                                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                                    {{ number_format($lineFinal, 2) }}</p>
                                                             @else
                                                                 {{-- No discount - show regular price --}}
                                                                 <p class="text-3xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent item-line-total"
                                                                     id="item-line-total-{{ $item->id }}">
-                                                                    {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($lineFinal, 2) }}</p>
+                                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                                    {{ number_format($lineFinal, 2) }}</p>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -350,11 +356,20 @@
             </div> --}}
 
                             <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sticky top-24">
-                                <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
-                                    <span
-                                        class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                    Order Summary
-                                </h2>
+                                <div class="mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                                        <span
+                                            class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                                        Order Summary
+                                    </h2>
+                                    <div
+                                        class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
+                                        <span class="text-sm font-semibold text-gray-700">Item Total:</span>
+                                        <span
+                                            class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
+                                            {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
+                                    </div>
+                                </div>
                                 @php
                                     $subtotal = $totals['subtotal'] ?? 0;
                                     $totalDiscount = $totals['total_discount'] ?? 0;
@@ -406,7 +421,8 @@
                                                             $summaryLine = $summaryUnit * $item->quantity;
                                                         @endphp
                                                         <p class="summary-item-price text-sm font-bold text-primary mt-1">
-                                                            {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($summaryLine, 2) }}</p>
+                                                            {{ config('app.CURRENCY_SYMBOL') }}
+                                                            {{ number_format($summaryLine, 2) }}</p>
                                                     </div>
                                                 </div>
                                                 <button type="button"
@@ -437,13 +453,13 @@
                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
                         <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                       </svg>
-                      Discount Savings
+                      Discount on MRP
                     </span>
                     <span id="order-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($totalDiscount, 2) }}</span>
                   </div>
 
                   <div class="flex justify-between text-gray-900 text-lg font-semibold border-t border-b border-gray-200 py-3">
-                    <span>Subtotal After Discount</span>
+                    <span>MRP After Discount</span>
                     <span id="order-subtotal-after-discount">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotalAfterDiscount, 2) }}</span>
                   </div>
                 @endif --}}
@@ -533,150 +549,130 @@
                             </div>
 
                             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
-                                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                                    <span
-                                        class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                    Shipping Address
-                                </h2>
-                                <div class="space-y-5">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                                            <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                                            Shipping Address
+                                        </h2>
+                                        <p class="text-gray-500 text-sm mt-1">Where should we deliver your order?</p>
+                                    </div>
                                     @if (Auth::check())
-                                        <div class="mb-6">
-                                            <div class="flex items-center justify-between mb-4">
-                                                <label class="block text-sm font-semibold text-gray-700">Saved Shipping
-                                                    Addresses
-                                                    <span class="text-xs text-gray-500">({{ $addresses->count() }}
-                                                        saved)</span></label>
-                                                <button type="button" id="addShippingAddressBtn"
-                                                    class="px-4 py-2 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 whitespace-nowrap flex items-center gap-2"
-                                                    data-address-type="shipping">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M12 4v16m8-8H4" />
-                                                    </svg>
-                                                    Add New Address
-                                                </button>
-                                            </div>
+                                        <button type="button" id="addShippingAddressBtn"
+                                            class="px-4 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            Add New
+                                        </button>
+                                    @endif
+                                </div>
+                                <div class="space-y-5">
+                                    @if (Auth::check() && $addresses->count() > 0)
+                                        <div>
+                                            <label for="shippingAddressSelect" class="block text-sm font-semibold text-gray-700 mb-3">
+                                                Select Saved Address
+                                                <span class="text-xs font-normal text-gray-500 ml-1">({{ $addresses->count() }} available)</span>
+                                            </label>
 
-                                            @if ($addresses->count() > 0)
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div class="relative">
+                                                <select id="shippingAddressSelect" name="shipping_address_id" required
+                                                    class="block w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none bg-white pr-12 text-gray-900 font-medium hover:border-gray-300">
+                                                    <option value="">-- Select shipping address --</option>
                                                     @foreach ($addresses as $addr)
-                                                        <div class="shippingAddressCard cursor-pointer p-4 rounded-xl border-2 border-gray-200 hover:border-primary hover:shadow-md transition-all duration-300 bg-white hover:bg-linear-to-br hover:from-primary/5 hover:to-transparent"
-                                                            data-address-id="{{ $addr->id }}"
-                                                            data-addr='@json($addr)'>
-                                                            <div class="flex items-start justify-between mb-3">
-                                                                <div class="flex items-start gap-3 flex-1">
-                                                                    <div
-                                                                        class="shippingAddressRadio w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0 mt-1 transition-all">
-                                                                        <div
-                                                                            class="w-2.5 h-2.5 rounded-full bg-transparent transition-all">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="flex-1">
-                                                                        @if ($addr->address_label)
-                                                                            <p class="font-semibold text-gray-900 text-sm">
-                                                                                {{ $addr->address_label }}</p>
-                                                                        @endif
-                                                                        <p class="font-semibold text-gray-900">
-                                                                            {{ $addr->name }}</p>
-                                                                        <p class="text-gray-600 text-sm mt-1">
-                                                                            {{ $addr->street }}</p>
-                                                                        <p class="text-gray-600 text-sm">
-                                                                            {{ $addr->city }}, {{ $addr->state }}
-                                                                            {{ $addr->postal_code }}</p>
-                                                                        @if ($addr->phone)
-                                                                            <p class="text-gray-600 text-sm mt-1">
-                                                                                {{ $addr->phone }}</p>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            @if ($addr->is_default)
-                                                                <div
-                                                                    class="flex items-center gap-2 text-xs font-semibold text-primary bg-primary/10 rounded-full px-3 py-1 w-fit">
-                                                                    <svg class="w-3 h-3" fill="currentColor"
-                                                                        viewBox="0 0 20 20">
-                                                                        <path fill-rule="evenodd"
-                                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                            clip-rule="evenodd" />
-                                                                        </path>
-                                                                    </svg>
-                                                                    Default
-                                                                </div>
-                                                            @endif
-                                                        </div>
+                                                        <option value="{{ $addr->id }}"
+                                                            data-addr='@json($addr)'
+                                                            {{ $addr->is_default ? 'selected' : '' }}>
+                                                            {{ $addr->address_label ? '📍 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }} ({{ $addr->city }}, {{ $addr->state }})
+                                                        </option>
                                                     @endforeach
-                                                </div>
-                                            @else
-                                                <div
-                                                    class="text-center py-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                </select>
+                                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                                     </svg>
-                                                    <p class="text-gray-600 font-medium">No saved addresses</p>
-                                                    <p class="text-gray-500 text-sm">Add your first address to get started
-                                                    </p>
                                                 </div>
-                                            @endif
+                                            </div>
+                                            @error('shipping_address_id')
+                                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                            <!-- Selected Address Display -->
+                                            <div id="selectedShippingDisplay" class="hidden mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <p class="text-sm font-semibold text-green-800 mb-1">Shipping To:</p>
+                                                        <p id="displayShippingName" class="font-bold text-gray-900"></p>
+                                                        <p id="displayShippingStreet" class="text-sm text-gray-700"></p>
+                                                        <p id="displayShippingCity" class="text-sm text-gray-700"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @elseif(Auth::check())
+                                        <div class="text-center py-10 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border-2 border-dashed border-gray-300">
+                                            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </div>
+                                            <p class="text-gray-700 font-semibold mb-2">No Saved Addresses</p>
+                                            <p class="text-gray-500 text-sm mb-4">Add your first shipping address to continue</p>
+                                            <button type="button" id="addShippingAddressBtnEmpty"
+                                                class="px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Add Shipping Address
+                                            </button>
                                         </div>
                                     @endif
 
                                     <script>
+                                        // Handle shipping address dropdown selection
                                         (function() {
-                                            const cards = document.querySelectorAll('.shippingAddressCard');
-                                            const shippingFormFields = document.getElementById('shippingFormFields');
-                                            const preview = document.getElementById('shippingAddressPreview');
+                                            const select = document.getElementById('shippingAddressSelect');
+                                            if (!select) return;
 
-                                            cards.forEach(card => {
-                                                card.addEventListener('click', function() {
-                                                    // Remove selection from other cards
-                                                    cards.forEach(c => {
-                                                        c.classList.remove('border-primary', 'bg-primary/5');
-                                                        c.querySelector('.shippingAddressRadio').classList.remove(
-                                                            'border-primary', 'bg-primary');
-                                                        c.querySelector('.shippingAddressRadio div').classList.remove(
-                                                            'bg-white');
-                                                    });
+                                            select.addEventListener('change', function() {
+                                                const option = this.options[this.selectedIndex];
+                                                if (!option || !option.dataset.addr) return;
 
-                                                    // Mark this card as selected
-                                                    this.classList.add('border-primary', 'bg-primary/5');
-                                                    this.querySelector('.shippingAddressRadio').classList.add('border-primary',
-                                                        'bg-primary');
-                                                    this.querySelector('.shippingAddressRadio div').classList.add('bg-white');
+                                                try {
+                                                    const addr = JSON.parse(option.dataset.addr);
 
-                                                    // Get address data
-                                                    try {
-                                                        const addr = JSON.parse(this.dataset.addr);
+                                                    // Parse name into first and last
+                                                    const nameParts = addr.name ? addr.name.split(' ') : ['', ''];
+                                                    const firstName = nameParts[0] || '';
+                                                    const lastName = nameParts.slice(1).join(' ') || '';
 
-                                                        // Hide form and show preview
-                                                        if (shippingFormFields) shippingFormFields.classList.add('hidden');
-                                                        if (preview) preview.classList.remove('hidden');
-
-                                                        // Update preview
-                                                        document.getElementById('previewShippingName').textContent = addr.name || '';
-                                                        document.getElementById('previewShippingStreet').textContent = addr.street ||
-                                                        '';
-                                                        document.getElementById('previewShippingCity').textContent = (addr.city || '') +
-                                                            ', ' + (addr.state || '') + ' ' + (addr.postal_code || '');
-
-                                                        // Populate hidden form fields
-                                                        document.getElementById('firstName').value = addr.name ? (addr.name.split(' ')[
-                                                            0] || addr.name) : '';
-                                                        document.getElementById('lastName').value = addr.name ? (addr.name.split(' ')
-                                                            .slice(1).join(' ') || '') : '';
-                                                        document.getElementById('address').value = addr.street || '';
-                                                        document.getElementById('city').value = addr.city || '';
-                                                        document.getElementById('state').value = addr.state || '';
-                                                        document.getElementById('zip').value = addr.postal_code || addr.postcode || addr
-                                                            .zip || '';
-                                                    } catch (e) {
-                                                        console.error('Error selecting address:', e);
-                                                    }
-                                                });
+                                                    // Populate hidden fields for submission
+                                                    document.getElementById('firstName').value = firstName;
+                                                    document.getElementById('lastName').value = lastName;
+                                                    document.getElementById('address').value = addr.street || '';
+                                                    document.getElementById('city').value = addr.city || '';
+                                                    document.getElementById('state').value = addr.state || '';
+                                                    document.getElementById('zip').value = addr.postal_code || '';
+                                                } catch (e) {
+                                                    console.error('Error parsing address:', e);
+                                                }
                                             });
+
+                                            // Trigger change on load if default is selected
+                                            if (select.value) {
+                                                select.dispatchEvent(new Event('change'));
+                                            }
                                         })();
                                     </script>
 
@@ -739,220 +735,126 @@
                                     </script>
 
                                     <!-- Hidden form fields for shipping address (populated by selected card) -->
-                                    <input type="hidden" id="firstName" name="firstName">
-                                    <input type="hidden" id="lastName" name="lastName">
-                                    <input type="hidden" id="address" name="address">
-                                    <input type="hidden" id="city" name="city">
-                                    <input type="hidden" id="state" name="state">
-                                    <input type="hidden" id="zip" name="zip">
+                                    <input type="hidden" id="firstName" name="firstName" value="">
+                                    <input type="hidden" id="lastName" name="lastName" value="">
+                                    <input type="hidden" id="address" name="address" value="">
+                                    <input type="hidden" id="city" name="city" value="">
+                                    <input type="hidden" id="state" name="state" value="">
+                                    <input type="hidden" id="zip" name="zip" value="">
+                                    <input type="hidden" id="country" name="country" value="Morocco">
                                 </div>
                             </div>
 
                             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
-                                <div class="flex items-start justify-between mb-6">
+                                <div class="flex items-center justify-between mb-6">
                                     <div>
                                         <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-                                            <span
-                                                class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                                            <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
                                             Billing Address
                                         </h2>
-                                        <p class="text-gray-500 text-sm mt-1">Use a separate billing address if it differs
-                                            from shipping.</p>
+                                        <p class="text-gray-500 text-sm mt-1">Payment and billing information</p>
                                     </div>
-                                    <label
-                                        class="inline-flex items-center text-sm font-semibold text-gray-700 select-none">
+                                    <label class="inline-flex items-center px-4 py-2 bg-blue-50 rounded-xl border-2 border-blue-200 cursor-pointer hover:bg-blue-100 transition-all">
                                         <input type="checkbox" id="billingSameAsShipping" name="billing_same_as_shipping"
-                                            value="1" class="form-checkbox h-4 w-4 text-primary mr-2" checked>
-                                        Billing same as shipping
+                                            value="1" class="form-checkbox h-4 w-4 text-primary rounded" checked>
+                                        <span class="ml-2 text-sm font-semibold text-gray-700">Same as shipping</span>
                                     </label>
                                 </div>
 
-                                <div id="billingFields" class="space-y-5">
+                                <div id="billingFields" class="space-y-5 hidden">
                                     @if (Auth::check())
-                                        <div class="mb-6">
-                                            <div class="flex items-center justify-between mb-4">
-                                                <label class="block text-sm font-semibold text-gray-700">Saved Billing
-                                                    Addresses
-                                                    <span class="text-xs text-gray-500">({{ $billingAddresses->count() }}
-                                                        saved)</span></label>
-                                                <button type="button" id="addBillingAddressBtn"
-                                                    class="px-4 py-2 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 whitespace-nowrap flex items-center gap-2"
-                                                    data-address-type="billing">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M12 4v16m8-8H4" />
-                                                    </svg>
-                                                    Add New Address
-                                                </button>
-                                            </div>
-
-                                            @if ($billingAddresses->count() > 0)
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    @foreach ($billingAddresses as $addr)
-                                                        <div class="billingAddressCard cursor-pointer p-4 rounded-xl border-2 border-gray-200 hover:border-primary hover:shadow-md transition-all duration-300 bg-white hover:bg-linear-to-br hover:from-primary/5 hover:to-transparent"
-                                                            data-address-id="{{ $addr->id }}"
-                                                            data-addr='@json($addr)'>
-                                                            <div class="flex items-start justify-between mb-3">
-                                                                <div class="flex items-start gap-3 flex-1">
-                                                                    <div
-                                                                        class="billingAddressRadio w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0 mt-1 transition-all">
-                                                                        <div
-                                                                            class="w-2.5 h-2.5 rounded-full bg-transparent transition-all">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="flex-1">
-                                                                        @if ($addr->address_label)
-                                                                            <p class="font-semibold text-gray-900 text-sm">
-                                                                                {{ $addr->address_label }}</p>
-                                                                        @endif
-                                                                        <p class="font-semibold text-gray-900">
-                                                                            {{ $addr->name }}</p>
-                                                                        <p class="text-gray-600 text-sm mt-1">
-                                                                            {{ $addr->street }}</p>
-                                                                        <p class="text-gray-600 text-sm">
-                                                                            {{ $addr->city }}, {{ $addr->state }}
-                                                                            {{ $addr->postal_code }}</p>
-                                                                        @if ($addr->phone)
-                                                                            <p class="text-gray-600 text-sm mt-1">
-                                                                                {{ $addr->phone }}</p>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            @if ($addr->is_default)
-                                                                <div
-                                                                    class="flex items-center gap-2 text-xs font-semibold text-primary bg-primary/10 rounded-full px-3 py-1 w-fit">
-                                                                    <svg class="w-3 h-3" fill="currentColor"
-                                                                        viewBox="0 0 20 20">
-                                                                        <path fill-rule="evenodd"
-                                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                            clip-rule="evenodd" />
-                                                                        </path>
-                                                                    </svg>
-                                                                    Default
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <div
-                                                    class="text-center py-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    </svg>
-                                                    <p class="text-gray-600 font-medium">No saved billing addresses</p>
-                                                    <p class="text-gray-500 text-sm">Add a billing address to get started
-                                                    </p>
-                                                </div>
-                                            @endif
+                                        <div class="flex items-center justify-between mb-4">
+                                            <label for="billingAddressSelect" class="block text-sm font-semibold text-gray-700">
+                                                Select Billing Address
+                                                @if($billingAddresses->count() > 0)
+                                                    <span class="text-xs font-normal text-gray-500 ml-1">({{ $billingAddresses->count() }} available)</span>
+                                                @endif
+                                            </label>
+                                            <button type="button" id="addBillingAddressBtn"
+                                                class="px-4 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Add New
+                                            </button>
                                         </div>
                                     @endif
 
-                                    <script>
-                                        (function() {
-                                            const cards = document.querySelectorAll('.billingAddressCard');
-                                            const billingFormFields = document.getElementById('billingFormFields');
-                                            const preview = document.getElementById('billingAddressPreview');
+                                    @if (Auth::check() && $billingAddresses->count() > 0)
+                                        <div>
+                                            <div class="relative">
+                                                <select id="billingAddressSelect" name="billing_address_id"
+                                                    class="block w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none bg-white pr-12 text-gray-900 font-medium hover:border-gray-300">
+                                                    <option value="">-- Select billing address --</option>
+                                                    @foreach ($billingAddresses as $addr)
+                                                        <option value="{{ $addr->id }}"
+                                                            data-addr='@json($addr)'
+                                                            {{ $addr->is_default ? 'selected' : '' }}>
+                                                            {{ $addr->address_label ? '💳 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }} ({{ $addr->city }}, {{ $addr->state }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            @error('billing_address_id')
+                                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
 
-                                            cards.forEach(card => {
-                                                card.addEventListener('click', function() {
-                                                    // Remove selection from other cards
-                                                    cards.forEach(c => {
-                                                        c.classList.remove('border-primary', 'bg-primary/5');
-                                                        c.querySelector('.billingAddressRadio').classList.remove(
-                                                            'border-primary', 'bg-primary');
-                                                        c.querySelector('.billingAddressRadio div').classList.remove(
-                                                        'bg-white');
-                                                    });
-
-                                                    // Mark this card as selected
-                                                    this.classList.add('border-primary', 'bg-primary/5');
-                                                    this.querySelector('.billingAddressRadio').classList.add('border-primary',
-                                                        'bg-primary');
-                                                    this.querySelector('.billingAddressRadio div').classList.add('bg-white');
-
-                                                    // Get address data
-                                                    try {
-                                                        const addr = JSON.parse(this.dataset.addr);
-
-                                                        // Hide form and show preview
-                                                        if (billingFormFields) billingFormFields.classList.add('hidden');
-                                                        if (preview) preview.classList.remove('hidden');
-
-                                                        // Update preview
-                                                        document.getElementById('previewBillingName').textContent = addr.name || '';
-                                                        document.getElementById('previewBillingStreet').textContent = addr.street || '';
-                                                        document.getElementById('previewBillingCity').textContent = (addr.city || '') +
-                                                            ', ' + (addr.state || '') + ' ' + (addr.postal_code || '');
-
-                                                        // Populate hidden form fields
-                                                        document.getElementById('billing_firstName').value = addr.name ? (addr.name
-                                                            .split(' ')[0] || addr.name) : '';
-                                                        document.getElementById('billing_lastName').value = addr.name ? (addr.name
-                                                            .split(' ').slice(1).join(' ') || '') : '';
-                                                        document.getElementById('billing_address_line').value = addr.street || '';
-                                                        document.getElementById('billing_city').value = addr.city || '';
-                                                        document.getElementById('billing_state').value = addr.state || '';
-                                                        document.getElementById('billing_zip').value = addr.postal_code || addr
-                                                            .postcode || addr.zip || '';
-                                                        document.getElementById('billing_country').value = addr.country || '';
-                                                        document.getElementById('billing_phone').value = addr.phone || '';
-                                                    } catch (e) {
-                                                        console.error('Error selecting address:', e);
-                                                    }
-                                                });
-                                            });
-                                        })();
-                                    </script>
-
-                                    <!-- Billing Address Preview Card -->
-                                    <div id="billingAddressPreview"
-                                        class="hidden mt-4 bg-white rounded-2xl overflow-hidden shadow-md border-l-4 border-blue-500">
-                                        <div
-                                            class="bg-linear-to-r from-blue-50 to-blue-25 px-6 py-4 border-b border-blue-100">
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-3">
-                                                    <div
-                                                        class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                        <svg class="w-6 h-6 text-blue-600" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            <!-- Selected Billing Address Display -->
+                                            <div id="selectedBillingDisplay" class="hidden mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </div>
-                                                    <div>
-                                                        <span class="block font-semibold text-gray-900">Billing
-                                                            Address</span>
-                                                        <span class="block text-xs text-gray-600">Confirmed</span>
+                                                    <div class="flex-1">
+                                                        <p class="text-sm font-semibold text-blue-800 mb-1">Billing To:</p>
+                                                        <p id="displayBillingName" class="font-bold text-gray-900"></p>
+                                                        <p id="displayBillingStreet" class="text-sm text-gray-700"></p>
+                                                        <p id="displayBillingCity" class="text-sm text-gray-700"></p>
                                                     </div>
                                                 </div>
-                                                <button type="button"
-                                                    class="changeAddressBtn text-primary hover:text-primary/80 text-sm font-semibold transition-colors">Change</button>
                                             </div>
                                         </div>
-                                        <div class="px-6 py-5">
-                                            <p id="previewBillingName" class="font-semibold text-gray-900 mb-2"></p>
-                                            <p id="previewBillingStreet" class="text-gray-700 text-sm mb-1"></p>
-                                            <p id="previewBillingCity" class="text-gray-700 text-sm"></p>
+                                    @elseif(Auth::check())
+                                        <div class="text-center py-10 bg-gradient-to-br from-gray-50 to-purple-50 rounded-2xl border-2 border-dashed border-gray-300">
+                                            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                                </svg>
+                                            </div>
+                                            <p class="text-gray-700 font-semibold mb-2">No Billing Addresses</p>
+                                            <p class="text-gray-500 text-sm mb-4">Add a billing address for payment</p>
+                                            <button type="button" id="addBillingAddressBtnEmpty"
+                                                class="px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Add Billing Address
+                                            </button>
                                         </div>
-                                    </div>
-
-                                    <!-- Hidden form fields for billing address (populated by selected card) -->
-                                    <input type="hidden" id="billing_firstName" name="billing_firstName">
-                                    <input type="hidden" id="billing_lastName" name="billing_lastName">
-                                    <input type="hidden" id="billing_address_line" name="billing_address_line">
-                                    <input type="hidden" id="billing_city" name="billing_city">
-                                    <input type="hidden" id="billing_state" name="billing_state">
-                                    <input type="hidden" id="billing_zip" name="billing_zip">
-                                    <input type="hidden" id="billing_country" name="billing_country">
-                                    <input type="hidden" id="billing_phone" name="billing_phone">
+                                    @endif
                                 </div>
+
+                                <!-- Hidden form fields for billing address (populated by dropdown) - OUTSIDE billingFields div -->
+                                <input type="hidden" id="billing_firstName" name="billing_firstName" value="">
+                                <input type="hidden" id="billing_lastName" name="billing_lastName" value="">
+                                <input type="hidden" id="billing_address_line" name="billing_address_line" value="">
+                                <input type="hidden" id="billing_city" name="billing_city" value="">
+                                <input type="hidden" id="billing_state" name="billing_state" value="">
+                                <input type="hidden" id="billing_zip" name="billing_zip" value="">
+                                <input type="hidden" id="billing_country" name="billing_country" value="Morocco">
+                                <input type="hidden" id="billing_phone" name="billing_phone" value="">
                             </div>
 
                             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
@@ -1099,7 +1001,13 @@
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
                                     Order Summary
                                 </h2>
-
+                                <div
+                                    class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
+                                    <span class="text-sm font-semibold text-gray-700">Item Total:</span>
+                                    <span
+                                        class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
+                                        {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
+                                </div>
                                 @php
                                     $subtotal = $totals['subtotal'] ?? 0;
                                     $totalDiscount = $totals['total_discount'] ?? 0;
@@ -1119,12 +1027,13 @@
                                     @endphp
                                     @if ($summaryItems && $summaryItems->count() > 0)
                                         @foreach ($summaryItems as $item)
-                                            <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 summary-item-row"
+                                            <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 summary-item-row items-center justify-between"
                                                 data-summary-item-id="{{ $item->id }}">
-                                                <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}"
-                                                    alt="{{ optional($item->product)->name ?? 'Product' }}"
-                                                    class="w-20 h-20 rounded-lg object-cover shadow-sm">
-                                                <div class="flex-1 min-w-0">
+                                                <div class="flex gap-4 flex-1 min-w-0">
+                                                    <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}"
+                                                        alt="{{ optional($item->product)->name ?? 'Product' }}"
+                                                        class="w-20 h-20 rounded-lg object-cover shadow-sm shrink-0">
+                                                    <div class="flex-1 min-w-0">
                                                     <h4 class="font-semibold text-gray-900 text-sm mb-1 truncate">
                                                         {{ optional($item->variant)->variant_name ?? (optional($item->product)->name ?? 'Product') }}
                                                     </h4>
@@ -1148,28 +1057,33 @@
                                                         $summaryLine = $summaryUnit * $item->quantity;
                                                     @endphp
                                                     <p class="summary-item-price text-sm font-bold text-primary mt-1">
-                                                        {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($summaryLine, 2) }}</p>
+                                                        {{ config('app.CURRENCY_SYMBOL') }}
+                                                        {{ number_format($summaryLine, 2) }}</p>
                                                 </div>
-                                                <button type="button"
-                                                    class="summary-remove-item-btn flex items-center justify-center text-red-500 hover:text-red-700 transition-colors duration-200 shrink-0"
-                                                    data-item-id="{{ $item->id }}" title="Remove item">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
                                             </div>
+                                            <button type="button"
+                                                class="summary-remove-item-btn flex items-center justify-center text-red-500 hover:text-red-700 transition-colors duration-200 shrink-0"
+                                                data-item-id="{{ $item->id }}" title="Remove item">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                         @endforeach
                                     @endif
                                 </div>
 
                                 <div class="space-y-4 mb-6">
-                                    <div class="flex justify-between text-gray-600 text-base">
-                                        <span>Subtotal</span>
-                                        <span class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
-                                            {{ number_format($subtotal, 2) }}</span>
+                                    <div class="space-y-3">
+                                        <span class="block text-sm font-semibold text-gray-700 mb-3">Price Details</span>
+
+                                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
+                                            <span class="text-gray-600 font-medium">MRP</span>
+                                            <span class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotal, 2) }}</span>
+                                        </div>
                                     </div>
 
                                     @if ($totalDiscount > 0)
@@ -1182,14 +1096,15 @@
                                                         d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                         clip-rule="evenodd" />
                                                 </svg>
-                                                Discount Savings
+                                                Discount on MRP
                                             </span>
-                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($totalDiscount, 2) }}</span>
+                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($totalDiscount, 2) }}</span>
                                         </div>
 
                                         <div
                                             class="flex justify-between text-gray-900 text-base font-semibold border-t border-b border-gray-200 py-3">
-                                            <span>Subtotal After Discount</span>
+                                            <span>MRP After Discount</span>
                                             <span>{{ config('app.CURRENCY_SYMBOL') }}
                                                 {{ number_format($subtotalAfterDiscount, 2) }}</span>
                                         </div>
@@ -1211,7 +1126,8 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($couponDiscount, 2) }}</span>
+                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($couponDiscount, 2) }}</span>
                                         </div>
                                     @endif
 
@@ -1221,10 +1137,10 @@
                                             class="font-bold text-green-600">{{ $shipping > 0 ? '$' . number_format($shipping, 2) : 'FREE' }}</span>
                                     </div>
                                     <div class="flex justify-between text-gray-600 text-base">
-                                        <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}%
-                                            included)</span>
-                                        <span class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
-                                            {{ number_format($tax, 2) }}</span>
+                                        {{-- <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}%
+                                            included)</span> --}}
+                                        {{-- <span class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
+                                            {{ number_format($tax, 2) }}</span> --}}
                                     </div>
                                     <div class="border-t-2 border-gray-100 pt-4">
                                         <div class="flex justify-between items-center">
@@ -1258,6 +1174,9 @@
                         </div>
                     </div>
                 @elseif($step == 3)
+                    @php
+                        $itemCount = $cart ? $cart->items->sum('quantity') : 0;
+                    @endphp
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div class="lg:col-span-2 space-y-6">
 
@@ -1359,7 +1278,13 @@
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-green-500 to-green-400 mr-3"></span>
                                     Order Summary
                                 </h2>
-
+                                <div
+                                    class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
+                                    <span class="text-sm font-semibold text-gray-700">Item Total:</span>
+                                    <span
+                                        class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
+                                        {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
+                                </div>
                                 @php
                                     $itemsForSummary =
                                         isset($order) && $order->items->isNotEmpty()
@@ -1411,7 +1336,8 @@
                                                 </h4>
                                                 <p class="text-xs text-gray-600">Qty: {{ $itm->quantity }}</p>
                                                 <p class="text-sm font-bold text-primary mt-1">
-                                                    {{ config('app.CURRENCY_SYMBOL') }} {{ number_format(($itm->final_price ?? ($itm->unit_price ?? ($itm->price ?? 0))) * $itm->quantity, 2) }}
+                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                    {{ number_format(($itm->final_price ?? ($itm->unit_price ?? ($itm->price ?? 0))) * $itm->quantity, 2) }}
                                                 </p>
                                             </div>
                                         </div>
@@ -1419,10 +1345,13 @@
                                 </div>
 
                                 <div class="space-y-4 mb-6">
-                                    <div class="flex justify-between text-gray-600 text-base">
-                                        <span>Subtotal</span>
-                                        <span class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
-                                            {{ number_format($subtotalStep3, 2) }}</span>
+                                    <div class="space-y-3">
+                                        <span class="block text-sm font-semibold text-gray-700 mb-3">Price Details</span>
+
+                                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
+                                            <span class="text-gray-600 font-medium">MRP</span>
+                                            <span class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotalStep3, 2) }}</span>
+                                        </div>
                                     </div>
 
                                     @if ($totalDiscountStep3 > 0)
@@ -1435,14 +1364,15 @@
                                                         d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                         clip-rule="evenodd" />
                                                 </svg>
-                                                Discount Savings
+                                                Discount on MRP
                                             </span>
-                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($totalDiscountStep3, 2) }}</span>
+                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($totalDiscountStep3, 2) }}</span>
                                         </div>
 
                                         <div
                                             class="flex justify-between text-gray-900 text-base font-semibold border-t border-b border-gray-200 py-3">
-                                            <span>Subtotal After Discount</span>
+                                            <span>MRP After Discount</span>
                                             <span>{{ config('app.CURRENCY_SYMBOL') }}
                                                 {{ number_format($subtotalAfterDiscountStep3, 2) }}</span>
                                         </div>
@@ -1464,7 +1394,8 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($couponDiscountStep3, 2) }}</span>
+                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($couponDiscountStep3, 2) }}</span>
                                         </div>
                                     @endif
 
@@ -1474,9 +1405,9 @@
                                             class="font-bold text-green-600">{{ $shippingStep3 > 0 ? '$' . number_format($shippingStep3, 2) : 'FREE' }}</span>
                                     </div>
                                     <div class="flex justify-between text-gray-600 text-base">
-                                        <span>{{ config('tax.label') }} ({{ config('tax.rate') }})</span>
-                                        <span class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
-                                            {{ number_format($taxStep3, 2) }}</span>
+                                        {{-- <span>{{ config('tax.label') }} ({{ config('tax.rate') }})</span> --}}
+                                        {{-- <span class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
+                                            {{ number_format($taxStep3, 2) }}</span> --}}
                                     </div>
                                     <div class="border-t-2 border-gray-100 pt-4">
                                         <div class="flex justify-between items-center">
@@ -1557,54 +1488,6 @@
                                 @endif
 
                             </div>
-
-                            <div class="mt-6 bg-linear-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6"
-                                id="coupon-container-step3">
-                                <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                                    </svg>
-                                    Have a Coupon Code?
-                                </h3>
-                                @if ((isset($order) && $order->coupon_code) || ($cart && $cart->coupon_code))
-                                    <div class="bg-white rounded-xl p-4 border-2 border-purple-200"
-                                        id="applied-coupon-display-step3">
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex items-center">
-                                                <div
-                                                    class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                                                    <svg class="w-5 h-5 text-purple-600" fill="currentColor"
-                                                        viewBox="0 0 20 20">
-                                                        <path
-                                                            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <p class="font-bold text-gray-900 text-sm">
-                                                        {{ isset($order) ? $order->coupon_code ?? ($cart->coupon_code ?? 'Applied') : $cart->coupon_code ?? 'Applied' }}
-                                                    </p>
-                                                    <p class="text-xs text-gray-600">Coupon Applied</p>
-                                                </div>
-                                            </div>
-                                            <button type="button" id="remove-coupon-btn-step3"
-                                                class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </div>
-                                @else
-                                    <div class="flex gap-3" id="coupon-input-form-step3">
-                                        <input type="text" id="coupon-code-input-step3"
-                                            placeholder="Enter coupon code"
-                                            class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
-                                        <button type="button" id="apply-coupon-btn-step3"
-                                            class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">Apply</button>
-                                    </div>
-                                @endif
-                                <div id="coupon-message-step3" class="mt-3 text-sm hidden"></div>
-                            </div>
                         </div>
                     </div>
                 @endif
@@ -1614,26 +1497,33 @@
     </div>
 
     {{-- Add Address Modal --}}
-    <div id="addAddressModal" style="z-index: 99999;" class="hidden fixed inset-0 items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-        <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl transform transition-all duration-300 scale-95 opacity-0" id="addAddressContent">
-            <div class="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-linear-to-r from-primary/5 to-primary/10">
+    <div id="addAddressModal" style="z-index: 99999;"
+        class="hidden fixed inset-0 items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl transform transition-all duration-300 scale-95 opacity-0"
+            id="addAddressContent">
+            <div
+                class="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-linear-to-r from-primary/5 to-primary/10">
                 <div class="flex items-center gap-3">
                     <div class="bg-primary/10 p-2.5 rounded-xl">
                         <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900">Add Address</h3>
                 </div>
-                <button type="button" id="closeAddressModal" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                <button type="button" id="closeAddressModal"
+                    class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <form id="addAddressForm" method="POST" action="{{ url('/client/addresses') }}" class="max-h-[calc(90vh-180px)] overflow-y-auto">
+            <form id="addAddressForm" method="POST" action="{{ url('/client/addresses') }}"
+                class="max-h-[calc(90vh-180px)] overflow-y-auto">
                 @csrf
                 <input type="hidden" name="_method" id="form-method" value="POST">
                 <input type="hidden" name="id" id="address-id" value="">
@@ -1643,81 +1533,98 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
                             <div class="relative">
-                                <select id="modal_address_type" name="type" required class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+                                <select id="modal_address_type" name="type" required
+                                    class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
                                     <option value="billing">Billing</option>
                                     <option value="shipping">Shipping</option>
                                 </select>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Address Label <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input id="modal_address_label" name="address_label" placeholder="e.g., Home, Office" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Address Label <span
+                                    class="text-gray-400 font-normal">(Optional)</span></label>
+                            <input id="modal_address_label" name="address_label" placeholder="e.g., Home, Office"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
-                            <input id="modal_first_name" name="first_name" required placeholder="John" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="modal_first_name" name="first_name" required placeholder="John"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
-                            <input id="modal_last_name" name="last_name" required placeholder="Doe" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="modal_last_name" name="last_name" required placeholder="Doe"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Street Address *</label>
-                        <input id="modal_street" name="street" required placeholder="123 Main Street" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                        <input id="modal_street" name="street" required placeholder="123 Main Street"
+                            class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">City *</label>
-                            <input id="modal_city" name="city" required placeholder="Casablanca" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="modal_city" name="city" required placeholder="Casablanca"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">State / Region *</label>
-                            <input id="modal_state" name="state" required placeholder="CA" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="modal_state" name="state" required placeholder="CA"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Postal Code *</label>
-                            <input id="modal_postal_code" name="postal_code" required placeholder="20000" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="modal_postal_code" name="postal_code" required placeholder="20000"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Country *</label>
-                            <input id="modal_country" name="country" required value="Morocco" placeholder="Morocco" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="modal_country" name="country" required value="Morocco" placeholder="Morocco"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
-                            <input id="modal_phone" name="phone" type="tel" placeholder="+1 (555) 123-4567" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="modal_phone" name="phone" type="tel" placeholder="+1 (555) 123-4567"
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         </div>
                     </div>
 
                     <div>
                         <label class="inline-flex items-center">
-                            <input id="modal_is_default" name="is_default" type="checkbox" value="1" class="form-checkbox h-4 w-4 text-primary rounded mr-3">
+                            <input id="modal_is_default" name="is_default" type="checkbox" value="1"
+                                class="form-checkbox h-4 w-4 text-primary rounded mr-3">
                             <span class="text-sm font-medium text-gray-700">Set as default address</span>
                         </label>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-3 px-8 py-6 bg-gray-50 border-t border-gray-200 rounded-b-3xl">
-                    <button type="button" id="cancelAddressModal" class="px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all">
+                <div
+                    class="flex items-center justify-end gap-3 px-8 py-6 bg-gray-50 border-t border-gray-200 rounded-b-3xl">
+                    <button type="button" id="cancelAddressModal"
+                        class="px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all">
                         Cancel
                     </button>
-                    <button type="submit" id="submitAddressBtn" class="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2">
+                    <button type="submit" id="submitAddressBtn"
+                        class="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
@@ -1856,7 +1763,8 @@
 
                                 // Show success message
                                 alert(
-                                    'Address saved successfully! The page will reload to show your new address.');
+                                    'Address saved successfully! The page will reload to show your new address.'
+                                    );
 
                                 // Reload page to refresh address list
                                 window.location.reload();
@@ -1928,4 +1836,90 @@
 @push('scripts')
     <script src="{{ asset('js/coupon.js') }}"></script>
     <script src="{{ asset('js/checkout-process.js') }}"></script>
+    <script src="{{ asset('js/checkout-address-dropdown.js') }}"></script>
+
+    <style>
+        @keyframes slide-down {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -100%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .animate-slide-down {
+            animation: slide-down 0.3s ease-out;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .animate-shake {
+            animation: shake 0.3s ease-in-out;
+        }
+    </style>
+
+    <script>
+        // Show Laravel validation errors on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            @if ($errors->any())
+                const errorMessages = @json($errors->all());
+                const message = errorMessages.length > 1
+                    ? `${errorMessages.length} validation errors found`
+                    : errorMessages[0];
+
+                showServerErrorBanner(message, errorMessages);
+            @endif
+        });
+
+        function showServerErrorBanner(title, errors) {
+            const banner = document.createElement('div');
+            banner.id = 'serverErrorBanner';
+            banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down';
+
+            let errorList = '';
+            if (errors.length > 1) {
+                errorList = '<ul class="mt-2 space-y-1 text-sm">';
+                errors.forEach(error => {
+                    errorList += `<li class="flex items-start gap-2"><span>•</span><span>${error}</span></li>`;
+                });
+                errorList += '</ul>';
+            }
+
+            banner.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    <div class="flex-1">
+                        <p class="font-semibold">${title}</p>
+                        ${errorList}
+                    </div>
+                    <button onclick="this.closest('#serverErrorBanner').remove()" class="text-white hover:text-red-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(banner);
+
+            // Auto-remove after 10 seconds for server errors
+            setTimeout(() => {
+                if (banner.parentElement) {
+                    banner.style.opacity = '0';
+                    banner.style.transform = 'translate(-50%, -100%)';
+                    setTimeout(() => banner.remove(), 300);
+                }
+            }, 10000);
+        }
+    </script>
 @endpush
