@@ -196,7 +196,8 @@
                                                                 {{ optional($item->variant)->variant_name ?? (optional($item->product)->name ?? 'Product') }}
                                                             </h3>
                                                             <span
-                                                                class="inline-block text-xs font-semibold px-3 py-1.5 rounded-full bg-linear-to-r from-gray-100 to-gray-200 text-gray-700">{{ optional($item->product)->brand->name ?? '' }}</span>
+                                                                class="inline-block text-xs font-semibold px-3 py-1.5 rounded-full bg-linear-to-r from-gray-100 to-gray-200 text-gray-700">{{ optional($item->product)->brand->name ?? '' }}
+                                                            </span>
                                                         </div>
 
                                                         {{-- The Remove Button (AJAX) --}}
@@ -268,9 +269,13 @@
 
                                                             @if ($hasDiscount)
                                                                 {{-- Original line total with strikethrough --}}
-                                                                <div class="text-lg text-gray-400 line-through mb-1">
-                                                                    {{ config('app.CURRENCY_SYMBOL') }}
-                                                                    {{ number_format($lineTotal, 2) }}</div>
+                                                                <div>
+                                                                    <div
+                                                                        class="inline-block text-lg text-gray-400 line-through mb-1">
+                                                                        {{ config('app.CURRENCY_SYMBOL') }}
+                                                                        {{ number_format($lineTotal, 2) }}
+                                                                    </div>
+                                                                </div>
 
                                                                 {{-- Discount badge --}}
                                                                 @if ($lineDiscount > 0)
@@ -552,7 +557,8 @@
                                 <div class="flex items-center justify-between mb-6">
                                     <div>
                                         <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-                                            <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                                            <span
+                                                class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
                                             Shipping Address
                                         </h2>
                                         <p class="text-gray-500 text-sm mt-1">Where should we deliver your order?</p>
@@ -560,8 +566,10 @@
                                     @if (Auth::check())
                                         <button type="button" id="addShippingAddressBtn"
                                             class="px-4 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 4v16m8-8H4" />
                                             </svg>
                                             Add New
                                         </button>
@@ -570,9 +578,12 @@
                                 <div class="space-y-5">
                                     @if (Auth::check() && $addresses->count() > 0)
                                         <div>
-                                            <label for="shippingAddressSelect" class="block text-sm font-semibold text-gray-700 mb-3">
+                                            <label for="shippingAddressSelect"
+                                                class="block text-sm font-semibold text-gray-700 mb-3">
                                                 Select Saved Address
-                                                <span class="text-xs font-normal text-gray-500 ml-1">({{ $addresses->count() }} available)</span>
+                                                <span
+                                                    class="text-xs font-normal text-gray-500 ml-1">({{ $addresses->count() }}
+                                                    available)</span>
                                             </label>
 
                                             <div class="relative">
@@ -583,35 +594,45 @@
                                                         <option value="{{ $addr->id }}"
                                                             data-addr='@json($addr)'
                                                             {{ $addr->is_default ? 'selected' : '' }}>
-                                                            {{ $addr->address_label ? '📍 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }} ({{ $addr->city }}, {{ $addr->state }})
+                                                            {{ $addr->address_label ? '📍 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }}
+                                                            ({{ $addr->city }}, {{ $addr->state }})
                                                         </option>
                                                     @endforeach
                                                 </select>
                                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    <svg class="w-5 h-5 text-gray-400" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M19 9l-7 7-7-7" />
                                                     </svg>
                                                 </div>
                                             </div>
                                             @error('shipping_address_id')
                                                 <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
                                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        <path fill-rule="evenodd"
+                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                                            clip-rule="evenodd" />
                                                     </svg>
                                                     {{ $message }}
                                                 </p>
                                             @enderror
 
                                             <!-- Selected Address Display -->
-                                            <div id="selectedShippingDisplay" class="hidden mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
+                                            <div id="selectedShippingDisplay"
+                                                class="hidden mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
                                                 <div class="flex items-start gap-3">
-                                                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    <div
+                                                        class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <svg class="w-5 h-5 text-white" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </div>
                                                     <div class="flex-1">
-                                                        <p class="text-sm font-semibold text-green-800 mb-1">Shipping To:</p>
+                                                        <p class="text-sm font-semibold text-green-800 mb-1">Shipping To:
+                                                        </p>
                                                         <p id="displayShippingName" class="font-bold text-gray-900"></p>
                                                         <p id="displayShippingStreet" class="text-sm text-gray-700"></p>
                                                         <p id="displayShippingCity" class="text-sm text-gray-700"></p>
@@ -620,19 +641,27 @@
                                             </div>
                                         </div>
                                     @elseif(Auth::check())
-                                        <div class="text-center py-10 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border-2 border-dashed border-gray-300">
-                                            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <div
+                                            class="text-center py-10 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border-2 border-dashed border-gray-300">
+                                            <div
+                                                class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
                                             </div>
                                             <p class="text-gray-700 font-semibold mb-2">No Saved Addresses</p>
-                                            <p class="text-gray-500 text-sm mb-4">Add your first shipping address to continue</p>
+                                            <p class="text-gray-500 text-sm mb-4">Add your first shipping address to
+                                                continue</p>
                                             <button type="button" id="addShippingAddressBtnEmpty"
                                                 class="px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 4v16m8-8H4" />
                                                 </svg>
                                                 Add Shipping Address
                                             </button>
@@ -749,12 +778,14 @@
                                 <div class="flex items-center justify-between mb-6">
                                     <div>
                                         <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-                                            <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                                            <span
+                                                class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
                                             Billing Address
                                         </h2>
                                         <p class="text-gray-500 text-sm mt-1">Payment and billing information</p>
                                     </div>
-                                    <label class="inline-flex items-center px-4 py-2 bg-blue-50 rounded-xl border-2 border-blue-200 cursor-pointer hover:bg-blue-100 transition-all">
+                                    <label
+                                        class="inline-flex items-center px-4 py-2 bg-blue-50 rounded-xl border-2 border-blue-200 cursor-pointer hover:bg-blue-100 transition-all">
                                         <input type="checkbox" id="billingSameAsShipping" name="billing_same_as_shipping"
                                             value="1" class="form-checkbox h-4 w-4 text-primary rounded" checked>
                                         <span class="ml-2 text-sm font-semibold text-gray-700">Same as shipping</span>
@@ -764,16 +795,21 @@
                                 <div id="billingFields" class="space-y-5 hidden">
                                     @if (Auth::check())
                                         <div class="flex items-center justify-between mb-4">
-                                            <label for="billingAddressSelect" class="block text-sm font-semibold text-gray-700">
+                                            <label for="billingAddressSelect"
+                                                class="block text-sm font-semibold text-gray-700">
                                                 Select Billing Address
-                                                @if($billingAddresses->count() > 0)
-                                                    <span class="text-xs font-normal text-gray-500 ml-1">({{ $billingAddresses->count() }} available)</span>
+                                                @if ($billingAddresses->count() > 0)
+                                                    <span
+                                                        class="text-xs font-normal text-gray-500 ml-1">({{ $billingAddresses->count() }}
+                                                        available)</span>
                                                 @endif
                                             </label>
                                             <button type="button" id="addBillingAddressBtn"
                                                 class="px-4 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 4v16m8-8H4" />
                                                 </svg>
                                                 Add New
                                             </button>
@@ -790,31 +826,40 @@
                                                         <option value="{{ $addr->id }}"
                                                             data-addr='@json($addr)'
                                                             {{ $addr->is_default ? 'selected' : '' }}>
-                                                            {{ $addr->address_label ? '💳 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }} ({{ $addr->city }}, {{ $addr->state }})
+                                                            {{ $addr->address_label ? '💳 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }}
+                                                            ({{ $addr->city }}, {{ $addr->state }})
                                                         </option>
                                                     @endforeach
                                                 </select>
                                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    <svg class="w-5 h-5 text-gray-400" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M19 9l-7 7-7-7" />
                                                     </svg>
                                                 </div>
                                             </div>
                                             @error('billing_address_id')
                                                 <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
                                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        <path fill-rule="evenodd"
+                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                                            clip-rule="evenodd" />
                                                     </svg>
                                                     {{ $message }}
                                                 </p>
                                             @enderror
 
                                             <!-- Selected Billing Address Display -->
-                                            <div id="selectedBillingDisplay" class="hidden mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
+                                            <div id="selectedBillingDisplay"
+                                                class="hidden mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
                                                 <div class="flex items-start gap-3">
-                                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    <div
+                                                        class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <svg class="w-5 h-5 text-white" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </div>
                                                     <div class="flex-1">
@@ -827,18 +872,24 @@
                                             </div>
                                         </div>
                                     @elseif(Auth::check())
-                                        <div class="text-center py-10 bg-gradient-to-br from-gray-50 to-purple-50 rounded-2xl border-2 border-dashed border-gray-300">
-                                            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                        <div
+                                            class="text-center py-10 bg-gradient-to-br from-gray-50 to-purple-50 rounded-2xl border-2 border-dashed border-gray-300">
+                                            <div
+                                                class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                                 </svg>
                                             </div>
                                             <p class="text-gray-700 font-semibold mb-2">No Billing Addresses</p>
                                             <p class="text-gray-500 text-sm mb-4">Add a billing address for payment</p>
                                             <button type="button" id="addBillingAddressBtnEmpty"
                                                 class="px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 4v16m8-8H4" />
                                                 </svg>
                                                 Add Billing Address
                                             </button>
@@ -849,7 +900,8 @@
                                 <!-- Hidden form fields for billing address (populated by dropdown) - OUTSIDE billingFields div -->
                                 <input type="hidden" id="billing_firstName" name="billing_firstName" value="">
                                 <input type="hidden" id="billing_lastName" name="billing_lastName" value="">
-                                <input type="hidden" id="billing_address_line" name="billing_address_line" value="">
+                                <input type="hidden" id="billing_address_line" name="billing_address_line"
+                                    value="">
                                 <input type="hidden" id="billing_city" name="billing_city" value="">
                                 <input type="hidden" id="billing_state" name="billing_state" value="">
                                 <input type="hidden" id="billing_zip" name="billing_zip" value="">
@@ -1034,44 +1086,45 @@
                                                         alt="{{ optional($item->product)->name ?? 'Product' }}"
                                                         class="w-20 h-20 rounded-lg object-cover shadow-sm shrink-0">
                                                     <div class="flex-1 min-w-0">
-                                                    <h4 class="font-semibold text-gray-900 text-sm mb-1 truncate">
-                                                        {{ optional($item->variant)->variant_name ?? (optional($item->product)->name ?? 'Product') }}
-                                                    </h4>
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        <p class="text-xs text-gray-600">Qty:</p>
-                                                        <div
-                                                            class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
-                                                            <button type="button"
-                                                                class="summary-qty-decrease px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
-                                                                data-item-id="{{ $item->id }}">−</button>
-                                                            <span
-                                                                class="summary-quantity px-3 py-1 text-xs font-semibold text-gray-900 bg-white min-w-[30px] text-center">{{ $item->quantity }}</span>
-                                                            <button type="button"
-                                                                class="summary-qty-increase px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
-                                                                data-item-id="{{ $item->id }}">+</button>
+                                                        <h4 class="font-semibold text-gray-900 text-sm mb-1 truncate">
+                                                            {{ optional($item->variant)->variant_name ?? (optional($item->product)->name ?? 'Product') }}
+                                                        </h4>
+                                                        <div class="flex items-center gap-2 mb-2">
+                                                            <p class="text-xs text-gray-600">Qty:</p>
+                                                            <div
+                                                                class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
+                                                                <button type="button"
+                                                                    class="summary-qty-decrease px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
+                                                                    data-item-id="{{ $item->id }}">−</button>
+                                                                <span
+                                                                    class="summary-quantity px-3 py-1 text-xs font-semibold text-gray-900 bg-white min-w-[30px] text-center">{{ $item->quantity }}</span>
+                                                                <button type="button"
+                                                                    class="summary-qty-increase px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
+                                                                    data-item-id="{{ $item->id }}">+</button>
+                                                            </div>
                                                         </div>
+                                                        @php
+                                                            // Use stored discount data
+                                                            $summaryUnit =
+                                                                $item->final_price ?? ($item->unit_price ?? 0);
+                                                            $summaryLine = $summaryUnit * $item->quantity;
+                                                        @endphp
+                                                        <p class="summary-item-price text-sm font-bold text-primary mt-1">
+                                                            {{ config('app.CURRENCY_SYMBOL') }}
+                                                            {{ number_format($summaryLine, 2) }}</p>
                                                     </div>
-                                                    @php
-                                                        // Use stored discount data
-                                                        $summaryUnit = $item->final_price ?? ($item->unit_price ?? 0);
-                                                        $summaryLine = $summaryUnit * $item->quantity;
-                                                    @endphp
-                                                    <p class="summary-item-price text-sm font-bold text-primary mt-1">
-                                                        {{ config('app.CURRENCY_SYMBOL') }}
-                                                        {{ number_format($summaryLine, 2) }}</p>
                                                 </div>
+                                                <button type="button"
+                                                    class="summary-remove-item-btn flex items-center justify-center text-red-500 hover:text-red-700 transition-colors duration-200 shrink-0"
+                                                    data-item-id="{{ $item->id }}" title="Remove item">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
                                             </div>
-                                            <button type="button"
-                                                class="summary-remove-item-btn flex items-center justify-center text-red-500 hover:text-red-700 transition-colors duration-200 shrink-0"
-                                                data-item-id="{{ $item->id }}" title="Remove item">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
                                         @endforeach
                                     @endif
                                 </div>
@@ -1082,7 +1135,8 @@
 
                                         <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
                                             <span class="text-gray-600 font-medium">MRP</span>
-                                            <span class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotal, 2) }}</span>
+                                            <span id="order-subtotal" class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($subtotal, 2) }}</span>
                                         </div>
                                     </div>
 
@@ -1098,16 +1152,16 @@
                                                 </svg>
                                                 Discount on MRP
                                             </span>
-                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                            <span id="order-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
                                                 {{ number_format($totalDiscount, 2) }}</span>
                                         </div>
 
-                                        <div
+                                        {{-- <div
                                             class="flex justify-between text-gray-900 text-base font-semibold border-t border-b border-gray-200 py-3">
                                             <span>MRP After Discount</span>
-                                            <span>{{ config('app.CURRENCY_SYMBOL') }}
+                                            <span id="order-subtotal-after-discount">{{ config('app.CURRENCY_SYMBOL') }}
                                                 {{ number_format($subtotalAfterDiscount, 2) }}</span>
-                                        </div>
+                                        </div> --}}
                                     @endif
 
                                     @if ($couponDiscount > 0)
@@ -1126,20 +1180,20 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                            <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                            <span id="order-coupon-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
                                                 {{ number_format($couponDiscount, 2) }}</span>
                                         </div>
                                     @endif
 
                                     <div class="flex justify-between text-gray-600 text-base">
                                         <span>Shipping</span>
-                                        <span
-                                            class="font-bold text-green-600">{{ $shipping > 0 ? '$' . number_format($shipping, 2) : 'FREE' }}</span>
+                                        <span id="order-shipping"
+                                            class="font-bold text-green-600">{{ $shipping > 0 ? config('app.CURRENCY_SYMBOL') . number_format($shipping, 2) : 'FREE' }}</span>
                                     </div>
                                     <div class="flex justify-between text-gray-600 text-base">
                                         {{-- <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}%
                                             included)</span> --}}
-                                        {{-- <span class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
+                                        {{-- <span id="order-tax" class="font-bold">{{ config('app.CURRENCY_SYMBOL') }}
                                             {{ number_format($tax, 2) }}</span> --}}
                                     </div>
                                     <div class="border-t-2 border-gray-100 pt-4">
@@ -1350,7 +1404,8 @@
 
                                         <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
                                             <span class="text-gray-600 font-medium">MRP</span>
-                                            <span class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotalStep3, 2) }}</span>
+                                            <span class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($subtotalStep3, 2) }}</span>
                                         </div>
                                     </div>
 
@@ -1370,12 +1425,12 @@
                                                 {{ number_format($totalDiscountStep3, 2) }}</span>
                                         </div>
 
-                                        <div
+                                        {{-- <div
                                             class="flex justify-between text-gray-900 text-base font-semibold border-t border-b border-gray-200 py-3">
                                             <span>MRP After Discount</span>
                                             <span>{{ config('app.CURRENCY_SYMBOL') }}
                                                 {{ number_format($subtotalAfterDiscountStep3, 2) }}</span>
-                                        </div>
+                                        </div> --}}
                                     @endif
 
                                     @if ($couponDiscountStep3 > 0)
@@ -1764,7 +1819,7 @@
                                 // Show success message
                                 alert(
                                     'Address saved successfully! The page will reload to show your new address.'
-                                    );
+                                );
 
                                 // Reload page to refresh address list
                                 window.location.reload();
@@ -1844,6 +1899,7 @@
                 opacity: 0;
                 transform: translate(-50%, -100%);
             }
+
             to {
                 opacity: 1;
                 transform: translate(-50%, 0);
@@ -1851,9 +1907,19 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
         }
 
         .animate-slide-down {
@@ -1871,9 +1937,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             @if ($errors->any())
                 const errorMessages = @json($errors->all());
-                const message = errorMessages.length > 1
-                    ? `${errorMessages.length} validation errors found`
-                    : errorMessages[0];
+                const message = errorMessages.length > 1 ?
+                    `${errorMessages.length} validation errors found` :
+                    errorMessages[0];
 
                 showServerErrorBanner(message, errorMessages);
             @endif
@@ -1882,7 +1948,8 @@
         function showServerErrorBanner(title, errors) {
             const banner = document.createElement('div');
             banner.id = 'serverErrorBanner';
-            banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down';
+            banner.className =
+                'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down';
 
             let errorList = '';
             if (errors.length > 1) {

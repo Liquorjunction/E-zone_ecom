@@ -219,6 +219,11 @@ if (viewInput) {
     setActiveView(viewInput.value || 'grid');
 }
 
+// Ensure loading overlay is hidden on page load
+if (loadingOverlay) {
+    loadingOverlay.classList.add('hidden');
+}
+
 // Category/subcategory helpers
 const subCategoryCheckboxes = document.querySelectorAll('.subcategory-checkbox');
 subCategoryCheckboxes.forEach((checkbox) => {

@@ -139,6 +139,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             const data = await resp.json();
             if (data && data.success) {
+                // Get the cart item row
+                const cartRow = document.querySelector(`.cart-item-row[data-item-id="${itemId}"]`);
+
                 // update line total if returned
                 const lineEl = document.getElementById(
                     "item-line-total-" + itemId
@@ -149,6 +152,33 @@ document.addEventListener("DOMContentLoaded", function () {
                     typeof data.item.line_total !== "undefined"
                 )
                     lineEl.textContent = formatMoney(data.item.line_total);
+
+                // Update discount badge
+                if (cartRow && data.item?.discount) {
+                    const discountBadge = cartRow.querySelector('.inline-flex.items-center.text-xs.font-semibold.text-green-700');
+                    if (data.item.discount.has_discount && data.item.discount.discount_amount > 0) {
+                        if (discountBadge) {
+                            // Update existing badge with new discount amount
+                            const discountText = discountBadge.querySelector('svg').nextSibling;
+                            if (discountText) {
+                                discountText.textContent = ` Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
+                            }
+                        } else {
+                            // Badge doesn't exist but should - create it
+                            const priceContainer = cartRow.querySelector('.text-right');
+                            if (priceContainer) {
+                                const newBadge = document.createElement('div');
+                                newBadge.className = 'inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1';
+                                newBadge.innerHTML = `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
+                                priceContainer.insertBefore(newBadge, priceContainer.firstChild);
+                            }
+                        }
+                    } else if (discountBadge) {
+                        // Remove badge if there's no discount
+                        discountBadge.remove();
+                    }
+                }
+
                 updateSummary(data.summary);
             }
         } catch (e) {
