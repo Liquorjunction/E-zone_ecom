@@ -9,6 +9,7 @@
             <div class="modal-body">
                 <form id="changePasswordForm" method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data">
                     @csrf
+                    @method('PUT')
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="form-group">

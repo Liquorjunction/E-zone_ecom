@@ -105,6 +105,7 @@
                                     <div class="user-profile position-relative">
                                     <form id="profileImageForm" method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data">
                                             @csrf
+                                            @method('PUT')
                                             <input type="file" id="profileImageInput" name="profile_image" accept="image/*">
 
                                             <img id="profileImage" src="{{ \App\Helpers\AdminHelper::profileImageUrl() }}" alt="User-Profile"
