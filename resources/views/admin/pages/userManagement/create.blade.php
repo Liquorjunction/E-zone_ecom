@@ -122,7 +122,7 @@
                                             @enderror
                                         </div>
                                         <div class="form-group col-md-6">
-                                            <label class="form-label" for="password_confirmation">Repeat Password:</label>
+                                            <label class="form-label" for="password_confirmation">Confirm Password:</label>
                                             <div class="position-relative">
                                                 <input type="password" name="password_confirmation" class="form-control"
                                                     id="password_confirmation" placeholder="Repeat Password " required>
