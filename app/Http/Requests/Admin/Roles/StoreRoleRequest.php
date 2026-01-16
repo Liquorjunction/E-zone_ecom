@@ -16,7 +16,7 @@ class StoreRoleRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:roles,name,NULL,id,guard_name,admin',
-            'permissions' => 'nullable|array',
+            'permissions' => 'required|array',
             'permissions.*' => 'exists:permissions,id', // Validate IDs
         ];
     }
@@ -25,6 +25,7 @@ class StoreRoleRequest extends FormRequest
     {
         return [
             'name.unique' => 'The role name has already been taken.',
+            'permissions.*.exists' => 'One of the selected permissions does not exist.',
         ];
     }
 

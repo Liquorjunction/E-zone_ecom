@@ -18,7 +18,7 @@ class UpdateRoleRequest extends FormRequest
         return [
             'id' => 'required',
             'name' => 'required|string|max:255|unique:roles,name,'.$roleId.',id,guard_name,admin',
-            'permissions' => 'nullable|array',
+            'permissions' => 'required|array',
             'permissions.*' => 'exists:permissions,id',
         ];
     }
@@ -27,6 +27,7 @@ class UpdateRoleRequest extends FormRequest
     {
         return [
             'name.unique' => 'The role name has already been taken.',
+            'permissions.*.exists' => 'One of the selected permissions does not exist.',
         ];
     }
 

@@ -47,6 +47,9 @@ class AdminAuthController extends Controller
 
             return DataTables::of($admins)
                 ->addIndexColumn()
+                ->addColumn('role', function ($admin) {
+                    return $admin->roles->pluck('name')->join(', ');
+                })
                 ->addColumn('profile_image', function ($admin) {
                     $data['image'] = $admin->profile_image ? asset('storage/avatars/'.$admin->profile_image) : asset('admin_assets/images/avatars/01.png');
 
@@ -58,6 +61,9 @@ class AdminAuthController extends Controller
                         ? route('admin.user-management.toggleStatus', ['id' => $admin->id]): '';
 
                     return view('admin.partials.datatable-status', $data)->render();
+                })
+                ->addColumn('created_at', function ($admin) {
+                    return $admin->created_at->format('Y-m-d');
                 })
                 ->addColumn('action', function ($admin) use ($request) {
                     $data['edit_url'] = $request->user()->can('user management.update')

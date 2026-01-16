@@ -141,13 +141,10 @@
                             @endcan
                         </ul>
                     </li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcanany
-
-
-
-                <li>
-                    <hr class="hr-horizontal">
-                </li>
 
                 @php
                     $isInventorySectionActive =
@@ -218,11 +215,11 @@
                         @endcan
                     </ul>
                 </li>
-                @endcanany
-
                 <li>
                     <hr class="hr-horizontal">
                 </li>
+                @endcanany
+
 
                 @php
                     // Check if any sub-route inside the main 'Pages' wrapper is active
@@ -491,11 +488,11 @@
                         @endcanany
                     </ul>
                 </li>
-                @endcanany
-
                 <li>
                     <hr class="hr-horizontal">
                 </li>
+                @endcanany
+
 
                 @php
                     $isUserSectionActive =
@@ -542,11 +539,11 @@
                         @endcan
                     </ul>
                 </li>
-                @endcanany
-
                 <li>
                     <hr class="hr-horizontal">
                 </li>
+                @endcanany
+
 
                 @php
                     $isDiscountSectionActive = request()->routeIs('admin.discounts.*') || request()->routeIs('admin.coupons.*') || request()->routeIs('admin.coupon-usage.*');
@@ -598,11 +595,11 @@
                         @endcan
                     </ul>
                 </li>
-                @endcanany
-
                 <li>
                     <hr class="hr-horizontal">
                 </li>
+                @endcanany
+
 
                 @php
                     $isOrderSectionActive =

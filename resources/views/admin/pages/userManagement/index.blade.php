@@ -38,6 +38,7 @@
                                         <tr class="ligth">
                                             <th>Profile</th>
                                             <th>Name</th>
+                                            <th>Role</th>
                                             <th>Email</th>
                                             <th>Username</th>
                                             <th>Status</th>

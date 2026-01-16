@@ -30,7 +30,8 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <div class="profile-img-edit position-relative">
-                                        <img id="profile-preview" src="{{ asset('admin_assets/images/avatars/01.png') }}" alt="profile-pic"
+                                        <img id="profile-preview" src="{{ asset('admin_assets/images/avatars/01.png') }}"
+                                            alt="profile-pic"
                                             class="theme-color-default-img profile-pic rounded avatar-100">
                                         {{-- ... other theme images ... --}}
                                         <div class="upload-icone bg-primary">
@@ -42,7 +43,9 @@
                                                 </svg>
                                             </label>
                                             {{-- FIX: Changed name to profile_image --}}
-                                            <input class="file-upload" type="file" id="profile_image" name="profile_image" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                            <input class="file-upload" type="file" id="profile_image"
+                                                name="profile_image" accept="image/*" style="display: none;"
+                                                onchange="previewImage(this)">
                                         </div>
                                     </div>
                                     <div class="img-extension mt-3">
@@ -60,7 +63,9 @@
                                             <option value="{{ $role->name }}">{{ $role->name }}</option>
                                         @endforeach
                                     </select>
-                                    @error('role') <div class="text-danger">{{ $message }}</div> @enderror
+                                    @error('role')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -71,6 +76,9 @@
                                 <div class="header-title">
                                     <h4 class="card-title">New User Information</h4>
                                 </div>
+                                <a href="{{ route('admin.user-management.index') }}" class="btn btn-sm btn-primary">
+                                    <i class="fa fa-arrow-left mr-2"></i>Back
+                                </a>
                             </div>
                             <div class="card-body">
                                 <div class="new-user-info">
@@ -81,13 +89,17 @@
                                             {{-- FIX: Changed name attribute --}}
                                             <input type="text" name="name" class="form-control" id="name"
                                                 placeholder="Full Name" required>
-                                            @error('name') <div class="text-danger">{{ $message }}</div> @enderror
+                                            @error('name')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="email">Email:</label>
                                             <input type="email" name="email" class="form-control" id="email"
                                                 placeholder="Email" required>
-                                            @error('email') <div class="text-danger">{{ $message }}</div> @enderror
+                                            @error('email')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
                                     <hr>
@@ -95,15 +107,35 @@
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="password">Password:</label>
-                                            <input type="password" name="password" class="form-control" id="password"
-                                                placeholder="Password" required>
-                                            @error('password') <div class="text-danger">{{ $message }}</div> @enderror
+                                            <div class="position-relative">
+                                                <input type="password" name="password" class="form-control" id="password"
+                                                    placeholder="Password" required>
+                                                <button type="button" class="btn-toggle-password" onclick="togglePassword('password'); return false;" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; color: #6c757d;">
+                                                    <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            @error('password')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="password_confirmation">Repeat Password:</label>
-                                            <input type="password" name="password_confirmation" class="form-control"
-                                                id="password_confirmation" placeholder="Repeat Password " required>
-                                            @error('password_confirmation') <div class="text-danger">{{ $message }}</div> @enderror
+                                            <div class="position-relative">
+                                                <input type="password" name="password_confirmation" class="form-control"
+                                                    id="password_confirmation" placeholder="Repeat Password " required>
+                                                <button type="button" class="btn-toggle-password" onclick="togglePassword('password_confirmation'); return false;" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; color: #6c757d;">
+                                                    <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            @error('password_confirmation')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary mt-3">Add New User</button>
@@ -119,5 +151,25 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('admin_assets/js/image-preview.js') }}"></script>
+    <script src="{{ asset('admin_assets/js/image-preview.js') }}"></script>
 @endsection
+
+@push('scripts')
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const svg = field.parentElement.querySelector('svg');
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                // Change to eye-off icon (hide)
+                svg.setAttribute('stroke', 'currentColor');
+                svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                field.type = 'password';
+                // Change back to eye icon (show)
+                svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+    </script>
+@endpush

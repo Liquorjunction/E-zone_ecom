@@ -55,8 +55,11 @@
                                                         <label for="permission_title" class="form-label">Permission
                                                             Title</label>
                                                         {{-- Corrected type to "text", added name attribute --}}
-                                                        <input type="text" class="form-control" name="permission_title"
-                                                            id="permission_title" placeholder="e.g., create-users">
+                                                        <input type="text" class="form-control @error('permission_title') is-invalid @enderror" name="permission_title"
+                                                            id="permission_title" placeholder="e.g., create-users" value="{{ old('permission_title') }}">
+                                                        @error('permission_title')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                     <div class="text-start">
                                                         {{-- Changed to type="submit" --}}
@@ -98,26 +101,28 @@
                                                     <div class="form-group">
                                                         <label for="role_title" class="form-label">Role Title</label>
                                                         {{-- Corrected type to "text", added name attribute --}}
-                                                        <input type="text" class="form-control" name="role_title"
-                                                            id="role_title" placeholder="e.g., Editor">
+                                                        <input type="text" class="form-control @error('name') is-invalid @enderror" name="name"
+                                                            id="role_title" placeholder="Enter role title" value="{{ old('name') }}">
+                                                        @error('name')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
-                                                    <div>
-                                                        <span>Status</span>
-                                                        {{-- Added name="status", unique IDs, and values --}}
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" name="status"
-                                                                id="status_yes" value="1" checked>
-                                                            <label class="form-check-label" for="status_yes">
-                                                                Active
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" name="status"
-                                                                id="status_no" value="0">
-                                                            <label class="form-check-label" for="status_no">
-                                                                Inactive
-                                                            </label>
-                                                        </div>
+                                                    <div class="form-group">
+                                                        <label for="role_permissions" class="form-label">Permissions</label>
+                                                        <select class="form-control @error('permissions') is-invalid @enderror @error('permissions.*') is-invalid @enderror"
+                                                            name="permissions[]" id="role_permissions" multiple size="5">
+                                                            {{-- Options would be populated from controller --}}
+                                                            {{-- Example: @foreach($permissions as $permission)
+                                                                <option value="{{ $permission->id }}">{{ $permission->name }}</option>
+                                                            @endforeach --}}
+                                                        </select>
+                                                        <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple permissions</small>
+                                                        @error('permissions')
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @enderror
+                                                        @error('permissions.*')
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                     <div class="text-start mt-2">
                                                         {{-- Changed to type="submit" --}}

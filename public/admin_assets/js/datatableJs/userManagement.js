@@ -17,6 +17,7 @@ $(document).ready(function () {
                 searchable: false,
             },
             { data: "name", name: "name" },
+            { data: "role", name: "role" },
             { data: "email", name: "email" },
             { data: "username", name: "username" },
             {
