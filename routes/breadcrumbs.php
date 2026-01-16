@@ -249,6 +249,11 @@ Breadcrumbs::for('admin.roles-permissions.index', function (BreadcrumbTrail $tra
     $trail->push('Roles & Permissions', route('admin.roles-permissions.index'));
 });
 
+Breadcrumbs::for('admin.roles-permissions.view', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.roles-permissions.index');
+    $trail->push('View Role', route('admin.roles-permissions.show', $id));
+});
+
 // This is the child route for User Management you asked for
 Breadcrumbs::for('admin.user-management.role-permission', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.user-management.index');

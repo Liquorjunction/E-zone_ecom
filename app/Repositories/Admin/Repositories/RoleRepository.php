@@ -66,6 +66,12 @@ class RoleRepository implements RoleRepositoryInterface
         return $role;
     }
 
+    public function deleteRole($id)
+    {
+        $role = Role::findOrFail($id);
+        return $role->delete();
+    }
+
     public function getDataForDataTable($request)
     {
         // return a query builder for server-side processing

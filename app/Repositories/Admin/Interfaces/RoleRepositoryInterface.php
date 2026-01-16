@@ -10,5 +10,6 @@ interface RoleRepositoryInterface
     public function getRoles();
     public function updateRole($request, $id);
     public function storeRole($request);
+    public function deleteRole($id);
     public function getDataForDataTable($request);
 }

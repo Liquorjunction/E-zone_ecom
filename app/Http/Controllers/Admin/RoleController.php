@@ -20,6 +20,19 @@ class RoleController extends Controller
         return view('admin.pages.rolePermission.index');
     }
 
+    public function show(ReadRoleRequest $request)
+    {
+        $id = $request->input('id');
+        $role = Role::where('guard_name', 'admin')->findOrFail($id);
+
+        $permissions = Permission::where('guard_name', 'admin')->get();
+        $permissionGroups = $permissions->groupBy(function ($permission) {
+            return explode('.', $permission->name)[0];
+        });
+
+        return view('admin.pages.rolePermission.view', compact('role', 'permissionGroups'));
+    }
+
     public function data(ReadRoleRequest $request, RoleRepo $roleRepo)
     {
         try {
@@ -28,7 +41,10 @@ class RoleController extends Controller
             return DataTables::of($roles)
                 ->addIndexColumn()
                 ->addColumn('action', function ($role) use ($request) {
+                    $data['id'] = $role->id;
+                    $data['view_url'] = $request->user()->can('role.read') ? route('admin.roles-permissions.show', ['id' => $role->id]): '';
                     $data['edit_url'] = $request->user()->can('role.update') ? route('admin.roles-permissions.edit', ['id' => $role->id]): '';
+                    $data['delete_url'] = $request->user()->can('role.delete') ? route('admin.roles-permissions.destroy', ['id' => $role->id]): '';
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->rawColumns(['action'])
@@ -78,7 +94,7 @@ class RoleController extends Controller
         return redirect()->route('admin.roles-permissions.index')->with('success', 'Role updated successfully.');
     }
 
-    public function destroy(DestroyRoleRequest $request)
+    public function destroy(DestroyRoleRequest $request, RoleRepo $roleRepo)
     {
         $id = $request->input('id');
         $role = Role::where('guard_name', 'admin')->findOrFail($id);
@@ -87,7 +103,7 @@ class RoleController extends Controller
             return back()->with('error', 'Cannot delete this system role.');
         }
 
-        $role->delete();
+        $roleRepo->deleteRole($id);
 
         return redirect()->route('admin.roles-permissions.index')->with('success', 'Role deleted successfully.');
     }

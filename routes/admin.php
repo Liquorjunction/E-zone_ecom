@@ -67,6 +67,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('roles-permissions')->name('roles-permissions.')->middleware('can:role.read,admin')->group(function () {
             Route::get('/', [RoleController::class, 'index'])->name('index'); // permission: role.read
             Route::get('/data', [RoleController::class, 'data'])->name('data');
+            Route::get('/show', [RoleController::class, 'show'])->name('show')->middleware('can:role.read,admin');
             Route::get('/create', [RoleController::class, 'create'])->name('create')->middleware('can:role.create,admin');
             Route::post('/', [RoleController::class, 'store'])->name('store')->middleware('can:role.create,admin');
             Route::get('/edit', [RoleController::class, 'edit'])->name('edit')->middleware('can:role.update,admin');
