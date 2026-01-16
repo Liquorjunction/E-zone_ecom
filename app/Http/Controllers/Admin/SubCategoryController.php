@@ -34,6 +34,12 @@ class SubCategoryController extends Controller
         try {
             $data = $request->validated();
 
+            // Category name and sub-category name should not be the same
+            $category = Categories::find($data['category_id']);
+            if ($category && $category->getTranslation('category-name', 'en') == $data['sub-category-name']['en']) {
+                return redirect()->back()->withErrors(['category_id' => 'Category name and sub-category name should not be the same.'])->withInput();
+            }
+
             // --- Smart Fill for 'sub-category-name' ---
             if (isset($data['sub-category-name']['en'])) {
                 if (empty($data['sub-category-name']['fr'])) {

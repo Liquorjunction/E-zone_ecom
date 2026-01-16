@@ -416,7 +416,7 @@
                                                                     class="summary-qty-decrease px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
                                                                     data-item-id="{{ $item->id }}">−</button>
                                                                 <span
-                                                                    class="summary-quantity px-3 py-1 text-xs font-semibold text-gray-900 bg-white min-w-[30px] text-center">{{ $item->quantity }}</span>
+                                                                    class="summary-quantity px-3 py-1 text-xs font-semibold text-gray-900 bg-white min-w-7.5 text-center">{{ $item->quantity }}</span>
                                                                 <button type="button"
                                                                     class="summary-qty-increase px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
                                                                     data-item-id="{{ $item->id }}">+</button>
@@ -568,7 +568,7 @@
                                     </div>
                                     @if (Auth::check())
                                         <button type="button" id="addShippingAddressBtn"
-                                            class="px-4 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                                            class="px-4 py-2.5 bg-linear-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -623,10 +623,10 @@
 
                                             <!-- Selected Address Display -->
                                             <div id="selectedShippingDisplay"
-                                                class="hidden mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
+                                                class="hidden mt-4 p-4 bg-linear-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
                                                 <div class="flex items-start gap-3">
                                                     <div
-                                                        class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center shrink-0">
                                                         <svg class="w-5 h-5 text-white" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -645,7 +645,7 @@
                                         </div>
                                     @elseif(Auth::check())
                                         <div
-                                            class="text-center py-10 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border-2 border-dashed border-gray-300">
+                                            class="text-center py-10 bg-linear-to-br from-gray-50 to-blue-50 rounded-2xl border-2 border-dashed border-gray-300">
                                             <div
                                                 class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
@@ -660,7 +660,7 @@
                                             <p class="text-gray-500 text-sm mb-4">Add your first shipping address to
                                                 continue</p>
                                             <button type="button" id="addShippingAddressBtnEmpty"
-                                                class="px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
+                                                class="px-6 py-3 bg-linear-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -808,7 +808,7 @@
                                                 @endif
                                             </label>
                                             <button type="button" id="addBillingAddressBtn"
-                                                class="px-4 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                                                class="px-4 py-2.5 bg-linear-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -855,10 +855,10 @@
 
                                             <!-- Selected Billing Address Display -->
                                             <div id="selectedBillingDisplay"
-                                                class="hidden mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
+                                                class="hidden mt-4 p-4 bg-linear-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
                                                 <div class="flex items-start gap-3">
                                                     <div
-                                                        class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center shrink-0">
                                                         <svg class="w-5 h-5 text-white" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -876,7 +876,7 @@
                                         </div>
                                     @elseif(Auth::check())
                                         <div
-                                            class="text-center py-10 bg-gradient-to-br from-gray-50 to-purple-50 rounded-2xl border-2 border-dashed border-gray-300">
+                                            class="text-center py-10 bg-linear-to-br from-gray-50 to-purple-50 rounded-2xl border-2 border-dashed border-gray-300">
                                             <div
                                                 class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
@@ -888,7 +888,7 @@
                                             <p class="text-gray-700 font-semibold mb-2">No Billing Addresses</p>
                                             <p class="text-gray-500 text-sm mb-4">Add a billing address for payment</p>
                                             <button type="button" id="addBillingAddressBtnEmpty"
-                                                class="px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
+                                                class="px-6 py-3 bg-linear-to-r from-primary to-primary/90 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1100,7 +1100,7 @@
                                                                     class="summary-qty-decrease px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
                                                                     data-item-id="{{ $item->id }}">−</button>
                                                                 <span
-                                                                    class="summary-quantity px-3 py-1 text-xs font-semibold text-gray-900 bg-white min-w-[30px] text-center">{{ $item->quantity }}</span>
+                                                                    class="summary-quantity px-3 py-1 text-xs font-semibold text-gray-900 bg-white min-w-7.5 text-center">{{ $item->quantity }}</span>
                                                                 <button type="button"
                                                                     class="summary-qty-increase px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
                                                                     data-item-id="{{ $item->id }}">+</button>
@@ -1965,7 +1965,7 @@
 
             banner.innerHTML = `
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-6 h-6 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                     </svg>
                     <div class="flex-1">

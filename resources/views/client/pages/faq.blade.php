@@ -26,11 +26,13 @@
                             </h3>
                             <nav class="flex flex-col space-y-1" aria-label="FAQ Navigation">
                                 @foreach ($faqcategories ?? [] as $category)
-                                    <a href="#category-{{ $category->id }}"
-                                       class="group flex items-start py-2 px-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-primary transition-all duration-200">
-                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 mr-3 group-hover:bg-primary transition-colors"></span>
-                                        {{ $category->name }}
-                                    </a>
+                                    @if(isset($category->faqs) && $category->faqs->isNotEmpty())
+                                        <a href="#category-{{ $category->id }}"
+                                           class="group flex items-start py-2 px-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-primary transition-all duration-200">
+                                            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 mr-3 group-hover:bg-primary transition-colors"></span>
+                                            {{ $category->name }}
+                                        </a>
+                                    @endif
                                 @endforeach
                             </nav>
                         </div>
@@ -64,7 +66,8 @@
                             <div class="space-y-12">
                                 {{-- Loop through Categories --}}
                                 @foreach (($faqcategories ?? []) as $loopIndex => $category)
-                                    <div id="category-{{ $category->id }}" class="scroll-mt-28">
+                                    @if(isset($category->faqs) && $category->faqs->isNotEmpty())
+                                        <div id="category-{{ $category->id }}" class="scroll-mt-28">
 
                                         {{-- Category Title --}}
                                         <div class="flex items-center mb-6 pb-4 border-b border-gray-100">
@@ -80,7 +83,7 @@
                                                         <span class="font-semibold text-gray-700 group-hover:text-primary group-open:text-primary transition-colors pr-4">
                                                             {{ $faq->question }}
                                                         </span>
-                                                        <span class="text-gray-400 group-hover:text-primary group-open:text-primary group-open:rotate-180 transition-transform duration-200 flex-shrink-0">
+                                                        <span class="text-gray-400 group-hover:text-primary group-open:text-primary group-open:rotate-180 transition-transform duration-200 shrink-0">
                                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                                             </svg>
@@ -98,6 +101,7 @@
                                             @endforeach
                                         </div>
                                     </div>
+                                    @endif
                                 @endforeach
                             </div>
                         @endif
