@@ -10,6 +10,7 @@ $(document).ready(function () {
             type: "GET",
         },
         columns: [
+            { data: "DT_RowIndex", name: "DT_RowIndex", orderable: false, searchable: false },
             {
                 data: "profile_image",
                 name: "profile_image",
@@ -19,7 +20,6 @@ $(document).ready(function () {
             { data: "name", name: "name" },
             { data: "role", name: "role" },
             { data: "email", name: "email" },
-            { data: "username", name: "username" },
             {
                 data: "status",
                 name: "status",

@@ -52,6 +52,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/create', [AdminAuthController::class, 'create'])->name('create')->middleware('can:user management.create,admin');
             Route::post('/', [AdminAuthController::class, 'store'])->name('store')->middleware('can:user management.create,admin');
             Route::get('/edit', [AdminAuthController::class, 'edit'])->name('edit')->middleware('can:user management.update,admin');
+            Route::get('/show', [AdminAuthController::class, 'show'])->name('view')->middleware('can:user management.read,admin');
             Route::put('/update', [AdminAuthController::class, 'update'])->name('update')->middleware('can:user management.update,admin');
             Route::patch('/toggle-status', [AdminAuthController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:user management.update,admin');
         });

@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (window.showToast) {
                         window.showToast(response.data.message || 'Status updated successfully!', 'success');
                     }
+                    
+                    // Reload DataTable to reflect the change from database
+                    const $table = $(input).closest('table');
+                    if ($table.length && $.fn.DataTable.isDataTable($table)) {
+                        $table.DataTable().ajax.reload(null, false);
+                    }
                 })
                 .catch(function (error) {
                     // Revert UI on Failure

@@ -92,8 +92,37 @@
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="email">Email:</label>
-                                            <input type="email" name="email" class="form-control" id="email"
-                                                placeholder="Email" value="{{ old('email', $admin->email) }}" required>
+                                            <input type="email" class="form-control" id="email"
+                                                placeholder="Email" value="{{ old('email', $admin->email) }}" readonly disabled>
+                                            <input type="hidden" name="email" value="{{ $admin->email }}">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="form-label" for="phone">Phone:</label>
+                                            <input type="text" name="phone" class="form-control" id="phone"
+                                                placeholder="Phone Number" value="{{ old('phone', $admin->phone ?? '') }}">
+                                            @error('phone')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="form-label" for="date_of_birth">Date of Birth:</label>
+                                            <input type="date" name="date_of_birth" class="form-control" id="date_of_birth"
+                                                value="{{ old('date_of_birth', $admin->date_of_birth ?? '') }}">
+                                            @error('date_of_birth')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label class="form-label" for="remarks">Remarks:</label>
+                                            <textarea name="remarks" class="form-control" id="remarks"
+                                                placeholder="Remarks" rows="3">{{ old('remarks', $admin->remarks ?? '') }}</textarea>
+                                            @error('remarks')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
                                     <hr>
@@ -101,8 +130,9 @@
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="username">User Name:</label>
-                                            <input type="text" name="username" class="form-control" id="username"
+                                            <input type="text" class="form-control" id="username"
                                                 value="{{ $admin->username }}" readonly disabled>
+                                            <input type="hidden" name="username" value="{{ $admin->username }}">
                                             <small>Usernames are auto-generated and cannot be changed.</small>
                                         </div>
                                         <div class="form-group col-md-6">
@@ -118,7 +148,7 @@
                                             <label class="form-label" for="password">Password:</label>
                                             <div class="position-relative">
                                                 <input type="password" name="password" class="form-control" id="password"
-                                                    placeholder="Password">
+                                                    placeholder="Password" oninput="validatePasswordMatch()">
                                                 <button type="button" class="btn-toggle-password" onclick="togglePassword('password'); return false;" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; color: #6c757d;">
                                                     <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -132,7 +162,7 @@
                                             <label class="form-label" for="password_confirmation">Confirm Password:</label>
                                             <div class="position-relative">
                                                 <input type="password" name="password_confirmation" class="form-control"
-                                                    id="password_confirmation" placeholder="Repeat Password">
+                                                    id="password_confirmation" placeholder="Repeat Password" oninput="validatePasswordMatch()">
                                                 <button type="button" class="btn-toggle-password" onclick="togglePassword('password_confirmation'); return false;" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; color: #6c757d;">
                                                     <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>

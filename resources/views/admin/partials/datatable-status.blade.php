@@ -4,7 +4,7 @@
         class="form-check-input status-toggle"
         type="checkbox"
         data-url="{{ $toggle_url }}"
-        @if(!empty($status)) checked @endif
+        @if($status === 'active') checked @endif
         @if(!empty($is_only_active)) disabled title="At least one slider must remain active" @endif
         id="{{ $__uid }}"
     >

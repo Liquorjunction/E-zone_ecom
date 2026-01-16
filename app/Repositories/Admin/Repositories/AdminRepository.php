@@ -23,10 +23,24 @@ class AdminRepository implements AdminRepositoryInterface
             return Auth::guard('admin')->attempt([
                 $field => $login,
                 'password' => $password,
+                'status' => 'active',
             ], $remember);
         } catch (\Exception $e) {
-            Log::error('Admin authentication failed: '. $e->getMessage());
+            Log::error('Admin authentication failed: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Get admin by ID.
+     */
+    public function getById($id)
+    {
+        try {
+            return admin::find($id);
+        } catch (\Exception $e) {
+            Log::error('Admin get failed: ' . $e->getMessage());
+            return null;
         }
     }
 
@@ -55,7 +69,7 @@ class AdminRepository implements AdminRepositoryInterface
 
             return null; // Not authorized
         } catch (\Exception $e) {
-            Log::error('Admin edit failed: '. $e->getMessage());
+            Log::error('Admin edit failed: ' . $e->getMessage());
             return null;
         }
     }
@@ -92,7 +106,7 @@ class AdminRepository implements AdminRepositoryInterface
                     return false;
                 }
                 if ($request->password !== $request->password_confirmation) {
-                     return false;
+                    return false;
                 }
                 $admin->password = Hash::make($request->password);
                 $hasChanges = true;
@@ -103,9 +117,8 @@ class AdminRepository implements AdminRepositoryInterface
             }
 
             return true;
-
         } catch (\Exception $e) {
-            Log::error('Admin update failed: '. $e->getMessage());
+            Log::error('Admin update failed: ' . $e->getMessage());
             return false;
         }
     }
@@ -128,6 +141,9 @@ class AdminRepository implements AdminRepositoryInterface
                 'name' => $request->name,
                 'email' => $request->email,
                 'username' => $request->email, // Temporary
+                'phone' => $request->phone,
+                'date_of_birth' => $request->date_of_birth,
+                'remarks' => $request->remarks,
                 'password' => Hash::make($request->password),
                 'status' => 'active',
             ]);
@@ -151,7 +167,7 @@ class AdminRepository implements AdminRepositoryInterface
 
             return $admin;
         } catch (\Exception $e) {
-            Log::error('Superadmin create admin failed: '. $e->getMessage());
+            Log::error('Superadmin create admin failed: ' . $e->getMessage());
             return false;
         }
     }
@@ -172,7 +188,7 @@ class AdminRepository implements AdminRepositoryInterface
             $admin = admin::find($id);
             if (!$admin) return false;
 
-            $dataToUpdate = $request->only(['name', 'email', 'status']);
+            $dataToUpdate = $request->only(['name', 'email', 'phone', 'date_of_birth', 'remarks', 'status']);
             $admin->fill($dataToUpdate);
 
             // Handle Profile Image
@@ -194,9 +210,8 @@ class AdminRepository implements AdminRepositoryInterface
 
             $admin->save();
             return true;
-
         } catch (\Exception $e) {
-            Log::error('Superadmin update admin failed: '. $e->getMessage());
+            Log::error('Superadmin update admin failed: ' . $e->getMessage());
             return false;
         }
     }
@@ -214,14 +229,27 @@ class AdminRepository implements AdminRepositoryInterface
                 return false;
             }
 
-            $admin = admin::find($id);
-            if (!$admin) return false;
+            $admin = admin::findOrFail($id);
 
+            // Toggle status
+            $oldStatus = $admin->status;
             $admin->status = $admin->status === 'active' ? 'inactive' : 'active';
-            $admin->save();
-            return true;
+
+            // Save the changes
+            if (!$admin->save()) {
+                return false;
+            }
+
+            // Return fresh instance from database to confirm save
+            $freshAdmin = admin::findOrFail($id);
+            return $freshAdmin;
         } catch (\Exception $e) {
-            Log::error('Superadmin toggle admin status failed: '. $e->getMessage());
+            Log::error('Toggle Status - Exception caught', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
     }
@@ -231,7 +259,7 @@ class AdminRepository implements AdminRepositoryInterface
         try {
             Auth::guard('admin')->logout();
         } catch (\Exception $e) {
-            Log::error('Admin logout failed: '. $e->getMessage());
+            Log::error('Admin logout failed: ' . $e->getMessage());
         }
     }
 

@@ -102,6 +102,33 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="form-label" for="phone">Phone:</label>
+                                            <input type="text" name="phone" class="form-control" id="phone"
+                                                placeholder="Phone Number" value="{{ old('phone', '') }}">
+                                            @error('phone')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="form-label" for="date_of_birth">Date of Birth:</label>
+                                            <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" value="{{ old('date_of_birth', '') }}">
+                                            @error('date_of_birth')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label class="form-label" for="remarks">Remarks:</label>
+                                            <textarea name="remarks" class="form-control" id="remarks"
+                                                placeholder="Remarks" rows="3">{{ old('remarks', '') }}</textarea>
+                                            @error('remarks')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                     <hr>
                                     <h5 class="mb-3">Security</h5>
                                     <div class="row">

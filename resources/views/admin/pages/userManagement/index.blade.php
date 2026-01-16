@@ -36,11 +36,11 @@
                                     data-bs-toggle="data-table" data-url="{{ route('admin.user-management.data') }}">
                                     <thead>
                                         <tr class="ligth">
+                                            <th>#</th>
                                             <th>Profile</th>
                                             <th>Name</th>
                                             <th>Role</th>
                                             <th>Email</th>
-                                            <th>Username</th>
                                             <th>Status</th>
                                             <th>Join Date</th>
                                             <th style="min-width: 100px">Action</th>

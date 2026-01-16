@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Auth\EditAdminRequest;
 use App\Http\Requests\Admin\Auth\ReadProfileRequest;
 use App\Http\Requests\Admin\Auth\StoreAdminRequest;
 use App\Http\Requests\Admin\Auth\UpdateAdminRequest;
+use App\Http\Requests\Admin\Auth\ViewAdminRequest;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -68,6 +69,8 @@ class AdminAuthController extends Controller
                 ->addColumn('action', function ($admin) use ($request) {
                     $data['edit_url'] = $request->user()->can('user management.update')
                         ? route('admin.user-management.edit', ['id' => $admin->id]): '';
+                    $data['view_url'] = $request->user()->can('user management.read')
+                        ? route('admin.user-management.view', ['id' => $admin->id]): '';
                     $data['model'] = $admin;
                     $data['routePrefix'] = 'admin.user-management';
 
@@ -108,6 +111,23 @@ class AdminAuthController extends Controller
         $roles = Role::where('guard_name', 'admin')->get();
 
         return view('admin.pages.userManagement.create', compact('roles'));
+    }
+
+    public function show(ViewAdminRequest $request, AdminRepositoryInterface $adminRepository)
+    {
+        try {
+            $id = $request->input('id');
+            $admin = $adminRepository->getById($id);
+
+            if (! $admin) {
+                abort(403, 'You are not authorized to view this user.');
+            }
+
+            return view('admin.pages.userManagement.view', compact('admin'));
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@show: '.$e->getMessage());
+            throw $e;
+        }
     }
 
     public function store(StoreAdminRequest $request, AdminRepositoryInterface $adminRepository)
@@ -158,18 +178,37 @@ class AdminAuthController extends Controller
     {
         try {
             $id = $request->input('id');
-            $adminRepository->superadminToggleAdminStatus($id);
 
+            // Call repository to toggle status
+            $result = $adminRepository->superadminToggleAdminStatus($id);
+
+            // Check if update was successful
+            if ($result === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update admin status. Please check permissions.',
+                ], 403);
+            }
+            // Return success with updated status
             return response()->json([
                 'success' => true,
                 'message' => 'Admin status updated successfully.',
-            ]);
+                'data' => [
+                    'id' => $result->id,
+                    'status' => $result->status,
+                ],
+            ], 200);
         } catch (\Exception $e) {
-            Log::error('Error in AdminAuthController@toggleStatus: '.$e->getMessage());
+            Log::error('Controller - Exception in toggleStatus', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while updating the status.',
             ], 500);
         }
     }

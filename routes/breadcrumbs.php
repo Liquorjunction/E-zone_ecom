@@ -232,6 +232,11 @@ Breadcrumbs::for('admin.user-management.create', function (BreadcrumbTrail $trai
     $trail->push('Create User', route('admin.user-management.create'));
 });
 
+Breadcrumbs::for('admin.user-management.view', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.user-management.index');
+    $trail->push('View User', route('admin.user-management.view', $id));
+});
+
 // No ID required here anymore
 Breadcrumbs::for('admin.user-management.edit', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.user-management.index');
