@@ -146,6 +146,9 @@ class TncController extends Controller
                 ->addColumn('content', function ($tnc) {
                     return \Illuminate\Support\Str::limit(strip_tags($tnc->getTranslation('content', 'en')), 50, '...');
                 })
+                ->addColumn('updated_at', function ($tnc) {
+                    return $tnc->updated_at->format('Y-m-d H:i:s');
+                })
                 ->addColumn('status', function ($tnc) use ($request) {
                     $data['toggle_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.toggleStatus', ['id' => $tnc->id]) : '';
                     $data['status'] = $tnc->status;

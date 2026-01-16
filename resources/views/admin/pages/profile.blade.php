@@ -14,46 +14,39 @@
 @endsection
 
 @section('content')
-
-    {{-- I've added a @push('styles') directive to add page-specific CSS --}}
-    {{-- This will be injected into the <head> if your layout.app file has @stack('styles') --}}
 @push('styles')
     <style>
         .user-profile {
-            /* This class already has position-relative, which is needed */
-            /* We make it inline-block to wrap its content snugly */
             display: inline-block;
         }
 
         .edit-profile-button {
             position: absolute;
-            bottom: 5px;  /* Position button at the bottom */
-            right: 10px; /* Position button from the right */
-            background-color: #ffffff; /* White background */
-            border: 1px solid #dee2e6; /* Light grey border */
-            border-radius: 50%;        /* Make it perfectly circular */
-            width: 32px;               /* Fixed width */
-            height: 32px;              /* Fixed height */
+            bottom: 5px;
+            right: 10px;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease-in-out;
         }
 
         .edit-profile-button svg {
-            width: 16px;  /* Size the icon inside */
+            width: 16px;
             height: 16px;
-            color: #495057; /* Icon color */
+            color: #495057;
         }
 
         .edit-profile-button:hover {
-            background-color: #f8f9fa; /* Slight hover color change */
+            background-color: #f8f9fa;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
-
-        /* Hide the default file input */
         #profileImageInput {
             display: none;
         }
@@ -95,13 +88,6 @@
                             </div>
                             <div class="card-body">
                                 <div class="text-center">
-                                    {{--
-                                        UPDATED IMAGE CONTAINER:
-                                        - The form now wraps the image and the new <label> button.
-                                        - The old .edit-icon div is removed.
-                                        - The <label> is styled with CSS to be the overlay button.
-                                        - This structure works for both existing and default images.
-                                    --}}
                                     <div class="user-profile position-relative">
                                     <form id="profileImageForm" method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data">
                                             @csrf
@@ -111,7 +97,6 @@
                                             <img id="profileImage" src="{{ \App\Helpers\AdminHelper::profileImageUrl() }}" alt="User-Profile"
                                                 class="theme-color-default-img img-fluid rounded-pill avatar-100">
 
-                                            {{-- This label is the new edit button. Clicking it triggers the file input. --}}
                                             <label for="profileImageInput" class="edit-profile-button">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2">
                                                     <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -144,7 +129,6 @@
                                 </div>
                                 <div class="mt-2">
                                     <h6 class="mb-1">Email Verified:</h6>
-                                    {{-- Show Verified or not --}}
                                     <p>
                                         @if (\App\Helpers\AdminHelper::user() && \App\Helpers\AdminHelper::user()->email_verified_at)
                                             <span style="color: green">Verified</span>
@@ -162,20 +146,39 @@
     </div>
 @endsection
 
-{{--
-    SIMPLIFIED JAVASCRIPT:
-    - Moved to a @push('scripts') stack.
-    - Removed the old click listeners for 'profileImage' and 'editIcon'
-      as the <label> now handles this functionality.
-    - Kept only the auto-submit logic.
---}}
 @push('scripts')
 <script>
+// Password toggle functionality
+function setupPasswordToggle() {
+    const toggleButtons = document.querySelectorAll('.password-toggle-btn');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-target');
+            const inputField = document.getElementById(targetId);
+            const eyeIcon = this.querySelector('.eye-icon');
+
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                // Change to eye-off icon
+                eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1 4.24 4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                inputField.type = 'password';
+                // Change back to eye icon
+                eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('profileImageInput');
     const profileImageForm = document.getElementById('profileImageForm');
     const profileImage = document.getElementById('profileImage');
     const changePasswordForm = document.getElementById('changePasswordForm');
+
+    // Setup password toggle buttons
+    setupPasswordToggle();
 
     // Auto-submit profile image form via AJAX when file is selected
     fileInput.addEventListener('change', function() {

@@ -93,9 +93,10 @@
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="email">Email:</label>
                                             <input type="email" class="form-control" id="email"
-                                                placeholder="Email" value="{{ old('email', $admin->email) }}" readonly disabled>
+                                                placeholder="Email" style="background: #80808061 !important;" value="{{ old('email', $admin->email) }}" readonly disabled>
                                             <input type="hidden" name="email" value="{{ $admin->email }}">
-                                        </div>
+                                            <small class="text-muted">Email cannot be changed</small>
+                                        </input>
                                     </div>
                                     <div class="row">
                                         <div class="form-group col-md-6">

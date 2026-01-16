@@ -11,6 +11,7 @@ interface AdminRepositoryInterface
     public function superadminCreateAdmin($request);
     public function superadminUpdateAdmin($request, $id);
     public function superadminToggleAdminStatus($id);
+    public function findByLoginCredentials(string $login, string $password);
     public function logout(): void;
     public function getDataForDataTable($request);
 }

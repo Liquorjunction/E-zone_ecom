@@ -177,6 +177,9 @@ class ShippingAndReturnController extends Controller
                 ->addColumn('content', function ($record) {
                     return Str::limit(strip_tags($record->getTranslation('content', 'en')), 50, '...');
                 })
+                ->addColumn('updated_at', function ($record) {
+                    return $record->updated_at->format('Y-m-d H:i:s');
+                })
                 ->addColumn('status', function ($record) use ($request) {
                     $data['toggle_url'] = $request->user()->can('shipping_return.update')
                         ? route('admin.shipping-return.toggleStatus', ['id' => $record->id])

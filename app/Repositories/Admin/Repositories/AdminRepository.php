@@ -23,7 +23,6 @@ class AdminRepository implements AdminRepositoryInterface
             return Auth::guard('admin')->attempt([
                 $field => $login,
                 'password' => $password,
-                'status' => 'active',
             ], $remember);
         } catch (\Exception $e) {
             Log::error('Admin authentication failed: ' . $e->getMessage());
@@ -251,6 +250,24 @@ class AdminRepository implements AdminRepositoryInterface
                 'trace' => $e->getTraceAsString()
             ]);
             return false;
+        }
+    }
+
+    public function findByLoginCredentials(string $login, string $password)
+    {
+        try {
+            $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+            $admin = admin::where($field, $login)->first();
+
+            if ($admin && Hash::check($password, $admin->password)) {
+                return $admin;
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Find by login credentials failed: ' . $e->getMessage());
+            return null;
         }
     }
 

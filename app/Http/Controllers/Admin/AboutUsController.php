@@ -142,8 +142,8 @@ class AboutUsController extends Controller
                     // Limit the description to 50 characters and its in html
                     return strlen(strip_tags($description)) > 50 ? substr(strip_tags($description), 0, 50) . '...' : strip_tags($description);
                 })
-                ->addColumn('updated_at', function ($data) {
-                    return $data->updated_at->format('Y-m-d H:i:s');
+                ->addColumn('created_at', function ($data) {
+                    return $data->created_at->format('Y-m-d H:i:s');
                 })
                 ->addColumn('status', function ($data) use ($request) {
                     $data['toggle_url'] = $request->user()->can('about_us.update') ? route('admin.about_us.toggleStatus', ['id' => $data->id]) : '';

@@ -8,6 +8,7 @@ $(document).ready(function () {
             { data: 'title', name: 'title' },
             { data: 'content', name: 'content' },
             // { data: 'status', name: 'status' },
+            { data: 'updated_at', name: 'updated_at' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
         initComplete: function () {

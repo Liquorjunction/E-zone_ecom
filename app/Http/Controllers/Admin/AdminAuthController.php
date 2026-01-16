@@ -90,6 +90,14 @@ class AdminAuthController extends Controller
             $login = $request->input('login');
             $password = $request->input('password');
 
+            $admin = $adminRepository->findByLoginCredentials($login, $password);
+
+            if ($admin && $admin->status === 'inactive') {
+                throw ValidationException::withMessages([
+                    'login' => ['Your account has been disabled. Please contact support.'],
+                ]);
+            }
+
             if ($adminRepository->authenticate($login, $password, $request->filled('remember'))) {
                 $request->session()->regenerate();
 

@@ -25,7 +25,7 @@ class StoreBrandRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
+            'name' => 'required|unique:brands,name',
             'name.en' => 'required',
             'name.ar' => 'nullable',
             'name.fr' => 'nullable',
@@ -37,6 +37,7 @@ class StoreBrandRequest extends FormRequest
     public function messages()
     {
         return [
+            'name.unique' => 'Name must be unique',
             'name.required' => 'Name is required',
             'image.required' => 'Image is required',
             'status.required' => 'Status is required',
