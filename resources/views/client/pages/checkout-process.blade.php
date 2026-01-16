@@ -193,7 +193,10 @@
                                                     <div class="flex justify-between items-start mb-3">
                                                         <div>
                                                             <h3 class="text-xl font-bold text-gray-900 mb-2">
-                                                                {{ optional($item->variant)->variant_name ?? (optional($item->product)->name ?? 'Product') }}
+                                                                {{ optional($item->product)->name ?? 'Product' }}
+                                                                @if(optional($item->variant)->variant_name)
+                                                                    <span class="text-gray-600 text-sm font-normal">- {{ optional($item->variant)->variant_name }}</span>
+                                                                @endif
                                                             </h3>
                                                             <span
                                                                 class="inline-block text-xs font-semibold px-3 py-1.5 rounded-full bg-linear-to-r from-gray-100 to-gray-200 text-gray-700">{{ optional($item->product)->brand->name ?? '' }}

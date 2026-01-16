@@ -61,11 +61,11 @@ class ContentSeeder extends Seeder
 
         // FAQ Categories
         $faqCategories = [
-            ['name' => ['en' => 'General', 'ar' => 'عام'], 'description' => ['en' => 'General questions about E-Zone', 'ar' => 'أسئلة عامة حول إي زون'], 'status' => 1],
-            ['name' => ['en' => 'Orders & Payments', 'ar' => 'الطلبات والدفع'], 'description' => ['en' => 'Questions about ordering and payment methods', 'ar' => 'أسئلة حول الطلب وطرق الدفع'], 'status' => 1],
-            ['name' => ['en' => 'Shipping & Delivery', 'ar' => 'الشحن والتوصيل'], 'description' => ['en' => 'Information about shipping and delivery', 'ar' => 'معلومات حول الشحن والتوصيل'], 'status' => 1],
-            ['name' => ['en' => 'Returns & Refunds', 'ar' => 'المرتجعات والاسترداد'], 'description' => ['en' => 'Learn about our return and refund policy', 'ar' => 'تعرف على سياسة الإرجاع والاسترداد'], 'status' => 1],
-            ['name' => ['en' => 'Technical Support', 'ar' => 'الدعم الفني'], 'description' => ['en' => 'Get technical help and support', 'ar' => 'احصل على المساعدة والدعم الفني'], 'status' => 1],
+            ['name' => ['en' => 'General', 'ar' => 'عام'], 'status' => 1],
+            ['name' => ['en' => 'Orders & Payments', 'ar' => 'الطلبات والدفع'], 'status' => 1],
+            ['name' => ['en' => 'Shipping & Delivery', 'ar' => 'الشحن والتوصيل'], 'status' => 1],
+            ['name' => ['en' => 'Returns & Refunds', 'ar' => 'المرتجعات والاسترداد'], 'status' => 1],
+            ['name' => ['en' => 'Technical Support', 'ar' => 'الدعم الفني'], 'status' => 1],
         ];
 
         foreach ($faqCategories as $category) {

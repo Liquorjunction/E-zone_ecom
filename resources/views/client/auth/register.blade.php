@@ -96,17 +96,17 @@
                         </button>
 
                         <!-- Divider -->
-                        <div class="relative my-4">
+                        {{-- <div class="relative">
                             <div class="absolute inset-0 flex items-center">
                                 <div class="w-full border-t border-gray-200"></div>
                             </div>
                             <div class="relative flex justify-center text-sm">
-                                <span class="px-4 bg-white text-gray-500">Or sign up with</span>
+                                <span class="px-4 bg-white text-gray-500">Or continue with</span>
                             </div>
-                        </div>
+                        </div> --}}
 
-                        <!-- Social Login -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <!-- Social Login Buttons -->
+                        {{-- <div class="grid grid-cols-2 gap-3">
                             <a href=""
                                 class="flex items-center justify-center px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300 hover:border-gray-300">
                                 <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
@@ -134,7 +134,7 @@
                                 </svg>
                                 Apple
                             </a>
-                        </div>
+                        </div> --}}
                     </form>
                 </div>
 

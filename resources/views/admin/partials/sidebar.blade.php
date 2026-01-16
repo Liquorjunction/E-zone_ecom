@@ -75,70 +75,73 @@
                         request()->routeIs('admin.category-subcategory.*') ||
                         request()->routeIs('admin.products.*');
                 @endphp
-                <li class="nav-item">
-                    <a class="nav-link {{ $isProductSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
-                        href="#sidebar-products" role="button"
-                        aria-expanded="{{ $isProductSectionActive ? 'true' : 'false' }}"
-                        aria-controls="sidebar-products">
-                        <i class="icon" style="display: inline-flex;">
-                            <i class="bi bi-box-seam" style="font-size:20px;"></i>
-                        </i>
-                        <span class="item-name">Product Management</span>
-                        <i class="right-icon">
-                            <i class="bi bi-chevron-right" style="font-size:16px;"></i>
-                        </i>
-                    </a>
-                    <ul class="sub-nav collapse {{ $isProductSectionActive ? 'show' : '' }}" id="sidebar-products"
-                        data-bs-parent="#sidebar-menu">
-                        @can('brands.read')
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}"
-                                    href="{{ route('admin.brands.index') }}">
-                                    <i class="icon" style="display: inline-flex;">
-                                        <i class="bi bi-tags" style="font-size:20px;"></i>
-                                    </i>
-                                    <span class="item-name">Brands</span>
-                                </a>
-                            </li>
-                        @endcan
 
-                        @can('category.read')
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('admin.category-subcategory.categories.*') ? 'active' : '' }}"
-                                    href="{{ route('admin.category-subcategory.categories.index') }}">
-                                    <i class="icon" style="display: inline-flex;">
-                                        <i class="bi bi-list" style="font-size:20px;"></i>
-                                    </i>
-                                    <span class="item-name">Categories</span>
-                                </a>
-                            </li>
-                        @endcan
+                @canany(['brands.read', 'category.read', 'subcategory.read', 'products.read'])
+                    <li class="nav-item">
+                        <a class="nav-link {{ $isProductSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
+                            href="#sidebar-products" role="button"
+                            aria-expanded="{{ $isProductSectionActive ? 'true' : 'false' }}"
+                            aria-controls="sidebar-products">
+                            <i class="icon" style="display: inline-flex;">
+                                <i class="bi bi-box-seam" style="font-size:20px;"></i>
+                            </i>
+                            <span class="item-name">Product Management</span>
+                            <i class="right-icon">
+                                <i class="bi bi-chevron-right" style="font-size:16px;"></i>
+                            </i>
+                        </a>
+                        <ul class="sub-nav collapse {{ $isProductSectionActive ? 'show' : '' }}" id="sidebar-products"
+                            data-bs-parent="#sidebar-menu">
+                            @can('brands.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.brands.index') }}">
+                                        <i class="icon" style="display: inline-flex;">
+                                            <i class="bi bi-tags" style="font-size:20px;"></i>
+                                        </i>
+                                        <span class="item-name">Brands</span>
+                                    </a>
+                                </li>
+                            @endcan
 
-                        @can('subcategory.read')
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('admin.category-subcategory.subcategories.*') ? 'active' : '' }}"
-                                    href="{{ route('admin.category-subcategory.subcategories.index') }}">
-                                    <i class="icon" style="display: inline-flex;">
-                                        <i class="bi bi-list-check" style="font-size:20px;"></i>
-                                    </i>
-                                    <span class="item-name">Subcategories</span>
-                                </a>
-                            </li>
-                        @endcan
+                            @can('category.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.category-subcategory.categories.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.category-subcategory.categories.index') }}">
+                                        <i class="icon" style="display: inline-flex;">
+                                            <i class="bi bi-list" style="font-size:20px;"></i>
+                                        </i>
+                                        <span class="item-name">Categories</span>
+                                    </a>
+                                </li>
+                            @endcan
 
-                        @can('products.read')
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
-                                    href="{{ route('admin.products.index') }}">
-                                    <i class="icon" style="display: inline-flex;">
-                                        <i class="bi bi-box" style="font-size:20px;"></i>
-                                    </i>
-                                    <span class="item-name">Products</span>
-                                </a>
-                            </li>
-                        @endcan
-                    </ul>
-                </li>
+                            @can('subcategory.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.category-subcategory.subcategories.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.category-subcategory.subcategories.index') }}">
+                                        <i class="icon" style="display: inline-flex;">
+                                            <i class="bi bi-list-check" style="font-size:20px;"></i>
+                                        </i>
+                                        <span class="item-name">Subcategories</span>
+                                    </a>
+                                </li>
+                            @endcan
+
+                            @can('products.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.products.index') }}">
+                                        <i class="icon" style="display: inline-flex;">
+                                            <i class="bi bi-box" style="font-size:20px;"></i>
+                                        </i>
+                                        <span class="item-name">Products</span>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
 
 
 
@@ -150,6 +153,7 @@
                     $isInventorySectionActive =
                         request()->routeIs('admin.stores.*') || request()->routeIs('admin.warehouses.*');
                 @endphp
+                @canany(['stores.read', 'warehouses.read', 'inventories.read', 'inventory-transaction.read'])
                 <li class="nav-item">
                     <a class="nav-link {{ $isInventorySectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-inventory" role="button"
@@ -214,6 +218,7 @@
                         @endcan
                     </ul>
                 </li>
+                @endcanany
 
                 <li>
                     <hr class="hr-horizontal">
@@ -232,6 +237,7 @@
                         request()->routeIs('admin.faq-categories.*') ||
                         request()->routeIs('admin.faqs.*');
                 @endphp
+                @canany(['slider.read', 'card.read', 'quick_stats.read', 'why_choose_us.read', 'about_us.read', 'showrooms.read', 'privacy_policies.read', 'tnc.read', 'shipping_return.read', 'faqs.read'])
                 <li class="nav-item">
                     <a class="nav-link {{ $isPagesSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-pages-main" role="button"
@@ -253,6 +259,7 @@
                             $isHomeMgmtActive =
                                 request()->routeIs('admin.hero-slider.*') || request()->routeIs('admin.cards.*');
                         @endphp
+                        @canany(['slider.read', 'card.read', 'quick_stats.read', 'why_choose_us.read'])
                         <li class="nav-item">
                             <a class="nav-link {{ $isHomeMgmtActive ? '' : 'collapsed' }}" href="#"
                                 data-bs-toggle="collapse" data-bs-target="#sidebar-homepage"
@@ -329,6 +336,7 @@
                                 @endcan
                             </ul>
                         </li>
+                        @endcanany
 
                         @php
                             $isCMSActive =
@@ -338,6 +346,7 @@
                                 request()->routeIs('admin.tncs.*') ||
                                 request()->routeIs('admin.shipping-return.*');
                         @endphp
+                        @canany(['about_us.read', 'showrooms.read', 'privacy_policies.read', 'tnc.read', 'shipping_return.read'])
                         <li class="nav-item">
                             <a class="nav-link {{ $isCMSActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                                 href="#sidebar-cms-pages" role="button"
@@ -423,11 +432,13 @@
                                 @endcan
                             </ul>
                         </li>
+                        @endcanany
 
                         @php
                             $isFAQActive =
                                 request()->routeIs('admin.faq-categories.*') || request()->routeIs('admin.faqs.*');
                         @endphp
+                        @canany(['faqs.read'])
                         <li class="nav-item">
                             <a class="nav-link {{ $isFAQActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                                 href="#sidebar-faqs-wrap" role="button"
@@ -477,8 +488,10 @@
                                 @endcan
                             </ul>
                         </li>
+                        @endcanany
                     </ul>
                 </li>
+                @endcanany
 
                 <li>
                     <hr class="hr-horizontal">
@@ -489,6 +502,7 @@
                         request()->routeIs('admin.user-management.*') ||
                         request()->routeIs('admin.roles-permissions.*');
                 @endphp
+                @canany(['user management.read', 'role.read'])
                 <li class="nav-item">
                     <a class="nav-link {{ $isUserSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-users" role="button"
@@ -528,6 +542,7 @@
                         @endcan
                     </ul>
                 </li>
+                @endcanany
 
                 <li>
                     <hr class="hr-horizontal">
@@ -536,6 +551,7 @@
                 @php
                     $isDiscountSectionActive = request()->routeIs('admin.discounts.*') || request()->routeIs('admin.coupons.*') || request()->routeIs('admin.coupon-usage.*');
                 @endphp
+                @canany(['discount.read', 'coupon.read'])
                 <li class="nav-item">
                     <a class="nav-link {{ $isDiscountSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-discounts" role="button"
@@ -582,6 +598,7 @@
                         @endcan
                     </ul>
                 </li>
+                @endcanany
 
                 <li>
                     <hr class="hr-horizontal">
@@ -591,6 +608,7 @@
                     $isOrderSectionActive =
                         request()->routeIs('admin.orders.*') || request()->routeIs('admin.return-requests.*');
                 @endphp
+                @canany(['order.read'])
                 <li class="nav-item">
                     <a class="nav-link {{ $isOrderSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-orders" role="button"
@@ -619,6 +637,7 @@
                         @endcan
                     </ul>
                 </li>
+                @endcanany
             </ul>
         </div>
     </div>
