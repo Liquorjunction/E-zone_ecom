@@ -103,9 +103,11 @@ class BrandController extends Controller
             $id = $request->validated()['id'];
             $brandRepo->deleteBrand($id);
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Brand deleted successfully']);
+            return redirect()->back()->with('success', 'Brand deleted successfully');
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error($e->getMessage());
+
+            return redirect()->back()->with('error', 'Error deleting brand');
         }
     }
 

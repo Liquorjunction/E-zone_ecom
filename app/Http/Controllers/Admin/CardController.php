@@ -161,6 +161,7 @@ class CardController extends Controller
                     return view('admin.partials.datatable-status', $data)->render();
                 })
                 ->addColumn('action', function ($card) use ($request) {
+                    $data['id'] = $card->id;
                     $data['edit_url'] = $request->user()->can('card.update') ? route('admin.cards.edit', ['id' => $card->id]) : '';
                     $data['delete_url'] = $request->user()->can('card.delete') ? route('admin.cards.destroy', ['id' => $card->id]) : '';
 

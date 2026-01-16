@@ -91,9 +91,11 @@ class CategoryController extends Controller
             $id = $request->input('id');
             $categoryRepo->deleteCategory($id);
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Category deleted successfully']);
+            return redirect()->back()->with('success', 'Category deleted successfully');
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error($e->getMessage());
+
+            return redirect()->back()->with('error', 'Error deleting category');
         }
     }
 

@@ -106,9 +106,10 @@ class TncController extends Controller
             $id = $request->validated()['id'];
             $tncRepo->deleteTnc($id);
 
-            return redirect()->back()->with(['success' => true, 'message' => 'T&C deleted successfully']);
+            return redirect()->back()->with('success', 'T&C deleted successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error($e->getMessage());
+            return redirect()->back()->with('error', 'Error deleting T&C');
         }
     }
 

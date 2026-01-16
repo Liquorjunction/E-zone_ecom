@@ -93,9 +93,11 @@ class PrivacyPolicyController extends Controller
             $id = $request->input('id');
             $privacyPolicyRepo->destroyPrivacyPolicy($id);
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Privacy Policy deleted successfully']);
+            return redirect()->back()->with('success', 'Privacy Policy deleted successfully');
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error($e->getMessage());
+
+            return redirect()->back()->with('error', 'Error deleting Privacy Policy');
         }
     }
 
