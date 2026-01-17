@@ -410,12 +410,13 @@
 
         @php $brandCount = ($brands ?? collect())->count(); $duration = max(12, $brandCount * 2); @endphp
         <style>
-            .brand-marquee { display: flex; gap: 3rem; align-items: center; }
-            .brand-marquee img { display: block; }
-            .brand-marquee-wrapper { overflow: hidden; }
-            .brand-marquee-inner { display: flex; gap: 3rem; animation: marquee linear infinite; }
+            .brand-marquee-wrapper { overflow: hidden; position: relative; }
+            .brand-marquee-inner { display: flex; align-items: center; gap: 3rem; width: max-content; will-change: transform; animation: marquee linear infinite; }
+            .brand-marquee { display: flex; align-items: center; gap: 3rem; }
+            .brand-marquee a { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; padding: 0 0.25rem; }
+            .brand-marquee img { display: block; height: 2.25rem; max-height: 2.5rem; width: auto; object-fit: contain; }
             .brand-marquee-inner:hover { animation-play-state: paused; }
-            @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+            @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         </style>
 
         <div class="brand-marquee-wrapper">
