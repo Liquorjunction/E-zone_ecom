@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('faq_categories', function (Blueprint $table) {
             $table->json('name')->change();
-            $table->json('description')->nullable()->change();
         });
     }
 
@@ -24,7 +23,6 @@ return new class extends Migration
     {
         Schema::table('faq_categories', function (Blueprint $table) {
             $table->string('name')->change();
-            $table->text('description')->nullable()->change();
         });
     }
 };
