@@ -20,8 +20,12 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            @php
+                                $hasAction = auth()->user()->can('about_us.update') || auth()->user()->can('about_us.delete');
+                            @endphp
                             <table id="about-us-table" class="table table-striped table-bordered w-100"
-                                data-route="{{ route('admin.about_us.data') }}">
+                                data-route="{{ route('admin.about_us.data') }}"
+                                data-has-action="{{ $hasAction ? 1 : 0 }}">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -29,7 +33,9 @@
                                         <th>Description (Preview)</th>
                                         <th>Created At</th>
                                         {{-- <th>Status</th> --}}
-                                        <th>Action</th>
+                                        @canany(['about_us.update', 'about_us.delete'])
+                                            <th>Action</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>

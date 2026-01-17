@@ -17,8 +17,12 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
+                        @php
+                            $hasAction = auth()->user()->can('store.update') || auth()->user()->can('store.delete');
+                        @endphp
                         <table id="store-table" class="table table-striped data-table" style="width: 100%"
-                            data-route="{{ route('admin.stores.data') }}">
+                            data-route="{{ route('admin.stores.data') }}"
+                            data-has-action="{{ $hasAction ? 1 : 0 }}">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -26,7 +30,9 @@
                                     <th>Store ID</th>
                                     <th>Store Name</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    @canany(['store.update', 'store.delete'])
+                                        <th>Action</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>

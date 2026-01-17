@@ -260,7 +260,7 @@
                                                     <thead>
                                                         <tr>
                                                             <th style="width: 30%">Variant Details & Images <span class="text-danger">*</span></th>
-                                                            <th style="width: 12%">Selling Price ($) <span class="text-danger">*</span></th>
+                                                            <th style="width: 12%">Selling Price ({{ config('app.CURRENCY_SYMBOL') }}) <span class="text-danger">*</span></th>
                                                             <th style="width: 12%">Bestseller</th>
                                                             <th style="width: 12%">Status</th>
                                                             <th style="width: 12%">Attributes</th>
@@ -298,7 +298,7 @@
                                                                 </td>
                                                                 <td style="vertical-align: top;">
                                                                     <div class="input-group input-group-sm">
-                                                                        <span class="input-group-text">$</span>
+                                                                        <span class="input-group-text">{{ config('app.CURRENCY_SYMBOL') }}</span>
                                                                         <input type="number" name="variants[{{ $index }}][price]" step="0.01" min="0" class="form-control" placeholder="0.00" value="{{ $variant['price'] ?? '' }}" required>
                                                                     </div>
                                                                 </td>

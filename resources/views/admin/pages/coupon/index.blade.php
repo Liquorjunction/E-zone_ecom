@@ -14,7 +14,12 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table id="coupons-table" class="table table-bordered table-striped" style="width:100%;" data-source="{{ route('admin.coupons.data') }}">
+            @php
+                $hasAction = auth()->user()->can('coupon.update') || auth()->user()->can('coupon.delete');
+            @endphp
+            <table id="coupons-table" class="table table-bordered table-striped" style="width:100%;"
+                data-source="{{ route('admin.coupons.data') }}"
+                data-has-action="{{ $hasAction ? 1 : 0 }}">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -24,7 +29,9 @@
                         <th>Start Date</th>
                         <th>End Date</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        @canany(['coupon.update', 'coupon.delete'])
+                            <th>Action</th>
+                        @endcanany
                     </tr>
                 </thead>
             </table>

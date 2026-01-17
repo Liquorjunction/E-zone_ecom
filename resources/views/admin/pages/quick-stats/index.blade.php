@@ -24,21 +24,29 @@
                         </div>
                         @can('quick_stats.create')
                             <div class="card-action">
-                                <a href="{{ route('admin.quick-stats.create') }}" id="add-quick-stat-btn" class="btn btn-primary">Add Quick Stat</a>
+                                <a href="{{ route('admin.quick-stats.create') }}" id="add-quick-stat-btn"
+                                    class="btn btn-primary">Add Quick Stat</a>
                             </div>
                         @endcan
                     </div>
                     <div class="card-body px-0">
                         <div class="table-responsive">
+                            @php
+                                $hasAction =
+                                    auth()->user()->can('quick_stats.update') ||
+                                    auth()->user()->can('quick_stats.delete');
+                            @endphp
                             <table id="quick-stats-table" class="table table-striped" role="grid"
-                                   data-url="{{ route('admin.quick-stats.data') }}">
+                                data-url="{{ route('admin.quick-stats.data') }}" data-has-action="{{ $hasAction ? 1 : 0 }}">
                                 <thead>
                                     <tr class="light">
                                         <th>#</th>
                                         <th>Icon</th>
                                         <th>Text</th>
                                         <th>Status</th>
-                                        <th style="min-width: 120px">Action</th>
+                                        @canany(['quick_stats.update', 'quick_stats.delete'])
+                                            <th>Action</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>

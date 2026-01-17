@@ -12,7 +12,12 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table id="discounts-table" class="table table-bordered table-striped" style="width:100%;" data-source="{{ route('admin.discounts.datatable') }}">
+            @php
+                $hasAction = auth()->user()->can('discount.update') || auth()->user()->can('discount.delete');
+            @endphp
+            <table id="discounts-table" class="table table-bordered table-striped" style="width:100%;"
+                data-source="{{ route('admin.discounts.datatable') }}"
+                data-has-action="{{ $hasAction ? 1 : 0 }}">
                 <thead>
                     <tr>
                         <th></th> <!-- For the expand icon -->
@@ -23,7 +28,9 @@
                         <th>Start Date</th>
                         <th>End Date</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        @canany(['discount.update', 'discount.delete'])
+                            <th>Action</th>
+                        @endcanany
                     </tr>
                 </thead>
             </table>

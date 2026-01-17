@@ -351,7 +351,7 @@
                                                                 <td>
                                                                     <label class="form-label small fw-semibold mb-1">Price</label>
                                                                     <div class="input-group input-group-sm">
-                                                                        <span class="input-group-text">$</span>
+                                                                        <span class="input-group-text">{{ config('app.CURRENCY_SYMBOL') }}</span>
                                                                         <input type="number" name="variants[{{ $index }}][price]" step="0.01" min="0" class="form-control" value="{{ $variant->price }}" required>
                                                                     </div>
                                                                 </td>

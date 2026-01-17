@@ -150,11 +150,15 @@ class TncController extends Controller
                     return $tnc->updated_at->format('Y-m-d H:i:s');
                 })
                 ->addColumn('status', function ($tnc) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.toggleStatus', ['id' => $tnc->id]) : '';
-                    $data['status'] = $tnc->status;
-                    $data['id'] = $tnc->id; // Ensure ID is passed for toggle
+                    if ($request->user()->can('tnc.update')) {
+                        $data['toggle_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.toggleStatus', ['id' => $tnc->id]) : '';
+                        $data['status'] = $tnc->status;
+                        $data['id'] = $tnc->id;
 
-                    return view('admin.partials.datatable-status', $data)->render();
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $tnc->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($tnc) use ($request) {
                     $data['edit_url'] = $request->user()->can('tnc.update') ? route('admin.tncs.edit', ['id' => $tnc->id]) : '';

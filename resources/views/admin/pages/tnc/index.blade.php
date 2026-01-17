@@ -23,8 +23,12 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            @php
+                                $hasAction = auth()->user()->can('tnc.update') || auth()->user()->can('tnc.delete');
+                            @endphp
                             <table id="tnc-table" class="table table-striped table-bordered w-100"
-                                data-route="{{ route('admin.tncs.data') }}">
+                                data-route="{{ route('admin.tncs.data') }}"
+                                data-has-action="{{ $hasAction ? 1 : 0 }}">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -32,7 +36,9 @@
                                         <th>Description</th>
                                         <th>Last Updated</th>
                                         {{-- <th>Status</th> --}}
-                                        <th>Actions</th>
+                                        @canany(['tnc.update', 'tnc.delete'])
+                                            <th>Actions</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                             </table>

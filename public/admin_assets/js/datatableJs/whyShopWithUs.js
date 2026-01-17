@@ -5,6 +5,33 @@ $(document).ready(function () {
     }
 
     var dataRoute = $table.data('route');
+    var hasAction = $table.data('hasAction') || $table.attr('data-has-action') == 1 || $table.attr('data-has-action') == '1';
+
+    var columns = [
+        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+        { data: 'icon', name: 'icon', orderable: false, searchable: false ,
+            render: function (data) {
+                if (data) {
+                    return '<img src="/storage/' + data + '" alt="Icon" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: contain;">';
+                }
+                return '<span class="text-muted">No Icon</span>';
+            }
+        },
+        { data: 'title', name: 'title' },
+        { data: 'description', name: 'description', orderable: false, searchable: false,
+            render: function (data) {
+                if (data && data.length > 100) {
+                    return data.substring(0, 100) + '...';
+                }
+                return data || '';
+            }
+        },
+        { data: 'status',name: 'status',orderable: false, searchable: false }
+    ];
+
+    if (hasAction) {
+        columns.push({ data: 'actions', name: 'actions',orderable: false, searchable: false });
+    }
 
     $table.DataTable({
         processing: true,
@@ -13,28 +40,7 @@ $(document).ready(function () {
             url: dataRoute,
             type: 'GET'
         },
-        columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'icon', name: 'icon', orderable: false, searchable: false ,
-                render: function (data) {
-                    if (data) {
-                        return '<img src="/storage/' + data + '" alt="Icon" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: contain;">';
-                    }
-                    return '<span class="text-muted">No Icon</span>';
-                }
-            },
-            { data: 'title', name: 'title' },
-            { data: 'description', name: 'description', orderable: false, searchable: false,
-                render: function (data) {
-                    if (data && data.length > 100) {
-                        return data.substring(0, 100) + '...';
-                    }
-                    return data || '';
-                }
-            },
-            { data: 'status',name: 'status',orderable: false, searchable: false },
-            { data: 'actions', name: 'actions',orderable: false, searchable: false }
-        ],
+        columns: columns,
         pageLength: 10,
         responsive: true,
         order: [[0, 'asc']]

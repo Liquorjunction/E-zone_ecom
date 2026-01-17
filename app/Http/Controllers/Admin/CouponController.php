@@ -114,13 +114,17 @@ class CouponController extends Controller
                 return optional($coupon->ends_at)->toDateTimeString();
             })
             ->addColumn('status', function ($coupon) use ($request) {
-                 $data['toggle_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.updateStatus', ['id' => $coupon->id]) : '';
-                 $data['status'] = $coupon->status ? 'active' : 'inactive';
-                 $data['id'] = $coupon->id;
-                 return view('admin.partials.datatable-status', $data)->render();
+                if ($request->user()->can('coupon.update')) {
+                    $data['toggle_url'] = $request->user()->can('coupon.update') ? route('admin.coupons.updateStatus', ['id' => $coupon->id]) : '';
+                    $data['status'] = $coupon->status ? 'active' : 'inactive';
+                    $data['id'] = $coupon->id;
+                    return view('admin.partials.datatable-status', $data)->render();
+                } else {
+                    return view('components.datatable-status-badge', ['status' => $coupon->status])->render();
+                }
             })
             ->addColumn('action', function ($coupon) use ($request) {
-                $data['id'] = $coupon->id; // Ensure coupon id is passed to actions/status partials
+                $data['id'] = $coupon->id;
                 $data['edit_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.edit', ['id' => $coupon->id]) : '';
                 $data['delete_url'] = $request->user() && $request->user()->can('coupon.delete') ? route('admin.coupons.destroy', ['id' => $coupon->id]) : '';
                 return view('admin.partials.datatable-actions', $data)->render();

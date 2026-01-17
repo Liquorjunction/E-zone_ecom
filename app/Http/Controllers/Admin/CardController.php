@@ -155,10 +155,14 @@ class CardController extends Controller
                     return 'No Image';
                 })
                 ->addColumn('status', function ($card) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('card.update') ? route('admin.cards.toggleStatus', ['id' => $card->id]) : '';
-                    $data['status'] = $card->status;
-
-                    return view('admin.partials.datatable-status', $data)->render();
+                    if ($request->user()->can('card.update')) {
+                        $data['toggle_url'] = $request->user()->can('card.update') ? route('admin.cards.toggleStatus', ['id' => $card->id]) : '';
+                        $data['status'] = $card->status;
+                        $data['id'] = $card->id;
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $card->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($card) use ($request) {
                     $data['id'] = $card->id;

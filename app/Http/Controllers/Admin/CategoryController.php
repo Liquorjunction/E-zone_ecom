@@ -116,11 +116,14 @@ class CategoryController extends Controller
                 return $category->getTranslation('category-name', 'en');
             })
             ->addColumn('is_active', function ($category) use ($request) {
-                $data['toggle_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.categories.toggleStatus', ['id' => $category->id]) : '';
-                $data['status'] = $category->status;
-                $data['id'] = $category->id;
-
-                return view('admin.partials.datatable-status', $data)->render();
+                if ($request->user()->can('category.update')) {
+                    $data['toggle_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.categories.toggleStatus', ['id' => $category->id]) : '';
+                    $data['status'] = $category->status;
+                    $data['id'] = $category->id;
+                    return view('admin.partials.datatable-status', $data)->render();
+                } else {
+                    return view('components.datatable-status-badge', ['status' => $category->status])->render();
+                }
             })
             ->addColumn('action', function ($category) use ($request) {
                 $data['edit_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.categories.edit', ['id' => $category->id]) : '';

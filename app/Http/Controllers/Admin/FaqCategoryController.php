@@ -140,10 +140,15 @@ class FaqCategoryController extends Controller
                     return $faqCategory->getTranslation('name', 'en');
                 })
                 ->addColumn('status', function ($faqCategory) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('faqs.update') ? route('admin.faq-categories.toggleStatus', ['id' => $faqCategory->id]) : '';
-                    $data['status'] = $faqCategory->status;
+                    if ($request->user()->can('faqs.update')) {
+                        $data['id'] = $faqCategory->id;
+                        $data['toggle_url'] = $request->user()->can('faqs.update') ? route('admin.faq-categories.toggleStatus', ['id' => $faqCategory->id]) : '';
+                        $data['status'] = $faqCategory->status;
 
-                    return view('admin.partials.datatable-status', $data)->render();
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $faqCategory->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($faqCategory) use ($request) {
                     $data['id'] = $faqCategory->id;
@@ -155,7 +160,7 @@ class FaqCategoryController extends Controller
                 ->rawColumns(['action', 'status'])
                 ->make(true);
         } catch (\Exception $e) {
-            Log::error('Error in AdminFaqCategoryController::data '.$e->getMessage());
+            Log::error('Error in AdminFaqCategoryController::data ' . $e->getMessage());
 
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }

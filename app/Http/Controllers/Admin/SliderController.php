@@ -191,11 +191,11 @@ class SliderController extends Controller
             return DataTables::of($sliders)
                 ->addIndexColumn()
                 ->addColumn('batch_checkbox', function ($slider) {
-                    return '<input type="checkbox" class="slider-checkbox" value="'.$slider->id.'">';
+                    return '<input type="checkbox" class="slider-checkbox" value="' . $slider->id . '">';
                 })
                 ->addColumn('image', function ($slider) {
                     if ($slider->image && Storage::disk('public')->exists($slider->image)) {
-                        return asset('storage/'.$slider->image);
+                        return asset('storage/' . $slider->image);
                     }
 
                     return 'No Image';
@@ -205,11 +205,16 @@ class SliderController extends Controller
                     return $slider->getTranslation('title', 'en');
                 })
                 ->addColumn('is_active', function ($slider) use ($request, $activeCount) {
-                    $data['toggle_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.toggleStatus', ['id' => $slider->id]) : '';
-                    $data['status'] = (bool) $slider->is_active;
-                    $data['is_only_active'] = ($activeCount === 1 && (bool) $slider->is_active);
+                    if ($request->user()->can('slider.update')) {
+                        $data['id'] = $slider->id;
+                        $data['toggle_url'] = $request->user()->can('slider.update') ? route('admin.hero-slider.toggleStatus', ['id' => $slider->id]) : '';
+                        $data['status'] = (bool) $slider->is_active;
+                        $data['is_only_active'] = ($activeCount === 1 && (bool) $slider->is_active);
 
-                    return view('admin.partials.datatable-status', $data)->render();
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $slider->is_active])->render();
+                    }
                 })
                 ->addColumn('action', function ($slider) use ($request) {
                     $data = ['id' => $slider->id];
@@ -221,7 +226,7 @@ class SliderController extends Controller
                 ->rawColumns(['batch_checkbox', 'action', 'image', 'is_active'])
                 ->make(true);
         } catch (\Exception $e) {
-            Log::error('Error in SliderController@getDataForDataTable: '.$e->getMessage());
+            Log::error('Error in SliderController@getDataForDataTable: ' . $e->getMessage());
             throw $e;
         }
     }

@@ -40,39 +40,48 @@ $(function () {
         return html;
     }
 
-    var table = $("#discounts-table").DataTable({
+    var tableEl = $("#discounts-table");
+
+    var hasAction = tableEl.data('hasAction') || tableEl.attr('data-has-action') == 1 || tableEl.attr('data-has-action') == '1';
+
+    var columns = [
+        {
+            className: "dt-control",
+            orderable: false,
+            data: null,
+            defaultContent: "",
+            width: "15px",
+        },
+        { data: "id", name: "id" },
+        { data: "name", name: "name" },
+        { data: "type", name: "type" },
+        { data: "value", name: "value" },
+        { data: "starts_at", name: "starts_at" },
+        { data: "ends_at", name: "ends_at" },
+        {
+            data: "status",
+            name: "status",
+            orderable: false,
+            searchable: false,
+        }
+    ];
+
+    if (hasAction) {
+        columns.push({
+            data: "action",
+            name: "action",
+            orderable: false,
+            searchable: false,
+        });
+    }
+
+    var table = tableEl.DataTable({
         processing: true,
         serverSide: true,
         autoWidth: false,
         responsive: true,
-        ajax: $("#discounts-table").data("source"),
-        columns: [
-            {
-                className: "dt-control",
-                orderable: false,
-                data: null,
-                defaultContent: "",
-                width: "15px",
-            },
-            { data: "id", name: "id" },
-            { data: "name", name: "name" },
-            { data: "type", name: "type" },
-            { data: "value", name: "value" },
-            { data: "starts_at", name: "starts_at" },
-            { data: "ends_at", name: "ends_at" },
-            {
-                data: "status",
-                name: "status",
-                orderable: false,
-                searchable: false,
-            },
-            {
-                data: "action",
-                name: "action",
-                orderable: false,
-                searchable: false,
-            },
-        ],
+        ajax: tableEl.data("source"),
+        columns: columns,
         order: [[1, "desc"]],
     });
 

@@ -154,10 +154,15 @@ class QuickStatController extends Controller
                 }
             })
             ->addColumn('status', function ($quickStat) use ($request) {
-                $data['toggle_url'] = $request->user()->can('quick_stats.update') ? route('admin.quick-stats.updateStatus') : null;
-                $data['status'] = $quickStat->status;
-                $data['id'] = $quickStat->id;
-                return view('admin.partials.datatable-status', $data)->render();
+                if ($request->user()->can('quick_stats.update')) {
+                    $data['toggle_url'] = $request->user()->can('quick_stats.update') ? route('admin.quick-stats.updateStatus') : null;
+                    $data['status'] = $quickStat->status;
+                    $data['id'] = $quickStat->id;
+
+                    return view('admin.partials.datatable-status', $data)->render();
+                } else {
+                    return view('components.datatable-status-badge', ['status' => $quickStat->status])->render();
+                }
             })
             ->addColumn('actions', function ($quickStat) use ($request) {
                 $data['id'] = $quickStat->id;

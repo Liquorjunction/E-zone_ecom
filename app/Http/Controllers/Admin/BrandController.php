@@ -139,20 +139,23 @@ class BrandController extends Controller
             return DataTables::of($brands)
                 ->addIndexColumn()
                 ->addColumn('image', function ($brand) {
-                     if ($brand->image && Storage::disk('public')->exists($brand->image)) {
-                         return '<img src="' . asset('storage/'.$brand->image) . '" width="50" class="rounded">';
-                     }
-                     return '';
+                    if ($brand->image && Storage::disk('public')->exists($brand->image)) {
+                        return '<img src="' . asset('storage/'.$brand->image) . '" width="50" class="rounded">';
+                    }
+                    return '';
                 })
                 ->addColumn('name', function ($brand) {
                     return $brand->getTranslation('name', 'en');
                 })
                 ->addColumn('status', function ($brand) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('brands.update') ? route('admin.brands.toggleStatus', ['id' => $brand->id]) : '';
-                    $data['status'] = $brand->status;
-                    $data['id'] = $brand->id;
-
-                    return view('admin.partials.datatable-status', $data)->render();
+                    if ($request->user()->can('brands.update')) {
+                        $data['toggle_url'] = $request->user()->can('brands.update') ? route('admin.brands.toggleStatus', ['id' => $brand->id]) : '';
+                        $data['status'] = $brand->status;
+                        $data['id'] = $brand->id;
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $brand->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($brand) use ($request) {
                     $data['edit_url'] = $request->user()->can('brands.update') ? route('admin.brands.edit', ['id' => $brand->id]) : '';

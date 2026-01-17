@@ -161,7 +161,6 @@ class DiscountController extends Controller
             DB::commit();
 
             $discountService->clearAllDiscountCaches();
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('DiscountController.update: ' . $e->getMessage(), ['discount_id' => $id ?? null]);
@@ -223,10 +222,14 @@ class DiscountController extends Controller
                 return $discountRepo->formatTargetsCollection($discount->targets);
             })
             ->addColumn('status', function ($discount) use ($request) {
-                $data['toggle_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.toggleStatus', ['id' => $discount->id]) : '';
-                $data['status'] = $discount->status ? 'active' : 'inactive';
-                $data['id'] = $discount->id;
-                return view('admin.partials.datatable-status', $data)->render();
+                if ($request->user()->can('discount.update')) {
+                    $data['toggle_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.toggleStatus', ['id' => $discount->id]) : '';
+                    $data['status'] = $discount->status ? 'active' : 'inactive';
+                    $data['id'] = $discount->id;
+                    return view('admin.partials.datatable-status', $data)->render();
+                } else {
+                    return view('components.datatable-status-badge', ['status' => $discount->status])->render();
+                }
             })
             ->addColumn('action', function ($discount) use ($request) {
                 $data['edit_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.edit', ['id' => $discount->id]) : '';

@@ -19,8 +19,11 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
+                        @php
+                            $hasAction = auth()->user()->can('warehouse.update') || auth()->user()->can('warehouse.delete');
+                        @endphp
                         <table id="warehouses-table" class="table table-striped table-hover" style="width:100%"
-                            data-route="{{ route('admin.warehouses.data') }}">
+                            data-route="{{ route('admin.warehouses.data') }}" data-has-action="{{ $hasAction ? 1 : 0 }}">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -28,7 +31,9 @@
                                     <th>Warehouse ID</th>
                                     <th>Location</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
+                                    @canany(['warehouse.update', 'warehouse.delete'])
+                                        <th>Actions</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>

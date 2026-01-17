@@ -48,11 +48,10 @@ class ShowroomController extends Controller
         try {
             $data = $request->validated();
 
-             // --- Smart Auto-Translate Logic ---
-            $attributes = ['name', 'description', 'address', 'city', 'state' ,'country'];
+            // --- Smart Auto-Translate Logic ---
+            $attributes = ['name', 'description', 'address', 'city', 'state', 'country'];
 
-            foreach ($attributes as $field)
-            {
+            foreach ($attributes as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
@@ -95,7 +94,7 @@ class ShowroomController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            $attributes = ['name', 'description', 'address', 'city', 'state' ,'country'];
+            $attributes = ['name', 'description', 'address', 'city', 'state', 'country'];
             foreach ($attributes as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
@@ -175,10 +174,15 @@ class ShowroomController extends Controller
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->addColumn('is_active', function ($showroom) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('showrooms.update') ? route('admin.showrooms.toggleStatus', ['id' => $showroom->id]) : '';
-                    $data['status'] = $showroom->status;
+                    if ($request->user()->can('showrooms.update')) {
+                        $data['id'] = $showroom->id;
+                        $data['toggle_url'] = $request->user()->can('showrooms.update') ? route('admin.showrooms.toggleStatus', ['id' => $showroom->id]) : '';
+                        $data['status'] = $showroom->status;
 
-                    return view('admin.partials.datatable-status', $data)->render();
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $showroom->status])->render();
+                    }
                 })
                 ->rawColumns(['action', 'is_active'])
                 ->make(true);

@@ -18,17 +18,24 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            @php
+                                $hasAction =
+                                    auth()->user()->can('why_choose_us.update') ||
+                                    auth()->user()->can('why_choose_us.delete');
+                            @endphp
                             <table id="whyshopwithus-table" class="table table-striped table-bordered w-100"
-                                   data-route="{{ route('admin.whyshopwithus.data') }}">
+                                data-route="{{ route('admin.whyshopwithus.data') }}" data-has-action="{{ $hasAction ? 1 : 0 }}">
                                 <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Icon</th>
-                                    <th>Title</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Icon</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        @canany(['why_choose_us.update', 'why_choose_us.delete'])
+                                            <th>Actions</th>
+                                        @endcanany
+                                    </tr>
                                 </thead>
                             </table>
                         </div>

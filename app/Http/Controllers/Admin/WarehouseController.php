@@ -174,10 +174,14 @@ class WarehouseController extends Controller
                     return $warehouse->getTranslation('location', 'en');
                 })
                 ->addColumn('status', function ($warehouse) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('warehouse.update') ? route('admin.warehouses.toggleStatus', ['id' => $warehouse->id]) : '';
-                    $data['status'] = $warehouse->status;
-                    $data['id'] = $warehouse->id; // Ensure ID is passed for toggle
-                    return view('admin.partials.datatable-status', $data)->render();
+                    if ($request->user()->can('warehouse.update')) {
+                        $data['toggle_url'] = $request->user()->can('warehouse.update') ? route('admin.warehouses.toggleStatus', ['id' => $warehouse->id]) : '';
+                        $data['status'] = $warehouse->status;
+                        $data['id'] = $warehouse->id;
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $warehouse->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($warehouse) use ($request) {
                     $data['edit_url'] = $request->user()->can('warehouse.update') ? route('admin.warehouses.edit', ['id' => $warehouse->id]) : '';

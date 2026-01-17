@@ -1,4 +1,4 @@
-@if (isset($edit_url))
+@if (!empty($edit_url))
     <a class="btn btn-sm btn-icon btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-original-title="Edit"
         href="{{ $edit_url }}" aria-label="Edit" data-bs-original-title="Edit">
         <span class="btn-inner">
@@ -15,7 +15,7 @@
         </span>
     </a>
 @endif
-@if (isset($delete_url))
+@if (!empty($delete_url))
     <form action="{{ $delete_url }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this item?');">
         @csrf
         @method('DELETE')

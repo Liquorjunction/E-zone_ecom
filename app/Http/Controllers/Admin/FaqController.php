@@ -179,10 +179,15 @@ class FaqController extends Controller
                     return $faq->category ? $faq->category->getTranslation('name', 'en') : 'Uncategorized';
                 })
                 ->addColumn('status', function ($faq) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('faqs.update') ? route('admin.faqs.toggleStatus', ['id' => $faq->id]) : '';
-                    $data['status'] = $faq->status;
+                    if ($request->user()->can('faqs.update')) {
+                        $data['id'] = $faq->id;
+                        $data['toggle_url'] = $request->user()->can('faqs.update') ? route('admin.faqs.toggleStatus', ['id' => $faq->id]) : '';
+                        $data['status'] = $faq->status;
 
-                    return view('admin.partials.datatable-status', $data)->render();
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $faq->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($faq) use ($request) {
                     $data['id'] = $faq->id;

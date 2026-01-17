@@ -64,8 +64,7 @@ class ShippingAndReturnController extends Controller
             $shippingRepo->createShippingAndReturn($request, $data);
 
             return redirect()->route('admin.shipping-return.index')
-                             ->with('success', 'Shipping & Return Policy created successfully.');
-
+                ->with('success', 'Shipping & Return Policy created successfully.');
         } catch (\Exception $e) {
             Log::error('Error creating Shipping & Return: ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
@@ -115,8 +114,7 @@ class ShippingAndReturnController extends Controller
             $shippingRepo->updateShippingAndReturn($id, $request, $data);
 
             return redirect()->route('admin.shipping-return.index')
-                             ->with('success', 'Shipping & Return Policy updated successfully.');
-
+                ->with('success', 'Shipping & Return Policy updated successfully.');
         } catch (\Exception $e) {
             Log::error('Error updating Shipping & Return: ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
@@ -181,13 +179,17 @@ class ShippingAndReturnController extends Controller
                     return $record->updated_at->format('Y-m-d H:i:s');
                 })
                 ->addColumn('status', function ($record) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('shipping_return.update')
-                        ? route('admin.shipping-return.toggleStatus', ['id' => $record->id])
-                        : '';
-                    $data['status'] = $record->status;
-                    $data['id'] = $record->id;
+                    if ($request->user()->can('shipping_return.update')) {
+                        $data['toggle_url'] = $request->user()->can('shipping_return.update')
+                            ? route('admin.shipping-return.toggleStatus', ['id' => $record->id])
+                            : '';
+                        $data['status'] = $record->status;
+                        $data['id'] = $record->id;
 
-                    return view('admin.partials.datatable-status', $data)->render();
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $record->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($record) use ($request) {
                     $data['edit_url'] = $request->user()->can('shipping_return.update')
@@ -199,7 +201,6 @@ class ShippingAndReturnController extends Controller
                 })
                 ->rawColumns(['title', 'status', 'action'])
                 ->make(true);
-
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()]);

@@ -19,15 +19,23 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            {{-- KEPT: id="datatable" and data-url --}}
-                            <table id="privacy-policy-table" class="table table-striped" data-route="{{ route('admin.privacy-policy.data') }}">
+                            @php
+                                $hasAction =
+                                    auth()->user()->can('privacy_policies.update') ||
+                                    auth()->user()->can('privacy_policies.delete');
+                            @endphp
+                            <table id="privacy-policy-table" class="table table-striped"
+                                data-route="{{ route('admin.privacy-policy.data') }}"
+                                data-has-action="{{ $hasAction ? 1 : 0 }}">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Title</th>
                                         <th>Description</th>
                                         <th>Last Updated</th>
-                                        {{-- <th>Status</th> --}}
+                                        @canany(['privacy_policies.update', 'privacy_policies.delete'])
+                                            {{-- <th>Action</th> --}}
+                                        @endcanany
                                         <th>Action</th>
                                     </tr>
                                 </thead>

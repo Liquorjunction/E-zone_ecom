@@ -18,15 +18,21 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            @php
+                                $hasAction = auth()->user()->can('brands.edit') || auth()->user()->can('brands.delete');
+                            @endphp
                             <table id="brand-table" class="table table-striped table-bordered w-100"
-                                data-route="{{ route('admin.brands.data') }}">
+                                data-route="{{ route('admin.brands.data') }}"
+                                data-has-action="{{ $hasAction ? 1 : 0 }}">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Image</th>
                                         <th>Name</th>
                                         <th>Status</th>
-                                        <th>Actions</th>
+                                        @if($hasAction)
+                                            <th>Action</th>
+                                        @endif
                                     </tr>
                                 </thead>
                             </table>

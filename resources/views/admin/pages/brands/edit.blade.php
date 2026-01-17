@@ -82,7 +82,7 @@
 
                     {{-- Right Column: Sidebar (Image & Status) --}}
                     <div class="col-lg-4 col-md-12">
-                        <div class="card border-1 p-3 shadow-sm">
+                        <div class="card border p-3 shadow-sm">
 
                             {{-- Image Upload --}}
                             <div class="text-center mb-3">

@@ -38,8 +38,12 @@
                         </div>
                         <div class="card-body px-0">
                             <div class="table-responsive">
+                                @php
+                                    $hasAction = auth()->user()->can('slider.update') || auth()->user()->can('slider.delete');
+                                @endphp
                                 <table id="slider-list-table" class="table table-striped" role="grid"
-                                    data-bs-toggle="data-table" data-url="{{ route('admin.hero-slider.data') }}">
+                                    data-bs-toggle="data-table" data-url="{{ route('admin.hero-slider.data') }}"
+                                    data-has-action="{{ $hasAction ? 1 : 0 }}">
                                     <thead>
                                         <tr class="light">
                                             <th><input type="checkbox" id="select-all-sliders"></th>
@@ -48,7 +52,9 @@
                                             <th>Image</th>
                                             <th>Status</th>
                                             <th>Sort Order</th>
-                                            <th style="min-width: 100px">Action</th>
+                                            @canany(['slider.update', 'slider.delete'])
+                                                <th style="min-width: 100px">Action</th>
+                                            @endcanany
                                         </tr>
                                     </thead>
                                     <tbody>

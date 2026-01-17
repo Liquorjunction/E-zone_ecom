@@ -146,10 +146,17 @@ class AboutUsController extends Controller
                     return $data->created_at->format('Y-m-d H:i:s');
                 })
                 ->addColumn('status', function ($data) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('about_us.update') ? route('admin.about_us.toggleStatus', ['id' => $data->id]) : '';
-                    return view('admin.partials.datatable-status', $data)->render();
+                    if ($request->user()->can('about_us.update')) {
+                       $data['toggle_url'] = $request->user()->can('about_us.update') ? route('admin.about_us.toggleStatus', ['id' => $data->id]) : '';
+                        $data['status'] = $data->status;
+                        $data['id'] = $data->id;
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $data->status])->render();
+                    }
                 })
                 ->addColumn('actions', function ($data) use ($request) {
+                    $data['id'] = $data->id;
                     $data['edit_url'] = $request->user()->can('about_us.update') ? route('admin.about_us.edit', ['id' => $data->id]) : '';
                     $data['delete_url'] = $request->user()->can('about_us.delete') ? route('admin.about_us.destroy', ['id' => $data->id]) : '';
                     return view('admin.partials.datatable-actions', $data)->render();

@@ -14,17 +14,24 @@ $(document).ready(function() {
             $(catTableSelector).DataTable().destroy();
         }
 
+        // Build columns dynamically so we can omit the action column when not allowed
+        var catColumns = [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'category-name', name: 'category-name' },
+            { data: 'image', name: 'image', orderable: false, searchable: false },
+            { data: 'is_active', name: 'status', orderable: true, searchable: false }
+        ];
+
+        var hasCatActions = $(catTableSelector).data('has-actions');
+        if (hasCatActions === 1 || hasCatActions === '1' || hasCatActions === true) {
+            catColumns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
+        }
+
         var catTable = $(catTableSelector).DataTable({
             processing: true,
             serverSide: true,
             ajax: $(catTableSelector).data('route'),
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'category-name', name: 'category-name' },
-                { data: 'image', name: 'image', orderable: false, searchable: false },
-                { data: 'is_active', name: 'status', orderable: true, searchable: false },
-                { data: 'action', name: 'action', orderable: false, searchable: false }
-            ]
+            columns: catColumns
         });
     }
 
@@ -38,20 +45,27 @@ $(document).ready(function() {
             $(subCatTableSelector).DataTable().destroy();
         }
 
+        // Build columns dynamically so we can omit the action column when not allowed
+        var subCatColumns = [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'name', name: 'sub-category-name' },
+
+            // FIXED: Changed data from 'category.name' to 'category_name'
+            { data: 'category_name', name: 'category_name', orderable: false, searchable: false },
+
+            { data: 'is_active', name: 'status', orderable: true, searchable: false }
+        ];
+
+        var hasSubCatActions = $(subCatTableSelector).data('has-actions');
+        if (hasSubCatActions === 1 || hasSubCatActions === '1' || hasSubCatActions === true) {
+            subCatColumns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
+        }
+
         var subCatTable = $(subCatTableSelector).DataTable({
             processing: true,
             serverSide: true,
             ajax: $(subCatTableSelector).data('route'),
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'name', name: 'sub-category-name' },
-
-                // FIXED: Changed data from 'category.name' to 'category_name'
-                { data: 'category_name', name: 'category.category-name', orderable: false, searchable: false },
-
-                { data: 'is_active', name: 'status', orderable: true, searchable: false },
-                { data: 'action', name: 'action', orderable: false, searchable: false }
-            ]
+            columns: subCatColumns
         });
     }
 

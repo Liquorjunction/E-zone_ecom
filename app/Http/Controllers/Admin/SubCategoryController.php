@@ -125,15 +125,18 @@ class SubCategoryController extends Controller
                 return $subCategory->category ? $subCategory->category->getTranslation('category-name', 'en') : 'N/A';
             })
             ->addColumn('is_active', function ($subCategory) use ($request) {
-                $data['toggle_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.subcategories.toggleStatus', ['id' => $subCategory->id]) : '';
-                $data['status'] = $subCategory->status;
-                $data['id'] = $subCategory->id;
-
-                return view('admin.partials.datatable-status', $data)->render();
+                if ($request->user()->can('subcategory.update')) {
+                    $data['toggle_url'] = $request->user()->can('subcategory.update') ? route('admin.category-subcategory.subcategories.toggleStatus', ['id' => $subCategory->id]) : '';
+                    $data['status'] = $subCategory->status;
+                    $data['id'] = $subCategory->id;
+                    return view('admin.partials.datatable-status', $data)->render();
+                } else {
+                    return view('components.datatable-status-badge', ['status' => $subCategory->status])->render();
+                }
             })
             ->addColumn('action', function ($subCategory) use ($request) {
-                $data['edit_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.subcategories.edit', ['id' => $subCategory->id]) : '';
-                $data['delete_url'] = $request->user()->can('category.delete') ? route('admin.category-subcategory.subcategories.destroy', ['id' => $subCategory->id]) : '';
+                $data['edit_url'] = $request->user()->can('subcategory.update') ? route('admin.category-subcategory.subcategories.edit', ['id' => $subCategory->id]) : '';
+                $data['delete_url'] = $request->user()->can('subcategory.delete') ? route('admin.category-subcategory.subcategories.destroy', ['id' => $subCategory->id]) : '';
                 $data['id'] = $subCategory->id;
 
                 return view('admin.partials.datatable-actions', $data)->render();

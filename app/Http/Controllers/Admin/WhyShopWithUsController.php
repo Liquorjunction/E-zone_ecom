@@ -148,18 +148,22 @@ class WhyShopWithUsController extends Controller
                 return $description;
             })
             ->addColumn('status', function ($entry) use ($request) {
-                $data['id'] = $entry->id;
-                $data['toggle_url'] = $request->user()->can('why_choose_us.update') ? route('admin.whyshopwithus.toggleStatus', ['id' => $entry->id]): '';
-                $data['status'] = $entry->status;
-                return view('admin.partials.datatable-status', $data)->render();
+                if ($request->user()->can('why_choose_us.update')) {
+                    $data['id'] = $entry->id;
+                    $data['toggle_url'] = $request->user()->can('why_choose_us.update') ? route('admin.whyshopwithus.toggleStatus', ['id' => $entry->id]) : '';
+                    $data['status'] = $entry->status;
+                    return view('admin.partials.datatable-status', $data)->render();
+                } else {
+                    return view('components.datatable-status-badge', ['status' => $entry->status])->render();
+                }
             })
             ->addColumn('actions', function ($entry) use ($request) {
                 $data['id'] = $entry->id;
-                $data['edit_url'] = $request->user()->can('why_choose_us.update') ? route('admin.whyshopwithus.edit', ['id' => $entry->id]): '';
-                $data['delete_url'] = $request->user()->can('why_choose_us.delete') ? route('admin.whyshopwithus.destroy', ['id' => $entry->id]): '';
+                $data['edit_url'] = $request->user()->can('why_choose_us.update') ? route('admin.whyshopwithus.edit', ['id' => $entry->id]) : '';
+                $data['delete_url'] = $request->user()->can('why_choose_us.delete') ? route('admin.whyshopwithus.destroy', ['id' => $entry->id]) : '';
                 return view('admin.partials.datatable-actions', $data)->render();
             })
-            ->rawColumns([ 'title', 'description', 'status', 'actions'])
+            ->rawColumns(['title', 'description', 'status', 'actions'])
             ->make(true);
     }
 }

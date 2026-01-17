@@ -135,19 +135,24 @@ class PrivacyPolicyController extends Controller
                 return $privacyPolicy->updated_at->format('Y-m-d H:i:s');
             })
             ->addColumn('status', function ($privacyPolicy) use ($request) {
-                $data['toggle_url'] = $request->user()->can('privacy_policies.update') ? route('admin.privacy-policy.toggleStatus', ['id' => $privacyPolicy->id]) : null;
-                $data['status'] = $privacyPolicy->status;
-                $data['id'] = $privacyPolicy->id;
-                return view('admin.partials.datatable-status', $data)->render();
+                if ($request->user()->can('privacy_policies.update')) {
+                    $data['toggle_url'] = $request->user()->can('privacy_policies.update') ? route('admin.privacy-policy.toggleStatus', ['id' => $privacyPolicy->id]) : null;
+                    $data['status'] = $privacyPolicy->status;
+                    $data['id'] = $privacyPolicy->id;
+
+                    return view('admin.partials.datatable-status', $data)->render();
+                } else {
+                    return view('components.datatable-status-badge', ['status' => $privacyPolicy->status])->render();
+                }
             })
             ->addColumn('action', function ($privacyPolicy) use ($request) {
-            $data['delete_url'] = $request->user()->can('privacy_policies.delete') ? route('admin.privacy-policy.destroy', ['id' => $privacyPolicy->id]) : '';
+                $data['delete_url'] = $request->user()->can('privacy_policies.delete') ? route('admin.privacy-policy.destroy', ['id' => $privacyPolicy->id]) : '';
                 $data['edit_url'] = $request->user()->can('privacy_policies.update') ? route('admin.privacy-policy.edit', ['id' => $privacyPolicy->id]) : '';
                 $data['id'] = $privacyPolicy->id;
 
                 return view('admin.partials.datatable-actions', $data)->render();
             })
-            ->rawColumns([ 'description', 'updated_at', 'status', 'action'])
+            ->rawColumns(['description', 'updated_at', 'status', 'action'])
             ->make(true);
     }
 }

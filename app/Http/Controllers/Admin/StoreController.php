@@ -190,10 +190,14 @@ class StoreController extends Controller
                     return $store->getTranslation('store_name', 'en');
                 })
                 ->addColumn('status', function ($store) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('store.update') ? route('admin.stores.toggleStatus', ['id' => $store->id]) : '';
-                    $data['status'] = $store->status;
-                    $data['id'] = $store->id; // Ensure ID is passed for toggle
-                    return view('admin.partials.datatable-status', $data)->render();
+                    if ($request->user()->can('store.update')) {
+                        $data['toggle_url'] = $request->user()->can('store.update') ? route('admin.stores.toggleStatus', ['id' => $store->id]) : '';
+                        $data['status'] = $store->status;
+                        $data['id'] = $store->id; // Ensure ID is passed for toggle
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $store->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($store) use ($request) {
                     $data['edit_url'] = $request->user()->can('store.update') ? route('admin.stores.edit', ['id' => $store->id]) : '';

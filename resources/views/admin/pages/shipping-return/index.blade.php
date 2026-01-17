@@ -30,16 +30,24 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            @php
+                                $hasAction =
+                                    auth()->user()->can('shipping_return.update') ||
+                                    auth()->user()->can('shipping_return.delete');
+                            @endphp
                             <table id="shipping-return-table" class="table table-striped"
-                                data-route="{{ route('admin.shipping-return.data') }}">
+                                data-route="{{ route('admin.shipping-return.data') }}"
+                                data-has-action="{{ $hasAction ? 1 : 0 }}"s>
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Title (EN)</th>
                                         <th>Description (EN)</th>
-                                        {{-- <th>Status</th> --}}
                                         <th>Last Updated</th>
+                                        {{-- <th>Status</th> --}}
+                                        @canany(['shipping_return.update', 'shipping_return.delete'])
                                         <th>Action</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>

@@ -28,15 +28,21 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            @php
+                                $hasCatActions = auth()->user()->can('category.update') || auth()->user()->can('category.delete');
+                            @endphp
                             <table id="categories-table" class="table table-striped table-bordered w-100"
-                                data-route="{{ route('admin.category-subcategory.categories.data') }}">
+                                data-route="{{ route('admin.category-subcategory.categories.data') }}"
+                                data-has-actions="{{ $hasCatActions ? 1 : 0 }}">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Name</th>
                                         <th>Image</th>
                                         <th>Status</th>
-                                        <th>Actions</th>
+                                        @canany(['category.update', 'category.delete'])
+                                            <th>Action</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                             </table>

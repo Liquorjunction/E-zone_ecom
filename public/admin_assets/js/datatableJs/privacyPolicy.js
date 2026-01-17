@@ -1,15 +1,35 @@
 $(document).ready(function () {
-    $('#privacy-policy-table').DataTable({
+    var table = $("#faqcategories-table");
+    var hasAction =
+        table.data("has-actions") ||
+        table.attr("data-has-actions") == 1 ||
+        table.attr("data-has-actions") == "1";
+
+    var columns = [
+        {
+            data: "DT_RowIndex",
+            name: "DT_RowIndex",
+            orderable: false,
+            searchable: false,
+        },
+        { data: "title", name: "title" },
+        { data: "description", name: "description" },
+        { data: "updated_at", name: "updated_at" },
+        // { data: 'status', name: 'status', orderable: false, searchable: false },
+    ];
+    if (hasAction) {
+        columns.push({
+            data: "action",
+            name: "action",
+            orderable: false,
+            searchable: false,
+        });
+    }
+
+    table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: $('#privacy-policy-table').data('route'),
-        columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'title', name: 'title' },
-            { data: 'description', name: 'description' },
-            { data: 'updated_at', name: 'updated_at' },
-            // { data: 'status', name: 'status', orderable: false, searchable: false },
-            { data: 'action', name: 'action', orderable: false, searchable: false }
-        ]
+        ajax: table.data("route"),
+        columns: columns,
     });
 });
