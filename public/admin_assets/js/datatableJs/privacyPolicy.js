@@ -1,9 +1,10 @@
 $(document).ready(function () {
-    var table = $("#faqcategories-table");
+    var table = $("#privacy-policy-table");
     var hasAction =
-        table.data("has-actions") ||
-        table.attr("data-has-actions") == 1 ||
-        table.attr("data-has-actions") == "1";
+        table.attr('data-has-action') == 1 ||
+        table.attr('data-has-action') == "1" ||
+        table.data('hasAction') === 1 ||
+        table.data('hasAction') === true;
 
     var columns = [
         {
@@ -15,7 +16,7 @@ $(document).ready(function () {
         { data: "title", name: "title" },
         { data: "description", name: "description" },
         { data: "updated_at", name: "updated_at" },
-        // { data: 'status', name: 'status', orderable: false, searchable: false },
+        { data: 'status', name: 'status', orderable: false, searchable: false },
     ];
     if (hasAction) {
         columns.push({

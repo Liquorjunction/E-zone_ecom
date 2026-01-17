@@ -33,10 +33,10 @@
                                         <th>Title</th>
                                         <th>Description</th>
                                         <th>Last Updated</th>
+                                        <th>Status</th>
                                         @canany(['privacy_policies.update', 'privacy_policies.delete'])
-                                            {{-- <th>Action</th> --}}
+                                            <th>Action</th>
                                         @endcanany
-                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
