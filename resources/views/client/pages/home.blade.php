@@ -487,7 +487,7 @@
                             {{ $title ?? 'Feature' }}
                         </h3>
                         <p class="text-sm text-gray-600 leading-relaxed">
-                            {{ $description ?? '' }}
+                            {!! $description ?? '' !!}
                         </p>
                     </div>
                 @endforeach
