@@ -125,18 +125,22 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $id = $request->input('id');
+            Log::info('ProductController.toggleStatus: request received', ['product_id' => $id]);
             $product = $productRepo->updateProductStatus($id);
-
             // Sync all variants with product status
             $newStatus = $product->status;
-            ProductVariant::where('product_id', $id)->update(['status' => $newStatus]);
+            $affected = ProductVariant::where('product_id', $id)->update(['status' => $newStatus]);
+            Log::info('ProductController.toggleStatus: applied status to variants', ['product_id' => $id, 'new_status' => $newStatus, 'variants_updated' => $affected]);
 
             DB::commit();
+            Log::info('ProductController.toggleStatus: response sent', ['product_id' => $id]);
             return response()->json([
                 'success' => true,
                 'message' => 'Product and variants status updated successfully.',
-                'status' => $newStatus
+                'status' => $newStatus,
+                'variants_updated' => $affected
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('ProductController.toggleStatus: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -181,9 +185,17 @@ class ProductController extends Controller
 
         try {
             $variantId = $request->input('variant_id');
-            $productRepo->updateProductVariantStatus($variantId);
+            $variant = $productRepo->updateProductVariantStatus($variantId);
 
-            return response()->json(['success' => true, 'message' => 'Product variant status updated successfully.']);
+            // fetch current product status after sync
+            $product = Product::find($variant->product_id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product variant status updated successfully.',
+                'product_status' => $product ? $product->status : null,
+                'variant_id' => $variant->id,
+            ]);
         } catch (\Exception $e) {
             Log::error('ProductController.toggleVariantStatus: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['success' => false, 'message' => 'Failed to update product variant status.'], 500);
@@ -201,10 +213,14 @@ class ProductController extends Controller
             $variantId = $request->input('variant_id');
             $variant = $productRepo->updateProductVariantBestseller($variantId);
 
+            $product = Product::find($variant->product_id);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Product variant bestseller status updated successfully.',
-                'is_bestseller' => $variant->is_bestseller,
+                'variant_id' => $variant->id,
+                'variant_is_bestseller' => $variant->is_bestseller,
+                'product_is_bestseller' => $product ? (bool)$product->is_bestseller : null,
             ]);
         } catch (\Exception $e) {
             Log::error('ProductController.toggleVariantBestseller: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -461,18 +477,33 @@ class ProductController extends Controller
                     return $product->category ? $product->category->getTranslation('category-name', 'en') : 'N/A';
                 })
                 ->addColumn('is_bestseller', function ($product) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleBestseller', ['id' => $product->id]) : '';
-                    $data['is_bestseller'] = $product->is_bestseller;
-                    $data['id'] = $product->id;
+                    if ($request->user()->can('products.update')) {
+                        $data['toggle_url'] = route('admin.products.toggleBestseller', ['id' => $product->id]);
+                        $data['is_bestseller'] = $product->is_bestseller;
+                        $data['id'] = $product->id;
+                        $totalVariants = $product->productVariants->count();
+                        $bestsellerCount = $product->productVariants->where('is_bestseller', 1)->count();
+                        $data['variants_all_bestseller'] = ($totalVariants > 0 && $bestsellerCount === $totalVariants);
+                        $data['variants_all_not_bestseller'] = ($totalVariants > 0 && $bestsellerCount === 0);
 
-                    return view('admin.partials.datatable-bestseller', $data)->render();
+                        return view('admin.partials.datatable-bestseller', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $product->is_bestseller])->render();
+                    }
                 })
                 ->addColumn('status', function ($product) use ($request) {
-                    $data['toggle_url'] = $request->user()->can('products.update') ? route('admin.products.toggleStatus', ['id' => $product->id]) : '';
-                    $data['status'] = $product->status;
-                    $data['id'] = $product->id;
-
-                    return view('admin.partials.datatable-status', $data)->render();
+                    if ($request->user()->can('products.update')) {
+                        $data['toggle_url'] = route('admin.products.toggleStatus', ['id' => $product->id]);
+                        $data['status'] = $product->status;
+                        $data['id'] = $product->id;
+                        $totalVariants = $product->productVariants->count();
+                        $activeCount = $product->productVariants->where('status', 'active')->count();
+                        $data['variants_all_active'] = ($totalVariants > 0 && $activeCount === $totalVariants);
+                        $data['variants_all_inactive'] = ($totalVariants > 0 && $activeCount === 0);
+                        return view('admin.partials.datatable-status', $data)->render();
+                    } else {
+                        return view('components.datatable-status-badge', ['status' => $product->status])->render();
+                    }
                 })
                 ->addColumn('action', function ($product) use ($request) {
                     $data['view_url'] = $request->user()->can('products.read') ? route('admin.products.show', ['id' => $product->id]) : '';
@@ -501,6 +532,7 @@ class ProductController extends Controller
                             'can_delete' => $request->user()->can('products.delete'),
                             'status_toggle_url' => route('admin.products.variantToggleStatus', ['variant_id' => $variant->id]),
                             'bestseller_toggle_url' => route('admin.products.variantToggleBestseller', ['variant_id' => $variant->id]),
+                            'delete_url' => route('admin.products.variantDestroy'),
                         ];
                     }
                     return json_encode($variantsData);

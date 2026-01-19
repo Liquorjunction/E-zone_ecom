@@ -276,33 +276,80 @@ class ProductRepository implements ProductRepositoryInterface
     public function updateProductStatus($id)
     {
         $product = Product::findOrFail($id);
-        $product->status = $product->status == 'active' ? 'inactive' : 'active';
-        $product->save();
+        $newStatus = $product->status === 'active' ? 'inactive' : 'active';
+
+        Log::info("Updating product ID {$id} status to {$newStatus}");
+
+        $product->update(['status' => $newStatus]);
+
+        $product->productVariants()->update(['status' => $newStatus]);
+
         return $product;
     }
 
     public function updateProductBestseller($id)
     {
         $product = Product::findOrFail($id);
-        $product->is_bestseller = !$product->is_bestseller;
-        $product->save();
+        $newState = !$product->is_bestseller;
+
+        Log::info("Updating product ID {$id} bestseller status to " . ($newState ? 'true' : 'false'));
+
+        $product->update(['is_bestseller' => $newState]);
+
+        $product->productVariants()->update(['is_bestseller' => $newState]);
+
         return $product;
     }
 
     public function updateProductVariantStatus($variantId)
     {
         $variant = ProductVariant::findOrFail($variantId);
-        $variant->status = $variant->status == 'active' ? 'inactive' : 'active';
-        $variant->save();
+        $newStatus = $variant->status === 'active' ? 'inactive' : 'active';
+
+        $variant->update(['status' => $newStatus]);
+
+        Log::info("Updated variant ID {$variantId} status to {$newStatus}");
+        $product = $variant->product;
+
+        $hasActiveVariants = $product->productVariants()->where('status', 'active')->exists();
+        $product->update(['status' => $hasActiveVariants ? 'active' : 'inactive']);
+
         return $variant;
+    }
+
+    public function syncProductStatus($productId)
+    {
+        $product = Product::findOrFail($productId);
+        $hasActive = $product->productVariants()->where('status', 'active')->exists();
+        $product->status = $hasActive ? 'active' : 'inactive';
+        Log::info("Syncing product ID {$productId} status to " . ($hasActive ? 'active' : 'inactive'));
+        $product->save();
+        return $product;
     }
 
     public function updateProductVariantBestseller($variantId)
     {
         $variant = ProductVariant::findOrFail($variantId);
-        $variant->is_bestseller = !$variant->is_bestseller;
-        $variant->save();
+        $newState = !$variant->is_bestseller;
+
+        $variant->update(['is_bestseller' => $newState]);
+
+        $product = $variant->product;
+
+        $hasBestsellerVariant = $product->productVariants()->where('is_bestseller', true)->exists();
+        $product->update(['is_bestseller' => $hasBestsellerVariant]);
+
         return $variant;
+    }
+
+    public function syncProductBestseller($productId)
+    {
+        $product = Product::findOrFail($productId);
+        $hasBestseller = $product->productVariants()->where('is_bestseller', 1)->exists();
+        $product->is_bestseller = $hasBestseller ? 1 : 0;
+        Log::info("Syncing product ID {$productId} bestseller status to " . ($hasBestseller ? 'true' : 'false'));
+        $product->save();
+        return $product;
     }
 
     private function syncVariants(Product $product, array $variantsData)
@@ -319,7 +366,7 @@ class ProductRepository implements ProductRepositoryInterface
             $data = $this->normalizeVariantData($data, is_numeric($key) ? (int)$key : 0);
 
             if (isset($data['attributes']) && is_array($data['attributes'])) {
-                foreach (['en','fr','ar'] as $ln) {
+                foreach (['en', 'fr', 'ar'] as $ln) {
                     if (isset($data['attributes'][$ln]) && is_string($data['attributes'][$ln])) {
                         $decoded = json_decode($data['attributes'][$ln], true);
                         if (is_array($decoded)) {
@@ -333,31 +380,31 @@ class ProductRepository implements ProductRepositoryInterface
 
             if (isset($data['id']) && in_array($data['id'], $existingIds)) {
                 $variant = ProductVariant::find($data['id']);
-                    if ($variant) {
-                        $logPayload = [
-                            'action' => 'update_variant',
-                            'variant_id' => $variant->id,
-                            'variant_name_en' => $data['variant_name']['en'] ?? ($data['name']['en'] ?? null),
-                            'attributes_counts' => [
-                                    'en' => isset($data['attributes']['en']) ? count($data['attributes']['en']) : 0,
-                                    'fr' => isset($data['attributes']['fr']) ? count($data['attributes']['fr']) : 0,
-                                    'ar' => isset($data['attributes']['ar']) ? count($data['attributes']['ar']) : 0,
-                                ],
-                            'attributes_sample' => [
-                                'en' => $this->extractSampleAttribute($data['attributes']['en'] ?? []),
-                                'fr' => $this->extractSampleAttribute($data['attributes']['fr'] ?? []),
-                                'ar' => $this->extractSampleAttribute($data['attributes']['ar'] ?? []),
-                            ],
-                        ];
-                        Log::info('ProductRepository.syncVariants variant payload before update', $logPayload);
+                if ($variant) {
+                    $logPayload = [
+                        'action' => 'update_variant',
+                        'variant_id' => $variant->id,
+                        'variant_name_en' => $data['variant_name']['en'] ?? ($data['name']['en'] ?? null),
+                        'attributes_counts' => [
+                            'en' => isset($data['attributes']['en']) ? count($data['attributes']['en']) : 0,
+                            'fr' => isset($data['attributes']['fr']) ? count($data['attributes']['fr']) : 0,
+                            'ar' => isset($data['attributes']['ar']) ? count($data['attributes']['ar']) : 0,
+                        ],
+                        'attributes_sample' => [
+                            'en' => $this->extractSampleAttribute($data['attributes']['en'] ?? []),
+                            'fr' => $this->extractSampleAttribute($data['attributes']['fr'] ?? []),
+                            'ar' => $this->extractSampleAttribute($data['attributes']['ar'] ?? []),
+                        ],
+                    ];
+                    Log::info('ProductRepository.syncVariants variant payload before update', $logPayload);
 
-                        $variant->update([
-                            'variant_name'  => $data['variant_name'],
-                            'price'         => $data['price'],
-                            'attributes'    => $data['attributes'] ?? null,
-                            'status'        => $data['status'] ?? 'active',
-                            'is_bestseller' => (bool)($data['is_bestseller'] ?? $variant->is_bestseller ?? false),
-                        ]);
+                    $variant->update([
+                        'variant_name'  => $data['variant_name'],
+                        'price'         => $data['price'],
+                        'attributes'    => $data['attributes'] ?? null,
+                        'status'        => $data['status'] ?? 'active',
+                        'is_bestseller' => (bool)($data['is_bestseller'] ?? $variant->is_bestseller ?? false),
+                    ]);
 
                     $processedIds[] = $variant->id;
 

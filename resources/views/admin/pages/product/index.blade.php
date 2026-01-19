@@ -20,8 +20,12 @@
                         @endcan
                     </div>
                     <div class="card-body">
+                        @php
+                            $hasAction = auth()->user()->can('products.update') || auth()->user()->can('products.delete');
+                        @endphp
                         <table id="product-table" class="table table-bordered table-striped" style="width:100%;"
-                            data-source="{{ route('admin.products.data') }}">
+                            data-source="{{ route('admin.products.data') }}"
+                            data-can-update="{{ $hasAction ? 1 : 0 }}">
                             <thead>
                                 <tr>
                                     <th></th>

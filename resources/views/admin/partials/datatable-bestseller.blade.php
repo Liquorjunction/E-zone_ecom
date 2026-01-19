@@ -3,6 +3,8 @@
         class="form-check-input bestseller-toggle"
         type="checkbox"
         data-url="{{ $toggle_url }}"
+        data-variants-all-bestseller="{{ $variants_all_bestseller ?? 0 }}"
+        data-variants-all-not-bestseller="{{ $variants_all_not_bestseller ?? 0 }}"
         {{ $is_bestseller ? 'checked' : '' }}
         id="bestseller-switch-{{ $id }}"
         {{ !$toggle_url ? 'disabled' : '' }}
