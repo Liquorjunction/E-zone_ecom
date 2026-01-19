@@ -108,7 +108,7 @@
                                 </label>
                                 <div class="bg-light p-2 rounded mb-2">
                                     <img id="iconPreview"
-                                         src="{{ $subCategory->{'sub-category-icon'} ? asset('storage/'.$subCategory->{'sub-category-icon'}) : asset('assets/images/no-image.png') }}"
+                                         src="{{ $subCategory->{'sub-category-icon'} ? asset('storage/'.$subCategory->{'sub-category-icon'}) : asset('images/no_image.jpg') }}"
                                          alt="Icon preview"
                                          class="img-fluid rounded"
                                          style="max-width: 120px; max-height: 120px; object-fit: cover;">

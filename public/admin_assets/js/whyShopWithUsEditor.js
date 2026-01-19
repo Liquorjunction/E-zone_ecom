@@ -50,8 +50,42 @@ document.addEventListener("DOMContentLoaded", function () {
                 quill.root.innerHTML = hiddenInput.value;
             }
 
-            // 4. Sync on Change
-            quill.on("text-change", function () {
+            // 4. Character limit setup (English only) and sync on change
+            const maxChars = (lang === 'en') ? 150 : null;
+
+            // create a small counter element under the editor
+            let counter = document.createElement('div');
+            counter.className = 'small text-muted mt-1';
+            if (maxChars) counter.textContent = `0/${maxChars} characters`;
+            editorElement.parentNode.insertBefore(counter, editorElement.nextSibling);
+
+            // helper to get plain text length (without trailing newline)
+            const getPlainLength = () => {
+                return quill.getText().replace(/\n$/, '').length;
+            };
+
+            // sync and enforce limit
+            quill.on("text-change", function (delta, oldDelta, source) {
+                if (maxChars) {
+                    let plainLen = getPlainLength();
+                    if (plainLen > maxChars) {
+                        // remove excess characters from the end
+                        const excess = plainLen - maxChars;
+                        const currentLength = quill.getLength(); // includes trailing newline
+                        // deleteText takes index and length; delete from (maxChars) for `excess` chars
+                        quill.deleteText(maxChars, excess, 'silent');
+                        plainLen = getPlainLength();
+                        // move cursor to end of allowed text
+                        const sel = quill.getSelection();
+                        if (sel) {
+                            quill.setSelection(Math.min(sel.index, maxChars), 0, 'silent');
+                        }
+                    }
+                    counter.textContent = `${plainLen}/${maxChars} characters`;
+                    counter.classList.toggle('text-danger', plainLen >= maxChars);
+                }
+
+                // always sync HTML to hidden input
                 hiddenInput.value = quill.root.innerHTML;
             });
         }

@@ -160,7 +160,7 @@ class WhyShopWithUsController extends Controller
             ->addColumn('actions', function ($entry) use ($request) {
                 $data['id'] = $entry->id;
                 $data['edit_url'] = $request->user()->can('why_choose_us.update') ? route('admin.whyshopwithus.edit', ['id' => $entry->id]) : '';
-                $data['delete_url'] = $request->user()->can('why_choose_us.delete') ? route('admin.whyshopwithus.destroy', ['id' => $entry->id]) : '';
+                // $data['delete_url'] = $request->user()->can('why_choose_us.delete') ? route('admin.whyshopwithus.destroy', ['id' => $entry->id]) : '';
                 return view('admin.partials.datatable-actions', $data)->render();
             })
             ->rawColumns(['title', 'description', 'status', 'actions'])

@@ -133,7 +133,7 @@
                                     <label class="form-label fw-bold small text-uppercase text-muted">Slider Image</label>
                                     <div class="bg-light p-2 rounded mb-2">
                                         <img id="imagePreview"
-                                            src="{{ $slider->image ? asset('storage/' . $slider->image) : asset('assets/images/no-image.png') }}"
+                                            src="{{ $slider->image ? asset('storage/' . $slider->image) : asset('images/no_image.jpg') }}"
                                             alt="Preview" class="img-fluid rounded"
                                             style="max-width: 100%; max-height: 150px; object-fit: contain;">
                                     </div>

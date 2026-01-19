@@ -92,7 +92,7 @@
                                 </label>
                                 <div class="bg-light p-2 rounded mb-2">
                                     <img id="iconPreview"
-                                         src="{{ $brand->image ? asset('storage/'.$brand->image) : asset('assets/images/no-image.png') }}"
+                                         src="{{ $brand->image ? asset('storage/'.$brand->image) : asset('images/no_image.jpg') }}"
                                          alt="Icon preview"
                                          class="img-fluid rounded"
                                          style="max-width: 120px; max-height: 120px; object-fit: cover;">

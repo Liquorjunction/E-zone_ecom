@@ -108,7 +108,7 @@
                                 <label class="form-label fw-bold small text-uppercase text-muted">Icon <span class="text-danger">*</span></label>
                                 <div class="bg-light p-2 rounded mb-2">
                                     <img id="iconPreview"
-                                         src="{{ asset('assets/images/no-image.png') }}"
+                                         src="{{ asset('images/no_image.jpg') }}"
                                          alt="Preview"
                                          class="img-fluid rounded"
                                          style="max-width: 100%; max-height: 150px; object-fit: contain; opacity: 0.75;">

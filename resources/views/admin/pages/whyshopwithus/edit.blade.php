@@ -101,11 +101,11 @@
                             </div>
 
                             <div class="col-lg-4 col-md-12">
-                                <div class="card border-1 p-3 shadow-sm">
+                                <div class="card border p-3 shadow-sm">
                                     <div class="text-center mb-3">
                                         <label class="form-label fw-bold small text-uppercase text-muted">Icon</label>
                                         <div class="bg-light p-2 rounded mb-2">
-                                            <img id="iconPreview" src="{{ $entry->icon ? asset('storage/' . $entry->icon) : asset('assets/images/no-image.png') }}" alt="Current Icon" class="img-fluid rounded" style="max-width: 100%; max-height: 150px; object-fit: contain;">
+                                            <img id="iconPreview" src="{{ $entry->icon ? asset('storage/' . $entry->icon) : asset('images/no_image.jpg') }}" alt="Current Icon" class="img-fluid rounded" style="max-width: 100%; max-height: 150px; object-fit: contain;">
                                         </div>
                                         <input id="icon-input" type="file" name="icon" class="form-control form-control-sm" accept=".jpeg,.png,.jpg,.gif,.webp,.bmp,.ico,.tiff,.avif">
                                         <div class="form-text mt-1 text-xs">Leave empty to keep current icon. Allowed: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif. Max size: 2MB.</div>

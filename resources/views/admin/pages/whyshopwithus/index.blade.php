@@ -9,11 +9,11 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">Why Shop With Us</h4>
                         @can('why_choose_us.create')
-                            <div>
+                            {{-- <div>
                                 <a href="{{ route('admin.whyshopwithus.create') }}" class="btn btn-primary">
                                     <i class="fa fa-plus"></i> Add Entry
                                 </a>
-                            </div>
+                            </div> --}}
                         @endcan
                     </div>
                     <div class="card-body">

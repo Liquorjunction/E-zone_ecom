@@ -131,7 +131,7 @@
                                 <label class="form-label fw-bold small text-uppercase text-muted">Card Image</label>
                                 <div class="bg-light p-2 rounded mb-2">
                                     <img id="imagePreview"
-                                         src="{{ $card->image ? asset('storage/'.$card->image) : asset('assets/images/no-image.png') }}"
+                                         src="{{ $card->image ? asset('storage/'.$card->image) : asset('images/no_image.jpg') }}"
                                          alt="Preview"
                                          class="img-fluid rounded"
                                          style="max-width: 100%; max-height: 200px; object-fit: contain;">
