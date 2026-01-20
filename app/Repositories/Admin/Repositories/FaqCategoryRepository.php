@@ -56,8 +56,7 @@ class FaqCategoryRepository implements FaqCategoryRepositoryInterface
 
     public function getDataforDataTable($request = null)
     {
-        $query = FaqCategory::query();
-        return $query->latest();
+        return FaqCategory::withCount('faqs')->latest();
     }
 
 

@@ -153,7 +153,12 @@ class FaqCategoryController extends Controller
                 ->addColumn('action', function ($faqCategory) use ($request) {
                     $data['id'] = $faqCategory->id;
                     $data['edit_url'] = $request->user()->can('faqs.update') ? route('admin.faq-categories.edit', ['id' => $faqCategory->id]) : '';
-                    $data['delete_url'] = $request->user()->can('faqs.delete') ? route('admin.faq-categories.destroy', ['id' => $faqCategory->id]) : '';
+
+                    if ($request->user()->can('faqs.delete') && isset($faqCategory->faqs_count) && $faqCategory->faqs_count == 0) {
+                        $data['delete_url'] = route('admin.faq-categories.destroy', ['id' => $faqCategory->id]);
+                    } else {
+                        $data['delete_url'] = '';
+                    }
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
