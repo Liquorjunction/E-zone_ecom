@@ -12,7 +12,6 @@ class AdminAuthenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        // Redirect to the admin login route if not authenticated
         return $request->expectsJson() ? null : route('admin.login');
     }
 
@@ -24,11 +23,19 @@ class AdminAuthenticate extends Middleware
      */
     protected function authenticate($request, array $guards)
     {
-        // We want to force this middleware to always check the 'admin' guard
-        if ($this->auth->guard('admin')->check()) {
+        $guard = $this->auth->guard('admin');
+        if ($guard->check()) {
+            $admin = $guard->user();
+            if ($admin && $admin->status === 'inactive') {
+                $guard->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                abort(redirect()->route('admin.login')->withErrors([
+                    'login' => 'Your account has been disabled. Please contact support.'
+                ]));
+            }
             return $this->auth->shouldUse('admin');
         }
-
         $this->unauthenticated($request, ['admin']);
     }
 }

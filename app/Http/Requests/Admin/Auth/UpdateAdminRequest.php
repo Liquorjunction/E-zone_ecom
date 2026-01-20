@@ -41,7 +41,7 @@ class UpdateAdminRequest extends FormRequest
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date_format:Y-m-d',
             'remarks' => 'nullable|string|max:1000',
-            'password' => 'nullable|string|min:8|confirmed_if:password,filled',
+            'password' => 'nullable|string|min:8|confirmed',
             'password_confirmation' => 'nullable|string',
             'role' => 'required|string|exists:roles,name,guard_name,admin',
             'roles.*' => 'string|exists:roles,name,guard_name,admin',

@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             ShowroomSeeder::class,
             StoreAndWarehouseSeeder::class,
             SubCategorySeeder::class,
+            WhyShopWithUsSeeder::class,
         ]);
 
         // Assign super-admin role to the first admin user

@@ -24,7 +24,6 @@ class StoreAdminRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:admin,email',
-            'username' => 'required|string|max:255|unique:admin,username',
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date_format:Y-m-d',
             'remarks' => 'nullable|string|max:1000',
@@ -42,8 +41,6 @@ class StoreAdminRequest extends FormRequest
             'email.required' => 'The email field is required.',
             'email.email' => 'The email must be a valid email address.',
             'email.unique' => 'The email has already been taken.',
-            'username.required' => 'The username field is required.',
-            'username.unique' => 'The username has already been taken.',
             'password.required' => 'The password field is required.',
             'password.min' => 'The password must be at least 8 characters.',
             'password.confirmed' => 'The password confirmation does not match.',
