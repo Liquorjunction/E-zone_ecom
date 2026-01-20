@@ -89,6 +89,11 @@ class Product extends Model
         return $this->morphMany(DiscountTarget::class, 'target');
     }
 
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
 
     // --- Helpers ---
     public function getRealPriceAttribute()

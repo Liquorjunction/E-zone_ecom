@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Spatie\Translatable\HasTranslations; // <--- Import Trait
+use Spatie\Translatable\HasTranslations;
 
 class Categories extends Model
 {
-    use HasSlug, SoftDeletes, HasRoles, Notifiable, HasTranslations; // <--- Add Trait
+    use HasSlug, SoftDeletes, HasRoles, Notifiable, HasTranslations;
 
     protected $table = 'categories';
     public $guard_name = 'admin';
@@ -31,8 +31,6 @@ class Categories extends Model
     public function getSlugOptions() : SlugOptions
     {
         return SlugOptions::create()
-            // FIX: Explicitly tell the slug generator to use ONLY the English translation.
-            // If we don't do this, it tries to slugify the JSON string '{"en":"Food"}' -> "en-food"
             ->generateSlugsFrom(function($model) {
                 return $model->getTranslation('category-name', 'en');
             })

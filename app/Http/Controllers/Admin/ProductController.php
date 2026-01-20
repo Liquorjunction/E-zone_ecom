@@ -508,7 +508,13 @@ class ProductController extends Controller
                 ->addColumn('action', function ($product) use ($request) {
                     $data['view_url'] = $request->user()->can('products.read') ? route('admin.products.show', ['id' => $product->id]) : '';
                     $data['edit_url'] = $request->user()->can('products.update') ? route('admin.products.edit', ['id' => $product->id]) : '';
-                    $data['delete_url'] = $request->user()->can('products.delete') ? route('admin.products.destroy', ['id' => $product->id]) : '';
+
+                    if ($request->user()->can('products.delete') && isset($product->productVariants_count) && $product->productVariants_count == 0) {
+                        $data['delete_url'] = route('admin.products.destroy', ['id' => $product->id]);
+                    } else {
+                        $data['delete_url'] = '';
+                    }
+
                     $data['product_id'] = $product->id;
 
                     return view('admin.partials.datatable-actions', $data)->render();
@@ -520,6 +526,8 @@ class ProductController extends Controller
                     $variantsData = [];
                     foreach ($product->productVariants as $variant) {
                         $variantName = is_array($variant->variant_name) ? ($variant->variant_name['en'] ?? 'N/A') : $variant->variant_name;
+                        $orderItemsCount = isset($variant->order_items_count) ? $variant->order_items_count : (isset($variant->orderItems_count) ? $variant->orderItems_count : 0);
+                        $canDeleteVariant = $request->user()->can('products.delete') && $orderItemsCount == 0;
                         $variantsData[] = [
                             'id' => $variant->id,
                             'product_id' => $product->id,
@@ -530,6 +538,7 @@ class ProductController extends Controller
                             'is_bestseller' => $variant->is_bestseller,
                             'can_update' => $request->user()->can('products.update'),
                             'can_delete' => $request->user()->can('products.delete'),
+                            'can_delete_variant' => $canDeleteVariant,
                             'status_toggle_url' => route('admin.products.variantToggleStatus', ['variant_id' => $variant->id]),
                             'bestseller_toggle_url' => route('admin.products.variantToggleBestseller', ['variant_id' => $variant->id]),
                             'delete_url' => route('admin.products.variantDestroy'),

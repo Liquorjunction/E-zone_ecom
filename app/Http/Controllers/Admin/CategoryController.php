@@ -127,7 +127,13 @@ class CategoryController extends Controller
             })
             ->addColumn('action', function ($category) use ($request) {
                 $data['edit_url'] = $request->user()->can('category.update') ? route('admin.category-subcategory.categories.edit', ['id' => $category->id]) : '';
-                $data['delete_url'] = $request->user()->can('category.delete') ? route('admin.category-subcategory.categories.destroy', ['id' => $category->id]) : '';
+
+                if ($request->user()->can('category.delete') && isset($category->subcategories_count) && $category->subcategories_count == 0) {
+                    $data['delete_url'] = route('admin.category-subcategory.categories.destroy', ['id' => $category->id]);
+                } else {
+                    $data['delete_url'] = '';
+                }
+
                 $data['id'] = $category->id;
 
                 return view('admin.partials.datatable-actions', $data)->render();

@@ -83,6 +83,6 @@ class BrandRepository implements BrandRepositoryInterface
 
     public function getDataForDatatable()
     {
-        return Brand::query();
+        return Brand::withCount('products')->get();
     }
 }

@@ -36,9 +36,16 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getDataforDataTable($request = null)
     {
-        return Product::with(['brand', 'category', 'productVariants'])
-            ->select('id', 'name', 'status', 'is_bestseller', 'cover_image', 'brand_id', 'category_id', 'sku')
-            ->selectRaw('COALESCE((
+        return Product::with([
+                'brand',
+                'category',
+                'productVariants' => function ($q) {
+                    $q->withCount('orderItems');
+                }
+            ])
+                ->withCount('productVariants')
+                ->select('id', 'name', 'status', 'is_bestseller', 'cover_image', 'brand_id', 'category_id', 'sku')
+                ->selectRaw('COALESCE((
                 SELECT MIN(price)
                 FROM product_variants
                 WHERE product_variants.product_id = products.id

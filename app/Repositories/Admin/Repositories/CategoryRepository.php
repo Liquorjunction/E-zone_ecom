@@ -107,6 +107,6 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     public function getDataForDataTable()
     {
-        return Categories::query()->latest();
+        return Categories::withCount('subcategories')->get();
     }
 }

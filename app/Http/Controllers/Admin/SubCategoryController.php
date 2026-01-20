@@ -136,7 +136,13 @@ class SubCategoryController extends Controller
             })
             ->addColumn('action', function ($subCategory) use ($request) {
                 $data['edit_url'] = $request->user()->can('subcategory.update') ? route('admin.category-subcategory.subcategories.edit', ['id' => $subCategory->id]) : '';
-                $data['delete_url'] = $request->user()->can('subcategory.delete') ? route('admin.category-subcategory.subcategories.destroy', ['id' => $subCategory->id]) : '';
+
+                if ($request->user()->can('subcategory.delete') && isset($subCategory->products_count) && $subCategory->products_count == 0) {
+                    $data['delete_url'] = route('admin.category-subcategory.subcategories.destroy', ['id' => $subCategory->id]);
+                } else {
+                    $data['delete_url'] = '';
+                }
+
                 $data['id'] = $subCategory->id;
 
                 return view('admin.partials.datatable-actions', $data)->render();

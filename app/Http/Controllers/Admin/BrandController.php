@@ -140,7 +140,7 @@ class BrandController extends Controller
                 ->addIndexColumn()
                 ->addColumn('image', function ($brand) {
                     if ($brand->image && Storage::disk('public')->exists($brand->image)) {
-                        return '<img src="' . asset('storage/'.$brand->image) . '" width="50" class="rounded">';
+                        return '<img src="' . asset('storage/' . $brand->image) . '" width="50" class="rounded">';
                     }
                     return '';
                 })
@@ -159,7 +159,13 @@ class BrandController extends Controller
                 })
                 ->addColumn('action', function ($brand) use ($request) {
                     $data['edit_url'] = $request->user()->can('brands.update') ? route('admin.brands.edit', ['id' => $brand->id]) : '';
-                    $data['delete_url'] = $request->user()->can('brands.delete') ? route('admin.brands.destroy', ['id' => $brand->id]) : '';
+
+                    if ($request->user()->can('brands.delete') && isset($brand->products_count) && $brand->products_count == 0) {
+                        $data['delete_url'] = route('admin.brands.destroy', ['id' => $brand->id]);
+                    } else {
+                        $data['delete_url'] = '';
+                    }
+
                     $data['id'] = $brand->id;
 
                     return view('admin.partials.datatable-actions', $data)->render();

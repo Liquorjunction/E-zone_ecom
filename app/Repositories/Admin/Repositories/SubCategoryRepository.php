@@ -116,6 +116,8 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
 
     public function getDataForDataTable()
     {
-        return SubCategories::with('category')->latest();
+        return SubCategories::with('category')
+            ->withCount('products')
+            ->latest();
     }
 }

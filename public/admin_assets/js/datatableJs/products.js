@@ -89,12 +89,16 @@ $(document).ready(function () {
 
             let actions = "";
             if (showVariantActions) {
-                actions = `
-                    <td>
-                        <button class="btn btn-sm btn-danger delete-variant shadow-sm" data-variant-id="${variant.id}" data-product-id="${variant.product_id}" data-url="${variant.delete_url || ""}" title="Delete Variant">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>`;
+                if (variant.can_delete_variant) {
+                    actions = `
+                        <td>
+                            <button class="btn btn-sm btn-danger delete-variant shadow-sm" data-variant-id="${variant.id}" data-product-id="${variant.product_id}" data-url="${variant.delete_url || ""}" title="Delete Variant">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>`;
+                } else {
+                    actions = `<td></td>`;
+                }
             }
 
             html += `
