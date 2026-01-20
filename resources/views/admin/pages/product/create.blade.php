@@ -367,8 +367,8 @@
                         <!-- EN -->
                         <div class="tab-pane fade show active" id="variant-en">
                             <div class="mb-3">
-                                <label class="form-label">Variant Name (EN)</label>
-                                <input type="text" class="form-control" id="modal-variant-name-en">
+                                <label class="form-label">Variant Name (EN)<span class="badge bg-secondary align-middle">Not Editable</span></label>
+                                <input type="text" class="form-control" id="modal-variant-name-en" readonly tabindex="-1" style="background-color: #b6b7b8 !important; pointer-events: none;">
                             </div>
                             <div class="mb-2 d-flex justify-content-between align-items-center">
                                 <label class="form-label mb-0">Attributes (EN)</label>

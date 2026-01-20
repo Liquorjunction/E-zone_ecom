@@ -19,7 +19,7 @@ class UpdateProductRequest extends FormRequest
             'id' => 'required|exists:products,id',
 
             // Translatable fields
-            'name.en' => ['required', 'string', 'max:255', Rule::unique('products', 'name->en')],
+            'name.en' => ['required', 'string', 'max:255', Rule::unique('products', 'name->en')->ignore($this->id)],
             'name.fr' => 'nullable|string|max:255',
             'name.ar' => 'nullable|string|max:255',
 

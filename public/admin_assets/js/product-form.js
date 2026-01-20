@@ -229,11 +229,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (qu) qu.classList.remove('is-invalid');
             }
 
-            // Ensure cover image is provided (file input)
+            // Only require cover image if not already present (edit mode)
             const coverInput = currentPane.querySelector('input[name="cover_image"]');
+            // Check for an existing image preview or hidden field indicating current image
+            const hasExisting = !!currentPane.querySelector('.current-cover-image, [data-has-cover-image="1"]');
             if (coverInput) {
                 const hasFile = coverInput.files && coverInput.files.length > 0;
-                if (!hasFile) {
+                if (!hasFile && !hasExisting) {
                     valid = false;
                     coverInput.classList.add('is-invalid');
                     if (!firstInvalid) firstInvalid = coverInput;
