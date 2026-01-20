@@ -9,7 +9,7 @@ class AdminHelper
     /**
      * Get the authenticated admin user
      *
-     * @return \App\Models\admin|null
+    * @return \App\Models\Admin|null
      */
     public static function user()
     {

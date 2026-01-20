@@ -36,7 +36,7 @@ class AdminRepository implements AdminRepositoryInterface
     public function getById($id)
     {
         try {
-            return admin::find($id);
+            return Admin::find($id);
         } catch (\Exception $e) {
             Log::error('Admin get failed: ' . $e->getMessage());
             return null;
@@ -50,7 +50,7 @@ class AdminRepository implements AdminRepositoryInterface
     {
         try {
             $loggedInAdmin = Auth::guard('admin')->user();
-            $adminToEdit = admin::find($id);
+            $adminToEdit = Admin::find($id);
 
             if (!$adminToEdit) {
                 return null;
@@ -136,7 +136,7 @@ class AdminRepository implements AdminRepositoryInterface
             }
 
             // 1. Create User
-            $admin = admin::create([
+            $admin = Admin::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'username' => $request->email, // Temporary
@@ -184,7 +184,7 @@ class AdminRepository implements AdminRepositoryInterface
                 return false;
             }
 
-            $admin = admin::find($id);
+            $admin = Admin::find($id);
             if (!$admin) return false;
 
             $dataToUpdate = $request->only(['name', 'email', 'phone', 'date_of_birth', 'remarks', 'status']);
@@ -228,7 +228,7 @@ class AdminRepository implements AdminRepositoryInterface
                 return false;
             }
 
-            $admin = admin::findOrFail($id);
+            $admin = Admin::findOrFail($id);
 
             // Toggle status
             $oldStatus = $admin->status;
@@ -240,7 +240,7 @@ class AdminRepository implements AdminRepositoryInterface
             }
 
             // Return fresh instance from database to confirm save
-            $freshAdmin = admin::findOrFail($id);
+            $freshAdmin = Admin::findOrFail($id);
             return $freshAdmin;
         } catch (\Exception $e) {
             Log::error('Toggle Status - Exception caught', [
@@ -258,7 +258,7 @@ class AdminRepository implements AdminRepositoryInterface
         try {
             $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-            $admin = admin::where($field, $login)->first();
+            $admin = Admin::where($field, $login)->first();
 
             if ($admin && Hash::check($password, $admin->password)) {
                 return $admin;
@@ -282,7 +282,7 @@ class AdminRepository implements AdminRepositoryInterface
 
     public function getDataForDataTable($request)
     {
-        return admin::select([
+        return Admin::select([
             'id',
             'name',
             'email',
