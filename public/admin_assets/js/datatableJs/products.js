@@ -552,4 +552,79 @@ $(document).ready(function () {
             }
         });
     });
+
+    // Handle Import Form
+    const importForm = document.getElementById("importForm");
+
+    if (importForm) {
+        const importFile = document.getElementById("importFile");
+        const btnStartImport = document.getElementById("btnStartImport");
+
+        importForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            if (!importFile.files.length) {
+                if (window.showToast) {
+                    window.showToast(
+                        "Please select a file to import",
+                        "warning",
+                    );
+                }
+                return;
+            }
+
+            const fileName = importFile.files[0].name;
+            const formData = new FormData(importForm);
+
+            // Disable button and close modal
+            btnStartImport.disabled = true;
+            const modal = bootstrap.Modal.getInstance(
+                document.getElementById("importModal"),
+            );
+            if (modal) {
+                modal.hide();
+            }
+
+            // Upload file and start import job
+            axios
+                .post(importForm.action, formData)
+                .then((response) => {
+                    if (response.data.success && response.data.batch_id) {
+                        // Create floating notification
+                        if (window.createImportNotification) {
+                            window.createImportNotification(
+                                response.data.batch_id,
+                                fileName,
+                                "/admin/products/import/progress/",
+                            );
+                        }
+                        // Reset form
+                        importForm.reset();
+                    } else {
+                        if (window.showToast) {
+                            window.showToast(
+                                response.data.message || "Upload failed",
+                                "error",
+                            );
+                        }
+                    }
+                })
+                .catch((error) => {
+                    let message = "Upload failed";
+                    if (
+                        error.response &&
+                        error.response.data &&
+                        error.response.data.message
+                    ) {
+                        message = error.response.data.message;
+                    }
+                    if (window.showToast) {
+                        window.showToast(message, "error");
+                    }
+                })
+                .finally(() => {
+                    btnStartImport.disabled = false;
+                });
+        });
+    }
 });

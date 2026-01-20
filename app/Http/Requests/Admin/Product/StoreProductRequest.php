@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
@@ -18,7 +19,7 @@ class StoreProductRequest extends FormRequest
             // --- Product Level ---
 
             // Product Name Translatable
-            'name.en' => 'required|string|max:255',
+            'name.en' => ['required', 'string', 'max:255', Rule::unique('products', 'name->en')],
             'name.fr' => 'nullable|string|max:255',
             'name.ar' => 'nullable|string|max:255',
             // Product Description Translatable
@@ -64,6 +65,7 @@ class StoreProductRequest extends FormRequest
     public function messages()
     {
         return [
+            'name.en.unique' => 'The Product Name (English) must be unique.',
             'name.en.required' => 'The Product Name (English) is required.',
             'variants.required' => 'You must add at least one product variant.',
             'variants.*.name.en.required' => 'All variants must have a name.',

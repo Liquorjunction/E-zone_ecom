@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Brands;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class UpdateBrandRequest extends FormRequest
 {
@@ -22,7 +23,7 @@ class UpdateBrandRequest extends FormRequest
         return [
             'id' => 'required',
             'name' => 'required|unique:brands,name,' . $this->id,
-            'name.en' => 'required',
+            'name.en' => ['required', Rule::unique('brands', 'name->en')->ignore($this->id)],
             'name.ar' => 'required',
             'name.fr' => 'required',
             'image' => 'image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
@@ -33,7 +34,7 @@ class UpdateBrandRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.unique' => 'Name must be unique',
+            'name.en.unique' => 'Name must be unique',
             'name.required' => 'Name is required',
             'image.required' => 'Image is required',
             'status.required' => 'Status is required',
@@ -44,6 +45,7 @@ class UpdateBrandRequest extends FormRequest
     {
         return [
             'name' => 'Name',
+            'name.en' => 'Name (en)',
             'image' => 'Image',
             'status' => 'Status',
         ];
