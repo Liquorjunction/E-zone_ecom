@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function validateAndGo(nextId, currentPane) {
+    function validateAndGo(nextId, currentPane, doActivate = true) {
         saveAllQuillContents();
         let valid = true;
         let firstInvalid = null;
@@ -224,6 +224,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const qu = select('#quill-description-en');
                 if (qu) qu.classList.add('is-invalid');
                 if (!firstInvalid) firstInvalid = qu || descEn;
+            } else {
+                const qu = select('#quill-description-en');
+                if (qu) qu.classList.remove('is-invalid');
+            }
+
+            // Ensure cover image is provided (file input)
+            const coverInput = currentPane.querySelector('input[name="cover_image"]');
+            if (coverInput) {
+                const hasFile = coverInput.files && coverInput.files.length > 0;
+                if (!hasFile) {
+                    valid = false;
+                    coverInput.classList.add('is-invalid');
+                    if (!firstInvalid) firstInvalid = coverInput;
+                } else {
+                    coverInput.classList.remove('is-invalid');
+                }
             }
         }
 
@@ -249,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        if (nextId) activatePane(nextId);
+        if (nextId && doActivate) activatePane(nextId);
         return true;
     }
 
@@ -261,6 +277,41 @@ document.addEventListener('DOMContentLoaded', () => {
         validateAndGo(nextId, pane);
     }));
     selectAll('.prev-step').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); activatePane(btn.getAttribute('data-prev')); }));
+
+    // Prevent manual tab switching unless current step is valid.
+    // Intercept nav button clicks (works for buttons and anchors) and validate current pane before allowing switch.
+    selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]').forEach(link => {
+        link.addEventListener('click', function (e) {
+            const rawTarget = (link.getAttribute('data-bs-target') || link.getAttribute('href') || '');
+            const targetId = rawTarget.replace('#', '');
+            const activePane = document.querySelector('.tab-pane.show.active');
+            if (activePane && activePane.id && activePane.id !== targetId) {
+                const ok = validateAndGo(targetId, activePane, false);
+                if (!ok) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }
+        }, true); // use capture to run before bootstrap handlers
+    });
+
+    // Also keep the bootstrap show event guard as a fallback
+    selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]').forEach(link => {
+        link.addEventListener('show.bs.tab', function (e) {
+            const rawTarget = (link.getAttribute('data-bs-target') || link.getAttribute('href') || '');
+            const targetId = rawTarget.replace('#', '');
+            const activePane = document.querySelector('.tab-pane.show.active');
+            if (activePane && activePane.id && activePane.id !== targetId) {
+                const ok = validateAndGo(targetId, activePane, false);
+                if (!ok) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }
+        });
+    });
 
     // ---------------------------
     // Select2 & subcategory filtering
