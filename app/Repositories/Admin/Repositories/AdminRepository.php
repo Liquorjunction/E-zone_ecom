@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Admin\Repositories;
 
-use App\Models\admin;
+use App\Models\Admin;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
