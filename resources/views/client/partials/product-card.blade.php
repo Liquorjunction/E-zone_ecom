@@ -133,12 +133,20 @@
       </span>
 
       <!-- Stock Indicator -->
-      <div class="flex items-center gap-1.5 text-xs font-medium text-green-600">
+      @php
+        $stock = $isVariant
+          ? ($product->getTotalStockAttribute() ?? 0)
+          : ($master->productVariants()->sum('inventory.quantity') ?? 0);
+      @endphp
+      <div class="flex items-center gap-1.5 text-xs font-medium {{ $stock > 0 ? 'text-green-600' : 'text-red-600' }}">
         <span class="flex h-2 w-2 relative">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $stock > 0 ? 'bg-green-400' : 'bg-red-400' }} opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 {{ $stock > 0 ? 'bg-green-500' : 'bg-red-500' }}"></span>
         </span>
-        In Stock
+        {{ $stock > 0 ? 'In Stock' : 'Out of Stock' }}
+        @if($stock > 0)
+          <span class="ml-1 text-gray-400">({{ $stock }})</span>
+        @endif
       </div>
     </div>
 
@@ -178,7 +186,7 @@
     </div>
 
     <!-- Price and Add to Cart -->
-    <div class="flex items-center justify-between gap-3">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div class="flex-1">
         @if($itemDiscountInfo['has_discount'])
           <div class="flex flex-col">
@@ -198,7 +206,7 @@
         @endif
       </div>
 
-      <button class="shrink-0 w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-all duration-300 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-95">
+      <button class="shrink-0 w-full sm:w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-all duration-300 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-95 order-2 sm:order-none mt-3 sm:mt-0">
         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
         </svg>

@@ -129,8 +129,17 @@
                         {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($itemDiscountInfo['final_price'], 2) }}
                     </div>
                 @endif
-                <div class="text-xs text-green-600 font-medium mt-1 flex items-center justify-end gap-1">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span> In Stock
+                @php
+                    $stock = $isVariant
+                        ? ($product->getTotalStockAttribute() ?? 0)
+                        : ($master->productVariants()->sum('inventory.quantity') ?? 0);
+                @endphp
+                <div class="text-xs font-medium mt-1 flex items-center justify-end gap-1 {{ $stock > 0 ? 'text-green-600' : 'text-red-600' }}">
+                    <span class="w-2 h-2 rounded-full {{ $stock > 0 ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                    {{ $stock > 0 ? 'In Stock' : 'Out of Stock' }}
+                    @if($stock > 0)
+                        <span class="ml-1 text-gray-400">({{ $stock }})</span>
+                    @endif
                 </div>
             </div>
 
