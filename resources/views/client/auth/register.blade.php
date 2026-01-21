@@ -53,13 +53,13 @@
                                 placeholder="John Doe">
                         </div>
 
-                        <!-- Phone Number -->
+                        <!-- Phone Number with intl-tel-input -->
                         <div>
-                            <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone
-                                Number</label>
-                            <input type="text" name="phone" id="phone" value="{{ old('phone') }}" required
+                            <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                            <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" required
                                 class="appearance-none block w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
-                                placeholder="+1 234 567 8900">
+                                placeholder="e.g. +212 612345678">
+                            <input type="hidden" name="country_code" id="country_code" value="">
                         </div>
 
                         <!-- Email -->
@@ -71,22 +71,46 @@
                                 placeholder="you@example.com">
                         </div>
 
-                        <!-- Password -->
+                        <!-- Password with Eye Button -->
                         <div>
                             <label for="password"
                                 class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                            <input type="password" name="password" id="password" required
-                                class="appearance-none block w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
-                                placeholder="••••••••">
+                            <div class="relative">
+                                <input type="password" name="password" id="password" required
+                                    class="appearance-none block w-full pr-12 pl-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
+                                    placeholder="••••••••">
+                                <button type="button" id="togglePassword" tabindex="-1"
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 focus:outline-none"
+                                    aria-label="Toggle password visibility">
+                                    <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Confirm Password -->
+                        <!-- Confirm Password with Eye Button -->
                         <div>
                             <label for="password_confirmation"
                                 class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation" required
-                                class="appearance-none block w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
-                                placeholder="••••••••">
+                            <div class="relative">
+                                <input type="password" name="password_confirmation" id="password_confirmation" required
+                                    class="appearance-none block w-full pr-12 pl-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
+                                    placeholder="••••••••">
+                                <button type="button" id="togglePasswordConfirm" tabindex="-1"
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 focus:outline-none"
+                                    aria-label="Toggle confirm password visibility">
+                                    <svg id="eyeIconConfirm" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Submit Button -->
@@ -155,3 +179,28 @@
 </body>
 
 </html>
+</html>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/intl-tel-custom.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
+    <script src="{{ asset('js/intl-tel-init.js') }}"></script>
+    <script src="{{ asset('js/register.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var phoneInput = document.getElementById('phone');
+            var countryCodeInput = document.getElementById('country_code');
+            var form = phoneInput ? phoneInput.form : null;
+            if (form && window.intlTelInput) {
+                form.addEventListener('submit', function (e) {
+                    var iti = window.intlTelInputGlobals.getInstance(phoneInput);
+                    if (iti) {
+                        countryCodeInput.value = iti.getSelectedCountryData().dialCode ? '+' + iti.getSelectedCountryData().dialCode : '';
+                        // Optionally, format phone number before submit:
+                        phoneInput.value = iti.getNumber();
+                    }
+                });
+            }
+        });
+    </script>
+</html>
+

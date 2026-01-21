@@ -42,9 +42,6 @@
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <p class="text-sm text-red-700 font-medium">
-                                        Please fix the following errors:
-                                    </p>
                                     <ul class="mt-1 list-disc list-inside text-sm text-red-600">
                                         @foreach ($errors->all() as $error)
                                             <li>{{ $error }}</li>
@@ -77,7 +74,7 @@
                             </div>
                         </div>
 
-                        <!-- Password Field -->
+                        <!-- Password Field with Eye Button -->
                         <div>
                             <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Password
@@ -91,8 +88,18 @@
                                     </svg>
                                 </div>
                                 <input id="password" name="password" type="password" required
-                                    class="appearance-none block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
+                                    class="appearance-none block w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
                                     placeholder="••••••••">
+                                <button type="button" id="togglePassword" tabindex="-1"
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 focus:outline-none"
+                                    aria-label="Toggle password visibility">
+                                    <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
@@ -208,3 +215,20 @@
 </body>
 
 </html>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        let isVisible = false;
+        if (togglePassword && passwordInput && eyeIcon) {
+            togglePassword.addEventListener('click', function () {
+                isVisible = !isVisible;
+                passwordInput.type = isVisible ? 'text' : 'password';
+                eyeIcon.innerHTML = isVisible
+                    ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95m3.671-2.568A9.953 9.953 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.293 5.032M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />`
+                    : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+            });
+        }
+    });
+</script>
