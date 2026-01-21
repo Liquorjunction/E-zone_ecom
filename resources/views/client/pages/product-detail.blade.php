@@ -335,11 +335,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach ($product->productVariants as $variant)
                                     @php
-                                        // Use the variant accessor which sums inventory rows.
-                                        // Fallback to summing the loaded collection if needed.
-                                        $qty =
-                                            (int) ($variant->total_stock ??
-                                                ($variant->inventory->sum('quantity') ?? 0));
+                                        $qty = (int) ($variant->total_stock ?? ($variant->inventory->sum('quantity') ?? 0));
                                         $variantImagePaths = [];
                                         if ($variant->relationLoaded('images')) {
                                             $variantImagePaths = $variant->images
@@ -361,8 +357,6 @@
                                             : (is_string($variant->attributes)
                                                 ? $variant->attributes
                                                 : json_encode([]));
-
-                                        // Get discount info for this variant and normalize to always include price fields
                                         $variantDiscount = isset($variantDiscounts[$variant->id]) ? $variantDiscounts[$variant->id] : null;
                                         $variantDiscountPayload = is_array($variantDiscount) ? $variantDiscount : [];
                                         $variantDiscountPayload['has_discount'] = $variantDiscountPayload['has_discount'] ?? false;
@@ -371,6 +365,10 @@
                                         $variantDiscountPayload['discount_percentage'] = $variantDiscountPayload['discount_percentage'] ?? 0;
                                         $variantDiscountPayload['discount_name'] = $variantDiscountPayload['discount_name'] ?? null;
                                         $variantHasDiscount = ($variantDiscountPayload['has_discount'] ?? false) && ($variantDiscountPayload['original_price'] ?? 0) > ($variantDiscountPayload['final_price'] ?? 0);
+
+                                        // Handle long SKU
+                                        $skuValue = is_array($variant->sku) ? $variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku)) : $variant->sku ?? '';
+                                        $displaySku = strlen($skuValue) > 14 ? substr($skuValue, 0, 6) . '...' . substr($skuValue, -4) : $skuValue;
                                     @endphp
                                     <button type="button"
                                         class="variant-button group border-2 border-gray-200 hover:border-primary rounded-xl px-4 py-3 bg-white hover:shadow-md transition-all duration-200 cursor-pointer text-left"
@@ -379,61 +377,58 @@
                                         data-variant-name="{{ e($variantLabel) }}"
                                         data-attributes='{{ $variantAttributesJson }}'
                                         data-price="{{ is_null($variant->price) ? '' : $variant->price }}"
-                                        data-sku="{{ is_array($variant->sku) ? $variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku)) : $variant->sku ?? '' }}"
+                                        data-sku="{{ $skuValue }}"
                                         data-qty="{{ $qty }}"
                                         data-discount='@json($variantDiscountPayload)'>
-                                        <div class="flex items-start justify-between gap-2 mb-2">
-                                            <div class="text-sm font-bold text-gray-900 line-clamp-1">
-                                                {{ is_array($variant->variant_name) ? $variant->variant_name[app()->getLocale()] ?? ($variant->variant_name['en'] ?? reset($variant->variant_name)) : (is_array($variant->name) ? $variant->name[app()->getLocale()] ?? ($variant->name['en'] ?? reset($variant->name)) : $variant->variant_name ?? ($variant->name ?? 'Variant')) }}
+                                        <div class="flex flex-col gap-2">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <div class="text-sm font-bold text-gray-900 line-clamp-1">
+                                                    {{ is_array($variant->variant_name) ? $variant->variant_name[app()->getLocale()] ?? ($variant->variant_name['en'] ?? reset($variant->variant_name)) : (is_array($variant->name) ? $variant->name[app()->getLocale()] ?? ($variant->name['en'] ?? reset($variant->name)) : $variant->variant_name ?? ($variant->name ?? 'Variant')) }}
+                                                </div>
+                                                <div class="flex items-center gap-1">
+                                                    @if ($variant->is_bestseller)
+                                                        <span class="text-[9px] px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-bold border border-amber-200">BESTSELLER</span>
+                                                    @endif
+                                                    {{-- <span class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium border border-gray-200" title="{{ $skuValue }}">
+                                                        {{ $displaySku }}
+                                                    </span> --}}
+                                                </div>
                                             </div>
-                                            <div class="flex flex-col items-end gap-1">
-                                                <span
-                                                    class="text-[10px] px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 font-medium">
-                                                    {{ is_array($variant->sku) ? $variant->sku[app()->getLocale()] ?? ($variant->sku['en'] ?? reset($variant->sku)) : $variant->sku ?? '' }}
-                                                </span>
-                                                @if ($variant->is_bestseller)
-                                                    <span class="text-[9px] px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 font-bold">BESTSELLER</span>
+                                            <div class="flex items-center justify-between gap-2">
+                                                @if ($variantHasDiscount)
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-400 line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['original_price'], 2) }}</span>
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-lg font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['final_price'], 2) }}</span>
+                                                            @if (($variantDiscount['discount_percentage'] ?? 0) > 0)
+                                                                <span class="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
+                                                                    -{{ number_format($variantDiscount['discount_percentage'], 0) }}%
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="text-lg font-bold text-primary">
+                                                        {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variant->price, 2) }}
+                                                    </div>
+                                                @endif
+                                                @if ($qty > 0)
+                                                    <span class="text-[10px] font-semibold text-green-700 bg-green-50 px-2 py-1 rounded stock-badge border border-green-200 whitespace-nowrap">
+                                                        In Stock
+                                                    </span>
+                                                @else
+                                                    <span class="text-[10px] font-semibold text-red-700 bg-red-50 px-2 py-1 rounded stock-badge border border-red-200 whitespace-nowrap">
+                                                        Out of Stock
+                                                    </span>
                                                 @endif
                                             </div>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mb-2 line-clamp-1">
-                                            {{ is_string($variant->attributes) ? $variant->attributes : (is_array($variant->attributes) ? json_encode($variant->attributes) : '') }}
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            @if ($variantHasDiscount)
-                                                <div class="flex flex-col">
-                                                    <span class="text-xs text-gray-400 line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['original_price'], 2) }}</span>
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="text-lg font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['final_price'], 2) }}</span>
-                                                        @if (($variantDiscount['discount_percentage'] ?? 0) > 0)
-                                                            <span class="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
-                                                                -{{ number_format($variantDiscount['discount_percentage'], 0) }}%
-                                                            </span>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <div class="text-lg font-bold text-primary">
-                                                    {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variant->price, 2) }}
-                                                </div>
-                                            @endif
-                                            @if ($qty > 0)
-                                                <span
-                                                    class="text-[10px] font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-md stock-badge border border-green-200">
-                                                    In Stock
-                                                </span>
-                                            @else
-                                                <span
-                                                    class="text-[10px] font-semibold text-red-700 bg-red-50 px-2 py-1 rounded-md stock-badge border border-red-200">
-                                                    Out of Stock
-                                                </span>
-                                            @endif
                                         </div>
                                     </button>
                                 @endforeach
                             </div>
                         </div>
                     @endif
+
 
                     <!-- Add to Cart Form -->
                     <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" class="space-y-4">
