@@ -47,6 +47,13 @@ class CartService
 
         $payload['unit_price'] = $unitPrice;
 
+        // Stock check
+        $quantity = $payload['quantity'] ?? 1;
+        $stock = $variant ? $variant->getTotalStockAttribute() : ($product ? $product->productVariants()->sum('inventory.quantity') : 0);
+        if ($stock < $quantity) {
+            throw new \Exception('Insufficient stock for this item.');
+        }
+
         $item = $this->repo->addItem($cart, $payload);
         $this->logger->info('Cart item added', [
             'cart_id' => $cart->id ?? null,
@@ -60,6 +67,16 @@ class CartService
     public function updateItem(Request $request, int $itemId, array $data)
     {
         $cart = $this->repo->getCartForUserOrSession($request);
+        $item = $cart->items->firstWhere('id', $itemId);
+        if ($item) {
+            $variant = $item->variant ?? null;
+            $product = $item->product ?? null;
+            $quantity = $data['quantity'] ?? $item->quantity;
+            $stock = $variant ? $variant->getTotalStockAttribute() : ($product ? $product->productVariants()->sum('inventory.quantity') : 0);
+            if ($stock < $quantity) {
+                throw new \Exception('Insufficient stock for this item.');
+            }
+        }
         $item = $this->repo->updateItem($cart, $itemId, $data);
         $this->logger->info('Cart item updated', ['cart_id' => $cart->id ?? null, 'item_id' => $item->id ?? null]);
         return $item;

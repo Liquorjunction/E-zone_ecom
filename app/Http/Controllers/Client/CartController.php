@@ -17,7 +17,17 @@ class CartController extends Controller
     public function add(CartAddRequest $request, CartService $cartService, LoggerInterface $logger)
     {
         $data = $request->validated();
-        $item = $cartService->addItem($request, $data);
+            try {
+                $item = $cartService->addItem($request, $data);
+            } catch (\Exception $e) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                    ], 400);
+                }
+                return redirect()->route('cart')->with('error', $e->getMessage());
+            }
         $logger->info('Added item to cart via controller', ['item_id' => $item->id ?? null]);
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -65,7 +75,17 @@ class CartController extends Controller
     {
         $itemId = (int) $request->input('item_id');
         $data = $request->only(['quantity']);
-        $item = $cartService->updateItem($request, $itemId, $data);
+            try {
+                $item = $cartService->updateItem($request, $itemId, $data);
+            } catch (\Exception $e) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                    ], 400);
+                }
+                return redirect()->back()->with('error', $e->getMessage());
+            }
         $logger->info('Updated cart item via controller', ['item_id' => $item->id ?? null]);
 
         $cart = $cartService->getCart($request);
