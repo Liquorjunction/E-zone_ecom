@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Faq;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreFaqRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class StoreFaqRequest extends FormRequest
         return [
             'faq_category_id' => 'required|exists:faq_categories,id',
             'question' => 'required|array',
-            'question.en' => 'required|string|max:255',
+            'question.en' => ['required', 'string', 'max:255', Rule::unique('faqs', 'question->en')],
             'question.ar' => 'nullable|string|max:255',
             'question.fr' => 'nullable|string|max:255',
             'answer' => 'required|array',
@@ -32,6 +33,7 @@ class StoreFaqRequest extends FormRequest
         return [
             'question.required' => 'The question field is required.',
             'question.en.required' => 'The question in English is required.',
+            'question.en.unique' => 'The question in must be unique.',
             'question.en.max' => 'The question in English may not be greater than 255 characters.',
             'question.ar.max' => 'The question in Arabic may not be greater than 255 characters.',
             'question.fr.max' => 'The question in French may not be greater than 255 characters.',

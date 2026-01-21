@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\FaqCategory;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreFaqCategoryRequest extends FormRequest
 {
@@ -23,8 +24,13 @@ class StoreFaqCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|array|unique:faq_categories,name',
-            'name.en' => 'required|string|max:255',
+            'name' => 'required|array',
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('faq_categories', 'name->en'),
+            ],
             'name.ar' => 'nullable|string|max:255',
             'name.fr' => 'nullable|string|max:255',
             'status' => 'required|in:active,inactive',
