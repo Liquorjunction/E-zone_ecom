@@ -15,6 +15,7 @@ use App\Http\Controllers\Client\ShippingAndReturnsController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
 use App\Http\Controllers\Client\InventoryController;
+use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\ReviewController;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
@@ -58,8 +59,6 @@ Route::group([], function () {
     Route::get('/brand/{slug}', function ($slug) {
         return view('client.pages.brand-products', ['brand_slug' => $slug]);
     })->name('brand-products');
-
-
 });
 
 // Inventory AJAX for client (transactions)
@@ -100,6 +99,10 @@ Route::middleware('auth')->group(function () {
     // Dashboard (authenticated)
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('/', [HomeController::class, 'dashboard'])->name('overview');
+        // Dashboard Profile Management
+        Route::get('/read', [ProfileController::class, 'readProfile'])->name('profile.read');
+        Route::get('/edit', [ProfileController::class, 'editProfile'])->name('profile.edit');
+        Route::post('/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
         Route::get('/orders', [HomeController::class, 'orders'])->name('orders');
         Route::view('/profile', 'client.pages.dashboard.profile')->name('profile');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
