@@ -21,7 +21,10 @@ import './pages/security';
 import './pagination';
 
 // AJAX add-to-cart for homepage/product cards
+
+// AJAX add-to-cart for homepage/product cards
 import './ajax-cart';
+import './add-to-cart-global';
 
 // Automatically show toast for axios responses and errors
 axios.interceptors.response.use(function (response) {

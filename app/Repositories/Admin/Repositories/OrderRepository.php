@@ -13,7 +13,8 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getOrderById($id)
     {
-        return Order::find($id);
+        // Eager load items, product, and variant for admin order details
+        return Order::with(['items.product', 'items.variant', 'user'])->find($id);
     }
 
     public function updateOrderStatus($id, $status)

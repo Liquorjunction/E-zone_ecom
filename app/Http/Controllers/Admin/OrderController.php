@@ -28,6 +28,43 @@ class OrderController extends Controller
         }
     }
 
+    public function edit(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    {
+        try {
+            $id = $request->input('id');
+            $order = $orderRepo->getOrderById($id);
+
+            return view('admin.pages.orders.edit', compact('order'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function update(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    {
+        try {
+            $id = $request->input('id');
+            $status = $request->input('status');
+            $order = $orderRepo->updateOrderStatus($id, $status);
+
+            return redirect()->back()->with(['success' => true, 'message' => 'Order status updated successfully.']);
+        } catch (\Exception $e) {
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateOrderStatus(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    {
+        try {
+            $id = $request->input('id', $request->route('id'));
+            $status = $request->input('status');
+            $order = $orderRepo->updateOrderStatus($id, $status);
+            return redirect()->back()->with(['success' => true, 'message' => 'Order status updated successfully.']);
+        } catch (\Exception $e) {
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function dataTable(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
     {
         try {
@@ -59,7 +96,6 @@ class OrderController extends Controller
                     return view('admin.partials.datatable-actions', [
                         'id' => $order->id,
                         'view_url' => $canRead ? route('admin.orders.show', ['id' => $order->id]) : null,
-                        'edit_url' => $canUpdate ? route('admin.orders.edit', ['id' => $order->id]) : null,
                     ])->render();
                 })
                 ->rawColumns(['action'])
