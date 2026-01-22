@@ -86,8 +86,8 @@
                                        class="form-control" required>
                             </div>
 
-                            <!-- Max Discount -->
-                            <div class="col-md-12 mb-4">
+                            <!-- Max Discount (Visible only for percentage type) -->
+                            <div class="col-md-12 mb-4" id="max-discount-cap-wrapper" style="display: none;">
                                 <label class="form-label fw-semibold">
                                     Maximum Discount Cap
                                     <span class="badge bg-soft-warning text-warning ms-2">Optional</span>
@@ -414,6 +414,21 @@
             productVariants: @json($productVariants ?? []),
             rowIdx: {{ old('targets') ? count(old('targets')) : (isset($discount) && isset($discount->targets) ? $discount->targets->count() : 0) }}
         };
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var typeSelect = document.querySelector('select[name="type"]');
+            var maxDiscountWrapper = document.getElementById('max-discount-cap-wrapper');
+            function toggleMaxDiscount() {
+                if (typeSelect.value === 'percentage') {
+                    maxDiscountWrapper.style.display = '';
+                } else {
+                    maxDiscountWrapper.style.display = 'none';
+                }
+            }
+            typeSelect.addEventListener('change', toggleMaxDiscount);
+            toggleMaxDiscount(); // Initial call
+        });
     </script>
     <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
 @endpush

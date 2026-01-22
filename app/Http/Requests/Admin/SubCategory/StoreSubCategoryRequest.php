@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\SubCategory;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreSubCategoryRequest extends FormRequest
 {
@@ -17,7 +18,12 @@ class StoreSubCategoryRequest extends FormRequest
         return [
             // Translatable Field
             'sub-category-name' => 'required|array',
-            'sub-category-name.en' => 'required|string|max:255',
+            'sub-category-name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('sub-categories', 'sub-category-name'),
+            ],
             'sub-category-name.fr' => 'nullable|string|max:255',
             'sub-category-name.ar' => 'nullable|string|max:255',
 
@@ -32,6 +38,7 @@ class StoreSubCategoryRequest extends FormRequest
     {
         return [
             'sub-category-name.en.required' => 'The English sub-category name is required.',
+            'sub-category-name.en.unique' => 'The English sub-category name has already been taken.',
             'category_id.required' => 'Please select a parent category.',
         ];
     }
