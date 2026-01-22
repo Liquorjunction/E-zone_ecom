@@ -74,17 +74,6 @@ class ProductRepository implements ProductRepositoryInterface
             ->latest();
 
         $results = $query->get();
-
-        // Debug log (will now show correct counts)
-        Log::debug('getDataforDataTable results', [
-            'products' => $results->map(function ($p) {
-                return [
-                    'id' => $p->id,
-                    'productVariants_count' => $p->productVariants_count,
-                ];
-            })
-        ]);
-
         return $results;
     }
 

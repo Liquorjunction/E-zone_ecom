@@ -151,6 +151,11 @@ class SliderController extends Controller
             $id = $request->input('id');
             $sliderRepo->updateStatus($id);
 
+            // Debug log in Detailed Logs
+            Log::debug('Slider status updated successfully.', ['slider_id' => $id]);
+            Log::debug('IsActive status: ' . (HeroSlider::find($id)->is_active ? 'true' : 'false'));
+            Log::info('Current active slider count: ' . HeroSlider::where('is_active', true)->count());
+
             return response()->json([
                 'success' => true,
                 'message' => 'Slider status updated successfully.',
