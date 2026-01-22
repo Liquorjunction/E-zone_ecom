@@ -49,6 +49,9 @@
     </section>
 
     {{-- Shop by Category Carousel --}}
+    @php
+        $categoryChunks = $categories->chunk(6);
+    @endphp
     <section class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
         currentSlide: 0,
         itemsPerPage: window.innerWidth >= 1280 ? 6 : window.innerWidth >= 1024 ? 5 : window.innerWidth >= 768 ? 4 : window.innerWidth >= 640 ? 3 : 2,
@@ -96,7 +99,8 @@
             <div class="relative overflow-hidden">
                 <div class="flex transition-transform duration-500 ease-out"
                     :style="`transform: translateX(-${currentSlide * 100}%)`">
-                    @foreach ($categories->chunk(6) as $categoryChunk)
+                    @foreach ($categoryChunks as $categoryChunk)
+                        @if ($categoryChunk->count() > 0)
                         <div class="w-full shrink-0">
                             <div
                                 class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
@@ -127,6 +131,7 @@
                                 @endforeach
                             </div>
                         </div>
+                        @endif
                     @endforeach
                 </div>
             </div>
@@ -144,105 +149,111 @@
 
     {{-- Featured Promotional Banners Carousel --}}
     @php
-        $chunks = $cards->take(4)->chunk(2);
+        // Always chunk by the maximum items per page (2 for banners)
+        $bannerChunks = $cards->take(4)->chunk(2);
     @endphp
     <section class="py-8 sm:py-12 bg-white" x-data="{
-        currentBanner: 0,
-        totalBanners: {{ $chunks->count() }},
+        currentSlide: 0,
+        itemsPerPage: window.innerWidth >= 1024 ? 2 : 1,
+        totalItems: {{ $cards->take(4)->count() }},
         autoplay: null,
+        get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
+        get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
+        get canGoPrev() { return this.currentSlide > 0 },
+        next() { if (this.canGoNext) this.currentSlide++; else this.currentSlide = 0 },
+        prev() { if (this.canGoPrev) this.currentSlide--; else this.currentSlide = this.totalSlides - 1 },
         init() {
             this.startAutoplay();
+            window.addEventListener('resize', () => {
+                this.itemsPerPage = window.innerWidth >= 1024 ? 2 : 1;
+                if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
+            });
         },
         startAutoplay() {
-            this.autoplay = setInterval(() => {
-                this.next();
-            }, 5000);
+            this.autoplay = setInterval(() => { this.next(); }, 5000);
         },
         stopAutoplay() {
             clearInterval(this.autoplay);
-        },
-        next() {
-            this.currentBanner = (this.currentBanner + 1) % this.totalBanners;
-        },
-        prev() {
-            this.currentBanner = this.currentBanner === 0 ? this.totalBanners - 1 : this.currentBanner - 1;
         }
-    }" @mouseenter="stopAutoplay()"
-        @mouseleave="startAutoplay()">
+    }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative">
-                <div class="overflow-hidden">
-                    @foreach ($chunks as $chunk)
-                        <div x-show="currentBanner === {{ $loop->index }}"
-                            x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0 transform translate-x-full"
-                            x-transition:enter-end="opacity-100 transform translate-x-0"
-                            x-transition:leave="transition ease-in duration-300"
-                            x-transition:leave-start="opacity-100 transform translate-x-0"
-                            x-transition:leave-end="opacity-0 transform -translate-x-full"
-                            class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            @foreach ($chunk as $card)
-                                @php
-                                    // remove gradient background so images show directly
-                                    $bgClass = '';
-                                    $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
-                                    $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
-                                @endphp
-                                <a href="{{ $card->link ?? '#' }}"
-                                    class="group relative overflow-hidden rounded-2xl bg-transparent min-h-70 sm:min-h-80 flex items-center">
-                                    <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
-                                        class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-
-                                    <div class="relative z-10 p-8 sm:p-10 lg:p-12">
-                                        <span
-                                            class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
-                                            {{ $firstTag }}
-                                        </span>
-                                        <h3
-                                            class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
-                                            {{ $card->title }}
-                                        </h3>
-                                        <p class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2">
-                                            {{ $card->description }}
-                                        </p>
-                                        @if ($card->link_text)
+            <div class="flex items-end justify-between mb-8 sm:mb-10">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                        {{ gtrans('Featured Promotions') }}
+                    </h2>
+                </div>
+                <div class="hidden md:flex items-center gap-2">
+                    <button @click="prev()" :disabled="!canGoPrev"
+                        :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                        class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button @click="next()" :disabled="!canGoNext"
+                        :class="!canGoNext ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                        class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="relative overflow-hidden">
+                <div class="flex transition-transform duration-500 ease-out"
+                    :style="`transform: translateX(-${currentSlide * 100}%)`">
+                    @foreach ($bannerChunks as $chunk)
+                        @if ($chunk->count() > 0)
+                        <div class="w-full shrink-0">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                @foreach ($chunk as $card)
+                                    @php
+                                        $bgClass = '';
+                                        $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
+                                        $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
+                                    @endphp
+                                    <a href="{{ $card->link ?? '#' }}"
+                                        class="group relative overflow-hidden rounded-2xl bg-transparent min-h-70 sm:min-h-80 flex items-center">
+                                        <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
+                                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                        <div class="relative z-10 p-8 sm:p-10 lg:p-12">
                                             <span
-                                                class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
-                                                {{ $card->link_text }}
-                                                <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1"
-                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                </svg>
+                                                class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+                                                {{ $firstTag }}
                                             </span>
-                                        @endif
-                                    </div>
-                                </a>
-                            @endforeach
+                                            <h3
+                                                class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
+                                                {{ $card->title }}
+                                            </h3>
+                                            <p class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2">
+                                                {{ $card->description }}
+                                            </p>
+                                            @if ($card->link_text)
+                                                <span
+                                                    class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
+                                                    {{ $card->link_text }}
+                                                    <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1"
+                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                    </svg>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
+                        @endif
                     @endforeach
                 </div>
-
-                {{-- Navigation Arrows --}}
-                <button @click="prev()"
-                    class="hidden lg:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full items-center justify-center shadow-lg transition-all z-10">
-                    <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <button @click="next()"
-                    class="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full items-center justify-center shadow-lg transition-all z-10">
-                    <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
             </div>
-
             {{-- Dots Indicator --}}
-            <div class="flex justify-center gap-2 mt-6">
-                <template x-for="i in totalBanners" :key="i">
-                    <button @click="currentBanner = i - 1"
-                        :class="currentBanner === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
+            <div class="flex justify-center gap-2 mt-6" x-show="totalSlides > 1">
+                <template x-for="i in totalSlides" :key="i">
+                    <button @click="currentSlide = i - 1"
+                        :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
                         class="h-2 rounded-full transition-all duration-300"></button>
                 </template>
             </div>
@@ -250,6 +261,9 @@
     </section>
 
     {{-- New Arrivals Carousel --}}
+    @php
+        $newArrivalsChunks = ($newArrivals ?? collect())->chunk(4);
+    @endphp
     <section id="new-arrivals" class="py-12 sm:py-16 lg:py-20 bg-white" x-data="{
         currentSlide: 0,
         itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
@@ -258,10 +272,8 @@
         get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
         get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
         get canGoPrev() { return this.currentSlide > 0 },
-        next() { if (this.canGoNext) this.currentSlide++;
-            else this.currentSlide = 0 },
-        prev() { if (this.canGoPrev) this.currentSlide--;
-            else this.currentSlide = this.totalSlides - 1 },
+        next() { if (this.canGoNext) this.currentSlide++; else this.currentSlide = 0 },
+        prev() { if (this.canGoPrev) this.currentSlide--; else this.currentSlide = this.totalSlides - 1 },
         init() {
             this.startAutoplay();
             window.addEventListener('resize', () => {
@@ -308,7 +320,8 @@
             <div class="relative overflow-hidden">
                 <div class="flex transition-transform duration-500 ease-out"
                     :style="`transform: translateX(-${currentSlide * 100}%)`">
-                    @foreach (($newArrivals ?? collect())->chunk(4) as $chunk)
+                    @foreach ($newArrivalsChunks as $chunk)
+                        @if ($chunk->count() > 0)
                         <div class="w-full shrink-0">
                             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                                 @foreach ($chunk as $productVariant)
@@ -318,6 +331,7 @@
                                 @endforeach
                             </div>
                         </div>
+                        @endif
                     @endforeach
                 </div>
             </div>
@@ -389,7 +403,11 @@
                 <div class="relative overflow-hidden">
                     <div class="flex transition-transform duration-500 ease-out"
                         :style="`transform: translateX(-${currentSlide * 100}%)`">
-                        @foreach (($bestSellers ?? collect())->chunk(4) as $chunk)
+                        @php
+                            $bestSellerChunks = ($bestSellers ?? collect())->chunk(4);
+                        @endphp
+                        @foreach ($bestSellerChunks as $chunk)
+                            @if ($chunk->count() > 0)
                             <div class="w-full shrink-0">
                                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                                     @foreach ($chunk as $productVariant)
@@ -399,6 +417,7 @@
                                     @endforeach
                                 </div>
                             </div>
+                            @endif
                         @endforeach
                     </div>
                 </div>
