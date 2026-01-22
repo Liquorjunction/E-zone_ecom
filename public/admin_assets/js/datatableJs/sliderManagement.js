@@ -58,40 +58,5 @@ $(document).ready(function () {
         itemCheckboxClass: 'slider-checkbox',
         itemName: 'slider'
     });
-    // Handle status toggle
-    $table.on('change', '.status-toggle', function () {
-        var $checkbox = $(this);
-        var url = $checkbox.data('url');
-        if (!url) return;
-
-        // Prevent toggle if disabled
-        if ($checkbox.is(':disabled')) return;
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: {
-                _token: window.Laravel && window.Laravel.csrfToken ? window.Laravel.csrfToken : $('meta[name="csrf-token"]').attr('content'),
-            },
-            success: function (response) {
-                if (response.success) {
-                    // Optionally show a toast or notification
-                    // Reload the table to reflect changes
-                    $table.DataTable().ajax.reload(null, false);
-                } else {
-                    alert(response.message || 'Failed to update status.');
-                    $table.DataTable().ajax.reload(null, false);
-                }
-            },
-            error: function (xhr) {
-                var msg = 'Failed to update status.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    msg = xhr.responseJSON.message;
-                }
-                alert(msg);
-                $table.DataTable().ajax.reload(null, false);
-            }
-        });
-    });
 });
 
