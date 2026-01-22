@@ -162,7 +162,7 @@
                         <button @click="accountOpen = !accountOpen"
                             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
                             @if (Auth::user()->avatar)
-                                <img src="{{ Auth::user()->avatar }}" alt="User Avatar" class="w-8 h-8 rounded-full ring-2 ring-gray-200">
+                                <img src="{{ Str::startsWith(Auth::user()->avatar, ['http://', 'https://']) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}" alt="User Avatar" class="w-8 h-8 rounded-full ring-2 ring-gray-200">
                             @else
                                 <img src="{{ asset('images/avatar-placeholder.png') }}" alt="User Avatar"
                                     class="w-8 h-8 rounded-full ring-2 ring-gray-200">

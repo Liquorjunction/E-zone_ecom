@@ -16,7 +16,7 @@
         <div class="flex flex-col items-center mb-6">
           <div class="relative group mb-4">
             <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-xl ring-2 ring-primary/20">
-              <img src="{{ auth()->user()->avatar ?? 'https://via.placeholder.com/150x150' }}" alt="User Avatar" class="w-full h-full object-cover">
+              <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/150x150' }}" alt="User Avatar" class="w-full h-full object-cover">
             </div>
             <button type="button" class="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
               <div class="text-center">
@@ -68,17 +68,8 @@
         {{-- Avatar with Upload Overlay --}}
         <div class="relative group flex-shrink-0">
           <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-primary/20">
-            <img src="{{ auth()->user()->avatar_url ?? 'https://via.placeholder.com/150x150' }}" alt="User Avatar" class="w-full h-full object-cover">
+            <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/150x150' }}" alt="User Avatar" class="w-full h-full object-cover">
           </div>
-          <button type="button" class="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-            <div class="text-center">
-              <svg class="w-10 h-10 text-white mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span class="text-sm text-white font-medium">Change Photo</span>
-            </div>
-          </button>
           {{-- Online Status Badge --}}
           <div class="absolute bottom-2 right-2 w-7 h-7 bg-green-500 border-4 border-white rounded-full shadow-lg relative">
             <div class="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75"></div>
@@ -103,11 +94,11 @@
 
         {{-- Quick Stats --}}
         <div class="flex gap-6">
-          <div class="text-center bg-white/80 backdrop-blur-sm rounded-xl p-5 min-w-[100px] border border-gray-100 shadow-sm">
+          <div class="text-center bg-white/80 backdrop-blur-sm rounded-xl p-5 min-w-25 border border-gray-100 shadow-sm">
             <p class="text-3xl font-bold text-primary mb-1">{{ $orderCount ?? '0' }}</p>
             <p class="text-sm text-gray-600 font-medium">Orders</p>
           </div>
-          <div class="text-center bg-white/80 backdrop-blur-sm rounded-xl p-5 min-w-[100px] border border-gray-100 shadow-sm">
+          <div class="text-center bg-white/80 backdrop-blur-sm rounded-xl p-5 min-w-25 border border-gray-100 shadow-sm hidden">
             <p class="text-3xl font-bold text-primary mb-1">{{ $rewardPoints ?? '0' }}</p>
             <p class="text-sm text-gray-600 font-medium">Points</p>
           </div>
@@ -274,54 +265,6 @@
     </div>
   </form>
 
-  <script>
-    function updateFileName(input) {
-      const fileName = input.files[0]?.name || 'Choose image file';
-      document.getElementById('file-name').textContent = fileName;
-    }
-
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const url = form.action;
-      const formData = new FormData(form);
-      // Remove previous errors
-      document.querySelectorAll('.field-error').forEach(el => el.remove());
-
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json',
-        },
-        body: formData
-      })
-      .then(async response => {
-        if (response.ok) {
-          const data = await response.json();
-          // Optionally update UI with new profile data
-          alert('Profile updated successfully!');
-          window.location.reload();
-        } else {
-          const errorData = await response.json();
-          if (errorData.errors) {
-            Object.entries(errorData.errors).forEach(([field, messages]) => {
-              const input = document.getElementById(field);
-              if (input) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'field-error text-xs text-red-500 mt-1';
-                errorDiv.textContent = messages.join(' ');
-                input.parentNode.appendChild(errorDiv);
-              }
-            });
-          } else if (errorData.message) {
-            alert(errorData.message);
-          }
-        }
-      })
-      .catch(() => {
-        alert('An error occurred. Please try again.');
-      });
-    });
-  </script>
+  {{-- External JS for profile page --}}
+  <script src="{{ asset('js/profile.js') }}"></script>
 @endsection

@@ -7,7 +7,7 @@ use App\Repositories\Client\Interfaces\ProfileRepositoryInterface as ClientProfi
 use App\Http\Requests\Client\Profile\UpdateProfileRequest;
 use App\Http\Requests\Client\Profile\ReadProfileRequest;
 use App\Http\Requests\Client\Profile\EditProfileRequest;
-
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -15,6 +15,16 @@ class ProfileController extends Controller
     {
         $profile = $clientProfileRepo->readProfile($request->user());
         return response()->json(['profile' => $profile], 200);
+    }
+
+    public function showProfile(ClientProfileRepo $clientProfileRepo)
+    {
+        $profile = $clientProfileRepo->readProfile(Auth::user());
+        // $profile is an array: ['user' => ..., 'orderCount' => ..., 'rewardPoints' => ...]
+        return view('client.pages.dashboard.profile', [
+            'orderCount' => $profile['orderCount'],
+            'rewardPoints' => $profile['rewardPoints'],
+        ]);
     }
 
     public function editProfile(EditProfileRequest $request, ClientProfileRepo $clientProfileRepo)
