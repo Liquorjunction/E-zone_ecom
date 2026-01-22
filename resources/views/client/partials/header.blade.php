@@ -1,7 +1,7 @@
 <header
-    class="bg-white shadow-md sticky top-0 z-50 container-query after:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-primary after:z-40 lg:after:block">
+    class="bg-white shadow-md sticky top-0 z-50 container-query after:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary after:z-40 lg:after:block">
 
-    <div class="bg-gradient-to-r from-primary to-primary-dark text-white">
+    <div class="bg-linear-to-r from-primary to-primary-dark text-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between py-2 text-xs sm:text-sm">
                 <div class="flex items-center space-x-4">
