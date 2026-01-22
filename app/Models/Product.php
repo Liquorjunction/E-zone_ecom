@@ -47,10 +47,10 @@ class Product extends Model
         'is_bestseller' => 'boolean',
     ];
 
-    public function getSlugOptions() : SlugOptions
+    public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom(function($model) {
+            ->generateSlugsFrom(function ($model) {
                 return $model->getTranslation('name', 'en');
             })
             ->saveSlugsTo('slug')
@@ -62,6 +62,11 @@ class Product extends Model
     public function productVariants()
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    public function productVariantsByProductId()
+    {
+        return $this->hasMany(ProductVariant::class, 'product_id', 'id');
     }
 
     public function brand()

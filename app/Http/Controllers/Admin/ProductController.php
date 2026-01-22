@@ -449,7 +449,7 @@ class ProductController extends Controller
 
             return DataTables::of($products)
                 ->addIndexColumn()
-                ->addColumn('image', function ($product) {
+                ->addColumn('image', function ($product) use ($productRepo) {
                     if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
                         return '<img src="' . asset('storage/' . $product->cover_image) . '" alt="Product Image" class="img-thumbnail" width="60" height="60">';
                     }

@@ -7,6 +7,7 @@ interface ProductRepositoryInterface
     public function getAllProducts();
     public function getAllActiveProducts();
     public function getProductVariants($productId);
+    public function getProductVarientCount($productId);
     public function getProductById($id);
     public function getDataforDataTable();
 

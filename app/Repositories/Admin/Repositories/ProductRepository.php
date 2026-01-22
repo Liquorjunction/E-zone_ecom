@@ -29,6 +29,12 @@ class ProductRepository implements ProductRepositoryInterface
         return ProductVariant::where('product_id', $productId)->where('status', 'active')->get();
     }
 
+    public function getProductVarientCount($productId)
+    {
+        $count = ProductVariant::where('product_id', $productId)->count();
+        dd($count);
+    }
+
     public function getProductById($id)
     {
         return Product::with(['productVariants.images', 'productVariants.inventory'])->findOrFail($id);
@@ -36,24 +42,52 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getDataforDataTable($request = null)
     {
-        return Product::with([
-                'brand',
-                'category',
-                'productVariants' => function ($q) {
-                    $q->withCount('orderItems');
+        $query = Product::with([
+            'brand',
+            'category',
+            'productVariants' => function ($q) {
+                $q->withCount('orderItems');
+            }
+        ])
+            ->withCount([
+                'productVariantsByProductId as productVariants_count' => function ($q) {
+                    $q->where('status', 'active');
                 }
             ])
-                ->withCount('productVariants')
-                ->select('id', 'name', 'status', 'is_bestseller', 'cover_image', 'brand_id', 'category_id', 'sku')
-                ->selectRaw('COALESCE((
-                SELECT MIN(price)
-                FROM product_variants
-                WHERE product_variants.product_id = products.id
-                AND product_variants.status = "active"
-            ), 0) as min_price')
-            ->latest()
-            ->get();
+            ->addSelect([
+                'products.id',
+                'products.name',
+                'products.status',
+                'products.is_bestseller',
+                'products.cover_image',
+                'products.brand_id',
+                'products.category_id',
+                'products.sku',
+            ])
+            ->selectRaw('COALESCE((
+            SELECT MIN(pv.price)
+            FROM product_variants pv
+            WHERE pv.product_id = products.id
+            AND pv.status = "active"
+            AND pv.deleted_at IS NULL
+        ), 0) as min_price')
+            ->latest();
+
+        $results = $query->get();
+
+        // Debug log (will now show correct counts)
+        Log::debug('getDataforDataTable results', [
+            'products' => $results->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'productVariants_count' => $p->productVariants_count,
+                ];
+            })
+        ]);
+
+        return $results;
     }
+
 
     public function createProduct($request, $data = null)
     {
