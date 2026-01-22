@@ -136,15 +136,21 @@
 </section>
 
 {{-- Featured Promotional Banners Carousel --}}
-@php
-    $chunks = $cards->take(4)->chunk(2);
-@endphp
-<section class="py-8 sm:py-12 bg-white" x-data="{
+
+<section class="py-8 sm:py-12 bg-white"
+    x-data="{
         currentBanner: 0,
-        totalBanners: {{ $chunks->count() }},
+        itemsPerPage: window.innerWidth >= 1024 ? 2 : 1,
         autoplay: null,
+        cards: [],
+        get totalBanners() { return Math.ceil(this.cards.length / this.itemsPerPage) },
         init() {
+            this.cards = JSON.parse(document.getElementById('banner-cards-json').textContent);
             this.startAutoplay();
+            window.addEventListener('resize', () => {
+                this.itemsPerPage = window.innerWidth >= 1024 ? 2 : 1;
+                if(this.currentBanner >= this.totalBanners) this.currentBanner = Math.max(0, this.totalBanners - 1);
+            });
         },
         startAutoplay() {
             this.autoplay = setInterval(() => {
@@ -160,58 +166,41 @@
         prev() {
             this.currentBanner = this.currentBanner === 0 ? this.totalBanners - 1 : this.currentBanner - 1;
         }
-    }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
+    }"
+    @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
+    <script type="application/json" id="banner-cards-json">@json($cards->take(4)->values())</script>
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="relative">
             <div class="overflow-hidden">
-                @foreach ($chunks as $chunk)
-                <div x-show="currentBanner === {{ $loop->index }}"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 transform translate-x-full"
-                     x-transition:enter-end="opacity-100 transform translate-x-0"
-                     x-transition:leave="transition ease-in duration-300"
-                     x-transition:leave-start="opacity-100 transform translate-x-0"
-                     x-transition:leave-end="opacity-0 transform -translate-x-full"
-                     class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    @foreach ($chunk as $card)
-                    @php
-                        // remove gradient background so images show directly
-                        $bgClass = '';
-                        $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
-                        $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
-                    @endphp
-                    <a href="{{ $card->link ?? '#' }}"
-                        class="group relative overflow-hidden rounded-2xl bg-transparent min-h-70 sm:min-h-80 flex items-center">
-                        <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
-                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-
-                        <div class="relative z-10 p-8 sm:p-10 lg:p-12">
-                            <span
-                                class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
-                                {{ $firstTag }}
-                            </span>
-                            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
-                                {{ $card->title }}
-                            </h3>
-                            <p class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2">
-                                {{ $card->description }}
-                            </p>
-                            @if ($card->link_text)
-                            <span
-                                class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
-                                {{ $card->link_text }}
-                                <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </span>
-                            @endif
-                        </div>
-                    </a>
-                    @endforeach
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <template x-for="(card, i) in cards" :key="i">
+                        <template x-if="Math.floor(i / itemsPerPage) === currentBanner">
+                            <a :href="card.link ?? '#'"
+                                class="group relative overflow-hidden rounded-2xl bg-transparent min-h-70 sm:min-h-80 flex items-center">
+                                <img :src="'/storage/' + card.image" :alt="card.title"
+                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                <div class="relative z-10 p-8 sm:p-10 lg:p-12">
+                                    <span
+                                        class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+                                        <span x-text="(card.tags && JSON.parse(card.tags).length > 0) ? JSON.parse(card.tags)[0] : 'FEATURED'"></span>
+                                    </span>
+                                    <h3 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight" x-text="card.title"></h3>
+                                    <p class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2" x-text="card.description"></p>
+                                    <template x-if="card.link_text">
+                                        <span class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
+                                            <span x-text="card.link_text"></span>
+                                            <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                            </svg>
+                                        </span>
+                                    </template>
+                                </div>
+                            </a>
+                        </template>
+                    </template>
                 </div>
-                @endforeach
             </div>
 
             {{-- Navigation Arrows --}}
