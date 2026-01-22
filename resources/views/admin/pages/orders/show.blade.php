@@ -81,7 +81,8 @@
                                 <div class="border rounded p-3">
                                     @if (!empty($shipping))
                                         <div>{{ $shipping['name'] ?? 'N/A' }}</div>
-                                        <div>{{ $shipping['street'] ?? ($shipping['address'] ?? ($shipping['line1'] ?? '')) }}
+                                        <div>
+                                            {{ $shipping['street'] ?? ($shipping['address'] ?? ($shipping['line1'] ?? '')) }}
                                         </div>
                                         <div>
                                             {{ trim(($shipping['city'] ?? '') . ' ' . ($shipping['state'] ?? '')) }}
@@ -156,7 +157,12 @@
                                                     $lineTotal = $item->line_total ?? $lineSubtotal - $discount;
                                                 @endphp
                                                 <tr>
-                                                    <td>{{ $productName }}</td>
+                                                    <td>
+                                                        {{ $productName }}
+                                                        @if (!empty($item->variant) && !empty($item->variant->variant_name))
+                                                            . {{ $item->variant->variant_name }}
+                                                        @endif
+                                                    </td>
                                                     <td>{{ optional($item->variant)->sku ?? (optional($item->product)->sku ?? ($item->sku ?? '—')) }}
                                                     </td>
                                                     <td>{{ $qty }}</td>
@@ -256,7 +262,8 @@
                                         <h5 class="mb-0">Edit Status</h5>
                                     </div>
                                     <div class="card-body py-3">
-                                        <form action="{{ route('admin.orders.update-order-status') }}" method="POST" class="needs-validation" novalidate>
+                                        <form action="{{ route('admin.orders.update-order-status') }}" method="POST"
+                                            class="needs-validation" novalidate>
                                             @csrf
                                             <input type="hidden" name="id" value="{{ $order->id }}">
                                             <div class="mb-3">
@@ -270,10 +277,14 @@
                                                             'cancelled' => 'Cancelled',
                                                         ];
                                                     @endphp
-                                                    @foreach($statuses as $value => $label)
+                                                    @foreach ($statuses as $value => $label)
                                                         <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" type="radio" name="status" id="status_{{ $value }}" value="{{ $value }}" {{ $order->status == $value ? 'checked' : '' }} required>
-                                                            <label class="form-check-label" for="status_{{ $value }}">{{ $label }}</label>
+                                                            <input class="form-check-input" type="radio" name="status"
+                                                                id="status_{{ $value }}"
+                                                                value="{{ $value }}"
+                                                                {{ $order->status == $value ? 'checked' : '' }} required>
+                                                            <label class="form-check-label"
+                                                                for="status_{{ $value }}">{{ $label }}</label>
                                                         </div>
                                                     @endforeach
                                                 </div>
@@ -281,7 +292,8 @@
                                                     Please select a status.
                                                 </div>
                                             </div>
-                                            <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                                            <button type="submit"
+                                                class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
                                                 <i class="bi bi-check-circle"></i>
                                                 <span>Update Status</span>
                                             </button>
