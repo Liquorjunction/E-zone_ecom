@@ -31,7 +31,7 @@
                                         <th>Icon</th>
                                         <th>Title</th>
                                         <th>Description</th>
-                                        <th>Status</th>
+                                        {{-- <th>Status</th> --}}
                                         @canany(['why_choose_us.update', 'why_choose_us.delete'])
                                             <th>Actions</th>
                                         @endcanany

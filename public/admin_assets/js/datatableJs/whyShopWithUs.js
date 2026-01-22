@@ -20,13 +20,10 @@ $(document).ready(function () {
         { data: 'title', name: 'title' },
         { data: 'description', name: 'description', orderable: false, searchable: false,
             render: function (data) {
-                if (data && data.length > 100) {
-                    return data.substring(0, 100) + '...';
-                }
                 return data || '';
             }
         },
-        { data: 'status',name: 'status',orderable: false, searchable: false }
+        // { data: 'status',name: 'status',orderable: false, searchable: false }
     ];
 
     if (hasAction) {

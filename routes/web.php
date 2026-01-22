@@ -103,7 +103,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/read', [ProfileController::class, 'readProfile'])->name('profile.read');
         Route::get('/edit', [ProfileController::class, 'editProfile'])->name('profile.edit');
         Route::post('/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
-        Route::get('/orders', [HomeController::class, 'orders'])->name('orders');
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');

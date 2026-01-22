@@ -17,6 +17,40 @@ use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderReposito
 
 class OrderController extends Controller
 {
+
+    public function index(Request $request)
+    {
+        if (!Auth::check()) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+            return redirect()->route('login');
+        }
+
+        $status = $request->query('status');
+        $query = OrderModel::where('user_id', Auth::id());
+
+        $allowedStatuses = ['processing', 'shipped', 'delivered', 'cancelled'];
+        if ($status && in_array($status, $allowedStatuses)) {
+            $query->where('status', $status);
+        }
+
+        $orders = $query->with(['items.product', 'items.variant'])->latest()->paginate(10);
+
+        if ($request->ajax()) {
+            $html = view('client.pages.dashboard.partials.orders-list', [
+                'orders' => $orders,
+                'currentStatus' => $status,
+            ])->render();
+            return response()->json(['html' => $html]);
+        }
+
+        return view('client.pages.dashboard.orders', [
+            'orders' => $orders,
+            'currentStatus' => $status,
+        ]);
+    }
+
     public function checkout(OrderCheckoutRequest $request, OrderService $orders)
     {
         // Fetch the cart for the current user or session
@@ -192,11 +226,11 @@ class OrderController extends Controller
         if ($step === 3) {
             $orderId = $request->session()->get('order_id');
             if ($orderId) {
-                $order = OrderModel::with(['items.product','items.variant'])->find($orderId);
+                $order = OrderModel::with(['items.product', 'items.variant'])->find($orderId);
             }
 
             if (!$order && Auth::check()) {
-                $order = OrderModel::with(['items.product','items.variant'])->where('user_id', Auth::id())->latest()->first();
+                $order = OrderModel::with(['items.product', 'items.variant'])->where('user_id', Auth::id())->latest()->first();
             }
         }
 
