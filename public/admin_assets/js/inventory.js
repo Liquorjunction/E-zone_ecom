@@ -87,8 +87,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 variantSelect.disabled = false;
                 if (data.length > 0) {
                     let options = '<option value="">Select Variant</option>';
+                    // Get current locale from <html lang> or fallback
+                    let locale = document.documentElement.lang || 'en';
                     data.forEach(v => {
-                        options += `<option value="${v.id}">${v.variant_name}</option>`;
+                        let name = v.variant_name;
+                        if (typeof name === 'object' && name !== null) {
+                            // Try to get translation for current locale
+                            name = name[locale] || name['en'] || Object.values(name)[0] || '';
+                        }
+                        options += `<option value="${v.id}">${name}</option>`;
                     });
                     variantSelect.innerHTML = options;
                 } else {

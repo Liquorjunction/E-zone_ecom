@@ -131,7 +131,7 @@
                                             <tr>
                                                 <th style="width: 30%">Product <span class="text-warning">*</span></th>
                                                 <th style="width: 25%">Variant</th>
-                                                <th style="width: 15%">Cost Price <span class="text-warning">*</span></th>
+                                                <th style="width: 15%">Unit Price <span class="text-warning">*</span></th>
                                                 <th style="width: 15%">Quantity <span class="text-warning">*</span></th>
                                                 <th style="width: 50px" class="text-center">Action</th>
                                             </tr>
@@ -161,7 +161,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="input-group input-group-sm">
-                                                                <span class="input-group-text">$</span>
+                                                                <span class="input-group-text">{{config('app.CURRENCY_SYMBOL')}}</span>
                                                                 <input type="number" step="0.01" name="items[{{ $key }}][cost_price]" class="form-control" value="{{ $item['cost_price'] ?? '' }}" required>
                                                             </div>
                                                         </td>
@@ -194,7 +194,7 @@
                                                             <select name="items[{{ $key }}][product_variant_id]" class="form-select variant-select">
                                                                 @if($item->variant)
                                                                     <option value="{{ $item->product_variant_id }}" selected>
-                                                                        {{ $item->variant->variant_name }}
+                                                                        {{ is_array($item->variant->variant_name) ? ($item->variant->getTranslation('variant_name', app()->getLocale()) ?? '') : $item->variant->variant_name }}
                                                                     </option>
                                                                 @else
                                                                     <option value="">Select Product First</option>
@@ -203,7 +203,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="input-group input-group-sm">
-                                                                <span class="input-group-text">$</span>
+                                                                <span class="input-group-text">{{config('app.CURRENCY_SYMBOL')}}</span>
                                                                 <input type="number" step="0.01" name="items[{{ $key }}][cost_price]" class="form-control" value="{{ $item->cost_price }}" required>
                                                             </div>
                                                         </td>
@@ -256,7 +256,7 @@
         </td>
         <td>
             <div class="input-group input-group-sm">
-                <span class="input-group-text">$</span>
+                <span class="input-group-text">{{ config('app.CURRENCY_SYMBOL') }}</span>
                 <input type="number" step="0.01" name="items[INDEX][cost_price]" class="form-control" placeholder="0.00" required>
             </div>
         </td>

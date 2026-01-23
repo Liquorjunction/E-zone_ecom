@@ -109,9 +109,12 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Cost Price</label>
-                                <input type="number" step="0.01" name="cost_price" class="form-control @error('cost_price') is-invalid @enderror"
-                                    value="{{ old('cost_price', $inventory->cost_price) }}">
+                                <label class="form-label">Unit Price</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">{{ config('app.CURRENCY_SYMBOL') }}</span>
+                                    <input type="number" step="0.01" name="cost_price" class="form-control @error('cost_price') is-invalid @enderror"
+                                        value="{{ old('cost_price', $inventory->cost_price) }}">
+                                </div>
                                 @error('cost_price') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
