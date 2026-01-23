@@ -184,6 +184,103 @@ class InventoryRepository implements InventoryRepositoryInterface
         return false;
     }
 
+        public function updateBatch($id, array $data)
+    {
+        $referenceItem = $this->find($id);
+        if (!$referenceItem) {
+            throw new \Exception('Original batch not found.');
+        }
+        $batchNo = $referenceItem->batch_no;
+        $adminId = Auth::id();
+        return DB::transaction(function () use ($data, $referenceItem, $batchNo, $adminId) {
+            // Fetch old items for this batch (not soft deleted)
+            $oldItems = Inventory::where('batch_no', $batchNo)->get();
+            $oldMap = [];
+            foreach ($oldItems as $item) {
+                $key = $item->product_id . '-' . ($item->product_variant_id ?? '0');
+                $oldMap[$key] = $item;
+            }
+            // Build new map from incoming data
+            $newMap = [];
+            foreach ($data['items'] as $item) {
+                $key = $item['product_id'] . '-' . (($item['product_variant_id'] ?? '0'));
+                $newMap[$key] = $item;
+            }
+            // 1. Handle updated and removed items
+            foreach ($oldMap as $key => $old) {
+                if (isset($newMap[$key])) {
+                    // Exists in both, check for quantity/cost change
+                    $new = $newMap[$key];
+                    $qtyChange = $new['quantity'] - $old->quantity;
+                    if ($qtyChange != 0 || ($old->cost_price != ($new['cost_price'] ?? 0))) {
+                        InventoryTransaction::create([
+                            'inventory_id' => $old->id,
+                            'type' => 'update',
+                            'quantity' => $new['quantity'],
+                            'rate' => $new['cost_price'] ?? 0,
+                            'batch_no' => $batchNo,
+                            'created_by' => $adminId,
+                            'description' => 'Batch item updated',
+                            'before_quantity' => $old->quantity,
+                            'after_quantity' => $new['quantity'],
+                            'quantity_change' => $qtyChange,
+                        ]);
+                    }
+                } else {
+                    // Was removed
+                    InventoryTransaction::create([
+                        'inventory_id' => $old->id,
+                        'type' => 'removed',
+                        'quantity' => 0,
+                        'rate' => $old->cost_price,
+                        'batch_no' => $batchNo,
+                        'created_by' => $adminId,
+                        'description' => 'Batch item removed',
+                        'before_quantity' => $old->quantity,
+                        'after_quantity' => 0,
+                        'quantity_change' => -$old->quantity,
+                    ]);
+                }
+            }
+            // 2. Handle added items
+            foreach ($newMap as $key => $new) {
+                if (!isset($oldMap[$key])) {
+                    InventoryTransaction::create([
+                        'inventory_id' => null, // will be set after createBatch
+                        'type' => 'added',
+                        'quantity' => $new['quantity'],
+                        'rate' => $new['cost_price'] ?? 0,
+                        'batch_no' => $batchNo,
+                        'created_by' => $adminId,
+                        'description' => 'Batch item added',
+                        'before_quantity' => 0,
+                        'after_quantity' => $new['quantity'],
+                        'quantity_change' => $new['quantity'],
+                    ]);
+                }
+            }
+            // Remove old
+            Inventory::where('batch_no', $batchNo)->delete();
+            // Create new with same batch number
+            $data['batch_no'] = $batchNo;
+            $created = $this->createBatch($data);
+            // Update inventory_id for added transactions (since we didn't have it before create)
+            foreach ($created as $inv) {
+                $key = $inv->product_id . '-' . ($inv->product_variant_id ?? '0');
+                if (!isset($oldMap[$key])) {
+                    InventoryTransaction::where([
+                        ['batch_no', '=', $batchNo],
+                        ['type', '=', 'added'],
+                        ['inventory_id', '=', null],
+                        ['quantity', '=', $inv->quantity],
+                        ['rate', '=', $inv->cost_price],
+                    ])->update(['inventory_id' => $inv->id]);
+                }
+            }
+            return $created;
+        });
+    }
+
     /**
      * Toggle status.
      */

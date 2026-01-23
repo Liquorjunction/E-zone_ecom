@@ -76,13 +76,13 @@ Breadcrumbs::for('product-compare', function (BreadcrumbTrail $trail) {
 // Home > Contact
 Breadcrumbs::for('contact', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Contact', route('contact'));
+    $trail->push('Contact Us', route('contact'));
 });
 
 // Home > About
 Breadcrumbs::for('about', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('About', route('about'));
+    $trail->push('About Us', route('about'));
 });
 
 // Home > FAQ
@@ -94,25 +94,25 @@ Breadcrumbs::for('faq', function (BreadcrumbTrail $trail) {
 // Home > Terms
 Breadcrumbs::for('terms', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Terms', route('terms'));
+    $trail->push('Terms & Conditions', route('terms'));
 });
 
 // Home > Privacy
 Breadcrumbs::for('privacy-policy', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('privacy-policy', route('privacy-policy'));
+    $trail->push('Privacy Policy', route('privacy-policy'));
 });
 
 // Home > Shipping Returns
 Breadcrumbs::for('shipping-returns', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Shipping Returns', route('shipping-returns'));
+    $trail->push('Shipping & Returns', route('shipping-returns'));
 });
 
 // Home > Showrooms
 Breadcrumbs::for('showrooms', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Showrooms', route('showrooms'));
+    $trail->push('Our Showrooms', route('showrooms'));
 });
 
 // Home > Dashboard

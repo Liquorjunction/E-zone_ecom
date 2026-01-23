@@ -110,23 +110,8 @@ class InventoryController extends Controller
     ) {
         try {
             $data = $request->validated();
-
-            // Get ID from hidden input
             $id = $request->input('id');
-            $referenceItem = $inventoryRepo->find($id);
-
-            if(!$referenceItem) {
-                return redirect()->back()->with('error', 'Original batch not found.');
-            }
-
-            DB::transaction(function () use ($inventoryRepo, $data, $referenceItem) {
-                // Remove old
-                Inventory::where('batch_no', $referenceItem->batch_no)->delete();
-                // Create new with same batch number
-                $data['batch_no'] = $referenceItem->batch_no;
-                $inventoryRepo->createBatch($data);
-            });
-
+            $inventoryRepo->updateBatch($id, $data);
             return redirect()->route('admin.inventory.index')->with('success', 'Batch updated successfully.');
         } catch (\Exception $e) {
             Log::error('Error updating inventory batch: ' . $e->getMessage());
@@ -176,7 +161,17 @@ class InventoryController extends Controller
                 ->with(['product', 'variant'])
                 ->get();
 
-            return view('admin.pages.inventory.show', compact('inventory', 'batchItems'));
+
+            // Build productBatchHistory: [inventory_id => [transactions...]]
+            $productBatchHistory = [];
+            foreach ($batchItems as $item) {
+                $inventoryId = $item->id;
+                $productBatchHistory[$inventoryId] = \App\Models\InventoryTransaction::where('inventory_id', $inventoryId)
+                    ->orderBy('created_at', 'asc')
+                    ->get();
+            }
+
+            return view('admin.pages.inventory.show', compact('inventory', 'batchItems', 'productBatchHistory'));
         } catch (\Exception $e) {
             Log::error('Error loading inventory details: ' . $e->getMessage());
             return redirect()->route('admin.inventory.index')->with('error', 'An error occurred while loading details.');

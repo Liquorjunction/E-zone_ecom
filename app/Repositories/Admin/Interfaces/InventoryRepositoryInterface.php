@@ -13,6 +13,7 @@ interface InventoryRepositoryInterface
     public function find(int $id);
     public function create(array $data);
     public function update(int $id, array $data);
+    public function updateBatch($id, array $data);
     public function updateStatus($id);
     public function delete(int $id);
     public function recordTransaction(array $data);

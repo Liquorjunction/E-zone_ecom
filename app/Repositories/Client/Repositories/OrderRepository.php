@@ -60,7 +60,7 @@ class OrderRepository implements OrderRepositoryInterface
                 'phone_no' => $data['phone_no'] ?? null,
                 'email' => $data['email'] ?? Auth::user()?->email ?? null,
                 'payment_method' => $data['payment_method'] ?? null,
-                'order_number' => 'EZ-ORD-'.uniqid(),
+                'order_number' => 'EZMA/ORD/'.uniqid(),
             ]);
 
             $total = 0;
@@ -177,7 +177,7 @@ class OrderRepository implements OrderRepositoryInterface
             }
 
             $order->total = $total;
-            $order->order_number = 'EZ-ORD-'.str_pad($order->id, 4, '0', STR_PAD_LEFT);
+            $order->order_number = 'EZMA/ORD/'.str_pad($order->id, 4, '0', STR_PAD_LEFT);
             $order->save();
 
             $cart->items()->delete();
