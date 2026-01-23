@@ -29,4 +29,12 @@ class InventoryTransaction extends Model
     {
         return $this->belongsTo(Inventory::class);
     }
+
+    public function order()
+    {
+        if ($this->reference_type === 'order' && $this->reference_id) {
+            return $this->belongsTo(Order::class, 'reference_id');
+        }
+        return $this->belongsTo(Order::class, 'reference_id')->whereRaw('1=0');
+    }
 }

@@ -11,10 +11,6 @@ use Illuminate\Support\Str;
 
 class InventoryRepository implements InventoryRepositoryInterface
 {
-    /**
-     * Handle bulk inventory creation.
-     * Generates a unique Batch No if not provided.
-     */
     public function createBatch(array $batchData)
     {
         return DB::transaction(function () use ($batchData) {
@@ -106,28 +102,31 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->where('batch_no', 'like', "%{$search}%");
         }
 
-        return $query;
+        // Get batches and add sold flag
+        $batches = $query->get();
+        foreach ($batches as $batch) {
+            $batch->is_sold = $this->isBatchSold($batch->batch_no);
+        }
+        return $batches;
     }
 
-    /**
-     * Get all inventory records.
-     */
+    public function isBatchSold($batchNo)
+    {
+        $variantIds = Inventory::where('batch_no', $batchNo)->pluck('product_variant_id')->toArray();
+        if (empty($variantIds)) return false;
+        return \App\Models\OrderItem::whereIn('variant_id', $variantIds)->exists();
+    }
+
     public function all(array $filters = [])
     {
         return Inventory::with(['variant.product', 'store', 'warehouse'])->latest()->get();
     }
 
-    /**
-     * Find a specific inventory record.
-     */
     public function find(int $id)
     {
         return Inventory::with(['variant.product', 'store', 'warehouse'])->find($id);
     }
 
-    /**
-     * Create a single inventory record.
-     */
     public function create(array $data)
     {
         // Wrap single create in batch logic to ensure consistency
@@ -145,9 +144,6 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $this->createBatch($batchData);
     }
 
-    /**
-     * Update an existing inventory record.
-     */
     public function update(int $id, array $data)
     {
         $inventory = Inventory::find($id);
@@ -503,13 +499,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $inv;
     }
 
-    /**
-     * Get Data for DataTable (Non-grouped / Single items view).
-     * Only used if you switch back to listing individual items.
-     */
     public function getDataforDataTable(array $filters = [])
     {
-        $query = Inventory::query()->with(['variant.product', 'store', 'warehouse']);
+        $query = Inventory::query()->with(['variant.product', 'store', 'warehouse'])->withCount('orderItems');
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -518,9 +510,6 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    /**
-     * Find a specific stock entry by product and location.
-     */
     public function findByProduct(int $productId, ?int $variantId = null, ?int $warehouseId = null, ?int $storeId = null)
     {
         $query = Inventory::query();

@@ -13,13 +13,6 @@
                             </h4>
                         </div>
                         <div>
-                            {{-- Edit Button (Uses helper to get ID) --}}
-                            @can('inventories.update')
-                                <a href="{{ route('admin.inventory.edit', ['id' => $inventory->id]) }}"
-                                    class="btn btn-warning btn-sm me-1">
-                                    <i class="bi bi-pencil-square me-1"></i> Edit Batch
-                                </a>
-                            @endcan
                             <a href="{{ route('admin.inventory.index') }}" class="btn btn-secondary btn-sm">
                                 <i class="bi bi-arrow-left me-1"></i> Back
                             </a>
@@ -112,7 +105,7 @@
                                         <th style="width: 15%">Unit Price</th>
                                         <th style="width: 10%">Quantity</th>
                                         <th style="width: 15%">Subtotal</th>
-                                        <th style="width: 5%"></th>
+                                        <th style="width: 5%">View</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -141,14 +134,14 @@
                                             </td>
                                             <td>
                                                 <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#history-{{ $item->id }}" aria-expanded="false" aria-controls="history-{{ $item->id }}">
-                                                    <i class="bi bi-clock-history"></i>
+                                                    <i class="bi bi-caret-down-fill"></i>
                                                 </button>
                                             </td>
                                         </tr>
                                         <tr class="collapse" id="history-{{ $item->id }}">
                                             <td colspan="7" class="bg-light">
                                                 <div>
-                                                    <h6 class="mb-2 text-secondary"><i class="bi bi-clock-history me-2"></i>Batch History for this Product</h6>
+                                                    <h6 class="mb-2 text-secondary"><i class="bi bi-caret-down-fill me-2"></i>Batch History for this Product</h6>
                                                     <div class="table-responsive">
                                                         <table class="table table-sm table-hover align-middle mb-0">
                                                             <thead class="bg-light">
@@ -159,7 +152,7 @@
                                                                     <th>Description</th>
                                                                     <th>Before Qty</th>
                                                                     <th>Change</th>
-                                                                    <th>After Qty</th>
+                                                                    <th>Balance</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>

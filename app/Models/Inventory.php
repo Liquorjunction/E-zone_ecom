@@ -44,22 +44,11 @@ class Inventory extends Model
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
-    /**
-     * Get the Product via the Variant.
-     * Useful for displaying "Product Name" in inventory lists.
-     */
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    /**
-     * Provide a `product` attribute so callers can use `$inventory->product->name`.
-     * This mirrors the product relation via the variant (product master is variant-based).
-     */
-    // Remove custom accessor so the `product` relation can be eager-loaded normally.
-    // If a fallback is needed, use `getProductNameAttribute()` below.
-    // Accessor for easy usage in Blade: $inventory->product_name
     public function getProductNameAttribute()
     {
         return optional($this->product)->name ?? optional(optional($this->variant)->product)->name ?? 'Unknown Product';
@@ -75,12 +64,14 @@ class Inventory extends Model
         return $this->belongsTo(Warehouse::class);
     }
 
-    /**
-     * Transaction history for this inventory record.
-     */
     public function transactions()
     {
         return $this->hasMany(InventoryTransaction::class, 'inventory_id');
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'variant_id', 'product_variant_id');
     }
 
     // --- Scopes ---
