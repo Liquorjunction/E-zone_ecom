@@ -28,7 +28,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Warehouse Name</th>
-                                    <th>Warehouse ID</th>
+                                    {{-- <th>Warehouse ID</th> --}}
                                     <th>Location</th>
                                     <th>Status</th>
                                     @canany(['warehouse.update', 'warehouse.delete'])

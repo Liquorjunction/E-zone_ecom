@@ -5,7 +5,7 @@ $(function () {
     var columns = [
         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
         { data: 'warehouse_name', name: 'warehouse_name' },
-        { data: 'warehouse_id', name: 'warehouse_id' },
+        // { data: 'warehouse_id', name: 'warehouse_id' },
         { data: 'location', name: 'location' },
         { data: 'status', name: 'status' },
     ];

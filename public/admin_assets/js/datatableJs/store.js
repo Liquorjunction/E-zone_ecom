@@ -26,7 +26,7 @@ $(function () {
                 return '<span class="badge bg-secondary">No Logo</span>';
             },
         },
-        { data: "store_id", name: "store_id" },
+        // { data: "store_id", name: "store_id" },
         { data: "store_name", name: "store_name" },
         { data: "status", name: "status" },
     ];

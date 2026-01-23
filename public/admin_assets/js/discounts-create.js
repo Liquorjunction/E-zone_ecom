@@ -215,16 +215,80 @@ $(document).ready(function() {
     // initialize Select2 on page load for existing selects
     initializeSelect2(document);
 
+    // Prevent back date selection for start date
+    function setMinStartDate() {
+        var today = new Date();
+        var yyyy = today.getFullYear();
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var dd = String(today.getDate()).padStart(2, '0');
+        var hh = String(today.getHours()).padStart(2, '0');
+        var min = String(today.getMinutes()).padStart(2, '0');
+        var minDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hh + ':' + min;
+        $("input[name='starts_at']").attr('min', minDateTime);
+    }
+    setMinStartDate();
+    // Also update min on page show (for browser back/forward)
+    $(window).on('pageshow', setMinStartDate);
+
     // form submit validation
     let $form = $('#target-rows').closest('form');
     $form.on('submit', function(e) {
         let valid = true;
         clearFormAlert();
         validateAllRows();
+        // Check for at least one non-empty target row
+        let hasTarget = false;
+        $('#target-rows tr').each(function() {
+            let $tr = $(this);
+            if ($tr.hasClass('empty-message')) return;
+            let type = $tr.find('select[name*="[target_type]"]').val();
+            let $idField = $tr.find('select[name*="[target_id]"], input[name*="[target_id]"]');
+            let id = $idField.length ? String($idField.val()).trim() : '';
+            if (type && id) {
+                hasTarget = true;
+            }
+        });
+        if (!hasTarget) {
+            valid = false;
+            showFormAlert('At least one target is required. Please add a target before submitting.');
+            // Highlight the empty-message row and show inline error
+            let $emptyRow = $('#target-rows .empty-message');
+            if ($emptyRow.length) {
+                $emptyRow.addClass('table-danger');
+                if ($emptyRow.find('.target-error').length === 0) {
+                    $emptyRow.find('td').eq(0).prepend('<div class="target-error small text-danger mb-2">At least one target is required.</div>');
+                }
+            }
+        } else {
+            // Remove error highlight if targets exist
+            $('#target-rows .empty-message').removeClass('table-danger').find('.target-error').remove();
+        }
+        // Validate start date is not in the past
+        var $startInput = $("input[name='starts_at']");
+        if ($startInput.length && $startInput.val()) {
+            var selected = new Date($startInput.val());
+            var now = new Date();
+            if (selected < now) {
+                valid = false;
+                $startInput.addClass('is-invalid');
+                if ($startInput.next('.start-date-error').length === 0) {
+                    $startInput.after('<div class="start-date-error invalid-feedback d-block">Start date cannot be in the past.</div>');
+                }
+            } else {
+                $startInput.removeClass('is-invalid');
+                $startInput.next('.start-date-error').remove();
+            }
+        }
         if ($('#target-rows tr[data-invalid="1"]').length) valid = false;
         if (!valid) {
             e.preventDefault();
-            showFormAlert('Please fix the highlighted target errors before submitting.');
+            if (!hasTarget) {
+                // Optionally, scroll to targets section
+                let $targetsSection = $('#targets-table');
+                if ($targetsSection.length) {
+                    $('html, body').animate({ scrollTop: $targetsSection.offset().top - 100 }, 300);
+                }
+            }
             return false;
         }
         return true;
