@@ -71,6 +71,6 @@ class WarehouseRepository implements WarehouseRepositoryInterface
 
     public function getDataForDataTable()
     {
-        return Warehouse::select(['id', 'warehouse_name', 'warehouse_id', 'location', 'status', 'created_at']);
+        return Warehouse::withCount('inventories')->latest();
     }
 }

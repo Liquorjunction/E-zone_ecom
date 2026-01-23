@@ -185,8 +185,13 @@ class WarehouseController extends Controller
                 })
                 ->addColumn('action', function ($warehouse) use ($request) {
                     $data['edit_url'] = $request->user()->can('warehouse.update') ? route('admin.warehouses.edit', ['id' => $warehouse->id]) : '';
-                    $data['delete_url'] = $request->user()->can('warehouse.delete') ? route('admin.warehouses.destroy', ['id' => $warehouse->id]) : '';
-                    $data['id'] = $warehouse->id; // Ensure ID is passed for delete
+                    $data['id'] = $warehouse->id;
+
+                    if($request->user()->can('warehouse.delete') && $warehouse->inventories_count > 0){
+                        $data['can_delete'] = false;
+                    } else {
+                        $data['delete_url'] = $request->user()->can('warehouse.delete') ? route('admin.warehouses.destroy', ['id' => $warehouse->id]) : '';
+                    }
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->rawColumns(['status', 'action'])

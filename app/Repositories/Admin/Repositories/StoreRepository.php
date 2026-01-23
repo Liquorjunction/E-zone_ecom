@@ -97,7 +97,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getDataForDataTable()
     {
-        return Store::select(['id', 'store_name', 'store_id', 'store_logo', 'status', 'created_at']);
+        return Store::withCount('inventories')->latest();
     }
 
 }

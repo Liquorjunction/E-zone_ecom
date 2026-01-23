@@ -201,8 +201,14 @@ class StoreController extends Controller
                 })
                 ->addColumn('action', function ($store) use ($request) {
                     $data['edit_url'] = $request->user()->can('store.update') ? route('admin.stores.edit', ['id' => $store->id]) : '';
-                    $data['delete_url'] = $request->user()->can('store.delete') ? route('admin.stores.destroy', ['id' => $store->id]) : '';
-                    $data['id'] = $store->id; // Ensure ID is passed for delete
+                    $data['id'] = $store->id;
+
+                    if($request->user()->can('store.delete') && $store->inventories_count > 0){
+                        $data['can_delete'] = false;
+                    } else {
+                        $data['delete_url'] = $request->user()->can('store.delete') ? route('admin.stores.destroy', ['id' => $store->id]) : '';
+                    }
+
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->rawColumns(['store_logo', 'status', 'action'])

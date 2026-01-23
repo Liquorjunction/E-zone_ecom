@@ -34,4 +34,9 @@ class Store extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class);
+    }
 }
