@@ -307,6 +307,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
 
             Route::get('/', [DiscountController::class, 'index'])->name('index');
             Route::get('/datatable', [DiscountController::class, 'datatable'])->name('datatable');
+            Route::get('/show', [DiscountController::class, 'show'])->name('show')->middleware('can:discount.read,admin');
             Route::get('/create', [DiscountController::class, 'create'])->name('create')->middleware('can:discount.create,admin');
             Route::post('/', [DiscountController::class, 'store'])->name('store')->middleware('can:discount.create,admin');
             Route::get('/edit', [DiscountController::class, 'edit'])->name('edit')->middleware('can:discount.update,admin');

@@ -168,6 +168,19 @@ class DiscountController extends Controller
         }
     }
 
+    public function show(ReadDiscountRequest $request, DiscountRepo $discountRepo)
+    {
+        $lists = $discountRepo->getSelectLists();
+        $id = $request->input('id');
+        $discount = $discountRepo->getDiscountById($id);
+
+        if (!$discount) {
+            return redirect()->route('admin.discounts.index')->with('error', 'Discount not found.');
+        }
+
+        return view('admin.pages.discounts.show', compact('discount', 'lists'));
+    }
+
     public function destroy(DestroyDiscountRequest $request, DiscountRepo $discountRepo, DiscountService $discountService)
     {
         $discountRepo->delete($request->input('id'));
@@ -234,6 +247,7 @@ class DiscountController extends Controller
             ->addColumn('action', function ($discount) use ($request) {
                 $data['edit_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.edit', ['id' => $discount->id]) : '';
                 $data['delete_url'] = $request->user() && $request->user()->can('discount.delete') ? route('admin.discounts.destroy', ['id' => $discount->id]) : '';
+                $data['view_url'] = $request->user() && $request->user()->can('discount.read') ? route('admin.discounts.show', ['id' => $discount->id]) : '';
                 $data['id'] = $discount->id;
                 return view('admin.partials.datatable-actions', $data)->render();
             })
