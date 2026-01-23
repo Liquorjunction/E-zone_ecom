@@ -197,12 +197,16 @@ class InventoryController extends Controller
                     return $row->warehouse->warehouse_name ?? 'Warehouse';
                 })
                 ->addColumn('items_summary', fn($row) => '<span class="badge bg-info">'.$row->items_count.' Items</span>')
+                ->addColumn('total_quantity', fn($row) => $row->total_quantity)
+                ->addColumn('subtotal_cost', function($row) {
+                    $symbol = config('app.CURRENCY_SYMBOL', '$');
+                    return '<span class="badge bg-success">' . $symbol . number_format($row->subtotal_cost, 2) . '</span>';
+                })
                 ->addColumn('action', function ($row) use ($request) {
                     $canRead = $request->user()->can('inventories.read');
                     $canUpdate = $request->user()->can('inventories.update');
                     $canDelete = $request->user()->can('inventories.delete');
 
-                    // Generates URLs like: /admin/inventory/edit?id=123
                     return view('admin.partials.datatable-actions', [
                         'id' => $row->id,
                         'view_url' => $canRead ? route('admin.inventory.show', ['id' => $row->id]) : null,
@@ -210,7 +214,7 @@ class InventoryController extends Controller
                         'delete_url' => $canDelete ? route('admin.inventory.destroy', ['id' => $row->id]) : null,
                     ])->render();
                 })
-                ->rawColumns(['batch_no', 'items_summary', 'action'])
+                ->rawColumns(['batch_no', 'items_summary', 'subtotal_cost', 'action'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error('Error loading inventory datatable: ' . $e->getMessage());

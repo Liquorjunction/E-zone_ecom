@@ -29,6 +29,8 @@
                                     <th>Date</th>
                                     <th>Location</th>
                                     <th>Summary</th>
+                                    <th>Total Quantity</th>
+                                    <th>Subtotal Cost</th>
                                     <th class="text-center" style="width: 100px;">Actions</th>
                                 </tr>
                             </thead>

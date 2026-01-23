@@ -12,6 +12,8 @@ $(function () {
                 { data: 'created_at', name: 'created_at' },
                 { data: 'location', name: 'location', orderable: false },
                 { data: 'items_summary', name: 'items_summary', searchable: false },
+                { data: 'total_quantity', name: 'total_quantity', searchable: false },
+                { data: 'subtotal_cost', name: 'subtotal_cost', searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
             ],
             order: [[2, 'desc']] // Sort by Date desc

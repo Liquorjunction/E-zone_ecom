@@ -90,7 +90,8 @@ class InventoryRepository implements InventoryRepositoryInterface
                 DB::raw('MAX(status) as status'),
                 DB::raw('MAX(id) as id'), // Valid ID for generating edit/delete routes
                 DB::raw('COUNT(id) as items_count'),
-                DB::raw('SUM(quantity) as total_quantity')
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('SUM(quantity * cost_price) as subtotal_cost')
             )
             ->with(['store', 'warehouse']) // Eager load relationships for location names
             ->groupBy('batch_no');

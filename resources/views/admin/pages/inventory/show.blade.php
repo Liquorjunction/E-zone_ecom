@@ -105,9 +105,9 @@
                                     <th style="width: 5%">#</th>
                                     <th style="width: 35%">Product</th>
                                     <th style="width: 20%">Variant</th>
-                                    <th style="width: 15%">Cost Price</th>
+                                    <th style="width: 15%">Unit Price</th>
                                     <th style="width: 10%">Quantity</th>
-                                    <th style="width: 15%">Subtotal Cost</th>
+                                    <th style="width: 15%">Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody>
