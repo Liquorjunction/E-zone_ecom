@@ -400,7 +400,8 @@
             rowIdx: {{ old('targets') ? count(old('targets')) : 0 }}
         };
     </script>
-    <script>
+        {{-- NOt USED FOr NOW --}}
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             var typeSelect = document.querySelector('select[name="type"]');
             var maxDiscountWrapper = document.getElementById('max-discount-cap-wrapper');
@@ -415,6 +416,6 @@
             typeSelect.addEventListener('change', toggleMaxDiscount);
             toggleMaxDiscount(); // Initial call
         });
-    </script>
+    </script> --}}
     <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
 @endpush
