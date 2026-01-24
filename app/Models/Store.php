@@ -15,10 +15,11 @@ class Store extends Model
     public $guard_name = 'admin';
     protected $guarded = [];
 
-    public $translatable = ['store_name', 'store_footer'];
+    public $translatable = ['store_name', 'store_footer', 'location'];
 
     protected $fillable = [
         'store_name',
+        'location',
         'store_logo',
         'store_id',
         'store_footer',

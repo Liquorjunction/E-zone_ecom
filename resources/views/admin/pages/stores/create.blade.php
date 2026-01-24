@@ -55,6 +55,14 @@
                                                 @enderror
                                             </div>
                                             <div class="col-md-12 mb-3">
+                                                <label class="form-label">Location (EN)</label>
+                                                <input type="text" name="location[en]" class="form-control @error('location.en') is-invalid @enderror"
+                                                    placeholder="Location in English" value="{{ old('location.en') }}">
+                                                @error('location.en')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-12 mb-3">
                                                 <label class="form-label">Store Footer (EN)</label>
                                                 <textarea name="store_footer[en]" class="form-control @error('store_footer.en') is-invalid @enderror"
                                                     rows="3" placeholder="Footer text in English">{{ old('store_footer.en') }}</textarea>
@@ -73,6 +81,15 @@
                                                 <input type="text" name="store_name[fr]" class="form-control @error('store_name.fr') is-invalid @enderror"
                                                     placeholder="Nom du magasin en français" value="{{ old('store_name.fr') }}">
                                                 @error('store_name.fr')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                                <small class="text-muted">If left empty, will be auto-translated from English</small>
+                                            </div>
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Location (FR)</label>
+                                                <input type="text" name="location[fr]" class="form-control @error('location.fr') is-invalid @enderror"
+                                                    placeholder="Emplacement en français" value="{{ old('location.fr') }}">
+                                                @error('location.fr')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                                 <small class="text-muted">If left empty, will be auto-translated from English</small>
@@ -97,6 +114,15 @@
                                                 <input type="text" name="store_name[ar]" class="form-control @error('store_name.ar') is-invalid @enderror"
                                                     placeholder="اسم المتجر بالعربية" value="{{ old('store_name.ar') }}" dir="rtl">
                                                 @error('store_name.ar')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                                <small class="text-muted">If left empty, will be auto-translated from English</small>
+                                            </div>
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Location (AR)</label>
+                                                <input type="text" name="location[ar]" class="form-control @error('location.ar') is-invalid @enderror"
+                                                    placeholder="الموقع بالعربية" value="{{ old('location.ar') }}" dir="rtl">
+                                                @error('location.ar')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                                 <small class="text-muted">If left empty, will be auto-translated from English</small>

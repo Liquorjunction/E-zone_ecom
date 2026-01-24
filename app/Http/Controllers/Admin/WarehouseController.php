@@ -126,6 +126,22 @@ class WarehouseController extends Controller
         }
     }
 
+    public function show(ReadWarehouseRequest $request, WarehouseRepo $warehouseRepo)
+    {
+        try {
+            $id = $request->validated()['id'];
+            $warehouse = $warehouseRepo->getWarehouseById($id);
+            return view('admin.pages.warehouses.show', compact('warehouse'));
+        } catch (\Exception $e) {
+            Log::error('Failed to load warehouse details', [
+                'warehouse_id' => $request->validated()['id'] ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('admin.warehouses.index')->with('error', 'Failed to load warehouse details: ' . $e->getMessage());
+        }
+    }
+
     public function destroy(DestroyWarehouseRequest $request, WarehouseRepo $warehouseRepo)
     {
         try {
@@ -184,6 +200,7 @@ class WarehouseController extends Controller
                     }
                 })
                 ->addColumn('action', function ($warehouse) use ($request) {
+                    $data['view_url'] = $request->user()->can('warehouse.read') ? route('admin.warehouses.show', ['id' => $warehouse->id]) : '';
                     $data['edit_url'] = $request->user()->can('warehouse.update') ? route('admin.warehouses.edit', ['id' => $warehouse->id]) : '';
                     $data['id'] = $warehouse->id;
 

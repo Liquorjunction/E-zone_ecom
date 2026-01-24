@@ -54,18 +54,26 @@
                                     {{-- EN --}}
                                     <div class="tab-pane fade show active" id="edit-lang-en">
                                         <div class="row">
+                                            <!-- Store Name (EN) -->
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Store Name (EN) <span class="text-danger">*</span></label>
-                                                <input type="text" name="store_name[en]" class="form-control @error('store_name.en') is-invalid @enderror"
-                                                    value="{{ old('store_name.en', $store->getTranslation('store_name', 'en')) }}" required>
+                                                <label class="form-label">Store Name (English) <span class="text-danger">*</span></label>
+                                                <input type="text" name="store_name[en]" class="form-control @error('store_name.en') is-invalid @enderror" value="{{ old('store_name.en', $store->getTranslation('store_name', 'en')) }}" required maxlength="255">
                                                 @error('store_name.en')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                            <!-- Location (EN) -->
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Store Footer (EN)</label>
-                                                <textarea name="store_footer[en]" class="form-control @error('store_footer.en') is-invalid @enderror"
-                                                    rows="3">{{ old('store_footer.en', $store->getTranslation('store_footer', 'en')) }}</textarea>
+                                                <label class="form-label">Location (English)</label>
+                                                <input type="text" name="location[en]" class="form-control @error('location.en') is-invalid @enderror" value="{{ old('location.en', $store->getTranslation('location', 'en')) }}">
+                                                @error('location.en')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <!-- Store Footer (EN) -->
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Store Footer (English)</label>
+                                                <textarea name="store_footer[en]" class="form-control @error('store_footer.en') is-invalid @enderror" maxlength="500">{{ old('store_footer.en', $store->getTranslation('store_footer', 'en')) }}</textarea>
                                                 @error('store_footer.en')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -76,23 +84,29 @@
                                     {{-- FR --}}
                                     <div class="tab-pane fade" id="edit-lang-fr">
                                         <div class="row">
+                                            <!-- Store Name (FR) -->
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Store Name (FR)</label>
-                                                <input type="text" name="store_name[fr]" class="form-control @error('store_name.fr') is-invalid @enderror"
-                                                    value="{{ old('store_name.fr', $store->getTranslation('store_name', 'fr')) }}">
+                                                <label class="form-label">Store Name (French)</label>
+                                                <input type="text" name="store_name[fr]" class="form-control @error('store_name.fr') is-invalid @enderror" value="{{ old('store_name.fr', $store->getTranslation('store_name', 'fr')) }}" maxlength="255">
                                                 @error('store_name.fr')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
-                                                <small class="text-muted">If left empty, will be auto-translated from English</small>
                                             </div>
+                                            <!-- Location (FR) -->
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Store Footer (FR)</label>
-                                                <textarea name="store_footer[fr]" class="form-control @error('store_footer.fr') is-invalid @enderror"
-                                                    rows="3">{{ old('store_footer.fr', $store->getTranslation('store_footer', 'fr')) }}</textarea>
+                                                <label class="form-label">Location (French)</label>
+                                                <input type="text" name="location[fr]" class="form-control @error('location.fr') is-invalid @enderror" value="{{ old('location.fr', $store->getTranslation('location', 'fr')) }}">
+                                                @error('location.fr')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <!-- Store Footer (FR) -->
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Store Footer (French)</label>
+                                                <textarea name="store_footer[fr]" class="form-control @error('store_footer.fr') is-invalid @enderror" maxlength="500">{{ old('store_footer.fr', $store->getTranslation('store_footer', 'fr')) }}</textarea>
                                                 @error('store_footer.fr')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
-                                                <small class="text-muted">If left empty, will be auto-translated from English</small>
                                             </div>
                                         </div>
                                     </div>
@@ -100,23 +114,29 @@
                                     {{-- AR --}}
                                     <div class="tab-pane fade" id="edit-lang-ar">
                                         <div class="row">
+                                            <!-- Store Name (AR) -->
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Store Name (AR)</label>
-                                                <input type="text" name="store_name[ar]" class="form-control @error('store_name.ar') is-invalid @enderror"
-                                                    value="{{ old('store_name.ar', $store->getTranslation('store_name', 'ar')) }}" dir="rtl">
+                                                <label class="form-label">Store Name (Arabic)</label>
+                                                <input type="text" name="store_name[ar]" class="form-control @error('store_name.ar') is-invalid @enderror" value="{{ old('store_name.ar', $store->getTranslation('store_name', 'ar')) }}" maxlength="255">
                                                 @error('store_name.ar')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
-                                                <small class="text-muted">If left empty, will be auto-translated from English</small>
                                             </div>
+                                            <!-- Location (AR) -->
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Store Footer (AR)</label>
-                                                <textarea name="store_footer[ar]" class="form-control @error('store_footer.ar') is-invalid @enderror"
-                                                    rows="3" dir="rtl">{{ old('store_footer.ar', $store->getTranslation('store_footer', 'ar')) }}</textarea>
+                                                <label class="form-label">Location (Arabic)</label>
+                                                <input type="text" name="location[ar]" class="form-control @error('location.ar') is-invalid @enderror" value="{{ old('location.ar', $store->getTranslation('location', 'ar')) }}">
+                                                @error('location.ar')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <!-- Store Footer (AR) -->
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Store Footer (Arabic)</label>
+                                                <textarea name="store_footer[ar]" class="form-control @error('store_footer.ar') is-invalid @enderror" maxlength="500">{{ old('store_footer.ar', $store->getTranslation('store_footer', 'ar')) }}</textarea>
                                                 @error('store_footer.ar')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
-                                                <small class="text-muted">If left empty, will be auto-translated from English</small>
                                             </div>
                                         </div>
                                     </div>

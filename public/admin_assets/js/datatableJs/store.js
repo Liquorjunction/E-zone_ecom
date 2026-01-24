@@ -28,6 +28,7 @@ $(function () {
         },
         // { data: "store_id", name: "store_id" },
         { data: "store_name", name: "store_name" },
+        { data: "location", name: "location" },
         { data: "status", name: "status" },
     ];
 

@@ -254,6 +254,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('stores')->name('stores.')->middleware('can:store.read,admin')->group(function () {
             Route::get('/', [StoreController::class, 'index'])->name('index'); // permission: store.read
             Route::get('/data', [StoreController::class, 'getDataForDataTable'])->name('data');
+            Route::get('/show', [StoreController::class, 'show'])->name('show')->middleware('can:store.read,admin');
             Route::get('/create', [StoreController::class, 'create'])->name('create')->middleware('can:store.create,admin');
             Route::post('/', [StoreController::class, 'store'])->name('store')->middleware('can:store.create,admin');
             Route::get('/edit', [StoreController::class, 'edit'])->name('edit')->middleware('can:store.update,admin');
@@ -266,6 +267,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('warehouses')->name('warehouses.')->middleware('can:warehouse.read,admin')->group(function () {
             Route::get('/', [WarehouseController::class, 'index'])->name('index'); // permission: warehouse.read
             Route::get('/data', [WarehouseController::class, 'getDataForDataTable'])->name('data');
+            Route::get('/show', [WarehouseController::class, 'show'])->name('show')->middleware('can:warehouse.read,admin');
             Route::get('/create', [WarehouseController::class, 'create'])->name('create')->middleware('can:warehouse.create,admin');
             Route::post('/', [WarehouseController::class, 'store'])->name('store')->middleware('can:warehouse.create,admin');
             Route::get('/edit', [WarehouseController::class, 'edit'])->name('edit')->middleware('can:warehouse.update,admin');

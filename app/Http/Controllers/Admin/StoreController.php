@@ -45,24 +45,19 @@ class StoreController extends Controller
         try {
             $data = $request->validated();
 
-            // --- Smart Auto-Translate Logic ---
-            foreach (['store_name', 'store_footer'] as $field) {
-                // Skip if English value is missing (should be caught by validation, but safe check)
+            foreach (['store_name', 'store_footer', 'location'] as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
 
-                // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
                     $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
 
-                // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
-            // ----------------------------------
 
             $storeRepo->createStore($request, $data);
 
@@ -100,24 +95,19 @@ class StoreController extends Controller
             $id = $request->validated()['id'];
             $data = $request->validated();
 
-            // --- Smart Auto-Translate Logic ---
-            foreach (['store_name', 'store_footer'] as $field) {
-                // Skip if English value is missing (should be caught by validation, but safe check)
+            foreach (['store_name', 'store_footer', 'location'] as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
 
-                // Auto-fill French if empty
                 if (empty($data[$field]['fr'])) {
                     $data[$field]['fr'] = gtrans($data[$field]['en'], 'fr');
                 }
 
-                // Auto-fill Arabic if empty
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
-            // ----------------------------------
 
             $storeRepo->updateStore($id, $request, $data);
 
@@ -130,6 +120,23 @@ class StoreController extends Controller
                 'data' => $request->except(['password', 'password_confirmation'])
             ]);
             return redirect()->back()->withInput()->with('error', 'Failed to update store: ' . $e->getMessage());
+        }
+    }
+
+    public function show(ReadStoreRequest $request, StoreRepo $storeRepo)
+    {
+        try {
+            $id = $request->validated()['id'];
+            $store = $storeRepo->getStoreById($id);
+
+            return view('admin.pages.stores.show', compact('store'));
+        } catch (\Exception $e) {
+            Log::error('Failed to load store', [
+                'store_id' => $request->validated()['id'] ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('admin.stores.index')->with('error', 'Failed to load store.');
         }
     }
 
@@ -189,17 +196,21 @@ class StoreController extends Controller
                 ->addColumn('store_name', function ($store) {
                     return $store->getTranslation('store_name', 'en');
                 })
+                ->addColumn('location', function ($store) {
+                    return $store->getTranslation('location', 'en');
+                })
                 ->addColumn('status', function ($store) use ($request) {
                     if ($request->user()->can('store.update')) {
                         $data['toggle_url'] = $request->user()->can('store.update') ? route('admin.stores.toggleStatus', ['id' => $store->id]) : '';
                         $data['status'] = $store->status;
-                        $data['id'] = $store->id; // Ensure ID is passed for toggle
+                        $data['id'] = $store->id;
                         return view('admin.partials.datatable-status', $data)->render();
                     } else {
                         return view('components.datatable-status-badge', ['status' => $store->status])->render();
                     }
                 })
                 ->addColumn('action', function ($store) use ($request) {
+                    $data['view_url'] = $request->user()->can('store.read') ? route('admin.stores.show', ['id' => $store->id]) : '';
                     $data['edit_url'] = $request->user()->can('store.update') ? route('admin.stores.edit', ['id' => $store->id]) : '';
                     $data['id'] = $store->id;
 
@@ -225,3 +236,4 @@ class StoreController extends Controller
         }
     }
 }
+

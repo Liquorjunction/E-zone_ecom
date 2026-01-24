@@ -29,6 +29,7 @@
                                     <th>Logo</th>
                                     {{-- <th>Store ID</th> --}}
                                     <th>Store Name</th>
+                                    <th>Location</th>
                                     <th>Status</th>
                                     @canany(['store.update', 'store.delete'])
                                         <th>Action</th>
