@@ -181,10 +181,10 @@ Breadcrumbs::for('best-sellers', function (BreadcrumbTrail $trail) {
     $trail->push('Best Sellers', route('best-sellers'));
 });
 
-// Home > Deals
-Breadcrumbs::for('deals', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Deals', route('deals'));
+// Home > Products > Deals
+Breadcrumbs::for('products.deals', function (BreadcrumbTrail $trail) {
+    $trail->parent('products.index');
+    $trail->push('Deals', route('products.deals'));
 });
 
 // Home > Products > [Brand Name]

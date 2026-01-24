@@ -59,6 +59,89 @@ class ProductRepository implements ProductRepositoryInterface
         return $query->paginate($perPage)->withQueryString();
     }
 
+    public function getDealVariants(Request $request, int $perPage = 12): LengthAwarePaginator {
+        $query = ProductVariant::query()
+            ->where('status', 'active')
+            ->with(['images', 'inventory', 'product' => function($q) {
+                $q->where('status', 'active')->with(['category', 'brand', 'images']);
+            }])
+            ->whereHas('product', function (Builder $q) {
+                $q->where('status', 'active');
+            });
+
+        if ($request->filled('search')) {
+            $keyword = $request->get('search');
+            $query->where(function (Builder $q) use ($keyword) {
+                $like = '%' . $keyword . '%';
+                $q->where('variant_name', 'LIKE', $like)
+                  ->orWhere('sku', 'LIKE', $like)
+                  ->orWhereHas('product', function (Builder $productQuery) use ($like) {
+                      $productQuery->where('name', 'LIKE', $like)
+                                   ->orWhere('description', 'LIKE', $like);
+                  });
+            });
+        }
+
+        if ($request->filled('category')) {
+            $categories = is_array($request->category) ? $request->category : [$request->category];
+            $query->whereHas('product.category', function (Builder $q) use ($categories) {
+                $q->whereIn('slug', $categories);
+            });
+        }
+
+        if ($request->filled('brand')) {
+            $brands = is_array($request->brand) ? $request->brand : [$request->brand];
+            $query->whereHas('product.brand', function (Builder $q) use ($brands) {
+                $q->whereIn('slug', $brands);
+            });
+        }
+
+        if ($request->filled('subcategory')) {
+            $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
+            $query->whereHas('product', function (Builder $q) use ($subcategories) {
+                $q->whereIn('sub_category_id', $subcategories);
+            });
+        }
+
+        if ($request->filled('bestseller') && $request->bestseller) {
+            $query->where('is_bestseller', true);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        switch ($request->get('sort')) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'bestseller':
+                $query->where('is_bestseller', true)->latest();
+                break;
+            case 'featured':
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $paginator = $query->paginate($perPage)->withQueryString();
+
+        $paginator->getCollection()->each(function (ProductVariant $variant) {
+            if (!$variant->relationLoaded('product') || !$variant->product) {
+                $variant->load('product.category', 'product.brand', 'product.images');
+            }
+        });
+
+        return $paginator;
+    }
+
     public function getAllActiveVariants(Request $request, int $perPage = 12): LengthAwarePaginator
     {
         $query = ProductVariant::query()
@@ -150,7 +233,7 @@ class ProductRepository implements ProductRepositoryInterface
             ->with([
                 'category',
                 'brand',
-                'images', // General Gallery
+                'images',
                 'productVariants' => function($q) {
                     $q->where('status', 'active')
                       ->with(['images', 'inventory']);

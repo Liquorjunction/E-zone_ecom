@@ -51,13 +51,29 @@ class HomeRepository implements HomeRepositoryInterface
             ->orderBy('name', 'asc')
             ->get();
 
+        // Fetch discounted product variants (deals) using DiscountService
+        $allVariants = ProductVariant::select('product_variants.*')
+            ->join('products', 'products.id', '=', 'product_variants.product_id')
+            ->where('products.status', 'active')
+            ->where('product_variants.status', 'active')
+            ->with(['product', 'images'])
+            ->orderBy('product_variants.updated_at', 'desc')
+            ->get();
+
+        // Use DiscountService to filter only discounted variants
+        $discountService = app(\App\Services\DiscountService::class);
+        $deals = $allVariants->filter(function($variant) use ($discountService) {
+            $discount = $discountService->calculateVariantDiscount($variant);
+            return $discount['has_discount'] && $discount['discount_amount'] > 0;
+        })->take(8)->values();
+
         $wishlistVariantIds = collect([]);
         $userId = Auth::id();
         if ($userId) {
             $wishlistVariantIds = Wishlist::where('user_id', $userId)->pluck('product_variant_id')->filter()->values();
         }
 
-        return compact('sliders', 'categories', 'cards', 'newArrivals', 'bestSellers', 'brands', 'wishlistVariantIds');
+        return compact('sliders', 'categories', 'cards', 'newArrivals', 'bestSellers', 'brands', 'wishlistVariantIds', 'deals');
     }
 
     public function getDashboardData()

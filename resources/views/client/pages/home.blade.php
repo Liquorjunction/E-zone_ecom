@@ -175,7 +175,7 @@
         stopAutoplay() {
             clearInterval(this.autoplay);
         }
-    }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
+        }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-end justify-between mb-8 sm:mb-10">
                 <div>
@@ -260,6 +260,101 @@
         </div>
     </section>
 
+    {{-- Deals Section (Carousel Style) --}}
+    @php
+        $dealsChunks = ($deals ?? collect())->chunk(4);
+        $dealsCount = ($deals ?? collect())->count();
+    @endphp
+    @if ($dealsCount > 0)
+        <section id="deals" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+            currentSlide: 0,
+            itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
+            totalItems: {{ $dealsCount }},
+            get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
+            get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
+            get canGoPrev() { return this.currentSlide > 0 },
+            next() { if (this.canGoNext) this.currentSlide++; else this.currentSlide = 0 },
+            prev() { if (this.canGoPrev) this.currentSlide--; else this.currentSlide = this.totalSlides - 1 },
+            init() {
+                window.addEventListener('resize', () => {
+                    this.itemsPerPage = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2;
+                    if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
+                });
+            }
+        }">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-end justify-between mb-8 sm:mb-10">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                                {{ gtrans('Deals & Discounts') }}
+                            </h2>
+                        </div>
+                        <p class="text-sm sm:text-base text-gray-600">
+                            {{ gtrans('Grab the best offers on top products') }}
+                        </p>
+                    </div>
+                    <div class="hidden md:flex items-center gap-2">
+                        <button @click="prev()" :disabled="!canGoPrev"
+                            :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                            class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button @click="next()" :disabled="!canGoNext"
+                            :class="!canGoNext ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                            class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="md:hidden">
+                        <a href="{{ route('products.deals') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
+                            {{ gtrans('View All Deals') }}
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden">
+                    <div class="flex transition-transform duration-500 ease-out"
+                        :style="`transform: translateX(-${currentSlide * 100}%)`">
+                        @foreach ($dealsChunks as $chunk)
+                            @if ($chunk->count() > 0)
+                            <div class="w-full shrink-0">
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                                    @foreach ($chunk as $productVariant)
+                                        @include('client.partials.product-card', ['product' => $productVariant])
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                {{-- Dots Indicator --}}
+                <div class="flex justify-center gap-2 mt-8" x-show="totalSlides > 1">
+                    <template x-for="i in totalSlides" :key="i">
+                        <button @click="currentSlide = i - 1"
+                            :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
+                            class="h-2 rounded-full transition-all duration-300"></button>
+                    </template>
+                </div>
+                <div class="mt-6 md:hidden flex justify-center">
+                    <a href="{{ route('products.deals') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
+                        {{ gtrans('View All Deals') }}
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- New Arrivals Carousel --}}
     @php
         $newArrivalsChunks = ($newArrivals ?? collect())->chunk(4);
@@ -287,7 +382,7 @@
         stopAutoplay() {
             clearInterval(this.autoplay);
         }
-    }"
+        }"
         @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-end justify-between mb-8 sm:mb-10">

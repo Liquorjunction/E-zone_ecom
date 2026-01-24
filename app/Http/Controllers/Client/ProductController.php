@@ -27,6 +27,15 @@ class ProductController extends Controller
         return view('client.pages.products', compact('products', 'bestsellers', 'bestsellersIds'));
     }
 
+    public function deals(Request $request, ProductRepo $productRepository)
+    {
+        $products = $productRepository->getDealVariants($request);
+        $bestsellers = $productRepository->getBestsellerVariants(12);
+        $bestsellersIds = $bestsellers->pluck('id')->toArray();
+
+        return view('client.pages.deals', compact('products', 'bestsellers', 'bestsellersIds'));
+    }
+
     public function show($slug, ProductRepo $productRepository)
     {
         $product = $productRepository->findActiveBySlug($slug);

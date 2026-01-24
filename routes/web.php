@@ -53,7 +53,6 @@ Route::group([], function () {
     Route::view('/support', 'client.pages.support')->name('support');
     Route::view('/new-arrivals', 'client.pages.new-arrivals')->name('new-arrivals');
     Route::view('/best-sellers', 'client.pages.best-sellers')->name('best-sellers');
-    Route::view('/deals', 'client.pages.deals')->name('deals');
     Route::view('/order-tracking', 'client.pages.order-tracking')->name('order-tracking');
 
     Route::get('/brand/{slug}', function ($slug) {
@@ -74,6 +73,7 @@ Route::middleware('auth')->group(function () {
 // Products
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
+    Route::get('/deals', [ProductController::class, 'deals'])->name('deals');
     Route::post('/variant-discount', [ProductController::class, 'getVariantDiscount'])->name('variant-discount');
     Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
 });
