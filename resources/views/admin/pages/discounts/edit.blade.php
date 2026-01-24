@@ -107,7 +107,8 @@
                                 <label class="form-label fw-semibold">Start Date & Time</label>
                                 <input type="datetime-local" name="starts_at"
                                        value="{{ $discount->starts_at }}"
-                                       class="form-control">
+                                       class="form-control" id="starts-at-field"
+                                       readonly style="background-color: #98a3ad!important; cursor: not-allowed;">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">End Date & Time</label>
@@ -414,21 +415,6 @@
             productVariants: @json($productVariants ?? []),
             rowIdx: {{ old('targets') ? count(old('targets')) : (isset($discount) && isset($discount->targets) ? $discount->targets->count() : 0) }}
         };
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var typeSelect = document.querySelector('select[name="type"]');
-            var maxDiscountWrapper = document.getElementById('max-discount-cap-wrapper');
-            function toggleMaxDiscount() {
-                if (typeSelect.value === 'percentage') {
-                    maxDiscountWrapper.style.display = '';
-                } else {
-                    maxDiscountWrapper.style.display = 'none';
-                }
-            }
-            typeSelect.addEventListener('change', toggleMaxDiscount);
-            toggleMaxDiscount(); // Initial call
-        });
     </script>
     <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
 @endpush

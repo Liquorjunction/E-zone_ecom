@@ -149,7 +149,6 @@
 
     {{-- Featured Promotional Banners Carousel --}}
     @php
-        // Always chunk by the maximum items per page (2 for banners)
         $bannerChunks = $cards->take(4)->chunk(2);
     @endphp
     <section class="py-8 sm:py-12 bg-white" x-data="{
@@ -444,7 +443,6 @@
     @php
         $bestSellerCount = ($bestSellers ?? collect())->count();
     @endphp
-
     @if ($bestSellerCount > 0)
         <section id="bestsellers" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
             currentSlide: 0,

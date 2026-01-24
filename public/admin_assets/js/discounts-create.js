@@ -1,4 +1,21 @@
 $(document).ready(function() {
+        // Lock the start date field (readonly, styled, non-editable) for both create and edit forms
+        function lockStartDateField() {
+            var $startInput = $("#starts-at-field");
+            if ($startInput.length) {
+                if (!$startInput.val()) {
+                    var now = new Date();
+                    var pad = n => n < 10 ? '0' + n : n;
+                    var local = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+                    $startInput.val(local);
+                }
+                $startInput.prop('readonly', true);
+                $startInput.css({'background-color': '#98a3ad', 'cursor': 'not-allowed'});
+                $startInput.attr('tabindex', -1);
+                $startInput.on('keydown', function(e) { e.preventDefault(); });
+            }
+        }
+        lockStartDateField();
     const data = window._discountData || {};
     let categories = data.categories || [];
     let brands = data.brands || [];

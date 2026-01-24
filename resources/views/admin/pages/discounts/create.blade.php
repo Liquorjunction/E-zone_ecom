@@ -367,36 +367,6 @@
             rowIdx: {{ old('targets') ? count(old('targets')) : 0 }}
         };
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var typeSelect = document.querySelector('select[name="type"]');
-            var maxDiscountWrapper = document.getElementById('max-discount-cap-wrapper');
-            function toggleMaxDiscount() {
-                if (typeSelect.value === 'percentage') {
-                    maxDiscountWrapper.style.display = '';
-                } else {
-                    maxDiscountWrapper.style.display = 'none';
-                }
-            }
-            typeSelect.addEventListener('change', toggleMaxDiscount);
-            toggleMaxDiscount(); // Initial call
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var startInput = document.getElementById('starts-at-field');
-            if (startInput) {
-                if (!startInput.value) {
-                    var now = new Date();
-                    var pad = n => n < 10 ? '0' + n : n;
-                    var local = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
-                    startInput.value = local;
-                }
-                startInput.readOnly = true;
-                startInput.tabIndex = -1;
-                startInput.addEventListener('keydown', function(e) { e.preventDefault(); });
-            }
-        });
-    </script>
+    <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
     <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
 @endpush
