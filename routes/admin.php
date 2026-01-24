@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingAndReturnController;
 use App\Http\Controllers\Admin\ShowroomController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\StockReportController;
 use App\Http\Controllers\Admin\StoreController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\TncController;
@@ -363,6 +364,11 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [WhyShopWithUsController::class, 'update'])->name('update')->middleware('can:why_choose_us.update,admin');
             Route::delete('/destroy', [WhyShopWithUsController::class, 'destroy'])->name('destroy')->middleware('can:why_choose_us.delete,admin');
             Route::patch('/toggle-status', [WhyShopWithUsController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:why_choose_us.update,admin');
+        });
+
+        // Reports Routes
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/stock', [StockReportController::class, 'index'])->name('stock');
         });
     });
 });

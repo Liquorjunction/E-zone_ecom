@@ -400,7 +400,7 @@
             rowIdx: {{ old('targets') ? count(old('targets')) : 0 }}
         };
     </script>
-        {{-- NOt USED FOr NOW --}}
+        {{-- Field NOt USED FOr NOW --}}
     {{-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             var typeSelect = document.querySelector('select[name="type"]');

@@ -115,7 +115,9 @@ class OrderRepository implements OrderRepositoryInterface
                     $before = $available;
                     $after = $before - $deduct;
 
+                    // Update both quantity and reserved_quantity
                     $inv->quantity = $after;
+                    $inv->reserved_quantity = ($inv->reserved_quantity ?? 0) + $deduct;
                     $inv->save();
 
                     $inventoryTxns[] = [
@@ -145,12 +147,14 @@ class OrderRepository implements OrderRepositoryInterface
                         'warehouse_id' => null,
                         'store_id' => null,
                         'quantity' => 0,
+                        'reserved_quantity' => 0,
                         'cost_price' => $item->unit_price ?? 0,
                         'status' => 'active',
                     ]);
 
                     $before = (float) $placeholder->quantity;
                     $placeholder->quantity = $before - $remaining;
+                    $placeholder->reserved_quantity = ($placeholder->reserved_quantity ?? 0) + $remaining;
                     $placeholder->save();
 
                     $inventoryTxns[] = [
@@ -222,7 +226,9 @@ class OrderRepository implements OrderRepositoryInterface
                 if (! $inv) continue;
 
                 $before = $inv->quantity;
+                $beforeReserved = $inv->reserved_quantity ?? 0;
                 $inv->quantity = $inv->quantity + $sum;
+                $inv->reserved_quantity = max(0, $beforeReserved - $sum);
                 $inv->save();
 
                 try {

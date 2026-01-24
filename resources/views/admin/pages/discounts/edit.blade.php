@@ -446,7 +446,7 @@
             rowIdx: {{ old('targets') ? count(old('targets')) : (isset($discount) && isset($discount->targets) ? $discount->targets->count() : 0) }}
         };
     </script>
-        {{-- NOt USED FOr NOW --}}
+        {{-- Field NOt USED FOr NOW --}}
     {{-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             var typeSelect = document.querySelector('select[name="type"]');

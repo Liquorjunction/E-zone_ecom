@@ -15,57 +15,63 @@
 <script src="{{ asset('admin_assets/js/datatableJs/batchOperations.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
 {{-- Toast Functionality --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Global function to show custom toast
-    window.showToast = function(message, type = 'info', title = 'Notification', actionCallback = null) {
-        const toastElement = document.getElementById('globalToast');
-        const toastMessage = document.getElementById('toastMessage');
-        const toastActionBtn = document.getElementById('toastActionBtn');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Global function to show custom toast
+        window.showToast = function(message, type = 'info', title = 'Notification', actionCallback = null) {
+            const toastElement = document.getElementById('globalToast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastActionBtn = document.getElementById('toastActionBtn');
 
-        // Set message
-        toastMessage.textContent = message;
+            // Set message
+            toastMessage.textContent = message;
 
-        // Set background color based on type
-        toastElement.className = 'toast fade show';
-        if (type === 'success') {
-            toastElement.classList.add('bg-success', 'text-white');
-        } else if (type === 'error') {
-            toastElement.classList.add('bg-danger', 'text-white');
-        } else if (type === 'warning') {
-            toastElement.classList.add('bg-warning');
-        } else {
-            toastElement.classList.add('bg-info', 'text-white');
-        }
+            // Set background color based on type
+            toastElement.className = 'toast fade show';
+            if (type === 'success') {
+                toastElement.classList.add('bg-success', 'text-white');
+            } else if (type === 'error') {
+                toastElement.classList.add('bg-danger', 'text-white');
+            } else if (type === 'warning') {
+                toastElement.classList.add('bg-warning');
+            } else {
+                toastElement.classList.add('bg-info', 'text-white');
+            }
 
-        // Handle action button
-        if (actionCallback) {
-            toastActionBtn.style.display = 'inline-block';
-            toastActionBtn.textContent = 'Take action';
-            toastActionBtn.onclick = actionCallback;
-        } else {
-            toastActionBtn.style.display = 'none';
-        }
+            // Handle action button
+            if (actionCallback) {
+                toastActionBtn.style.display = 'inline-block';
+                toastActionBtn.textContent = 'Take action';
+                toastActionBtn.onclick = actionCallback;
+            } else {
+                toastActionBtn.style.display = 'none';
+            }
 
-        // Show the toast
-        const toast = new bootstrap.Toast(toastElement);
-        toast.show();
-    };
+            // Show the toast
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        };
 
-    // Automatically show toasts for flashed session messages
-    @if(session('success'))
-        showToast("{{ session('success') }}", 'success', 'Success');
-    @endif
-    @if(session('error'))
-        showToast("{{ session('error') }}", 'error', 'Error');
-    @endif
-    @if(session('warning'))
-        showToast("{{ session('warning') }}", 'warning', 'Warning');
-    @endif
-    @if(session('info'))
-        showToast("{{ session('info') }}", 'info', 'Info');
-    @endif
-});
+        // Automatically show toasts for flashed session messages
+        @if (session('success'))
+            showToast("{{ session('success') }}", 'success', 'Success');
+        @endif
+        @if (session('error'))
+            showToast("{{ session('error') }}", 'error', 'Error');
+        @endif
+        @if (session('warning'))
+            showToast("{{ session('warning') }}", 'warning', 'Warning');
+        @endif
+        @if (session('info'))
+            showToast("{{ session('info') }}", 'info', 'Info');
+        @endif
+    });
 </script>
