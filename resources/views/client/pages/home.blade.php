@@ -294,7 +294,7 @@
                             {{ gtrans('Grab the best offers on top products') }}
                         </p>
                     </div>
-                    <div class="hidden md:flex items-center gap-2">
+                    <div class="flex items-center gap-2">
                         <button @click="prev()" :disabled="!canGoPrev"
                             :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
                             class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
@@ -309,9 +309,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
-                    </div>
-                    <div class="md:hidden">
-                        <a href="{{ route('products.deals') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
+                        <a href="{{ route('products.deals') }}" class="ml-4 inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
                             {{ gtrans('View All Deals') }}
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
