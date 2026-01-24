@@ -64,8 +64,8 @@
                                             </div>
                                             <!-- Location (EN) -->
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Location (English)</label>
-                                                <input type="text" name="location[en]" class="form-control @error('location.en') is-invalid @enderror" value="{{ old('location.en', $store->getTranslation('location', 'en')) }}">
+                                                <label class="form-label">Location (English)<span class="text-danger">*</span></label>
+                                                <input type="text" name="location[en]" class="form-control @error('location.en') is-invalid @enderror" required value="{{ old('location.en', $store->getTranslation('location', 'en')) }}">
                                                 @error('location.en')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror

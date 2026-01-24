@@ -35,7 +35,7 @@
                 <ul class="space-y-3">
                     <li><a href="{{ route('about') }}" class="hover:text-white transition-colors">About Us</a></li>
                     <li><a href="{{ route('showrooms') }}" class="hover:text-white transition-colors">Showrooms</a></li>
-                    <li><a href="{{ route('sitemap') }}" class="hover:text-white transition-colors">Sitemap</a></li>
+                    {{-- <li><a href="{{ route('sitemap') }}" class="hover:text-white transition-colors">Sitemap</a></li> --}}
                 </ul>
             </div>
 

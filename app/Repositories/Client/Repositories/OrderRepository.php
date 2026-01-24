@@ -64,6 +64,8 @@ class OrderRepository implements OrderRepositoryInterface
             ]);
 
             $total = 0;
+            $orderItems = [];
+            $inventoryTxns = [];
             foreach ($cart->items as $item) {
                 $variant = $item->variant ?: ProductVariant::withTrashed()->find($item->variant_id);
                 $product = $item->product;
@@ -76,7 +78,7 @@ class OrderRepository implements OrderRepositoryInterface
                 $lineDiscount = round($discountPerUnit * $item->quantity, 2);
                 $lineFinal = round($unitPriceFinal * $item->quantity, 2);
 
-                OrderItem::create([
+                $orderItems[] = [
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'variant_id' => $item->variant_id,
@@ -88,7 +90,7 @@ class OrderRepository implements OrderRepositoryInterface
                     'line_discount' => $lineDiscount,
                     'total_price' => $lineFinal,
                     'line_total' => $lineFinal,
-                ]);
+                ];
                 $total += $lineFinal;
 
                 $remaining = $item->quantity;
@@ -116,24 +118,20 @@ class OrderRepository implements OrderRepositoryInterface
                     $inv->quantity = $after;
                     $inv->save();
 
-                    try {
-                        InventoryTransaction::create([
-                            'inventory_id' => $inv->id,
-                            'type' => 'sale',
-                            'quantity' => $deduct,
-                            'rate' => $item->unit_price ?? 0,
-                            'batch_no' => $inv->batch_no,
-                            'created_by' => Auth::id() ?? ($order->user_id ?? null),
-                            'description' => 'Order #' . $order->id,
-                            'reference_type' => 'order',
-                            'reference_id' => $order->id,
-                            'before_quantity' => $before,
-                            'after_quantity' => $after,
-                            'quantity_change' => -1 * $deduct,
-                        ]);
-                    } catch (\Throwable $e) {
-                        Log::error($e->getMessage());
-                    }
+                    $inventoryTxns[] = [
+                        'inventory_id' => $inv->id,
+                        'type' => 'sale',
+                        'quantity' => $deduct,
+                        'rate' => $item->unit_price ?? 0,
+                        'batch_no' => $inv->batch_no,
+                        'created_by' => Auth::id() ?? ($order->user_id ?? null),
+                        'description_type' => 'normal',
+                        'reference_type' => 'order',
+                        'reference_id' => $order->id,
+                        'before_quantity' => $before,
+                        'after_quantity' => $after,
+                        'quantity_change' => -1 * $deduct,
+                    ];
 
                     $remaining -= $deduct;
                 }
@@ -155,30 +153,45 @@ class OrderRepository implements OrderRepositoryInterface
                     $placeholder->quantity = $before - $remaining;
                     $placeholder->save();
 
-                    try {
-                        InventoryTransaction::create([
-                            'inventory_id' => $placeholder->id,
-                            'type' => 'sale',
-                            'quantity' => $remaining,
-                            'rate' => $item->unit_price ?? 0,
-                            'batch_no' => $placeholder->batch_no,
-                            'created_by' => Auth::id() ?? ($order->user_id ?? null),
-                            'description' => 'Order #' . $order->id . ' (backorder)',
-                            'reference_type' => 'order',
-                            'reference_id' => $order->id,
-                            'before_quantity' => $before,
-                            'after_quantity' => $placeholder->quantity,
-                            'quantity_change' => -1 * $remaining,
-                        ]);
-                    } catch (\Throwable $e) {
-                        Log::error($e->getMessage());
-                    }
+                    $inventoryTxns[] = [
+                        'inventory_id' => $placeholder->id,
+                        'type' => 'sale',
+                        'quantity' => $remaining,
+                        'rate' => $item->unit_price ?? 0,
+                        'batch_no' => $placeholder->batch_no,
+                        'created_by' => Auth::id() ?? ($order->user_id ?? null),
+                        'description_type' => 'backorder',
+                        'reference_type' => 'order',
+                        'reference_id' => $order->id,
+                        'before_quantity' => $before,
+                        'after_quantity' => $placeholder->quantity,
+                        'quantity_change' => -1 * $remaining,
+                    ];
                 }
+            }
+
+            foreach ($orderItems as $oi) {
+                OrderItem::create($oi);
             }
 
             $order->total = $total;
             $order->order_number = 'EZMA/ORD/'.str_pad($order->id, 4, '0', STR_PAD_LEFT);
             $order->save();
+
+            // Now create inventory transactions with correct order_number
+            foreach ($inventoryTxns as $txn) {
+                try {
+                    $desc = $txn['description_type'] === 'backorder'
+                        ? 'Order #' . $order->order_number . ' (backorder)'
+                        : 'Order #' . $order->order_number;
+                    $txnData = $txn;
+                    unset($txnData['description_type']);
+                    $txnData['description'] = $desc;
+                    InventoryTransaction::create($txnData);
+                } catch (\Throwable $e) {
+                    Log::error($e->getMessage());
+                }
+            }
 
             $cart->items()->delete();
             $cart->delete();

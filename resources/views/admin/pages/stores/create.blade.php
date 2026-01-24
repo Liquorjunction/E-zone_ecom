@@ -55,9 +55,9 @@
                                                 @enderror
                                             </div>
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label">Location (EN)</label>
+                                                <label class="form-label">Location (EN) <span class="text-danger">*</span></label>
                                                 <input type="text" name="location[en]" class="form-control @error('location.en') is-invalid @enderror"
-                                                    placeholder="Location in English" value="{{ old('location.en') }}">
+                                                    placeholder="Location in English" required value="{{ old('location.en') }}">
                                                 @error('location.en')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror

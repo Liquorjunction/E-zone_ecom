@@ -11,8 +11,17 @@
 </head>
 
 <body class="bg-white min-h-screen">
-    <div
-        class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-gray-50 to-white">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-gray-50 to-white relative">
+        <!-- Back Button Top Left -->
+        <div class="absolute top-6 left-6 z-10">
+            <a href="{{ url('/') }}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-xl bg-white text-primary font-semibold shadow-sm hover:bg-gray-100 transition-all duration-200">
+                <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Home
+            </a>
+        </div>
         <div class="max-w-md w-full space-y-8">
             <!-- Header -->
             <div class="text-center">
@@ -172,15 +181,6 @@
                                 aria-hidden="true">→</span>
                         </a>
                     </p>
-                    <div class="mt-4 flex justify-center">
-                        <a href="{{ url('/') }}"
-                           class="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-xl bg-white text-primary font-semibold shadow-sm hover:bg-gray-100 transition-all duration-200">
-                            <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Back to Home Page
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

@@ -127,10 +127,10 @@
                                             </td>
                                             <td>${{ number_format($item->cost_price, 2) }}</td>
                                             <td>
-                                                <span class="fw-bold">{{ number_format($item->quantity) }}</span>
+                                                <span class="fw-bold">{{ (int) $item->quantity }}</span>
                                             </td>
                                             <td class="fw-bold text-primary">
-                                                ${{ number_format($item->cost_price * $item->quantity, 2) }}
+                                                ${{ number_format($item->cost_price * $item->quantity, 0) }}
                                             </td>
                                             <td>
                                                 <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#history-{{ $item->id }}" aria-expanded="false" aria-controls="history-{{ $item->id }}">
@@ -162,15 +162,26 @@
                                                                         <td>{{ $txn->created_at->format('d M Y, h:i A') }}</td>
                                                                         <td>
                                                                             @php
-                                                                                $user = $txn->created_by ? \App\Models\Admin::find($txn->created_by) : null;
+                                                                                $userName = 'System';
+                                                                                if ($txn->created_by) {
+                                                                                    if (in_array($txn->type, ['stock-in', 'stock-adjustment', 'stock-transfer'])) {
+                                                                                        $admin = \App\Models\Admin::find($txn->created_by);
+                                                                                        $userName = $admin ? $admin->name : 'Admin';
+                                                                                    } elseif (in_array($txn->type, ['sale', 'return'])) {
+                                                                                        $userName = 'Customer';
+                                                                                    } else {
+                                                                                        $admin = \App\Models\Admin::find($txn->created_by);
+                                                                                        $userName = $admin ? $admin->name : 'User';
+                                                                                    }
+                                                                                }
                                                                             @endphp
-                                                                            {{ $user ? $user->name : 'System' }}
+                                                                            {{ $userName }}
                                                                         </td>
                                                                         <td><span class="badge bg-info text-dark text-uppercase">{{ $txn->type }}</span></td>
                                                                         <td>{{ $txn->description }}</td>
-                                                                        <td>{{ $txn->before_quantity ?? '-' }}</td>
-                                                                        <td>{{ $txn->quantity_change ?? $txn->quantity }}</td>
-                                                                        <td>{{ $txn->after_quantity ?? '-' }}</td>
+                                                                        <td>{{ isset($txn->before_quantity) ? (int) $txn->before_quantity : '-' }}</td>
+                                                                        <td>{{ isset($txn->quantity_change) ? (int) $txn->quantity_change : (int) $txn->quantity }}</td>
+                                                                        <td>{{ isset($txn->after_quantity) ? (int) $txn->after_quantity : '-' }}</td>
                                                                     </tr>
                                                                 @empty
                                                                     <tr>
@@ -195,7 +206,7 @@
                                 <tfoot class="bg-light">
                                     <tr>
                                         <td colspan="4" class="text-end fw-bold">Total:</td>
-                                        <td class="fw-bold">{{ $batchItems->sum('quantity') }}</td>
+                                        <td class="fw-bold">{{ (int) $batchItems->sum('quantity') }}</td>
                                         <td class="fw-bold text-primary">
                                             ${{ number_format($batchItems->sum(function ($i) {return $i->cost_price * $i->quantity;}),2) }}
                                         </td>

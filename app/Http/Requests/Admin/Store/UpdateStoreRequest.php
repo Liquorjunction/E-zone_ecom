@@ -28,8 +28,8 @@ class UpdateStoreRequest extends FormRequest
             'store_name.en' => 'required|string|max:255',
             'store_name.fr' => 'nullable|string|max:255',
             'store_name.ar' => 'nullable|string|max:255',
-            'location' => 'nullable|array',
-            'location.en' => 'nullable|string',
+            'location' => 'required|array',
+            'location.en' => 'required|string',
             'location.fr' => 'nullable|string',
             'location.ar' => 'nullable|string',
             'status' => 'required|in:0,1,active,inactive',
@@ -46,6 +46,7 @@ class UpdateStoreRequest extends FormRequest
             'id.required' => 'The store ID is required.',
             'id.exists'   => 'The specified store does not exist.',
             'store_name.en.required' => 'The English store name is required.',
+            'location.en.required' => 'The English location is required.',
             'store_logo.image'       => 'The store logo must be an image file.',
             'store_logo.max'         => 'The store logo size must not exceed 5MB.',
         ];
