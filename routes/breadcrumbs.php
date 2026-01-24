@@ -355,3 +355,63 @@ Breadcrumbs::for('admin.category-subcategory.subcategories.edit', function (Brea
     $trail->parent('admin.category-subcategory.subcategories.index');
     $trail->push('Edit SubCategory', route('admin.category-subcategory.subcategories.edit'));
 });
+
+// --- Brands ---
+Breadcrumbs::for('admin.brands.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Brands', route('admin.brands.index'));
+});
+
+Breadcrumbs::for('admin.brands.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.brands.index');
+    $trail->push('Create Brand', route('admin.brands.create'));
+});
+
+Breadcrumbs::for('admin.brands.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.brands.index');
+    $trail->push('Edit Brand', route('admin.brands.edit'));
+});
+
+// --- Inventory ---
+Breadcrumbs::for('admin.inventory.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Inventory Batches', route('admin.inventory.index'));
+});
+
+Breadcrumbs::for('admin.inventory.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.inventory.index');
+    $trail->push('Create Inventory Batch', route('admin.inventory.create'));
+});
+
+Breadcrumbs::for('admin.inventory.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.inventory.index');
+    $trail->push('Edit Inventory Batch', route('admin.inventory.edit'));
+});
+
+Breadcrumbs::for('admin.inventory.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.inventory.index');
+    $trail->push('View Inventory Batch', route('admin.inventory.show', $id));
+});
+
+// --- Order ---
+Breadcrumbs::for('admin.order.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Orders', route('admin.order.index'));
+});
+
+// --CMS Pages ---
+
+// --- About Us ---
+Breadcrumbs::for('admin.about_us.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('About Us', route('admin.about_us.index'));
+});
+Breadcrumbs::for('admin.about_us.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.about_us.index');
+    $trail->push('Create About Us', route('admin.about_us.create'));
+});
+Breadcrumbs::for('admin.about_us.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.about_us.index');
+    $trail->push('Edit About Us', route('admin.about_us.edit'));
+});
+

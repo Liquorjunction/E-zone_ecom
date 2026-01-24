@@ -2,13 +2,13 @@ $(document).ready(function() {
         // Lock the start date field (readonly, styled, non-editable) for both create and edit forms
         function lockStartDateField() {
             var $startInput = $("#starts-at-field");
-            if ($startInput.length) {
-                if (!$startInput.val()) {
-                    var now = new Date();
-                    var pad = n => n < 10 ? '0' + n : n;
-                    var local = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
-                    $startInput.val(local);
-                }
+            var $hiddenInput = $("#starts-at-hidden");
+            if ($startInput.length && $hiddenInput.length) {
+                // Always sync hidden input value with visible field
+                $hiddenInput.val($startInput.val());
+                $startInput.on('change input', function() {
+                    $hiddenInput.val($startInput.val());
+                });
                 $startInput.prop('readonly', true);
                 $startInput.css({'background-color': '#98a3ad', 'cursor': 'not-allowed'});
                 $startInput.attr('tabindex', -1);
@@ -280,22 +280,7 @@ $(document).ready(function() {
             // Remove error highlight if targets exist
             $('#target-rows .empty-message').removeClass('table-danger').find('.target-error').remove();
         }
-        // Validate start date is not in the past
-        var $startInput = $("input[name='starts_at']");
-        if ($startInput.length && $startInput.val()) {
-            var selected = new Date($startInput.val());
-            var now = new Date();
-            if (selected < now) {
-                valid = false;
-                $startInput.addClass('is-invalid');
-                if ($startInput.next('.start-date-error').length === 0) {
-                    $startInput.after('<div class="start-date-error invalid-feedback d-block">Start date cannot be in the past.</div>');
-                }
-            } else {
-                $startInput.removeClass('is-invalid');
-                $startInput.next('.start-date-error').remove();
-            }
-        }
+        // Removed JS validation for start date being in the past
         if ($('#target-rows tr[data-invalid="1"]').length) valid = false;
         if (!valid) {
             e.preventDefault();

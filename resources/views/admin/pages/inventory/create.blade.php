@@ -1,6 +1,17 @@
 @extends('admin.layouts.app')
 
 @section('title', isset($referenceItem) ? 'Edit Inventory Batch' : 'Inward New Stock')
+@section('header-title', isset($referenceItem) ? 'Edit Inventory Batch' : 'Inward New Stock')
+@section('header-description', isset($referenceItem) ? 'Modify existing inventory batch details' : 'Create a new inventory batch by adding products and their quantities')
+@section('breadcrumbs')
+    @foreach(Breadcrumbs::generate('admin.inventory.create', isset($referenceItem) ? $referenceItem : null) as $breadcrumb)
+        @if($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
 <div class="container-fluid">

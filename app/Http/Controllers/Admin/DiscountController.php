@@ -75,7 +75,7 @@ class DiscountController extends Controller
 
             $discountService->clearAllDiscountCaches();
 
-            return redirect()->back()->with('success', 'Discount created successfully.');
+            return redirect()->route('admin.discounts.index')->with('success', 'Discount created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('DiscountController.store: ' . $e->getMessage(), ['data' => $data ?? []]);
@@ -161,6 +161,8 @@ class DiscountController extends Controller
             DB::commit();
 
             $discountService->clearAllDiscountCaches();
+
+            return redirect()->route('admin.discounts.index')->with('success', 'Discount updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('DiscountController.update: ' . $e->getMessage(), ['discount_id' => $id ?? null]);

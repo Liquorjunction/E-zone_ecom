@@ -1,5 +1,16 @@
 @extends('admin.layouts.app')
 @section('title', 'Brands Management')
+@section('header-title', 'Brands Management')
+@section('header-description', 'Manage all brands associated with products')
+@section('breadcrumbs')
+    @foreach(Breadcrumbs::generate('admin.brands.index') as $breadcrumb)
+        @if($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
      <div class="container-fluid">

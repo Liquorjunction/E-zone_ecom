@@ -106,9 +106,10 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Start Date & Time</label>
                                 <input type="datetime-local" name="starts_at"
-                                       value="{{ $discount->starts_at }}"
-                                       class="form-control" id="starts-at-field"
-                                       readonly style="background-color: #98a3ad!important; cursor: not-allowed;">
+                                                    value="{{ \Carbon\Carbon::parse($discount->starts_at)->format('Y-m-d\TH:i') }}"
+                                        class="form-control" id="starts-at-field"
+                                        style="background-color: #98a3ad!important; cursor: not-allowed;">
+                                                <input type="hidden" name="starts_at" id="starts-at-hidden" value="{{ \Carbon\Carbon::parse($discount->starts_at)->format('Y-m-d\TH:i') }}">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">End Date & Time</label>

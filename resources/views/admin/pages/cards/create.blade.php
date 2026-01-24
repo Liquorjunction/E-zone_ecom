@@ -1,5 +1,16 @@
 @extends('admin.layouts.app')
 @section('title', 'Create Card')
+@section('header-title', 'Create Card')
+@section('header-description', 'Add a new card to be displayed on the homepage')
+@section('breadcrumbs')
+    @foreach(Breadcrumbs::generate('admin.about_us.create') as $breadcrumb)
+        @if($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('breadcrumbs')
     @foreach (Breadcrumbs::generate('admin.cards.create') as $breadcrumb)

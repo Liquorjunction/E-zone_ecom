@@ -92,7 +92,9 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Start Date & Time</label>
                                     <input type="datetime-local" name="starts_at" class="form-control" id="starts-at-field"
-                                        value="{{ old('starts_at', now()->format('Y-m-d\TH:i')) }}" readonly style="background-color: #98a3ad!important; cursor: not-allowed;">
+                                        value="{{ old('starts_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}"
+                                        style="background-color: #98a3ad!important; cursor: not-allowed;">
+                                    <input type="hidden" name="starts_at" id="starts-at-hidden" value="{{ old('starts_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">End Date & Time</label>
@@ -264,61 +266,92 @@
                                                 </tr>
                                             @endforeach
                                         @elseif(isset($resolvedTargets) && count($resolvedTargets))
-                                            @foreach($resolvedTargets as $index => $t)
+                                            @foreach ($resolvedTargets as $index => $t)
                                                 <tr>
                                                     <td class="ps-4">
-                                                        <select name="targets[{{ $index }}][target_type]" class="form-select target-type-select">
-                                                            <option value="product" {{ $t['target_type'] == 'product' ? 'selected' : '' }}>Product</option>
-                                                            <option value="category" {{ $t['target_type'] == 'category' ? 'selected' : '' }}>Category</option>
-                                                            <option value="subcategory" {{ $t['target_type'] == 'subcategory' ? 'selected' : '' }}>Subcategory</option>
-                                                            <option value="brand" {{ $t['target_type'] == 'brand' ? 'selected' : '' }}>Brand</option>
+                                                        <select name="targets[{{ $index }}][target_type]"
+                                                            class="form-select target-type-select">
+                                                            <option value="product"
+                                                                {{ $t['target_type'] == 'product' ? 'selected' : '' }}>
+                                                                Product</option>
+                                                            <option value="category"
+                                                                {{ $t['target_type'] == 'category' ? 'selected' : '' }}>
+                                                                Category</option>
+                                                            <option value="subcategory"
+                                                                {{ $t['target_type'] == 'subcategory' ? 'selected' : '' }}>
+                                                                Subcategory</option>
+                                                            <option value="brand"
+                                                                {{ $t['target_type'] == 'brand' ? 'selected' : '' }}>Brand
+                                                            </option>
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        @if($t['target_type'] == 'category')
-                                                            <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
+                                                        @if ($t['target_type'] == 'category')
+                                                            <select name="targets[{{ $index }}][target_id]"
+                                                                class="form-select target-id-select">
                                                                 <option value="">Select Category</option>
                                                                 @foreach ($categories ?? [] as $cat)
-                                                                    <option value="{{ $cat->id }}" {{ $t['target_id'] == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                                                    <option value="{{ $cat->id }}"
+                                                                        {{ $t['target_id'] == $cat->id ? 'selected' : '' }}>
+                                                                        {{ $cat->name }}</option>
                                                                 @endforeach
                                                             </select>
                                                         @elseif($t['target_type'] == 'brand')
-                                                            <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
+                                                            <select name="targets[{{ $index }}][target_id]"
+                                                                class="form-select target-id-select">
                                                                 <option value="">Select Brand</option>
                                                                 @foreach ($brands ?? [] as $br)
-                                                                    <option value="{{ $br->id }}" {{ $t['target_id'] == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
+                                                                    <option value="{{ $br->id }}"
+                                                                        {{ $t['target_id'] == $br->id ? 'selected' : '' }}>
+                                                                        {{ $br->name }}</option>
                                                                 @endforeach
                                                             </select>
                                                         @elseif($t['target_type'] == 'subcategory')
-                                                            <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
+                                                            <select name="targets[{{ $index }}][target_id]"
+                                                                class="form-select target-id-select">
                                                                 <option value="">Select Subcategory</option>
                                                                 @foreach ($subcategories ?? [] as $sc)
-                                                                    <option value="{{ $sc->id }}" {{ $t['target_id'] == $sc->id ? 'selected' : '' }}>{{ $sc->name }}</option>
+                                                                    <option value="{{ $sc->id }}"
+                                                                        {{ $t['target_id'] == $sc->id ? 'selected' : '' }}>
+                                                                        {{ $sc->name }}</option>
                                                                 @endforeach
                                                             </select>
-                                                            @elseif($t['target_type'] == 'product')
+                                                        @elseif($t['target_type'] == 'product')
                                                             @php
-                                                                $variantIds = collect($productVariants ?? [])->pluck('id')->all();
+                                                                $variantIds = collect($productVariants ?? [])
+                                                                    ->pluck('id')
+                                                                    ->all();
                                                             @endphp
-                                                            @if(in_array($t['target_id'], $variantIds))
-                                                                <select name="targets[{{ $index }}][target_id]" class="form-select target-id-select">
+                                                            @if (in_array($t['target_id'], $variantIds))
+                                                                <select name="targets[{{ $index }}][target_id]"
+                                                                    class="form-select target-id-select">
                                                                     <option value="">Select Variant</option>
                                                                     @foreach ($productVariants ?? [] as $p)
-                                                                        <option value="{{ $p->id }}" {{ $t['target_id'] == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
+                                                                        <option value="{{ $p->id }}"
+                                                                            {{ $t['target_id'] == $p->id ? 'selected' : '' }}>
+                                                                            {{ $p->name }}</option>
                                                                     @endforeach
                                                                 </select>
                                                             @else
                                                                 <div class="d-flex">
-                                                                    <input type="number" name="targets[{{ $index }}][target_id]" class="form-control me-2" value="{{ $t['target_id'] }}" readonly>
-                                                                    <input type="text" class="form-control" value="{{ $t['name'] ?? 'Unknown' }}" readonly>
+                                                                    <input type="number"
+                                                                        name="targets[{{ $index }}][target_id]"
+                                                                        class="form-control me-2"
+                                                                        value="{{ $t['target_id'] }}" readonly>
+                                                                    <input type="text" class="form-control"
+                                                                        value="{{ $t['name'] ?? 'Unknown' }}" readonly>
                                                                 </div>
                                                             @endif
                                                         @else
-                                                            <input type="number" name="targets[{{ $index }}][target_id]" class="form-control" placeholder="Enter ID (e.g., 105)" value="{{ $t['target_id'] }}" required>
+                                                            <input type="number"
+                                                                name="targets[{{ $index }}][target_id]"
+                                                                class="form-control" placeholder="Enter ID (e.g., 105)"
+                                                                value="{{ $t['target_id'] }}" required>
                                                         @endif
                                                     </td>
                                                     <td class="text-center">
-                                                        <button type="button" class="btn btn-soft-danger btn-sm remove-row">
+                                                        <button type="button"
+                                                            class="btn btn-soft-danger btn-sm remove-row">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </td>
@@ -367,6 +400,21 @@
             rowIdx: {{ old('targets') ? count(old('targets')) : 0 }}
         };
     </script>
-    <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var typeSelect = document.querySelector('select[name="type"]');
+            var maxDiscountWrapper = document.getElementById('max-discount-cap-wrapper');
+
+            function toggleMaxDiscount() {
+                if (typeSelect.value === 'percentage') {
+                    maxDiscountWrapper.style.display = '';
+                } else {
+                    maxDiscountWrapper.style.display = 'none';
+                }
+            }
+            typeSelect.addEventListener('change', toggleMaxDiscount);
+            toggleMaxDiscount(); // Initial call
+        });
+    </script>
     <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
 @endpush
