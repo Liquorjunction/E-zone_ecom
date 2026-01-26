@@ -15,4 +15,5 @@ interface DiscountRepositoryInterface
     public function getProductVariants();
     public function formatTargetsCollection($items);
     public function getSelectLists();
+    public function hasDuplicateActiveTargets(array $targets);
 }

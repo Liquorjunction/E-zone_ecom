@@ -210,4 +210,27 @@ class DiscountRepository implements DiscountRepositoryInterface
 
         return compact('categories', 'subcategories', 'brands', 'products');
     }
+
+    public function hasDuplicateActiveTargets(array $targets): bool
+    {
+        foreach ($targets as $target) {
+            if (!empty($target['target_type']) && !empty($target['target_id'])) {
+                $exists = \App\Models\DiscountTarget::where('target_type', $target['target_type'])
+                    ->where('target_id', $target['target_id'])
+                    ->whereHas('discount', function ($q) {
+                        $q->where('status', true)
+                          ->where(function ($query) {
+                              $now = now();
+                              $query->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+                              $query->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+                          });
+                    })
+                    ->exists();
+                if ($exists) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

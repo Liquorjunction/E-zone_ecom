@@ -54,6 +54,14 @@ class DiscountController extends Controller
             }
             // ----------------------------------------
 
+            // Prevent duplicate active targets using repository
+            if ($request->has('targets') && !empty($request->targets)) {
+                if ($discountRepo->hasDuplicateActiveTargets($request->targets)) {
+                    DB::rollBack();
+                    return redirect()->back()->with('error', 'One or more targets are already used in an active discount.')->withInput();
+                }
+            }
+
             $discount = $discountRepo->create($data);
 
             if ($request->has('targets') && !empty($request->targets)) {
