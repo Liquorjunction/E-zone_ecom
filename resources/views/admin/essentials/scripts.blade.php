@@ -1,3 +1,4 @@
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="{{ asset('admin_assets/js/core/libs.min.js') }}"></script>
 <script src="{{ asset('admin_assets/js/core/external.min.js') }}"></script>
@@ -13,10 +14,10 @@
 <script src="{{ asset('admin_assets/js/datatable-status-toggle.js') }}"></script>
 <script src="{{ asset('admin_assets/js/sidebar-hover.js') }}"></script>
 <script src="{{ asset('admin_assets/js/datatableJs/batchOperations.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<!-- jQuery and DataTables JS -->
+<!-- jQuery and DataTables JS (jQuery must come before Select2) -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
