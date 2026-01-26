@@ -236,10 +236,10 @@ class DiscountController extends Controller
                 return $discount->getTranslation('name', 'en');
             })
             ->addColumn('starts_at', function ($discount) {
-                return $discount->starts_at ? $discount->starts_at->format('Y-m-d') : '';
+                return $discount->starts_at ? $discount->starts_at->format('Y-m-d H:i:s') : '';
             })
             ->addColumn('ends_at', function ($discount) {
-                return $discount->ends_at ? $discount->ends_at->format('Y-m-d') : '';
+                return $discount->ends_at ? $discount->ends_at->format('Y-m-d H:i:s') : '';
             })
             ->addColumn('targets', function ($discount) use ($discountRepo) {
                 return $discountRepo->formatTargetsCollection($discount->targets);
