@@ -216,7 +216,7 @@ class SliderController extends Controller
                         $data['status'] = (bool) $slider->is_active;
                         $data['is_only_active'] = ($activeCount === 1 && (bool) $slider->is_active);
 
-                        return view('admin.partials.datatable-status', $data)->render();
+                        return view('admin.partials.sliderdatatable-status', $data)->render();
                     } else {
                         return view('components.datatable-status-badge', ['status' => $slider->is_active])->render();
                     }

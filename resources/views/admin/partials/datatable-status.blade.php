@@ -6,7 +6,7 @@
         data-url="{{ $toggle_url }}"
         data-variants-all-active="{{ $variants_all_active ?? 0 }}"
         data-variants-all-inactive="{{ $variants_all_inactive ?? 0 }}"
-        @if($status) checked @endif
+        @if($status === 'active') checked @endif
         @if(!empty($is_only_active)) disabled title="At least one slider must remain active" @endif
         id="{{ $__uid }}"
     >
