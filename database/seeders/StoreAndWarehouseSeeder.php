@@ -22,18 +22,21 @@ class StoreAndWarehouseSeeder extends Seeder
                 'store_name' => ['en' => 'Main Store - Riyadh', 'ar' => 'المتجر الرئيسي - الرياض'],
                 'store_id' => 'STORE-001',
                 'store_footer' => ['en' => 'Your trusted electronics partner', 'ar' => 'شريكك الموثوق في الإلكترونيات'],
+                'location' => ['en' => 'Riyadh, Saudi Arabia', 'ar' => 'الرياض، المملكة العربية السعودية'],
                 'status' => 'active',
             ],
             [
                 'store_name' => ['en' => 'Jeddah Branch', 'ar' => 'فرع جدة'],
                 'store_id' => 'STORE-002',
                 'store_footer' => ['en' => 'Quality electronics in Western Region', 'ar' => 'إلكترونيات عالية الجودة في المنطقة الغربية'],
+                'location' => ['en' => 'Jeddah, Saudi Arabia', 'ar' => 'جدة، المملكة العربية السعودية'],
                 'status' => 'active',
             ],
             [
                 'store_name' => ['en' => 'Dammam Store', 'ar' => 'متجر الدمام'],
                 'store_id' => 'STORE-003',
                 'store_footer' => ['en' => 'Electronics hub of Eastern Province', 'ar' => 'مركز الإلكترونيات في المنطقة الشرقية'],
+                'location' => ['en' => 'Dammam, Saudi Arabia', 'ar' => 'الدمام، المملكة العربية السعودية'],
                 'status' => 'active',
             ],
         ];

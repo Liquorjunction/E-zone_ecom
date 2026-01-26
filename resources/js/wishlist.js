@@ -24,7 +24,6 @@ async function postJson(url, data) {
         body: JSON.stringify(data),
         credentials: 'same-origin'
     });
-    console.log('Posting to', url, 'data:', data);
     return res;
 }
 
@@ -63,16 +62,12 @@ function updateButtonState(button, added) {
 document.addEventListener('click', async (ev) => {
     const btn = ev.target.closest('.wishlist-btn');
     if (!btn) return;
-    console.log('[Wishlist Debug] Button clicked:', btn, 'data-product-variant-id:', btn.dataset.productVariantId);
     ev.preventDefault();
     ev.stopPropagation();
     try { ev.stopImmediatePropagation(); } catch (e) {}
     try { btn.type = 'button'; } catch (e) {}
     const id = btn.dataset.productVariantId;
-    if (!id) {
-        console.warn('[Wishlist Debug] No productVariantId found on button:', btn);
-        return;
-    }
+    if (!id) return;
     const isWishlisted = btn.classList.contains('is-wishlisted');
     try {
         if (isWishlisted) {

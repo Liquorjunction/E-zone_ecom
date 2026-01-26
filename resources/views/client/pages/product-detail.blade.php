@@ -1,6 +1,9 @@
 @extends('client.layouts.app')
 
 @section('content')
+    <script>
+        window.CURRENCY_SYMBOL = @json(config('app.CURRENCY_SYMBOL'));
+    </script>
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
 
@@ -152,30 +155,26 @@
                     </div>
 
                     <!-- Price Box -->
-                    <div
-                        class="bg-linear-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
+                    <div class="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
                         <div class="flex items-center justify-between flex-wrap gap-4">
                             <div class="flex items-baseline gap-3">
-                                @php
-                                    $variantCount = $product->productVariants ? $product->productVariants->count() : 0;
-                                    // Use discount info passed from controller, or fetch it if not available
-                                    if (!isset($discountInfo) || !is_array($discountInfo)) {
-                                        $discountInfo = $product->getDiscountInfo();
-                                    }
-                                    if (!isset($variantDiscounts)) {
-                                        $variantDiscounts = [];
-                                    }
-
-                                    $hasDiscount = isset($discountInfo['has_discount']) && $discountInfo['has_discount'] === true && ($discountInfo['original_price'] ?? 0) > ($discountInfo['final_price'] ?? 0);
-                                    $originalPrice = $discountInfo['original_price'] ?? 0;
-                                    $finalPrice = $discountInfo['final_price'] ?? 0;
-                                    $discountPercentage = $hasDiscount ? ($discountInfo['discount_percentage'] ?? 0) : 0;
-                                    $discountName = $discountInfo['discount_name'] ?? '';
-                                @endphp
-
-                                @if ($variantCount > 1)
-                                    @if ($hasDiscount)
-                                        <div class="flex flex-col gap-2">
+                                <div class="flex flex-col gap-2">
+                                    @php
+                                        $variantCount = $product->productVariants ? $product->productVariants->count() : 0;
+                                        if (!isset($discountInfo) || !is_array($discountInfo)) {
+                                            $discountInfo = $product->getDiscountInfo();
+                                        }
+                                        if (!isset($variantDiscounts)) {
+                                            $variantDiscounts = [];
+                                        }
+                                        $hasDiscount = isset($discountInfo['has_discount']) && $discountInfo['has_discount'] === true && ($discountInfo['original_price'] ?? 0) > ($discountInfo['final_price'] ?? 0);
+                                        $originalPrice = $discountInfo['original_price'] ?? 0;
+                                        $finalPrice = $discountInfo['final_price'] ?? 0;
+                                        $discountPercentage = $hasDiscount ? ($discountInfo['discount_percentage'] ?? 0) : 0;
+                                        $discountName = $discountInfo['discount_name'] ?? '';
+                                    @endphp
+                                    @if ($variantCount > 1)
+                                        @if ($hasDiscount)
                                             <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
                                             <div class="flex items-baseline gap-2">
                                                 <span class="text-sm text-gray-600 font-medium">From</span>
@@ -189,19 +188,17 @@
                                                     Save {{ number_format($discountPercentage, 0) }}%
                                                 </span>
                                             @endif
-                                        </div>
+                                        @else
+                                            @php
+                                                $minPrice = $product->productVariants->min('price');
+                                            @endphp
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-sm text-gray-600 font-medium">From</span>
+                                                <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }}</span>
+                                            </div>
+                                        @endif
                                     @else
-                                        @php
-                                            $minPrice = $product->productVariants->min('price');
-                                        @endphp
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-sm text-gray-600 font-medium">From</span>
-                                            <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }}</span>
-                                        </div>
-                                    @endif
-                                @else
-                                    @if ($hasDiscount)
-                                        <div class="flex flex-col gap-2">
+                                        @if ($hasDiscount)
                                             <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
                                             <span id="product-price" class="text-4xl font-bold text-red-600">${{ number_format($finalPrice, 2) }}</span>
                                             @if ($discountPercentage > 0)
@@ -212,22 +209,18 @@
                                                     Save {{ number_format($discountPercentage, 0) }}%
                                                 </span>
                                             @endif
-                                        </div>
-                                    @else
-                                        <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
+                                        @else
+                                            <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
+                                        @endif
                                     @endif
-                                @endif
-
-                                <span class="text-sm text-gray-500 font-medium">incl. taxes</span>
+                                    <span class="text-sm text-gray-500 font-medium">incl. taxes</span>
+                                </div>
                             </div>
                         </div>
                         @if ($hasDiscount && !empty($discountName))
-                            <div
-                                class="mt-4 flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg border border-green-200">
+                            <div class="mt-4 flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg border border-green-200">
                                 <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                                 <span class="text-sm font-semibold text-green-800">{{ $discountName }} applied!</span>
                             </div>
