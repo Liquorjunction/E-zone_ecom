@@ -66,7 +66,7 @@ class CouponRepository implements CouponRepositoryInterface
     public function getDataForDataTable($filters = [])
     {
         $query = Coupon::query()
-            ->select(['id', 'name', 'code', 'coupon_type', 'starts_at', 'ends_at', 'status']);
+            ->select(['id', 'name', 'code', 'coupon_type', 'starts_at', 'ends_at', 'status'])->withCount('usages');
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);

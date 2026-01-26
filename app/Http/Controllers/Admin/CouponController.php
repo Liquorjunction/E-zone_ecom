@@ -112,6 +112,9 @@ class CouponController extends Controller
             ->addColumn('code', function ($coupon) {
                 return strtoupper($coupon->code);
             })
+            ->addColumn('usages_count', function ($coupon) {
+                return $coupon->usages_count;
+            })
             ->addColumn('coupon_type', function ($coupon) {
                 return ucfirst($coupon->coupon_type);
             })
@@ -134,8 +137,17 @@ class CouponController extends Controller
             ->addColumn('action', function ($coupon) use ($request) {
                 $data['id'] = $coupon->id;
                 $data['view_url'] = $request->user() && $request->user()->can('coupon.read') ? route('admin.coupons.show', ['id' => $coupon->id]) : '';
-                $data['edit_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.edit', ['id' => $coupon->id]) : '';
-                $data['delete_url'] = $request->user() && $request->user()->can('coupon.delete') ? route('admin.coupons.destroy', ['id' => $coupon->id]) : '';
+                if ($request->user()->can('coupon.update') && isset($coupon->usages_count) && $coupon->usages_count == 0) {
+                     $data['edit_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.edit', ['id' => $coupon->id]) : '';
+                } else {
+                    $data['edit_url'] = '';
+                }
+                if ($request->user()->can('coupon.delete') && isset($coupon->usages_count) && $coupon->usages_count == 0) {
+                    $data['delete_url'] = $request->user() && $request->user()->can('coupon.delete') ? route('admin.coupons.destroy', ['id' => $coupon->id]) : '';
+                } else {
+                    $data['delete_url'] = '';
+
+                }
                 return view('admin.partials.datatable-actions', $data)->render();
             })
             ->rawColumns(['status', 'action'])

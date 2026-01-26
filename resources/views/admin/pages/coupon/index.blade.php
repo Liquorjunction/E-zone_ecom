@@ -25,6 +25,7 @@
                         <th>#</th>
                         <th>Name</th>
                         <th>Code</th>
+                        <th>Usages</th>
                         <th>Type</th>
                         <th>Start Date</th>
                         <th>End Date</th>
