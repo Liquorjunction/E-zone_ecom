@@ -9,7 +9,6 @@ class StockReportRepository implements StockReportRepositoryInterface
 {
     public function getStockReport()
     {
-        // Eager load relationships
         $inventories = Inventory::with([
             'product.brand',
             'product.category',
@@ -17,43 +16,29 @@ class StockReportRepository implements StockReportRepositoryInterface
             'variant',
             'warehouse',
             'store',
-            'orderItems.order' // eager load order for status filtering
+            'orderItems.order'
         ])->orderByDesc('updated_at')->get();
 
-        // Map with production-grade calculations
-
         $inventories->transform(function ($inventory) {
-            // Filter orderItems by both product_id and variant_id for accuracy
+            $reservedQty = (float) ($inventory->reserved_quantity ?? 0);
+
             $filteredOrderItems = $inventory->orderItems->filter(function ($item) use ($inventory) {
                 return $item->product_id == $inventory->product_id && $item->variant_id == $inventory->product_variant_id;
             });
-
-            // Only count sold quantity for completed/paid orders (not cancelled/returned)
             $soldQty = $filteredOrderItems
                 ->filter(function ($item) {
                     return $item->order && in_array($item->order->status, ['completed', 'paid', 'delivered']);
                 })
                 ->sum('quantity');
 
-            // Reserved quantity: sum of items in partial orders
-            $reservedQty = $filteredOrderItems
-                ->filter(function ($item) {
-                    return $item->order && $item->order->status === 'partial';
-                })
-                ->sum('quantity');
-
-            // Add back returned quantity from inventory transactions of type 'return'
             $returnedQty = $inventory->transactions
                 ->where('type', 'return')
                 ->sum('quantity_change');
 
-            // Total available = (quantity - reserved) + returned
-            $availableQty = ($inventory->quantity - $reservedQty) + $returnedQty;
+            $availableQty = (float) $inventory->quantity;
 
-            // Total qty = sold + available
-            $totalQty = $soldQty + $availableQty;
+            $totalQty = $availableQty + $reservedQty + $soldQty;
 
-            // Attach calculated fields for the view
             $inventory->sold_qty = $soldQty;
             $inventory->returned_qty = $returnedQty;
             $inventory->available_qty = $availableQty;

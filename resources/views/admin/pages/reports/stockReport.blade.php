@@ -47,10 +47,18 @@
                                                     N/A
                                                 @endif
                                             </td>
-                                            <td>{{ $report->total_qty }}</td>
-                                            <td>{{ $report->sold_qty }}</td>
-                                            <td>{{ $report->reserved_qty }}</td>
-                                            <td>{{ $report->available_qty }}</td>
+                                            <td>
+                                                <span title="Total = Available + Reserved + Sold">{{ $report->total_qty }}</span>
+                                            </td>
+                                            <td>
+                                                <span title="Sold (Completed/Paid/Delivered orders)">{{ $report->sold_qty }}</span>
+                                            </td>
+                                            <td>
+                                                <span title="Reserved (Pending/Processing orders)">{{ $report->reserved_qty }}</span>
+                                            </td>
+                                            <td>
+                                                <span title="Available (Current stock not reserved)">{{ $report->available_qty }}</span>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
