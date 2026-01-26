@@ -1,29 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Refactored product-form.js
-    // Responsibilities:
-    // - Initialize Quill editors and keep hidden inputs in-sync
-    // - Controlled tab navigation + validation on steps
-    // - Select2 initialization and subcategory filtering
-    // - Dynamic specs table (add/remove rows)
-    // - Dynamic variants table (add/remove, handle existing rows)
-    // - Variant translation & attributes modal
-    // - Ensure quill contents flushed on submit
-
-    // ---------------------------
-    // Utilities
-    // ---------------------------
     const select = (s, ctx = document) => ctx.querySelector(s);
     const selectAll = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
     const isEmpty = v => v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
 
-    // ---------------------------
-    // QUILL: initialization and sync
-    // ---------------------------
     const quillEditors = {};
     function initQuill(id, hiddenId) {
         const container = select(`#${id}`);
         if (!container) return;
-        if (container.classList.contains('ql-container')) return; // already initialized
+        if (container.classList.contains('ql-container')) return;
 
         const quill = new Quill(`#${id}`, {
             theme: 'snow',
@@ -43,12 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const hidden = select(`#${hiddenId}`);
         if (hidden) hidden.__quill = quill;
         if (hidden && hidden.value) quill.root.innerHTML = hidden.value;
-
-        // Sync hidden input with initial content from div if no hidden value
         if (hidden && !hidden.value && container.innerHTML.trim()) {
             hidden.value = container.innerHTML;
         }
-
         quill.on('text-change', () => {
             if (hidden) {
                 hidden.value = quill.getText().trim().length === 0 ? '' : quill.root.innerHTML;
@@ -69,12 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ---------------------------
-    // Translate All (fallback copy EN -> FR/AR for nested fields)
-    // ---------------------------
     selectAll('.btn-translate-all').forEach(btn => btn.addEventListener('click', (e) => {
         e.preventDefault();
-        // Copy top-level simple fields
         const langs = ['fr', 'ar'];
         const copyIfEmpty = (selector, value) => {
             if (!value) return;
@@ -84,28 +61,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        // Names
         const enName = select('input[name="name[en]"]')?.value || '';
         copyIfEmpty('input[name="name[{lang}]"]', enName);
 
-        // Descriptions (hidden inputs)
         const descEn = select('#description_en')?.value || '';
         copyIfEmpty('input[name="description[{lang}]"]', descEn);
 
-        // Dimensions & Warranty
         const dimEn = select('input[name="dimensions[en]"]')?.value || '';
         copyIfEmpty('input[name="dimensions[{lang}]"]', dimEn);
         const warEn = select('input[name="warranty[en]"]')?.value || '';
         copyIfEmpty('input[name="warranty[{lang}]"]', warEn);
 
-        // Specifications tables: copy each row title/value as plain JSON if target empty
         ['en'].forEach(srcLang => {
             langs.forEach(tLang => {
                 const srcRows = selectAll(`#spec-table-${srcLang} tbody tr`);
                 const tgtBody = select(`#spec-table-${tLang} tbody`);
                 if (!tgtBody) return;
                 if (tgtBody.children.length <= 0) {
-                    // replicate rows (best-effort)
                     srcRows.forEach(r => {
                         const title = r.querySelector('input')?.value || '';
                         const value = r.querySelectorAll('input')[1]?.value || '';
@@ -117,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Variants: copy name[en] -> name[fr|ar] and attributes en->fr/ar if empty
         const variantRows = selectAll('#variants-table tbody tr');
         variantRows.forEach(row => {
             if (row.id === 'no-variants-row') return;
@@ -140,17 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Quick UX feedback
         const original = btn.innerHTML;
         btn.innerHTML = '<i class="bi bi-check me-2"></i> Done';
         setTimeout(() => btn.innerHTML = original, 1500);
     }));
 
-    // ---------------------------
-    // TAB NAVIGATION + VALIDATION
-    // ---------------------------
     function activatePane(targetId) {
-        // Prefer using Bootstrap Tab API for proper activation
         const allNavLinks = selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]');
         const targetLink = allNavLinks.find(link => {
             const href = (link.getAttribute('href') || '').split('#')[1];
@@ -159,12 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (targetLink) {
-            // enable the target and show via bootstrap API
             targetLink.classList.remove('disabled');
             try {
                 new bootstrap.Tab(targetLink).show();
             } catch (e) {
-                // fallback to manual activation
                 const pane = document.getElementById(targetId);
                 if (pane) {
                     const container = pane.closest('.tab-content');
@@ -173,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } else {
-            // simple fallback if no nav link found
             const pane = document.getElementById(targetId);
             if (!pane) return;
             const container = pane.closest('.tab-content');
@@ -181,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
             pane.classList.add('show', 'active');
         }
 
-        // ensure nav links reflect active state
         allNavLinks.forEach(link => {
             const href = (link.getAttribute('href') || '').split('#')[1];
             const dataTarget = (link.getAttribute('data-bs-target') || '').replace('#', '');
@@ -204,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let valid = true;
         let firstInvalid = null;
 
-        // Simple required field check inside current pane
         selectAll('[required]', currentPane).forEach(input => {
             const val = (input.type === 'file') ? (input.files && input.files.length > 0) : input.value;
             if (isEmpty(val)) {
@@ -216,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Step-specific checks
         if (currentPane && currentPane.id === 'step1') {
             const descEn = select('#description_en');
             if (!descEn || isEmpty(descEn.value)) {
@@ -229,9 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (qu) qu.classList.remove('is-invalid');
             }
 
-            // Only require cover image if not already present (edit mode)
             const coverInput = currentPane.querySelector('input[name="cover_image"]');
-            // Check for an existing image preview or hidden field indicating current image
             const hasExisting = !!currentPane.querySelector('.current-cover-image, [data-has-cover-image="1"]');
             if (coverInput) {
                 const hasFile = coverInput.files && coverInput.files.length > 0;
@@ -271,7 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // wired next/prev
     selectAll('.next-step').forEach(btn => btn.addEventListener('click', e => {
         e.preventDefault();
         const pane = btn.closest('.tab-pane');
@@ -280,8 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
     selectAll('.prev-step').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); activatePane(btn.getAttribute('data-prev')); }));
 
-    // Prevent manual tab switching unless current step is valid.
-    // Intercept nav button clicks (works for buttons and anchors) and validate current pane before allowing switch.
     selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]').forEach(link => {
         link.addEventListener('click', function (e) {
             const rawTarget = (link.getAttribute('data-bs-target') || link.getAttribute('href') || '');
@@ -295,10 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return false;
                 }
             }
-        }, true); // use capture to run before bootstrap handlers
+        }, true);
     });
 
-    // Also keep the bootstrap show event guard as a fallback
     selectAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]').forEach(link => {
         link.addEventListener('show.bs.tab', function (e) {
             const rawTarget = (link.getAttribute('data-bs-target') || link.getAttribute('href') || '');
@@ -315,11 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ---------------------------
-    // Select2 & subcategory filtering
-    // ---------------------------
     if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
-        // Initialize brand and category select2 with their own placeholder so allowClear shows correctly
         $('#brand-select, #category-select, #subcategory-select').each(function () {
             const $el = $(this);
             const placeholder = $el.data('placeholder') || $el.attr('placeholder') || $el.find('option[value=""]').text() || '';
@@ -328,9 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             $el.select2(options);
         });
 
-        // capture all options for subcategory and rebuild on category change
         const cfg = { allowClear: true, width: '100%' };
-        // Prefer full list provided by server in edit mode (window.__ALL_SUBCATEGORIES)
         const allOpts = (window.__ALL_SUBCATEGORIES && Array.isArray(window.__ALL_SUBCATEGORIES))
             ? window.__ALL_SUBCATEGORIES
             : (function(){ const tmp = []; $('#subcategory-select option').each(function () { tmp.push({ id: $(this).val(), text: $(this).text(), categoryId: $(this).attr('data-category') }); }); return tmp; })();
@@ -345,7 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const selCat = $('#category-select').val();
             const curVal = $sub.val();
 
-            // Rebuild DOM options from original snapshot
             const fragment = document.createDocumentFragment();
             const placeholderOpt = new Option('Select Sub Category', '');
             fragment.appendChild(placeholderOpt);
@@ -357,20 +304,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // destroy select2 instance if present, replace options, then re-init
             const hadSelect2 = !!($sub.data('select2'));
             if (hadSelect2) {
-                try { $sub.select2('destroy'); } catch (e) { /* ignore */ }
+                try { $sub.select2('destroy'); } catch (e) { }
             }
 
             $sub.empty();
             $sub[0].appendChild(fragment);
 
-            // Restore value if still available
             if (curVal && $sub.find(`option[value="${curVal}"]`).length) $sub.val(curVal);
             else $sub.val('');
 
-            // re-init select2 if it was present before
             if (hadSelect2 && $.fn && $.fn.select2) {
                 $sub.select2({ ...cfg, placeholder: $sub.data('placeholder') || 'Select Sub Category' });
             }
@@ -378,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setSubDisabled(!selCat);
         }
 
-        // Initially disable subcategory if no category selected
         setSubDisabled(!$('#category-select').val());
         $('#category-select').on('change', function () {
             const has = !!$(this).val();
@@ -387,12 +330,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         setTimeout(rebuildSub, 200);
     } else {
-        // Fallback: basic select functionality without Select2
         const categorySelect = select('#category-select');
         const subcategorySelect = select('#subcategory-select');
 
         if (categorySelect && subcategorySelect) {
-            // Store original options
             const allSubOptions = Array.from(subcategorySelect.options).map(opt => ({
                 value: opt.value,
                 text: opt.text,
@@ -409,19 +350,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         subcategorySelect.appendChild(newOpt);
                     }
                 });
-                // toggle disabled state
                 subcategorySelect.disabled = !categorySelect.value;
             }
 
             categorySelect.addEventListener('change', () => { rebuildSub(); });
-            // initial state
             setTimeout(rebuildSub, 200);
         }
     }
 
-    // ---------------------------
-    // Specifications dynamic rows
-    // ---------------------------
     document.body.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-spec-row')) e.target.closest('tr')?.remove();
         if (e.target.classList.contains('add-spec-btn')) {
@@ -433,14 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ---------------------------
-    // Variants: add/remove and name sync
-    // ---------------------------
     const variantsTbody = select('#variants-table tbody');
     const noVariantsRow = select('#no-variants-row');
 
     if (variantsTbody) {
-        // delegated remove
         variantsTbody.addEventListener('click', (e) => {
             const rem = e.target.closest('.remove-variant');
             if (!rem) return;
@@ -501,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const idx = 'new_' + Date.now();
         variantsTbody.insertAdjacentHTML('beforeend', makeVariantRow(idx));
         const newRow = variantsTbody.lastElementChild;
-        // sync name -> fr/ar only when empty
         const en = newRow.querySelector('.variant-name-input');
         en.addEventListener('input', function () {
             const fr = newRow.querySelector('input[name*="[name][fr]"]');
@@ -511,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Delegated handler: keep FR/AR hidden fields in sync only when they are empty
     document.body.addEventListener('input', (e) => {
         if (e.target && e.target.classList && e.target.classList.contains('variant-name-input')) {
             const row = e.target.closest('tr');
@@ -523,9 +453,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ---------------------------
-    // Variant attributes modal
-    // ---------------------------
     const variantModal = select('#variantTranslationModal');
     const modalIndex = select('#modal-variant-index');
     const modalNameEn = select('#modal-variant-name-en');
@@ -533,7 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalNameAr = select('#modal-variant-name-ar');
 
     function parseAttributesValue(val) {
-        // Accept JSON array [{key,value}] or object map {k:v} or empty string
         if (isEmpty(val)) return [];
         try {
             const parsed = JSON.parse(val);
@@ -564,7 +490,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.body.addEventListener('click', (e) => {
-        // open modal
         const editBtn = e.target.closest('.edit-variant-attributes');
         if (editBtn) {
             const idx = editBtn.getAttribute('data-index');
@@ -579,29 +504,23 @@ document.addEventListener('DOMContentLoaded', () => {
             new bootstrap.Modal(variantModal).show();
         }
 
-        // add attr
         if (e.target.classList.contains('add-variant-attr-btn')) {
             const lang = e.target.getAttribute('data-lang');
             const tbody = select(`#variant-attr-table-${lang} tbody`);
             tbody.insertAdjacentHTML('beforeend', `<tr><td><input class="form-control form-control-sm attr-key"></td><td><input class="form-control form-control-sm attr-value"></td><td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-attr-row">&times;</button></td></tr>`);
         }
 
-        // remove attr
         if (e.target.classList.contains('remove-attr-row')) e.target.closest('tr')?.remove();
     });
 
-    // Save modal
     const saveModalBtn = select('#save-variant-translation');
     if (saveModalBtn) saveModalBtn.addEventListener('click', () => {
         const idx = modalIndex.value;
         let targetRow = null;
 
-        // Try multiple ways to find the row
         if (idx.startsWith('new_')) {
-            // For new variants, find by data-index on the edit button
             targetRow = select(`button[data-index="${idx}"]`)?.closest('tr');
         } else {
-            // For existing variants, find by input name
             targetRow = [...selectAll('#variants-table tbody tr')].find(r => r.querySelector(`input[name="variants[${idx}][name][en]"]`));
         }
 
@@ -628,9 +547,5 @@ document.addEventListener('DOMContentLoaded', () => {
         bootstrap.Modal.getInstance(variantModal).hide();
     });
 
-    // ---------------------------
-    // Ensure Quill contents are flushed before final submit
-    // ---------------------------
     const form = select('#product-form'); if (form) form.addEventListener('submit', () => saveAllQuillContents());
-
 });
