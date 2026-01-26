@@ -16,18 +16,15 @@ class StoreSubCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Translatable Field
             'sub-category-name' => 'required|array',
             'sub-category-name.en' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('sub-categories', 'sub-category-name'),
             ],
             'sub-category-name.fr' => 'nullable|string|max:255',
             'sub-category-name.ar' => 'nullable|string|max:255',
 
-            // Standard Fields
             'category_id' => 'required|exists:categories,id',
             'sub-category-icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
             'status' => 'nullable',
@@ -41,5 +38,18 @@ class StoreSubCategoryRequest extends FormRequest
             'sub-category-name.en.unique' => 'The English sub-category name has already been taken.',
             'category_id.required' => 'Please select a parent category.',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $enName = $this->input('sub-category-name.en');
+            if ($enName) {
+                $exists = \App\Models\SubCategories::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`sub-category-name`, '$.en')) = ?", [$enName])->exists();
+                if ($exists) {
+                    $validator->errors()->add('sub-category-name.en', 'The English sub-category name has already been taken.');
+                }
+            }
+        });
     }
 }

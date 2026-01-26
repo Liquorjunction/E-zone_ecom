@@ -329,6 +329,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::prefix('coupons')->name('coupons.')->middleware('can:coupon.read,admin')->group(function () {
             Route::get('/', [CouponController::class, 'index'])->name('index'); // permission: coupon.read
             Route::get('/data', [CouponController::class, 'data'])->name('data');
+            Route::get('/show', [CouponController::class, 'show'])->name('show')->middleware('can:coupon.read,admin');
             Route::get('/create', [CouponController::class, 'create'])->name('create')->middleware('can:coupon.create,admin');
             Route::post('/', [CouponController::class, 'store'])->name('store')->middleware('can:coupon.create,admin');
             Route::get('/edit', [CouponController::class, 'edit'])->name('edit')->middleware('can:coupon.update,admin');

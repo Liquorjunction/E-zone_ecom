@@ -51,12 +51,20 @@
                 </span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                {{-- Server Time Display --}}
+                <li class="nav-item d-flex align-items-center me-3">
+                    <span class="text-muted small">
+                        <i class="bi bi-clock me-1"></i>
+                        {{ \Carbon\Carbon::now()->format('Y-m-d H:i:s') }} (Server Time)
+                    </span>
+                </li>
                 <ul class="mb-2 navbar-nav ms-auto align-items-center navbar-list mb-lg-0">
                     {{-- This should be dynamic based on Auth user --}}
                     <li class="nav-item dropdown custom-drop">
                         <a class="py-0 nav-link d-flex align-items-center" href="#" id="navbarDropdown"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img id="navbar-profile-image" src="{{ \App\Helpers\AdminHelper::profileImageUrl() }}" alt="User-Profile"
+                            <img id="navbar-profile-image" src="{{ \App\Helpers\AdminHelper::profileImageUrl() }}"
+                                alt="User-Profile"
                                 class="theme-color-default-img img-fluid avatar avatar-50 avatar-rounded">
                             <img src="{{ asset('admin_assets/images/avatars/avtar_1.png') }}" alt="User-Profile"
                                 class="theme-color-purple-img img-fluid avatar avatar-50 avatar-rounded">
@@ -69,24 +77,26 @@
                             <img src="{{ asset('admin_assets/images/avatars/avtar_3.png') }}" alt="User-Profile"
                                 class="theme-color-pink-img img-fluid avatar avatar-50 avatar-rounded">
                             <div class="caption ms-3 d-none d-md-block ">
-                                <h6 class="mb-0 caption-title">{{ \App\Helpers\AdminHelper::name() ?? 'Admin User' }}</h6>
-                                <p class="mb-0 caption-sub-title">{{ \App\Helpers\AdminHelper::role() ?? 'Administrator' }}</p>
+                                <h6 class="mb-0 caption-title">{{ \App\Helpers\AdminHelper::name() ?? 'Admin User' }}
+                                </h6>
+                                <p class="mb-0 caption-sub-title">
+                                    {{ \App\Helpers\AdminHelper::role() ?? 'Administrator' }}</p>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="{{ route('admin.profile.index') }}">Profile</a>
                             </li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <form action="{{ route('admin.logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">Logout</button>
-                                </form>
-                            </li>
-                            {{-- TODO: This should be a POST request to a logout route --}}
-                        </ul>
+                            <hr class="dropdown-divider">
                     </li>
+                    <li>
+                        <form action="{{ route('admin.logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item">Logout</button>
+                        </form>
+                    </li>
+                    {{-- TODO: This should be a POST request to a logout route --}}
+                </ul>
+                </li>
                 </ul>
             </div>
         </div>

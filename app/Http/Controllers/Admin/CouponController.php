@@ -40,10 +40,18 @@ class CouponController extends Controller
         }
     }
 
-    public function edit(EditCouponRequest $request)
+    public function show(ReadCouponRequest $request, CouponRepo $couponRepo)
     {
         $id = $request->input('id');
-        $coupon = Coupon::findOrFail($id);
+        $coupon = $couponRepo->getCouponById($id);
+
+        return view('admin.pages.coupon.show', compact('coupon'));
+    }
+
+    public function edit(EditCouponRequest $request , CouponRepo $couponRepo)
+    {
+        $id = $request->input('id');
+        $coupon = $couponRepo->getCouponById($id);
 
         return view('admin.pages.coupon.edit', compact('coupon'));
     }
@@ -125,6 +133,7 @@ class CouponController extends Controller
             })
             ->addColumn('action', function ($coupon) use ($request) {
                 $data['id'] = $coupon->id;
+                $data['view_url'] = $request->user() && $request->user()->can('coupon.read') ? route('admin.coupons.show', ['id' => $coupon->id]) : '';
                 $data['edit_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.edit', ['id' => $coupon->id]) : '';
                 $data['delete_url'] = $request->user() && $request->user()->can('coupon.delete') ? route('admin.coupons.destroy', ['id' => $coupon->id]) : '';
                 return view('admin.partials.datatable-actions', $data)->render();

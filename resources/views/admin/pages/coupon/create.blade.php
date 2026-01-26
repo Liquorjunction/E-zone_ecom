@@ -59,9 +59,9 @@
                                             Discount (%)</option>
                                         <option value="flat_amount"
                                             {{ old('coupon_type') == 'flat_amount' ? 'selected' : '' }}>Flat Amount</option>
-                                        <option value="free_shipping"
+                                        {{-- <option value="free_shipping"
                                             {{ old('coupon_type') == 'free_shipping' ? 'selected' : '' }}>Free Shipping
-                                        </option>
+                                        </option> --}}
                                     </select>
                                 </div>
                             </div>
@@ -81,24 +81,25 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mb-4">
+                                {{-- <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Maximum Discount</label>
                                     <input type="number" step="0.01" name="max_discount" class="form-control"
                                         placeholder="e.g., 100" value="{{ old('max_discount') }}">
-                                </div>
+                                </div> --}}
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Usage Limit</label>
                                     <input type="number" min="1" name="usage_limit" class="form-control"
                                         placeholder="Unlimited" value="{{ old('usage_limit') }}">
                                 </div>
-                            </div>
-
-                            <div class="row">
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Usage Limit Per User</label>
                                     <input type="number" min="1" name="usage_limit_per_user" class="form-control"
                                         placeholder="Unlimited" value="{{ old('usage_limit_per_user') }}">
                                 </div>
+                            </div>
+
+                            <div class="row">
+
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Status</label>
                                     <div class="form-check form-switch">
@@ -114,8 +115,9 @@
                             <div class="row">
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Starts At</label>
-                                    <input type="datetime-local" name="starts_at" class="form-control"
-                                        value="{{ old('starts_at') }}">
+                                    <input type="datetime-local" name="starts_at" id="starts-at-field" class="form-control"
+                                        value="{{ old('starts_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
+                                    <input type="hidden" name="starts_at" id="starts-at-hidden" value="{{ old('starts_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Ends At</label>
@@ -157,3 +159,7 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('admin_assets/js/coupons-create.js') }}"></script>
+@endpush

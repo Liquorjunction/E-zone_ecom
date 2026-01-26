@@ -18,13 +18,11 @@ class UpdateSubCategoryRequest extends FormRequest
         return [
             'id' => 'required|exists:sub-categories,id',
 
-            // Translatable Field
             'sub-category-name' => 'required|array',
             'sub-category-name.en' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('sub-categories', 'sub-category-name')->ignore($this->id),
             ],
             'sub-category-name.fr' => 'nullable|string|max:255',
             'sub-category-name.ar' => 'nullable|string|max:255',
@@ -41,5 +39,21 @@ class UpdateSubCategoryRequest extends FormRequest
             'sub-category-name.en.required' => 'The English sub-category name is required.',
             'sub-category-name.en.unique' => 'The English sub-category name has already been taken.',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $enName = $this->input('sub-category-name.en');
+            $id = $this->input('id');
+            if ($enName) {
+                $exists = \App\Models\SubCategories::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`sub-category-name`, '$.en')) = ?", [$enName])
+                    ->where('id', '!=', $id)
+                    ->exists();
+                if ($exists) {
+                    $validator->errors()->add('sub-category-name.en', 'The Sub-category name has already been taken.');
+                }
+            }
+        });
     }
 }
