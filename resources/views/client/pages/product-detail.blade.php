@@ -196,7 +196,7 @@
                                             @endphp
                                             <div class="flex items-baseline gap-2">
                                                 <span class="text-sm text-gray-600 font-medium">From</span>
-                                                <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($minPrice, 2) }}</span>
+                                                <span id="product-price" class="text-4xl font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($minPrice, 2) }}</span>
                                             </div>
                                         @endif
                                     @else
@@ -212,7 +212,7 @@
                                                 </span>
                                             @endif
                                         @else
-                                            <span id="product-price" class="text-4xl font-bold text-primary">${{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
+                                            <span id="product-price" class="text-4xl font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
                                         @endif
                                     @endif
                                     <span class="text-sm text-gray-500 font-medium">incl. taxes</span>

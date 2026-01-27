@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Show regular price (no discount)
             priceWrapper.innerHTML = `
-                <span class="text-4xl font-bold text-primary">${window.CURRENCY_SYMBOL}${formatPrice(finalPrice)}</span>
+                <span class="text-4xl font-bold text-primary">${window.CURRENCY_SYMBOL} ${formatPrice(finalPrice)}</span>
             `;
         }
 
