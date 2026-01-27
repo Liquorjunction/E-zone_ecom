@@ -169,7 +169,7 @@
             });
         },
         startAutoplay() {
-            this.autoplay = setInterval(() => { this.next(); }, 5000);
+              this.autoplay = setInterval(() => { this.next(); }, 9000);
         },
         stopAutoplay() {
             clearInterval(this.autoplay);
@@ -374,7 +374,7 @@
             });
         },
         startAutoplay() {
-            this.autoplay = setInterval(() => { this.next(); }, 4000);
+              this.autoplay = setInterval(() => { this.next(); }, 9000);
         },
         stopAutoplay() {
             clearInterval(this.autoplay);
