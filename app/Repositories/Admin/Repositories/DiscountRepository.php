@@ -116,10 +116,26 @@ class DiscountRepository implements DiscountRepositoryInterface
                         $name = $variantName ?: ($related->sku ?? ('Variant ' . $related->id));
                     }
                 } elseif ($related instanceof Product) {
-                    if (method_exists($related, 'getTranslation')) {
-                        try { $name = $related->getTranslation('name', 'en'); } catch (\Throwable $e) { }
+                    // If a Product and ProductVariant have the same ID, and a variant exists, always show both
+                    $variant = ProductVariant::find($t->target_id);
+                    if ($variant) {
+                        $product = $variant->product ?? null;
+                        $productName = null;
+                        $variantName = method_exists($variant, 'getTranslation') ? @call_user_func([$variant, 'getTranslation'], 'variant_name', 'en') : ($variant->variant_name ?? null);
+                        if ($product && method_exists($product, 'getTranslation')) {
+                            try { $productName = $product->getTranslation('name', 'en'); } catch (\Throwable $e) { }
+                        }
+                        if (!empty($productName)) {
+                            $name = $productName . ' / ' . ($variantName ?: ($variant->sku ?? $variant->id));
+                        } else {
+                            $name = $variantName ?: ($variant->sku ?? ('Variant ' . $variant->id));
+                        }
+                    } else {
+                        if (method_exists($related, 'getTranslation')) {
+                            try { $name = $related->getTranslation('name', 'en'); } catch (\Throwable $e) { }
+                        }
+                        $name = $name ?: ($related->name ?? null);
                     }
-                    $name = $name ?: ($related->name ?? null);
                 } else {
                     if (method_exists($related, 'getTranslation')) {
                         try { $name = $related->getTranslation('name', 'en'); } catch (\Throwable $e) { }
@@ -145,24 +161,26 @@ class DiscountRepository implements DiscountRepositoryInterface
                             }
                             break;
                         case 'product':
-                            $prod = Product::find($t->target_id);
-                            if ($prod && method_exists($prod, 'getTranslation')) {
-                                try { $name = $prod->getTranslation('name', 'en'); } catch (\Throwable $e) { }
-                            }
-                            if (empty($name)) {
-                                $variant = ProductVariant::find($t->target_id);
-                                if ($variant) {
-                                    $productName = null;
-                                    $variantName = method_exists($variant, 'getTranslation') ? @call_user_func([$variant, 'getTranslation'], 'variant_name', 'en') : ($variant->variant_name ?? null);
-                                    if ($variant->product && method_exists($variant->product, 'getTranslation')) {
-                                        try { $productName = $variant->product->getTranslation('name', 'en'); } catch (\Throwable $e) { }
-                                    }
-                                    if (!empty($productName)) {
-                                        $name = $productName . ' / ' . ($variantName ?: ($variant->sku ?? $variant->id));
-                                    } else {
-                                        $name = $variantName ?: ($variant->sku ?? ('Variant ' . $variant->id));
-                                    }
+                            // If a Product and ProductVariant have the same ID, and a variant exists, always show both
+                            $variant = ProductVariant::find($t->target_id);
+                            if ($variant) {
+                                $product = $variant->product ?? null;
+                                $productName = null;
+                                $variantName = method_exists($variant, 'getTranslation') ? @call_user_func([$variant, 'getTranslation'], 'variant_name', 'en') : ($variant->variant_name ?? null);
+                                if ($product && method_exists($product, 'getTranslation')) {
+                                    try { $productName = $product->getTranslation('name', 'en'); } catch (\Throwable $e) { }
                                 }
+                                if (!empty($productName)) {
+                                    $name = $productName . ' / ' . ($variantName ?: ($variant->sku ?? $variant->id));
+                                } else {
+                                    $name = $variantName ?: ($variant->sku ?? ('Variant ' . $variant->id));
+                                }
+                            } else {
+                                $prod = Product::find($t->target_id);
+                                if ($prod && method_exists($prod, 'getTranslation')) {
+                                    try { $name = $prod->getTranslation('name', 'en'); } catch (\Throwable $e) { }
+                                }
+                                $name = $name ?: ($prod->name ?? null);
                             }
                             break;
                         default:
