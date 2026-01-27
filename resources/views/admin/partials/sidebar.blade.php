@@ -1,6 +1,6 @@
 <aside class="sidebar sidebar-default sidebar-white sidebar-base navs-rounded-all"
-    style="height:100vh;display:flex;flex-direction:column;">
-    <div class="sidebar-header d-flex align-items-center justify-content-center px-3 py-3">
+    style="height:100vh;display:flex;flex-direction:column;" role="navigation" aria-label="Admin Sidebar">
+    <div class="sidebar-header d-flex align-items-center justify-content-center px-3 py-3" tabindex="0">
         <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
             <div class="logo-main">
                 <div class="logo-normal">
@@ -38,10 +38,10 @@
             <ul class="navbar-nav iq-main-menu" id="sidebar-menu">
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.dashboard') ? '' : 'collapsed' }}"
+                    <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : 'collapsed' }}"
                         data-bs-toggle="collapse" href="#sidebar-home" role="button"
                         aria-expanded="{{ request()->routeIs('admin.dashboard') ? 'true' : 'false' }}"
-                        aria-controls="sidebar-home">
+                        aria-controls="sidebar-home" tabindex="0">
                         <i class="icon" style="display: inline-flex;">
                             <i class="bi bi-house" style="font-size:20px;"></i>
                         </i>
@@ -54,7 +54,7 @@
                         id="sidebar-home" data-bs-parent="#sidebar-menu">
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-                                href="{{ route('admin.dashboard') }}">
+                                href="{{ route('admin.dashboard') }}" role="menuitem" tabindex="0">
                                 <i class="icon" style="display: inline-flex;">
                                     <i class="bi bi-grid" style="font-size:20px;"></i>
                                 </i>
@@ -73,15 +73,19 @@
                     $isProductSectionActive =
                         request()->routeIs('admin.brands.*') ||
                         request()->routeIs('admin.category-subcategory.*') ||
-                        request()->routeIs('admin.products.*');
+                        request()->routeIs('admin.products.*') ||
+                        request()->routeIs('admin.category-subcategory.categories.*') ||
+                        request()->routeIs('admin.category-subcategory.subcategories.*');
+                    // Ensure parent is expanded if any child is active
+                    $isProductSectionActive = $isProductSectionActive || request()->routeIs('admin.brands.*') || request()->routeIs('admin.category-subcategory.categories.*') || request()->routeIs('admin.category-subcategory.subcategories.*') || request()->routeIs('admin.products.*');
                 @endphp
 
                 @canany(['brands.read', 'category.read', 'subcategory.read', 'products.read'])
                     <li class="nav-item">
-                        <a class="nav-link {{ $isProductSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
+                        <a class="nav-link {{ $isProductSectionActive ? 'active' : 'collapsed' }}" data-bs-toggle="collapse"
                             href="#sidebar-products" role="button"
                             aria-expanded="{{ $isProductSectionActive ? 'true' : 'false' }}"
-                            aria-controls="sidebar-products">
+                            aria-controls="sidebar-products" tabindex="0">
                             <i class="icon" style="display: inline-flex;">
                                 <i class="bi bi-box-seam" style="font-size:20px;"></i>
                             </i>
@@ -107,7 +111,7 @@
                             @can('category.read')
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.category-subcategory.categories.*') ? 'active' : '' }}"
-                                        href="{{ route('admin.category-subcategory.categories.index') }}">
+                                        href="{{ route('admin.category-subcategory.categories.index') }}" role="menuitem" tabindex="0">
                                         <i class="icon" style="display: inline-flex;">
                                             <i class="bi bi-list" style="font-size:20px;"></i>
                                         </i>
@@ -119,7 +123,7 @@
                             @can('subcategory.read')
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.category-subcategory.subcategories.*') ? 'active' : '' }}"
-                                        href="{{ route('admin.category-subcategory.subcategories.index') }}">
+                                        href="{{ route('admin.category-subcategory.subcategories.index') }}" role="menuitem" tabindex="0">
                                         <i class="icon" style="display: inline-flex;">
                                             <i class="bi bi-list-check" style="font-size:20px;"></i>
                                         </i>
@@ -155,7 +159,7 @@
                     <a class="nav-link {{ $isInventorySectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-inventory" role="button"
                         aria-expanded="{{ $isInventorySectionActive ? 'true' : 'false' }}"
-                        aria-controls="sidebar-inventory">
+                        aria-controls="sidebar-inventory" tabindex="0">
                         <i class="icon" style="display: inline-flex;">
                             <i class="bi bi-boxes" style="font-size:20px;"></i>
                         </i>
@@ -239,7 +243,7 @@
                     <a class="nav-link {{ $isPagesSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-pages-main" role="button"
                         aria-expanded="{{ $isPagesSectionActive ? 'true' : 'false' }}"
-                        aria-controls="sidebar-pages-main">
+                        aria-controls="sidebar-pages-main" tabindex="0">
                         <i class="icon" style="display: inline-flex;">
                             <i class="bi bi-file-earmark-text" style="font-size:20px;"></i>
                         </i>
@@ -503,7 +507,7 @@
                 <li class="nav-item">
                     <a class="nav-link {{ $isUserSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-users" role="button"
-                        aria-expanded="{{ $isUserSectionActive ? 'true' : 'false' }}" aria-controls="sidebar-users">
+                        aria-expanded="{{ $isUserSectionActive ? 'true' : 'false' }}" aria-controls="sidebar-users" tabindex="0">
                         <i class="icon" style="display: inline-flex;">
                             <i class="bi bi-people" style="font-size:20px;"></i>
                         </i>
@@ -553,7 +557,7 @@
                     <a class="nav-link {{ $isDiscountSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-discounts" role="button"
                         aria-expanded="{{ $isDiscountSectionActive ? 'true' : 'false' }}"
-                        aria-controls="sidebar-discounts">
+                        aria-controls="sidebar-discounts" tabindex="0">
                         <i class="icon" style="display: inline-flex;">
                             <i class="bi bi-percent" style="font-size:20px;"></i>
                         </i>
@@ -610,7 +614,7 @@
                     <a class="nav-link {{ $isOrderSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                         href="#sidebar-orders" role="button"
                         aria-expanded="{{ $isOrderSectionActive ? 'true' : 'false' }}"
-                        aria-controls="sidebar-orders">
+                        aria-controls="sidebar-orders" tabindex="0">
                         <i class="icon" style="display: inline-flex;">
                             <i class="bi bi-cart-check" style="font-size:20px;"></i>
                         </i>

@@ -53,6 +53,8 @@
     // Category
     $catRaw = $master->category?->name ?? 'General';
     $categoryName = is_array($catRaw) ? implode(' ', array_filter($catRaw)) : (string) $catRaw;
+    // Ensure $variantId is always defined for use in buttons
+    $variantId = $isVariant ? ($product->id ?? null) : ($master->productVariants()->first()?->id ?? null);
 @endphp
 
 <div class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary transition-all duration-300 overflow-hidden">
@@ -144,7 +146,12 @@
             </div>
 
             <div class="w-full space-y-2">
-                <button class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2">
+                <button class="add-to-cart-btn w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2"
+                    onclick="addToCart('{{ $variantId }}', '{{ $master->id }}')"
+                    data-product-variant-id="{{ $variantId }}"
+                    data-product-id="{{ $master->id }}"
+                    @if(!$variantId) disabled @endif
+                >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                     Add to Cart
                 </button>
