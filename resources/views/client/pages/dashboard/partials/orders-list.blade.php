@@ -32,7 +32,7 @@
           $itemsCount = $order->items->count();
           $firstName = null;
           if ($firstItem) {
-            $firstName = $firstItem->variant->name ?? $firstItem->product->name ?? 'Product';
+            $firstName = $firstItem->variant->variant_name ?? $firstItem->product->name ?? 'Product';
           }
           $itemsLabel = $firstName ? ($itemsCount > 1 ? $firstName.' + '.($itemsCount - 1).' more' : $firstName) : ($itemsCount.' item'.($itemsCount>1?'s':''));
         @endphp

@@ -3,22 +3,28 @@
 namespace App\Services;
 
 use App\Models\Cart;
+use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use App\Services\PaymentService;
 use App\Services\CouponService;
+use App\Services\PriceCalculatorService;
 use Illuminate\Support\Facades\Auth;
 
 class OrderService
 {
-    protected $orders;
-    protected $logger;
-    protected $paymentService;
-    protected $couponService;
+    protected OrderRepositoryInterface $orders;
+    protected CartRepositoryInterface $cartRepo;
+    protected PriceCalculatorService $priceCalculator;
+    protected LoggerInterface $logger;
+    protected PaymentService $paymentService;
+    protected CouponService $couponService;
 
-    public function __construct(OrderRepositoryInterface $orders, PaymentService $paymentService, CouponService $couponService, LoggerInterface $logger)
+    public function __construct(OrderRepositoryInterface $orders, CartRepositoryInterface $cartRepo, PaymentService $paymentService, PriceCalculatorService $priceCalculator, CouponService $couponService, LoggerInterface $logger)
     {
         $this->orders = $orders;
+        $this->cartRepo = $cartRepo;
+        $this->priceCalculator = $priceCalculator;
         $this->paymentService = $paymentService;
         $this->couponService = $couponService;
         $this->logger = $logger;
@@ -28,7 +34,7 @@ class OrderService
     {
         $this->logger->info('Creating order from cart', ['cart_id' => $cart->id]);
 
-        $order = $this->orders->createOrderFromCart($cart, $data);
+        $order = $this->orders->createOrderFromCart($cart, $data, $this->cartRepo, $this->priceCalculator);
 
         $this->logger->info('Order created', ['order_id' => $order->id]);
 

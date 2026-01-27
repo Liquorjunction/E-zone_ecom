@@ -4,12 +4,20 @@ namespace App\Services;
 
 use App\Models\Coupon;
 use App\Models\Cart;
+use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 use App\Models\CouponUsage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class CouponService
 {
+    protected CartRepositoryInterface $cartRepo;
+
+    public function __construct(CartRepositoryInterface $cartRepo)
+    {
+        $this->cartRepo = $cartRepo;
+    }
+
     public function validateAndApplyCoupon(string $code, Cart $cart): array
     {
         $coupon = Coupon::where('code', strtoupper($code))
@@ -74,7 +82,7 @@ class CouponService
             ];
         }
 
-        $totals = $cart->calculateTotals();
+        $totals = $this->cartRepo->calculateCartTotals($cart);
         $subtotal = $totals['total'];
 
         if ($coupon->min_order_amount && $subtotal < $coupon->min_order_amount) {

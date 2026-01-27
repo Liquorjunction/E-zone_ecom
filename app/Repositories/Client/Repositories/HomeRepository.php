@@ -34,7 +34,7 @@ class HomeRepository implements HomeRepositoryInterface
             ->where('product_variants.status', 'active')
             ->with(['product', 'images'])
             ->orderBy('products.created_at', 'desc')
-            ->take(8)
+            ->take(12)
             ->get();
 
         $bestSellers = ProductVariant::select('product_variants.*')

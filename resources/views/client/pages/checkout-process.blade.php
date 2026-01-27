@@ -194,8 +194,9 @@
                                                         <div>
                                                             <h3 class="text-xl font-bold text-gray-900 mb-2">
                                                                 {{ optional($item->product)->name ?? 'Product' }}
-                                                                @if(optional($item->variant)->variant_name)
-                                                                    <span class="text-gray-600 text-sm font-normal">- {{ optional($item->variant)->variant_name }}</span>
+                                                                @if (optional($item->variant)->variant_name)
+                                                                    <span class="text-gray-600 text-sm font-normal">-
+                                                                        {{ optional($item->variant)->variant_name }}</span>
                                                                 @endif
                                                             </h3>
                                                             <span
@@ -378,19 +379,6 @@
                                             {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
                                     </div>
                                 </div>
-                                @php
-                                    $subtotal = $totals['subtotal'] ?? 0;
-                                    $totalDiscount = $totals['total_discount'] ?? 0;
-                                    $subtotalAfterDiscount = $totals['total'] ?? 0;
-                                    $couponDiscount = $cart->coupon_discount_amount ?? 0;
-                                    $totalAfterCoupon = max(0, $subtotalAfterDiscount - $couponDiscount);
-                                    // Tax is included in price (Morocco 20% VAT)
-                                    $taxRate = config('tax.rate', 20.0);
-                                    $tax = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
-                                    $shipping = 0.0;
-                                    $finalTotal = $totalAfterCoupon + $shipping;
-                                    $itemCount = $cart ? $cart->items->sum('quantity') : 0;
-                                @endphp
 
                                 <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
                                     @php
@@ -451,7 +439,7 @@
                                 <div class="space-y-5 mb-8">
                                     {{-- <div class="flex justify-between text-gray-600 text-lg">
                   <span>Subtotal (<span id="order-item-count">{{ $itemCount }}</span> item{{ $itemCount !== 1 ? 's' : '' }})</span>
-                  <span id="order-subtotal" class="font-bold">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotal, 2) }}</span>
+                  <span id="order-subtotal" class="font-bold">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($totals['subtotal'] ?? 0, 2) }}</span>
                 </div> --}}
 
                                     {{-- @if ($totalDiscount > 0)
@@ -463,12 +451,12 @@
                       </svg>
                       Discount on MRP
                     </span>
-                    <span id="order-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($totalDiscount, 2) }}</span>
+                    <span id="order-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($totals['total_discount'] ?? 0, 2) }}</span>
                   </div>
 
                   <div class="flex justify-between text-gray-900 text-lg font-semibold border-t border-b border-gray-200 py-3">
                     <span>MRP After Discount</span>
-                    <span id="order-subtotal-after-discount">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($subtotalAfterDiscount, 2) }}</span>
+                    <span id="order-subtotal-after-discount">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format(($totals['subtotal'] ?? 0) - ($totals['total_discount'] ?? 0), 2) }}</span>
                   </div>
                 @endif --}}
 
@@ -485,13 +473,13 @@
                         @endif
                       </div>
                     </div>
-                    <span id="order-coupon-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($couponDiscount, 2) }}</span>
+                    <span id="order-coupon-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($totals['coupon_discount'] ?? 0, 2) }}</span>
                   </div>
                 @endif --}}
 
                                     {{-- <div class="flex justify-between text-gray-600 text-lg">
                   <span>Shipping</span>
-                  <span id="order-shipping" class="font-bold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
+                  <span id="order-shipping" class="font-bold text-green-600">{{ ($totals['shipping'] ?? 0) > 0 ? config('app.CURRENCY_SYMBOL') . number_format($totals['shipping'],2) : 'FREE' }}</span>
                 </div>
                 <div class="flex justify-between text-gray-600 text-lg">
                   <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}% included)</span>
@@ -502,7 +490,7 @@
                                             <span class="text-xl font-bold text-gray-900">Total</span>
                                             <span id="order-total"
                                                 class="text-xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($finalTotal, 2) }}</span>
+                                                {{ number_format($totals['final_total'] ?? ($totals['total'] ?? 0), 2) }}</span>
                                         </div>
 
                                         {{-- @if ($totalDiscount > 0)
@@ -1063,18 +1051,6 @@
                                         class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
                                         {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
                                 </div>
-                                @php
-                                    $subtotal = $totals['subtotal'] ?? 0;
-                                    $totalDiscount = $totals['total_discount'] ?? 0;
-                                    $subtotalAfterDiscount = $totals['total'] ?? 0;
-                                    $couponDiscount = $cart->coupon_discount_amount ?? 0;
-                                    $totalAfterCoupon = max(0, $subtotalAfterDiscount - $couponDiscount);
-                                    // Tax is included in price (Morocco 20% VAT)
-                                    $taxRate = config('tax.rate', 20.0);
-                                    $tax = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
-                                    $shipping = 0.0;
-                                    $finalTotal = $totalAfterCoupon + $shipping;
-                                @endphp
 
                                 <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
                                     @php
@@ -1138,12 +1114,13 @@
 
                                         <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
                                             <span class="text-gray-600 font-medium">MRP</span>
-                                            <span id="order-subtotal" class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($subtotal, 2) }}</span>
+                                            <span id="order-subtotal"
+                                                class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($totals['subtotal'] ?? 0, 2) }}</span>
                                         </div>
                                     </div>
 
-                                    @if ($totalDiscount > 0)
+                                    @if (($totals['total_discount'] ?? 0) > 0)
                                         <div
                                             class="flex justify-between text-green-600 text-base bg-green-50 px-4 py-3 rounded-xl">
                                             <span class="flex items-center">
@@ -1155,19 +1132,20 @@
                                                 </svg>
                                                 Discount on MRP
                                             </span>
-                                            <span id="order-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($totalDiscount, 2) }}</span>
+                                            <span id="order-discount"
+                                                class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($totals['total_discount'] ?? 0, 2) }}</span>
                                         </div>
 
                                         {{-- <div
                                             class="flex justify-between text-gray-900 text-base font-semibold border-t border-b border-gray-200 py-3">
                                             <span>MRP After Discount</span>
                                             <span id="order-subtotal-after-discount">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($subtotalAfterDiscount, 2) }}</span>
+                                                {{ number_format(($totals['subtotal'] ?? 0) - ($totals['total_discount'] ?? 0), 2) }}</span>
                                         </div> --}}
                                     @endif
 
-                                    @if ($couponDiscount > 0)
+                                    @if (($totals['coupon_discount'] ?? 0) > 0)
                                         <div
                                             class="flex justify-between items-center text-purple-600 text-base bg-purple-50 px-4 py-3 rounded-xl">
                                             <div class="flex items-center">
@@ -1183,15 +1161,16 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                            <span id="order-coupon-discount" class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($couponDiscount, 2) }}</span>
+                                            <span id="order-coupon-discount"
+                                                class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
+                                                {{ number_format($totals['coupon_discount'] ?? 0, 2) }}</span>
                                         </div>
                                     @endif
 
                                     <div class="flex justify-between text-gray-600 text-base">
                                         <span>Shipping</span>
                                         <span id="order-shipping"
-                                            class="font-bold text-green-600">{{ $shipping > 0 ? config('app.CURRENCY_SYMBOL') . number_format($shipping, 2) : 'FREE' }}</span>
+                                            class="font-bold text-green-600">{{ ($totals['shipping'] ?? 0) > 0 ? config('app.CURRENCY_SYMBOL') . number_format($totals['shipping'], 2) : 'FREE' }}</span>
                                     </div>
                                     <div class="flex justify-between text-gray-600 text-base">
                                         {{-- <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}%
@@ -1204,7 +1183,7 @@
                                             <span class="text-xl font-bold text-gray-900">Total</span>
                                             <span id="summary-total"
                                                 class="text-xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($finalTotal, 2) }}</span>
+                                                {{ number_format($totals['final_total'] ?? ($totals['total'] ?? 0), 2) }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1342,45 +1321,10 @@
                                         class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
                                         {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
                                 </div>
+
                                 @php
-                                    $itemsForSummary =
-                                        isset($order) && $order->items->isNotEmpty()
-                                            ? $order->items
-                                            : ($cart
-                                                ? $cart->items
-                                                : collect());
-
-                                    // Use stored order data if available, otherwise fallback to cart/totals
-                                    if (isset($order) && $order->id) {
-                                        $subtotalStep3 = $order->subtotal ?? 0;
-                                        $totalDiscountStep3 = $order->discount_amount ?? 0;
-                                        $subtotalAfterDiscountStep3 = $subtotalStep3 - $totalDiscountStep3;
-                                        $couponDiscountStep3 = $order->coupon_discount_amount ?? 0;
-                                        $taxStep3 = $order->tax_amount ?? 0;
-                                        $shippingStep3 = $order->shipping_cost ?? 0;
-                                        $totalStep3 = $order->total ?? 0;
-                                    } else {
-                                        $subtotalStep3 =
-                                            $totals['subtotal'] ??
-                                            $itemsForSummary->sum(function ($i) {
-                                                return $i->quantity * ($i->unit_price ?? ($i->price ?? 0));
-                                            });
-                                        $totalDiscountStep3 = $totals['total_discount'] ?? 0;
-                                        $subtotalAfterDiscountStep3 = $subtotalStep3 - $totalDiscountStep3;
-                                        $couponDiscountStep3 =
-                                            $totals['coupon_discount'] ??
-                                            ($cart ? $cart->coupon_discount_amount ?? 0 : 0);
-                                        $totalAfterCouponStep3 = max(
-                                            0,
-                                            $subtotalAfterDiscountStep3 - $couponDiscountStep3,
-                                        );
-                                        $taxStep3 = $totals['tax'] ?? round($totalAfterCouponStep3 * 0.08, 2);
-                                        $shippingStep3 = $totals['shipping'] ?? 0.0;
-                                        $totalStep3 =
-                                            $totals['total'] ?? $totalAfterCouponStep3 + $taxStep3 + $shippingStep3;
-                                    }
+                                    $itemsForSummary = $itemsForView ?? ($cart?->items ?? collect());
                                 @endphp
-
                                 <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
                                     @foreach ($itemsForSummary as $itm)
                                         <div class="flex gap-4 p-4 bg-gray-50 rounded-xl">
@@ -1408,11 +1352,11 @@
                                         <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
                                             <span class="text-gray-600 font-medium">MRP</span>
                                             <span class="font-bold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($subtotalStep3, 2) }}</span>
+                                                {{ number_format($totals['subtotal'] ?? 0, 2) }}</span>
                                         </div>
                                     </div>
 
-                                    @if ($totalDiscountStep3 > 0)
+                                    @if (($totals['total_discount'] ?? 0) > 0)
                                         <div
                                             class="flex justify-between text-green-600 text-base bg-green-50 px-4 py-3 rounded-xl">
                                             <span class="flex items-center">
@@ -1425,7 +1369,7 @@
                                                 Discount on MRP
                                             </span>
                                             <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($totalDiscountStep3, 2) }}</span>
+                                                {{ number_format($totals['total_discount'] ?? 0, 2) }}</span>
                                         </div>
 
                                         {{-- <div
@@ -1436,7 +1380,7 @@
                                         </div> --}}
                                     @endif
 
-                                    @if ($couponDiscountStep3 > 0)
+                                    @if (($totals['coupon_discount'] ?? 0) > 0)
                                         <div
                                             class="flex justify-between items-center text-purple-600 text-base bg-purple-50 px-4 py-3 rounded-xl">
                                             <div class="flex items-center">
@@ -1453,14 +1397,14 @@
                                                 </div>
                                             </div>
                                             <span class="font-bold">-{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($couponDiscountStep3, 2) }}</span>
+                                                {{ number_format($totals['coupon_discount'] ?? 0, 2) }}</span>
                                         </div>
                                     @endif
 
                                     <div class="flex justify-between text-gray-600 text-base">
                                         <span>Shipping</span>
                                         <span
-                                            class="font-bold text-green-600">{{ $shippingStep3 > 0 ? '$' . number_format($shippingStep3, 2) : 'FREE' }}</span>
+                                            class="font-bold text-green-600">{{ ($totals['shipping'] ?? 0) > 0 ? config('app.CURRENCY_SYMBOL') . number_format($totals['shipping'], 2) : 'FREE' }}</span>
                                     </div>
                                     <div class="flex justify-between text-gray-600 text-base">
                                         {{-- <span>{{ config('tax.label') }} ({{ config('tax.rate') }})</span> --}}
@@ -1472,7 +1416,7 @@
                                             <span class="text-xl font-bold text-gray-900">Total</span>
                                             <span
                                                 class="text-xl font-bold bg-linear-to-r from-green-500 to-green-400 bg-clip-text text-transparent">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($totalStep3, 2) }}</span>
+                                                {{ number_format($totals['final_total'] ?? ($totals['total'] ?? 0), 2) }}</span>
                                         </div>
                                     </div>
                                 </div>

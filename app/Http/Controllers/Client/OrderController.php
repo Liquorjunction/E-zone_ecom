@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Orders\OrderCheckoutRequest;
+use App\Http\Requests\Client\Orders\OrderShowRequest;
+use App\Http\Requests\Client\Orders\OrderCancelRequest;
+use App\Http\Requests\Client\Orders\OrderDetailRequest;
+use App\Http\Requests\Client\Orders\OrderInvoiceRequest;
 use App\Models\Cart;
 use App\Services\CartService;
 use App\Services\OrderService;
@@ -12,13 +16,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
 use App\Models\Address;
-use App\Models\Order as OrderModel;
-use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepositoryInterface;
+use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepo;
+use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
+use App\Services\PriceCalculatorService;
 
 class OrderController extends Controller
 {
 
-    public function index(Request $request)
+    public function index(Request $request, OrderRepo $orderRepo)
     {
         if (!Auth::check()) {
             if ($request->ajax()) {
@@ -28,14 +33,13 @@ class OrderController extends Controller
         }
 
         $status = $request->query('status');
-        $query = OrderModel::where('user_id', Auth::id());
 
         $allowedStatuses = ['processing', 'shipped', 'delivered', 'cancelled'];
+        $filters = ['user_id' => Auth::id()];
         if ($status && in_array($status, $allowedStatuses)) {
-            $query->where('status', $status);
+            $filters['status'] = $status;
         }
-
-        $orders = $query->with(['items.product', 'items.variant'])->latest()->paginate(10);
+        $orders = $orderRepo->getOrdersWithRelations($filters, ['items.product', 'items.variant'], 10);
 
         if ($request->ajax()) {
             $html = view('client.pages.dashboard.partials.orders-list', [
@@ -51,9 +55,8 @@ class OrderController extends Controller
         ]);
     }
 
-    public function checkout(OrderCheckoutRequest $request, OrderService $orders)
+    public function checkout(OrderCheckoutRequest $request, OrderService $orders, PriceCalculatorService $priceService)
     {
-        // Fetch the cart for the current user or session
         if (Auth::check()) {
             $cart = Cart::with('items')->where('user_id', Auth::id())->first();
         } else {
@@ -93,12 +96,10 @@ class OrderController extends Controller
         }
         $data['phone_no'] = $phone ?? ($data['phone_no'] ?? null);
 
-        // Billing address: allow separate entry or fall back to shipping
         $billingSame = (bool) ($data['billing_same_as_shipping'] ?? false);
         if ($billingSame) {
             $data['billing_address'] = $data['shipping_address'] ?? null;
         } else {
-            // Check for saved billing address
             if (Auth::check()) {
                 $savedBillingAddressId = $data['saved_billing_address_id'] ?? null;
 
@@ -184,14 +185,15 @@ class OrderController extends Controller
             }
         }
 
-        $order = $orders->createFromCart($cart, $data);
+        $order = $orders->createFromCart($cart, $data, $priceService);
 
         Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id()]);
 
         return redirect()->route('checkout', ['step' => 3])->with('order_id', $order->id ?? null);
     }
 
-    public function show(Request $request, CartService $cartService)
+
+    public function show(OrderShowRequest $request, CartService $cartService, CartRepo $cartRepo, OrderRepo $orderRepo)
     {
         $step = (int) $request->get('step', 1);
 
@@ -209,13 +211,11 @@ class OrderController extends Controller
         $addresses = collect();
         $billingAddresses = collect();
         if (Auth::check()) {
-            // Fetch all addresses for shipping
             $addresses = Address::where('user_id', Auth::id())
                 ->where('type', 'shipping')
                 ->orWhereNull('type')
                 ->get();
 
-            // Fetch billing addresses separately
             $billingAddresses = Address::where('user_id', Auth::id())
                 ->where('type', 'billing')
                 ->orWhereNull('type')
@@ -226,16 +226,16 @@ class OrderController extends Controller
         if ($step === 3) {
             $orderId = $request->session()->get('order_id');
             if ($orderId) {
-                $order = OrderModel::with(['items.product', 'items.variant'])->find($orderId);
+                $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
             }
 
             if (!$order && Auth::check()) {
-                $order = OrderModel::with(['items.product', 'items.variant'])->where('user_id', Auth::id())->latest()->first();
+                $order = $orderRepo->getLatestOrderForUser(Auth::id(), ['items.product', 'items.variant']);
             }
         }
 
         if ($cart) {
-            $totals = $cart->calculateTotals();
+            $totals = $cartRepo->calculateCartTotals($cart);
         } elseif ($order && $order->relationLoaded('items')) {
             $totals = [
                 'subtotal' => $order->subtotal ?? 0,
@@ -271,49 +271,47 @@ class OrderController extends Controller
         ]);
     }
 
-    public function detail(OrderModel $order)
+    public function detail(OrderDetailRequest $request, $orderId, OrderRepo $orderRepo)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
         }
 
-        if ($order->user_id !== Auth::id()) {
+        $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
+        if (!$order || $order->user_id !== Auth::id()) {
             abort(403);
         }
-
-        $order->load(['items.product', 'items.variant']);
 
         return view('client.pages.order-detail', ['order' => $order]);
     }
 
-    public function invoice($id)
+    public function invoice(OrderInvoiceRequest $request, $id, OrderRepo $orderRepo)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
         }
 
-        $order = OrderModel::with(['items.product', 'items.variant'])->findOrFail($id);
-
-        if ($order->user_id !== Auth::id()) {
+        $order = $orderRepo->findOrderWithRelations($id, ['items.product', 'items.variant']);
+        if (!$order || $order->user_id !== Auth::id()) {
             abort(403);
         }
 
         return view('client.pages.order-invoice', ['order' => $order]);
     }
 
-    public function cancel(Request $request, $id, OrderRepositoryInterface $orders)
+    public function cancel(OrderCancelRequest $request, $id, OrderRepo $orderRepo)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
         }
 
-        $order = OrderModel::findOrFail($id);
-        if ($order->user_id !== Auth::id()) {
+        $order = $orderRepo->findOrder($id);
+        if (!$order || $order->user_id !== Auth::id()) {
             abort(403);
         }
 
         $reason = $request->input('reason');
-        $ok = $orders->cancelOrder($order->id, $reason);
+        $ok = $orderRepo->cancelOrder($order->id, $reason);
 
         if ($ok) {
             return back()->with('success', 'Order cancelled successfully.');
@@ -322,3 +320,4 @@ class OrderController extends Controller
         return back()->withErrors(['cancel' => 'Unable to cancel the order.']);
     }
 }
+

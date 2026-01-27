@@ -115,6 +115,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\Client\Interfaces\WhyShopWithUsRepositoryInterface::class, \App\Repositories\Client\Repositories\WhyShopWithUsRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\QuickStatRepositoryInterface::class, \App\Repositories\Client\Repositories\QuickStatRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\ProfileRepositoryInterface::class, \App\Repositories\Client\Repositories\ProfileRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\CartRepositoryInterface::class, \App\Repositories\Client\Repositories\CartRepository::class);
     }
 
     /**

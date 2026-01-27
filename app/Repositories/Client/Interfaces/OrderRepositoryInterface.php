@@ -3,17 +3,14 @@
 namespace App\Repositories\Client\Interfaces;
 
 use App\Models\Cart;
+use App\Services\PriceCalculatorService;
 
 interface OrderRepositoryInterface
 {
-    /**
-     * Create an order (and order items) from a cart inside a transaction.
-     * Returns the created Order instance.
-     */
-    public function createOrderFromCart(Cart $cart, array $data);
-    /**
-     * Cancel an order by id. Should restore inventory and log transactions.
-     * Returns true on success.
-     */
+    public function createOrderFromCart(Cart $cart, array $data, CartRepositoryInterface $cartRepo, PriceCalculatorService $priceService);
     public function cancelOrder(int $orderId, ?string $reason = null);
+    public function getOrdersWithRelations(array $filters, array $relations = [], int $perPage = 10);
+    public function findOrderWithRelations(int $orderId, array $relations = []);
+    public function getLatestOrderForUser(int $userId, array $relations = []);
+    public function findOrder(int $orderId);
 }

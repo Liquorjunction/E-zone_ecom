@@ -21,7 +21,6 @@ class CartService
     {
         $cart = $this->repo->getCartForUserOrSession($request);
 
-        // Resolve product and variant (include soft-deleted) to ensure we always have a price source
         $productId = $payload['product_id'] ?? null;
         $variantId = $payload['variant_id'] ?? null;
 
@@ -33,13 +32,11 @@ class CartService
             ? $product->productVariants->firstWhere('id', $variantId)
             : null;
 
-        // If variant not provided, pick the first available (even soft-deleted) for pricing consistency
         if (!$variant && $product && $product->productVariants->count() > 0) {
             $variant = $product->productVariants->first();
             $payload['variant_id'] = $variant->id;
         }
 
-        // Compute unit price: prefer variant price, then provided unit_price, then product price, fallback to 0
         $unitPrice = $payload['unit_price'] ?? null;
         if ($unitPrice === null) {
             $unitPrice = $variant->price ?? $variant->sale_price ?? $product->price ?? 0;
@@ -47,7 +44,6 @@ class CartService
 
         $payload['unit_price'] = $unitPrice;
 
-        // Stock check
         $quantity = $payload['quantity'] ?? 1;
         $stock = $variant ? $variant->getTotalStockAttribute() : ($product ? $product->productVariants()->sum('inventory.quantity') : 0);
         if ($stock < $quantity) {

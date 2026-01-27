@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Client\SecurityController;
-// Locale switch (public)
 Route::get('lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'fr', 'ar'])) {
         Session::put('locale', $locale);
@@ -30,23 +29,18 @@ Route::get('lang/{locale}', function ($locale) {
     return Redirect::back();
 })->name('lang.switch');
 
-// Public routes: home, content pages, misc views
 Route::group([], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
-
     Route::get('/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy-policy');
     Route::get('/faq', [FaqController::class, 'index'])->name('faq');
     Route::get('/terms', [TermsController::class, 'index'])->name('terms');
     Route::get('/shipping-returns', [ShippingAndReturnsController::class, 'index'])->name('shipping-returns');
     Route::get('/about-us', [AboutUsController::class, 'index'])->name('about');
     Route::get('/brands', [BrandController::class, 'index'])->name('brands');
-
-    // Remove legacy `/checkout-success` route — use multi-step checkout `checkout?step=3`
     Route::view('/search', 'client.pages.search-results')->name('search');
     Route::view('/checkout-process', 'client.pages.checkout-process')->name('checkout-process');
     Route::view('/checkout-demo', 'client.pages.checkout')->name('checkout.demo');
     Route::view('/product-compare', 'client.pages.compare')->name('product-compare');
-
     Route::view('/contact', 'client.pages.contact')->name('contact');
     Route::view('/showrooms', 'client.pages.showrooms')->name('showrooms');
     Route::view('/sitemap', 'client.pages.sitemap')->name('sitemap');
@@ -54,23 +48,19 @@ Route::group([], function () {
     Route::view('/new-arrivals', 'client.pages.new-arrivals')->name('new-arrivals');
     Route::view('/best-sellers', 'client.pages.best-sellers')->name('best-sellers');
     Route::view('/order-tracking', 'client.pages.order-tracking')->name('order-tracking');
-
     Route::get('/brand/{slug}', function ($slug) {
         return view('client.pages.brand-products', ['brand_slug' => $slug]);
     })->name('brand-products');
 });
 
-// Inventory AJAX for client (transactions)
 Route::post('/inventory/transactions', [InventoryController::class, 'transactions'])->name('inventory.transactions');
 
-// Reservation / Return endpoints (auth required)
 Route::middleware('auth')->group(function () {
     Route::post('/inventory/reserve', [InventoryController::class, 'reserve'])->name('inventory.reserve');
     Route::post('/inventory/release', [InventoryController::class, 'release'])->name('inventory.release');
     Route::post('/inventory/return', [InventoryController::class, 'processReturn'])->name('inventory.return');
 });
 
-// Products
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
     Route::get('/deals', [ProductController::class, 'deals'])->name('deals');
@@ -78,7 +68,6 @@ Route::prefix('products')->name('products.')->group(function () {
     Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
 });
 
-// Guest-only auth pages (login / register views + submit actions)
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'client.auth.login')->name('login');
     Route::view('/register', 'client.auth.register')->name('register');
@@ -87,19 +76,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
 });
 
-// Authentication-required routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Email verification
     Route::get('/email/verify', [VerificationController::class, 'notice'])->name('verification.notice');
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])->middleware(['throttle:6,1'])->name('verification.send');
 
-    // Dashboard (authenticated)
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('/', [HomeController::class, 'dashboard'])->name('overview');
-        // Dashboard Profile Management
         Route::get('/read', [ProfileController::class, 'readProfile'])->name('profile.read');
         Route::get('/edit', [ProfileController::class, 'editProfile'])->name('profile.edit');
         Route::post('/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
@@ -121,11 +106,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/client/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
     Route::get('/order-detail/{order}', [OrderController::class, 'detail'])->name('order-detail');
 
-    // Reviews
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
-// Cart endpoints: keep `GET /cart` public but require auth for modifications
 Route::get('/cart', [CartController::class, 'show'])->name('cart');
 Route::get('/cart/add', function () {
     return redirect()->route('cart');
@@ -138,15 +121,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon'])->name('cart.removeCoupon');
 });
 
-// Client addresses endpoints (AJAX-driven from dashboard)
 Route::prefix('client')->middleware('auth')->group(function () {
     Route::post('/addresses', [AddressController::class, 'store']);
-    // AJAX endpoints without URL parameters: id is passed in request body
     Route::post('/addresses/show', [AddressController::class, 'show']);
     Route::post('/addresses/update', [AddressController::class, 'update']);
     Route::post('/addresses/delete', [AddressController::class, 'destroy']);
     Route::post('/addresses/default', [AddressController::class, 'setDefault']);
-    // Wishlist AJAX endpoints
     Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
     Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
     Route::post('/wishlist/get', [WishlistController::class, 'getWishlist']);

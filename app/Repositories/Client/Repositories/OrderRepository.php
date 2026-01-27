@@ -10,65 +10,83 @@ use App\Models\InventoryTransaction;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
+use App\Services\PriceCalculatorService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderRepository implements OrderRepositoryInterface
 {
-    public function createOrderFromCart(Cart $cart, array $data)
+    public function getOrdersWithRelations(array $filters, array $relations = [], int $perPage = 10)
+    {
+        $query = Order::query();
+        foreach ($filters as $key => $value) {
+            $query->where($key, $value);
+        }
+        if (!empty($relations)) {
+            $query->with($relations);
+        }
+        return $query->latest()->paginate($perPage);
+    }
+
+    public function findOrderWithRelations(int $orderId, array $relations = [])
+    {
+        $query = Order::query();
+        if (!empty($relations)) {
+            $query->with($relations);
+        }
+        return $query->find($orderId);
+    }
+
+    public function getLatestOrderForUser(int $userId, array $relations = [])
+    {
+        $query = Order::where('user_id', $userId);
+        if (!empty($relations)) {
+            $query->with($relations);
+        }
+        return $query->latest()->first();
+    }
+
+    public function findOrder(int $orderId)
+    {
+        return Order::find($orderId);
+    }
+
+    public function createOrderFromCart(Cart $cart, array $data, CartRepo $cartRepo, PriceCalculatorService $priceService)
     {
         $order = null;
 
-        DB::transaction(function() use ($cart, $data, &$order) {
-            // Calculate cart totals and discounts
-            $cartTotals = $cart->calculateTotals();
-            $subtotal = $cartTotals['subtotal'] ?? 0;
-            $totalItemDiscount = $cartTotals['total_discount'] ?? 0;
-            $subtotalAfterItemDiscount = $cartTotals['total'] ?? 0;
-
-            // Coupon data
-            $couponDiscount = $cart->coupon_discount_amount ?? 0;
-            $totalAfterCoupon = max(0, $subtotalAfterItemDiscount - $couponDiscount);
-
-            $taxRate = config('tax.rate', 20.0);
-            $taxAmount = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
-            $taxableAmount = round($totalAfterCoupon - $taxAmount, 2);
-
-            // Shipping data
+        DB::transaction(function () use ($cart, $data, &$order, $priceService) {
             $shippingMethod = $data['shipping_method'] ?? 'standard';
-            $shippingCost = $shippingMethod === 'express' ? 12.99 : 0.00;
-
-            // Final total
-            $finalTotal = round($totalAfterCoupon + $shippingCost, 2);
+            $pricing = $priceService->calculate($cart, $shippingMethod);
 
             $order = Order::create([
                 'user_id' => $cart->user_id ?? null,
-                'subtotal' => round($subtotal, 2),
-                'discount_amount' => round($totalItemDiscount, 2),
+                'subtotal' => $pricing['subtotal'],
+                'discount_amount' => $pricing['total_item_discount'],
                 'coupon_id' => $cart->coupon_id ?? null,
                 'coupon_code' => $cart->coupon_code ?? null,
-                'coupon_discount_amount' => round($couponDiscount, 2),
+                'coupon_discount_amount' => $pricing['coupon_discount'],
                 'shipping_method' => $shippingMethod,
-                'shipping_cost' => round($shippingCost, 2),
-                'tax_amount' => round($taxAmount, 2),
-                'tax_percentage' => $taxRate,
-                'taxable_amount' => $taxableAmount,
-                'total' => $finalTotal,
+                'shipping_cost' => $pricing['shipping_cost'],
+                'tax_amount' => $pricing['tax_amount'],
+                'tax_percentage' => $pricing['tax_rate'],
+                'taxable_amount' => $pricing['taxable_amount'],
+                'total' => $pricing['final_total'],
                 'status' => 'pending',
                 'shipping_address' => $data['shipping_address'] ?? null,
                 'billing_address' => $data['billing_address'] ?? ($data['shipping_address'] ?? null),
                 'phone_no' => $data['phone_no'] ?? null,
                 'email' => $data['email'] ?? Auth::user()?->email ?? null,
                 'payment_method' => $data['payment_method'] ?? null,
-                'order_number' => 'EZMA/ORD/'.uniqid(),
+                'order_number' => 'EZMA/ORD/' . uniqid(),
             ]);
 
-            $total = 0;
             $orderItems = [];
             $inventoryTxns = [];
+
             foreach ($cart->items as $item) {
                 $variant = $item->variant ?: ProductVariant::withTrashed()->find($item->variant_id);
-                $product = $item->product;
 
                 $unitPriceOriginal = $item->unit_price ?? 0;
                 $discountPerUnit = $item->discount_amount ?? 0;
@@ -91,17 +109,20 @@ class OrderRepository implements OrderRepositoryInterface
                     'total_price' => $lineFinal,
                     'line_total' => $lineFinal,
                 ];
-                $total += $lineFinal;
 
+                // Inventory Logic with Locking
                 $remaining = $item->quantity;
 
+                // Lock rows for update to prevent race conditions
                 $inventories = Inventory::where('product_variant_id', $item->variant_id)
                     ->orderBy('created_at', 'asc')
+                    ->lockForUpdate() // Added locking
                     ->get();
 
                 if ($inventories->isEmpty()) {
                     $inventories = Inventory::where('product_id', $item->product_id)
                         ->orderBy('created_at', 'asc')
+                        ->lockForUpdate() // Added locking
                         ->get();
                 }
 
@@ -115,7 +136,6 @@ class OrderRepository implements OrderRepositoryInterface
                     $before = $available;
                     $after = $before - $deduct;
 
-                    // Update both quantity and reserved_quantity
                     $inv->quantity = $after;
                     $inv->reserved_quantity = ($inv->reserved_quantity ?? 0) + $deduct;
                     $inv->save();
@@ -138,6 +158,7 @@ class OrderRepository implements OrderRepositoryInterface
                     $remaining -= $deduct;
                 }
 
+                // Backorder handling
                 if ($remaining > 0) {
                     $placeholder = Inventory::firstOrCreate([
                         'product_id' => $item->product_id,
@@ -151,6 +172,9 @@ class OrderRepository implements OrderRepositoryInterface
                         'cost_price' => $item->unit_price ?? 0,
                         'status' => 'active',
                     ]);
+
+                    // We re-fetch to lock this specific row if it existed or was just created
+                    $placeholder = Inventory::where('id', $placeholder->id)->lockForUpdate()->first();
 
                     $before = (float) $placeholder->quantity;
                     $placeholder->quantity = $before - $remaining;
@@ -178,11 +202,10 @@ class OrderRepository implements OrderRepositoryInterface
                 OrderItem::create($oi);
             }
 
-            $order->total = $total;
-            $order->order_number = 'EZMA/ORD/'.str_pad($order->id, 4, '0', STR_PAD_LEFT);
+            // Update order number only
+            $order->order_number = 'EZMA/ORD/' . str_pad($order->id, 4, '0', STR_PAD_LEFT);
             $order->save();
 
-            // Now create inventory transactions with correct order_number
             foreach ($inventoryTxns as $txn) {
                 try {
                     $desc = $txn['description_type'] === 'backorder'
@@ -213,7 +236,7 @@ class OrderRepository implements OrderRepositoryInterface
             return false;
         }
 
-        DB::transaction(function() use ($order, $reason) {
+        DB::transaction(function () use ($order, $reason) {
             $txns = InventoryTransaction::where('reference_type', 'order')
                 ->where('reference_id', $order->id)
                 ->where('type', 'sale')
@@ -239,7 +262,7 @@ class OrderRepository implements OrderRepositoryInterface
                         'rate' => $inv->cost_price ?? 0,
                         'batch_no' => $inv->batch_no,
                         'created_by' => Auth::id() ?? ($order->user_id ?? null),
-                        'description' => 'Order cancellation: '.$order->order_number,
+                        'description' => 'Order cancellation: ' . $order->order_number,
                         'reference_type' => 'order_cancellation',
                         'reference_id' => $order->id,
                         'before_quantity' => $before,
