@@ -61,17 +61,21 @@
   }
 @endphp
 
-<div class="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border-2 border-gray-100 hover:border-primary/20">
+
+@php
+  $cardUrl = route('products.detail', $master->slug) . ($isVariant ? '?variant=' . ($product->slug ?? '') : '');
+@endphp
+<a href="{{ $cardUrl }}" class="block group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border-2 border-gray-100 hover:border-primary/20 relative" style="text-decoration: none;">
+  <!-- Overlay to prevent click on buttons -->
+  <span class="absolute inset-0 z-0"></span>
   <!-- Image Container -->
   <div class="relative aspect-square bg-gray-100 overflow-hidden">
-    <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}" class="block w-full h-full">
-      <img
-        src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}"
-        alt="{{ $name }}"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        loading="lazy"
-      >
-    </a>
+    <img
+      src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}"
+      alt="{{ $name }}"
+      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+      loading="lazy"
+    >
 
     <!-- Gradient Overlay on Hover -->
     <div class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -120,22 +124,12 @@
       data-toast-ignore
       class="wishlist-btn no-toast absolute top-3 right-3 w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 z-10 {{ $isWishlisted ? 'opacity-100 is-wishlisted' : 'opacity-0 group-hover:opacity-100' }}"
       @if(!$variantId) disabled @endif
+      onclick="event.stopPropagation();"
     >
       <svg class="w-5 h-5 {{ $isWishlisted ? 'text-red-500 fill-current' : 'text-gray-600' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
       </svg>
     </button>
-
-    <!-- Quick View - Professional Style -->
-    <div class="absolute inset-x-0 bottom-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-      <button class="w-full px-4 py-2.5 bg-white/95 backdrop-blur-sm text-gray-900 rounded-lg font-semibold text-sm hover:bg-white transition-all duration-200 shadow-lg flex items-center justify-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-        </svg>
-        Quick View
-      </button>
-    </div>
   </div>
 
   <!-- Product Info -->
@@ -154,7 +148,7 @@
             <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
           In Stock
-          <span class="ml-1 text-gray-400">({{ $stock }})</span>
+          {{-- <span class="ml-1 text-gray-400">({{ $stock }})</span> --}}
         </div>
       @else
         <div class="flex items-center gap-1.5 text-xs font-medium text-red-600">
@@ -167,11 +161,9 @@
     </div>
 
     <!-- Product Title -->
-    <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
-      <h3 class="text-sm font-bold text-gray-900 line-clamp-2 mb-3 min-h-14 group-hover:text-primary transition-colors leading-snug">
-        {{ $name }}
-      </h3>
-    </a>
+    <h3 class="text-sm font-bold text-gray-900 line-clamp-2 mb-3 group-hover:text-primary transition-colors leading-snug">
+      {{ $name }}
+    </h3>
 
     <!-- Rating -->
     <div class="flex items-center gap-2 mb-4">
@@ -222,16 +214,16 @@
         @endif
       </div>
 
-        <button class="add-to-cart-btn shrink-0 w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-all duration-300 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-95"
-          onclick="addToCart('{{ $variantId }}', '{{ $master->id }}')"
-          data-product-variant-id="{{ $variantId }}"
-          data-product-id="{{ $master->id }}"
-          @if(!$variantId) disabled @endif
-        >
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-          </svg>
-        </button>
+      <button class="add-to-cart-btn shrink-0 w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-all duration-300 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-95"
+        onclick="event.stopPropagation(); addToCart('{{ $variantId }}', '{{ $master->id }}')"
+        data-product-variant-id="{{ $variantId }}"
+        data-product-id="{{ $master->id }}"
+        @if(!$variantId) disabled @endif
+      >
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+      </button>
     </div>
   </div>
-</div>
+</a>
