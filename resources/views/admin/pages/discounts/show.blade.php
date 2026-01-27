@@ -114,12 +114,7 @@
                         </h6>
                     </div>
                     <div class="card-body p-4">
-                        @if ($discount->targets && $discount->targets->count())
-                            @php
-                                // Use the repository's formatTargetsCollection for correct names
-                                $repo = app(\App\Repositories\Admin\Interfaces\DiscountRepositoryInterface::class);
-                                $resolvedTargets = $repo->formatTargetsCollection($discount->targets);
-                            @endphp
+                        @if (isset($resolvedTargets) && count($resolvedTargets))
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover align-middle mb-0">
                                     <thead class="bg-light">

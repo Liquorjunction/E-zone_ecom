@@ -188,7 +188,10 @@ class DiscountController extends Controller
             return redirect()->route('admin.discounts.index')->with('error', 'Discount not found.');
         }
 
-        return view('admin.pages.discounts.show', compact('discount', 'lists'));
+        // Always resolve targets in controller, not in blade
+        $resolvedTargets = $discountRepo->formatTargetsCollection($discount->targets);
+
+        return view('admin.pages.discounts.show', compact('discount', 'lists', 'resolvedTargets'));
     }
 
     public function destroy(DestroyDiscountRequest $request, DiscountRepo $discountRepo, DiscountService $discountService)

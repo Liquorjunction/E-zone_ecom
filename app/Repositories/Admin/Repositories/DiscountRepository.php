@@ -7,6 +7,7 @@ use App\Repositories\Admin\Interfaces\DiscountRepositoryInterface;
 use App\Models\Categories;
 use App\Models\SubCategories;
 use App\Models\Brand;
+use App\Models\DiscountTarget;
 use App\Models\Product;
 use App\Models\ProductVariant;
 
@@ -215,7 +216,7 @@ class DiscountRepository implements DiscountRepositoryInterface
     {
         foreach ($targets as $target) {
             if (!empty($target['target_type']) && !empty($target['target_id'])) {
-                $exists = \App\Models\DiscountTarget::where('target_type', $target['target_type'])
+                $exists = DiscountTarget::where('target_type', $target['target_type'])
                     ->where('target_id', $target['target_id'])
                     ->whereHas('discount', function ($q) {
                         $q->where('status', true)
