@@ -176,11 +176,11 @@
                                     @if ($variantCount > 1)
                                         @if ($hasDiscount)
                                             <div class="text-2xl text-gray-400">
-                                                <span class="line-through">{{ config('app.CURRENCY_SYMBOL') }}{{ number_format($originalPrice, 2) }}</span>
+                                                <span class="line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($originalPrice, 2) }}</span>
                                             </div>
                                             <div class="flex items-baseline gap-2">
                                                 <span class="text-sm text-gray-600 font-medium">From</span>
-                                                <span id="product-price" class="text-4xl font-bold text-red-600">${{ number_format($finalPrice, 2) }}</span>
+                                                <span id="product-price" class="text-4xl font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($finalPrice, 2) }}</span>
                                             </div>
                                             @if ($discountPercentage > 0)
                                                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
@@ -201,8 +201,8 @@
                                         @endif
                                     @else
                                         @if ($hasDiscount)
-                                            <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
-                                            <span id="product-price" class="text-4xl font-bold text-red-600">${{ number_format($finalPrice, 2) }}</span>
+                                            <span class="text-2xl text-gray-400 line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($originalPrice, 2) }}</span>
+                                            <span id="product-price" class="text-4xl font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($finalPrice, 2) }}</span>
                                             @if ($discountPercentage > 0)
                                                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
                                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

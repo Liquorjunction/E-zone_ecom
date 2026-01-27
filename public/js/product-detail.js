@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show discounted price
             priceWrapper.innerHTML = `
                 <div class="text-2xl text-gray-400">
-                    <span class="line-through">${window.CURRENCY_SYMBOL}${formatPrice(originalPrice)}</span>
+                    <span class="line-through">${window.CURRENCY_SYMBOL} ${formatPrice(originalPrice)}</span>
                 </div>
                 <span class="text-4xl font-bold text-red-600">${window.CURRENCY_SYMBOL} ${formatPrice(finalPrice)}</span>
                 ${discountPercentage > 0 ? `
