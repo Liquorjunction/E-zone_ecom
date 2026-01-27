@@ -132,17 +132,31 @@
                     </div>
                 @endif
                 @php
-                    $stock = $isVariant
-                        ? ($product->getTotalStockAttribute() ?? 0)
-                        : ($master->productVariants()->sum('inventory.quantity') ?? 0);
+                    // Stock calculation (match grid card logic)
+                    if ($isVariant) {
+                        $stock = $product->getTotalStockAttribute() ?? 0;
+                    } else {
+                        if ($master->productVariants && $master->productVariants->count() > 0) {
+                            $stock = $master->productVariants->sum(function($v) {
+                                return method_exists($v, 'getTotalStockAttribute') ? $v->getTotalStockAttribute() : 0;
+                            });
+                        } else {
+                            $stock = method_exists($master, 'getTotalStockAttribute') ? $master->getTotalStockAttribute() : 0;
+                        }
+                    }
                 @endphp
-                <div class="text-xs font-medium mt-1 flex items-center justify-end gap-1 {{ $stock > 0 ? 'text-green-600' : 'text-red-600' }}">
-                    <span class="w-2 h-2 rounded-full {{ $stock > 0 ? 'bg-green-500' : 'bg-red-500' }}"></span>
-                    {{ $stock > 0 ? 'In Stock' : 'Out of Stock' }}
-                    @if($stock > 0)
+                @if($stock > 0)
+                    <div class="text-xs font-medium mt-1 flex items-center justify-end gap-1 text-green-600">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        In Stock
                         <span class="ml-1 text-gray-400">({{ $stock }})</span>
-                    @endif
-                </div>
+                    </div>
+                @else
+                    <div class="text-xs font-medium mt-1 flex items-center justify-end gap-1 text-red-600">
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                        Out of Stock
+                    </div>
+                @endif
             </div>
 
             <div class="w-full space-y-2">

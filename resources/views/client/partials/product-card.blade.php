@@ -45,6 +45,20 @@
     $firstVariant = $master->productVariants?->first();
     $isBestseller = $firstVariant && (bool) $firstVariant->is_bestseller;
   }
+
+  // Stock calculation
+  if ($isVariant) {
+    $stock = $product->getTotalStockAttribute() ?? 0;
+  } else {
+    // If product has variants, sum their stock, else fallback to product's own inventory if available
+    if ($master->productVariants && $master->productVariants->count() > 0) {
+      $stock = $master->productVariants->sum(function($v) {
+        return method_exists($v, 'getTotalStockAttribute') ? $v->getTotalStockAttribute() : 0;
+      });
+    } else {
+      $stock = method_exists($master, 'getTotalStockAttribute') ? $master->getTotalStockAttribute() : 0;
+    }
+  }
 @endphp
 
 <div class="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border-2 border-gray-100 hover:border-primary/20">
@@ -133,13 +147,23 @@
       </span>
 
       <!-- Stock Indicator -->
-      <div class="flex items-center gap-1.5 text-xs font-medium text-green-600">
-        <span class="flex h-2 w-2 relative">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-        </span>
-        In Stock
-      </div>
+      @if($stock > 0)
+        <div class="flex items-center gap-1.5 text-xs font-medium text-green-600">
+          <span class="flex h-2 w-2 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          In Stock
+          <span class="ml-1 text-gray-400">({{ $stock }})</span>
+        </div>
+      @else
+        <div class="flex items-center gap-1.5 text-xs font-medium text-red-600">
+          <span class="flex h-2 w-2 relative">
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+          Out of Stock
+        </div>
+      @endif
     </div>
 
     <!-- Product Title -->
