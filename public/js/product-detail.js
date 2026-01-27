@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="text-2xl text-gray-400">
                     <span class="line-through">${window.CURRENCY_SYMBOL}${formatPrice(originalPrice)}</span>
                 </div>
-                <span class="text-4xl font-bold text-red-600">${window.CURRENCY_SYMBOL}${formatPrice(finalPrice)}</span>
+                <span class="text-4xl font-bold text-red-600">${window.CURRENCY_SYMBOL} ${formatPrice(finalPrice)}</span>
                 ${discountPercentage > 0 ? `
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-500 text-white text-sm font-bold self-start">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
