@@ -175,7 +175,9 @@
                                     @endphp
                                     @if ($variantCount > 1)
                                         @if ($hasDiscount)
-                                            <span class="text-2xl text-gray-400 line-through">${{ number_format($originalPrice, 2) }}</span>
+                                            <div class="text-2xl text-gray-400">
+                                                <span class="line-through">{{ config('app.CURRENCY_SYMBOL') }}{{ number_format($originalPrice, 2) }}</span>
+                                            </div>
                                             <div class="flex items-baseline gap-2">
                                                 <span class="text-sm text-gray-600 font-medium">From</span>
                                                 <span id="product-price" class="text-4xl font-bold text-red-600">${{ number_format($finalPrice, 2) }}</span>
@@ -390,7 +392,9 @@
                                             <div class="flex items-center justify-between gap-2">
                                                 @if ($variantHasDiscount)
                                                     <div class="flex flex-col">
-                                                        <span class="text-xs text-gray-400 line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['original_price'], 2) }}</span>
+                                                        <div class="text-xs text-gray-400">
+                                                            <span class="line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['original_price'], 2) }}</span>
+                                                        </div>
                                                         <div class="flex items-center gap-2">
                                                             <span class="text-lg font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($variantDiscount['final_price'], 2) }}</span>
                                                             @if (($variantDiscount['discount_percentage'] ?? 0) > 0)
