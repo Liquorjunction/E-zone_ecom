@@ -1,7 +1,7 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-gradient-to-br from-gray-50 to-white min-h-screen py-8">
+    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
             <x-breadcrumbs>
                 <x-slot:title>Order Details</x-slot:title>
@@ -36,7 +36,7 @@
                         <p class="text-sm text-gray-600">Placed on {{ optional($order->created_at)->format('F j, Y \a\t g:i A') }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <a href="{{ route('client.orders.invoice', $order->id) ?? '#' }}" class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                        <a href="{{ route('client.orders.invoice', ['id' => $order->id]) ?? '#' }}" class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
                             <span class="flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -53,7 +53,7 @@
                             </span>
                         </a>
                         @if(Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled','shipped','delivered']))
-                            <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');" class="inline-block">
+                            <form method="POST" action="{{ route('client.orders.cancel', ['id' => $order->id]) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');" class="inline-block">
                                 @csrf
                                 <button type="submit" class="px-4 py-2.5 border-2 border-red-200 text-red-700 font-semibold rounded-lg hover:bg-red-50 transition-colors text-sm">
                                     <span class="flex items-center gap-2">
@@ -127,7 +127,7 @@
                                     }
                                 @endphp
                                 <div class="flex gap-4">
-                                    <div class="flex flex-col items-center w-12 flex-shrink-0">
+                                    <div class="flex flex-col items-center w-12 shrink-0">
                                         <div class="w-10 h-10 rounded-full flex items-center justify-center {{ $isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500' }}">
                                             @if($isActive)
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -153,7 +153,7 @@
                         {{-- Shipping Info --}}
                         <div class="mt-6 p-4 bg-green-50 border-2 border-green-100 rounded-xl">
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                                 <div>
@@ -213,7 +213,7 @@
                                     @endphp
 
                                     <div class="flex gap-4 p-4 border-2 border-gray-100 rounded-xl hover:border-gray-200 transition-colors">
-                                        <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                                        <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-lg bg-gray-100 overflow-hidden shrink-0">
                                             <img src="{{ $imgUrl }}" alt="{{ $title }}" class="w-full h-full object-cover">
                                         </div>
                                         <div class="flex-1 min-w-0">
@@ -377,9 +377,9 @@
                     </div>
 
                     {{-- Need Help --}}
-                    <div class="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl lg:rounded-2xl border-2 border-primary/20 p-4 lg:p-6">
+                    <div class="bg-linear-to-br from-primary/5 to-primary/10 rounded-xl lg:rounded-2xl border-2 border-primary/20 p-4 lg:p-6">
                         <div class="flex items-start gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>

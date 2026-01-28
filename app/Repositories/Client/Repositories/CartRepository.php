@@ -4,21 +4,23 @@ namespace App\Repositories\Client\Repositories;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\Product;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 use App\Services\DiscountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CartRepository implements CartRepositoryInterface
 {
     public function getCartForUserOrSession(Request $request)
     {
         if (Auth::check()) {
-            return Cart::with('items.product','items.variant')->firstOrCreate(['user_id' => Auth::id()]);
+            return Cart::with('items.product', 'items.variant')->firstOrCreate(['user_id' => Auth::id()]);
         }
 
-        return Cart::with('items.product','items.variant')->firstOrCreate(['session_id' => $request->session()->getId()]);
+        return Cart::with('items.product', 'items.variant')->firstOrCreate(['session_id' => $request->session()->getId()]);
     }
 
     public function addItem($cart, array $data)
@@ -148,5 +150,61 @@ class CartRepository implements CartRepositoryInterface
             'final_total' => round($finalTotal, 2),
             'items' => $itemsData,
         ];
+    }
+
+    public function getOrderDataByOrderId(int $orderId)
+    {
+        $order = Order::with([
+            'items.product',
+            'items.variant'
+        ])->find($orderId);
+
+        if (!$order) {
+            return null;
+        }
+
+        $orderData = [
+            'order' => $order->toArray(),
+            'items' => [],
+        ];
+
+        foreach ($order->items as $item) {
+            $orderData['items'][] = [
+                'id' => $item->id,
+                'product_id' => $item->product_id,
+                'product' => $item->product ? $item->product->toArray() : null,
+                'variant_id' => $item->variant_id,
+                'variant' => $item->variant ? $item->variant->toArray() : null,
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'discount_id' => $item->discount_id ?? null,
+                'discount_amount' => $item->discount_amount ?? 0,
+                'final_price' => $item->final_price ?? $item->unit_price,
+                'created_at' => $item->created_at,
+                'updated_at' => $item->updated_at,
+            ];
+        }
+        return $orderData;
+    }
+
+    public function getAllOrdersForUser($userId)
+    {
+        return Order::with(['items.product', 'items.variant'])
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
+
+            $orders = Order::with(['items.product', 'items.variant'])
+                ->where('user_id', $userId)
+                ->orderByDesc('created_at')
+                ->get();
+
+            Log::debug('Fetched all orders for user', [
+                'user_id' => $userId,
+                'orders' => $orders->toArray(),
+                'order_count' => $orders->count()
+            ]);
+
+            return $orders;
     }
 }

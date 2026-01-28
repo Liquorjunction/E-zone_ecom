@@ -13,4 +13,6 @@ interface CartRepositoryInterface
     public function removeItem($cart, int $itemId);
     public function clearCart($cart);
     public function calculateCartTotals(Cart $cart): array;
+    public function getOrderDataByOrderId(int $orderId);
+    public function getAllOrdersForUser($userId);
 }

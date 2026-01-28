@@ -223,6 +223,7 @@ class OrderController extends Controller
         }
 
         $order = null;
+        $orders = collect();
         if ($step === 3) {
             $orderId = $request->session()->get('order_id');
             if ($orderId) {
@@ -231,6 +232,11 @@ class OrderController extends Controller
 
             if (!$order && Auth::check()) {
                 $order = $orderRepo->getLatestOrderForUser(Auth::id(), ['items.product', 'items.variant']);
+            }
+
+            // Fetch all orders for the user for step 3
+            if (Auth::check()) {
+                $orders = $cartRepo->getAllOrdersForUser(Auth::id());
             }
         }
 
@@ -266,17 +272,19 @@ class OrderController extends Controller
             'addresses' => $addresses,
             'billingAddresses' => $billingAddresses,
             'order' => $order,
+            'orders' => $orders,
             'totals' => $totals,
             'itemsForView' => $itemsForView,
         ]);
     }
 
-    public function detail(OrderDetailRequest $request, $orderId, OrderRepo $orderRepo)
+    public function detail(OrderDetailRequest $request, OrderRepo $orderRepo)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
         }
 
+        $orderId = $request->input('order');
         $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
         if (!$order || $order->user_id !== Auth::id()) {
             abort(403);
@@ -285,13 +293,14 @@ class OrderController extends Controller
         return view('client.pages.order-detail', ['order' => $order]);
     }
 
-    public function invoice(OrderInvoiceRequest $request, $id, OrderRepo $orderRepo)
+    public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
         }
 
-        $order = $orderRepo->findOrderWithRelations($id, ['items.product', 'items.variant']);
+        $orderId = $request->input('id');
+        $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
         if (!$order || $order->user_id !== Auth::id()) {
             abort(403);
         }
@@ -305,7 +314,8 @@ class OrderController extends Controller
             return redirect()->route('login');
         }
 
-        $order = $orderRepo->findOrder($id);
+        $orderId = $request->input('id');
+        $order = $orderRepo->findOrder($orderId);
         if (!$order || $order->user_id !== Auth::id()) {
             abort(403);
         }

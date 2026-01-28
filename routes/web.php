@@ -102,9 +102,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/checkout', [OrderController::class, 'show'])->name('checkout');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
-    Route::get('/client/orders/{id}/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
-    Route::post('/client/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
-    Route::get('/order-detail/{order}', [OrderController::class, 'detail'])->name('order-detail');
+    Route::get('/client/orders/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
+    Route::post('/client/orders/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
+    Route::get('/order-detail', [OrderController::class, 'detail'])->name('order-detail');
 
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });

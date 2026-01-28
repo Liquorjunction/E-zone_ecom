@@ -37,21 +37,22 @@ function updateButtonState(button, added) {
         `.wishlist-btn[data-wid="${id}"]`
     ];
     const buttons = document.querySelectorAll(selectors.join(','));
+    const svgFilled = '<svg class="w-5 h-5 text-red-500 drop-shadow-sm transition-all duration-200" fill="currentColor" viewBox="0 0 24 24"><path d="M12.1 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.35 1.31z"/></svg>';
+    const svgOutline = '<svg class="w-5 h-5 text-gray-400 transition-all duration-200 group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12.1 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.35 1.31z"/></svg>';
     buttons.forEach(b => {
-        const svg = b.querySelector('svg');
         if (added) {
             b.classList.add('is-wishlisted');
             b.classList.add('opacity-100');
             b.setAttribute('data-init-wishlisted', '1');
             b.setAttribute('aria-pressed', 'true');
             b.classList.remove('opacity-0');
-            if (svg) svg.classList.add('text-red-500');
+            b.innerHTML = svgFilled;
         } else {
             b.classList.remove('is-wishlisted');
             b.classList.remove('opacity-100');
             b.setAttribute('data-init-wishlisted', '0');
             b.setAttribute('aria-pressed', 'false');
-            if (svg) svg.classList.remove('text-red-500');
+            b.innerHTML = svgOutline;
         }
     });
     try {

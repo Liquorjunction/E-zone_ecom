@@ -139,8 +139,6 @@
                                                 <th>SKU</th>
                                                 <th>Qty</th>
                                                 <th>Unit Price</th>
-                                                <th>Discount</th>
-                                                <th>Line Subtotal</th>
                                                 <th>Line Total</th>
                                             </tr>
                                         </thead>
@@ -166,9 +164,15 @@
                                                     <td>{{ optional($item->variant)->sku ?? (optional($item->product)->sku ?? ($item->sku ?? '—')) }}
                                                     </td>
                                                     <td>{{ $qty }}</td>
-                                                    <td>{{ number_format($unitPrice, 2) }}</td>
-                                                    <td>{{ number_format($discount, 2) }}</td>
-                                                    <td>{{ number_format($lineSubtotal, 2) }}</td>
+                                                    <td>
+                                                        @if (isset($discount) && $discount > 0)
+                                                            <del>{{ number_format($unitPrice + $discount / $qty, 2) }}</del>
+                                                            <br>
+                                                            {{ number_format($unitPrice, 2) }}
+                                                        @else
+                                                            {{ number_format($unitPrice, 2) }}
+                                                        @endif
+                                                    </td>
                                                     <td>{{ number_format($lineTotal, 2) }}</td>
                                                 </tr>
                                             @empty
@@ -192,17 +196,19 @@
                                         <table class="table table-sm mb-0">
                                             <tr>
                                                 <th class="w-50">Subtotal</th>
-                                                <td>{{ isset($order->subtotal) ? number_format($order->subtotal, 2) : '-' }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>Discount</th>
-                                                <td>{{ isset($order->discount_amount) ? number_format($order->discount_amount, 2) : '-' }}
-                                                </td>
+                                                @if (isset($order->coupon_id))
+                                                    <td>
+                                                        {{ isset($order->subtotal) ? number_format($order->subtotal, 2) : '-' }}
+                                                    </td>
+                                                @else
+                                                    <td>
+                                                        {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
+                                                    </td>
+                                                @endif
                                             </tr>
                                             <tr>
                                                 <th>Coupon Discount</th>
-                                                <td>{{ isset($order->coupon_discount_amount) ? number_format($order->coupon_discount_amount, 2) : '-' }}
+                                                <td>-{{ isset($order->coupon_discount_amount) ? number_format($order->coupon_discount_amount, 2) : '-' }}
                                                 </td>
                                             </tr>
                                             <tr>
@@ -210,6 +216,21 @@
                                                 <td>{{ isset($order->shipping_amount) ? number_format($order->shipping_amount, 2) : (isset($order->shipping_cost) ? number_format($order->shipping_cost, 2) : '-') }}
                                                 </td>
                                             </tr>
+                                            <tr class="table-active font-weight-bold">
+                                                <th>Total</th>
+                                                <td class="font-weight-bold">
+                                                    {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-light py-2">
+                                        <h5 class="mb-0">Tax Summary</h5>
+                                    </div>
+                                    <div class="card-body py-3">
+                                        <table class="table table-sm mb-0">
                                             <tr>
                                                 <th>Taxable Amount</th>
                                                 <td>{{ isset($order->taxable_amount) ? number_format($order->taxable_amount, 2) : '-' }}
@@ -221,14 +242,15 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th>Tax</th>
+                                                <th>Tax Amount</th>
                                                 <td>{{ isset($order->tax_amount) ? number_format($order->tax_amount, 2) : (isset($order->tax) ? number_format($order->tax, 2) : '-') }}
                                                 </td>
                                             </tr>
                                             <tr class="table-active font-weight-bold">
-                                                <th>Total</th>
+                                                <th>Total Tax Inclusive Amount</th>
                                                 <td class="font-weight-bold">
-                                                    {{ isset($order->total) ? number_format($order->total, 2) : '-' }}</td>
+                                                    {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
+                                                </td>
                                             </tr>
                                         </table>
                                     </div>
@@ -302,12 +324,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-2 w-100 d-flex justify-content-end gap-2">
-                            <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Back to Orders</a>
-                        </div>
+                    </div>
+                    <div class="mb-2 w-100 d-flex justify-content-end gap-2">
+                        <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Back to Orders</a>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 @endsection

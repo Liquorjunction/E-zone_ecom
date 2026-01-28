@@ -200,9 +200,10 @@ Breadcrumbs::for('order-tracking', function (BreadcrumbTrail $trail) {
 });
 
 // Home > Order Detail
-Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Order Detail', route('order-detail', $id));
+    $orderId = request('order');
+    $trail->push('Order Detail', route('order-detail', ['order' => $orderId]));
 });
 
 // Home > All Brands

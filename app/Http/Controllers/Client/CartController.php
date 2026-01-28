@@ -12,6 +12,7 @@ use App\Services\CouponService;
 use App\Services\PriceCalculatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 
 class CartController extends Controller
@@ -52,11 +53,12 @@ class CartController extends Controller
         return redirect()->route('cart')->with('success', 'Item added to cart.');
     }
 
-    public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, \App\Services\PriceCalculatorService $priceService)
+    public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService)
     {
         $cart = $cartService->getCart($request);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
         $step = (int) $request->get('step', 1);
+        Log::debug('CartController@show step value', ['step' => $step, 'request_step' => $request->get('step')]);
 
         $totals = $cart ? $priceService->calculate($cart) : [
             'subtotal' => 0,
