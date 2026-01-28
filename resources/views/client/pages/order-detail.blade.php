@@ -44,14 +44,6 @@
                                 Download Invoice
                             </span>
                         </a>
-                        <a href="#" class="px-4 py-2.5 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors text-sm">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                Reorder
-                            </span>
-                        </a>
                         @if(Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled','shipped','delivered']))
                             <form method="POST" action="{{ route('client.orders.cancel', ['id' => $order->id]) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');" class="inline-block">
                                 @csrf
@@ -173,43 +165,15 @@
 
                             <div class="space-y-4">
                                 @foreach($order->items as $item)
+
                                     @php
                                         $variant = $item->variant;
                                         $product = $item->product;
                                         $img = optional(optional(optional($variant)?->images())?->first())->image_path ?? optional($product)->cover_image ?? optional(optional(optional($product)?->images())?->first())->image_path;
                                         $imgUrl = $img ? (\Illuminate\Support\Str::startsWith($img, ['http','https','/']) ? $img : asset('storage/' . ltrim($img, '/'))) : 'https://via.placeholder.com/100x100';
-                                        $title = $variant && $variant->variant_name ? $variant->variant_name : ($product->name ?? 'Product');
-                                        if (is_array($title)) {
-                                            if (method_exists($product, 'getTranslation')) {
-                                                $title = $product->getTranslation('name', app()->getLocale() ?? 'en') ?? $product->getTranslation('name', 'en') ?? implode(' ', array_values($title));
-                                            } else {
-                                                $title = implode(' ', array_values($title));
-                                            }
-                                        }
-
-                                        $attributes = null;
-                                        if ($variant && $variant->attributes) {
-                                            $attrs = (array) $variant->attributes;
-                                            $pairs = [];
-                                            foreach ($attrs as $k => $v) {
-                                                if (is_array($v)) {
-                                                    $arr = (array) $v;
-                                                    $val = (array_keys($arr) !== range(0, count($arr) - 1)) ? json_encode($arr) : implode(', ', $arr);
-                                                } else {
-                                                    $val = (string) $v;
-                                                }
-                                                $pairs[] = $k . ': ' . $val;
-                                            }
-                                            $attributes = implode(' | ', $pairs);
-                                        }
-                                        $productName = $product->name ?? null;
-                                        if (is_array($productName)) {
-                                            if (method_exists($product, 'getTranslation')) {
-                                                $productName = $product->getTranslation('name', app()->getLocale() ?? 'en') ?? $product->getTranslation('name', 'en') ?? implode(' ', array_values($productName));
-                                            } else {
-                                                $productName = implode(' ', array_values($productName));
-                                            }
-                                        }
+                                        $productName = $product->name ?? 'Product';
+                                        $variantName = $variant && $variant->variant_name ? $variant->variant_name : null;
+                                        $title = $variantName ? ($productName . ' - ' . $variantName) : $productName;
                                     @endphp
 
                                     <div class="flex gap-4 p-4 border-2 border-gray-100 rounded-xl hover:border-gray-200 transition-colors">
@@ -218,15 +182,28 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <h3 class="font-semibold text-gray-900 text-sm lg:text-base mb-1 line-clamp-2">{{ $title }}</h3>
-                                            @if($attributes)
-                                                <p class="text-xs text-gray-600 mb-2">{{ $attributes }}</p>
-                                            @elseif($product && $productName)
-                                                <p class="text-xs text-gray-600 mb-2">{{ $productName }}</p>
-                                            @endif
+                                                <p class="text-xs text-gray-500 mb-2">Qty: {{ $item->quantity }}</p>
                                             <div class="flex items-center justify-between flex-wrap gap-2">
-                                                <div class="flex items-baseline gap-2">
-                                                    <p class="text-base lg:text-lg font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->unit_price, 2) }}</p>
-                                                    <p class="text-xs text-gray-500">Qty: {{ $item->quantity }}</p>
+                                                <div class="flex-1">
+                                                    @php
+                                                        $hasDiscount = (isset($item->unit_price_original) && $item->unit_price_original > $item->unit_price);
+                                                    @endphp
+                                                    @if($hasDiscount)
+                                                        <div class="flex flex-col">
+                                                            <div>
+                                                                <span class="inline-block text-xs text-gray-400 line-through opacity-75">
+                                                                    {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->unit_price_original, 2) }}
+                                                                </span>
+                                                            </div>
+                                                            <span class="text-2xl font-bold text-red-600">
+                                                                {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->unit_price, 2) }}
+                                                            </span>
+                                                        </div>
+                                                    @else
+                                                        <span class="text-2xl font-bold text-primary">
+                                                            {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->unit_price, 2) }}
+                                                        </span>
+                                                    @endif
                                                 </div>
                                                 <button class="text-xs lg:text-sm font-semibold text-primary hover:text-primary/80">Write Review</button>
                                             </div>
@@ -243,7 +220,10 @@
 
                     {{-- Order Summary --}}
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Order Summary</h3>
+                        <h3 class="text-lg font-bold flex items-center justify-between text-gray-900 mb-4">
+                            Order Summary
+                            <span class="text-sm font-semibold text-gray-600">Item Total: {{ $order->items->count() }}</span>
+                        </h3>
                         @php
                             // Use stored order data (new fields added via migration)
                             $subtotal = $order->subtotal ?? 0;
@@ -253,7 +233,6 @@
                             $tax = $order->tax_amount ?? 0;
                             $total = $order->total ?? 0;
                         @endphp
-
                         <div class="space-y-3 mb-4 pb-4 border-b-2 border-gray-100">
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">Subtotal</span>
@@ -300,11 +279,6 @@
                                         @endif
                                     @endif
                                 </span>
-                            </div>
-
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Tax ({{ $order->tax_percentage ?? 8 }}%)</span>
-                                <span class="font-semibold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($tax, 2) }}</span>
                             </div>
                         </div>
 
@@ -373,31 +347,6 @@
                                 </svg>
                                 <span class="font-medium">{{ $addr['phone'] ?? $order->phone_no ?? '—' }}</span>
                             </p>
-                        </div>
-                    </div>
-
-                    {{-- Need Help --}}
-                    <div class="bg-linear-to-br from-primary/5 to-primary/10 rounded-xl lg:rounded-2xl border-2 border-primary/20 p-4 lg:p-6">
-                        <div class="flex items-start gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-1">Need Help?</h4>
-                                <p class="text-xs text-gray-600 mb-3">
-                                    Have questions about your order? Our support team is here to help.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <button class="w-full px-4 py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors text-sm">
-                                Contact Support
-                            </button>
-                            <button class="w-full px-4 py-2.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
-                                Track Package
-                            </button>
                         </div>
                     </div>
 

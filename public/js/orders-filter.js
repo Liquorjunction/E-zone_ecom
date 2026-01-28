@@ -1,48 +1,32 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // AJAX for filter tabs
-  document.querySelectorAll('.hidden.lg\\:flex a').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      e.preventDefault();
-      fetchOrders(el.getAttribute('href'));
-    });
-  });
-  // AJAX for mobile dropdown
-  var select = document.querySelector('#orders-filter-form select');
-  if (select) {
-    select.addEventListener('change', function() {
-      var url = select.form.action + (select.value ? ('?status=' + encodeURIComponent(select.value)) : '');
-      fetchOrders(url);
-    });
-  }
-  function fetchOrders(url) {
-    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('orders-list-container').innerHTML = data.html;
-        // Update tab and dropdown active state
-        var params = new URL(url, window.location.origin).searchParams;
-        var status = params.get('status') || '';
-        // Update tab classes
-        document.querySelectorAll('.hidden.lg\\:flex a').forEach(function(tab) {
-          var tabStatus = '';
-          var href = tab.getAttribute('href');
-          if (href) {
-            var tabParams = new URL(href, window.location.origin).searchParams;
-            tabStatus = tabParams.get('status') || '';
-          }
-          if (tabStatus === status) {
-            tab.classList.add('text-white', 'bg-primary');
-            tab.classList.remove('text-gray-600', 'hover:text-primary', 'hover:bg-primary/5');
-          } else {
-            tab.classList.remove('text-white', 'bg-primary');
-            tab.classList.add('text-gray-600', 'hover:text-primary', 'hover:bg-primary/5');
-          }
-        });
-        // Update dropdown
-        var select = document.querySelector('#orders-filter-form select');
-        if (select) {
-          select.value = status;
+    const form = document.getElementById('orders-filter-form');
+    if (!form) return;
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+            if (value) params.append(key, value);
         }
-      });
-  }
+        fetch(window.location.pathname + '?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            // Replace only the orders list container
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newList = doc.querySelector('#orders-list-container');
+            if (newList) {
+                document.getElementById('orders-list-container').innerHTML = newList.innerHTML;
+            } else {
+                // fallback: replace whole body
+                document.body.innerHTML = html;
+            }
+        });
+    });
+    // Optional: auto-submit on change for filters
+    form.querySelectorAll('select,input[type=date]').forEach(el => {
+        el.addEventListener('change', () => form.requestSubmit());
+    });
 });

@@ -99,4 +99,9 @@ class ProductVariant extends Model
         $discountInfo = $this->getDiscountInfo();
         return $discountInfo['has_discount'];
     }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class, 'variant_id');
+    }
 }

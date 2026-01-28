@@ -157,4 +157,9 @@ class Product extends Model
         $discountService = app(\App\Services\DiscountService::class);
         return $discountService->findBestDiscountForProduct($this);
     }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
 }

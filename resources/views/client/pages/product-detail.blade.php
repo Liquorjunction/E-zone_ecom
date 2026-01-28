@@ -428,7 +428,18 @@
 
 
                     <!-- Add to Cart Form -->
-                    <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" class="space-y-4">
+                    @php
+                        $totalStock = 0;
+                        if ($product->productVariants && $product->productVariants->count() > 0) {
+                            $totalStock = $product->productVariants->sum(function($v) {
+                                return method_exists($v, 'getTotalStockAttribute') ? $v->getTotalStockAttribute() : ($v->inventory->sum('quantity') ?? 0);
+                            });
+                        } else {
+                            $totalStock = method_exists($product, 'getTotalStockAttribute') ? $product->getTotalStockAttribute() : ($product->inventory->sum('quantity') ?? 0);
+                        }
+                    @endphp
+                    @if ($totalStock > 0)
+                        <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" class="space-y-4">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="variant_id" id="cart-variant-id" value="">
@@ -479,7 +490,8 @@
                                 </button>
                             </div>
                         </div>
-                    </form>
+                        </form>
+                    @endif
 
                     <!-- Trust Badges -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-gray-200">
