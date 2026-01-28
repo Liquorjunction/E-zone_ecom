@@ -386,11 +386,11 @@
     </div>
         <script>
             (function(){
-                function updateCounter(count){
+                // Cart counter update
+                function updateCartCounter(count){
                     var els = document.querySelectorAll('#cart-counter');
                     els.forEach(function(el){ el.textContent = (count === null || count === undefined) ? 0 : count; });
                 }
-
                 window.addEventListener('cart:changed', function(e){
                     var data = e && e.detail ? e.detail : null;
                     var count = null;
@@ -401,7 +401,28 @@
                             else if (typeof data === 'number') count = data;
                         }
                     } catch (err) { count = null; }
-                    if (count !== null) updateCounter(count);
+                    if (count !== null) updateCartCounter(count);
+                });
+
+                // Wishlist counter update
+                function updateWishlistCounter(count){
+                    var els = document.querySelectorAll('#wishlist-counter');
+                    els.forEach(function(el){ el.textContent = (count === null || count === undefined) ? 0 : count; });
+                }
+                window.addEventListener('wishlist:changed', function(e){
+                    var data = e && e.detail ? e.detail : null;
+                    var count = null;
+                    if (typeof data === 'number') count = data;
+                    else if (data && typeof data.count !== 'undefined') count = data.count;
+                    if (count === null || count === undefined) {
+                        // fallback: fetch from server
+                        fetch('/client/wishlist/ajax-count')
+                            .then(function(resp){ return resp.json(); })
+                            .then(function(json){ updateWishlistCounter(json.count); })
+                            .catch(function(){ updateWishlistCounter(0); });
+                    } else {
+                        updateWishlistCounter(count);
+                    }
                 });
             })();
         </script>

@@ -267,10 +267,6 @@
                                                                         : null;
                                                             @endphp
 
-                                                            <div class="text-sm text-gray-500 mb-1">Unit:
-                                                                {{ config('app.CURRENCY_SYMBOL') }}
-                                                                {{ number_format($unitPrice, 2) }}</div>
-
                                                             @if ($hasDiscount)
                                                                 {{-- Original line total with strikethrough --}}
                                                                 <div>
@@ -375,6 +371,7 @@
                                         class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
                                         <span class="text-sm font-semibold text-gray-700">Item Total:</span>
                                         <span
+                                            id="item-total-count"
                                             class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
                                             {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
                                     </div>
@@ -1053,8 +1050,8 @@
                                     class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
                                     <span class="text-sm font-semibold text-gray-700">Item Total:</span>
                                     <span
-                                        class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
-                                        {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
+                                        id="item-total-count"
+                                        class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }} {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
                                 </div>
 
                                 <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">

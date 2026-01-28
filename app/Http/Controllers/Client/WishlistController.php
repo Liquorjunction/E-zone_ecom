@@ -8,7 +8,9 @@ use App\Http\Requests\Client\Wishlist\RemoveWishlistRequest;
 use App\Http\Requests\Client\Wishlist\GetWishlistRequest;
 use App\Http\Requests\Client\Wishlist\CountWishlistRequest;
 use App\Http\Requests\Client\Wishlist\ClearWishlistRequest;
+use App\Models\Wishlist;
 use App\Repositories\Client\Interfaces\WishlistRepositoryInterface as WishlistRepo;
+use Illuminate\Support\Facades\Auth;
 
 class WishlistController extends Controller
 {
@@ -80,5 +82,14 @@ class WishlistController extends Controller
         $wishlistRepo->clearWishlist($userId);
 
         return response()->json(['message' => 'Wishlist cleared'], 200);
+    }
+
+    public function ajaxCount()
+    {
+        $count = 0;
+        if (Auth::check()) {
+            $count = Wishlist::where('user_id', Auth::id())->count();
+        }
+        return response()->json(['count' => $count]);
     }
 }

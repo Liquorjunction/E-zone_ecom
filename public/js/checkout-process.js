@@ -519,6 +519,15 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
+        // --- Update the Item Total count for both step 1 and 2 ---
+        if (typeof summary.itemCount !== 'undefined') {
+            const itemTotalCount = document.getElementById('item-total-count');
+            if (itemTotalCount) {
+                // Try to preserve the "Quantity" label as in Blade
+                itemTotalCount.textContent = summary.itemCount + ' ' + (summary.itemCount === 1 ? 'Quantity' : 'Quantity');
+            }
+        }
+
         // Update summary items in order summary section
         updateOrderSummaryItems(summary);
     }

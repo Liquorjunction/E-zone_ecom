@@ -132,4 +132,5 @@ Route::prefix('client')->middleware('auth')->group(function () {
     Route::post('/wishlist/get', [WishlistController::class, 'getWishlist']);
     Route::post('/wishlist/count', [WishlistController::class, 'countWishlist']);
     Route::post('/wishlist/clear', [WishlistController::class, 'clearWishlist']);
+    Route::get('/client/wishlist/ajax-count', [WishlistController::class, 'ajaxCount'])->middleware('auth');
 });
