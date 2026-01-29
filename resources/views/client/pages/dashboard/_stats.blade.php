@@ -1,5 +1,5 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-  <div class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow">
+  <a href="{{ route('dashboard.orders') }}" class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow block focus:outline-none focus:ring-2 focus:ring-primary/50">
     <div class="flex items-center justify-between">
       <div>
         <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">Total Orders</p>
@@ -11,9 +11,9 @@
         </svg>
       </div>
     </div>
-  </div>
+  </a>
 
-  <div class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow">
+  <a href="{{ route('dashboard.wishlist') }}" class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow block focus:outline-none focus:ring-2 focus:ring-primary/50">
     <div class="flex items-center justify-between">
       <div>
         <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">Wishlist Items</p>
@@ -25,9 +25,9 @@
         </svg>
       </div>
     </div>
-  </div>
+  </a>
 
-  <div class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+  <a href="{{ route('dashboard.addresses') }}" class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow block focus:outline-none focus:ring-2 focus:ring-primary/50 sm:col-span-2 lg:col-span-1">
     <div class="flex items-center justify-between">
       <div>
         <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">Saved Addresses</p>
@@ -40,5 +40,5 @@
         </svg>
       </div>
     </div>
-  </div>
+  </a>
 </div>

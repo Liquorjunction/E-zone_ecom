@@ -33,13 +33,23 @@ class OrderController extends Controller
         }
 
         $status = $request->query('status');
+        $search = $request->query('search');
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+        $sort = $request->query('sort', 'latest');
 
         $allowedStatuses = ['processing', 'shipped', 'delivered', 'cancelled'];
         $filters = ['user_id' => Auth::id()];
         if ($status && in_array($status, $allowedStatuses)) {
             $filters['status'] = $status;
         }
-        $orders = $orderRepo->getOrdersWithRelations($filters, ['items.product', 'items.variant'], 10);
+
+        $orders = $orderRepo->getOrdersWithRelations($filters, ['items.product', 'items.variant'], 10, [
+            'search' => $search,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+            'sort' => $sort,
+        ]);
 
         if ($request->ajax()) {
             $html = view('client.pages.dashboard.partials.orders-list', [

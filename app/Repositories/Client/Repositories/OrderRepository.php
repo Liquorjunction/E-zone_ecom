@@ -17,16 +17,52 @@ use Illuminate\Support\Facades\Log;
 
 class OrderRepository implements OrderRepositoryInterface
 {
-    public function getOrdersWithRelations(array $filters, array $relations = [], int $perPage = 10)
+    public function getOrdersWithRelations(array $filters, array $relations = [], int $perPage = 10, array $extra = [])
     {
         $query = Order::query();
         foreach ($filters as $key => $value) {
             $query->where($key, $value);
         }
+
+        // Search by order number, product name, etc.
+        if (!empty($extra['search'])) {
+            $search = $extra['search'];
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'like', "%$search%")
+                  ->orWhereHas('items.product', function($q2) use ($search) {
+                      $q2->where('name', 'like', "%$search%") ;
+                  });
+            });
+        }
+
+        // Date range filter
+        if (!empty($extra['date_from'])) {
+            $query->whereDate('created_at', '>=', $extra['date_from']);
+        }
+        if (!empty($extra['date_to'])) {
+            $query->whereDate('created_at', '<=', $extra['date_to']);
+        }
+
         if (!empty($relations)) {
             $query->with($relations);
         }
-        return $query->latest()->paginate($perPage);
+
+        // Sorting
+        switch ($extra['sort'] ?? 'latest') {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'amount_high':
+                $query->orderBy('total', 'desc');
+                break;
+            case 'amount_low':
+                $query->orderBy('total', 'asc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+        }
+
+        return $query->paginate($perPage);
     }
 
     public function findOrderWithRelations(int $orderId, array $relations = [])
