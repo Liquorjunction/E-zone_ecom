@@ -123,7 +123,7 @@
                         <h1 id="product-title"
                             data-base-name="{{ is_array($product->name) ? $product->name[app()->getLocale()] ?? ($product->name['en'] ?? '') : $product->name }}"
                             class="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-                            {{ is_array($product->name) ? $product->name[app()->getLocale()] ?? ($product->name['en'] ?? '') : $product->name }}
+                            {!! is_array($product->name) ? $product->name[app()->getLocale()] ?? ($product->name['en'] ?? '') : $product->name !!}
                         </h1>
 
                         <!-- Rating & Stock -->

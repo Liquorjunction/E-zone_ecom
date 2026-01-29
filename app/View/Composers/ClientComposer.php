@@ -28,24 +28,28 @@ class ClientComposer
         ]);
 
         $wishlistVariantIds = [];
+        $wishlistCount = 0;
         if (Auth::check()) {
             $wishlistVariantIds = \App\Models\Wishlist::where('user_id', Auth::id())->pluck('product_variant_id')->toArray();
+            $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
         }
 
         $view->with('wishlistVariantIds', $wishlistVariantIds);
-            $cartItemCount = 0;
-            try {
-                $cartService = app(\App\Services\CartService::class);
-                $cart = $cartService->getCart(request());
-                if ($cart && $cart->relationLoaded('items')) {
-                    $cartItemCount = (int) $cart->items->sum('quantity');
-                } elseif ($cart) {
-                    $cartItemCount = (int) $cart->items()->sum('quantity');
-                }
-            } catch (\Throwable $e) {
-                $cartItemCount = 0;
-            }
 
-            $view->with('cartItemCount', $cartItemCount);
+        $cartItemCount = 0;
+        try {
+            $cartService = app(\App\Services\CartService::class);
+            $cart = $cartService->getCart(request());
+            if ($cart && $cart->relationLoaded('items')) {
+                $cartItemCount = (int) $cart->items->sum('quantity');
+            } elseif ($cart) {
+                $cartItemCount = (int) $cart->items()->sum('quantity');
+            }
+        } catch (\Throwable $e) {
+            $cartItemCount = 0;
+        }
+
+        $view->with('cartItemCount', $cartItemCount);
+        $view->with('wishlistCount', $wishlistCount);
     }
 }

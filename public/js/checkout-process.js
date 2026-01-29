@@ -589,6 +589,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     itemData
                 );
             }
+
+            // Update original (line-through) price if discount applies
+            const lineThroughEl = summaryRow.querySelector(".text-xs.text-gray-400.line-through");
+            if (lineThroughEl) {
+                // Only show if there is a discount and original price is different
+                if (itemData.unit_price && itemData.final_price && itemData.unit_price > itemData.final_price) {
+                    const originalLineTotal = itemData.unit_price * itemData.quantity;
+                    lineThroughEl.innerHTML = `${window.env?.CURRENCY_SYMBOL || '$'} ${Number(originalLineTotal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}<br />`;
+                    lineThroughEl.style.display = '';
+                } else {
+                    // Hide if no discount
+                    lineThroughEl.style.display = 'none';
+                }
+            }
         });
     }
 });

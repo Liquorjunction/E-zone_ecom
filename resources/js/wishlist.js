@@ -55,9 +55,16 @@ function updateButtonState(button, added) {
             b.innerHTML = svgOutline;
         }
     });
-    try {
-        window.dispatchEvent(new CustomEvent('wishlist:changed', { detail: { id, added } }));
-    } catch (e) {}
+    // Optionally, pass count if available
+    if (typeof window._wishlistCount !== 'undefined') {
+        try {
+            window.dispatchEvent(new CustomEvent('wishlist:changed', { detail: { id, added, itemCount: window._wishlistCount } }));
+        } catch (e) {}
+    } else {
+        try {
+            window.dispatchEvent(new CustomEvent('wishlist:changed', { detail: { id, added } }));
+        } catch (e) {}
+    }
 }
 
 document.addEventListener('click', async (ev) => {
@@ -74,6 +81,12 @@ document.addEventListener('click', async (ev) => {
         if (isWishlisted) {
             const res = await postJson('/client/wishlist/remove', { product_variant_id: id });
             const json = await res.json().catch(()=>({}));
+            let count = (typeof json.count !== 'undefined') ? json.count : (typeof json.itemCount !== 'undefined' ? json.itemCount : undefined);
+            if (typeof count === 'undefined') {
+                // fallback: try to count .wishlist-btn with is-wishlisted
+                count = document.querySelectorAll('.wishlist-btn.is-wishlisted').length - 1;
+            }
+            window._wishlistCount = count;
             if (res.ok) {
                 console.debug('Wishlist: removed', id, json);
                 updateButtonState(btn, false);
@@ -87,38 +100,33 @@ document.addEventListener('click', async (ev) => {
                     ].join(',');
                     const wrapper = document.querySelector(wrapperSelectors);
                     if (wrapper) wrapper.remove();
-                    const countEl = document.getElementById('wishlist-count');
-                    if (countEl) {
-                        let count = parseInt(countEl.textContent, 10) || 0;
-                        count = Math.max(0, count - 1);
-                        countEl.textContent = count;
-                        if (count === 0) {
-                            try {
-                                const grid = document.getElementById('wishlist-grid');
-                                const tpl = document.getElementById('wishlist-empty-template');
-                                if (grid && tpl) {
-                                    const header = grid.previousElementSibling;
-                                    const parent = header ? header.parentNode : grid.parentNode;
-                                    parent.style.transition = 'opacity 220ms ease';
-                                    parent.style.opacity = '0';
-                                    setTimeout(() => {
-                                        try {
-                                            let node = header || grid;
-                                            while (node) {
-                                                const next = node.nextElementSibling;
-                                                node.remove();
-                                                if (node.classList && node.classList.contains('mt-6')) break;
-                                                node = next;
-                                            }
-                                        } catch (e) {}
-                                        try { parent.insertBefore(tpl.content.cloneNode(true), parent.firstChild); } catch (e) {}
-                                        parent.style.opacity = '1';
-                                    }, 240);
-                                } else {
-                                    window.location.reload();
-                                }
-                            } catch (e) { window.location.reload(); }
-                        }
+                    // Remove manual count update here, rely on event
+                    if (count === 0) {
+                        try {
+                            const grid = document.getElementById('wishlist-grid');
+                            const tpl = document.getElementById('wishlist-empty-template');
+                            if (grid && tpl) {
+                                const header = grid.previousElementSibling;
+                                const parent = header ? header.parentNode : grid.parentNode;
+                                parent.style.transition = 'opacity 220ms ease';
+                                parent.style.opacity = '0';
+                                setTimeout(() => {
+                                    try {
+                                        let node = header || grid;
+                                        while (node) {
+                                            const next = node.nextElementSibling;
+                                            node.remove();
+                                            if (node.classList && node.classList.contains('mt-6')) break;
+                                            node = next;
+                                        }
+                                    } catch (e) {}
+                                    try { parent.insertBefore(tpl.content.cloneNode(true), parent.firstChild); } catch (e) {}
+                                    parent.style.opacity = '1';
+                                }, 240);
+                            } else {
+                                window.location.reload();
+                            }
+                        } catch (e) { window.location.reload(); }
                     }
                 } catch (e) {}
                 const msg = json.message || 'Removed from wishlist';
@@ -130,6 +138,12 @@ document.addEventListener('click', async (ev) => {
         } else {
             const res = await postJson('/client/wishlist/add', { product_variant_id: id });
             const json = await res.json().catch(()=>({}));
+            let count = (typeof json.count !== 'undefined') ? json.count : (typeof json.itemCount !== 'undefined' ? json.itemCount : undefined);
+            if (typeof count === 'undefined') {
+                // fallback: try to count .wishlist-btn with is-wishlisted
+                count = document.querySelectorAll('.wishlist-btn.is-wishlisted').length + 1;
+            }
+            window._wishlistCount = count;
             if (res.ok) {
                 console.debug('Wishlist: added', id, json);
                 updateButtonState(btn, true);

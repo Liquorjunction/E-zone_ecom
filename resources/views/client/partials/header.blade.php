@@ -137,8 +137,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M4.318 6.318a4.5 4.5 0 0 0 0 6.364L12 20.364l7.682-7.682a4.5 4.5 0 0 0-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 0 0-6.364 0z" />
                         </svg>
-                        <span id="wishlist-counter"
-                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">{{ \App\Helpers\ClientHelper::getWishlistCount() }}</span>
+                        <span
+                            class="wishlist-counter absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">{{ $wishlistCount ?? 0 }}</span>
                     </a>
 
 
@@ -151,8 +151,8 @@
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
                         </svg>
-                        <span id="cart-counter"
-                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">{{ $cartItemCount ?? 0 }}</span>
+                        <span
+                            class="cart-counter absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">{{ $cartItemCount ?? 0 }}</span>
                     </a>
                 </div>
 
@@ -164,7 +164,8 @@
                         <button @click="accountOpen = !accountOpen"
                             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
                             @if (Auth::user()->avatar)
-                                <img src="{{ Str::startsWith(Auth::user()->avatar, ['http://', 'https://']) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}" alt="User Avatar" class="w-8 h-8 rounded-full ring-2 ring-gray-200">
+                                <img src="{{ Str::startsWith(Auth::user()->avatar, ['http://', 'https://']) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}"
+                                    alt="User Avatar" class="w-8 h-8 rounded-full ring-2 ring-gray-200">
                             @else
                                 <img src="{{ asset('images/avatar-placeholder.png') }}" alt="User Avatar"
                                     class="w-8 h-8 rounded-full ring-2 ring-gray-200">
@@ -261,8 +262,8 @@
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
                         </svg>
-                        <span id="cart-counter"
-                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">{{ $cartItemCount ?? 0 }}</span>
+                        <span
+                            class="cart-counter absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">{{ $cartItemCount ?? 0 }}</span>
                     </a>
 
                     <button @click="mobileMenuOpen = !mobileMenuOpen"
@@ -384,46 +385,53 @@
         </div>
         <!-- bottom stripe removed - rendered via CSS pseudo-element -->
     </div>
-        <script>
-            (function(){
-                // Cart counter update
-                function updateCartCounter(count){
-                    var els = document.querySelectorAll('#cart-counter');
-                    els.forEach(function(el){ el.textContent = (count === null || count === undefined) ? 0 : count; });
-                }
-                window.addEventListener('cart:changed', function(e){
-                    var data = e && e.detail ? e.detail : null;
-                    var count = null;
-                    try{
-                        if (data) {
-                            if (data.summary && typeof data.summary.itemCount !== 'undefined') count = data.summary.itemCount;
-                            else if (typeof data.itemCount !== 'undefined') count = data.itemCount;
-                            else if (typeof data === 'number') count = data;
-                        }
-                    } catch (err) { count = null; }
-                    if (count !== null) updateCartCounter(count);
+    <script>
+        (function() {
+            // Cart counter update
+            function updateCartCounter(count) {
+                var els = document.querySelectorAll('.cart-counter');
+                els.forEach(function(el) {
+                    el.textContent = (count === null || count === undefined) ? 0 : count;
                 });
-
-                // Wishlist counter update
-                function updateWishlistCounter(count){
-                    var els = document.querySelectorAll('#wishlist-counter');
-                    els.forEach(function(el){ el.textContent = (count === null || count === undefined) ? 0 : count; });
-                }
-                window.addEventListener('wishlist:changed', function(e){
-                    var data = e && e.detail ? e.detail : null;
-                    var count = null;
-                    if (typeof data === 'number') count = data;
-                    else if (data && typeof data.count !== 'undefined') count = data.count;
-                    if (count === null || count === undefined) {
-                        // fallback: fetch from server
-                        fetch('/client/wishlist/ajax-count')
-                            .then(function(resp){ return resp.json(); })
-                            .then(function(json){ updateWishlistCounter(json.count); })
-                            .catch(function(){ updateWishlistCounter(0); });
-                    } else {
-                        updateWishlistCounter(count);
+            }
+            window.addEventListener('cart:changed', function(e) {
+                var data = e && e.detail ? e.detail : null;
+                var count = null;
+                try {
+                    if (data) {
+                        if (data.summary && typeof data.summary.itemCount !== 'undefined') count = data.summary
+                            .itemCount;
+                        else if (typeof data.itemCount !== 'undefined') count = data.itemCount;
+                        else if (typeof data === 'number') count = data;
                     }
+                } catch (err) {
+                    count = null;
+                }
+                if (count !== null) updateCartCounter(count);
+            });
+
+            // Wishlist counter update
+            function updateWishlistCounter(count) {
+                var els = document.querySelectorAll('.wishlist-counter');
+                els.forEach(function(el) {
+                    el.textContent = (count === null || count === undefined) ? 0 : count;
                 });
-            })();
-        </script>
+            }
+            window.addEventListener('wishlist:changed', function(e) {
+                var data = e && e.detail ? e.detail : null;
+                var count = null;
+                try {
+                    if (data) {
+                        if (data.summary && typeof data.summary.itemCount !== 'undefined') count = data.summary
+                            .itemCount;
+                        else if (typeof data.itemCount !== 'undefined') count = data.itemCount;
+                        else if (typeof data === 'number') count = data;
+                    }
+                } catch (err) {
+                    count = null;
+                }
+                if (count !== null) updateWishlistCounter(count);
+            });
+        })();
+    </script>
 </header>

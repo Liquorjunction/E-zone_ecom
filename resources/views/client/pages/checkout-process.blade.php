@@ -370,8 +370,7 @@
                                     <div
                                         class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
                                         <span class="text-sm font-semibold text-gray-700">Item Total:</span>
-                                        <span
-                                            id="item-total-count"
+                                        <span id="item-total-count"
                                             class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
                                             {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
                                     </div>
@@ -413,14 +412,34 @@
                                                             </div>
                                                         </div>
                                                         @php
-                                                            // Use stored discount data
-                                                            $summaryUnit =
-                                                                $item->final_price ?? ($item->unit_price ?? 0);
-                                                            $summaryLine = $summaryUnit * $item->quantity;
+                                                            $unitPrice = $item->unit_price ?? 0;
+                                                            $unitFinal = $item->final_price ?? $unitPrice;
+                                                            $lineTotal = $unitPrice * $item->quantity;
+                                                            $lineDiscount =
+                                                                ($item->discount_amount ?? 0) * $item->quantity;
+                                                            $lineFinal = $unitFinal * $item->quantity;
+                                                            $hasDiscount = ($item->discount_amount ?? 0) > 0;
                                                         @endphp
-                                                        <p class="summary-item-price text-sm font-bold text-primary mt-1">
-                                                            {{ config('app.CURRENCY_SYMBOL') }}
-                                                            {{ number_format($summaryLine, 2) }}</p>
+                                                        @if ($hasDiscount)
+                                                            <div>
+                                                                <span class="text-xs text-gray-400 line-through">
+                                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                                    {{ number_format($lineTotal, 2) }}
+                                                                    <br />
+                                                                </span>
+                                                                <span
+                                                                    class="summary-item-price text-sm font-bold text-red-600">
+                                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                                    {{ number_format($lineFinal, 2) }}
+                                                                </span>
+                                                            </div>
+                                                        @else
+                                                            <p
+                                                                class="summary-item-price text-sm font-bold text-primary mt-1">
+                                                                {{ config('app.CURRENCY_SYMBOL') }}
+                                                                {{ number_format($lineFinal, 2) }}
+                                                            </p>
+                                                        @endif
                                                     </div>
                                                 </div>
                                                 <button type="button"
@@ -1049,9 +1068,9 @@
                                 <div
                                     class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
                                     <span class="text-sm font-semibold text-gray-700">Item Total:</span>
-                                    <span
-                                        id="item-total-count"
-                                        class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }} {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
+                                    <span id="item-total-count"
+                                        class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">{{ $itemCount }}
+                                        {{ $itemCount === 1 ? 'Quantity' : 'Quantity' }}</span>
                                 </div>
 
                                 <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
@@ -1090,14 +1109,34 @@
                                                             </div>
                                                         </div>
                                                         @php
-                                                            // Use stored discount data
-                                                            $summaryUnit =
-                                                                $item->final_price ?? ($item->unit_price ?? 0);
-                                                            $summaryLine = $summaryUnit * $item->quantity;
+                                                            $unitPrice = $item->unit_price ?? 0;
+                                                            $unitFinal = $item->final_price ?? $unitPrice;
+                                                            $lineTotal = $unitPrice * $item->quantity;
+                                                            $lineDiscount =
+                                                                ($item->discount_amount ?? 0) * $item->quantity;
+                                                            $lineFinal = $unitFinal * $item->quantity;
+                                                            $hasDiscount = ($item->discount_amount ?? 0) > 0;
                                                         @endphp
-                                                        <p class="summary-item-price text-sm font-bold text-primary mt-1">
-                                                            {{ config('app.CURRENCY_SYMBOL') }}
-                                                            {{ number_format($summaryLine, 2) }}</p>
+                                                        @if ($hasDiscount)
+                                                            <div>
+                                                                <span class="text-xs text-gray-400 line-through">
+                                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                                    {{ number_format($lineTotal, 2) }}
+                                                                    <br />
+                                                                </span>
+                                                                <span
+                                                                    class="summary-item-price text-sm font-bold text-red-600">
+                                                                    {{ config('app.CURRENCY_SYMBOL') }}
+                                                                    {{ number_format($lineFinal, 2) }}
+                                                                </span>
+                                                            </div>
+                                                        @else
+                                                            <p
+                                                                class="summary-item-price text-sm font-bold text-primary mt-1">
+                                                                {{ config('app.CURRENCY_SYMBOL') }}
+                                                                {{ number_format($lineFinal, 2) }}
+                                                            </p>
+                                                        @endif
                                                     </div>
                                                 </div>
                                                 <button type="button"

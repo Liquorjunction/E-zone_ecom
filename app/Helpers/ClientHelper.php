@@ -16,14 +16,6 @@ class ClientHelper
         });
     }
 
-    public static function getWishlistCount()
-    {
-        if (Auth::check()) {
-            return Wishlist::where('user_id', Auth::id())->count();
-        }
-        return 0;
-    }
-
     public static function getBrandBySlug($slug)
     {
         return self::getActiveBrands()->where('slug', $slug)->first();
