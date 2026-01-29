@@ -393,7 +393,7 @@
                         </button>
                     @endif
                 <!-- Cancel Order Modal (moved to body by JS) -->
-                <div id="cancel-order-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                <div id="cancel-order-modal" class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-40 hidden">
                     <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
                         <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
