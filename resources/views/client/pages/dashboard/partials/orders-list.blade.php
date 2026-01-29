@@ -392,7 +392,7 @@
                             Cancel
                         </button>
                     @endif
-                <!-- Cancel Order Modal -->
+                <!-- Cancel Order Modal (moved to body by JS) -->
                 <div id="cancel-order-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
                     <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
                         <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
@@ -461,37 +461,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/orders-filter.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('cancel-order-modal');
-            const form = document.getElementById('cancel-order-form');
-            const idInput = document.getElementById('cancel-order-id');
-            const orderNumberSpan = document.getElementById('cancel-order-number');
-            const openBtns = document.querySelectorAll('.open-cancel-modal-btn');
-            const closeBtns = document.querySelectorAll('.close-cancel-modal-btn');
-
-            openBtns.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const orderId = this.getAttribute('data-order-id');
-                    const orderNumber = this.getAttribute('data-order-number');
-                    idInput.value = orderId;
-                    orderNumberSpan.textContent = orderNumber;
-                    form.action = "{{ route('client.orders.cancel', 0) }}".replace('/0', '/' + orderId);
-                    modal.classList.remove('hidden');
-                });
-            });
-            closeBtns.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    modal.classList.add('hidden');
-                    form.reset();
-                });
-            });
-            form.addEventListener('submit', function (e) {
-                if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
 @endpush
 

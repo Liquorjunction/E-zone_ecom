@@ -1,4 +1,54 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const cancelModal = document.getElementById('cancel-order-modal');
+    if (cancelModal && cancelModal.parentNode !== document.body) {
+        document.body.appendChild(cancelModal);
+    }
+    if (cancelModal) {
+        cancelModal.classList.add('bg-black', 'bg-opacity-50');
+        cancelModal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    }
+    const cancelForm = document.getElementById('cancel-order-form');
+    const cancelIdInput = document.getElementById('cancel-order-id');
+    const cancelOrderNumberSpan = document.getElementById('cancel-order-number');
+    const openCancelBtns = document.querySelectorAll('.open-cancel-modal-btn');
+    const closeCancelBtns = document.querySelectorAll('.close-cancel-modal-btn');
+    if (openCancelBtns && cancelForm && cancelModal) {
+        openCancelBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const orderId = this.getAttribute('data-order-id');
+                const orderNumber = this.getAttribute('data-order-number');
+                cancelIdInput.value = orderId;
+                cancelOrderNumberSpan.textContent = orderNumber;
+                cancelForm.action = '/client/orders/cancel';
+                cancelModal.classList.remove('hidden');
+                cancelModal.classList.add('flex');
+            });
+        });
+    }
+    if (closeCancelBtns && cancelForm && cancelModal) {
+        closeCancelBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                cancelModal.classList.add('hidden');
+                cancelModal.classList.remove('flex');
+                cancelForm.reset();
+            });
+        });
+    }
+    if (cancelModal && cancelForm) {
+        cancelModal.addEventListener('click', function(e){
+            if(e.target === this) {
+                cancelModal.classList.add('hidden');
+                cancelModal.classList.remove('flex');
+                cancelForm.reset();
+            }
+        });
+        cancelForm.addEventListener('submit', function (e) {
+            if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+                e.preventDefault();
+            }
+        });
+    }
+
     const form = document.getElementById('orders-filter-form');
     if (!form) return;
 
@@ -33,15 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    // Always AJAX for all filter submits, never reload
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(form);
         const params = new URLSearchParams();
-
         for (const [key, value] of formData.entries()) {
             if (value) params.append(key, value);
         }
-
         const queryString = params.toString();
         const url = window.location.pathname + (queryString ? '?' + queryString : '');
         ajaxLoad(url);
@@ -74,27 +123,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const autoSubmitElements = form.querySelectorAll('select, input[type=date]');
+    // Consistent AJAX filter: all select/date/search auto-submit, no reloads, no Enter required
+    // All filter controls (select, date, text) trigger AJAX, no reloads
+    // Fix: always allow repeated search input AJAX submits
+    // Debounced AJAX for all filter types (text, select, date)
+    const autoSubmitElements = form.querySelectorAll('select, input[type=date], input[type="text"]');
     autoSubmitElements.forEach(el => {
-        el.addEventListener('change', function() {
-            setTimeout(() => {
-                form.requestSubmit();
-            }, 300);
-        });
-    });
-
-    const searchInput = document.getElementById('search');
-    if (searchInput) {
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                if (this.value.length >= 3 || this.value.length === 0) {
+        // Use a property on the element to store its timeout
+        el._filterTimeout = null;
+        if (el.type === 'text') {
+            el.addEventListener('input', function() {
+                if (this._filterTimeout) clearTimeout(this._filterTimeout);
+                this._filterTimeout = setTimeout(() => {
+                    form.requestSubmit();
+                }, 400);
+            });
+            el.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this._filterTimeout) clearTimeout(this._filterTimeout);
                     form.requestSubmit();
                 }
-            }, 500);
-        });
-    }
+            });
+        } else {
+            el.addEventListener('change', function() {
+                if (this._filterTimeout) clearTimeout(this._filterTimeout);
+                this._filterTimeout = setTimeout(() => {
+                    form.requestSubmit();
+                }, 400);
+            });
+        }
+    });
 
     const clearSearchBtn = document.querySelector('[onclick*="getElementById(\'search\')"]');
     if (clearSearchBtn) {
@@ -157,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearAllBtn = document.querySelector('a[href*="current()"]');
     if (clearAllBtn) {
         clearAllBtn.addEventListener('click', function() {
-            // Default behavior
         });
     }
 

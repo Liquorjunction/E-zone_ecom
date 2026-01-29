@@ -24,18 +24,20 @@ class OrderRepository implements OrderRepositoryInterface
             $query->where($key, $value);
         }
 
-        // Search by order number, product name, etc.
         if (!empty($extra['search'])) {
             $search = $extra['search'];
             $query->where(function($q) use ($search) {
                 $q->where('order_number', 'like', "%$search%")
                   ->orWhereHas('items.product', function($q2) use ($search) {
                       $q2->where('name', 'like', "%$search%") ;
+                  })
+                  ->orWhereHas('items.variant', function($q3) use ($search) {
+                      $q3->where('variant_name', 'like', "%$search%")
+                          ->orWhereRaw("CONCAT(variant_name, ' ', sku) like ?", ["%$search%"]);
                   });
             });
         }
 
-        // Date range filter
         if (!empty($extra['date_from'])) {
             $query->whereDate('created_at', '>=', $extra['date_from']);
         }
@@ -47,7 +49,6 @@ class OrderRepository implements OrderRepositoryInterface
             $query->with($relations);
         }
 
-        // Sorting
         switch ($extra['sort'] ?? 'latest') {
             case 'oldest':
                 $query->orderBy('created_at', 'asc');
@@ -146,19 +147,17 @@ class OrderRepository implements OrderRepositoryInterface
                     'line_total' => $lineFinal,
                 ];
 
-                // Inventory Logic with Locking
                 $remaining = $item->quantity;
 
-                // Lock rows for update to prevent race conditions
                 $inventories = Inventory::where('product_variant_id', $item->variant_id)
                     ->orderBy('created_at', 'asc')
-                    ->lockForUpdate() // Added locking
+                    ->lockForUpdate()
                     ->get();
 
                 if ($inventories->isEmpty()) {
                     $inventories = Inventory::where('product_id', $item->product_id)
                         ->orderBy('created_at', 'asc')
-                        ->lockForUpdate() // Added locking
+                        ->lockForUpdate()
                         ->get();
                 }
 
@@ -194,7 +193,6 @@ class OrderRepository implements OrderRepositoryInterface
                     $remaining -= $deduct;
                 }
 
-                // Backorder handling
                 if ($remaining > 0) {
                     $placeholder = Inventory::firstOrCreate([
                         'product_id' => $item->product_id,
@@ -209,7 +207,6 @@ class OrderRepository implements OrderRepositoryInterface
                         'status' => 'active',
                     ]);
 
-                    // We re-fetch to lock this specific row if it existed or was just created
                     $placeholder = Inventory::where('id', $placeholder->id)->lockForUpdate()->first();
 
                     $before = (float) $placeholder->quantity;
@@ -238,7 +235,6 @@ class OrderRepository implements OrderRepositoryInterface
                 OrderItem::create($oi);
             }
 
-            // Update order number only
             $order->order_number = 'EZMA/ORD/' . str_pad($order->id, 4, '0', STR_PAD_LEFT);
             $order->save();
 
