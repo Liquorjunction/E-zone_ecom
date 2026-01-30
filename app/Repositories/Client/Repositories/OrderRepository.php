@@ -305,8 +305,9 @@ class OrderRepository implements OrderRepositoryInterface
                     Log::error($e->getMessage());
                 }
             }
-            $order->status = 'cancelled';
-            $order->save();
+                $order->status = 'cancelled';
+                $order->cancel_reason = $reason;
+                $order->save();
         });
 
         return true;

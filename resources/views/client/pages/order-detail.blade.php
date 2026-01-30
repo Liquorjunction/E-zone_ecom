@@ -36,6 +36,7 @@
                         <p class="text-sm text-gray-600">Placed on {{ optional($order->created_at)->format('F j, Y \a\t g:i A') }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
+                        @if($status === 'delivered' || $status === 'completed')
                         <a href="{{ route('client.orders.invoice', ['id' => $order->id]) ?? '#' }}" class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
                             <span class="flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,17 +45,44 @@
                                 Download Invoice
                             </span>
                         </a>
-                        @if(Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled','shipped','delivered']))
-                            <form method="POST" action="{{ route('client.orders.cancel', ['id' => $order->id]) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');" class="inline-block">
-                                @csrf
-                                <button type="submit" class="px-4 py-2.5 border-2 border-red-200 text-red-700 font-semibold rounded-lg hover:bg-red-50 transition-colors text-sm">
-                                    <span class="flex items-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        Cancel Order
-                                    </span>
-                                </button>
-                            </form>
                         @endif
+                        @if(Auth::check() && $order->user_id === Auth::id() && in_array(strtolower($order->status ?? ''), ['pending','processing']))
+                            <button type="button"
+                                class="px-4 py-2.5 border-2 border-red-200 text-red-700 font-semibold rounded-lg hover:bg-red-50 transition-colors text-sm open-cancel-modal-btn"
+                                data-order-id="{{ $order->id }}"
+                                data-order-number="{{ $order->order_number ?? '#' . $order->id }}">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Cancel Order
+                                </span>
+                            </button>
+                        @endif
+                        <!-- Cancel Order Modal (moved to body by JS) -->
+                        <div id="cancel-order-modal" class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-40 hidden">
+                            <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+                                <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                                <form id="cancel-order-form" method="POST" action="{{ route('client.orders.cancel') }}">
+                                    @csrf
+                                    <input type="hidden" name="id" id="cancel-order-id" value="{{ $order->id }}">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Order <span id="cancel-order-number" class="text-primary">{{ $order->order_number ?? '#' . $order->id }}</span></h3>
+                                    <p class="text-gray-700 mb-4">Please provide a reason for cancellation. This action cannot be undone.</p>
+                                    <div class="mb-4">
+                                        <label for="cancel-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason <span class="text-red-500">*</span></label>
+                                        <textarea name="reason" id="cancel-reason" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"></textarea>
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">Close</button>
+                                        <button type="submit" class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">Confirm Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -356,3 +384,6 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+    <script src="{{ asset('js/order-cancel-popup.js') }}"></script>
+@endpush

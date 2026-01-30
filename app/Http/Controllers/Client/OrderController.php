@@ -318,7 +318,7 @@ class OrderController extends Controller
         return view('client.pages.order-invoice', ['order' => $order]);
     }
 
-    public function cancel(OrderCancelRequest $request, $id, OrderRepo $orderRepo)
+    public function cancel(OrderCancelRequest $request, OrderRepo $orderRepo)
     {
         if (! Auth::check()) {
             return redirect()->route('login');

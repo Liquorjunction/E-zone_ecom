@@ -400,7 +400,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                        <form id="cancel-order-form" method="POST" action="{{ route('client.orders.cancel', 0) }}">
+                        <form id="cancel-order-form" method="POST" action="{{ route('client.orders.cancel') }}">
                             @csrf
                             <input type="hidden" name="id" id="cancel-order-id" value="">
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Order <span id="cancel-order-number" class="text-primary"></span></h3>
@@ -461,5 +461,6 @@
 
 @push('scripts')
     <script src="{{ asset('js/orders-filter.js') }}"></script>
+    <script src="{{ asset('js/order-cancel-popup.js') }}"></script>
 @endpush
 

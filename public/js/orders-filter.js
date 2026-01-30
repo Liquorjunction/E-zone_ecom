@@ -49,15 +49,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     cancelForm.reset();
                 }
             });
-            cancelForm.addEventListener("submit", function (e) {
-                if (
-                    !confirm(
-                        "Are you sure you want to cancel this order? This action cannot be undone.",
-                    )
-                ) {
-                    e.preventDefault();
-                }
-            });
         }
 
         const form = document.getElementById("orders-filter-form");

@@ -24,6 +24,7 @@ class Order extends Model
         'taxable_amount',
         'total',
         'status',
+        'cancel_reason',
         'shipping_address',
         'billing_address',
         'phone_no',
