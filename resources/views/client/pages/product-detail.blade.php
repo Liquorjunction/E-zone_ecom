@@ -155,7 +155,7 @@
                     </div>
 
                     <!-- Price Box -->
-                    <div class="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
+                    <div class="bg-linear-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
                         <div class="flex items-center justify-between flex-wrap gap-4">
                             <div class="flex items-baseline gap-3">
                                 <div class="flex flex-col gap-2">

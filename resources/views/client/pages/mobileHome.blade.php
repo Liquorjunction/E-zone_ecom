@@ -134,7 +134,7 @@
                             <a href="{{ $card->link ?? '#' }}" class="block relative h-48 rounded-xl overflow-hidden">
                                 <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
                                     class="absolute inset-0 w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
                                 <div class="absolute bottom-0 left-0 right-0 p-4">
                                     @php
                                         $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
@@ -279,7 +279,7 @@
                             @php
                                 $imgPath = $brand->image ? asset('storage/' . $brand->image) : 'https://logo.clearbit.com/' . ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
                             @endphp
-                            <a href="{{ route('brand-products', $brand->slug ?? $brand->id) }}">
+                            <a href="{{ route('brand.products', $brand->slug ?? $brand->id) }}">
                                 <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
                                     class="h-6 w-auto grayscale opacity-60">
                             </a>
@@ -290,7 +290,7 @@
                             @php
                                 $imgPath = $brand->image ? asset('storage/' . $brand->image) : 'https://logo.clearbit.com/' . ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
                             @endphp
-                            <a href="{{ route('brand-products', $brand->slug ?? $brand->id) }}">
+                            <a href="{{ route('brand.products', $brand->slug ?? $brand->id) }}">
                                 <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
                                     class="h-6 w-auto grayscale opacity-60">
                             </a>
