@@ -19,4 +19,14 @@ class BrandController extends Controller
         $products = $brandRepo->getDiscountedProductsByBrandSlug($slug, 12);
         return view('client.pages.products', compact('products'));
     }
+
+    public function productsByBrand(ReadBrandRequest $request, string $slug, BrandRepo $brandRepo)
+    {
+        $products = $brandRepo->getProductsByBrandSlug($slug, 12);
+        return view('client.pages.brand-products', [
+            'brand' => $brandRepo->getBrandBySlug($slug),
+            'products' => $products,
+            'brand_slug' => $slug
+        ]);
+    }
 }

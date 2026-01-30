@@ -214,33 +214,55 @@ document.addEventListener('DOMContentLoaded', function() {
         const productTitleEl = document.getElementById('product-title');
         if (productTitleEl) {
             const baseName = productTitleEl.getAttribute('data-base-name') || productTitleEl.textContent;
-            productTitleEl.textContent = variantName ? baseName + ' - ' + variantName : baseName;
+            // Decode HTML entities in variantName if present
+            let decodedVariantName = variantName;
+            if (variantName && typeof variantName === 'string') {
+                const txt = document.createElement('textarea');
+                txt.innerHTML = variantName;
+                decodedVariantName = txt.value;
+            }
+            productTitleEl.textContent = decodedVariantName ? baseName + ' - ' + decodedVariantName : baseName;
         }
 
         if (qtyInput) {
             if (qty > 0) {
-                qtyInput.removeAttribute('disabled');
-                qtyInput.value = '1';
+            qtyInput.removeAttribute('hidden');
+            qtyInput.value = '1';
             } else {
-                qtyInput.value = '0';
-                qtyInput.setAttribute('disabled', 'disabled');
+            qtyInput.value = '0';
+            qtyInput.setAttribute('hidden', 'hidden');
             }
         }
+        if(qtyDecrease) {
+            if (qty > 0) {
+                qtyDecrease.removeAttribute('hidden');
+            } else {
+                qtyDecrease.setAttribute('hidden', 'hidden');
+            }
+        }
+        if(qtyIncrease) {
+            if (qty > 0) {
+                qtyIncrease.removeAttribute('hidden');
+            } else {
+                qtyIncrease.setAttribute('hidden', 'hidden');
+            }
+        }
+
         if (addToCartBtn) {
             if (qty > 0) {
-                addToCartBtn.removeAttribute('disabled');
+                addToCartBtn.removeAttribute('hidden');
                 addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
-                addToCartBtn.setAttribute('disabled', 'disabled');
+                addToCartBtn.setAttribute('hidden', 'hidden');
                 addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }
         if (buyNowBtn) {
             if (qty > 0) {
-                buyNowBtn.removeAttribute('disabled');
+                buyNowBtn.removeAttribute('hidden');
                 buyNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
-                buyNowBtn.setAttribute('disabled', 'disabled');
+                buyNowBtn.setAttribute('hidden', 'hidden');
                 buyNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }

@@ -188,9 +188,9 @@ Breadcrumbs::for('products.deals', function (BreadcrumbTrail $trail) {
 });
 
 // Home > Products > [Brand Name]
-Breadcrumbs::for('brand-products', function (BreadcrumbTrail $trail, $slug) {
+Breadcrumbs::for('brand.products', function (BreadcrumbTrail $trail, $slug) {
     $trail->parent('products.index');
-    $trail->push(Str::title($slug), route('brand-products', $slug));
+    $trail->push(Str::title($slug), route('brand.products', $slug));
 });
 
 // Home > Order Tracking

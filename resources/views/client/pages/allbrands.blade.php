@@ -81,7 +81,7 @@
 
                         {{-- Image Area --}}
                         <div
-                            class="relative flex-shrink-0 flex items-center justify-center rounded-lg bg-gray-50/50"
+                            class="relative shrink-0 flex items-center justify-center rounded-lg bg-gray-50/50"
                             :class="view === 'list' ? 'w-20 h-20' : 'w-full h-40 mb-4'"
                         >
                             @if($brand->image)
@@ -104,7 +104,7 @@
                             {{-- <p class="text-xs text-gray-400 mt-1 line-clamp-1">Explore products from {{ $brand->name }}</p> --}}
 
                             <div class="mt-4">
-                                <a href="{{ route('brand-products', $brand->slug) }}"
+                                <a href="{{ route('brand.products', $brand->slug) }}"
                                    class="inline-flex items-center text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
                                 >
                                     <span>Browse Collection</span>
@@ -126,7 +126,7 @@
                 {{-- Empty Search State --}}
                 <div x-show="search !== '' && $el.parentElement.querySelectorAll('div[x-show]').length > 0 && Array.from($el.parentElement.querySelectorAll('div[x-show]')).every(el => el.style.display === 'none')"
                      class="hidden col-span-full py-12 text-center"
-                     :class="{ '!block': true }"
+                     :class="{ 'block': true }"
                 >
                     <p class="text-gray-500">No brands match your search "<span x-text="search" class="font-bold text-gray-900"></span>".</p>
                     <button @click="search = ''" class="mt-2 text-primary text-sm hover:underline">Clear Search</button>

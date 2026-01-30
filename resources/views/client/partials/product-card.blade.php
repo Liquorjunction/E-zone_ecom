@@ -13,7 +13,6 @@
     $catRaw = $master->category?->{'category-name'} ?? ($master->category?->name ?? 'Uncategorized');
     $categoryName = is_array($catRaw) ? implode(' ', array_filter($catRaw)) : (string) $catRaw;
 
-    // Image preference order
     $variantImage = null;
     if ($isVariant) {
         $variantImage = optional($product->images()->ordered()->first())->image_path;
@@ -31,20 +30,19 @@
         $imagePath = null;
     }
 
-    // Get discount info
     $real = $isVariant
         ? $product->price ?? ($master->real_price ?? ($master->price ?? 0))
         : $master->real_price ?? ($master->price ?? 0);
     $itemDiscountInfo = $isVariant ? $product->getDiscountInfo() : $master->getDiscountInfo();
     $productDiscountInfo = $master->getDiscountInfo();
 
-    // Wishlist data
     $variantId = $isVariant
         ? $product->id ?? null
-        : $master->productVariants()->ordered()->pluck('id')->first() ?? null;
+        : ($master->productVariants && $master->productVariants->count() > 0
+            ? $master->productVariants->first()->id
+            : $master->id);
     $isWishlisted = isset($wishlistVariantIds) && $variantId ? in_array($variantId, $wishlistVariantIds) : false;
 
-    // Bestseller check
     $isBestseller = false;
     if ($isVariant) {
         $isBestseller = (bool) $product->is_bestseller;
@@ -53,37 +51,30 @@
         $isBestseller = $firstVariant && (bool) $firstVariant->is_bestseller;
     }
 
-    // Stock calculation
     if ($isVariant) {
         $stock = $product->getTotalStockAttribute() ?? 0;
     } else {
-        // If product has variants, sum their stock, else fallback to product's own inventory if available
-    if ($master->productVariants && $master->productVariants->count() > 0) {
-        $stock = $master->productVariants->sum(function ($v) {
-            return method_exists($v, 'getTotalStockAttribute') ? $v->getTotalStockAttribute() : 0;
-        });
-    } else {
-        $stock = method_exists($master, 'getTotalStockAttribute') ? $master->getTotalStockAttribute() : 0;
+        if ($master->productVariants && $master->productVariants->count() > 0) {
+            $stock = $master->productVariants->sum(function ($v) {
+                return method_exists($v, 'getTotalStockAttribute') ? $v->getTotalStockAttribute() : 0;
+            });
+        } else {
+            $stock = method_exists($master, 'getTotalStockAttribute') ? $master->getTotalStockAttribute() : 0;
         }
     }
 @endphp
 
 <div
     class="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border-2 border-gray-100 hover:border-primary/20">
-    <!-- Image Container -->
     <div class="relative aspect-square bg-gray-100 overflow-hidden">
         <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}"
             class="block w-full h-full">
             <img src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}" alt="{{ $name }}"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
         </a>
-
-        <!-- Gradient Overlay on Hover -->
         <div
             class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         </div>
-
-        <!-- Badges -->
         @if ($productDiscountInfo['has_discount'] || $master->created_at > now()->subDays(30) || $isBestseller)
             <div class="absolute top-3 left-3 flex flex-col gap-2 z-10">
                 @if ($productDiscountInfo['has_discount'])
@@ -126,21 +117,17 @@
             </div>
         @endif
 
-        <!-- Wishlist Button -->
-
         <button type="button" aria-label="Add to wishlist" data-product-variant-id="{{ $variantId }}"
             data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}" data-toast-ignore
             class="wishlist-btn no-toast absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none {{ $isWishlisted ? 'opacity-100 is-wishlisted' : 'opacity-0 group-hover:opacity-100' }}"
             @if (!$variantId) disabled @endif>
             @if ($isWishlisted)
-                <!-- Filled Heart, subtle shadow -->
                 <svg class="w-5 h-5 text-red-500 drop-shadow-sm transition-all duration-200" fill="currentColor"
                     viewBox="0 0 24 24">
                     <path
                         d="M12.1 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.35 1.31z" />
                 </svg>
             @else
-                <!-- Outlined Heart, minimal -->
                 <svg class="w-5 h-5 text-gray-400 transition-all duration-200 group-hover:text-red-400" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -150,16 +137,12 @@
         </button>
     </div>
 
-    <!-- Product Info -->
     <div class="p-5">
-        <!-- Category Badge -->
         <div class="flex items-center justify-between mb-3">
             <span
                 class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
                 {{ $categoryName }}
             </span>
-
-            <!-- Stock Indicator -->
             @if ($stock > 0)
                 <div class="flex items-center gap-1.5 text-xs font-medium text-green-600">
                     <span class="flex h-2 w-2 relative">
@@ -168,7 +151,6 @@
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
                     In Stock
-                    {{-- <span class="ml-1 text-gray-400">({{ $stock }})</span> --}}
                 </div>
             @else
                 <div class="flex items-center gap-1.5 text-xs font-medium text-red-600">
@@ -180,7 +162,6 @@
             @endif
         </div>
 
-        <!-- Product Title -->
         <a
             href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
             <h3
@@ -189,7 +170,6 @@
             </h3>
         </a>
 
-        <!-- Rating -->
         <div class="flex items-center gap-2 mb-4">
             <div class="flex items-center">
                 @for ($i = 0; $i < 5; $i++)
@@ -202,7 +182,6 @@
             <span class="text-sm text-gray-600 font-medium">4.8 <span class="text-gray-400">(150)</span></span>
         </div>
 
-        <!-- Features -->
         <div class="flex gap-2 mb-4 pb-4 border-b border-gray-100">
             <div class="flex items-center gap-1.5 text-xs text-gray-600">
                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -222,7 +201,6 @@
             </div>
         </div>
 
-        <!-- Price and Add to Cart -->
         <div class="flex items-center justify-between gap-3">
             <div class="flex-1">
                 @if ($itemDiscountInfo['has_discount'])

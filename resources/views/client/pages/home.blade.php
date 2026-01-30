@@ -603,7 +603,7 @@
                                     : 'https://logo.clearbit.com/' .
                                         ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
                             @endphp
-                            <a href="{{ route('brand-products', $brand->slug ?? $brand->id) }}" class="shrink-0">
+                            <a href="{{ route('brand.products', $brand->slug ?? $brand->id) }}" class="shrink-0">
                                 <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
                                     class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
                             </a>
@@ -619,7 +619,7 @@
                                     : 'https://logo.clearbit.com/' .
                                         ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
                             @endphp
-                            <a href="{{ route('brand-products', $brand->slug ?? $brand->id) }}" class="shrink-0">
+                            <a href="{{ route('brand.products', $brand->slug ?? $brand->id) }}" class="shrink-0">
                                 <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
                                     class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
                             </a>

@@ -48,9 +48,7 @@ Route::group([], function () {
     Route::view('/new-arrivals', 'client.pages.new-arrivals')->name('new-arrivals');
     Route::view('/best-sellers', 'client.pages.best-sellers')->name('best-sellers');
     Route::view('/order-tracking', 'client.pages.order-tracking')->name('order-tracking');
-    Route::get('/brand/{slug}', function ($slug) {
-        return view('client.pages.brand-products', ['brand_slug' => $slug]);
-    })->name('brand-products');
+    Route::get('/brand/{slug}', [BrandController::class, 'productsByBrand'])->name('brand.products');
 });
 
 Route::post('/inventory/transactions', [InventoryController::class, 'transactions'])->name('inventory.transactions');

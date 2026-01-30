@@ -121,9 +121,9 @@
 
                         <!-- Title -->
                         <h1 id="product-title"
-                            data-base-name="{{ is_array($product->name) ? $product->name[app()->getLocale()] ?? ($product->name['en'] ?? '') : $product->name }}"
+                            data-base-name="{{ is_array($product->name) ? strip_tags(html_entity_decode($product->name[app()->getLocale()] ?? ($product->name['en'] ?? ''), ENT_QUOTES, 'UTF-8')) : strip_tags(html_entity_decode($product->name, ENT_QUOTES, 'UTF-8')) }}"
                             class="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-                            {!! is_array($product->name) ? $product->name[app()->getLocale()] ?? ($product->name['en'] ?? '') : $product->name !!}
+                            {!! is_array($product->name) ? strip_tags(html_entity_decode($product->name[app()->getLocale()] ?? ($product->name['en'] ?? ''), ENT_QUOTES, 'UTF-8')) : strip_tags(html_entity_decode($product->name, ENT_QUOTES, 'UTF-8')) !!}
                         </h1>
 
                         <!-- Rating & Stock -->
@@ -243,7 +243,7 @@
                         @if ($product->brand)
                             <div class="flex items-center gap-2">
                                 <span class="text-gray-500 font-medium">Brand:</span>
-                                <a href="{{ route('brand-products', $product->brand->slug) }}"
+                                <a href="{{ route('brand.products', $product->brand->slug) }}"
                                     class="text-primary hover:text-primary-dark font-semibold transition-colors">
                                     {{ method_exists($product->brand ?? null, 'getTranslation') ? $product->brand->getTranslation('name', app()->getLocale()) : (is_array(optional($product->brand)->name) ? optional($product->brand)->name[app()->getLocale()] ?? (optional($product->brand)->name['en'] ?? '') : optional($product->brand)->name) }}
                                 </a>

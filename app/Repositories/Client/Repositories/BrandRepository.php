@@ -24,7 +24,10 @@ class BrandRepository implements BrandRepositoryInterface
     {
         $brand = $this->getBrandBySlug($slug);
         if ($brand) {
-            return $brand->products()->where('status', 'active')->paginate($perPage);
+            return $brand->products()
+                ->with(['images', 'category', 'productVariants.images', 'productVariants'])
+                ->where('status', 'active')
+                ->paginate($perPage);
         }
         return null;
     }

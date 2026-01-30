@@ -1,11 +1,8 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
-        <div class="container mx-auto px-4">
-            @php
-                $brand = \App\Helpers\ClientHelper::getBrandBySlug($brand_slug);
-            @endphp
+    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-10">
+        <div class="container mx-auto px-4 max-w-7xl">
 
             <x-breadcrumbs>
                 <x-slot:title>Shop: {{ $brand ? $brand->name : Str::title($brand_slug) }}</x-slot:title>
@@ -13,17 +10,45 @@
             </x-breadcrumbs>
 
             @if($brand)
-                <div class="mt-8">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $brand->name }}</h1>
+                <div class="flex flex-col md:flex-row items-center gap-8 bg-white rounded-xl shadow-lg p-8 mt-8 mb-10">
                     @if($brand->image)
-                        <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" class="w-32 h-32 object-cover rounded-lg mb-4">
+                        <img src="{{ asset('storage/' . $brand->image) }}" alt="{{ $brand->name }}" class="w-36 h-36 object-contain rounded-lg border border-gray-200 shadow-sm bg-white" style="object-fit: contain;">
+                    @else
+                        <div class="w-36 h-36 flex items-center justify-center bg-gray-100 rounded-lg text-4xl text-gray-400 font-bold border border-gray-200">
+                            <span>{{ strtoupper(substr($brand->name, 0, 1)) }}</span>
+                        </div>
                     @endif
-                    <p class="text-gray-600">Explore all products from {{ $brand->name }}.</p>
+                    <div class="flex-1 text-center md:text-left">
+                        <h1 class="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">{{ $brand->name }}</h1>
+                        <p class="text-lg text-gray-600 mb-2">Explore all products from <span class="font-semibold">{{ $brand->name }}</span>.</p>
+                        @if(!empty($brand->description))
+                            <p class="text-gray-500">{{ $brand->description }}</p>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Products</h2>
+                    @if($products && $products->count())
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                            @foreach($products as $product)
+                                @include('client.partials.product-card', ['product' => $product])
+                            @endforeach
+                        </div>
+                        <div class="mt-8">
+                            {{ $products->links() }}
+                        </div>
+                    @else
+                        <div class="text-center py-16 text-gray-500 text-lg">
+                            No products found for this brand.
+                        </div>
+                    @endif
                 </div>
             @else
-                <div class="mt-8">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-4">Brand Not Found</h1>
-                    <p class="text-gray-600">The brand "{{ Str::title($brand_slug) }}" could not be found.</p>
+                <div class="mt-16 text-center">
+                    <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Brand Not Found</h1>
+                    <p class="text-gray-600 text-lg">The brand "{{ Str::title($brand_slug) }}" could not be found.</p>
+                    <a href="{{ route('brands') }}" class="mt-6 inline-block bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-primary-dark transition">Back to All Brands</a>
                 </div>
             @endif
         </div>
