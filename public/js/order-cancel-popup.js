@@ -42,6 +42,52 @@ document.addEventListener("DOMContentLoaded", function () {
                 cancelForm.reset();
             }
         });
-        // No browser confirm needed; modal handles confirmation
+        cancelForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(cancelForm);
+            const submitBtn = cancelForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Cancelling...';
+            }
+            fetch(cancelForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': formData.get('_token') || document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    // Always hide the cancel modal before showing the universal popup
+                    cancelModal.classList.add("hidden");
+                    cancelModal.classList.remove("flex");
+                    cancelForm.reset();
+                    if (data && (data.success || data.status === 'success')) {
+                        window.showUniversalPopup(data.message || 'Order cancelled successfully', 'success');
+                        if (typeof ajaxLoad === 'function') {
+                            ajaxLoad(window.location.href);
+                        } else {
+                            setTimeout(() => window.location.reload(), 1200);
+                        }
+                    } else {
+                        window.showUniversalPopup((data && data.message) || 'Failed to cancel order', 'failure');
+                    }
+                })
+                .catch(() => {
+                    // Also hide the modal before showing failure popup
+                    cancelModal.classList.add("hidden");
+                    cancelModal.classList.remove("flex");
+                    cancelForm.reset();
+                    window.showUniversalPopup('Failed to cancel order', 'failure');
+                })
+                .finally(() => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Confirm Cancel';
+                    }
+                });
+        });
     }
 });
