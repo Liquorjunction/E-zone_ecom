@@ -261,7 +261,7 @@
                     <span class="font-bold text-gray-900 text-lg">{{ money_format_number($order->total ?? 0) }}</span>
                     <div class="flex items-center gap-2">
                         <a href="{{ route('order-detail', ['order' => $order->id]) }}"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -271,7 +271,7 @@
                         </a>
                         @if (Auth::check() &&
                                 $order->user_id === Auth::id() &&
-                                !in_array(strtolower($order->status ?? ''), ['cancelled', 'shipped', 'delivered']))
+                                !in_array(strtolower($order->status ?? ''), ['cancelled', 'shipped', 'delivered', 'completed']))
                             <button type="button"
                                 class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-all duration-200 open-cancel-modal-btn"
                                 data-order-id="{{ $order->id }}"

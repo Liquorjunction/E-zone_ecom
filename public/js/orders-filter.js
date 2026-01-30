@@ -135,20 +135,21 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-        const clearSearchBtn = document.querySelector(
-            "[onclick*=\"getElementById('search')\"]",
-        );
-        if (clearSearchBtn) {
-            clearSearchBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const searchField = document.getElementById("search");
-                if (searchField) {
-                    searchField.value = "";
-                    form.requestSubmit();
-                }
-            });
+        function attachClearSearchHandler() {
+            const clearSearchBtn = document.getElementById("clear-search-btn");
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const searchField = document.getElementById("search");
+                    if (searchField) {
+                        searchField.value = "";
+                        form.requestSubmit();
+                    }
+                });
+            }
         }
+        attachClearSearchHandler();
 
         function updateFilterCount() {
             const activeFilters = [];
@@ -229,6 +230,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     window.history.pushState({}, "", url);
                     attachPaginationHandler();
                     initOrdersFilter(); // Re-initialize listeners after AJAX
+                    // Attach clear search handler after AJAX content update
+                    const form = document.getElementById("orders-filter-form");
+                    if (form) {
+                        const clearSearchBtn = document.getElementById("clear-search-btn");
+                        if (clearSearchBtn) {
+                            clearSearchBtn.addEventListener("click", function (e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const searchField = document.getElementById("search");
+                                if (searchField) {
+                                    searchField.value = "";
+                                    form.requestSubmit();
+                                }
+                            });
+                        }
+                    }
                     container.scrollIntoView({
                         behavior: "smooth",
                         block: "start",
