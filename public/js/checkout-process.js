@@ -1,4 +1,3 @@
-// Move Modal to Body on Load (Fixes stacking context "under header" issue)
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('addAddressModal');
     if(modal) document.body.appendChild(modal);
@@ -8,7 +7,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const root = document.getElementById("checkout-root");
     if (!root) return;
 
-    // --- Configuration ---
     const updateUrl = root.dataset.updateUrl;
     const removeUrl = root.dataset.removeUrl;
     const csrf =
@@ -16,14 +14,11 @@ document.addEventListener("DOMContentLoaded", function () {
             .querySelector('meta[name="csrf-token"]')
             ?.getAttribute("content") || "";
 
-    // Timer storage for debouncing (prevents rapid-fire server requests)
     let debounceTimers = {};
 
     function formatMoney(n) {
         const symbol = window.env?.CURRENCY_SYMBOL || "$";
-        // Convert to number, handle commas and spaces
         const num = typeof n === 'string' ? parseFloat(n.replace(/[,\s]/g, '')) : Number(n);
-        // Format with thousands separators and 2 decimal places
         const formatted = num.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
@@ -31,28 +26,84 @@ document.addEventListener("DOMContentLoaded", function () {
         return symbol + ' ' + formatted;
     }
 
-    // ============================================================
-    //  SECTION 1: CART ACTIONS (Event Delegation)
-    // ============================================================
+    function showStockLimitMessage(max) {
+        if (!max) return;
+        const message = max === 1
+            ? 'Only 1 item available in stock.'
+            : `Only ${max} items available in stock.`;
 
-    // Handle Clicks (Remove, Increase, Decrease)
+        if (window.Toast && typeof window.Toast.info === 'function') {
+            window.Toast.info({
+                title: 'Stock limit',
+                message: message,
+            });
+            return;
+        }
+
+        let banner = document.getElementById('stockLimitBanner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'stockLimitBanner';
+            banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-amber-500 text-white px-4 py-3 rounded-xl shadow-xl';
+            document.body.appendChild(banner);
+        }
+        banner.textContent = message;
+        banner.style.opacity = '1';
+        banner.style.transform = 'translate(-50%, 0)';
+
+        clearTimeout(banner._hideTimer);
+        banner._hideTimer = setTimeout(() => {
+            banner.style.opacity = '0';
+            banner.style.transform = 'translate(-50%, -100%)';
+            setTimeout(() => banner.remove(), 300);
+        }, 2500);
+    }
+
+    function getMaxStockForItem(id) {
+        const input = root.querySelector(
+            `.cart-quantity-input[data-item-id="${id}"]`
+        );
+        let max = null;
+
+        if (input) {
+            const raw = input.getAttribute('max') || input.dataset.maxStock || input.dataset.max;
+            const parsed = parseInt(raw || '', 10);
+            if (!Number.isNaN(parsed) && parsed > 0) {
+                max = parsed;
+            }
+        }
+
+        if (!max) {
+            const summaryRow = document.querySelector(
+                `.summary-item-row[data-summary-item-id="${id}"]`
+            );
+            const raw = summaryRow?.dataset?.maxStock;
+            const parsed = parseInt(raw || '', 10);
+            if (!Number.isNaN(parsed) && parsed > 0) {
+                max = parsed;
+            }
+        }
+
+        return max;
+    }
+
+    function clampQuantity(val, max) {
+        let v = Math.max(1, Number(val || 1));
+        if (max && v > max) v = max;
+        return v;
+    }
+
     root.addEventListener("click", function (e) {
         const target = e.target;
 
-        // A. Remove Item Button
         const removeBtn = target.closest(".remove-item-btn, .remove-item-ajax");
         if (removeBtn) {
-            e.preventDefault(); // STOP page reload/form submit
+            e.preventDefault();
             const id = removeBtn.dataset.itemId;
-
-            // Optional: Confirm dialog
-            // if (!confirm("Are you sure you want to remove this item?")) return;
-
             if (id) removeItem(id);
             return;
         }
 
-        // B. Increase Quantity Button (+)
         const increaseBtn = target.closest(".qty-increase");
         if (increaseBtn) {
             e.preventDefault();
@@ -61,14 +112,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 `.cart-quantity-input[data-item-id="${id}"]`
             );
             if (input) {
+                const max = getMaxStockForItem(id);
                 let newVal = Number(input.value || 0) + 1;
-                input.value = newVal; // Update UI immediately
-                debounceUpdate(id, newVal); // Queue server request
+                if (max) newVal = Math.min(newVal, max);
+                input.value = newVal;
+                if (max && newVal === max) showStockLimitMessage(max);
+                debounceUpdate(id, newVal);
             }
             return;
         }
 
-        // C. Decrease Quantity Button (-)
         const decreaseBtn = target.closest(".qty-decrease");
         if (decreaseBtn) {
             e.preventDefault();
@@ -78,21 +131,19 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             if (input) {
                 let newVal = Math.max(1, Number(input.value || 1) - 1);
-                input.value = newVal; // Update UI immediately
-                debounceUpdate(id, newVal); // Queue server request
+                input.value = newVal;
+                debounceUpdate(id, newVal);
             }
             return;
         }
 
-        // D. Summary Increase Quantity Button (+)
         const summaryIncreaseBtn = target.closest(".summary-qty-increase");
         if (summaryIncreaseBtn) {
             e.preventDefault();
 
-            // Check if we're on step 3 (order confirmation) - don't allow changes
             const isStep3 = document.querySelector('.text-xl.font-extrabold.text-gray-900.mb-4')?.textContent.includes('Order Successfully Placed');
             if (isStep3) {
-                return; // Order is complete, no changes allowed
+                return;
             }
 
             const id = summaryIncreaseBtn.dataset.itemId;
@@ -104,30 +155,32 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             if (mainInput) {
-                // Step 1: Main cart exists, sync with it
+                const max = getMaxStockForItem(id);
                 let newVal = Number(mainInput.value || 0) + 1;
+                if (max) newVal = Math.min(newVal, max);
                 mainInput.value = newVal;
                 if (quantityDisplay) quantityDisplay.textContent = newVal;
+                if (max && newVal === max) showStockLimitMessage(max);
                 debounceUpdate(id, newVal);
             } else if (quantityDisplay) {
-                // Step 2: No main cart, update directly from summary
+                const max = getMaxStockForItem(id);
                 let currentQty = Number(quantityDisplay.textContent || 0);
                 let newVal = currentQty + 1;
+                if (max) newVal = Math.min(newVal, max);
                 quantityDisplay.textContent = newVal;
+                if (max && newVal === max) showStockLimitMessage(max);
                 debounceUpdate(id, newVal);
             }
             return;
         }
 
-        // E. Summary Decrease Quantity Button (-)
         const summaryDecreaseBtn = target.closest(".summary-qty-decrease");
         if (summaryDecreaseBtn) {
             e.preventDefault();
 
-            // Check if we're on step 3 (order confirmation) - don't allow changes
             const isStep3 = document.querySelector('.text-xl.font-extrabold.text-gray-900.mb-4')?.textContent.includes('Order Successfully Placed');
             if (isStep3) {
-                return; // Order is complete, no changes allowed
+                return;
             }
 
             const id = summaryDecreaseBtn.dataset.itemId;
@@ -139,13 +192,11 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             if (mainInput) {
-                // Step 1: Main cart exists, sync with it
                 let newVal = Math.max(1, Number(mainInput.value || 1) - 1);
                 mainInput.value = newVal;
                 if (quantityDisplay) quantityDisplay.textContent = newVal;
                 debounceUpdate(id, newVal);
             } else if (quantityDisplay) {
-                // Step 2: No main cart, update directly from summary
                 let currentQty = Number(quantityDisplay.textContent || 1);
                 let newVal = Math.max(1, currentQty - 1);
                 quantityDisplay.textContent = newVal;
@@ -154,7 +205,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // F. Summary Remove Item Button
         const summaryRemoveBtn = target.closest(".summary-remove-item-btn");
         if (summaryRemoveBtn) {
             e.preventDefault();
@@ -164,26 +214,22 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Handle Manual Input Changes (Typing quantity)
     root.addEventListener("input", function (e) {
         if (e.target.classList.contains("cart-quantity-input")) {
             const id = e.target.dataset.itemId;
-            const val = Math.max(1, Number(e.target.value || 1));
+            const max = getMaxStockForItem(id);
+            const val = clampQuantity(e.target.value, max);
+            e.target.value = val;
+            if (max && val === max) showStockLimitMessage(max);
             debounceUpdate(id, val);
         }
     });
 
-    // ============================================================
-    //  SECTION 2: CHECKOUT FORM LOGIC
-    // ============================================================
-
-    // A. Saved Address Logic
     const addressSelect = document.getElementById("savedAddressSelect");
     if (addressSelect) {
         addressSelect.addEventListener("change", function () {
             const opt = this.options[this.selectedIndex];
 
-            // Fields to clear/fill
             const fieldIds = [
                 "firstName",
                 "lastName",
@@ -195,7 +241,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 "email",
             ];
 
-            // 1. Clear fields if "New Address" or invalid selection
             if (!opt || !opt.dataset || !opt.dataset.addr) {
                 fieldIds.forEach((id) => {
                     const el = document.getElementById(id);
@@ -204,7 +249,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // 2. Parse and Fill
             try {
                 const addr = JSON.parse(opt.dataset.addr);
                 const mapping = {
@@ -222,9 +266,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     const el = document.getElementById(id);
                     if (el && val) {
                         el.value = val;
-                        // Visual flash effect
                         el.style.transition = "background-color 0.3s ease";
-                        el.style.backgroundColor = "rgba(34, 197, 94, 0.1)"; // Light green
+                        el.style.backgroundColor = "rgba(34, 197, 94, 0.1)";
                         setTimeout(() => (el.style.backgroundColor = ""), 500);
                     }
                 }
@@ -234,7 +277,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // B. Payment Method Toggle
     function updateCardDetailsVisibility() {
         const selected = document.querySelector(
             'input[name="payment_method"]:checked'
@@ -244,11 +286,9 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("cardDetails");
 
         if (cardWrapper) {
-            // Show if 'card' is selected
             cardWrapper.style.display =
                 selected && selected.value === "card" ? "block" : "none";
 
-            // Toggle 'required' attribute for inputs inside to prevent validation errors on other methods
             const inputs = cardWrapper.querySelectorAll("input, select");
             inputs.forEach((input) => {
                 if (selected && selected.value === "card") {
@@ -260,20 +300,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Attach listeners to payment radios
     document
         .querySelectorAll('input[name="payment_method"]')
         .forEach((radio) => {
             radio.addEventListener("change", updateCardDetailsVisibility);
         });
-    // Run once on load
     updateCardDetailsVisibility();
 
-    // ============================================================
-    //  SECTION 3: NETWORK / AJAX FUNCTIONS
-    // ============================================================
-
-    // Wrapper to debounce requests (wait 500ms after last click)
     function debounceUpdate(id, quantity) {
         if (debounceTimers[id]) clearTimeout(debounceTimers[id]);
 
@@ -291,29 +324,66 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": csrf,
-                    Accept: "application/json", // Crucial fix for Laravel
+                    Accept: "application/json",
                 },
                 body: JSON.stringify({
                     id: id,
-                    item_id: id, // Send both to be safe
+                    item_id: id,
                     quantity: quantity,
                 }),
             });
 
-            if (!resp.ok) throw new Error("Server returned " + resp.status);
+            let data = null;
+            try {
+                data = await resp.json();
+            } catch (e) {
+                data = null;
+            }
 
-            const data = await resp.json();
+            if (!resp.ok) {
+                const maxStock = data?.item?.max_stock || data?.max_stock;
+                if (maxStock) {
+                    const input = root.querySelector(
+                        `.cart-quantity-input[data-item-id="${id}"]`
+                    );
+                    if (input) {
+                        input.value = Math.min(Number(input.value || 1), maxStock);
+                    }
+                    const summaryQtyDisplay = document.querySelector(
+                        `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
+                    );
+                    if (summaryQtyDisplay) {
+                        const currentVal = Number(summaryQtyDisplay.textContent || 1);
+                        summaryQtyDisplay.textContent = Math.min(currentVal, maxStock);
+                    }
+                    showStockLimitMessage(maxStock);
+                }
+                throw new Error(data?.message || ("Server returned " + resp.status));
+            }
 
             if (data.success) {
-                // Get the cart item row
+                if (data.item?.max_stock) {
+                    const input = root.querySelector(
+                        `.cart-quantity-input[data-item-id="${id}"]`
+                    );
+                    if (input) {
+                        input.setAttribute('max', data.item.max_stock);
+                        input.dataset.maxStock = data.item.max_stock;
+                    }
+                    const summaryRow = document.querySelector(
+                        `.summary-item-row[data-summary-item-id="${id}"]`
+                    );
+                    if (summaryRow) {
+                        summaryRow.dataset.maxStock = data.item.max_stock;
+                    }
+                }
+
                 const cartRow = document.querySelector(`.cart-item-row[data-item-id="${id}"]`);
 
-                // Update Line Total specific to this row
                 const lineTotalEl = document.querySelector(
                     `#item-line-total-${id}`
                 );
                 if (lineTotalEl && data.item?.discount) {
-                    // If item has discount, update with discount info
                     if (data.item.discount.has_discount) {
                         lineTotalEl.textContent = formatMoney(
                             data.item.discount.line_total_after_discount
@@ -327,18 +397,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     lineTotalEl.textContent = formatMoney(data.item.line_total);
                 }
 
-                // Update discount badge
                 if (cartRow && data.item?.discount) {
                     const discountBadge = cartRow.querySelector('.inline-flex.items-center.text-xs.font-semibold.text-green-700');
                     if (data.item.discount.has_discount && data.item.discount.discount_amount > 0) {
                         if (discountBadge) {
-                            // Update existing badge with new discount amount
                             const discountText = discountBadge.querySelector('svg').nextSibling;
                             if (discountText) {
                                 discountText.textContent = ` Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
                             }
                         } else {
-                            // Badge doesn't exist but should - create it
                             const priceContainer = cartRow.querySelector('.text-right');
                             if (priceContainer) {
                                 const newBadge = document.createElement('div');
@@ -348,12 +415,10 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                         }
                     } else if (discountBadge) {
-                        // Remove badge if there's no discount
                         discountBadge.remove();
                     }
                 }
 
-                // Sync summary item quantity display with cart quantity
                 const summaryQtyDisplay = document.querySelector(
                     `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
                 );
@@ -364,7 +429,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     summaryQtyDisplay.textContent = cartInput.value;
                 }
 
-                // Update summary item price
                 const summaryItemPrice = document.querySelector(
                     `.summary-item-row[data-summary-item-id="${id}"] .summary-item-price`
                 );
@@ -380,14 +444,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
 
-                // Update Global Summaries
                 updateSummary(data.summary);
+
+                // Dispatch event to update header cart counter
+                if (data.summary && typeof data.summary.itemCount !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('cart:changed', {
+                        detail: {
+                            summary: data.summary
+                        }
+                    }));
+                }
             } else {
                 console.error("Update failed:", data.message);
                 alert(data.message || "Could not update item.");
             }
         } catch (e) {
             console.error("AJAX Error:", e);
+            if (e?.message) {
+                alert(e.message);
+            }
         }
     }
 
@@ -413,7 +488,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await resp.json();
 
             if (data.success) {
-                // Remove main cart row from DOM
                 const row = document.querySelector(
                     `.cart-item-row[data-item-id="${id}"]`
                 );
@@ -421,7 +495,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     row.remove();
                 }
 
-                // Remove summary row from DOM
                 const summaryRow = document.querySelector(
                     `.summary-item-row[data-summary-item-id="${id}"]`
                 );
@@ -429,7 +502,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     summaryRow.remove();
                 }
 
-                // Check if cart is now empty
                 if (document.querySelectorAll(".cart-item-row").length === 0) {
                     location.reload();
                     return;
@@ -437,14 +509,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 updateSummary(data.summary);
 
-                // Show toast if available
+                // Dispatch event to update header cart counter
+                if (data.summary && typeof data.summary.itemCount !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('cart:changed', {
+                        detail: {
+                            summary: data.summary
+                        }
+                    }));
+                }
+
                 if (window.Toast)
                     window.Toast.success({
                         title: "Removed",
                         message: "Item removed from cart",
                     });
             } else {
-                // Fallback if JSON says failed
                 submitFallback(id);
             }
         } catch (e) {
@@ -453,7 +532,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Fallback: Create a form and submit it normally (if AJAX fails completely)
     function submitFallback(id) {
         const form = document.createElement("form");
         form.method = "POST";
@@ -476,7 +554,6 @@ document.addEventListener("DOMContentLoaded", function () {
         form.submit();
     }
 
-    // Helper: Update Totals on Page
     function updateSummary(summary) {
         if (!summary) return;
 
@@ -519,20 +596,16 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // --- Update the Item Total count for both step 1 and 2 ---
         if (typeof summary.itemCount !== 'undefined') {
             const itemTotalCount = document.getElementById('item-total-count');
             if (itemTotalCount) {
-                // Try to preserve the "Quantity" label as in Blade
                 itemTotalCount.textContent = summary.itemCount + ' ' + (summary.itemCount === 1 ? 'Quantity' : 'Quantity');
             }
         }
 
-        // Update summary items in order summary section
         updateOrderSummaryItems(summary);
     }
 
-    // Helper: Update order summary items with quantity controls
     function updateOrderSummaryItems(summary) {
         if (!summary || !summary.items) {
             console.warn(
@@ -544,7 +617,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log("Updating order summary items:", summary.items);
 
-        // Update each summary item row
         Object.entries(summary.items).forEach(([itemId, itemData]) => {
             const summaryRow = document.querySelector(
                 `.summary-item-row[data-summary-item-id="${itemId}"]`
@@ -554,7 +626,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // Update quantity display
             const qtyDisplay = summaryRow.querySelector(".summary-quantity");
             if (qtyDisplay) {
                 qtyDisplay.textContent = itemData.quantity;
@@ -563,7 +634,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
             }
 
-            // Update price - use specific class selector for reliable targeting
             const priceElement = summaryRow.querySelector(
                 ".summary-item-price"
             );
@@ -590,16 +660,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
             }
 
-            // Update original (line-through) price if discount applies
             const lineThroughEl = summaryRow.querySelector(".text-xs.text-gray-400.line-through");
             if (lineThroughEl) {
-                // Only show if there is a discount and original price is different
                 if (itemData.unit_price && itemData.final_price && itemData.unit_price > itemData.final_price) {
                     const originalLineTotal = itemData.unit_price * itemData.quantity;
                     lineThroughEl.innerHTML = `${window.env?.CURRENCY_SYMBOL || '$'} ${Number(originalLineTotal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}<br />`;
                     lineThroughEl.style.display = '';
                 } else {
-                    // Hide if no discount
                     lineThroughEl.style.display = 'none';
                 }
             }

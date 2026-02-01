@@ -458,7 +458,8 @@
                                 </button>
                                 <input type="text" name="quantity" id="cart-quantity" value="1"
                                     class="w-14 text-center text-lg font-bold text-gray-900 border-x-2 border-gray-200 focus:outline-none bg-transparent"
-                                    readonly aria-label="Quantity">
+                                    readonly aria-label="Quantity"
+                                    @if ($totalStock > 0) max="{{ $totalStock }}" @endif>
                                 <button type="button" id="qty-increase"
                                     class="w-12 h-12 text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors rounded-r-xl"
                                     aria-label="Increase quantity">

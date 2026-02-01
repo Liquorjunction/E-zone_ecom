@@ -333,6 +333,23 @@ class OrderController extends Controller
         $reason = $request->input('reason');
         $ok = $orderRepo->cancelOrder($order->id, $reason);
 
+        // Handle AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            if ($ok) {
+                return response()->json([
+                    'success' => true,
+                    'status' => 'success',
+                    'message' => 'Order cancelled successfully.'
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'status' => 'error',
+                'message' => 'Unable to cancel the order.'
+            ], 422);
+        }
+
+        // Handle regular form submissions
         if ($ok) {
             return back()->with('success', 'Order cancelled successfully.');
         }

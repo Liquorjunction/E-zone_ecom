@@ -83,8 +83,14 @@ document.addEventListener('click', async (ev) => {
             const json = await res.json().catch(()=>({}));
             let count = (typeof json.count !== 'undefined') ? json.count : (typeof json.itemCount !== 'undefined' ? json.itemCount : undefined);
             if (typeof count === 'undefined') {
-                // fallback: try to count .wishlist-btn with is-wishlisted
-                count = document.querySelectorAll('.wishlist-btn.is-wishlisted').length - 1;
+                // fallback: count unique productVariantId from wishlisted buttons
+                const ids = new Set();
+                document.querySelectorAll('.wishlist-btn.is-wishlisted').forEach((b) => {
+                    const vid = b.dataset.productVariantId;
+                    if (vid) ids.add(vid);
+                });
+                // removing one item
+                count = Math.max(0, ids.size - 1);
             }
             window._wishlistCount = count;
             if (res.ok) {
@@ -140,8 +146,14 @@ document.addEventListener('click', async (ev) => {
             const json = await res.json().catch(()=>({}));
             let count = (typeof json.count !== 'undefined') ? json.count : (typeof json.itemCount !== 'undefined' ? json.itemCount : undefined);
             if (typeof count === 'undefined') {
-                // fallback: try to count .wishlist-btn with is-wishlisted
-                count = document.querySelectorAll('.wishlist-btn.is-wishlisted').length + 1;
+                // fallback: count unique productVariantId from wishlisted buttons
+                const ids = new Set();
+                document.querySelectorAll('.wishlist-btn.is-wishlisted').forEach((b) => {
+                    const vid = b.dataset.productVariantId;
+                    if (vid) ids.add(vid);
+                });
+                // adding one item
+                count = ids.size + 1;
             }
             window._wishlistCount = count;
             if (res.ok) {

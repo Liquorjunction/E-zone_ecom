@@ -2,6 +2,33 @@
 // It submits an AJAX request to add the product/variant to the cart
 import axios from 'axios';
 
+function markButtonsInCart(variantId, productId) {
+    const selectors = [];
+    if (variantId) selectors.push('button.add-to-cart-btn[data-product-variant-id="' + variantId + '"]');
+    if (productId) selectors.push('button.add-to-cart-btn[data-product-id="' + productId + '"]');
+    if (!selectors.length) return;
+
+    const seen = new Set();
+    document.querySelectorAll(selectors.join(',')).forEach((btn) => {
+        if (!btn || seen.has(btn)) return;
+        seen.add(btn);
+        btn.disabled = true;
+        btn.setAttribute('aria-disabled', 'true');
+        btn.classList.add('opacity-60', 'cursor-not-allowed');
+        btn.classList.remove('hover:bg-primary/90', 'hover:shadow-xl', 'hover:shadow-primary/40', 'hover:scale-105');
+
+        const textSpan = btn.querySelector('span');
+        if (textSpan) {
+            textSpan.textContent = 'In Cart';
+        } else {
+            // Icon-only button: swap to check icon
+            btn.innerHTML = '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>';
+        }
+    });
+}
+
+window.__markInCartButtons = markButtonsInCart;
+
 window.addToCart = function(variantId, productId) {
     if (!productId && !variantId) return;
 
@@ -60,6 +87,7 @@ window.addToCart = function(variantId, productId) {
         const data = resp && resp.data;
         const msg = (data && (data.message || (data.success ? data.success : null))) || 'Item added to cart';
         try { window.Toast && window.Toast.success({ title: 'Added', message: msg }); } catch (e) { alert(msg); }
+        try { markButtonsInCart(variantId, productId); } catch (e) {}
         try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: data })); } catch (e) {}
     }).catch(function (error) {
         const resp = error && error.response;

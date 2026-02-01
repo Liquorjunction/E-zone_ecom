@@ -88,13 +88,37 @@ class CartController extends Controller
         $itemId = (int) $request->input('item_id');
         $data = $request->only(['quantity']);
 
+        $getAvailableStock = function ($cartItem) {
+            if (!$cartItem) {
+                return 0;
+            }
+            $variant = $cartItem->variant ?? null;
+            $product = $cartItem->product ?? null;
+            if ($variant) {
+                return (int) ($variant->getTotalStockAttribute() ?? 0);
+            }
+            if ($product) {
+                return (int) ($product->productVariants()->sum('inventory.quantity') ?? 0);
+            }
+            return 0;
+        };
+
         try {
             $item = $cartService->updateItem($request, $itemId, $data);
         } catch (\Exception $e) {
             if ($request->wantsJson() || $request->ajax()) {
+                $cart = $cartService->getCart($request);
+                $currentItem = $cart ? $cart->items->firstWhere('id', $itemId) : null;
+                $maxStock = $getAvailableStock($currentItem);
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage(),
+                    'item' => [
+                        'id' => $currentItem->id ?? $itemId,
+                        'quantity' => $currentItem->quantity ?? null,
+                        'max_stock' => $maxStock,
+                    ],
+                    'max_stock' => $maxStock,
                 ], 400);
             }
             return redirect()->back()->with('error', $e->getMessage());
@@ -130,6 +154,7 @@ class CartController extends Controller
         }
 
         if ($request->wantsJson() || $request->ajax()) {
+            $maxStock = $getAvailableStock($item);
             $items = [];
             if ($cart) {
                 foreach ($cart->items as $cartItem) {
@@ -139,6 +164,7 @@ class CartController extends Controller
                         'unit_price' => $cartItem->unit_price,
                         'final_price' => $cartItem->final_price ?? $cartItem->unit_price,
                         'discount_amount' => $cartItem->discount_amount ?? 0,
+                        'max_stock' => $getAvailableStock($cartItem),
                     ];
                 }
             }
@@ -152,6 +178,7 @@ class CartController extends Controller
                     'unit_price' => $item->unit_price ?? null,
                     'line_total' => isset($item->quantity, $item->unit_price) ? ($item->quantity * $item->unit_price) : null,
                     'discount' => $itemDiscount,
+                    'max_stock' => $maxStock,
                 ],
                 'summary' => [
                     'subtotal' => round($totals['subtotal'] ?? 0, 2),

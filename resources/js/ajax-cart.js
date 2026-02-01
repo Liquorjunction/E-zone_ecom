@@ -25,6 +25,12 @@ document.addEventListener('submit', function (ev) {
         const msg = (data && (data.message || (data.success ? data.success : null))) || 'Item added to cart';
         try { window.Toast && window.Toast.success({ title: 'Added', message: msg }); } catch (e) { alert(msg); }
 
+        try {
+            if (typeof window.__markInCartButtons === 'function') {
+                window.__markInCartButtons(vid, pid);
+            }
+        } catch (e) {}
+
         // Optionally fire a custom event so other scripts (cart icon) can update
         try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: data })); } catch (e) {}
     }).catch(function (error) {

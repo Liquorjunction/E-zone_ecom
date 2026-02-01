@@ -1,5 +1,6 @@
 <div id="universal-popup"
-    class="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 ease-out">
+    class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 ease-out"
+    style="z-index: 99999;">
 
     <div id="universal-popup-overlay" class="absolute inset-0"></div>
 

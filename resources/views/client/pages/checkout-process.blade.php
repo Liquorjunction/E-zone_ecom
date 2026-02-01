@@ -229,6 +229,18 @@
                                                             <span class="font-medium">In Stock</span>
                                                         </p>
                                                     </div>
+                                                    @php
+                                                        $availableStock = 0;
+                                                        if ($item->variant) {
+                                                            $availableStock = (int) ($item->variant->total_stock ?? $item->variant->inventory()->sum('quantity') ?? 0);
+                                                        } elseif ($item->product) {
+                                                            if (method_exists($item->product, 'getTotalStockAttribute')) {
+                                                                $availableStock = (int) $item->product->getTotalStockAttribute();
+                                                            } elseif (method_exists($item->product, 'inventory')) {
+                                                                $availableStock = (int) $item->product->inventory()->sum('quantity');
+                                                            }
+                                                        }
+                                                    @endphp
                                                     <div
                                                         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                                         <div class="flex items-center">
@@ -238,14 +250,17 @@
                                                                 class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
                                                                 <button type="button"
                                                                     class="qty-decrease px-5 py-3 bg-gray-50 hover:bg-primary hover:text-white text-gray-700 font-bold transition-all duration-300"
-                                                                    data-item-id="{{ $item->id }}">−</button>
+                                                                    data-item-id="{{ $item->id }}"
+                                                                    @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @endif>−</button>
                                                                 <input type="number" value="{{ $item->quantity }}"
                                                                     min="1"
                                                                     class="cart-quantity-input w-16 text-center border-0 focus:outline-none font-bold text-gray-900 bg-white"
-                                                                    data-item-id="{{ $item->id }}">
+                                                                    data-item-id="{{ $item->id }}"
+                                                                    @if ($availableStock > 0) max="{{ $availableStock }}" data-max-stock="{{ $availableStock }}" @endif>
                                                                 <button type="button"
                                                                     class="qty-increase px-5 py-3 bg-gray-50 hover:bg-primary hover:text-white text-gray-700 font-bold transition-all duration-300"
-                                                                    data-item-id="{{ $item->id }}">+</button>
+                                                                    data-item-id="{{ $item->id }}"
+                                                                    @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @endif>+</button>
                                                             </div>
                                                         </div>
                                                         <div class="text-right">
@@ -382,8 +397,21 @@
                                     @endphp
                                     @if ($summaryItems && $summaryItems->count() > 0)
                                         @foreach ($summaryItems as $item)
+                                            @php
+                                                $availableStock = 0;
+                                                if ($item->variant) {
+                                                    $availableStock = (int) ($item->variant->total_stock ?? $item->variant->inventory()->sum('quantity') ?? 0);
+                                                } elseif ($item->product) {
+                                                    if (method_exists($item->product, 'getTotalStockAttribute')) {
+                                                        $availableStock = (int) $item->product->getTotalStockAttribute();
+                                                    } elseif (method_exists($item->product, 'inventory')) {
+                                                        $availableStock = (int) $item->product->inventory()->sum('quantity');
+                                                    }
+                                                }
+                                            @endphp
                                             <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 summary-item-row items-center justify-between"
-                                                data-summary-item-id="{{ $item->id }}">
+                                                data-summary-item-id="{{ $item->id }}"
+                                                @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @endif>
                                                 <div class="flex gap-4 flex-1 min-w-0">
                                                     <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}"
                                                         alt="{{ optional($item->product)->name ?? 'Product' }}"
@@ -1079,8 +1107,21 @@
                                     @endphp
                                     @if ($summaryItems && $summaryItems->count() > 0)
                                         @foreach ($summaryItems as $item)
+                                            @php
+                                                $availableStock = 0;
+                                                if ($item->variant) {
+                                                    $availableStock = (int) ($item->variant->total_stock ?? $item->variant->inventory()->sum('quantity') ?? 0);
+                                                } elseif ($item->product) {
+                                                    if (method_exists($item->product, 'getTotalStockAttribute')) {
+                                                        $availableStock = (int) $item->product->getTotalStockAttribute();
+                                                    } elseif (method_exists($item->product, 'inventory')) {
+                                                        $availableStock = (int) $item->product->inventory()->sum('quantity');
+                                                    }
+                                                }
+                                            @endphp
                                             <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 summary-item-row items-center justify-between"
-                                                data-summary-item-id="{{ $item->id }}">
+                                                data-summary-item-id="{{ $item->id }}"
+                                                @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @endif>
                                                 <div class="flex gap-4 flex-1 min-w-0">
                                                     <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}"
                                                         alt="{{ optional($item->product)->name ?? 'Product' }}"

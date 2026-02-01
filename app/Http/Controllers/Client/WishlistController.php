@@ -43,7 +43,8 @@ class WishlistController extends Controller
 
         $wishlistRepo->addToWishlist($userId, $productVariantId);
 
-        return response()->json(['message' => 'Product added to wishlist'], 201);
+        $count = $wishlistRepo->countWishlist($userId);
+        return response()->json(['message' => 'Product added to wishlist', 'count' => $count], 201);
     }
 
     public function removeFromWishlist(RemoveWishlistRequest $request, WishlistRepo $wishlistRepo)
@@ -56,8 +57,9 @@ class WishlistController extends Controller
         }
 
         $wishlistRepo->removeFromWishlist($userId, $productVariantId);
+        $count = $wishlistRepo->countWishlist($userId);
 
-        return response()->json(['message' => 'Product removed from wishlist'], 200);
+        return response()->json(['message' => 'Product removed from wishlist', 'count' => $count], 200);
     }
 
     public function getWishlist(GetWishlistRequest $request, WishlistRepo $wishlistRepo)

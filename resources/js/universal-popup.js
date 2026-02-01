@@ -1,4 +1,12 @@
 (function () {
+    // Move popup to body on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+        const popup = document.getElementById('universal-popup');
+        if (popup && popup.parentNode !== document.body) {
+            document.body.appendChild(popup);
+        }
+    });
+
     function showUniversalPopup(message, type = "success", timeout = 3000) {
         let popup = document.getElementById("universal-popup");
         let card = document.getElementById("universal-popup-card");
@@ -20,7 +28,7 @@
             return;
         }
 
-        // Always move popup to body to fix stacking context issues
+        // Ensure popup is in body (fallback)
         if (popup.parentNode !== document.body) {
             document.body.appendChild(popup);
         }

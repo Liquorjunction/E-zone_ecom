@@ -7,6 +7,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function showStockLimitMessage(max) {
+        if (!max) return;
+        const message = max === 1
+            ? 'Only 1 item available in stock.'
+            : `Only ${max} items available in stock.`;
+
+        if (window.Toast && typeof window.Toast.info === 'function') {
+            window.Toast.info({
+                title: 'Stock limit',
+                message: message,
+            });
+            return;
+        }
+
+        let banner = document.getElementById('stockLimitBanner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'stockLimitBanner';
+            banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-amber-500 text-white px-4 py-3 rounded-xl shadow-xl';
+            document.body.appendChild(banner);
+        }
+        banner.textContent = message;
+        banner.style.opacity = '1';
+        banner.style.transform = 'translate(-50%, 0)';
+
+        clearTimeout(banner._hideTimer);
+        banner._hideTimer = setTimeout(() => {
+            banner.style.opacity = '0';
+            banner.style.transform = 'translate(-50%, -100%)';
+            setTimeout(() => banner.remove(), 300);
+        }, 2500);
+    }
+
     // Function to update price display with discount information
     function updatePriceDisplay(discountInfo) {
         if (!discountInfo) return;
@@ -143,6 +176,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const qtyIncrease = document.getElementById('qty-increase');
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const buyNowBtn = document.getElementById('buy-now-btn');
+    let currentMaxStock = null;
+
+    function setMaxStock(value) {
+        const parsed = parseInt(value || '', 10);
+        if (!Number.isNaN(parsed) && parsed > 0) {
+            currentMaxStock = parsed;
+            if (qtyInput) qtyInput.setAttribute('max', String(parsed));
+        } else {
+            currentMaxStock = null;
+            if (qtyInput) qtyInput.removeAttribute('max');
+        }
+    }
+
+    function getMaxStock() {
+        return currentMaxStock && currentMaxStock > 0 ? currentMaxStock : null;
+    }
+
+    if (qtyInput) {
+        const initialMax = parseInt(qtyInput.getAttribute('max') || '', 10);
+        if (!Number.isNaN(initialMax) && initialMax > 0) {
+            setMaxStock(initialMax);
+        }
+    }
 
     if (qtyDecrease && qtyIncrease && qtyInput) {
         qtyDecrease.addEventListener('click', () => {
@@ -151,6 +207,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         qtyIncrease.addEventListener('click', () => {
             let v = parseInt(qtyInput.value || '1', 10);
+            const max = getMaxStock();
+            if (max && v >= max) {
+                qtyInput.value = String(max);
+                showStockLimitMessage(max);
+                return;
+            }
             qtyInput.value = v + 1;
         });
     }
@@ -227,9 +289,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (qtyInput) {
             if (qty > 0) {
             qtyInput.removeAttribute('hidden');
+            setMaxStock(qty);
             qtyInput.value = '1';
             } else {
             qtyInput.value = '0';
+            setMaxStock(null);
             qtyInput.setAttribute('hidden', 'hidden');
             }
         }
@@ -539,4 +603,76 @@ document.addEventListener('DOMContentLoaded', function() {
             setActiveVariant(variantButtons[0]);
         }
     }
+
+    // Handle Add-to-Cart form submission with AJAX
+    const addToCartForm = document.getElementById('addToCartForm');
+    if (addToCartForm) {
+        addToCartForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const isBuyNow = this.querySelector('button[name="buy_now"][type="submit"]')?.disabled === false;
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Dispatch cart:changed event to update header cart counter
+                    if (data.summary && typeof data.summary.itemCount !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('cart:changed', {
+                            detail: {
+                                summary: data.summary,
+                                itemCount: data.summary.itemCount
+                            }
+                        }));
+                    }
+
+                    // Show success message
+                    if (window.Toast && typeof window.Toast.success === 'function') {
+                        window.Toast.success({
+                            title: 'Success',
+                            message: data.message || 'Item added to cart.',
+                        });
+                    } else {
+                        alert(data.message || 'Item added to cart.');
+                    }
+
+                    // Redirect if buy_now
+                    if (isBuyNow) {
+                        setTimeout(() => {
+                            window.location.href = '{{ route("checkout", ["step" => 2]) }}';
+                        }, 500);
+                    }
+                } else {
+                    if (window.Toast && typeof window.Toast.error === 'function') {
+                        window.Toast.error({
+                            title: 'Error',
+                            message: data.message || 'Could not add item to cart.',
+                        });
+                    } else {
+                        alert(data.message || 'Could not add item to cart.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (window.Toast && typeof window.Toast.error === 'function') {
+                    window.Toast.error({
+                        title: 'Error',
+                        message: 'An error occurred. Please try again.',
+                    });
+                } else {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    }
 });
+
+```

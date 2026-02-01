@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (cancelModal) {
         cancelModal.classList.add("bg-black", "bg-opacity-50");
         cancelModal.style.backgroundColor = "rgba(0,0,0,0.5)";
+        cancelModal.style.zIndex = "50";
     }
     const cancelForm = document.getElementById("cancel-order-form");
     const cancelIdInput = document.getElementById("cancel-order-id");
@@ -60,27 +61,42 @@ document.addEventListener("DOMContentLoaded", function () {
             })
                 .then(res => res.json())
                 .then(data => {
-                    // Always hide the cancel modal before showing the universal popup
+                    // Hide the cancel modal first
                     cancelModal.classList.add("hidden");
                     cancelModal.classList.remove("flex");
+                    cancelModal.style.display = 'none';
                     cancelForm.reset();
-                    if (data && (data.success || data.status === 'success')) {
-                        window.showUniversalPopup(data.message || 'Order cancelled successfully', 'success');
-                        if (typeof ajaxLoad === 'function') {
-                            ajaxLoad(window.location.href);
+
+                    // Wait a moment for the modal to fully hide, then show universal popup
+                    setTimeout(() => {
+                        if (data && (data.success || data.status === 'success')) {
+                            if (typeof window.showUniversalPopup === 'function') {
+                                window.showUniversalPopup(data.message || 'Order cancelled successfully', 'success');
+                            }
+                            if (typeof ajaxLoad === 'function') {
+                                setTimeout(() => ajaxLoad(window.location.href), 1200);
+                            } else {
+                                setTimeout(() => window.location.reload(), 1200);
+                            }
                         } else {
-                            setTimeout(() => window.location.reload(), 1200);
+                            if (typeof window.showUniversalPopup === 'function') {
+                                window.showUniversalPopup((data && data.message) || 'Failed to cancel order', 'failure');
+                            }
                         }
-                    } else {
-                        window.showUniversalPopup((data && data.message) || 'Failed to cancel order', 'failure');
-                    }
+                    }, 100);
                 })
                 .catch(() => {
-                    // Also hide the modal before showing failure popup
+                    // Hide the modal before showing failure popup
                     cancelModal.classList.add("hidden");
                     cancelModal.classList.remove("flex");
+                    cancelModal.style.display = 'none';
                     cancelForm.reset();
-                    window.showUniversalPopup('Failed to cancel order', 'failure');
+
+                    setTimeout(() => {
+                        if (typeof window.showUniversalPopup === 'function') {
+                            window.showUniversalPopup('Failed to cancel order', 'failure');
+                        }
+                    }, 100);
                 })
                 .finally(() => {
                     if (submitBtn) {
