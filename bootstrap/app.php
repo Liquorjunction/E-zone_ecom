@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AdminAuthenticate;
+use App\Http\Middleware\ClientAuthenticate;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin.auth' => AdminAuthenticate::class,
+            'client.auth' => ClientAuthenticate::class,
         ]);
     })
     ->withMiddleware(function (Middleware $middleware) {

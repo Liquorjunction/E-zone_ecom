@@ -53,7 +53,7 @@ Route::group([], function () {
 
 Route::post('/inventory/transactions', [InventoryController::class, 'transactions'])->name('inventory.transactions');
 
-Route::middleware('auth')->group(function () {
+Route::middleware('client.auth')->group(function () {
     Route::post('/inventory/reserve', [InventoryController::class, 'reserve'])->name('inventory.reserve');
     Route::post('/inventory/release', [InventoryController::class, 'release'])->name('inventory.release');
     Route::post('/inventory/return', [InventoryController::class, 'processReturn'])->name('inventory.return');
@@ -74,7 +74,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('client.auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/email/verify', [VerificationController::class, 'notice'])->name('verification.notice');
@@ -111,8 +111,8 @@ Route::middleware('auth')->group(function () {
 Route::get('/cart', [CartController::class, 'show'])->name('cart');
 Route::get('/cart/add', function () {
     return redirect()->route('cart');
-})->middleware('auth');
-Route::middleware('auth')->group(function () {
+})->middleware('client.auth');
+Route::middleware('client.auth')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
@@ -120,7 +120,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon'])->name('cart.removeCoupon');
 });
 
-Route::prefix('client')->middleware('auth')->group(function () {
+Route::prefix('client')->middleware('client.auth')->group(function () {
     Route::post('/addresses', [AddressController::class, 'store']);
     Route::post('/addresses/show', [AddressController::class, 'show']);
     Route::post('/addresses/update', [AddressController::class, 'update']);
