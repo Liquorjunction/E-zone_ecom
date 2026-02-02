@@ -33,9 +33,9 @@ class UpdateProductRequest extends FormRequest
             'sub_category_id' => 'required|exists:sub-categories,id',
 
             // Images
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:2048',
-            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:2048',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:5120',
+            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:5120',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,bmp,ico,tiff,avif|max:5120',
             'gallery_images_existing' => 'nullable|array',
             'gallery_images_variant_id' => 'nullable|integer',
 
@@ -58,7 +58,7 @@ class UpdateProductRequest extends FormRequest
             'variants.*.attributes.en' => 'nullable|string',
             'variants.*.attributes.fr' => 'nullable|string',
             'variants.*.attributes.ar' => 'nullable|string',
-            'variants.*.images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'variants.*.images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'variants.*.status' => 'nullable|in:active,inactive',
             'variants.*.is_bestseller' => 'nullable|boolean',
         ];

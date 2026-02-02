@@ -168,7 +168,7 @@
                                             <input type="file" name="cover_image" class="form-control"
                                                 accept="image/*">
                                             <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
-                                            <span class="text-danger d-block">Max size: 2MB.</span>
+                                            <span class="text-danger d-block">Max size: 5MB.</span>
                                             @if ($product->cover_image)
                                                 <div class="mt-2">
                                                     <img src="{{ asset('storage/' . $product->cover_image) }}"

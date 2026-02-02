@@ -146,7 +146,7 @@
                                             <label class="form-label">Cover Image <span class="text-muted">(Recommended: 800x800px)</span> <span class="text-danger">*</span></label>
                                             <input type="file" name="cover_image" class="form-control" accept="image/*" required>
                                             <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
-                                            <span class="text-danger d-block">Max size: 2MB.</span>
+                                            <span class="text-danger d-block">Max size: 5MB.</span>
                                         </div>
 
                                         <div class="col-md-6 mb-3">

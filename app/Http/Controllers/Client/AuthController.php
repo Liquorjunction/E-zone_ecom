@@ -42,13 +42,15 @@ class AuthController extends Controller
     {
         $credentials = $request->only(['email', 'password']);
 
-        // Attempt to log the user in
-        // We also check 'is_active' to prevent banned users from logging in
-        if (Auth::attempt([
-            'email' => $request->email,
-            'password' => $request->password,
-            'is_active' => 1
-        ], $request->boolean('remember'))) {
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && !$user->is_active) {
+            return back()->withErrors([
+                'email' => 'Your account is inactive. Please contact support.',
+            ])->onlyInput('email');
+        }
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             if (config('session.driver') === 'database') {
                 DB::table('sessions')
