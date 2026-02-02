@@ -30,14 +30,14 @@ class ClientAuthenticate extends Middleware
                 $guard->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                
+
                 if ($request->expectsJson()) {
                     return response()->json([
                         'message' => 'Your account has been disabled. Please contact support.',
                         'redirect' => route('login')
                     ], 403);
                 }
-                
+
                 abort(redirect()->route('login')->withErrors([
                     'login' => 'Your account has been disabled. Please contact support.'
                 ]));
