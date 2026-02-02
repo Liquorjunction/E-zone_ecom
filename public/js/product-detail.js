@@ -674,5 +674,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-```
