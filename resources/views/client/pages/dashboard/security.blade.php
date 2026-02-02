@@ -8,7 +8,7 @@
     {{-- Password Strength --}}
     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
           <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
@@ -28,14 +28,17 @@
     {{-- Active Sessions --}}
     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
           <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
         <div>
           <p class="text-sm font-medium text-gray-600">Active Sessions</p>
-          <p class="text-lg font-bold text-gray-900">{{ count($sessions ?? []) }} Device{{ count($sessions ?? []) !== 1 ? 's' : '' }}</p>
+          <p class="text-lg font-bold text-gray-900">
+            <span id="active-sessions-count">{{ count($sessions ?? []) }}</span>
+            <span id="active-sessions-label">Device{{ count($sessions ?? []) !== 1 ? 's' : '' }}</span>
+          </p>
         </div>
       </div>
       <a href="#sessions" class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
@@ -220,9 +223,9 @@
             $isCurrent = session()->getId() === $s->id;
           @endphp
 
-          <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border-2 rounded-xl {{ $isCurrent ? 'bg-gradient-to-r from-green-50 to-transparent border-green-100' : 'border-gray-100 hover:border-gray-200' }}">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border-2 rounded-xl {{ $isCurrent ? 'bg-linear-to-r from-green-50 to-transparent border-green-100' : 'border-gray-100 hover:border-gray-200' }}">
             <div class="flex items-start gap-4 flex-1">
-              <div class="w-12 h-12 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center flex-shrink-0">
+              <div class="w-12 h-12 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center shrink-0">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
@@ -254,7 +257,7 @@
     {{-- Info Box --}}
     <div class="mt-6 p-4 bg-blue-50 border-2 border-blue-100 rounded-xl">
       <div class="flex gap-3">
-        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+        <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
         </svg>
         <div>
@@ -265,3 +268,41 @@
     </div>
   </div>
 @endsection
+
+@push('scripts')
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const countEl = document.getElementById('active-sessions-count');
+      const labelEl = document.getElementById('active-sessions-label');
+      if (!countEl || !labelEl) return;
+
+      const endpoint = "{{ route('dashboard.security.sessions-count') }}";
+
+      const updateCount = (count) => {
+        countEl.textContent = count;
+        labelEl.textContent = `Device${count === 1 ? '' : 's'}`;
+      };
+
+      const fetchCount = async () => {
+        try {
+          const response = await fetch(endpoint, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            cache: 'no-store'
+          });
+
+          if (!response.ok) return;
+
+          const data = await response.json();
+          if (typeof data.count === 'number') {
+            updateCount(data.count);
+          }
+        } catch (e) {
+          // Silent fail
+        }
+      };
+
+      fetchCount();
+      setInterval(fetchCount, 30000);
+    });
+  </script>
+@endpush

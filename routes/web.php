@@ -91,6 +91,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
         Route::get('/security', [SecurityController::class, 'index'])->name('security');
+        Route::get('/security/sessions-count', [SecurityController::class, 'sessionsCount'])->name('security.sessions-count');
         Route::post('/security/password', [SecurityController::class, 'updatePassword'])->name('security.update-password');
         Route::post('/security/logout-all', [SecurityController::class, 'logoutAllSessions'])->name('security.logout-all');
         Route::post('/security/revoke-session', [SecurityController::class, 'revokeSession'])->name('security.revoke-session');

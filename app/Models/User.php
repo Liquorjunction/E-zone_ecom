@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-// 2. Add "implements MustVerifyEmail"
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
@@ -23,7 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_active',
         'is_newsletter_subscribed',
         'last_login_at',
-        'email_verified_at', // Ensure this is fillable for Social Login logic
+        'email_verified_at',
     ];
 
     protected $hidden = [

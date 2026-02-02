@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Repositories\Client\Interfaces\AddressRepositoryInterface;
-use App\Models\Inventory;
 use App\Repositories\Admin\Interfaces\AboutUsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Admin\Interfaces\BrandRepositoryInterface;
@@ -17,6 +15,7 @@ use App\Repositories\Admin\Interfaces\FaqCategoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface;
+use App\Repositories\Admin\Interfaces\ManageCustomerRepositoryInterface;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
 use App\Repositories\Admin\Interfaces\ProductRepositoryInterface;
@@ -45,6 +44,7 @@ use App\Repositories\Admin\Repositories\FaqCategoryRepository;
 use App\Repositories\Admin\Repositories\FaqRepository;
 use App\Repositories\Admin\Repositories\InventoryRepository;
 use App\Repositories\Admin\Repositories\InventoryTransactionsRepository;
+use App\Repositories\Admin\Repositories\ManageCustomerRepository;
 use App\Repositories\Admin\Repositories\OrderRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
 use App\Repositories\Admin\Repositories\ProductRepository;
@@ -97,6 +97,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(QuickStatRepositoryInterface::class, QuickStatRepository::class);
         $this->app->bind(WhyShopWithUsRepositoryInterface::class, WhyShopWithUsRepository::class);
         $this->app->bind(StockReportRepositoryInterface::class, StockReportRepository::class);
+        $this->app->bind(ManageCustomerRepositoryInterface::class, ManageCustomerRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);

@@ -20,6 +20,17 @@ class SecurityRepository implements SecurityRepositoryInterface
 			->get();
 	}
 
+	public function countSessions(int $userId): int
+	{
+		if (config('session.driver') !== 'database') {
+			return 0;
+		}
+
+		return (int) DB::table('sessions')
+			->where('user_id', $userId)
+			->count();
+	}
+
 	public function updatePassword($user, string $newPassword): void
 	{
 		$user->password = $newPassword;

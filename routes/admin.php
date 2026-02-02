@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\InventoryTransactionsController;
+use App\Http\Controllers\Admin\ManageCustomerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
@@ -365,6 +366,17 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [WhyShopWithUsController::class, 'update'])->name('update')->middleware('can:why_choose_us.update,admin');
             Route::delete('/destroy', [WhyShopWithUsController::class, 'destroy'])->name('destroy')->middleware('can:why_choose_us.delete,admin');
             Route::patch('/toggle-status', [WhyShopWithUsController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:why_choose_us.update,admin');
+        });
+
+        // Manage Customers Routes
+        Route::prefix('customers')->name('customers.')->middleware('can:manageCustomers.read,admin')->group(function () {
+            Route::get('/', [ManageCustomerController::class, 'index'])->name('index'); // permission: manageCustomers.read
+            Route::get('/data', [ManageCustomerController::class, 'data'])->name('data');
+            Route::get('/show', [ManageCustomerController::class, 'show'])->name('show')->middleware('can:manageCustomers.read,admin');
+            Route::get('/edit', [ManageCustomerController::class, 'edit'])->name('edit')->middleware('can:manageCustomers.update,admin');
+            Route::put('/update', [ManageCustomerController::class, 'update'])->name('update')->middleware('can:manageCustomers.update,admin');
+            Route::delete('/destroy', [ManageCustomerController::class, 'destroy'])->name('destroy')->middleware('can:manageCustomers.delete,admin');
+            Route::patch('/toggle-status', [ManageCustomerController::class, 'updateCustomerStatus'])->name('toggleStatus')->middleware('can:manageCustomers.update,admin');
         });
 
         // Reports Routes

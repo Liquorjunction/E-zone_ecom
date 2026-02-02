@@ -18,6 +18,15 @@ class SecurityController extends Controller
         return view('client.pages.dashboard.security', compact('sessions'));
     }
 
+    public function sessionsCount(Request $request, SecurityRepo $securityRepo)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'count' => $securityRepo->countSessions($user->id),
+        ]);
+    }
+
     public function updatePassword(UpdatePasswordRequest $request, SecurityRepo $securityRepo)
     {
         $user = $request->user();

@@ -604,6 +604,57 @@
                 </li>
                 @endcanany
 
+                @php
+                    $isManageCustomerSectionActive =
+                        request()->routeIs('admin.customers.*') ||
+                        request()->routeIs('admin.newsletter-subscribers.*');
+                @endphp
+
+                @canany(['manageCustomers.read', 'newsletter_subscriber.read'])
+                <li class="nav-item">
+                    <a class="nav-link {{ $isManageCustomerSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
+                        href="#sidebar-manage-customers" role="button"
+                        aria-expanded="{{ $isManageCustomerSectionActive ? 'true' : 'false' }}"
+                        aria-controls="sidebar-manage-customers" tabindex="0">
+                        <i class="icon" style="display: inline-flex;">
+                            <i class="bi bi-people" style="font-size:20px;"></i>
+                        </i>
+                        <span class="item-name">Manage Customers</span>
+                        <i class="right-icon">
+                            <i class="bi bi-chevron-right" style="font-size:16px;"></i>
+                        </i>
+                    </a>
+                    <ul class="sub-nav collapse {{ $isManageCustomerSectionActive ? 'show' : '' }}"
+                        id="sidebar-manage-customers" data-bs-parent="#sidebar-menu">
+                        @can('manageCustomers.read')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.customers.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <i class="bi bi-people" style="font-size:20px;"></i>
+                                    </i>
+                                    <span class="item-name">Customers</span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('newsletter_subscriber.read')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.newsletter-subscribers.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.newsletter-subscribers.index') }}">
+                                    <i class="icon" style="display: inline-flex;">
+                                        <i class="bi bi-people" style="font-size:20px;"></i>
+                                    </i>
+                                    <span class="item-name">Newsletter Subscribers</span>
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </li>
+                <li>
+                    <hr class="hr-horizontal">
+                </li>
+                @endcanany
+
 
                 @php
                     $isOrderSectionActive =
