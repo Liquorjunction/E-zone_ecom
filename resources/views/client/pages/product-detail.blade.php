@@ -128,12 +128,12 @@
 
                         <!-- Rating & Stock -->
                         <div class="flex flex-wrap items-center gap-4">
-                            <div class="flex items-center gap-2">
+                            {{-- <div class="flex items-center gap-2">
                                 <div class="flex items-center text-yellow-400 text-lg">
                                     ★★★★★
                                 </div>
                                 <span class="text-gray-600 text-sm font-medium">(247 reviews)</span>
-                            </div>
+                            </div> --}}
                             @php
                                 $totalStock = 0;
                                 if ($product->productVariants && $product->productVariants->count() > 0) {
@@ -166,14 +166,14 @@
                                     Out of Stock
                                 </span>
                             @endif
-                            <span
+                            {{-- <span
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3" />
                                 </svg>
                                 Free returns 30d
-                            </span>
+                            </span> --}}
                         </div>
                     </div>
 
