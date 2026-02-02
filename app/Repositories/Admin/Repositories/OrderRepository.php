@@ -30,7 +30,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getDataForDataTable()
     {
-        return Order::select(['id', 'order_number', 'user_id', 'total', 'status', 'payment_method', 'created_at']);
+        return Order::select(['id', 'order_number', 'user_id', 'total', 'status', 'payment_method', 'cancel_reason', 'created_at'])->orderBy('created_at', 'desc');
     }
 
     public function getCustomerNameByOrderId($orderId)

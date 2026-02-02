@@ -123,19 +123,25 @@
                         <div class="hidden md:block">
                             <div class="relative py-6">
                                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                    <div class="w-full border-t border-gray-200"></div>
+                                    <div class="w-full border-t-2 border-gray-200"></div>
                                 </div>
 
                                 <div class="relative flex justify-between items-start">
-                                    @foreach ($stages as $idx => $stage)
+                                    @php
+                                        $displayStages = $stages;
+                                        if (strtolower($order->status ?? '') === 'cancelled') {
+                                            $displayStages[] = 'cancelled';
+                                        }
+                                    @endphp
+                                    
+                                    @foreach ($displayStages as $idx => $stage)
                                         @php
-                                            $isActive = $idx <= $currentIndex;
+                                            $isActive = $idx <= $currentIndex || strtolower($order->status ?? '') === 'cancelled';
+                                            $isCancelled = $stage === 'cancelled';
                                             $label = ucfirst($stage);
-                                            // try stage specific timestamps if present on model
                                             $tsField = $stage . '_at';
                                             $ts = $order->{$tsField} ?? null;
                                             if (!$ts) {
-                                                // fallback: show created_at for placed, updated_at for others when active
                                                 $ts =
                                                     $stage === 'placed'
                                                         ? $order->created_at
@@ -147,8 +153,12 @@
 
                                         <div class="flex-1 min-w-0 text-center px-2">
                                             <div
-                                                class="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 {{ $isActive ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-500' }}">
-                                                @if ($isActive)
+                                                class="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 {{ $isCancelled ? 'bg-red-100 text-red-600' : ($isActive ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-500') }}">
+                                                @if ($isCancelled)
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                @elseif ($isActive)
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -158,12 +168,17 @@
                                                     <span class="text-sm font-semibold">{{ $idx + 1 }}</span>
                                                 @endif
                                             </div>
-                                            <div class="text-xs font-semibold text-gray-900">{{ $label }}</div>
+                                            <div class="text-xs font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">{{ $label }}</div>
                                             <div class="text-xs text-gray-500 mt-1">
                                                 @if ($ts)
                                                     {{ optional($ts)->format('M j, g:i A') }}
                                                 @endif
                                             </div>
+                                            @if ($isCancelled && $order->cancellation_reason)
+                                                <div class="text-xs text-red-600 font-medium mt-2 px-1">
+                                                    {{ Str::limit($order->cancellation_reason, 50) }}
+                                                </div>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
@@ -172,9 +187,17 @@
 
                         {{-- Mobile Timeline: stacked steps --}}
                         <div class="md:hidden space-y-4">
-                            @foreach ($stages as $idx => $stage)
+                            @php
+                                $displayStages = $stages;
+                                if (strtolower($order->status ?? '') === 'cancelled') {
+                                    $displayStages[] = 'cancelled';
+                                }
+                            @endphp
+                            @foreach ($displayStages as $idx => $stage)
                                 @php
-                                    $isActive = $idx <= $currentIndex;
+                                    $isActive = $idx <= $currentIndex || strtolower($order->status ?? '') === 'cancelled';
+                                    $isCancelled = $stage === 'cancelled';
+                                    $label = ucfirst($stage);
                                     $tsField = $stage . '_at';
                                     $ts = $order->{$tsField} ?? null;
                                     if (!$ts) {
@@ -189,8 +212,12 @@
                                 <div class="flex gap-4">
                                     <div class="flex flex-col items-center w-12 shrink-0">
                                         <div
-                                            class="w-10 h-10 rounded-full flex items-center justify-center {{ $isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500' }}">
-                                            @if ($isActive)
+                                            class="w-10 h-10 rounded-full flex items-center justify-center {{ $isCancelled ? 'bg-red-100 text-red-600' : ($isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500') }}">
+                                            @if ($isCancelled)
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            @elseif ($isActive)
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -201,23 +228,21 @@
                                             @endif
                                         </div>
                                         @if (!$loop->last)
-                                            <div class="w-px h-full bg-gray-200 mt-2"></div>
+                                            <div class="w-px h-8 bg-gray-200 mt-2"></div>
                                         @endif
                                     </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center justify-between">
-                                            <div class="text-sm font-semibold text-gray-900">{{ ucfirst($stage) }}</div>
-                                            <div class="text-xs text-gray-500">
-                                                @if ($ts)
-                                                    {{ optional($ts)->format('M j, g:i A') }}
-                                                @endif
-                                            </div>
-                                        </div>
+                                    <div class="flex-1 pb-2">
+                                        <div class="text-sm font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">{{ $label }}</div>
                                         <div class="text-xs text-gray-500 mt-1">
-                                            @if ($isActive)
-                                                Status: {{ ucfirst($order->status ?? '') }}
+                                            @if ($ts)
+                                                {{ optional($ts)->format('M j, g:i A') }}
                                             @endif
                                         </div>
+                                        @if ($isCancelled && $order->cancellation_reason)
+                                            <div class="text-xs text-red-600 font-medium mt-2">
+                                                {{ Str::limit($order->cancellation_reason, 50) }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

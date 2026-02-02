@@ -16,7 +16,6 @@
                     </div>
                     <div class="card-body">
                         @php
-                            // Always use $order->items (relation) for order items
                             $items = $order->items ?? collect();
                             $shipping = [];
                             if (is_array($order->shipping_address)) {
@@ -74,6 +73,17 @@
                                 </table>
                             </div>
                         </div>
+
+                        @if (isset($order->status) && $order->status === 'cancelled' && !empty($order->cancel_reason))
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6>Cancel Reason</h6>
+                                    <div class="border rounded p-3">
+                                        <div>{{ $order->cancel_reason ?? 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="row mb-4">
                             <div class="col-6">

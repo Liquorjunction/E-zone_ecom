@@ -86,6 +86,9 @@ class OrderController extends Controller
                 ->addColumn('status', function ($order) {
                     return $order->status ?? 'N/A';
                 })
+                ->addColumn('cancel_reason', function ($order) {
+                    return $order->cancel_reason ?? 'N/A';
+                })
                 ->addColumn('payment_method', function ($order) {
                     return $order->payment_method ?? 'N/A';
                 })

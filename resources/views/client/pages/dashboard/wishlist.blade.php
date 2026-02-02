@@ -10,9 +10,6 @@
         <h2 class="text-xl lg:text-2xl font-bold text-gray-900">Your Wishlist</h2>
         <p class="text-sm text-gray-600 mt-1"><span id="wishlist-count">{{ $wishlist->count() }}</span> {{ Str::plural('item', $wishlist->count()) }} saved</p>
       </div>
-      <button class="mt-3 sm:mt-0 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5 rounded-lg transition-colors">
-        Share Wishlist
-      </button>
     </div>
 
     {{-- Wishlist Grid --}}
@@ -131,16 +128,6 @@
         {{ $wishlist->links() }}
       </div>
     @endif
-
-    {{-- Quick Actions --}}
-    <div class="mt-6 flex flex-col sm:flex-row gap-3 p-4 lg:p-6 bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100">
-      <button class="flex-1 px-4 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors text-sm lg:text-base">
-        Add All to Cart
-      </button>
-      <button class="flex-1 px-4 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm lg:text-base">
-        Clear Wishlist
-      </button>
-    </div>
 
     {{-- Hidden empty-template for client-side replacement when last item removed --}}
     <template id="wishlist-empty-template">
