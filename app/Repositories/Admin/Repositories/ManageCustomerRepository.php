@@ -32,9 +32,42 @@ class ManageCustomerRepository implements ManageCustomerRepositoryInterface
         $customer->delete();
     }
 
+    public function batchDelete(array $ids)
+    {
+        $customers = User::whereIn('id', $ids)->get();
+        foreach ($customers as $customer) {
+            $customer->delete();
+        }
+        return true;
+    }
+
     public function getDataForDataTable($request)
     {
-        return User::all();
+        $customers = User::query();
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $customers->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+        }
+
+        if ($request->has('is_active')) {
+            $customers->where('is_active', $request->input('is_active'));
+        }
+
+        if ($request->has('date_range')) {
+            $dates = explode(',', $request->input('date_range'));
+            if (count($dates) == 2) {
+                $customers->whereBetween('created_at', [$dates[0], $dates[1]]);
+            }
+        }
+
+        if ($request->has('sort_by') && $request->has('sort_order')) {
+            $customers->orderBy($request->input('sort_by'), $request->input('sort_order'));
+        }
+
+        $perPage = $request->input('per_page', 10);
+        return $customers->paginate($perPage);
     }
 
     public function updateCustomerStatus($id)
@@ -43,5 +76,11 @@ class ManageCustomerRepository implements ManageCustomerRepositoryInterface
         $customer->is_active = !$customer->is_active;
         $customer->save();
         return $customer;
+    }
+
+    public function batchUpdateStatus(array $ids, $status)
+    {
+        User::whereIn('id', $ids)->update(['is_active' => $status]);
+        return true;
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ManageCustomer\BatchDestroyCustomerRequest;
+use App\Http\Requests\Admin\ManageCustomer\BatchUpdateStatusCustomerRequest;
 use App\Http\Requests\Admin\ManageCustomer\DestroyCustomerRequest;
 use App\Http\Requests\Admin\ManageCustomer\EditCustomerRequest;
 use App\Http\Requests\Admin\ManageCustomer\ReadCustomerRequest;
@@ -69,6 +71,18 @@ class ManageCustomerController extends Controller
         }
     }
 
+    public function batchDestroy(BatchDestroyCustomerRequest $request, ManageCustomerRepo $customerRepo)
+    {
+        try {
+            $ids = $request->input('ids', []);
+            $customerRepo->batchDelete($ids);
+
+            return redirect()->back()->with(['success', 'message' => 'Selected customers deleted successfully.']);
+        } catch (\Exception $e) {
+            return redirect()->back()->with(['success', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function data(ReadCustomerRequest $request, ManageCustomerRepo $customerRepo)
     {
         try {
@@ -90,23 +104,22 @@ class ManageCustomerController extends Controller
                     return $customer->updated_at;
                 })
                 ->addColumn('action', function ($customer) use ($request) {
-                    $data['edit_url'] = $request->user()->can('manageCustomers.update')? route('admin.customers.edit', ['id' => $customer->id]): '';
-                    $data['view_url'] = $request->user()->can('manageCustomers.read')? route('admin.customers.show', ['id' => $customer->id]): '';
+                    $data['edit_url'] = $request->user()->can('manageCustomers.update') ? route('admin.customers.edit', ['id' => $customer->id]) : '';
+                    $data['view_url'] = $request->user()->can('manageCustomers.read') ? route('admin.customers.show', ['id' => $customer->id]) : '';
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
                 ->addColumn('status', function ($customer) use ($request) {
                     if ($request->user()->can('manageCustomers.update')) {
                         $data['id'] = $customer->id;
-                        $data['toggle_url'] = $request->user()->can('manageCustomers.update')? route('admin.customers.toggleStatus', ['id' => $customer->id]): '';
+                        $data['toggle_url'] = $request->user()->can('manageCustomers.update') ? route('admin.customers.toggleStatus', ['id' => $customer->id]) : '';
                         $data['status'] = $customer->is_active;
                         return view('admin.partials.sliderdatatable-status', $data)->render();
                     } else {
-                         return view('components.datatable-status-badge', ['status' => $customer->is_active])->render();
+                        return view('components.datatable-status-badge', ['status' => $customer->is_active])->render();
                     }
                 })
                 ->rawColumns(['status', 'action'])
                 ->make(true);
-
         } catch (\Exception $e) {
             Log::error('DataTable Error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to load data.'], 500);
@@ -125,6 +138,26 @@ class ManageCustomerController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Status Update Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function batchUpdateCustomerStatus(BatchUpdateStatusCustomerRequest $request, ManageCustomerRepo $customerRepo)
+    {
+        try {
+            $ids = $request->input('ids', []);
+            $status = $request->input('status');
+            $customerRepo->batchUpdateStatus($ids, $status);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Selected customers status updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Batch Status Update Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

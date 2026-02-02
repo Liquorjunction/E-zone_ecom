@@ -78,7 +78,7 @@
           {{-- Product Info --}}
           <div class="p-3 lg:p-4">
             <a href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}">
-              <h3 class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-2 mb-2 min-h-[2.5rem] lg:min-h-[2.8rem] group-hover:text-primary transition-colors">
+              <h3 class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-2 mb-2 min-h-10 lg:min-h-[2.8rem] group-hover:text-primary transition-colors">
                 {{ $name }}
               </h3>
             </a>
@@ -134,7 +134,7 @@
       <div class="flex items-center justify-center py-16 lg:py-24 bg-white rounded-xl lg:rounded-2xl border-2 border-gray-100">
         <div class="text-center max-w-md px-6">
           <div class="relative w-32 h-32 lg:w-40 lg:h-40 mx-auto mb-6 lg:mb-8">
-            <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-pink-50 animate-pulse"></div>
+            <div class="absolute inset-0 rounded-full bg-linear-to-br from-red-50 to-pink-50 animate-pulse"></div>
             <div class="absolute inset-0 flex items-center justify-center">
               <svg class="w-16 h-16 lg:w-20 lg:h-20 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -176,7 +176,7 @@
       <div class="text-center max-w-md px-6">
         {{-- Animated Heart Icon --}}
         <div class="relative w-32 h-32 lg:w-40 lg:h-40 mx-auto mb-6 lg:mb-8">
-          <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-pink-50 animate-pulse"></div>
+          <div class="absolute inset-0 rounded-full bg-linear-to-br from-red-50 to-pink-50 animate-pulse"></div>
           <div class="absolute inset-0 flex items-center justify-center">
             <svg class="w-16 h-16 lg:w-20 lg:h-20 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
