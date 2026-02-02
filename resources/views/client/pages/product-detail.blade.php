@@ -134,15 +134,38 @@
                                 </div>
                                 <span class="text-gray-600 text-sm font-medium">(247 reviews)</span>
                             </div>
-                            <span
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-sm font-semibold">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                In Stock
-                            </span>
+                            @php
+                                $totalStock = 0;
+                                if ($product->productVariants && $product->productVariants->count() > 0) {
+                                    $totalStock = $product->productVariants->sum(function($v) {
+                                        return method_exists($v, 'getTotalStockAttribute') ? $v->getTotalStockAttribute() : ($v->inventory->sum('quantity') ?? 0);
+                                    });
+                                } else {
+                                    $totalStock = method_exists($product, 'getTotalStockAttribute') ? $product->getTotalStockAttribute() : ($product->inventory->sum('quantity') ?? 0);
+                                }
+                                $isInStock = $totalStock > 0;
+                            @endphp
+                            @if($isInStock)
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-sm font-semibold">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    In Stock
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-sm font-semibold">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Out of Stock
+                                </span>
+                            @endif
                             <span
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,7 +518,7 @@
                     @endif
 
                     <!-- Trust Badges -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-gray-200">
+                    {{-- <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-gray-200">
                         <div class="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
                             <svg class="w-8 h-8 text-primary mb-2" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -528,7 +551,7 @@
                             </svg>
                             <span class="text-xs font-semibold text-gray-900">24/7 Support</span>
                         </div>
-                    </div>
+                    </div> --}}
 
                 </div>
             </div>
@@ -557,7 +580,7 @@
                             </svg>
                             Specifications
                         </button>
-                        <button
+                        {{-- <button
                             class="tab-button px-6 py-4 text-gray-600 hover:text-gray-900 font-semibold transition-colors whitespace-nowrap"
                             data-tab="reviews">
                             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor"
@@ -577,7 +600,7 @@
                                     d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                             </svg>
                             Shipping & Returns
-                        </button>
+                        </button> --}}
                     </nav>
                 </div>
 

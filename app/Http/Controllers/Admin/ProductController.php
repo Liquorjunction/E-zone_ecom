@@ -59,7 +59,7 @@ class ProductController extends Controller
             DB::commit();
             Log::info('ProductController.store: Product created successfully', ['product_id' => $product->id]);
             return redirect()->route('admin.products.index')
-                ->with(['success' => true, 'message' => 'Product created successfully']);
+                ->with(['success', 'message' => 'Product created successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('ProductController.store: Failed to create product', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -100,7 +100,7 @@ class ProductController extends Controller
             DB::commit();
             Log::info('ProductController.update: Product updated successfully', ['product_id' => $product->id]);
             return redirect()->route('admin.products.index')
-                ->with(['success' => true, 'message' => 'Product updated successfully']);
+                ->with(['success', 'message' => 'Product updated successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('ProductController.update: Failed to update product', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
