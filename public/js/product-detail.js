@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     specData.forEach((item, idx) => {
                         if (item && typeof item === 'object') {
                             if (item.title || item.value) {
-                                const k = item.title || ('Spec ' + (idx + 1));
+                                const k = item.key;
                                 const v = item.value || item.description || '';
                                 rows += `<tr class="py-2"><td class="py-3 text-gray-500 font-medium w-1/3">${k}</td><td class="py-3 text-gray-900">${v}</td></tr>`;
                             } else {
