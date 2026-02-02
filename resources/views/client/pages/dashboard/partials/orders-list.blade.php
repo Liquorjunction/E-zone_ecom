@@ -392,30 +392,6 @@
                             Cancel
                         </button>
                     @endif
-                <!-- Cancel Order Modal (moved to body by JS) -->
-                <div id="cancel-order-modal" class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-40 hidden">
-                    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
-                        <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <form id="cancel-order-form" method="POST" action="{{ route('client.orders.cancel') }}">
-                            @csrf
-                            <input type="hidden" name="id" id="cancel-order-id" value="">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Order <span id="cancel-order-number" class="text-primary"></span></h3>
-                            <p class="text-gray-700 mb-4">Please provide a reason for cancellation. This action cannot be undone.</p>
-                            <div class="mb-4">
-                                <label for="cancel-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason <span class="text-red-500">*</span></label>
-                                <textarea name="reason" id="cancel-reason" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"></textarea>
-                            </div>
-                            <div class="flex items-center justify-end gap-2">
-                                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">Close</button>
-                                <button type="submit" class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">Confirm Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
                 </div>
             </div>
         @empty
@@ -457,6 +433,31 @@
             </nav>
         </div>
     @endif
+</div>
+
+<!-- Cancel Order Modal (moved to body by JS) -->
+<div id="cancel-order-modal" class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+        <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <form id="cancel-order-form" method="POST" action="{{ route('client.orders.cancel') }}">
+            @csrf
+            <input type="hidden" name="id" id="cancel-order-id" value="">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Order <span id="cancel-order-number" class="text-primary"></span></h3>
+            <p class="text-gray-700 mb-4">Please provide a reason for cancellation. This action cannot be undone.</p>
+            <div class="mb-4">
+                <label for="cancel-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason <span class="text-red-500">*</span></label>
+                <textarea name="reason" id="cancel-reason" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"></textarea>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">Close</button>
+                <button type="submit" class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">Confirm Cancel</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @push('scripts')
