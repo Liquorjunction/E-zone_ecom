@@ -376,7 +376,9 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/edit', [ManageCustomerController::class, 'edit'])->name('edit')->middleware('can:manageCustomers.update,admin');
             Route::put('/update', [ManageCustomerController::class, 'update'])->name('update')->middleware('can:manageCustomers.update,admin');
             Route::delete('/destroy', [ManageCustomerController::class, 'destroy'])->name('destroy')->middleware('can:manageCustomers.delete,admin');
+            Route::delete('/batch-destroy', [ManageCustomerController::class, 'batchDestroy'])->name('batchDestroy')->middleware('can:manageCustomers.delete,admin');
             Route::patch('/toggle-status', [ManageCustomerController::class, 'updateCustomerStatus'])->name('toggleStatus')->middleware('can:manageCustomers.update,admin');
+            Route::post('/batch-update-status', [ManageCustomerController::class, 'batchUpdateCustomerStatus'])->name('batchUpdateStatus')->middleware('can:manageCustomers.update,admin');
         });
 
         // Reports Routes

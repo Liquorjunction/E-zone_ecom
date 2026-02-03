@@ -1,9 +1,30 @@
 $(document).ready(function () {
-    $('#customers-table').DataTable({
+    var $table = $('#customers-table');
+    var dataUrl = $table.data('route');
+
+    console.log('DataTable URL:', dataUrl);
+
+    var table = $table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: $('#customers-table').data('route'),
+        ajax: {
+            url: dataUrl,
+            type: 'GET',
+            data: function(d) {
+                // Add filter parameters
+                d.status = $('#status-filter').val();
+                d.date_from = $('#date-from-filter').val();
+                d.date_to = $('#date-to-filter').val();
+                console.log('Sending filters:', d);
+            },
+            error: function(xhr, error, thrown) {
+                console.error('DataTable AJAX Error:', xhr.responseText);
+                console.error('Error:', error);
+                console.error('Thrown:', thrown);
+            }
+        },
         columns: [
+            { data: 'batch_checkbox', name: 'batch_checkbox', orderable: false, searchable: false, className: 'text-center', defaultContent: '' },
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'name', name: 'name' },
             { data: 'email', name: 'email' },
@@ -11,6 +32,20 @@ $(document).ready(function () {
             { data: 'phone', name: 'phone' },
             { data: 'status', name: 'status' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
-        ]
+        ],
+        drawCallback: function() {
+            $('#select-all-customers').prop('checked', false);
+        }
+    });
+
+    // Store table reference globally for filter access
+    window.customersDataTable = table;
+
+    // Initialize batch operations
+    initBatchOperations({
+        tableId: 'customers-table',
+        selectAllCheckboxId: 'select-all-customers',
+        itemCheckboxClass: 'customer-checkbox',
+        itemName: 'customer'
     });
 });

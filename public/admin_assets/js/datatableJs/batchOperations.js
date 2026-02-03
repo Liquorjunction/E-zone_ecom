@@ -75,7 +75,7 @@ function initBatchOperations(config) {
             return;
         }
 
-        const baseUrl = $table.data('url');
+        const baseUrl = $table.data('url') || $table.data('route');
         const batchDestroyUrl = baseUrl.replace('/data', '/batch-destroy');
 
         $.ajax({
@@ -136,7 +136,7 @@ function initBatchOperations(config) {
 
     // Batch update status helper
     function batchUpdateStatus(selectedIds, isActive, action) {
-        const baseUrl = $table.data('url');
+        const baseUrl = $table.data('url') || $table.data('route');
         const batchStatusUrl = baseUrl.replace('/data', '/batch-update-status');
 
         $.ajax({
@@ -145,7 +145,7 @@ function initBatchOperations(config) {
             contentType: 'application/json',
             data: JSON.stringify({
                 ids: selectedIds,
-                is_active: isActive ? 1 : 0,
+                status: isActive ? 1 : 0,
                 _token: $('meta[name="csrf-token"]').attr('content')
             }),
             success: function(response) {

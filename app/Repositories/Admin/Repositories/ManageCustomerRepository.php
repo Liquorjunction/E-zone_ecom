@@ -45,29 +45,26 @@ class ManageCustomerRepository implements ManageCustomerRepositoryInterface
     {
         $customers = User::query();
 
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $customers->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+        // Status filter
+        if ($request->filled('status')) {
+            $customers->where('is_active', $request->input('status'));
         }
 
-        if ($request->has('is_active')) {
-            $customers->where('is_active', $request->input('is_active'));
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $customers->whereDate('created_at', '>=', $request->input('date_from'));
         }
 
-        if ($request->has('date_range')) {
-            $dates = explode(',', $request->input('date_range'));
-            if (count($dates) == 2) {
-                $customers->whereBetween('created_at', [$dates[0], $dates[1]]);
-            }
+        if ($request->filled('date_to')) {
+            $customers->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
+        // Sorting
         if ($request->has('sort_by') && $request->has('sort_order')) {
             $customers->orderBy($request->input('sort_by'), $request->input('sort_order'));
         }
 
-        $perPage = $request->input('per_page', 10);
-        return $customers->paginate($perPage);
+        return $customers;
     }
 
     public function updateCustomerStatus($id)

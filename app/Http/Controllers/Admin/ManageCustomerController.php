@@ -86,8 +86,13 @@ class ManageCustomerController extends Controller
     public function data(ReadCustomerRequest $request, ManageCustomerRepo $customerRepo)
     {
         try {
-            return DataTables::of($customerRepo->getDataForDataTable($request))
+            $query = $customerRepo->getDataForDataTable($request);
+
+            return DataTables::eloquent($query)
                 ->addIndexColumn()
+                ->addColumn('batch_checkbox', function ($customer) {
+                    return '<input type="checkbox" class="customer-checkbox" value="' . $customer->id . '">';
+                })
                 ->addColumn('name', function ($customer) {
                     return $customer->name;
                 })
@@ -95,13 +100,13 @@ class ManageCustomerController extends Controller
                     return $customer->email;
                 })
                 ->addColumn('last_login_at', function ($customer) {
-                    return $customer->last_login_at;
+                    return $customer->last_login_at ? $customer->last_login_at->format('M d, Y H:i') : 'Never';
+                })
+                ->addColumn('phone', function ($customer) {
+                    return $customer->phone;
                 })
                 ->addColumn('created_at', function ($customer) {
-                    return $customer->created_at;
-                })
-                ->addColumn('updated_at', function ($customer) {
-                    return $customer->updated_at;
+                    return $customer->created_at ? $customer->created_at->format('M d, Y H:i') : '';
                 })
                 ->addColumn('action', function ($customer) use ($request) {
                     $data['edit_url'] = $request->user()->can('manageCustomers.update') ? route('admin.customers.edit', ['id' => $customer->id]) : '';
@@ -118,7 +123,7 @@ class ManageCustomerController extends Controller
                         return view('components.datatable-status-badge', ['status' => $customer->is_active])->render();
                     }
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['batch_checkbox', 'name', 'email', 'last_login_at', 'phone', 'created_at', 'status', 'action'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error('DataTable Error: ' . $e->getMessage());

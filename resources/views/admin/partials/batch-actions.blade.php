@@ -7,8 +7,10 @@
         data-bs-toggle="tooltip" title="Deactivate Selected">
         <i class="bi bi-x-circle me-1"></i>
     </button>
-    <button type="button" id="batch-delete-btn" class="btn btn-sm btn-outline-danger"
-        data-bs-toggle="tooltip" title="Delete Selected">
-        <i class="bi bi-trash me-1"></i>
-    </button>
+    @isset($showBatchDelete)
+        <button type="button" id="batch-delete-btn" class="btn btn-sm btn-outline-danger"
+            data-bs-toggle="tooltip" title="Delete Selected">
+            <i class="bi bi-trash me-1"></i>
+        </button>
+    @endisset
 </div>
