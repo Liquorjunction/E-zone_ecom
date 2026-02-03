@@ -273,6 +273,12 @@ document.addEventListener('DOMContentLoaded', function() {
             skuEl.textContent = 'SKU: ' + sku;
         }
 
+        // Update the product price element directly
+        if (priceEl) {
+            const displayPrice = discountInfo?.final_price || price || 0;
+            priceEl.textContent = window.CURRENCY_SYMBOL + ' ' + formatPrice(displayPrice);
+        }
+
         const productTitleEl = document.getElementById('product-title');
         if (productTitleEl) {
             const baseName = productTitleEl.getAttribute('data-base-name') || productTitleEl.textContent;
@@ -606,12 +612,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle Add-to-Cart form submission with AJAX
     const addToCartForm = document.getElementById('addToCartForm');
+    let clickedButton = null;
+
     if (addToCartForm) {
+        // Track which button was clicked
+        const addToCartBtn = document.getElementById('add-to-cart-btn');
+        const buyNowBtn = document.getElementById('buy-now-btn');
+
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function() {
+                clickedButton = 'add_to_cart';
+            });
+        }
+
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', function() {
+                clickedButton = 'buy_now';
+            });
+        }
+
         addToCartForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            const isBuyNow = this.querySelector('button[name="buy_now"][type="submit"]')?.disabled === false;
+            // Check if buy_now button was clicked
+            const isBuyNow = clickedButton === 'buy_now';
 
             fetch(this.action, {
                 method: 'POST',
@@ -646,7 +671,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Redirect if buy_now
                     if (isBuyNow) {
                         setTimeout(() => {
-                            window.location.href = '{{ route("checkout", ["step" => 2]) }}';
+                            window.location.href = window.CHECKOUT_URL || '/checkout?step=2';
                         }, 500);
                     }
                 } else {

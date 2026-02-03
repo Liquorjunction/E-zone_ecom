@@ -3,6 +3,7 @@
 @section('content')
     <script>
         window.CURRENCY_SYMBOL = @json(config('app.CURRENCY_SYMBOL'));
+        window.CHECKOUT_URL = @json(route('checkout', ['step' => 2]));
     </script>
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
@@ -496,7 +497,7 @@
 
                             <!-- Action Buttons -->
                             <div class="flex-1 flex gap-3">
-                                <button id="add-to-cart-btn" type="submit"
+                                <button id="add-to-cart-btn" type="submit" name="add_to_cart" value="1"
                                     class="flex-1 bg-linear-to-r from-primary to-primary-dark text-white text-base font-bold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -580,7 +581,7 @@
                             </svg>
                             Specifications
                         </button>
-                        {{-- <button
+                        <button
                             class="tab-button px-6 py-4 text-gray-600 hover:text-gray-900 font-semibold transition-colors whitespace-nowrap"
                             data-tab="reviews">
                             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor"
@@ -590,7 +591,7 @@
                             </svg>
                             Reviews (247)
                         </button>
-                        <button
+                        {{-- <button
                             class="tab-button px-6 py-4 text-gray-600 hover:text-gray-900 font-semibold transition-colors whitespace-nowrap"
                             data-tab="shipping">
                             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor"

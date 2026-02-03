@@ -20,6 +20,7 @@ use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
 use App\Repositories\Admin\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Admin\Interfaces\QuickStatRepositoryInterface;
+use App\Repositories\Admin\Interfaces\ReviewRepositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShippingAndReturnRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface;
@@ -49,6 +50,7 @@ use App\Repositories\Admin\Repositories\OrderRepository;
 use App\Repositories\Admin\Repositories\PrivacyPolicyRespository;
 use App\Repositories\Admin\Repositories\ProductRepository;
 use App\Repositories\Admin\Repositories\QuickStatRepository;
+use App\Repositories\Admin\Repositories\ReviewRepository;
 use App\Repositories\Admin\Repositories\RoleRepository;
 use App\Repositories\Admin\Repositories\ShippingAndReturnRepository;
 use App\Repositories\Admin\Repositories\ShowroomRepository;
@@ -98,6 +100,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(WhyShopWithUsRepositoryInterface::class, WhyShopWithUsRepository::class);
         $this->app->bind(StockReportRepositoryInterface::class, StockReportRepository::class);
         $this->app->bind(ManageCustomerRepositoryInterface::class, ManageCustomerRepository::class);
+        $this->app->bind(ReviewRepositoryInterface::class, ReviewRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);
@@ -117,6 +120,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\Client\Interfaces\QuickStatRepositoryInterface::class, \App\Repositories\Client\Repositories\QuickStatRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\ProfileRepositoryInterface::class, \App\Repositories\Client\Repositories\ProfileRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\CartRepositoryInterface::class, \App\Repositories\Client\Repositories\CartRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\ReviewRepositoryInterface::class, \App\Repositories\Client\Repositories\ReviewRepository::class);
     }
 
     /**

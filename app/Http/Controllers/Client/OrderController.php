@@ -300,7 +300,20 @@ class OrderController extends Controller
             abort(403);
         }
 
-        return view('client.pages.order-detail', ['order' => $order]);
+        // Fetch user reviews for order items
+        $userReviews = [];
+        if(Auth::check()) {
+            foreach($order->items as $item) {
+                $review = \App\Models\Review::where('order_item_id', $item->id)
+                    ->where('user_id', Auth::id())
+                    ->first();
+                if($review) {
+                    $userReviews[$item->id] = $review;
+                }
+            }
+        }
+
+        return view('client.pages.order-detail', ['order' => $order, 'userReviews' => $userReviews]);
     }
 
     public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo)

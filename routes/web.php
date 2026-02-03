@@ -106,7 +106,13 @@ Route::middleware('client.auth')->group(function () {
     Route::get('/order-detail', [OrderController::class, 'detail'])->name('order-detail');
 
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::put('/reviews', [ReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::get('/my-reviews', [ReviewController::class, 'myReviews'])->name('reviews.my');
 });
+
+Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+Route::get('/reviews/show', [ReviewController::class, 'show'])->name('reviews.show');
 
 Route::get('/cart', [CartController::class, 'show'])->name('cart');
 Route::get('/cart/add', function () {

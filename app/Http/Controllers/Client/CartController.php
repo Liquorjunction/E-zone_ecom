@@ -29,7 +29,7 @@ class CartController extends Controller
                     'message' => $e->getMessage(),
                 ], 400);
             }
-            return redirect()->route('cart')->with('error', $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
         $logger->info('Added item to cart via controller', ['item_id' => $item->id ?? null]);
 
@@ -50,7 +50,7 @@ class CartController extends Controller
             return redirect()->route('checkout', ['step' => 2])->with('success', 'Item added. Proceed to checkout.');
         }
 
-        return redirect()->route('cart')->with('success', 'Item added to cart.');
+        return redirect()->back()->with('success', 'Item added to cart.');
     }
 
     public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService)

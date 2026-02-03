@@ -347,9 +347,44 @@
                                                     </span>
                                                 @endif
                                             </div>
-                                            <button
-                                                class="text-xs lg:text-sm font-semibold text-primary hover:text-primary/80">Write
-                                                Review</button>
+                                            @if(in_array(strtolower($order->status ?? ''), ['delivered', 'completed']))
+                                                @if(isset($userReviews[$item->id]) && $userReviews[$item->id])
+                                                    @php $userReview = $userReviews[$item->id]; @endphp
+                                                    <button type="button"
+                                                        onclick="openReviewModal({
+                                                            id: {{ $userReview->id }},
+                                                            product_id: {{ $product->id ?? 0 }},
+                                                            product_variant_id: {{ $item->variant_id ?? 'null' }},
+                                                            order_id: {{ $order->id }},
+                                                            order_item_id: {{ $item->id }},
+                                                            rating: {{ $userReview->rating }},
+                                                            title: '{{ addslashes($userReview->title ?? '') }}',
+                                                            review_text: '{{ addslashes($userReview->review_text ?? '') }}',
+                                                            reviewer_name: '{{ addslashes($userReview->reviewer_name ?? '') }}',
+                                                            reviewer_email: '{{ addslashes($userReview->reviewer_email ?? '') }}',
+                                                            product_name: '{{ addslashes($productName) }}',
+                                                            variant_name: '{{ addslashes($variantName ?? '') }}',
+                                                            product_image: '{{ $imgUrl }}'
+                                                        })"
+                                                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-all duration-200">
+                                                        Edit Review
+                                                    </button>
+                                                @else
+                                                    <button type="button"
+                                                        onclick="openReviewModal({
+                                                            product_id: {{ $product->id ?? 0 }},
+                                                            product_variant_id: {{ $item->variant_id ?? 'null' }},
+                                                            order_id: {{ $order->id }},
+                                                            order_item_id: {{ $item->id }},
+                                                            product_name: '{{ addslashes($productName) }}',
+                                                            variant_name: '{{ addslashes($variantName ?? '') }}',
+                                                            product_image: '{{ $imgUrl }}'
+                                                        })"
+                                                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:text-gray-700 bg-white hover:bg-white border hover:border-gray-300 border-primary rounded-lg transition-all duration-200">
+                                                        Write Review
+                                                    </button>
+                                                @endif
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

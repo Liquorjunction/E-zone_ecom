@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\QuickStatController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingAndReturnController;
 use App\Http\Controllers\Admin\ShowroomController;
@@ -304,6 +305,16 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [OrderController::class, 'show'])->name('show')->middleware('can:order.read,admin');
             Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
+        });
+
+        // Review Routes
+        Route::prefix('reviews')->name('reviews.')->group(function () {
+            Route::get('/', [ReviewController::class, 'index'])->name('index');
+            Route::get('/pending', [ReviewController::class, 'pending'])->name('pending');
+            Route::get('/show', [ReviewController::class, 'show'])->name('show');
+            Route::post('/approve', [ReviewController::class, 'approve'])->name('approve');
+            Route::post('/reject', [ReviewController::class, 'reject'])->name('reject');
+            Route::delete('/destroy', [ReviewController::class, 'destroy'])->name('destroy');
         });
 
         // Discount Routes

@@ -40,6 +40,7 @@ class ReviewRepository implements ReviewRepositoryInterface
 
             $review = Review::create([
                 'product_id' => $data['product_id'],
+                'product_variant_id' => $data['product_variant_id'] ?? null,
                 'user_id' => $userId,
                 'order_id' => $orderItem->order_id,
                 'order_item_id' => $orderItem->id,
@@ -100,5 +101,73 @@ class ReviewRepository implements ReviewRepositoryInterface
         }
 
         return $orderItem;
+    }
+
+    public function getUserReviews(int $userId)
+    {
+        return Review::where('user_id', $userId)
+            ->with(['product', 'images', 'orderItem'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    public function getUserReviewById(int $id, int $userId)
+    {
+        return Review::where('id', $id)
+            ->where('user_id', $userId)
+            ->with(['product', 'images'])
+            ->first();
+    }
+
+    public function getUserReviewByOrderItem(int $userId, int $orderItemId)
+    {
+        return Review::where('user_id', $userId)
+            ->where('order_item_id', $orderItemId)
+            ->first();
+    }
+
+    public function updateReview(int $id, int $userId, array $data)
+    {
+        return DB::transaction(function () use ($id, $userId, $data) {
+            $review = Review::where('id', $id)
+                ->where('user_id', $userId)
+                ->firstOrFail();
+
+            $review->update([
+                'rating' => $data['rating'] ?? $review->rating,
+                'title' => $data['title'] ?? $review->title,
+                'review_text' => $data['review_text'] ?? $review->review_text,
+                'reviewer_name' => $data['reviewer_name'] ?? $review->reviewer_name,
+                'reviewer_email' => $data['reviewer_email'] ?? $review->reviewer_email,
+            ]);
+
+            // Handle image updates if provided
+            if (isset($data['images']) && is_array($data['images'])) {
+                // Delete old images
+                $review->images()->delete();
+
+                // Add new images
+                foreach ($data['images'] as $imagePath) {
+                    ReviewImage::create([
+                        'review_id' => $review->id,
+                        'image_path' => $imagePath,
+                    ]);
+                }
+            }
+
+            return $review->fresh(['images']);
+        });
+    }
+
+    public function deleteReview(int $id, int $userId)
+    {
+        return DB::transaction(function () use ($id, $userId) {
+            $review = Review::where('id', $id)
+                ->where('user_id', $userId)
+                ->firstOrFail();
+
+            $review->images()->delete();
+            return $review->delete();
+        });
     }
 }
