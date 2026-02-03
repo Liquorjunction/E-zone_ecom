@@ -14,17 +14,17 @@ class ReviewRepository implements ReviewRepositoryInterface
 {
     public function getAllApprovedReviews()
     {
-        return Review::where('is_approved', 1)->get();
+        return Review::where('is_approved', 'approved')->get();
     }
 
     public function getApprovedReviewById(int $id)
     {
-        return Review::where('id', $id)->where('is_approved', 1)->first();
+        return Review::where('id', $id)->where('is_approved', 'approved')->first();
     }
 
     public function getApprovedReviewsByProductId(int $productId)
     {
-        return Review::where('product_id', $productId)->where('is_approved', 1)->get();
+        return Review::where('product_id', $productId)->where('is_approved', 'approved')->get();
     }
 
     public function createReview(array $data)
@@ -50,7 +50,7 @@ class ReviewRepository implements ReviewRepositoryInterface
                 'reviewer_name' => $data['reviewer_name'] ?? null,
                 'reviewer_email' => $data['reviewer_email'] ?? null,
                 'is_verified_purchase' => true,
-                'is_approved' => $data['is_approved'] ?? false,
+                'is_approved' => $data['is_approved'] ?? 'pending',
             ]);
 
             if (isset($data['images']) && is_array($data['images'])) {

@@ -3,95 +3,117 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Reviews\ApproveReviewRequest;
+use App\Http\Requests\Admin\Reviews\DestroyReviewRequest;
+use App\Http\Requests\Admin\Reviews\ReadReviewRequest;
 use App\Repositories\Admin\Interfaces\ReviewRepositoryInterface as ReviewRepo;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class ReviewController extends Controller
 {
-    public function index(ReviewRepo $reviewRepo)
+    public function index()
     {
-        $reviews = $reviewRepo->getAllReviews();
-
-        return response()->json([
-            'reviews' => $reviews,
-        ], 200);
+        return view('admin.pages.reviews.index');
     }
 
-    public function pending(ReviewRepo $reviewRepo)
-    {
-        $reviews = $reviewRepo->getPendingReviews();
-
-        return response()->json([
-            'reviews' => $reviews,
-        ], 200);
-    }
-
-    public function show(Request $request, ReviewRepo $reviewRepo)
+    public function show(ReadReviewRequest $request, ReviewRepo $reviewRepo)
     {
         try {
-            $id = $request->input('id');
-            $review = $reviewRepo->getReviewById($id);
-
-            return response()->json([
-                'review' => $review,
-            ], 200);
+            $review = $reviewRepo->getReviewById($request->input('id'));
+            return view('admin.pages.reviews.show', compact('review'));
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Review not found.',
-            ], 404);
+            Log::error($e);
+            return redirect()->route('admin.reviews.index')->with('error', 'Review not found.');
         }
     }
 
-    public function approve(Request $request, ReviewRepo $reviewRepo)
+    public function readReview(ReadReviewRequest $request, ReviewRepo $reviewRepo)
+    {
+        return $reviewRepo->getAllReviews($request->input('id'));
+    }
+
+    public function approve(ApproveReviewRequest $request, ReviewRepo $reviewRepo)
     {
         try {
             $id = $request->input('id');
-            $review = $reviewRepo->approveReview($id);
-
-            return response()->json([
-                'message' => 'Review approved successfully.',
-                'review' => $review,
-            ], 200);
+            $reviewRepo->approveReview($id);
+            return response()->json(['message' => 'Review approved successfully.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Unable to approve review.',
-                'error' => $e->getMessage(),
-            ], 422);
+            return response()->json(['message' => 'Failed to approve review.'], 500);
         }
     }
 
-    public function reject(Request $request, ReviewRepo $reviewRepo)
+    public function reject(ApproveReviewRequest $request, ReviewRepo $reviewRepo)
     {
         try {
             $id = $request->input('id');
-            $review = $reviewRepo->rejectReview($id);
-
-            return response()->json([
-                'message' => 'Review rejected successfully.',
-                'review' => $review,
-            ], 200);
+            $reviewRepo->rejectReview($id);
+            return response()->json(['message' => 'Review rejected successfully.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Unable to reject review.',
-                'error' => $e->getMessage(),
-            ], 422);
+            return response()->json(['message' => 'Failed to reject review.'], 500);
         }
     }
 
-    public function destroy(Request $request, ReviewRepo $reviewRepo)
+    public function destroy(DestroyReviewRequest $request, ReviewRepo $reviewRepo)
     {
         try {
             $id = $request->input('id');
             $reviewRepo->deleteReview($id);
-
-            return response()->json([
-                'message' => 'Review deleted successfully.',
-            ], 200);
+            return response()->json(['message' => 'Review deleted successfully.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Unable to delete review.',
-                'error' => $e->getMessage(),
-            ], 422);
+            return response()->json(['message' => 'Failed to delete review.'], 500);
+        }
+    }
+
+    public function data(ReviewRepo $reviewRepo)
+    {
+        try {
+            $review = $reviewRepo->getDataForDataTable();
+
+            return DataTables::of($review)
+            ->addIndexColumn()
+            ->addColumn('product', function ($review) {
+                if (!$review->product) {
+                    return 'N/A';
+                }
+                $name = $review->product->getTranslation('name', 'en');
+                if ($review->productVariant) {
+                    $variant = $review->productVariant->getTranslation('variant_name', 'en');
+                    return $name . ($variant ? ' - ' . $variant : '');
+                }
+                return $name;
+            })
+            ->addColumn('user', function ($review) {
+                return $review->user ? $review->user->name : ($review->reviewer_name ?? 'N/A');
+            })
+            ->addColumn('order', function ($review) {
+                return $review->order ? $review->order->order_number : 'N/A';
+            })
+            ->addColumn('rating', function ($review) {
+                return view('admin.partials.datatable-ratings', ['rating' => $review->rating])->render();
+            })
+            ->addColumn('review_text', function ($review) {
+                return Str::limit($review->review_text, 50);
+            })
+            ->addColumn('approval_actions', function ($review) {
+                $data['id'] = $review->id;
+                $data['is_approved'] = $review->is_approved;
+                $data['approve_route'] = auth('admin')->user()->can('reviews.update') ? route('admin.reviews.approve') : null;
+                $data['reject_route'] = auth('admin')->user()->can('reviews.update') ? route('admin.reviews.reject') : null;
+                return view('admin.partials.datatable-reviewActions', $data)->render();
+            })
+            ->addColumn('actions', function ($review) {
+                $data['id'] = $review->id;
+                $data['view_url'] = auth('admin')->user()->can('reviews.read') ? route('admin.reviews.show', ['id' => $review->id]) : '';
+                return view('admin.partials.datatable-actions', $data)->render();
+            })
+            ->rawColumns(['approval_actions', 'rating', 'actions'])
+            ->make(true);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }

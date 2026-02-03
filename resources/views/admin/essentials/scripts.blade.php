@@ -14,6 +14,7 @@
 <script src="{{ asset('admin_assets/js/datatable-status-toggle.js') }}"></script>
 <script src="{{ asset('admin_assets/js/sidebar-hover.js') }}"></script>
 <script src="{{ asset('admin_assets/js/datatableJs/batchOperations.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- jQuery and DataTables JS (jQuery must come before Select2) -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

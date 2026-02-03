@@ -30,7 +30,6 @@ class Review extends Model
     protected $casts = [
         'rating' => 'float',
         'is_verified_purchase' => 'boolean',
-        'is_approved' => 'boolean',
     ];
 
     public function images()
@@ -41,6 +40,11 @@ class Review extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function productVariant()
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
     public function user()
@@ -56,11 +60,6 @@ class Review extends Model
     public function orderItem()
     {
         return $this->belongsTo(OrderItem::class);
-    }
-
-    public function scopeApproved($query)
-    {
-        return $query->where('is_approved', true);
     }
 
     public function scopeVerifiedPurchase($query)

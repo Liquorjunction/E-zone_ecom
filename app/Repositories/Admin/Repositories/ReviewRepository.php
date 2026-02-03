@@ -17,38 +17,47 @@ class ReviewRepository implements ReviewRepositoryInterface
 
     public function getPendingReviews()
     {
-        return Review::where('is_approved', false)
+        return Review::where('is_approved', 'pending')
             ->with(['product', 'user', 'images', 'orderItem'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
 
-    public function getReviewById(int $id)
+    public function getReviewById($id)
     {
-        return Review::with(['product', 'user', 'images', 'orderItem', 'order'])
+        return Review::with(['order', 'product', 'productVariant', 'user'])
+            ->select('reviews.*')
+            ->orderBy('created_at', 'desc')
             ->findOrFail($id);
     }
 
-    public function approveReview(int $id)
+    public function approveReview($id)
     {
         $review = Review::findOrFail($id);
-        $review->update(['is_approved' => true]);
+        $review->update(['is_approved' => 'approved']);
         return $review;
     }
 
-    public function rejectReview(int $id)
+    public function rejectReview($id)
     {
         $review = Review::findOrFail($id);
-        $review->update(['is_approved' => false]);
+        $review->update(['is_approved' => 'rejected']);
         return $review;
     }
 
-    public function deleteReview(int $id)
+    public function deleteReview($id)
     {
         return DB::transaction(function () use ($id) {
             $review = Review::findOrFail($id);
             $review->images()->delete();
             return $review->delete();
         });
+    }
+
+    public function getDataForDataTable()
+    {
+        return Review::with(['order', 'product', 'productVariant', 'user'])
+            ->select('reviews.*')
+            ->orderBy('created_at', 'desc');
     }
 }

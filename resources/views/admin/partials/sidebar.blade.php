@@ -690,6 +690,41 @@
                     </ul>
                 </li>
                 @endcanany
+
+                @php
+                    $isReviewSectionActive = request()->routeIs('admin.reviews.*');
+                @endphp
+                @can('reviews.read')
+                <li>
+                    <hr class="hr-horizontal">
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ $isReviewSectionActive ? '' : 'collapsed' }}" data-bs-toggle="collapse"
+                        href="#sidebar-reviews" role="button"
+                        aria-expanded="{{ $isReviewSectionActive ? 'true' : 'false' }}"
+                        aria-controls="sidebar-reviews" tabindex="0">
+                        <i class="icon" style="display: inline-flex;">
+                            <i class="bi bi-star" style="font-size:20px;"></i>
+                        </i>
+                        <span class="item-name">Reviews</span>
+                        <i class="right-icon">
+                            <i class="bi bi-chevron-right" style="font-size:16px;"></i>
+                        </i>
+                    </a>
+                    <ul class="sub-nav collapse {{ $isReviewSectionActive ? 'show' : '' }}" id="sidebar-reviews"
+                        data-bs-parent="#sidebar-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}"
+                                href="{{ route('admin.reviews.index') }}">
+                                <i class="icon" style="display: inline-flex;">
+                                    <i class="bi bi-star-half" style="font-size:20px;"></i>
+                                </i>
+                                <span class="item-name">All Reviews</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endcan
             </ul>
         </div>
     </div>

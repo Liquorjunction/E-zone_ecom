@@ -392,6 +392,16 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::post('/batch-update-status', [ManageCustomerController::class, 'batchUpdateCustomerStatus'])->name('batchUpdateStatus')->middleware('can:manageCustomers.update,admin');
         });
 
+        // Reviews Routes
+        Route::prefix('reviews')->name('reviews.')->middleware('can:reviews.read,admin')->group(function () {
+            Route::get('/', [ReviewController::class, 'index'])->name('index'); // permission: reviews.read
+            Route::get('/data', [ReviewController::class, 'data'])->name('data');
+            Route::get('/show', [ReviewController::class, 'show'])->name('show')->middleware('can:reviews.read,admin');
+            Route::post('/approve', [ReviewController::class, 'approve'])->name('approve')->middleware('can:reviews.update,admin');
+            Route::post('/reject', [ReviewController::class, 'reject'])->name('reject')->middleware('can:reviews.update,admin');
+            Route::delete('/destroy', [ReviewController::class, 'destroy'])->name('destroy')->middleware('can:reviews.delete,admin');
+        });
+
         // Reports Routes
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/stock', [StockReportController::class, 'index'])->name('stock');

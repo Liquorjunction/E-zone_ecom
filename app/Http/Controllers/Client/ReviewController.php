@@ -59,7 +59,7 @@ class ReviewController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = $request->user()->id;
-        $data['is_approved'] = $data['is_approved'] ?? false;
+        $data['is_approved'] = $data['is_approved'] ?? 'pending';
 
         try {
 

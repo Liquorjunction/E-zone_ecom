@@ -6,8 +6,9 @@ interface ReviewRepositoryInterface
 {
     public function getAllReviews();
     public function getPendingReviews();
-    public function getReviewById(int $id);
-    public function approveReview(int $id);
-    public function rejectReview(int $id);
-    public function deleteReview(int $id);
+    public function getReviewById($id);
+    public function approveReview($id);
+    public function rejectReview($id);
+    public function deleteReview($id);
+    public function getDataForDataTable();
 }
