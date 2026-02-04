@@ -52,10 +52,10 @@ class ManageCustomerController extends Controller
             $customerRepo->updateCustomer($request, $id, $data);
 
             Log::info('Customer Updated: ID ' . $id);
-            return redirect()->back()->with(['success' => true, 'message' => 'Customer updated successfully.']);
+            return redirect()->route('admin.customers.index')->with(['success', 'message' => 'Customer updated successfully.']);
         } catch (\Exception $e) {
             Log::error('Customer Update Error: ' . $e->getMessage());
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            return redirect()->back()->with(['failure', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -65,9 +65,9 @@ class ManageCustomerController extends Controller
             $id = $request->input('id');
             $customerRepo->deleteCustomer($id);
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Customer deleted successfully.']);
+            return redirect()->back()->with(['success', 'message' => 'Customer deleted successfully.']);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            return redirect()->back()->with(['failure', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -79,7 +79,7 @@ class ManageCustomerController extends Controller
 
             return redirect()->back()->with(['success', 'message' => 'Selected customers deleted successfully.']);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success', 'message' => $e->getMessage()], 500);
+            return redirect()->back()->with(['failure', 'message' => $e->getMessage()], 500);
         }
     }
 
