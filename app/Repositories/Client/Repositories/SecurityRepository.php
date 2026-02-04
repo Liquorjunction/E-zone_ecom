@@ -4,6 +4,7 @@ namespace App\Repositories\Client\Repositories;
 
 use App\Repositories\Client\Interfaces\SecurityRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class SecurityRepository implements SecurityRepositoryInterface
@@ -31,9 +32,20 @@ class SecurityRepository implements SecurityRepositoryInterface
 			->count();
 	}
 
+    public function getLastPasswordUpdateTime(int $userId)
+    {
+        $user = DB::table('users')->where('id', $userId)->first();
+        return $user ? $user->updated_at : null;
+    }
+
+    public function validateCurrentPassword($user, string $currentPassword): bool
+    {
+        return Hash::check($currentPassword, $user->password);
+    }
+
 	public function updatePassword($user, string $newPassword): void
 	{
-		$user->password = $newPassword;
+		$user->password = Hash::make($newPassword);
 		$user->setRememberToken(Str::random(60));
 		$user->save();
 

@@ -14,8 +14,9 @@ class SecurityController extends Controller
     {
         $user = $request->user();
         $sessions = $securityRepo->getSessions($user->id);
+        $lastPasswordUpdate = $securityRepo->getLastPasswordUpdateTime($user->id);
 
-        return view('client.pages.dashboard.security', compact('sessions'));
+        return view('client.pages.dashboard.security', compact('sessions', 'lastPasswordUpdate'));
     }
 
     public function sessionsCount(Request $request, SecurityRepo $securityRepo)
@@ -31,15 +32,21 @@ class SecurityController extends Controller
     {
         $user = $request->user();
 
-        if (! \Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'The current password is incorrect.']);
+        if (! $securityRepo->validateCurrentPassword($user, $request->current_password)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'errors' => ['current_password' => ['The current password is incorrect.']]
+                ], 422);
+            }
+            return back()->withErrors(['current_password' => 'The current password is incorrect.'])->withInput();
         }
 
         $securityRepo->updatePassword($user, $request->new_password);
-
         $request->session()->regenerate();
-
-        return back()->with('status', 'Password updated successfully.');
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['message' => 'Password updated successfully.']);
+        }
+        return back()->with('success', 'Password updated successfully.');
     }
 
     public function logoutAllSessions(Request $request, SecurityRepo $securityRepo)
