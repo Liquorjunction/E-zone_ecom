@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="{{ asset('admin_assets/css/hope-ui.min.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/custom.css') }}?v={{ time() }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/custom.min.css') }}">
+<link rel="stylesheet" href="{{ asset('admin_assets/css/breadcrumbs.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/customizer.min.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/rtl.min.css') }}">
 <link rel="stylesheet" href="{{ asset('admin_assets/css/sidebar.css') }}">
