@@ -416,3 +416,17 @@ Breadcrumbs::for('admin.about_us.edit', function (BreadcrumbTrail $trail) {
     $trail->push('Edit About Us', route('admin.about_us.edit'));
 });
 
+// --- Quick Stats ---
+Breadcrumbs::for('admin.quick-stats.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Quick Stats', route('admin.quick-stats.index'));
+});
+Breadcrumbs::for('admin.quick-stats.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.quick-stats.index');
+    $trail->push('Create Quick Stat', route('admin.quick-stats.create'));
+});
+Breadcrumbs::for('admin.quick-stats.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.quick-stats.index');
+    $trail->push('Edit Quick Stat', route('admin.quick-stats.edit'));
+});
+

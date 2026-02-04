@@ -3,6 +3,7 @@
 namespace App\Repositories\Client\Repositories;
 
 use App\Repositories\Client\Interfaces\SecurityRepositoryInterface;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -34,7 +35,7 @@ class SecurityRepository implements SecurityRepositoryInterface
 
     public function getLastPasswordUpdateTime(int $userId)
     {
-        $user = DB::table('users')->where('id', $userId)->first();
+        $user = User::find($userId);
         return $user ? $user->updated_at : null;
     }
 
