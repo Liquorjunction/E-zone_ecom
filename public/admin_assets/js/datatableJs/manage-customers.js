@@ -2,8 +2,6 @@ $(document).ready(function () {
     var $table = $('#customers-table');
     var dataUrl = $table.data('route');
 
-    console.log('DataTable URL:', dataUrl);
-
     var table = $table.DataTable({
         processing: true,
         serverSide: true,

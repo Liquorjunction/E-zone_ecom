@@ -1,15 +1,25 @@
 $(function() {
-    var table = $('#reviews-table').DataTable({
+    window.reviewsDataTable = $('#reviews-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: reviewDataUrl,
+        ajax: {
+            url: reviewDataUrl,
+            data: function(d) {
+                // Add filter parameters
+                d.status = $('#status').val();
+                d.date_from = $('#date_from').val();
+                d.date_to = $('#date_to').val();
+                d.rating = $('#rating').val();
+            }
+        },
         columns: [
             { data: 'id', name: 'id' },
             { data: 'product', name: 'product.name', orderable: false, searchable: false },
+            { data: 'review_text', name: 'review_text', orderable: false, searchable: false },
             { data: 'user', name: 'user.name', orderable: false, searchable: false },
             { data: 'order', name: 'order.order_number', orderable: false, searchable: false },
             { data: 'rating', name: 'rating', orderable: false, searchable: false },
-            { data: 'review_text', name: 'review_text', orderable: false, searchable: false },
+            { data: 'created_at', name: 'created_at' },
             { data: 'approval_actions', name: 'approval_actions', orderable: false, searchable: false },
             { data: 'actions', name: 'actions', orderable: false, searchable: false },
         ],
@@ -22,17 +32,17 @@ $(function() {
     $(document).on('click', '.approve-review-btn', function() {
         const reviewId = $(this).data('review-id');
         const route = $(this).data('route');
-        
+
         if (typeof Swal === 'undefined') {
-            if (confirm('Are you sure you want to approve this review?')) {
-                approveReview(reviewId, route, table);
+            if (confirm('Are you sure Once you approve this review it can not be reverted?')) {
+                approveReview(reviewId, route, window.reviewsDataTable);
             }
             return;
         }
 
         Swal.fire({
             title: 'Are you sure?',
-            text: "You want to approve this review?",
+            text: "Once you approve this review it can not be reverted?",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#28a745',
@@ -41,7 +51,7 @@ $(function() {
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                approveReview(reviewId, route, table);
+                approveReview(reviewId, route, window.reviewsDataTable);
             }
         });
     });
@@ -50,17 +60,17 @@ $(function() {
     $(document).on('click', '.decline-review-btn', function() {
         const reviewId = $(this).data('review-id');
         const route = $(this).data('route');
-        
+
         if (typeof Swal === 'undefined') {
-            if (confirm('Are you sure you want to reject this review?')) {
-                rejectReview(reviewId, route, table);
+            if (confirm('Are you sure Once you reject this review it can not be reverted?')) {
+                rejectReview(reviewId, route, window.reviewsDataTable);
             }
             return;
         }
 
         Swal.fire({
             title: 'Are you sure?',
-            text: "You want to reject this review?",
+            text: "Once you reject this review it can not be reverted?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
@@ -69,7 +79,7 @@ $(function() {
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                rejectReview(reviewId, route, table);
+                rejectReview(reviewId, route, window.reviewsDataTable);
             }
         });
     });

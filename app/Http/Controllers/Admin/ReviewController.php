@@ -97,6 +97,9 @@ class ReviewController extends Controller
             ->addColumn('review_text', function ($review) {
                 return Str::limit($review->review_text, 50);
             })
+            ->addColumn('created_at', function ($review) {
+                return $review->created_at->format('d M Y');
+            })
             ->addColumn('approval_actions', function ($review) {
                 $data['id'] = $review->id;
                 $data['is_approved'] = $review->is_approved;
