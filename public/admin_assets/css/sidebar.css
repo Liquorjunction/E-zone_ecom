@@ -16,8 +16,8 @@
     --sidebar-active-border: #3a57e8;
     --sidebar-hover-bg: #f8f9fa;
     --sidebar-section-active-bg: #e8edff;
-    --sidebar-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --sidebar-transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-transition-fast: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-bs-theme="dark"] {
@@ -44,12 +44,15 @@
     box-shadow: var(--sidebar-shadow);
     display: flex;
     flex-direction: column;
-    transition: width var(--sidebar-transition), box-shadow var(--sidebar-transition);
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1040;
     overflow: hidden;
-    transform: translateZ(0);
+    transform: translateZ(0) translate3d(0, 0, 0);
     backface-visibility: hidden;
     will-change: width;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ========================================
@@ -211,7 +214,11 @@
     font-weight: 400;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color var(--sidebar-transition-fast), color var(--sidebar-transition-fast), transform var(--sidebar-transition-fast), padding var(--sidebar-transition), gap var(--sidebar-transition);
+    transition: background-color 0.15s ease-out,
+                color 0.15s ease-out,
+                transform 0.15s ease-out,
+                padding 0.25s ease-in-out,
+                gap 0.25s ease-in-out;
     border-radius: 8px;
     position: relative;
     border-left: 0;
@@ -224,7 +231,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform var(--sidebar-transition-fast), width var(--sidebar-transition), height var(--sidebar-transition);
+    transition: transform 0.15s ease-out, width 0.25s ease-in-out, height 0.25s ease-in-out;
 }
 
 .sidebar .nav-link .icon i {
@@ -238,7 +245,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: opacity var(--sidebar-transition-fast), width var(--sidebar-transition);
+    transition: opacity 0.15s ease-out, width 0.25s ease-in-out;
 }
 
 .sidebar .nav-link .right-icon {
@@ -248,7 +255,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform var(--sidebar-transition-fast), opacity var(--sidebar-transition-fast), width var(--sidebar-transition);
+    transition: transform 0.15s ease-out, opacity 0.15s ease-out, width 0.25s ease-in-out;
 }
 
 .sidebar .nav-link .right-icon i {
@@ -392,7 +399,8 @@
 
 .sidebar.sidebar-mini {
     width: var(--sidebar-mini-width);
-    transition: width var(--sidebar-transition), box-shadow var(--sidebar-transition);
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar.sidebar-mini .sidebar-header {
@@ -406,7 +414,7 @@
     opacity: 0;
     width: 0;
     overflow: hidden;
-    transition: opacity var(--sidebar-transition-fast), width var(--sidebar-transition);
+    transition: opacity 0.12s ease-out, width 0.25s ease-in-out;
 }
 
 .sidebar.sidebar-mini .nav-link {
@@ -414,7 +422,11 @@
     padding: 0.875rem 0.5rem;
     margin: 0.25rem 0.5rem;
     gap: 0;
-    transition: background-color var(--sidebar-transition-fast), color var(--sidebar-transition-fast), transform var(--sidebar-transition-fast), padding var(--sidebar-transition), gap var(--sidebar-transition);
+    transition: background-color 0.15s ease-out,
+                color 0.15s ease-out,
+                transform 0.15s ease-out,
+                padding 0.25s ease-in-out,
+                gap 0.25s ease-in-out;
 }
 
 .sidebar.sidebar-mini .nav-link .icon {
@@ -533,7 +545,8 @@
 .sidebar.sidebar-hover:hover {
     width: var(--sidebar-width);
     box-shadow: 0 0 40px rgba(0,0,0,0.15);
-    transition: width var(--sidebar-transition), box-shadow var(--sidebar-transition);
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Force sync: Trigger adjacent sibling transition at exact same time */

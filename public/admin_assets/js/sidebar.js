@@ -9,7 +9,7 @@
     const CONFIG = {
         storageKey: 'sidebarPinned',
         hoverDelay: 100,
-        collapseDelay: 200,
+        collapseDelay: 100,
         classes: {
             sidebar: '.sidebar',
             pinBtn: '#sidebarPinBtn',
