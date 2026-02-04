@@ -151,19 +151,13 @@
 
           <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="#"
+              href="{{ route('products.index') }}"
               class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-primary text-white font-semibold rounded-xl shadow-lg hover:bg-primary/90 hover:shadow-xl transition-all text-sm lg:text-base group"
             >
               <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               Discover Products
-            </a>
-            <a
-              href="#"
-              class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm lg:text-base"
-            >
-              Browse Categories
             </a>
           </div>
         </div>
@@ -194,7 +188,7 @@
         {{-- CTA Buttons --}}
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
           <a
-            href="{{-- route('products') --}}"
+            href="{{ route('products.index') }}"
             class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-primary text-white font-semibold rounded-xl shadow-lg hover:bg-primary/90 hover:shadow-xl transition-all text-sm lg:text-base group"
           >
             <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
