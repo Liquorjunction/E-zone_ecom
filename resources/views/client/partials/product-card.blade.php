@@ -5,10 +5,9 @@
 
     $nameRaw = $master?->getTranslation('name', $locale) ?? '';
     $variantName = $isVariant ? $product->getTranslation('variant_name', $locale) ?? '' : '';
-    $name = trim(
-        (is_array($nameRaw) ? implode(' ', array_filter($nameRaw)) : (string) $nameRaw) .
-            ($variantName ? ' - ' . (is_array($variantName) ? implode(' ', $variantName) : $variantName) : ''),
-    );
+    $name = $isVariant 
+        ? (is_array($variantName) ? implode(' ', array_filter($variantName)) : (string) $variantName)
+        : (is_array($nameRaw) ? implode(' ', array_filter($nameRaw)) : (string) $nameRaw);
 
     $catRaw = $master->category?->{'category-name'} ?? ($master->category?->name ?? 'Uncategorized');
     $categoryName = is_array($catRaw) ? implode(' ', array_filter($catRaw)) : (string) $catRaw;

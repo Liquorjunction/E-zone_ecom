@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 txt.innerHTML = variantName;
                 decodedVariantName = txt.value;
             }
-            productTitleEl.textContent = decodedVariantName ? baseName + ' - ' + decodedVariantName : baseName;
+            productTitleEl.textContent = decodedVariantName || baseName;
         }
 
         if (qtyInput) {
