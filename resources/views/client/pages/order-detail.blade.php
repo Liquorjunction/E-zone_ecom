@@ -10,20 +10,20 @@
 
             {{-- Order Header --}}
             @php
-                $status = strtolower($order->status ?? 'pending');
-                $statusClass = match ($status) {
-                    'delivered' => 'text-green-700 bg-green-100',
-                    'shipped' => 'text-primary bg-primary/10',
-                    'processing' => 'text-yellow-700 bg-yellow-100',
-                    'cancelled' => 'text-red-700 bg-red-100',
-                    default => 'text-gray-700 bg-gray-100',
-                };
-                $stages = ['placed', 'processing', 'shipped', 'delivered'];
-                $currentIndex = array_search($status, $stages, true);
-                if ($currentIndex === false) {
-                    $currentIndex = max(0, min(count($stages) - 1, 0));
-                }
-                $progressPct = (($currentIndex + 1) / count($stages)) * 100;
+                    $status = strtolower($order->status ?? 'pending');
+                    $statusClass = match ($status) {
+                        'delivered', 'completed' => 'text-green-700 bg-green-100',
+                        'shipped' => 'text-primary bg-primary/10',
+                        'processing' => 'text-yellow-700 bg-yellow-100',
+                        'cancelled' => 'text-red-700 bg-red-100',
+                        default => 'text-gray-700 bg-gray-100',
+                    };
+                    $stages = ['placed', 'processing', 'shipped', 'delivered', 'completed'];
+                    $currentIndex = array_search($status, $stages, true);
+                    if ($currentIndex === false) {
+                        $currentIndex = 0;
+                    }
+                    $progressPct = (($currentIndex + 1) / count($stages)) * 100;
             @endphp
 
             <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 mb-4 lg:mb-6">
@@ -264,7 +264,7 @@
                         @endif
 
                         {{-- Shipping Info --}}
-                        @if ($status === 'delivered' && $order->delivered_by)
+                        @if ($status === 'delivered' || $status === 'completed' && $order->delivered_by)
                             <div class="mt-6 p-4 bg-green-50 border-2 border-green-100 rounded-xl">
                                 <div class="flex items-start gap-3">
                                     <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="currentColor"
