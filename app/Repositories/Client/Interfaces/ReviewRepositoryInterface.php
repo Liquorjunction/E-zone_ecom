@@ -6,7 +6,8 @@ interface ReviewRepositoryInterface
 {
     public function getAllApprovedReviews();
     public function getApprovedReviewById(int $id);
-    public function getApprovedReviewsByProductId(int $productId);
+    public function getApprovedReviewsByProductId(int $productId, ?int $variantId);
+    public function getReviewsByStarRating(int $starRating);
     public function createReview(array $data);
     public function getUserReviews(int $userId);
     public function getUserReviewById(int $id, int $userId);

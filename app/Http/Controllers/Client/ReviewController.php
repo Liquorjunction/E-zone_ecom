@@ -18,9 +18,10 @@ class ReviewController extends Controller
     public function index(Request $request, ReviewRepo $reviewRepo)
     {
         $productId = $request->input('product_id');
+        $variantId = $request->input('variant_id');
 
         if ($productId) {
-            $reviews = $reviewRepo->getApprovedReviewsByProductId($productId);
+            $reviews = $reviewRepo->getApprovedReviewsByProductId($productId, $variantId);
         } else {
             $reviews = $reviewRepo->getAllApprovedReviews();
         }

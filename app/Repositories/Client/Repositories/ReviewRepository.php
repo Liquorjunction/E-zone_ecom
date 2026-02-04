@@ -22,9 +22,19 @@ class ReviewRepository implements ReviewRepositoryInterface
         return Review::where('id', $id)->where('is_approved', 'approved')->first();
     }
 
-    public function getApprovedReviewsByProductId(int $productId)
+    public function getReviewsByStarRating(int $starRating)
     {
-        return Review::where('product_id', $productId)->where('is_approved', 'approved')->get();
+        return Review::where('rating', $starRating)->where('is_approved', 'approved')->get();
+    }
+
+    public function getApprovedReviewsByProductId(int $productId, ?int $variantId)
+    {
+        $query = Review::where('product_id', $productId)->where('is_approved', 'approved');
+
+        if ($variantId) {
+            $query->where('product_variant_id', $variantId);
+        }
+        return $query->with(['user', 'images'])->orderBy('created_at', 'desc')->get();
     }
 
     public function createReview(array $data)

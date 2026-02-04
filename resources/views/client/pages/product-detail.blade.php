@@ -4,6 +4,9 @@
     <script>
         window.CURRENCY_SYMBOL = @json(config('app.CURRENCY_SYMBOL'));
         window.CHECKOUT_URL = @json(route('checkout', ['step' => 2]));
+        window.PRODUCT_ID = @json($product->id);
+        window.PRODUCT_VARIANT_ID = null;
+        window.IS_AUTHENTICATED = @json(auth('web')->check());
     </script>
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
@@ -129,12 +132,12 @@
 
                         <!-- Rating & Stock -->
                         <div class="flex flex-wrap items-center gap-4">
-                            {{-- <div class="flex items-center gap-2">
-                                <div class="flex items-center text-yellow-400 text-lg">
-                                    ★★★★★
+                            <div class="flex items-center gap-2">
+                                <div id="productHeaderStars" class="flex items-center text-yellow-400 text-lg">
+                                    ☆☆☆☆☆
                                 </div>
-                                <span class="text-gray-600 text-sm font-medium">(247 reviews)</span>
-                            </div> --}}
+                                <span id="productHeaderReviewCount" class="text-gray-600 text-sm font-medium">(0 reviews)</span>
+                            </div>
                             @php
                                 $totalStock = 0;
                                 if ($product->productVariants && $product->productVariants->count() > 0) {
@@ -589,7 +592,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                             </svg>
-                            Reviews (247)
+                            Reviews (<span id="reviewsTabCount">0</span>)
                         </button>
                         {{-- <button
                             class="tab-button px-6 py-4 text-gray-600 hover:text-gray-900 font-semibold transition-colors whitespace-nowrap"
@@ -717,94 +720,44 @@
                     <!-- Reviews Tab -->
                     <div id="reviews-tab" class="tab-content hidden">
                         <div class="space-y-8">
-                            <div
-                                class="bg-linear-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                            <div class="bg-linear-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                                 <div class="flex items-center justify-between mb-6">
                                     <h4 class="text-2xl font-bold text-gray-900">Customer Reviews</h4>
-                                    <button
-                                        class="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-semibold transition-colors shadow-sm">
-                                        Write a Review
-                                    </button>
+                                    @auth('web')
+                                        {{-- <button id="writeReviewBtn"
+                                            class="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-semibold transition-colors shadow-sm">
+                                            Write a Review
+                                        </button> --}}
+                                    @else
+                                        <a href="{{ route('login') }}"
+                                            class="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-semibold transition-colors shadow-sm inline-block">
+                                            Login to Review
+                                        </a>
+                                    @endauth
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div id="reviewStats" class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div class="text-center">
-                                        <div class="text-5xl font-bold text-gray-900 mb-2">4.8</div>
-                                        <div class="flex items-center justify-center text-yellow-400 text-2xl mb-2">
-                                            ★★★★★
+                                        <div id="avgRating" class="text-5xl font-bold text-gray-900 mb-2">-</div>
+                                        <div id="avgRatingStars" class="flex items-center justify-center text-yellow-400 text-2xl mb-2">
+                                            ☆☆☆☆☆
                                         </div>
-                                        <div class="text-sm text-gray-600 font-medium">Based on 247 reviews</div>
+                                        <div id="reviewCount" class="text-sm text-gray-600 font-medium">Loading reviews...</div>
                                     </div>
-                                    <div class="space-y-3">
-                                        @for ($i = 5; $i >= 1; $i--)
-                                            <div class="flex items-center gap-3">
-                                                <span class="text-sm font-semibold text-gray-700 w-12">{{ $i }}
-                                                    ★</span>
-                                                <div class="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
-                                                    <div class="bg-yellow-400 h-3 rounded-full transition-all"
-                                                        style="width: {{ [75, 20, 3, 1, 1][$i - 1] }}%"></div>
-                                                </div>
-                                                <span
-                                                    class="text-sm text-gray-600 font-medium w-12 text-right">{{ [186, 49, 8, 3, 1][$i - 1] }}</span>
-                                            </div>
-                                        @endfor
+                                    <div id="ratingBreakdown" class="space-y-3">
+                                        <!-- Dynamically populated -->
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="space-y-4">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <div
-                                        class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-                                        <div class="flex items-start justify-between mb-4">
-                                            <div class="flex items-center space-x-3">
-                                                <div
-                                                    class="w-12 h-12 bg-linear-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                                                    {{ substr(['John D.', 'Sarah M.', 'Mike R.', 'Emma L.', 'Alex K.'][$i - 1], 0, 1) }}
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-gray-900">
-                                                        {{ ['John D.', 'Sarah M.', 'Mike R.', 'Emma L.', 'Alex K.'][$i - 1] }}
-                                                    </div>
-                                                    <div class="text-sm text-gray-500">
-                                                        {{ ['2 weeks ago', '1 month ago', '3 weeks ago', '1 week ago', '2 days ago'][$i - 1] }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center text-yellow-400 text-lg">
-                                                ★★★★★
-                                            </div>
-                                        </div>
-                                        <h5 class="font-bold text-gray-900 mb-2 text-lg">
-                                            {{ ['Excellent Sound Quality', 'Perfect for Workouts', 'Great Battery Life', 'Comfortable for Long Sessions', 'Worth Every Penny'][$i - 1] }}
-                                        </h5>
-                                        <p class="text-gray-700 leading-relaxed">
-                                            {{ [
-                                                'These headphones exceeded my expectations. The sound quality is incredible and the noise cancellation works perfectly for my daily commute.',
-                                                'I use these for gym sessions and they stay put perfectly. The battery lasts all day and the sound is crystal clear.',
-                                                '30 hours of battery life is no joke! I can go days without charging. The build quality feels premium.',
-                                                'Super comfortable even after wearing for 8+ hours. The leather cushions are soft and the fit is perfect.',
-                                                'Best headphones I\'ve ever owned. The audio quality, comfort, and features make them worth every cent.',
-                                            ][$i - 1] }}
-                                        </p>
-                                        <div class="flex items-center space-x-4 mt-4 text-sm">
-                                            <button
-                                                class="flex items-center text-gray-600 hover:text-primary transition-colors font-medium">
-                                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                                                </svg>
-                                                Helpful ({{ rand(5, 25) }})
-                                            </button>
-                                            <button
-                                                class="text-gray-500 hover:text-red-500 transition-colors font-medium">Report</button>
-                                        </div>
-                                    </div>
-                                @endfor
+                            <div id="reviewsList" class="space-y-4">
+                                <div class="text-center py-8">
+                                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                                    <p class="text-gray-600">Loading reviews...</p>
+                                </div>
                             </div>
 
-                            <div class="text-center">
-                                <button
+                            <div id="loadMoreContainer" class="text-center hidden">
+                                <button id="loadMoreReviews"
                                     class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold transition-colors">
                                     Load More Reviews
                                 </button>
@@ -1007,8 +960,10 @@
 
         </div>
     </div>
+
 @endsection
 
 @push('scripts')
     <script src="{{ asset('js/product-detail.js') }}"></script>
+    <script src="{{ asset('js/product-reviews.js') }}"></script>
 @endpush

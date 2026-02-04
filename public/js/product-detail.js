@@ -339,6 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         window.currentSelectedVariantId = variantId ? String(variantId) : null;
         window.currentSelectedVariantSlug = variantSlug ? String(variantSlug) : null;
+        window.PRODUCT_VARIANT_ID = variantId ? parseInt(variantId, 10) : null;
 
         const cartVariantInput = document.getElementById('cart-variant-id');
         if (cartVariantInput) cartVariantInput.value = variantId || '';
@@ -382,6 +383,18 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) {}
 
         renderVariantSpecs(variantAttributes);
+
+        // Notify reviews module about variant change
+        try {
+            document.dispatchEvent(new CustomEvent('variantChanged', {
+                detail: { variantId: window.PRODUCT_VARIANT_ID }
+            }));
+        } catch (e) {
+            // Fallback: direct reload if available
+            if (window.ProductReviews && typeof window.ProductReviews.reload === 'function') {
+                window.ProductReviews.reload();
+            }
+        }
     }
 
     if (variantButtons.length > 0) {
