@@ -4,9 +4,15 @@
             <i class="bi bi-funnel text-info"></i>
             <h6 class="mb-0">Filters</h6>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-secondary" id="reset-filters" onclick="event.stopPropagation();">
-            <i class="bi bi-arrow-clockwise me-1"></i>Reset
-        </button>
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-primary" id="apply-filters">
+                <i class="bi bi-search me-1"></i>Apply Filters
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-filters">
+                <i class="bi bi-x me-1"></i>Clear
+            </button>
+        </div>
     </div>
     <div class="card-body p-4" id="filters-body">
         <form id="filter-form" class="row g-3">
@@ -29,18 +35,7 @@
 
             <div class="col-md-6 col-lg-4">
                 <label for="date-to-filter" class="form-label small fw-semibold">To Date</label>
-                <input type="date" class="form-control form-control-sm" id="date-to-filter"
-                    data-filter="date_to">
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="col-12 d-flex gap-2 pt-2">
-                <button type="button" class="btn btn-sm btn-primary" id="apply-filters">
-                    <i class="bi bi-search me-1"></i>Apply Filters
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-filters">
-                    <i class="bi bi-x me-1"></i>Clear
-                </button>
+                <input type="date" class="form-control form-control-sm" id="date-to-filter" data-filter="date_to">
             </div>
         </form>
     </div>
