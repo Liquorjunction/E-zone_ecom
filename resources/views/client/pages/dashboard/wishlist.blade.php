@@ -196,12 +196,6 @@
             </svg>
             Discover Products
           </a>
-          <a
-            href="{{-- route('categories') --}}"
-            class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm lg:text-base"
-          >
-            Browse Categories
-          </a>
         </div>
       </div>
     </div>
