@@ -142,10 +142,17 @@ hr {
   transition: all 400ms ease;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   -webkit-transition: background-color 250ms ease-in-out;
   -o-transition: background-color 250ms ease-in-out;
   transition: background-color 250ms ease-in-out;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .sign-bg {
@@ -1126,6 +1133,18 @@ body.uikit .btn-download {
     display: none;
     opacity: 0;
     transition: opacity 0.15s linear;
+}
+
+/* Fix horizontal scrolling issues */
+.main-content,
+.container-fluid,
+.container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+* {
+    max-width: 100%;
 }
 
 .tab-content .tab-pane.active,

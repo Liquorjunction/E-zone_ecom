@@ -41,7 +41,7 @@
         @yield('content')
 
         {{-- Settings --}}
-        @include('admin.components.settings')
+        {{-- @include('admin.components.settings') --}}
         {{-- Footer --}}
         @include('admin.partials.footer')
     </main>
