@@ -332,18 +332,18 @@
                                                             <span
                                                                 class="inline-block text-xs text-gray-400 line-through opacity-75">
                                                                 {{ config('app.CURRENCY_SYMBOL') }}
-                                                                {{ number_format($item->unit_price_original, 2) }}
+                                                                {{ number_format($item->unit_price_original * $item->quantity, 2) }}
                                                             </span>
                                                         </div>
                                                         <span class="text-2xl font-bold text-red-600">
                                                             {{ config('app.CURRENCY_SYMBOL') }}
-                                                            {{ number_format($item->unit_price, 2) }}
+                                                            {{ number_format($item->unit_price * $item->quantity, 2) }}
                                                         </span>
                                                     </div>
                                                 @else
                                                     <span class="text-2xl font-bold text-primary">
                                                         {{ config('app.CURRENCY_SYMBOL') }}
-                                                        {{ number_format($item->unit_price, 2) }}
+                                                        {{ number_format($item->unit_price * $item->quantity, 2) }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -402,7 +402,7 @@
                         <h3 class="text-lg font-bold flex items-center justify-between text-gray-900 mb-4">
                             Order Summary
                             <span class="text-sm font-semibold text-gray-600">Item Total:
-                                {{ $order->items->count() }}</span>
+                                {{ $order->items->sum('quantity') }}</span>
                         </h3>
                         @php
                             // Use stored order data (new fields added via migration)

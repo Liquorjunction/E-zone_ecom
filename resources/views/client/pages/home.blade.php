@@ -67,7 +67,7 @@
                 if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
             });
         }
-        }">
+    }">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-end justify-between mb-8 sm:mb-10">
                 <div>
@@ -101,36 +101,36 @@
                     :style="`transform: translateX(-${currentSlide * 100}%)`">
                     @foreach ($categoryChunks as $categoryChunk)
                         @if ($categoryChunk->count() > 0)
-                        <div class="w-full shrink-0">
-                            <div
-                                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
-                                @foreach ($categoryChunk as $category)
-                                    <a href="{{ route('products.index', ['category' => $category->slug]) }}"
-                                        class="group bg-white rounded-xl p-5 sm:p-6 text-center hover:shadow-lg transition-all duration-300 border border-transparent hover:border-primary/20">
-                                        <div class="flex flex-col items-center">
-                                            <div
-                                                class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-50 flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
-                                                @if ($category->{'category-icon'})
-                                                    <img src="{{ asset('/storage/' . $category->{'category-icon'}) }}"
-                                                        alt="{{ $category->{'category-name'} }}"
-                                                        class="w-8 h-8 sm:w-10 sm:h-10 object-contain">
-                                                @else
-                                                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 group-hover:text-primary transition-colors"
-                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                                                    </svg>
-                                                @endif
+                            <div class="w-full shrink-0">
+                                <div
+                                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
+                                    @foreach ($categoryChunk as $category)
+                                        <a href="{{ route('products.index', ['category' => $category->slug]) }}"
+                                            class="group bg-white rounded-xl p-5 sm:p-6 text-center hover:shadow-lg transition-all duration-300 border border-transparent hover:border-primary/20">
+                                            <div class="flex flex-col items-center">
+                                                <div
+                                                    class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-50 flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
+                                                    @if ($category->{'category-icon'})
+                                                        <img src="{{ asset('/storage/' . $category->{'category-icon'}) }}"
+                                                            alt="{{ $category->{'category-name'} }}"
+                                                            class="w-8 h-8 sm:w-10 sm:h-10 object-contain">
+                                                    @else
+                                                        <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 group-hover:text-primary transition-colors"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                                        </svg>
+                                                    @endif
+                                                </div>
+                                                <h3
+                                                    class="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+                                                    {{ $category->{'category-name'} }}
+                                                </h3>
                                             </div>
-                                            <h3
-                                                class="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-                                                {{ $category->{'category-name'} }}
-                                            </h3>
-                                        </div>
-                                    </a>
-                                @endforeach
+                                        </a>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
                         @endif
                     @endforeach
                 </div>
@@ -151,149 +151,42 @@
     @php
         $bannerChunks = $cards->take(4)->chunk(2);
     @endphp
-    <section class="py-8 sm:py-12 bg-white" x-data="{
-        currentSlide: 0,
-        itemsPerPage: window.innerWidth >= 1024 ? 2 : 1,
-        totalItems: {{ $cards->take(4)->count() }},
-        autoplay: null,
-        get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
-        get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
-        get canGoPrev() { return this.currentSlide > 0 },
-        next() { if (this.canGoNext) this.currentSlide++; else this.currentSlide = 0 },
-        prev() { if (this.canGoPrev) this.currentSlide--; else this.currentSlide = this.totalSlides - 1 },
-        init() {
-            this.startAutoplay();
-            window.addEventListener('resize', () => {
-                this.itemsPerPage = window.innerWidth >= 1024 ? 2 : 1;
-                if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
-            });
-        },
-        startAutoplay() {
-              this.autoplay = setInterval(() => { this.next(); }, 9000);
-        },
-        stopAutoplay() {
-            clearInterval(this.autoplay);
-        }
-        }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-end justify-between mb-8 sm:mb-10">
-                <div>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                        {{ gtrans('Featured Promotions') }}
-                    </h2>
-                </div>
-                <div class="hidden md:flex items-center gap-2">
-                    <button @click="prev()" :disabled="!canGoPrev"
-                        :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
-                        class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button @click="next()" :disabled="!canGoNext"
-                        :class="!canGoNext ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
-                        class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <div class="relative overflow-hidden">
-                <div class="flex transition-transform duration-500 ease-out"
-                    :style="`transform: translateX(-${currentSlide * 100}%)`">
-                    @foreach ($bannerChunks as $chunk)
-                        @if ($chunk->count() > 0)
-                        <div class="w-full shrink-0">
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                @foreach ($chunk as $card)
-                                    @php
-                                        $bgClass = '';
-                                        $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
-                                        $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
-                                    @endphp
-                                    <a href="{{ $card->link ?? '#' }}"
-                                        class="group relative overflow-hidden rounded-2xl bg-transparent min-h-70 sm:min-h-80 flex items-center">
-                                        <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
-                                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                                        <div class="relative z-10 p-8 sm:p-10 lg:p-12">
-                                            <span
-                                                class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
-                                                {{ $firstTag }}
-                                            </span>
-                                            <h3
-                                                class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
-                                                {{ $card->title }}
-                                            </h3>
-                                            <p class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2">
-                                                {{ $card->description }}
-                                            </p>
-                                            @if ($card->link_text)
-                                                <span
-                                                    class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
-                                                    {{ $card->link_text }}
-                                                    <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1"
-                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                    </svg>
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-            {{-- Dots Indicator --}}
-            <div class="flex justify-center gap-2 mt-6" x-show="totalSlides > 1">
-                <template x-for="i in totalSlides" :key="i">
-                    <button @click="currentSlide = i - 1"
-                        :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
-                        class="h-2 rounded-full transition-all duration-300"></button>
-                </template>
-            </div>
-        </div>
-    </section>
-
-    {{-- Deals Section (Carousel Style) --}}
-    @php
-        $dealsChunks = ($deals ?? collect())->chunk(4);
-        $dealsCount = ($deals ?? collect())->count();
-    @endphp
-    @if ($dealsCount > 0)
-        <section id="deals" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+    @if ($cards->isNotEmpty())
+        <section class="py-8 sm:py-12 bg-white" x-data="{
             currentSlide: 0,
-            itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
-            totalItems: {{ $dealsCount }},
+            itemsPerPage: window.innerWidth >= 1024 ? 2 : 1,
+            totalItems: {{ $cards->take(4)->count() }},
+            autoplay: null,
             get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
             get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
             get canGoPrev() { return this.currentSlide > 0 },
-            next() { if (this.canGoNext) this.currentSlide++; else this.currentSlide = 0 },
-            prev() { if (this.canGoPrev) this.currentSlide--; else this.currentSlide = this.totalSlides - 1 },
+            next() { if (this.canGoNext) this.currentSlide++;
+                else this.currentSlide = 0 },
+            prev() { if (this.canGoPrev) this.currentSlide--;
+                else this.currentSlide = this.totalSlides - 1 },
             init() {
+                this.startAutoplay();
                 window.addEventListener('resize', () => {
-                    this.itemsPerPage = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2;
+                    this.itemsPerPage = window.innerWidth >= 1024 ? 2 : 1;
                     if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
                 });
+            },
+            startAutoplay() {
+                this.autoplay = setInterval(() => { this.next(); }, 9000);
+            },
+            stopAutoplay() {
+                clearInterval(this.autoplay);
             }
-        }">
+        }" @mouseenter="stopAutoplay()"
+            @mouseleave="startAutoplay()">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-end justify-between mb-8 sm:mb-10">
                     <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                                {{ gtrans('Deals & Discounts') }}
-                            </h2>
-                        </div>
-                        <p class="text-sm sm:text-base text-gray-600">
-                            {{ gtrans('Grab the best offers on top products') }}
-                        </p>
+                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                            {{ gtrans('Featured Promotions') }}
+                        </h2>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="hidden md:flex items-center gap-2">
                         <button @click="prev()" :disabled="!canGoPrev"
                             :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
                             class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
@@ -308,7 +201,163 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
-                        <a href="{{ route('products.deals') }}" class="ml-4 inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
+                    </div>
+                </div>
+                <div class="relative overflow-hidden">
+                    <div class="flex transition-transform duration-500 ease-out"
+                        :style="`transform: translateX(-${currentSlide * 100}%)`">
+                        @foreach ($bannerChunks as $chunk)
+                            @if ($chunk->count() > 0)
+                                <div class="w-full shrink-0">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        @foreach ($chunk as $card)
+                                            @php
+                                                $bgClass = '';
+                                                $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
+                                                $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
+                                            @endphp
+                                            <a href="{{ $card->link ?? '#' }}"
+                                                class="group relative overflow-hidden rounded-2xl bg-transparent min-h-70 sm:min-h-80 flex items-center">
+                                                <img src="{{ asset('storage/' . $card->image) }}"
+                                                    alt="{{ $card->title }}"
+                                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                                <div class="relative z-10 p-8 sm:p-10 lg:p-12">
+                                                    <span
+                                                        class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+                                                        {{ $firstTag }}
+                                                    </span>
+                                                    <h3
+                                                        class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
+                                                        {{ $card->title }}
+                                                    </h3>
+                                                    <p
+                                                        class="text-white/90 text-sm sm:text-base mb-6 max-w-md line-clamp-2">
+                                                        {{ $card->description }}
+                                                    </p>
+                                                    @if ($card->link_text)
+                                                        <span
+                                                            class="inline-flex items-center text-white font-semibold text-sm group-hover:gap-2 transition-all">
+                                                            {{ $card->link_text }}
+                                                            <svg class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                            </svg>
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                {{-- Dots Indicator --}}
+                <div class="flex justify-center gap-2 mt-6" x-show="totalSlides > 1">
+                    <template x-for="i in totalSlides" :key="i">
+                        <button @click="currentSlide = i - 1"
+                            :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
+                            class="h-2 rounded-full transition-all duration-300"></button>
+                    </template>
+                </div>
+            </div>
+        </section>
+    @endif
+
+        {{-- Deals Section (Carousel Style) --}}
+        @php
+            $dealsChunks = ($deals ?? collect())->chunk(4);
+            $dealsCount = ($deals ?? collect())->count();
+        @endphp
+        @if ($dealsCount > 0)
+            <section id="deals" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+                currentSlide: 0,
+                itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
+                totalItems: {{ $dealsCount }},
+                get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
+                get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
+                get canGoPrev() { return this.currentSlide > 0 },
+                next() { if (this.canGoNext) this.currentSlide++;
+                    else this.currentSlide = 0 },
+                prev() { if (this.canGoPrev) this.currentSlide--;
+                    else this.currentSlide = this.totalSlides - 1 },
+                init() {
+                    window.addEventListener('resize', () => {
+                        this.itemsPerPage = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2;
+                        if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
+                    });
+                }
+            }">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end justify-between mb-8 sm:mb-10">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                                    {{ gtrans('Deals & Discounts') }}
+                                </h2>
+                            </div>
+                            <p class="text-sm sm:text-base text-gray-600">
+                                {{ gtrans('Grab the best offers on top products') }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button @click="prev()" :disabled="!canGoPrev"
+                                :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                                class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button @click="next()" :disabled="!canGoNext"
+                                :class="!canGoNext ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                                class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                            <a href="{{ route('products.deals') }}"
+                                class="ml-4 inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
+                                {{ gtrans('View All Deals') }}
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden">
+                        <div class="flex transition-transform duration-500 ease-out"
+                            :style="`transform: translateX(-${currentSlide * 100}%)`">
+                            @foreach ($dealsChunks as $chunk)
+                                @if ($chunk->count() > 0)
+                                    <div class="w-full shrink-0">
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                                            @foreach ($chunk as $productVariant)
+                                                @include('client.partials.product-card', [
+                                                    'product' => $productVariant,
+                                                ])
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    {{-- Dots Indicator --}}
+                    <div class="flex justify-center gap-2 mt-8" x-show="totalSlides > 1">
+                        <template x-for="i in totalSlides" :key="i">
+                            <button @click="currentSlide = i - 1"
+                                :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
+                                class="h-2 rounded-full transition-all duration-300"></button>
+                        </template>
+                    </div>
+                    <div class="mt-6 md:hidden flex justify-center">
+                        <a href="{{ route('products.deals') }}"
+                            class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
                             {{ gtrans('View All Deals') }}
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -316,173 +365,61 @@
                         </a>
                     </div>
                 </div>
-                <div class="relative overflow-hidden">
-                    <div class="flex transition-transform duration-500 ease-out"
-                        :style="`transform: translateX(-${currentSlide * 100}%)`">
-                        @foreach ($dealsChunks as $chunk)
-                            @if ($chunk->count() > 0)
-                            <div class="w-full shrink-0">
-                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                                    @foreach ($chunk as $productVariant)
-                                        @include('client.partials.product-card', ['product' => $productVariant])
-                                    @endforeach
-                                </div>
-                            </div>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
-                {{-- Dots Indicator --}}
-                <div class="flex justify-center gap-2 mt-8" x-show="totalSlides > 1">
-                    <template x-for="i in totalSlides" :key="i">
-                        <button @click="currentSlide = i - 1"
-                            :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
-                            class="h-2 rounded-full transition-all duration-300"></button>
-                    </template>
-                </div>
-                <div class="mt-6 md:hidden flex justify-center">
-                    <a href="{{ route('products.deals') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition-all text-sm">
-                        {{ gtrans('View All Deals') }}
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </section>
-    @endif
+            </section>
+        @endif
 
-    {{-- New Arrivals Carousel --}}
-    @php
-        $newArrivalsChunks = ($newArrivals ?? collect())->chunk(4);
-    @endphp
-    <section id="new-arrivals" class="py-12 sm:py-16 lg:py-20 bg-white" x-data="{
-        currentSlide: 0,
-        itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
-        totalItems: {{ isset($newArrivals) ? $newArrivals->count() : 0 }},
-        autoplay: null,
-        get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
-        get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
-        get canGoPrev() { return this.currentSlide > 0 },
-        next() { if (this.canGoNext) this.currentSlide++; else this.currentSlide = 0 },
-        prev() { if (this.canGoPrev) this.currentSlide--; else this.currentSlide = this.totalSlides - 1 },
-        init() {
-            this.startAutoplay();
-            window.addEventListener('resize', () => {
-                this.itemsPerPage = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2;
-                if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
-            });
-        },
-        startAutoplay() {
-              this.autoplay = setInterval(() => { this.next(); }, 9000);
-        },
-        stopAutoplay() {
-            clearInterval(this.autoplay);
-        }
-        }"
-        @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-end justify-between mb-8 sm:mb-10">
-                <div>
-                    <div class="flex items-center gap-2 mb-2">
-                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                            {{ gtrans('New Arrivals') }}
-                        </h2>
-                    </div>
-                    <p class="text-sm sm:text-base text-gray-600">
-                        {{ gtrans('The latest tech just landed') }}
-                    </p>
-                </div>
-                <div class="hidden md:flex items-center gap-2">
-                    <button @click="prev()" :class="!canGoPrev ? 'opacity-40' : 'hover:bg-primary hover:text-white'"
-                        class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button @click="next()" :class="!canGoNext ? 'opacity-40' : 'hover:bg-primary hover:text-white'"
-                        class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="relative overflow-hidden">
-                <div class="flex transition-transform duration-500 ease-out"
-                    :style="`transform: translateX(-${currentSlide * 100}%)`">
-                    @foreach ($newArrivalsChunks as $chunk)
-                        @if ($chunk->count() > 0)
-                        <div class="w-full shrink-0">
-                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                                @foreach ($chunk as $productVariant)
-                                    @include('client.partials.product-card', [
-                                        'product' => $productVariant,
-                                    ])
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- Dots Indicator --}}
-            <div class="flex justify-center gap-2 mt-8" x-show="totalSlides > 1">
-                <template x-for="i in totalSlides" :key="i">
-                    <button @click="currentSlide = i - 1"
-                        :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
-                        class="h-2 rounded-full transition-all duration-300"></button>
-                </template>
-            </div>
-        </div>
-    </section>
-
-    {{-- Bestsellers Carousel --}}
-    @php
-        $bestSellerCount = ($bestSellers ?? collect())->count();
-    @endphp
-    @if ($bestSellerCount > 0)
-        <section id="bestsellers" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+        {{-- New Arrivals Carousel --}}
+        @php
+            $newArrivalsChunks = ($newArrivals ?? collect())->chunk(4);
+        @endphp
+        <section id="new-arrivals" class="py-12 sm:py-16 lg:py-20 bg-white" x-data="{
             currentSlide: 0,
             itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
-            totalItems: {{ $bestSellerCount }},
+            totalItems: {{ isset($newArrivals) ? $newArrivals->count() : 0 }},
+            autoplay: null,
             get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
             get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
             get canGoPrev() { return this.currentSlide > 0 },
-            next() { if (this.canGoNext) this.currentSlide++ },
-            prev() { if (this.canGoPrev) this.currentSlide-- },
+            next() { if (this.canGoNext) this.currentSlide++;
+                else this.currentSlide = 0 },
+            prev() { if (this.canGoPrev) this.currentSlide--;
+                else this.currentSlide = this.totalSlides - 1 },
             init() {
+                this.startAutoplay();
                 window.addEventListener('resize', () => {
                     this.itemsPerPage = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2;
                     if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
                 });
+            },
+            startAutoplay() {
+                this.autoplay = setInterval(() => { this.next(); }, 9000);
+            },
+            stopAutoplay() {
+                clearInterval(this.autoplay);
             }
-        }">
+        }"
+            @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-end justify-between mb-8 sm:mb-10">
                     <div>
                         <div class="flex items-center gap-2 mb-2">
                             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                                {{ gtrans('Best Sellers') }}
+                                {{ gtrans('New Arrivals') }}
                             </h2>
                         </div>
                         <p class="text-sm sm:text-base text-gray-600">
-                            {{ gtrans('Most loved by our customers') }}
+                            {{ gtrans('The latest tech just landed') }}
                         </p>
                     </div>
                     <div class="hidden md:flex items-center gap-2">
-                        <button @click="prev()" :disabled="!canGoPrev"
-                            :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                        <button @click="prev()" :class="!canGoPrev ? 'opacity-40' : 'hover:bg-primary hover:text-white'"
                             class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
-                        <button @click="next()" :disabled="!canGoNext"
-                            :class="!canGoNext ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                        <button @click="next()" :class="!canGoNext ? 'opacity-40' : 'hover:bg-primary hover:text-white'"
                             class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -494,20 +431,17 @@
                 <div class="relative overflow-hidden">
                     <div class="flex transition-transform duration-500 ease-out"
                         :style="`transform: translateX(-${currentSlide * 100}%)`">
-                        @php
-                            $bestSellerChunks = ($bestSellers ?? collect())->chunk(4);
-                        @endphp
-                        @foreach ($bestSellerChunks as $chunk)
+                        @foreach ($newArrivalsChunks as $chunk)
                             @if ($chunk->count() > 0)
-                            <div class="w-full shrink-0">
-                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                                    @foreach ($chunk as $productVariant)
-                                        @include('client.partials.product-card', [
-                                            'product' => $productVariant,
-                                        ])
-                                    @endforeach
+                                <div class="w-full shrink-0">
+                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                                        @foreach ($chunk as $productVariant)
+                                            @include('client.partials.product-card', [
+                                                'product' => $productVariant,
+                                            ])
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
                             @endif
                         @endforeach
                     </div>
@@ -523,171 +457,257 @@
                 </div>
             </div>
         </section>
-    @endif
 
-    {{-- Brands Carousel (CSS marquee for smooth continuous scroll) --}}
-    <section id="brands" class="py-12 sm:py-16 bg-white border-y border-gray-100">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10">
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                    {{ gtrans('Trusted Brands') }}
-                </h2>
-                <p class="text-sm sm:text-base text-gray-600">
-                    {{ gtrans('We partner with the world\'s leading technology brands') }}
-                </p>
-            </div>
-
-            @php
-                $brandCount = ($brands ?? collect())->count();
-                $duration = max(12, $brandCount * 2);
-            @endphp
-            <style>
-                .brand-marquee-wrapper {
-                    overflow: hidden;
-                    position: relative;
+        {{-- Bestsellers Carousel --}}
+        @php
+            $bestSellerCount = ($bestSellers ?? collect())->count();
+        @endphp
+        @if ($bestSellerCount > 0)
+            <section id="bestsellers" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+                currentSlide: 0,
+                itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
+                totalItems: {{ $bestSellerCount }},
+                get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
+                get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
+                get canGoPrev() { return this.currentSlide > 0 },
+                next() { if (this.canGoNext) this.currentSlide++ },
+                prev() { if (this.canGoPrev) this.currentSlide-- },
+                init() {
+                    window.addEventListener('resize', () => {
+                        this.itemsPerPage = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2;
+                        if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
+                    });
                 }
-
-                .brand-marquee-inner {
-                    display: flex;
-                    align-items: center;
-                    gap: 3rem;
-                    width: max-content;
-                    will-change: transform;
-                    animation: marquee linear infinite;
-                }
-
-                .brand-marquee {
-                    display: flex;
-                    align-items: center;
-                    gap: 3rem;
-                }
-
-                .brand-marquee a {
-                    flex: 0 0 auto;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 0 0.25rem;
-                }
-
-                .brand-marquee img {
-                    display: block;
-                    height: 2.25rem;
-                    max-height: 2.5rem;
-                    width: auto;
-                    object-fit: contain;
-                }
-
-                .brand-marquee-inner:hover {
-                    animation-play-state: paused;
-                }
-
-                @keyframes marquee {
-                    0% {
-                        transform: translateX(0);
-                    }
-
-                    100% {
-                        transform: translateX(-50%);
-                    }
-                }
-            </style>
-
-            <div class="brand-marquee-wrapper">
-                <div class="brand-marquee-inner" style="animation-duration: {{ $duration }}s;">
-                    <div class="brand-marquee">
-                        @foreach ($brands ?? collect() as $brand)
-                            @php
-                                $imgPath = $brand->image
-                                    ? asset('storage/' . $brand->image)
-                                    : 'https://logo.clearbit.com/' .
-                                        ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
-                            @endphp
-                            <a href="javascript:void(0)" class="shrink-0">
-                                <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
-                                    class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
-                            </a>
-                        @endforeach
-                    </div>
-
-                    {{-- Duplicate for seamless loop --}}
-                    <div class="brand-marquee" aria-hidden="true">
-                        @foreach ($brands ?? collect() as $brand)
-                            @php
-                                $imgPath = $brand->image
-                                    ? asset('storage/' . $brand->image)
-                                    : 'https://logo.clearbit.com/' .
-                                        ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
-                            @endphp
-                            <a href="javascript:void(0)" class="shrink-0">
-                                <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
-                                    class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- Why Choose Section --}}
-    <section class="py-12 sm:py-16 lg:py-20 bg-gray-50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                    {{ gtrans('Why Shop With Us?') }}
-                </h2>
-                <p class="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-                    {{ gtrans('Experience excellence in every purchase') }}
-                </p>
-            </div>
-
-            @php
-                $whyShopWithUs = isset($whyShopWithUs) ? $whyShopWithUs : collect();
-                $locale = app()->getLocale();
-            @endphp
-
-            @if ($whyShopWithUs->isNotEmpty())
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 lg:gap-8">
-                    @foreach ($whyShopWithUs as $item)
-                        @php
-                            $title =
-                                $item->getTranslation('title', $locale, false) ??
-                                $item->getTranslation('title', 'en', false);
-                            $description =
-                                $item->getTranslation('description', $locale, false) ??
-                                $item->getTranslation('description', 'en', false);
-                            $icon = $item->icon ? asset('storage/' . ltrim($item->icon, '/')) : null;
-                        @endphp
-                        <div
-                            class="bg-white rounded-2xl p-6 lg:p-8 text-center hover:shadow-lg transition-all border border-gray-100">
-                            <div
-                                class="w-14 h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                                @if ($icon)
-                                    <img src="{{ $icon }}" alt="{{ $title ?? 'Icon' }}"
-                                        class="w-7 h-7 lg:w-8 lg:h-8 object-contain">
-                                @else
-                                    <svg class="w-7 h-7 lg:w-8 lg:h-8 text-primary" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7" />
-                                    </svg>
-                                @endif
+            }">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end justify-between mb-8 sm:mb-10">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                                    {{ gtrans('Best Sellers') }}
+                                </h2>
                             </div>
-                            <h3 class="text-lg lg:text-xl font-bold text-gray-900 mb-3">
-                                {{ $title ?? 'Feature' }}
-                            </h3>
-                            <p class="text-sm text-gray-600 leading-relaxed">
-                                {!! $description ?? '' !!}
+                            <p class="text-sm sm:text-base text-gray-600">
+                                {{ gtrans('Most loved by our customers') }}
                             </p>
                         </div>
-                    @endforeach
+                        <div class="hidden md:flex items-center gap-2">
+                            <button @click="prev()" :disabled="!canGoPrev"
+                                :class="!canGoPrev ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                                class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button @click="next()" :disabled="!canGoNext"
+                                :class="!canGoNext ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary hover:text-white'"
+                                class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative overflow-hidden">
+                        <div class="flex transition-transform duration-500 ease-out"
+                            :style="`transform: translateX(-${currentSlide * 100}%)`">
+                            @php
+                                $bestSellerChunks = ($bestSellers ?? collect())->chunk(4);
+                            @endphp
+                            @foreach ($bestSellerChunks as $chunk)
+                                @if ($chunk->count() > 0)
+                                    <div class="w-full shrink-0">
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                                            @foreach ($chunk as $productVariant)
+                                                @include('client.partials.product-card', [
+                                                    'product' => $productVariant,
+                                                ])
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Dots Indicator --}}
+                    <div class="flex justify-center gap-2 mt-8" x-show="totalSlides > 1">
+                        <template x-for="i in totalSlides" :key="i">
+                            <button @click="currentSlide = i - 1"
+                                :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
+                                class="h-2 rounded-full transition-all duration-300"></button>
+                        </template>
+                    </div>
                 </div>
-            @else
-                <div class="text-center text-gray-500">
-                    {{ gtrans('No features available at the moment.') }}
+            </section>
+        @endif
+
+        {{-- Brands Carousel (CSS marquee for smooth continuous scroll) --}}
+        <section id="brands" class="py-12 sm:py-16 bg-white border-y border-gray-100">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-10">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                        {{ gtrans('Trusted Brands') }}
+                    </h2>
+                    <p class="text-sm sm:text-base text-gray-600">
+                        {{ gtrans('We partner with the world\'s leading technology brands') }}
+                    </p>
                 </div>
-            @endif
-        </div>
-    </section>
-@endsection
+
+                @php
+                    $brandCount = ($brands ?? collect())->count();
+                    $duration = max(12, $brandCount * 2);
+                @endphp
+                <style>
+                    .brand-marquee-wrapper {
+                        overflow: hidden;
+                        position: relative;
+                    }
+
+                    .brand-marquee-inner {
+                        display: flex;
+                        align-items: center;
+                        gap: 3rem;
+                        width: max-content;
+                        will-change: transform;
+                        animation: marquee linear infinite;
+                    }
+
+                    .brand-marquee {
+                        display: flex;
+                        align-items: center;
+                        gap: 3rem;
+                    }
+
+                    .brand-marquee a {
+                        flex: 0 0 auto;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0 0.25rem;
+                    }
+
+                    .brand-marquee img {
+                        display: block;
+                        height: 2.25rem;
+                        max-height: 2.5rem;
+                        width: auto;
+                        object-fit: contain;
+                    }
+
+                    .brand-marquee-inner:hover {
+                        animation-play-state: paused;
+                    }
+
+                    @keyframes marquee {
+                        0% {
+                            transform: translateX(0);
+                        }
+
+                        100% {
+                            transform: translateX(-50%);
+                        }
+                    }
+                </style>
+
+                <div class="brand-marquee-wrapper">
+                    <div class="brand-marquee-inner" style="animation-duration: {{ $duration }}s;">
+                        <div class="brand-marquee">
+                            @foreach ($brands ?? collect() as $brand)
+                                @php
+                                    $imgPath = $brand->image
+                                        ? asset('storage/' . $brand->image)
+                                        : 'https://logo.clearbit.com/' .
+                                            ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
+                                @endphp
+                                <a href="javascript:void(0)" class="shrink-0">
+                                    <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
+                                        class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
+                                </a>
+                            @endforeach
+                        </div>
+
+                        {{-- Duplicate for seamless loop --}}
+                        <div class="brand-marquee" aria-hidden="true">
+                            @foreach ($brands ?? collect() as $brand)
+                                @php
+                                    $imgPath = $brand->image
+                                        ? asset('storage/' . $brand->image)
+                                        : 'https://logo.clearbit.com/' .
+                                            ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
+                                @endphp
+                                <a href="javascript:void(0)" class="shrink-0">
+                                    <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
+                                        class="h-8 lg:h-10 w-auto grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- Why Choose Section --}}
+        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
+                        {{ gtrans('Why Shop With Us?') }}
+                    </h2>
+                    <p class="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
+                        {{ gtrans('Experience excellence in every purchase') }}
+                    </p>
+                </div>
+
+                @php
+                    $whyShopWithUs = isset($whyShopWithUs) ? $whyShopWithUs : collect();
+                    $locale = app()->getLocale();
+                @endphp
+
+                @if ($whyShopWithUs->isNotEmpty())
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 lg:gap-8">
+                        @foreach ($whyShopWithUs as $item)
+                            @php
+                                $title =
+                                    $item->getTranslation('title', $locale, false) ??
+                                    $item->getTranslation('title', 'en', false);
+                                $description =
+                                    $item->getTranslation('description', $locale, false) ??
+                                    $item->getTranslation('description', 'en', false);
+                                $icon = $item->icon ? asset('storage/' . ltrim($item->icon, '/')) : null;
+                            @endphp
+                            <div
+                                class="bg-white rounded-2xl p-6 lg:p-8 text-center hover:shadow-lg transition-all border border-gray-100">
+                                <div
+                                    class="w-14 h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                                    @if ($icon)
+                                        <img src="{{ $icon }}" alt="{{ $title ?? 'Icon' }}"
+                                            class="w-7 h-7 lg:w-8 lg:h-8 object-contain">
+                                    @else
+                                        <svg class="w-7 h-7 lg:w-8 lg:h-8 text-primary" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <h3 class="text-lg lg:text-xl font-bold text-gray-900 mb-3">
+                                    {{ $title ?? 'Feature' }}
+                                </h3>
+                                <p class="text-sm text-gray-600 leading-relaxed">
+                                    {!! $description ?? '' !!}
+                                </p>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center text-gray-500">
+                        {{ gtrans('No features available at the moment.') }}
+                    </div>
+                @endif
+            </div>
+        </section>
+    @endsection
