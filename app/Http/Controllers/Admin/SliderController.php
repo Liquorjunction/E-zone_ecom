@@ -110,10 +110,16 @@ class SliderController extends Controller
             $id = $request->input('id');
             $sliderRepo->deleteSlider($id);
 
-            return redirect()->route('admin.hero-slider.index')->with('success', 'Slider deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Slider deleted successfully.',
+            ]);
         } catch (\Throwable $e) {
-            return redirect()->route('admin.hero-slider.index')
-                ->withErrors(['error' => $e->getMessage()]);
+            Log::error('Error deleting slider: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 
@@ -131,7 +137,10 @@ class SliderController extends Controller
                 ]);
             }
 
-            return redirect()->route('admin.hero-slider.index')->with('success', 'Selected sliders deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Selected sliders deleted successfully.',
+            ]);
         } catch (\Throwable $e) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -140,8 +149,10 @@ class SliderController extends Controller
                 ], 422);
             }
 
-            return redirect()->route('admin.hero-slider.index')
-                ->withErrors(['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 

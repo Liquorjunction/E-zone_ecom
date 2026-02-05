@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Helper function to format price with commas
     function formatPrice(price) {
         return parseFloat(price).toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -40,29 +39,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2500);
     }
 
-    // Function to update price display with discount information
     function updatePriceDisplay(discountInfo) {
         if (!discountInfo) return;
 
         const priceContainer = document.querySelector('.bg-gradient-to-r.from-primary\\/5');
         if (!priceContainer) return;
 
-        // Find the inner flex container (items-baseline) that holds the price
         const flexContainer = priceContainer.querySelector('.flex.items-baseline');
         if (!flexContainer) return;
 
-        // Find existing price wrapper (flex-col div), or create one
         let priceWrapper = flexContainer.querySelector('.flex.flex-col');
 
         if (!priceWrapper) {
-            // Create price wrapper if it doesn't exist
             priceWrapper = document.createElement('div');
             priceWrapper.className = 'flex flex-col gap-2';
-            // Insert it at the beginning of flexContainer
             flexContainer.insertBefore(priceWrapper, flexContainer.firstChild);
         }
 
-        // Determine if there's an actual discount
         const originalPrice = parseFloat(discountInfo.original_price) || 0;
         const finalPrice = parseFloat(discountInfo.final_price) || 0;
         const hasActualDiscount = discountInfo.has_discount === true && originalPrice > finalPrice;
@@ -77,9 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             discount_name: discountInfo.discount_name
         });
 
-        // Now update only the price wrapper content
         if (hasActualDiscount) {
-            // Show discounted price
             priceWrapper.innerHTML = `
                 <div class="text-2xl text-gray-400">
                     <span class="line-through">${window.CURRENCY_SYMBOL} ${formatPrice(originalPrice)}</span>
@@ -94,13 +85,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </span>` : ''}
             `;
         } else {
-            // Show regular price (no discount)
             priceWrapper.innerHTML = `
                 <span class="text-4xl font-bold text-primary">${window.CURRENCY_SYMBOL} ${formatPrice(finalPrice)}</span>
             `;
         }
 
-        // Handle discount badge (separate from price area)
         let discountBadge = priceContainer.querySelector('.mt-4.flex.items-center.gap-2.px-4.py-3.bg-green-50');
         if (hasActualDiscount && discountInfo.discount_name) {
             if (!discountBadge) {
@@ -115,7 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="text-sm font-semibold text-green-800">${discountInfo.discount_name} applied!</span>
             `;
         } else if (discountBadge) {
-            // Remove discount badge if no discount
             discountBadge.remove();
         }
     }
@@ -151,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const thumbButtons = document.querySelectorAll('.thumb-button');
     const mainImage = document.getElementById('main-product-image');
     thumbButtons.forEach(btn => {
-        button = btn; // Scope fix if strictly needed, but 'btn' usage below is fine
         btn.addEventListener('click', () => {
             const src = btn.getAttribute('data-image');
             if (src && mainImage) {
@@ -235,19 +222,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const variantId = btn.getAttribute('data-variant-id');
         const discountData = btn.getAttribute('data-discount');
 
-        // Parse and update discount information
         let discountInfo = null;
         if (discountData) {
             try {
                 discountInfo = JSON.parse(discountData);
                 console.log('Raw Parsed Discount Data:', discountInfo);
-                // Ensure has_discount is a boolean
                 discountInfo.has_discount = discountInfo.has_discount === true || discountInfo.has_discount === 1 || discountInfo.has_discount === '1' || discountInfo.has_discount === 'true';
                 console.log('Processed Discount Info:', discountInfo);
                 updatePriceDisplay(discountInfo);
             } catch (e) {
                 console.error('Error parsing discount data:', e, 'Raw data:', discountData);
-                // Fallback: create a basic discount info object with just the price
                 discountInfo = {
                     has_discount: false,
                     original_price: price,
@@ -258,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 updatePriceDisplay(discountInfo);
             }
         } else {
-            // No discount data, create empty discount info and show regular price
             discountInfo = {
                 has_discount: false,
                 original_price: price,
@@ -273,7 +256,6 @@ document.addEventListener('DOMContentLoaded', function() {
             skuEl.textContent = 'SKU: ' + sku;
         }
 
-        // Update the product price element directly
         if (priceEl) {
             const displayPrice = discountInfo?.final_price || price || 0;
             priceEl.textContent = window.CURRENCY_SYMBOL + ' ' + formatPrice(displayPrice);
@@ -282,7 +264,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const productTitleEl = document.getElementById('product-title');
         if (productTitleEl) {
             const baseName = productTitleEl.getAttribute('data-base-name') || productTitleEl.textContent;
-            // Decode HTML entities in variantName if present
             let decodedVariantName = variantName;
             if (variantName && typeof variantName === 'string') {
                 const txt = document.createElement('textarea');
@@ -294,13 +275,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (qtyInput) {
             if (qty > 0) {
-            qtyInput.removeAttribute('hidden');
-            setMaxStock(qty);
-            qtyInput.value = '1';
+                qtyInput.removeAttribute('hidden');
+                setMaxStock(qty);
+                qtyInput.value = '1';
             } else {
-            qtyInput.value = '0';
-            setMaxStock(null);
-            qtyInput.setAttribute('hidden', 'hidden');
+                qtyInput.value = '0';
+                setMaxStock(null);
+                qtyInput.setAttribute('hidden', 'hidden');
             }
         }
         if(qtyDecrease) {
@@ -384,13 +365,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         renderVariantSpecs(variantAttributes);
 
-        // Notify reviews module about variant change
         try {
             document.dispatchEvent(new CustomEvent('variantChanged', {
                 detail: { variantId: window.PRODUCT_VARIANT_ID }
             }));
         } catch (e) {
-            // Fallback: direct reload if available
             if (window.ProductReviews && typeof window.ProductReviews.reload === 'function') {
                 window.ProductReviews.reload();
             }
@@ -405,7 +384,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const specsRoot = document.getElementById('specifications-root');
         const productSpecsEl = document.getElementById('product-specs');
         const variantSpecsEl = document.getElementById('variant-specs');
-        const productHasContent = productSpecsEl && productSpecsEl.innerHTML.trim().length > 20;
 
         function renderVariantSpecs(specData) {
             if (!specsRoot || !variantSpecsEl) return;
@@ -415,7 +393,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                // decode HTML entities (Blade escapes JSON into attributes)
                 function htmlDecode(input) {
                     const txt = document.createElement('textarea');
                     txt.innerHTML = input;
@@ -423,7 +400,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (typeof specData === 'string') {
-                    // decode entities then try parsing JSON
                     const decoded = htmlDecode(specData.trim());
                     if (!decoded || decoded === 'null' || decoded === '[]' || decoded === '{}' || decoded === '""') {
                         variantSpecsEl.innerHTML = '';
@@ -437,7 +413,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 function renderRowsFromObject(obj) {
-                    // Normalize many shapes into [{k,v},...]
                     function getLocaleText(v) {
                         if (typeof v === 'string') return v;
                         if (typeof v === 'object') return v[document.documentElement.lang] || v.en || JSON.stringify(v);
@@ -476,7 +451,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         const pairs = [];
                         if (!spec && spec !== 0) return pairs;
                         if (typeof spec === 'string') {
-                            // assume already parsed string handled elsewhere
                             pairs.push({
                                 k: '',
                                 v: spec
@@ -497,7 +471,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                             v: item.value
                                         });
                                     } else {
-                                        // flatten object properties as separate rows
                                         Object.entries(item).forEach(([kk, vv]) => {
                                             const val = typeof vv === 'object' ? getLocaleText(vv) : vv;
                                             pairs.push({
@@ -516,10 +489,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             return pairs;
                         }
                         if (spec && typeof spec === 'object') {
-                            // maybe localized arrays
                             const localized = rowsFromLocalizedArray(spec);
                             if (localized && localized.length) return localized;
-                            // otherwise key->value map
                             Object.entries(spec).forEach(([k, v]) => {
                                 const val = typeof v === 'object' ? getLocaleText(v) : v;
                                 pairs.push({
@@ -529,7 +500,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                             return pairs;
                         }
-                        // fallback
                         pairs.push({
                             k: '',
                             v: String(spec)
@@ -540,7 +510,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const normalized = normalize(obj);
                     let rows = '';
                     normalized.forEach(p => {
-                        // detect image URLs
                         const val = p.v ?? '';
                         const isImage = typeof val === 'string' && (val.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) || val.includes('/storage/') || val.startsWith('http'));
                         const display = isImage ? `<img src="${val}" class="w-24 h-24 object-contain" alt="${p.k || ''}">` : (val ?? '');
@@ -551,7 +520,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 let variantHtml = '';
                 if (Array.isArray(specData) && specData.length > 0) {
-                    // produce table rows for array items
                     let rows = '';
                     specData.forEach((item, idx) => {
                         if (item && typeof item === 'object') {
@@ -587,13 +555,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (variantHtml) {
-                    // Auto-switch to Specifications tab when variant specs are present
                     try {
                         const specTabBtn = document.querySelector('.tab-button[data-tab="specifications"]');
                         if (specTabBtn) specTabBtn.click();
                     } catch (e) {}
 
-                    // Render only into the variant container; product content remains untouched
                     variantSpecsEl.innerHTML = variantHtml;
                 } else {
                     variantSpecsEl.innerHTML = '';
@@ -623,12 +589,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Handle Add-to-Cart form submission with AJAX
     const addToCartForm = document.getElementById('addToCartForm');
     let clickedButton = null;
 
     if (addToCartForm) {
-        // Track which button was clicked
         const addToCartBtn = document.getElementById('add-to-cart-btn');
         const buyNowBtn = document.getElementById('buy-now-btn');
 
@@ -648,7 +612,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             const formData = new FormData(this);
-            // Check if buy_now button was clicked
             const isBuyNow = clickedButton === 'buy_now';
 
             fetch(this.action, {
@@ -661,7 +624,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Dispatch cart:changed event to update header cart counter
                     if (data.summary && typeof data.summary.itemCount !== 'undefined') {
                         window.dispatchEvent(new CustomEvent('cart:changed', {
                             detail: {
@@ -671,7 +633,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         }));
                     }
 
-                    // Show success message
                     if (window.Toast && typeof window.Toast.success === 'function') {
                         window.Toast.success({
                             title: 'Success',
@@ -681,7 +642,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert(data.message || 'Item added to cart.');
                     }
 
-                    // Redirect if buy_now
                     if (isBuyNow) {
                         setTimeout(() => {
                             window.location.href = window.CHECKOUT_URL || '/checkout?step=2';

@@ -100,11 +100,17 @@ class CardController extends Controller
         try {
             $cardRepo->deleteCard($request->input('id'));
 
-            return redirect()->route('admin.cards.index')->with('success', 'Card deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Card deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return redirect()->route('admin.cards.index')->with('error', $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 

@@ -124,10 +124,16 @@ class ShowroomController extends Controller
             $id = $request->validated()['id'];
             $showroomRepo->deleteShowroom($id);
 
-            return redirect()->route('admin.showrooms.index')->with('success', 'Showroom deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Showroom deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error($e);
-            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 

@@ -5,7 +5,7 @@
 
     $nameRaw = $master?->getTranslation('name', $locale) ?? '';
     $variantName = $isVariant ? $product->getTranslation('variant_name', $locale) ?? '' : '';
-    $name = $isVariant 
+    $name = $isVariant
         ? (is_array($variantName) ? implode(' ', array_filter($variantName)) : (string) $variantName)
         : (is_array($nameRaw) ? implode(' ', array_filter($nameRaw)) : (string) $nameRaw);
 
@@ -19,15 +19,7 @@
 
     $productImage = optional($master->images()->forProduct($master->id)->ordered()->first())->image_path;
 
-    if ($variantImage) {
-        $imagePath = asset('storage/' . $variantImage);
-    } elseif ($productImage) {
-        $imagePath = asset('storage/' . $productImage);
-    } elseif ($master->cover_image) {
-        $imagePath = asset('storage/' . $master->cover_image);
-    } else {
-        $imagePath = null;
-    }
+    $imagePath = asset('storage/' . $master->cover_image);
 
     $real = $isVariant
         ? $product->price ?? ($master->real_price ?? ($master->price ?? 0))

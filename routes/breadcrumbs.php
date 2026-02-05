@@ -271,6 +271,12 @@ Breadcrumbs::for('admin.roles-permissions.edit', function (BreadcrumbTrail $trai
     $trail->push('Edit Role', route('admin.roles-permissions.edit'));
 });
 
+// --- Newsletter Subscribers ---
+Breadcrumbs::for('admin.newsletters.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Newsletter Subscribers', route('admin.newsletter-subscribers.index'));
+});
+
 // --- Profile ---
 Breadcrumbs::for('admin.profile.index', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');

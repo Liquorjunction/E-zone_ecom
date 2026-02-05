@@ -5,6 +5,7 @@ namespace App\Repositories\Admin\Repositories;
 use App\Models\QuickStat;
 use App\Repositories\Admin\Interfaces\QuickStatRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class QuickStatRepository implements QuickStatRepositoryInterface
 {
@@ -35,6 +36,8 @@ class QuickStatRepository implements QuickStatRepositoryInterface
 
         // Ensure status is valid enum value
         $data['status'] = in_array($data['status'], ['active', 'inactive']) ? $data['status'] : 'active';
+        $data['created_at'] = now();
+        $data['updated_at'] = now();
 
         return QuickStat::create($data);
     }

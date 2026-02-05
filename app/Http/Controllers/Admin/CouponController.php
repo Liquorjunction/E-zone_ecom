@@ -48,7 +48,7 @@ class CouponController extends Controller
         return view('admin.pages.coupon.show', compact('coupon'));
     }
 
-    public function edit(EditCouponRequest $request , CouponRepo $couponRepo)
+    public function edit(EditCouponRequest $request, CouponRepo $couponRepo)
     {
         $id = $request->input('id');
         $coupon = $couponRepo->getCouponById($id);
@@ -78,9 +78,12 @@ class CouponController extends Controller
             $id = $request->input('id');
             $couponRepo->deleteCoupon($id);
 
-            return redirect()->route('admin.coupons.index')->with('success', 'Coupon deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Coupon deleted successfully.',
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -138,7 +141,7 @@ class CouponController extends Controller
                 $data['id'] = $coupon->id;
                 $data['view_url'] = $request->user() && $request->user()->can('coupon.read') ? route('admin.coupons.show', ['id' => $coupon->id]) : '';
                 if ($request->user()->can('coupon.update') && isset($coupon->usages_count) && $coupon->usages_count == 0) {
-                     $data['edit_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.edit', ['id' => $coupon->id]) : '';
+                    $data['edit_url'] = $request->user() && $request->user()->can('coupon.update') ? route('admin.coupons.edit', ['id' => $coupon->id]) : '';
                 } else {
                     $data['edit_url'] = '';
                 }
@@ -146,7 +149,6 @@ class CouponController extends Controller
                     $data['delete_url'] = $request->user() && $request->user()->can('coupon.delete') ? route('admin.coupons.destroy', ['id' => $coupon->id]) : '';
                 } else {
                     $data['delete_url'] = '';
-
                 }
                 return view('admin.partials.datatable-actions', $data)->render();
             })

@@ -12,11 +12,15 @@
                 <div class="flex-col mb-4">
                     <h3 class="text-lg font-semibold text-white mb-2">Join Our Newsletter</h3>
                     <p class="text-sm">Get updates on new products and special offers.</p>
-                    <input type="checkbox" id="newsletter-checkbox">
-                    <span class="text-sm text-gray-400">I accept the <a href="#"
-                            class="text-primary hover:text-primary-dark transition-colors">Terms & Conditions</a></span>
+                    <div class="flex items-center gap-2 mt-3">
+                        <input type="checkbox" id="newsletter-checkbox" class="w-4 h-4 text-primary bg-gray-800 border-gray-600 rounded focus:ring-primary focus:ring-2">
+                        <label for="newsletter-checkbox" class="text-sm text-gray-400">
+                            I accept the <a href="{{ route('terms') }}"
+                                class="text-primary hover:text-primary-dark transition-colors">Terms & Conditions</a>
+                        </label>
+                    </div>
                 </div>
-                <form action="#" method="POST" class="flex">
+                <form id="newsletter-form" action="{{ route('newsletter.subscribe') }}" method="POST" class="flex">
                     @csrf
                     <label for="footer-email" class="sr-only">Email address</label>
                     <input type="email" name="email" id="footer-email" placeholder="Enter your email address"

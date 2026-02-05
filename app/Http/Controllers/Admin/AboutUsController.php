@@ -105,10 +105,16 @@ class AboutUsController extends Controller
             $id = $request->validated()['id'];
             $aboutUsRepo->destroyAboutUsData($id);
 
-            return redirect()->route('admin.about_us.index')->with('success', 'About Us deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'About Us deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('Error deleting About Us: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while deleting About Us.');
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting About Us.',
+            ], 500);
         }
     }
 

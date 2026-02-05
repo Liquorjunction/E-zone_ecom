@@ -114,11 +114,17 @@ class FaqController extends Controller
             $id = $request->input('id');
             $faqRepo->deleteFaq($id);
 
-            return redirect()->route('admin.faqs.index')->with('success', 'FAQ deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'FAQ deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 

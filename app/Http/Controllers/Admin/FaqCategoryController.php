@@ -102,10 +102,22 @@ class FaqCategoryController extends Controller
 
     public function destroy(DestroyFaqCategoryRequest $request, FaqCategoryRepo $faqCategoryRepo)
     {
-        $id = $request->input('id');
-        $faqCategoryRepo->deleteFaqCategory($id);
+        try {
+            $id = $request->input('id');
+            $faqCategoryRepo->deleteFaqCategory($id);
 
-        return redirect()->route('admin.faq-categories.index')->with('success', 'FAQ Category deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'FAQ Category deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
+        }
     }
 
     public function toggleStatus(EditFaqCategoryRequest $request, FaqCategoryRepo $faqCategoryRepo)

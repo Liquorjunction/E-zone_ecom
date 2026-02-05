@@ -147,14 +147,20 @@ class WarehouseController extends Controller
         try {
             $id = $request->validated()['id'];
             $warehouseRepo->deleteWarehouse($id);
-            return redirect()->route('admin.warehouses.index')->with('success', 'Warehouse deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Warehouse deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to delete warehouse', [
                 'warehouse_id' => $request->validated()['id'] ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->route('admin.warehouses.index')->with('error', 'Failed to delete warehouse: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 

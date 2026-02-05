@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\InventoryTransactionsController;
 use App\Http\Controllers\Admin\ManageCustomerController;
+use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
@@ -400,6 +401,14 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::post('/approve', [ReviewController::class, 'approve'])->name('approve')->middleware('can:reviews.update,admin');
             Route::post('/reject', [ReviewController::class, 'reject'])->name('reject')->middleware('can:reviews.update,admin');
             Route::delete('/destroy', [ReviewController::class, 'destroy'])->name('destroy')->middleware('can:reviews.delete,admin');
+        });
+
+        // Newsletter Subscribers Routes
+        Route::prefix('newsletter')->name('newsletter-subscribers.')->middleware('can:newsletter.read,admin')->group(function () {
+            Route::get('/', [NewsletterController::class, 'index'])->name('index');
+            Route::get('/data', [NewsletterController::class, 'data'])->name('data');
+            Route::patch('/toggle-status', [NewsletterController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:newsletter.update,admin'); // permission: newsletter.update
+            Route::delete('/destroy', [NewsletterController::class, 'destroy'])->name('destroy')->middleware('can:newsletter.delete,admin');
         });
 
         // Reports Routes

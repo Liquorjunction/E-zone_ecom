@@ -8,6 +8,7 @@ use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\InventoryController;
+use App\Http\Controllers\Client\NewsletterController;
 use App\Http\Controllers\Client\OrderController;
 use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\ProductController;
@@ -168,6 +169,10 @@ Route::middleware('client.auth')->group(function () {
     Route::post('/inventory/reserve', [InventoryController::class, 'reserve'])->name('inventory.reserve');
     Route::post('/inventory/release', [InventoryController::class, 'release'])->name('inventory.release');
     Route::post('/inventory/return', [InventoryController::class, 'processReturn'])->name('inventory.return');
+
+    // Newsletter Subscription
+    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
     // Addresses
     Route::prefix('client')->group(function () {

@@ -23,7 +23,7 @@ class DestroyStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|array',
+            'id' => 'required|integer|exists:stores,id',
         ];
     }
 
@@ -31,7 +31,6 @@ class DestroyStoreRequest extends FormRequest
     {
         return [
             'id.required' => 'The store ID is required.',
-            'id.array'    => 'The store ID must be an array.',
         ];
     }
 

@@ -130,11 +130,17 @@ class ShippingAndReturnController extends Controller
             $id = $request->validated()['id'];
             $shippingRepo->deleteShippingAndReturn($id);
 
-            return redirect()->back()->with('success', 'Shipping & Return Policy deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Shipping & Return Policy deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return redirect()->back()->with('error', 'Error deleting Shipping & Return Policy');
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting Shipping & Return Policy',
+            ], 500);
         }
     }
 

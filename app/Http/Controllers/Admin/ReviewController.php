@@ -41,7 +41,7 @@ class ReviewController extends Controller
             $reviewRepo->approveReview($id);
             return response()->json(['message' => 'Review approved successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to approve review.'], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to approve review.'], 500);
         }
     }
 
@@ -52,7 +52,7 @@ class ReviewController extends Controller
             $reviewRepo->rejectReview($id);
             return response()->json(['message' => 'Review rejected successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to reject review.'], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to reject review.'], 500);
         }
     }
 
@@ -61,9 +61,15 @@ class ReviewController extends Controller
         try {
             $id = $request->input('id');
             $reviewRepo->deleteReview($id);
-            return response()->json(['message' => 'Review deleted successfully.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Review deleted successfully.',
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to delete review.'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete review.'
+            ], 500);
         }
     }
 

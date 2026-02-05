@@ -107,10 +107,16 @@ class QuickStatController extends Controller
             $id = $request->input('id');
             $quickStatRepo->deleteQuickStat($id);
 
-            return redirect()->route('admin.quick-stats.index')->with('success', 'Quick Stat deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Quick Stat deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('Error deleting Quick Stat: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while deleting the Quick Stat.');
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting the Quick Stat.',
+            ], 500);
         }
     }
 

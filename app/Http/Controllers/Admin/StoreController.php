@@ -146,14 +146,20 @@ class StoreController extends Controller
             $id = $request->validated()['id'];
             $storeRepo->deleteStore($id);
 
-            return redirect()->route('admin.stores.index')->with('success', 'Store deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Store deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to delete store', [
                 'store_id' => $request->validated()['id'] ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('error', 'Failed to delete store: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 

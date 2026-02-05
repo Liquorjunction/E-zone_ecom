@@ -196,11 +196,18 @@ class DiscountController extends Controller
 
     public function destroy(DestroyDiscountRequest $request, DiscountRepo $discountRepo, DiscountService $discountService)
     {
-        $discountRepo->delete($request->input('id'));
+        try {
+            $discountRepo->delete($request->input('id'));
+            $discountService->clearAllDiscountCaches();
 
-        $discountService->clearAllDiscountCaches();
-
-        return redirect()->route('admin.discounts.index')->with('success', 'Discount deleted.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Discount deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('DiscountController.destroy: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to delete discount.'], 500);
+        }
     }
 
     public function toggleStatus(Request $request, DiscountRepo $discountRepo, DiscountTargetRepo $discountTargetRepo, DiscountService $discountService)

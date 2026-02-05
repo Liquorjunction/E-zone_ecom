@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Roles\ReadRoleRequest;
 use App\Http\Requests\Admin\Roles\StoreRoleRequest;
 use App\Http\Requests\Admin\Roles\UpdateRoleRequest;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface as RoleRepo;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
@@ -96,15 +97,29 @@ class RoleController extends Controller
 
     public function destroy(DestroyRoleRequest $request, RoleRepo $roleRepo)
     {
-        $id = $request->input('id');
-        $role = Role::where('guard_name', 'admin')->findOrFail($id);
+        try {
+            $id = $request->input('id');
+            $role = Role::where('guard_name', 'admin')->findOrFail($id);
 
-        if (in_array($role->name, ['super-admin'])) {
-            return back()->with('error', 'Cannot delete this system role.');
+            if (in_array($role->name, ['super-admin'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete this system role.',
+                ], 422);
+            }
+
+            $roleRepo->deleteRole($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Role deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to delete role: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
-
-        $roleRepo->deleteRole($id);
-
-        return redirect()->route('admin.roles-permissions.index')->with('success', 'Role deleted successfully.');
     }
 }

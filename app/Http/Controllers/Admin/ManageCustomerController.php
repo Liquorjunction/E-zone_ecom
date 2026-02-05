@@ -65,9 +65,16 @@ class ManageCustomerController extends Controller
             $id = $request->input('id');
             $customerRepo->deleteCustomer($id);
 
-            return redirect()->back()->with(['success', 'message' => 'Customer deleted successfully.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Customer deleted successfully.',
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['failure', 'message' => $e->getMessage()], 500);
+            Log::error($e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 
@@ -77,9 +84,15 @@ class ManageCustomerController extends Controller
             $ids = $request->input('ids', []);
             $customerRepo->batchDelete($ids);
 
-            return redirect()->back()->with(['success', 'message' => 'Selected customers deleted successfully.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Selected customers deleted successfully.',
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['failure', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 

@@ -103,11 +103,17 @@ class SubCategoryController extends Controller
             $id = $request->input('id');
             $subCategoryRepo->deleteSubCategory($id);
 
-            return redirect()->back()->with('success', 'SubCategory deleted successfully');
+            return response()->json([
+                'success' => true,
+                'message' => 'SubCategory deleted successfully',
+            ]);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return redirect()->back()->with('error', 'Error deleting SubCategory');
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 

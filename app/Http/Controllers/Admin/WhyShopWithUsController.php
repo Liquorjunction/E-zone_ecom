@@ -121,16 +121,25 @@ class WhyShopWithUsController extends Controller
             $deleted = $whyShopWithUsRepo->deleteWhyShopWithUs($id);
 
             if (!$deleted) {
-                return redirect()->back()->with('error', 'Failed to delete entry.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to delete',
+                ], 500);
             }
 
-            return redirect()->route('admin.whyshopwithus.index')->with('success', 'Entry deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Entry deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to delete Why Shop With Us entry', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('error', 'Failed to delete entry: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete',
+            ], 500);
         }
     }
 

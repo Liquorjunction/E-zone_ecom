@@ -17,10 +17,10 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Quick Stats List</h5>
-            @can('quick-stats.create')
+            @can('quick_stats.create')
                 <div class="card-action d-flex gap-2 align-items-center">
                     @include('admin.partials.batch-actions')
-                    <a href="{{ route('admin.quick-stats.create') }}" class="btn btn-sm btn-primary">
+                    <a id="add-quick-stat-btn" href="{{ route('admin.quick-stats.create') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus-circle me-1"></i>Add New Quick Stat
                     </a>
                 </div>

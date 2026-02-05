@@ -17,6 +17,7 @@ import './pagination';
 import './ajax-cart';
 import './add-to-cart-global';
 import './universal-popup';
+import './newsletter';
 
 axios.interceptors.response.use(function (response) {
     try {

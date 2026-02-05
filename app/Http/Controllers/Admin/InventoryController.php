@@ -135,13 +135,19 @@ class InventoryController extends Controller
                 return response()->json(['success' => 'Batch deleted successfully.']);
             }
 
-            return redirect()->route('admin.inventory.index')->with('success', 'Batch deleted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Batch deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('Error deleting inventory batch: ' . $e->getMessage());
             if ($request->ajax()) {
                 return response()->json(['error' => 'An error occurred while deleting.'], 500);
             }
-            return redirect()->back()->with('error', 'An error occurred while deleting the inventory.');
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting.',
+            ], 500);
         }
     }
 

@@ -140,7 +140,6 @@ class ProductController extends Controller
                 'status' => $newStatus,
                 'variants_updated' => $affected
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('ProductController.toggleStatus: Exception', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -233,11 +232,13 @@ class ProductController extends Controller
         try {
             $id = $request->validated()['id'];
             $productRepo->deleteProduct($id);
-            Log::info('ProductController.destroy: Product deleted', ['product_id' => $id]);
-            return redirect()->back()->with('success', 'Record deleted successfully');
+            return response()->json([
+                'success' => true,
+                'message' => 'Product deleted successfully.',
+            ]);
         } catch (\Exception $e) {
             Log::error('ProductController.destroy: Failed to delete product', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return redirect()->back()->with('error', 'Failed to delete record. Please check logs for details.');
+            return response()->json(['success' => false, 'message' => 'Failed to delete'], 500);
         }
     }
 
