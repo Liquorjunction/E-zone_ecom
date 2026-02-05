@@ -8,7 +8,7 @@ $(document).ready(function() {
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 title: 'Are you sure?',
-                text: "Once you delete this item it cannot be reverted?",
+                text: "This action cannot be undone.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
@@ -39,7 +39,7 @@ $(document).ready(function() {
             },
             success: function (response) {
                 console.log('Delete response:', response);
-                
+
                 if (response.success === true || response.success === 'true') {
                     // Show success message
                     if (typeof Swal !== 'undefined') {
@@ -53,7 +53,7 @@ $(document).ready(function() {
                     } else {
                         alert(response.message || 'Item deleted successfully.');
                     }
-                    
+
                     // Reload DataTable after a short delay
                     setTimeout(function() {
                         reloadDataTable();
@@ -75,13 +75,13 @@ $(document).ready(function() {
             error: function (xhr) {
                 console.error('Delete error:', xhr);
                 let message = 'An error occurred while deleting the item.';
-                
+
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                     message = xhr.responseJSON.message;
                 } else if (xhr.statusText) {
                     message = xhr.statusText;
                 }
-                
+
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'error',

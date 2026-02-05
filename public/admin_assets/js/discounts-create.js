@@ -57,18 +57,57 @@ $(document).ready(function() {
         }
     }
 
+    function getLockedTargetType() {
+        let $rows = $('#target-rows tr').not('.empty-message');
+        if (!$rows.length) return '';
+        let $first = $rows.first().find('select[name*="[target_type]"]');
+        return $first.length ? $first.val() : '';
+    }
+
+    function buildTargetTypeOptions(selectedType, lockedType) {
+        let options = [
+            { value: 'product', label: 'Product' },
+            { value: 'category', label: 'Category' },
+            { value: 'subcategory', label: 'Subcategory' },
+            { value: 'brand', label: 'Brand' }
+        ];
+        return options.map(function(opt) {
+            let selected = opt.value === selectedType ? 'selected' : '';
+            let disabled = lockedType && opt.value !== lockedType ? 'disabled' : '';
+            return `<option value="${opt.value}" ${selected} ${disabled}>${opt.label}</option>`;
+        }).join('');
+    }
+
+    function syncAllTargetTypes(lockedType) {
+        $('#target-rows tr').each(function() {
+            let $tr = $(this);
+            if ($tr.hasClass('empty-message')) return;
+            let $typeSelect = $tr.find('select[name*="[target_type]"]');
+            if (!$typeSelect.length) return;
+            let name = $typeSelect.attr('name');
+            let match = name.match(/targets\[(\d+)\]\[target_type\]/);
+            let index = match ? match[1] : null;
+            if ($typeSelect.val() !== lockedType) {
+                $typeSelect.val(lockedType);
+                let $secondTd = $tr.find('td').eq(1);
+                let $existing = $secondTd.find('select, input');
+                let currentVal = $existing.length ? $existing.val() : '';
+                $secondTd.html(makeTargetIdFieldHtml(index, lockedType, currentVal));
+                initializeSelect2($secondTd);
+            }
+        });
+    }
+
     $('#add-target-row').on('click', function() {
         $('.empty-message').remove();
-        let targetType = 'product';
+        let lockedType = getLockedTargetType();
+        let targetType = lockedType || 'product';
 
         let html = `
                 <tr>
                     <td class="ps-4">
                         <select name="targets[${rowIdx}][target_type]" class="form-select target-type-select">
-                            <option value="product">Product</option>
-                            <option value="category">Category</option>
-                            <option value="subcategory">Subcategory</option>
-                            <option value="brand">Brand</option>
+                            ${buildTargetTypeOptions(targetType, lockedType)}
                         </select>
                     </td>
                     <td>
@@ -95,6 +134,11 @@ $(document).ready(function() {
         let match = name.match(/targets\[(\d+)\]\[target_type\]/);
         let index = match ? match[1] : null;
         let val = $select.val();
+        let lockedType = getLockedTargetType();
+        if (lockedType && val !== lockedType) {
+            $select.val(lockedType);
+            val = lockedType;
+        }
         let currentVal = '';
         let $secondTd = $tr.find('td').eq(1);
         let $existing = $secondTd.find('select, input');
@@ -104,6 +148,9 @@ $(document).ready(function() {
         $secondTd.html(makeTargetIdFieldHtml(index, val, currentVal));
         // initialize select2 for replaced field
         initializeSelect2($secondTd);
+        if ($tr.is($('#target-rows tr').not('.empty-message').first())) {
+            syncAllTargetTypes(val);
+        }
         // re-validate all rows after replacing the field
         validateAllRows();
     });

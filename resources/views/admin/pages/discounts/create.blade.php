@@ -169,6 +169,10 @@
                                 </h5>
                                 <small class="text-muted">Specify which products, categories, or brands this discount
                                     applies to</small>
+                                <div class="small text-warning mt-2">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    All targets must use the same type as the first row.
+                                </div>
                             </div>
                             <button type="button" class="btn btn-primary" id="add-target-row">
                                 <i class="bi bi-plus me-2"></i>Add Target

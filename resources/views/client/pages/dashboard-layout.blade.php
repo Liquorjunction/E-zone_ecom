@@ -1,7 +1,7 @@
 @extends('client.layouts.app')
 
 @section('content')
-    <div class="bg-gradient-to-br from-gray-50 to-white min-h-screen">
+    <div class="bg-linear-to-br from-gray-50 to-white min-h-screen">
         <div class="container mx-auto px-4 py-4 lg:py-8">
 
             <x-breadcrumbs>
@@ -150,7 +150,7 @@
                 </div>
 
                 {{-- Desktop Sidebar --}}
-                <aside class="hidden lg:block lg:w-80 flex-shrink-0">
+                <aside class="hidden lg:block lg:w-80 shrink-0">
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 sticky top-24">
 
                         <div class="flex items-center gap-4 mb-6 pb-6 border-b-2 border-gray-100">
