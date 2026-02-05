@@ -10,8 +10,7 @@
         request()->routeIs('admin.inventory.*') ||
         request()->routeIs('admin.inventory-transactions.*');
 
-    $isCustomerSectionActive = request()->routeIs('admin.customers.*') ||
-        request()->routeIs('admin.newsletter-subscribers.*');
+    $isCustomerSectionActive = request()->routeIs('admin.customers.*');
 
     $isHomeMgmtActive = request()->routeIs('admin.hero-slider.*') ||
         request()->routeIs('admin.cards.*') ||
@@ -33,6 +32,10 @@
         request()->routeIs('admin.roles-permissions.*');
 
     $isOrdersSectionActive = request()->routeIs('admin.orders.*');
+
+    $isReviewsSectionActive = request()->routeIs('admin.reviews.*');
+
+    $isReportsSectionActive = request()->routeIs('admin.reports.*');
 
     $isCouponSectionActive = request()->routeIs('admin.coupons.*') ||
         request()->routeIs('admin.coupon-usage.*');
@@ -63,7 +66,7 @@
         </button>
     </div>
 
-    <div class="sidebar-body">
+    <div class="sidebar-body" style="overflow-y: auto; max-height: calc(100vh - 120px);">
         <div class="sidebar-list">
             <ul class="navbar-nav" id="sidebar-menu">
                 <!-- Dashboard -->
@@ -218,48 +221,18 @@
                 @endcanany
 
                 <!-- Manage Customers -->
-                @canany(['manageCustomers.read', 'newsletter_subscriber.read'])
+                @can('manageCustomers.read')
                     <li class="nav-item">
-                        <a class="nav-link {{ $isCustomerSectionActive ? 'section-active' : 'collapsed' }}"
-                            data-bs-toggle="collapse" href="#sidebar-customers" role="button"
-                            aria-expanded="{{ $isCustomerSectionActive ? 'true' : 'false' }}"
-                            aria-controls="sidebar-customers">
+                        <a class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}"
+                            href="{{ route('admin.customers.index') }}">
                             <i class="icon">
                                 <i class="bi bi-people"></i>
                             </i>
-                            <span class="item-name">Manage Customers</span>
-                            <i class="right-icon">
-                                <i class="bi bi-chevron-right"></i>
-                            </i>
+                            <span class="item-name">Customers</span>
                         </a>
-                        <ul class="sub-nav collapse {{ $isCustomerSectionActive ? 'show' : '' }}"
-                            id="sidebar-customers" data-bs-parent="#sidebar-menu">
-                            @can('manageCustomers.read')
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}"
-                                        href="{{ route('admin.customers.index') }}">
-                                        <i class="icon">
-                                            <i class="bi bi-person-lines-fill"></i>
-                                        </i>
-                                        <span class="item-name">Customers</span>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('newsletterSubscriber.read')
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('admin.newsletter-subscribers.*') ? 'active' : '' }}"
-                                        href="{{ route('admin.newsletter-subscribers.index') }}">
-                                        <i class="icon">
-                                            <i class="bi bi-envelope"></i>
-                                        </i>
-                                        <span class="item-name">Newsletter Subscribers</span>
-                                    </a>
-                                </li>
-                            @endcan
-                        </ul>
                     </li>
                     <li><hr class="hr-horizontal"></li>
-                @endcanany
+                @endcan
 
                 <!-- Pages -->
                 @canany(['slider.read', 'card.read', 'quick_stats.read', 'why_choose_us.read', 'about_us.read',
@@ -478,7 +451,7 @@
                 @endcanany
 
                 <!-- Orders -->
-                @can('orders.read')
+                @can('order.read')
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
                             href="{{ route('admin.orders.index') }}">
@@ -486,6 +459,20 @@
                                 <i class="bi bi-cart-check"></i>
                             </i>
                             <span class="item-name">Orders</span>
+                        </a>
+                    </li>
+                    <li><hr class="hr-horizontal"></li>
+                @endcan
+
+                <!-- Reviews -->
+                @can('reviews.read')
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}"
+                            href="{{ route('admin.reviews.index') }}">
+                            <i class="icon">
+                                <i class="bi bi-star"></i>
+                            </i>
+                            <span class="item-name">Reviews</span>
                         </a>
                     </li>
                     <li><hr class="hr-horizontal"></li>
@@ -587,7 +574,21 @@
                             @endcan
                         </ul>
                     </li>
+                    <li><hr class="hr-horizontal"></li>
                 @endcanany
+
+                <!-- Reports -->
+                @can('reports.read')
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
+                            href="{{ route('admin.reports.stock') }}">
+                            <i class="icon">
+                                <i class="bi bi-file-earmark-bar-graph"></i>
+                            </i>
+                            <span class="item-name">Stock Reports</span>
+                        </a>
+                    </li>
+                @endcan
             </ul>
         </div>
     </div>
