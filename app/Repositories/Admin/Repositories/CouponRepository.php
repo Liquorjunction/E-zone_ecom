@@ -68,8 +68,27 @@ class CouponRepository implements CouponRepositoryInterface
         $query = Coupon::query()
             ->select(['id', 'name', 'code', 'coupon_type', 'starts_at', 'ends_at', 'status'])->withCount('usages');
 
+        // Apply filters if provided
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
+        }
+
+        // Apply global search filter
+        if (isset($filters['search']['value']) && !empty($filters['search']['value'])) {
+            $search = $filters['search']['value'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('code', 'like', "%$search%")
+                  ->orWhere('coupon_type', 'like', "%$search%");
+            });
+        }
+
+        // Apply ordering
+        if (isset($filters['order'][0]['column']) && isset($filters['order'][0]['dir'])) {
+            $columns = ['id', 'name', 'code', 'usages_count', 'coupon_type', 'starts_at', 'ends_at', 'status'];
+            $orderColumn = $columns[$filters['order'][0]['column']];
+            $orderDir = $filters['order'][0]['dir'];
+            $query->orderBy($orderColumn, $orderDir);
         }
 
         return $query;

@@ -36,12 +36,12 @@ $(function () {
                 defaultContent: '',
                 width: "15px"
             },
-            { data: 'id', name: 'id' },
-            { data: 'product_name', name: 'product_name' },
-            { data: 'quantity', name: 'quantity' },
-            { data: 'location_type', name: 'location_type' },
-            { data: 'type', name: 'type' },
-            { data: 'created_at', name: 'created_at' }
+            { data: 'id', name: 'inventory_transactions.id' },
+            { data: 'product_name', name: 'products.name' },
+            { data: 'quantity', name: 'inventory_transactions.quantity' },
+            { data: 'location_type', name: 'inventories.location_type' },
+            { data: 'type', name: 'inventory_transactions.type' },
+            { data: 'created_at', name: 'inventory_transactions.created_at' }
         ],
         order: [[1, 'desc']]
     });

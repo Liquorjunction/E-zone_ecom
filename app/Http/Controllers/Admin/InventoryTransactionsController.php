@@ -7,6 +7,7 @@ use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface a
 use App\Http\Requests\Admin\InventoryTransactions\ReadInventoryTransactionsRequest;
 use Yajra\DataTables\Facades\DataTables;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class InventoryTransactionsController extends Controller
 {
@@ -18,7 +19,9 @@ class InventoryTransactionsController extends Controller
     public function getDataTable(InventoryTransactionsRepo $inventoryTransactionsRepo)
     {
         try {
-            return DataTables::of($inventoryTransactionsRepo->getdataforDataTable())
+            $data = $inventoryTransactionsRepo->getdataforDataTable();
+
+            return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('product_name', function ($transaction) {
                     $product_name = $transaction->product_name;
@@ -96,6 +99,7 @@ class InventoryTransactionsController extends Controller
                 })
                 ->make(true);
         } catch (Exception $e) {
+            Log::error('DataTable Error:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to fetch data for DataTable.'], 500);
         }
     }

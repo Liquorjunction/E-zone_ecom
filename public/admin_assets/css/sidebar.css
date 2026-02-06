@@ -706,3 +706,17 @@
 .sidebar-hover:hover .nav-link {
     contain: layout style paint;
 }
+
+/* Ensure mini logo is visible in collapsed view */
+.sidebar.sidebar-mini .logo-normal {
+    display: none;
+}
+
+.sidebar.sidebar-mini .logo-mini {
+    display: block !important;
+}
+
+/* Default state for mini logo */
+.logo-mini {
+    display: none;
+}
