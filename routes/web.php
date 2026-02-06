@@ -96,6 +96,10 @@ Route::middleware('guest')->group(function () {
     Route::view('/register', 'client.auth.register')->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+
+    // Newsletter Subscription
+    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 });
 
 /*
@@ -169,10 +173,6 @@ Route::middleware('client.auth')->group(function () {
     Route::post('/inventory/reserve', [InventoryController::class, 'reserve'])->name('inventory.reserve');
     Route::post('/inventory/release', [InventoryController::class, 'release'])->name('inventory.release');
     Route::post('/inventory/return', [InventoryController::class, 'processReturn'])->name('inventory.return');
-
-    // Newsletter Subscription
-    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
-    Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
     // Addresses
     Route::prefix('client')->group(function () {
