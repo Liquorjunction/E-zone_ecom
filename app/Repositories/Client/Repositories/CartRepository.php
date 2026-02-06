@@ -127,18 +127,17 @@ class CartRepository implements CartRepositoryInterface
             $totalDiscount += $lineDiscount;
 
             $itemsData[$item->id] = [
+                'id' => $item->id,
                 'quantity' => $quantity,
                 'unit_price' => $itemPrice,
-                'discount_amount' => $discountData['discount_amount'] ?? 0,
-                'final_price' => $discountData['final_price'] ?? $itemPrice,
-                'line_total' => round($lineTotal, 2),
-                'line_discount' => round($lineDiscount, 2),
-                'line_total_after_discount' => round($lineFinal, 2),
-                'discount_info' => $discountData,
+                'line_total' => $lineTotal,
+                'discount_amount' => $lineDiscount,
+                'line_total_after_discount' => $lineFinal,
             ];
         }
 
-        $couponDiscount = $cart->coupon_discount_amount ?? 0;
+        // Retrieve coupon discount from session
+        $couponDiscount = session('cart.coupon.discount_amount', 0);
         $totalAfterDiscount = $subtotal - $totalDiscount;
         $finalTotal = max(0, $totalAfterDiscount - $couponDiscount);
 
