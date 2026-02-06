@@ -133,6 +133,7 @@ class ReviewRepository implements ReviewRepositoryInterface
     {
         return Review::where('user_id', $userId)
             ->where('order_item_id', $orderItemId)
+            ->with(['images'])
             ->first();
     }
 

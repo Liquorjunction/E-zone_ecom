@@ -581,13 +581,13 @@
                                     <div>
                                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email
                                             Address *</label>
-                                        <input type="email" id="email" name="email" required
+                                        <input type="email" id="email" name="email" value="{{ Auth::check() ? Auth::user()->email : '' }}" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                                     </div>
                                     <div>
                                         <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone
                                             Number *</label>
-                                        <input type="tel" id="phone" name="phone" required
+                                        <input type="tel" id="phone" name="phone" value="{{ Auth::check() ? Auth::user()->phone : '' }}" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                                     </div>
                                 </div>

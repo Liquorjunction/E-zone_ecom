@@ -118,9 +118,20 @@
                     </div>
                     <div class="row mb-4">
                         <div class="col-12">
-                            <h6>Review Content</h6>
-                            <div class="border rounded p-3 bg-light">
-                                <div class="lh-lg">{{ $review->review_text }}</div>
+                            <h6 class="mb-3">
+                                <i class="bi bi-chat-left-quote text-primary me-2"></i>Review Content
+                            </h6>
+                            <div class="card border-0 bg-light shadow-sm">
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-600 text-dark">Title</label>
+                                        <p class="mb-0 text-dark">{{ $review->title }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="form-label fw-600 text-dark">Review</label>
+                                        <p class="mb-0 text-muted lh-lg">{{ $review->review_text }}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -164,82 +175,10 @@
                         <a href="{{ route('admin.reviews.index') }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-2"></i>Back to Reviews
                         </a>
-                        @if(auth('admin')->user()->can('reviews.delete'))
-                            <button class="btn btn-outline-danger ms-auto" onclick="deleteReview({{ $review->id }})">
-                                <i class="bi bi-trash me-2"></i>Delete Review
-                            </button>
-                        @endif
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    function deleteReview(reviewId) {
-        if (typeof Swal === 'undefined') {
-            if (confirm('Are you sure you want to delete this review?')) {
-                deleteReviewConfirm(reviewId);
-            }
-            return;
-        }
-
-        Swal.fire({
-            title: 'Delete Review?',
-            text: "This action cannot be undone!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                deleteReviewConfirm(reviewId);
-            }
-        });
-    }
-
-    function deleteReviewConfirm(reviewId) {
-        $.ajax({
-            url: '{{ route("admin.reviews.destroy") }}',
-            type: 'POST',
-            data: {
-                id: reviewId,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Deleted!',
-                        text: response.message,
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.href = '{{ route("admin.reviews.index") }}';
-                    });
-                } else {
-                    alert(response.message);
-                    window.location.href = '{{ route("admin.reviews.index") }}';
-                }
-            },
-            error: function(xhr) {
-                const message = xhr.responseJSON?.message || 'Failed to delete review.';
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: message
-                    });
-                } else {
-                    alert('Error: ' + message);
-                }
-            }
-        });
-    }
-</script>
-@endpush
 @endsection

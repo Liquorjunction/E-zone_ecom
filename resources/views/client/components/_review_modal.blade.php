@@ -40,7 +40,8 @@
 
         {{-- Rating --}}
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Overall Rating <span class="text-red-500">*</span></label>
+          <p class="text-xs text-gray-500 mb-2">Select 1 to 5 stars to rate this product.</p>
           <div class="flex items-center gap-2">
             <div class="flex gap-1" id="star-rating">
               @for($i = 1; $i <= 5; $i++)
@@ -53,38 +54,43 @@
             </div>
             <span id="rating-text" class="text-sm font-medium text-gray-600 ml-2"></span>
           </div>
+          <p id="review-rating-error" class="mt-2 text-xs text-red-600 hidden">Please select a rating.</p>
           <input type="hidden" name="rating" id="review-rating" value="" required>
         </div>
 
         {{-- Title --}}
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Review Title</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Review Title</label>
+          <p class="text-xs text-gray-500 mb-2">Summarize your experience in a short headline.</p>
           <input type="text" name="title" id="review-title" placeholder="Summarize your experience" maxlength="255" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
         </div>
 
         {{-- Review Text --}}
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Your Review</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Your Review</label>
+          <p class="text-xs text-gray-500 mb-2">Share what you liked, what could be better, and any tips for others.</p>
           <textarea name="review_text" id="review-text" rows="5" placeholder="Share your thoughts about this product..." class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           {{-- Reviewer Name --}}
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Display Name</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
+            <p class="text-xs text-gray-500 mb-2">Shown publicly with your review.</p>
             <input type="text" name="reviewer_name" id="review-name" placeholder="Your name" maxlength="255" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
           </div>
 
           {{-- Reviewer Email --}}
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Email (Optional)</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span id="review-email-optional">(Optional)</span></label>
+            <p class="text-xs text-gray-500 mb-2">Used for verification only, not displayed.</p>
             <input type="email" name="reviewer_email" id="review-email" placeholder="your@email.com" maxlength="255" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
           </div>
         </div>
 
         {{-- Images --}}
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Add Photos <span class="text-gray-400 font-normal">(Optional)</span></label>
+        <div id="review-image-section">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Add Photos <span id="review-images-optional" class="text-gray-400 font-normal">(Optional)</span></label>
           <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-primary hover:bg-primary/5 transition-all cursor-pointer" id="image-upload-area">
             <input type="file" name="images[]" id="review-images" multiple accept="image/*" class="hidden" onchange="handleImagePreview(this)">
             <label for="review-images" class="cursor-pointer">
@@ -100,7 +106,7 @@
       </div>
 
       <div class="flex items-center justify-end gap-3 px-8 py-6 bg-gray-50 border-t border-gray-200">
-        <button type="button" onclick="closeReviewModal()" class="px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all">
+        <button type="button" id="review-cancel-btn" onclick="closeReviewModal()" class="px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all">
           Cancel
         </button>
         <button type="submit" id="review-submit-btn" class="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2">
@@ -122,8 +128,9 @@
         <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
+        <span id="mobile-review-back-label" class="sr-only">Back</span>
       </button>
-      <h3 id="mobile-review-title" class="text-lg font-bold text-gray-900">Write a Review</h3>
+      <h3 id="mobile-review-modal-title" class="text-lg font-bold text-gray-900">Write a Review</h3>
       <div class="w-10"></div>
     </div>
   </div>
@@ -151,7 +158,8 @@
 
       {{-- Mobile Rating --}}
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Overall Rating <span class="text-red-500">*</span></label>
+        <p class="text-xs text-gray-500 mb-2">Select 1 to 5 stars to rate this product.</p>
         <div class="flex items-center gap-2">
           <div class="flex gap-1" id="mobile-star-rating">
             @for($i = 1; $i <= 5; $i++)
@@ -163,31 +171,36 @@
             @endfor
           </div>
         </div>
+        <p id="mobile-review-rating-error" class="mt-2 text-xs text-red-600 hidden">Please select a rating.</p>
         <input type="hidden" name="rating" id="mobile-review-rating" value="" required>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">Review Title</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Review Title</label>
+        <p class="text-xs text-gray-500 mb-2">Summarize your experience in a short headline.</p>
         <input type="text" name="title" id="mobile-review-title" placeholder="Summarize your experience" maxlength="255" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Review</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Your Review</label>
+        <p class="text-xs text-gray-500 mb-2">Share what you liked, what could be better, and any tips for others.</p>
         <textarea name="review_text" id="mobile-review-text" rows="5" placeholder="Share your thoughts..." class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none text-base"></textarea>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">Display Name</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
+        <p class="text-xs text-gray-500 mb-2">Shown publicly with your review.</p>
         <input type="text" name="reviewer_name" id="mobile-review-name" placeholder="Your name" maxlength="255" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">Email (Optional)</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span id="mobile-review-email-optional">(Optional)</span></label>
+        <p class="text-xs text-gray-500 mb-2">Used for verification only, not displayed.</p>
         <input type="email" name="reviewer_email" id="mobile-review-email" placeholder="your@email.com" maxlength="255" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
       </div>
 
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">Add Photos (Optional)</label>
+      <div id="mobile-review-image-section">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Add Photos <span id="mobile-review-images-optional">(Optional)</span></label>
         <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center" id="mobile-image-upload-area">
           <input type="file" name="images[]" id="mobile-review-images" multiple accept="image/*" class="hidden" onchange="handleMobileImagePreview(this)">
           <label for="mobile-review-images" class="cursor-pointer">

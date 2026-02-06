@@ -10,20 +10,20 @@
 
             {{-- Order Header --}}
             @php
-                    $status = strtolower($order->status ?? 'pending');
-                    $statusClass = match ($status) {
-                        'delivered', 'completed' => 'text-green-700 bg-green-100',
-                        'shipped' => 'text-primary bg-primary/10',
-                        'processing' => 'text-yellow-700 bg-yellow-100',
-                        'cancelled' => 'text-red-700 bg-red-100',
-                        default => 'text-gray-700 bg-gray-100',
-                    };
-                    $stages = ['placed', 'processing', 'shipped', 'delivered', 'completed'];
-                    $currentIndex = array_search($status, $stages, true);
-                    if ($currentIndex === false) {
-                        $currentIndex = 0;
-                    }
-                    $progressPct = (($currentIndex + 1) / count($stages)) * 100;
+                $status = strtolower($order->status ?? 'pending');
+                $statusClass = match ($status) {
+                    'delivered', 'completed' => 'text-green-700 bg-green-100',
+                    'shipped' => 'text-primary bg-primary/10',
+                    'processing' => 'text-yellow-700 bg-yellow-100',
+                    'cancelled' => 'text-red-700 bg-red-100',
+                    default => 'text-gray-700 bg-gray-100',
+                };
+                $stages = ['placed', 'processing', 'shipped', 'delivered', 'completed'];
+                $currentIndex = array_search($status, $stages, true);
+                if ($currentIndex === false) {
+                    $currentIndex = 0;
+                }
+                $progressPct = (($currentIndex + 1) / count($stages)) * 100;
             @endphp
 
             <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 mb-4 lg:mb-6">
@@ -136,7 +136,9 @@
 
                                     @foreach ($displayStages as $idx => $stage)
                                         @php
-                                            $isActive = $idx <= $currentIndex || strtolower($order->status ?? '') === 'cancelled';
+                                            $isActive =
+                                                $idx <= $currentIndex ||
+                                                strtolower($order->status ?? '') === 'cancelled';
                                             $isCancelled = $stage === 'cancelled';
                                             $label = ucfirst($stage);
                                             $tsField = $stage . '_at';
@@ -155,8 +157,10 @@
                                             <div
                                                 class="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 {{ $isCancelled ? 'bg-red-100 text-red-600' : ($isActive ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-500') }}">
                                                 @if ($isCancelled)
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
                                                 @elseif ($isActive)
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"
@@ -168,7 +172,9 @@
                                                     <span class="text-sm font-semibold">{{ $idx + 1 }}</span>
                                                 @endif
                                             </div>
-                                            <div class="text-xs font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">{{ $label }}</div>
+                                            <div
+                                                class="text-xs font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">
+                                                {{ $label }}</div>
                                             <div class="text-xs text-gray-500 mt-1">
                                                 @if ($ts)
                                                     {{ optional($ts)->format('M j, g:i A') }}
@@ -195,7 +201,8 @@
                             @endphp
                             @foreach ($displayStages as $idx => $stage)
                                 @php
-                                    $isActive = $idx <= $currentIndex || strtolower($order->status ?? '') === 'cancelled';
+                                    $isActive =
+                                        $idx <= $currentIndex || strtolower($order->status ?? '') === 'cancelled';
                                     $isCancelled = $stage === 'cancelled';
                                     $label = ucfirst($stage);
                                     $tsField = $stage . '_at';
@@ -214,8 +221,10 @@
                                         <div
                                             class="w-10 h-10 rounded-full flex items-center justify-center {{ $isCancelled ? 'bg-red-100 text-red-600' : ($isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500') }}">
                                             @if ($isCancelled)
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             @elseif ($isActive)
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
@@ -232,7 +241,9 @@
                                         @endif
                                     </div>
                                     <div class="flex-1 pb-2">
-                                        <div class="text-sm font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">{{ $label }}</div>
+                                        <div
+                                            class="text-sm font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">
+                                            {{ $label }}</div>
                                         <div class="text-xs text-gray-500 mt-1">
                                             @if ($ts)
                                                 {{ optional($ts)->format('M j, g:i A') }}
@@ -252,8 +263,11 @@
                         @if (strtolower($order->status ?? '') === 'cancelled' && $order->cancel_reason)
                             <div class="mt-6 p-4 bg-red-50 border-2 border-red-100 rounded-xl">
                                 <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="currentColor"
+                                        viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <div>
                                         <p class="text-sm font-semibold text-red-900">Order Cancelled</p>
@@ -264,7 +278,7 @@
                         @endif
 
                         {{-- Shipping Info --}}
-                        @if ($status === 'delivered' || $status === 'completed' && $order->delivered_by)
+                        @if ($status === 'delivered' || ($status === 'completed' && $order->delivered_by))
                             <div class="mt-6 p-4 bg-green-50 border-2 border-green-100 rounded-xl">
                                 <div class="flex items-start gap-3">
                                     <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="currentColor"
@@ -317,7 +331,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h3 class="font-semibold text-gray-900 text-sm lg:text-base mb-1 line-clamp-2">
-                                            {{ $title }}</h3>
+                                            {{ $variantName }}</h3>
                                         <p class="text-xs text-gray-500 mb-2">Qty: {{ $item->quantity }}</p>
                                         <div class="flex items-center justify-between flex-wrap gap-2">
                                             <div class="flex-1">
@@ -347,39 +361,81 @@
                                                     </span>
                                                 @endif
                                             </div>
-                                            @if(in_array(strtolower($order->status ?? ''), ['delivered', 'completed']))
-                                                @if(isset($userReviews[$item->id]) && $userReviews[$item->id])
-                                                    @php $userReview = $userReviews[$item->id]; @endphp
-                                                    <button type="button"
-                                                        onclick="openReviewModal({
-                                                            id: {{ $userReview->id }},
-                                                            product_id: {{ $product->id ?? 0 }},
-                                                            product_variant_id: {{ $item->variant_id ?? 'null' }},
-                                                            order_id: {{ $order->id }},
-                                                            order_item_id: {{ $item->id }},
-                                                            rating: {{ $userReview->rating }},
-                                                            title: '{{ addslashes($userReview->title ?? '') }}',
-                                                            review_text: '{{ addslashes($userReview->review_text ?? '') }}',
-                                                            reviewer_name: '{{ addslashes($userReview->reviewer_name ?? '') }}',
-                                                            reviewer_email: '{{ addslashes($userReview->reviewer_email ?? '') }}',
-                                                            product_name: '{{ addslashes($productName) }}',
-                                                            variant_name: '{{ addslashes($variantName ?? '') }}',
-                                                            product_image: '{{ $imgUrl }}'
-                                                        })"
-                                                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-all duration-200">
-                                                        Edit Review
-                                                    </button>
+                                            @if (in_array(strtolower($order->status ?? ''), ['delivered', 'completed']))
+                                                @if (!empty($userReviews[$item->id]))
+                                                    @php
+                                                        $userReview = $userReviews[$item->id];
+                                                        $reviewStatus = strtolower($userReview->is_approved ?? 'pending');
+                                                        $reviewImages = $userReview->images
+                                                            ? $userReview->images->map(function ($image) {
+                                                                $path = $image->image_path ?? '';
+                                                                return \Illuminate\Support\Str::startsWith($path, ['http', 'https', '/'])
+                                                                    ? $path
+                                                                    : asset('storage/' . ltrim($path, '/'));
+                                                            })->values()
+                                                            : collect();
+                                                    @endphp
+                                                    @if ($reviewStatus === 'approved')
+                                                        <button type="button"
+                                                            onclick='openReviewModal({
+                                                                mode: "view",
+                                                                id: {{ $userReview->id }},
+                                                                product_id: {{ $product->id ?? 0 }},
+                                                                product_variant_id: {{ $item->variant_id ?? 'null' }},
+                                                                order_id: {{ $order->id }},
+                                                                order_item_id: {{ $item->id }},
+                                                                rating: {{ $userReview->rating }},
+                                                                title: @json($userReview->title ?? ''),
+                                                                review_text: @json($userReview->review_text ?? ''),
+                                                                reviewer_name: @json($userReview->reviewer_name ?? ''),
+                                                                reviewer_email: @json($userReview->reviewer_email ?? ''),
+                                                                fallback_reviewer_name: @json(Auth::user()?->name ?? ''),
+                                                                fallback_reviewer_email: @json(Auth::user()?->email ?? ''),
+                                                                product_name: @json($productName),
+                                                                variant_name: @json($variantName ?? ''),
+                                                                product_image: @json($imgUrl),
+                                                                images: @json($reviewImages)
+                                                            })'
+                                                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-500 hover:text-gray-700 bg-white hover:bg-white border hover:border-gray-300 border-green-600 rounded-lg transition-all duration-200">
+                                                            View Review
+                                                        </button>
+                                                    @else
+                                                        <button type="button"
+                                                            onclick='openReviewModal({
+                                                                id: {{ $userReview->id }},
+                                                                product_id: {{ $product->id ?? 0 }},
+                                                                product_variant_id: {{ $item->variant_id ?? 'null' }},
+                                                                order_id: {{ $order->id }},
+                                                                order_item_id: {{ $item->id }},
+                                                                rating: {{ $userReview->rating }},
+                                                                title: @json($userReview->title ?? ''),
+                                                                review_text: @json($userReview->review_text ?? ''),
+                                                                reviewer_name: @json($userReview->reviewer_name ?? ''),
+                                                                reviewer_email: @json($userReview->reviewer_email ?? ''),
+                                                                fallback_reviewer_name: @json(Auth::user()?->name ?? ''),
+                                                                fallback_reviewer_email: @json(Auth::user()?->email ?? ''),
+                                                                product_name: @json($productName),
+                                                                variant_name: @json($variantName ?? ''),
+                                                                product_image: @json($imgUrl),
+                                                                images: @json($reviewImages)
+                                                            })'
+                                                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-all duration-200">
+                                                            Edit Review
+                                                        </button>
+                                                    @endif
                                                 @else
                                                     <button type="button"
-                                                        onclick="openReviewModal({
+                                                        onclick='openReviewModal({
                                                             product_id: {{ $product->id ?? 0 }},
                                                             product_variant_id: {{ $item->variant_id ?? 'null' }},
                                                             order_id: {{ $order->id }},
                                                             order_item_id: {{ $item->id }},
-                                                            product_name: '{{ addslashes($productName) }}',
-                                                            variant_name: '{{ addslashes($variantName ?? '') }}',
-                                                            product_image: '{{ $imgUrl }}'
-                                                        })"
+                                                            product_name: @json($productName),
+                                                            variant_name: @json($variantName ?? ''),
+                                                            product_image: @json($imgUrl),
+                                                            reviewer_name: @json(Auth::user()?->name ?? ''),
+                                                            reviewer_email: @json(Auth::user()?->email ?? '')
+                                                        })'
                                                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:text-gray-700 bg-white hover:bg-white border hover:border-gray-300 border-primary rounded-lg transition-all duration-200">
                                                         Write Review
                                                     </button>

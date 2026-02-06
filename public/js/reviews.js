@@ -24,8 +24,15 @@ function openReviewModal(data = {}){
 // Desktop Review Form
 function openDesktopReviewForm(data){
   const isEdit = data.id ? true : false;
+  const isView = data.mode === 'view';
+  const images = Array.isArray(data.images) ? data.images : [];
+  const hasImages = images.length > 0;
 
-  document.getElementById('review-modal-title').textContent = isEdit ? 'Edit Review' : 'Write a Review';
+  document.getElementById('review-modal-title').textContent = isView ? 'View Review' : (isEdit ? 'Edit Review' : 'Write a Review');
+  const cancelBtn = document.getElementById('review-cancel-btn');
+  if(cancelBtn){
+    cancelBtn.textContent = isView ? 'Close' : 'Cancel';
+  }
   document.getElementById('review-form').action = '/reviews';
   document.getElementById('review-form-method').value = isEdit ? 'PUT' : 'POST';
   document.getElementById('review-id').value = data.id || '';
@@ -51,8 +58,8 @@ function openDesktopReviewForm(data){
   // Set form values
   document.getElementById('review-title').value = data.title || '';
   document.getElementById('review-text').value = data.review_text || '';
-  document.getElementById('review-name').value = data.reviewer_name || '';
-  document.getElementById('review-email').value = data.reviewer_email || '';
+  document.getElementById('review-name').value = data.reviewer_name || data.fallback_reviewer_name || '';
+  document.getElementById('review-email').value = data.reviewer_email || data.fallback_reviewer_email || '';
 
   // Set rating
   if(data.rating){
@@ -66,6 +73,12 @@ function openDesktopReviewForm(data){
   previewContainer.innerHTML = '';
   previewContainer.classList.add('hidden');
   document.getElementById('review-images').value = '';
+
+  if(hasImages){
+    renderReviewImagePreviews(previewContainer, images, isView);
+  }
+
+  setDesktopReviewReadOnly(isView, hasImages);
 
   const modal = document.getElementById('review-modal');
   const content = document.getElementById('review-modal-content');
@@ -84,8 +97,18 @@ function openDesktopReviewForm(data){
 // Mobile Review Form
 function openMobileReviewForm(data){
   const isEdit = data.id ? true : false;
+  const isView = data.mode === 'view';
+  const images = Array.isArray(data.images) ? data.images : [];
+  const hasImages = images.length > 0;
 
-  document.getElementById('mobile-review-title').textContent = isEdit ? 'Edit Review' : 'Write a Review';
+  const mobileTitle = document.getElementById('mobile-review-modal-title');
+  if(mobileTitle){
+    mobileTitle.textContent = isView ? 'View Review' : (isEdit ? 'Edit Review' : 'Write a Review');
+  }
+  const mobileBackLabel = document.getElementById('mobile-review-back-label');
+  if(mobileBackLabel){
+    mobileBackLabel.textContent = isView ? 'Close' : 'Back';
+  }
   document.getElementById('mobile-review-form-element').action = '/reviews';
   document.getElementById('mobile-review-form-method').value = isEdit ? 'PUT' : 'POST';
   document.getElementById('mobile-review-id').value = data.id || '';
@@ -108,8 +131,8 @@ function openMobileReviewForm(data){
 
   document.getElementById('mobile-review-title').value = data.title || '';
   document.getElementById('mobile-review-text').value = data.review_text || '';
-  document.getElementById('mobile-review-name').value = data.reviewer_name || '';
-  document.getElementById('mobile-review-email').value = data.reviewer_email || '';
+  document.getElementById('mobile-review-name').value = data.reviewer_name || data.fallback_reviewer_name || '';
+  document.getElementById('mobile-review-email').value = data.reviewer_email || data.fallback_reviewer_email || '';
 
   if(data.rating){
     setMobileRating(data.rating);
@@ -122,9 +145,139 @@ function openMobileReviewForm(data){
   previewContainer.classList.add('hidden');
   document.getElementById('mobile-review-images').value = '';
 
+  if(hasImages){
+    renderReviewImagePreviews(previewContainer, images, isView);
+  }
+
+  setMobileReviewReadOnly(isView, hasImages);
+
   const form = document.getElementById('mobile-review-form');
   form.classList.remove('translate-y-full');
   document.body.style.overflow = 'hidden';
+}
+
+function setDesktopReviewReadOnly(isReadOnly, hasImages){
+  const fields = [
+    document.getElementById('review-title'),
+    document.getElementById('review-text'),
+    document.getElementById('review-name'),
+    document.getElementById('review-email'),
+    document.getElementById('review-images')
+  ];
+
+  fields.forEach((field) => {
+    if(field){
+      field.disabled = !!isReadOnly;
+      field.readOnly = !!isReadOnly;
+    }
+  });
+
+  const starButtons = document.querySelectorAll('#star-rating .star-btn');
+  starButtons.forEach((btn) => {
+    btn.disabled = !!isReadOnly;
+    btn.classList.toggle('pointer-events-none', !!isReadOnly);
+  });
+
+  const uploadArea = document.getElementById('image-upload-area');
+  if(uploadArea){
+    uploadArea.classList.toggle('hidden', !!isReadOnly);
+  }
+
+  const imageSection = document.getElementById('review-image-section');
+  if(imageSection){
+    const hideImageSection = !!isReadOnly && !hasImages;
+    imageSection.classList.toggle('hidden', hideImageSection);
+  }
+
+  const emailOptional = document.getElementById('review-email-optional');
+  if(emailOptional){
+    emailOptional.classList.toggle('hidden', !!isReadOnly);
+  }
+  const imagesOptional = document.getElementById('review-images-optional');
+  if(imagesOptional){
+    imagesOptional.classList.toggle('hidden', !!isReadOnly);
+  }
+
+  const submitBtn = document.getElementById('review-submit-btn');
+  if(submitBtn){
+    submitBtn.disabled = !!isReadOnly;
+    submitBtn.classList.toggle('hidden', !!isReadOnly);
+  }
+}
+
+function setMobileReviewReadOnly(isReadOnly, hasImages){
+  const fields = [
+    document.getElementById('mobile-review-title'),
+    document.getElementById('mobile-review-text'),
+    document.getElementById('mobile-review-name'),
+    document.getElementById('mobile-review-email'),
+    document.getElementById('mobile-review-images')
+  ];
+
+  fields.forEach((field) => {
+    if(field){
+      field.disabled = !!isReadOnly;
+      field.readOnly = !!isReadOnly;
+    }
+  });
+
+  const starButtons = document.querySelectorAll('#mobile-star-rating .mobile-star-btn');
+  starButtons.forEach((btn) => {
+    btn.disabled = !!isReadOnly;
+    btn.classList.toggle('pointer-events-none', !!isReadOnly);
+  });
+
+  const uploadArea = document.getElementById('mobile-image-upload-area');
+  if(uploadArea){
+    uploadArea.classList.toggle('hidden', !!isReadOnly);
+  }
+
+  const imageSection = document.getElementById('mobile-review-image-section');
+  if(imageSection){
+    const hideImageSection = !!isReadOnly && !hasImages;
+    imageSection.classList.toggle('hidden', hideImageSection);
+  }
+
+  const emailOptional = document.getElementById('mobile-review-email-optional');
+  if(emailOptional){
+    emailOptional.classList.toggle('hidden', !!isReadOnly);
+  }
+  const imagesOptional = document.getElementById('mobile-review-images-optional');
+  if(imagesOptional){
+    imagesOptional.classList.toggle('hidden', !!isReadOnly);
+  }
+
+  const submitBtn = document.getElementById('mobile-review-submit-btn');
+  if(submitBtn){
+    submitBtn.disabled = !!isReadOnly;
+    submitBtn.classList.toggle('hidden', !!isReadOnly);
+  }
+}
+
+function renderReviewImagePreviews(container, images, isReadOnly){
+  if(!container || !Array.isArray(images) || images.length === 0){
+    return;
+  }
+
+  container.classList.remove('hidden');
+  images.forEach((img) => {
+    const src = typeof img === 'string' ? img : (img?.url || img?.image_path || '');
+    if(!src){
+      return;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'relative group';
+    div.innerHTML = `
+      <img src="${src}" class="w-full h-24 object-cover rounded-lg border-2 border-gray-200">
+    `;
+
+    if(!isReadOnly){
+      div.classList.add('opacity-70');
+    }
+
+    container.appendChild(div);
+  });
 }
 
 // Close Modal Functions
@@ -151,6 +304,10 @@ function submitMobileReviewForm() {
 // Rating Functions
 function setRating(rating){
   document.getElementById('review-rating').value = rating;
+  const ratingError = document.getElementById('review-rating-error');
+  if(ratingError){
+    ratingError.classList.add('hidden');
+  }
   const stars = document.querySelectorAll('#star-rating .star-btn');
   const ratingText = document.getElementById('rating-text');
 
@@ -170,6 +327,10 @@ function setRating(rating){
 
 function resetRating(){
   document.getElementById('review-rating').value = '';
+  const ratingError = document.getElementById('review-rating-error');
+  if(ratingError){
+    ratingError.classList.add('hidden');
+  }
   const stars = document.querySelectorAll('#star-rating .star-btn');
   stars.forEach(star => {
     star.classList.remove('text-yellow-400');
@@ -180,6 +341,10 @@ function resetRating(){
 
 function setMobileRating(rating){
   document.getElementById('mobile-review-rating').value = rating;
+  const ratingError = document.getElementById('mobile-review-rating-error');
+  if(ratingError){
+    ratingError.classList.add('hidden');
+  }
   const stars = document.querySelectorAll('#mobile-star-rating .mobile-star-btn');
 
   stars.forEach((star, index) => {
@@ -195,6 +360,10 @@ function setMobileRating(rating){
 
 function resetMobileRating(){
   document.getElementById('mobile-review-rating').value = '';
+  const ratingError = document.getElementById('mobile-review-rating-error');
+  if(ratingError){
+    ratingError.classList.add('hidden');
+  }
   const stars = document.querySelectorAll('#mobile-star-rating .mobile-star-btn');
   stars.forEach(star => {
     star.classList.remove('text-yellow-400');
@@ -300,6 +469,10 @@ async function handleReviewFormSubmit(e) {
   // Validate rating
   const rating = isMobile ? document.getElementById('mobile-review-rating').value : document.getElementById('review-rating').value;
   if(!rating){
+    const ratingError = isMobile ? document.getElementById('mobile-review-rating-error') : document.getElementById('review-rating-error');
+    if(ratingError){
+      ratingError.classList.remove('hidden');
+    }
     showUniversalPopup('Please select a rating before submitting your review', 'error', 3000);
     return;
   }

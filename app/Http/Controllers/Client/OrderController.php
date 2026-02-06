@@ -18,6 +18,7 @@ use Illuminate\Support\Arr;
 use App\Models\Address;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepo;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
+use App\Repositories\Client\Interfaces\ReviewRepositoryInterface;
 use App\Services\PriceCalculatorService;
 
 class OrderController extends Controller
@@ -288,7 +289,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function detail(OrderDetailRequest $request, OrderRepo $orderRepo)
+    public function detail(OrderDetailRequest $request, OrderRepo $orderRepo, ReviewRepositoryInterface $reviewRepo)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
@@ -297,17 +298,15 @@ class OrderController extends Controller
         $orderId = $request->input('order');
         $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
         if (!$order || $order->user_id !== Auth::id()) {
-            abort(403);
+            abort(404, 'Order not found or access denied.');
         }
 
-        // Fetch user reviews for order items
+        // Fetch user reviews for order items using ReviewRepository
         $userReviews = [];
-        if(Auth::check()) {
-            foreach($order->items as $item) {
-                $review = \App\Models\Review::where('order_item_id', $item->id)
-                    ->where('user_id', Auth::id())
-                    ->first();
-                if($review) {
+        if (Auth::check()) {
+            foreach ($order->items as $item) {
+                $review = $reviewRepo->getUserReviewByOrderItem(Auth::id(), $item->id);
+                if ($review) {
                     $userReviews[$item->id] = $review;
                 }
             }

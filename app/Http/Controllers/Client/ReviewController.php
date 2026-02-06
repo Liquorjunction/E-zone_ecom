@@ -62,6 +62,16 @@ class ReviewController extends Controller
         $data['user_id'] = $request->user()->id;
         $data['is_approved'] = $data['is_approved'] ?? 'pending';
 
+        if ($request->hasFile('images')) {
+            $paths = [];
+            foreach ($request->file('images') as $image) {
+                if ($image) {
+                    $paths[] = $image->store('reviews', 'public');
+                }
+            }
+            $data['images'] = $paths;
+        }
+
         try {
 
             Log::info('Creating review', $data);
@@ -84,6 +94,16 @@ class ReviewController extends Controller
         $data = $request->validated();
         $userId = $request->user()->id;
         $id = $data['id'];
+
+        if ($request->hasFile('images')) {
+            $paths = [];
+            foreach ($request->file('images') as $image) {
+                if ($image) {
+                    $paths[] = $image->store('reviews', 'public');
+                }
+            }
+            $data['images'] = $paths;
+        }
 
         try {
             $review = $reviewRepo->updateReview($id, $userId, $data);
