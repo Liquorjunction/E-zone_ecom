@@ -41,6 +41,7 @@
         request()->routeIs('admin.coupon-usage.*');
 
     $isDiscountSectionActive = request()->routeIs('admin.discounts.*');
+    $isNewsletterSectionActive = request()->routeIs('admin.newsletter-subscribers.*');
 @endphp
 
 <aside class="sidebar" role="navigation" aria-label="Admin Sidebar">
@@ -478,59 +479,65 @@
                     <li><hr class="hr-horizontal"></li>
                 @endcan
 
-                <!-- Coupons -->
-                @can('coupon.read')
+                <!-- Newsletter -->
+                @can('newsletter.read')
                     <li class="nav-item">
-                        <a class="nav-link {{ $isCouponSectionActive ? 'section-active' : 'collapsed' }}"
-                            data-bs-toggle="collapse" href="#sidebar-coupons" role="button"
-                            aria-expanded="{{ $isCouponSectionActive ? 'true' : 'false' }}"
-                            aria-controls="sidebar-coupons">
+                        <a class="nav-link {{ $isNewsletterSectionActive ? 'active' : '' }}"
+                            href="{{ route('admin.newsletter-subscribers.index') }}">
                             <i class="icon">
-                                <i class="bi bi-ticket-perforated"></i>
+                                <i class="bi bi-envelope"></i>
                             </i>
-                            <span class="item-name">Coupons</span>
-                            <i class="right-icon">
-                                <i class="bi bi-chevron-right"></i>
-                            </i>
+                            <span class="item-name">Newsletter</span>
                         </a>
-                        <ul class="sub-nav collapse {{ $isCouponSectionActive ? 'show' : '' }}"
-                            id="sidebar-coupons" data-bs-parent="#sidebar-menu">
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}"
-                                    href="{{ route('admin.coupons.index') }}">
-                                    <i class="icon">
-                                        <i class="bi bi-ticket-perforated"></i>
-                                    </i>
-                                    <span class="item-name">All Coupons</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('admin.coupon-usage.*') ? 'active' : '' }}"
-                                    href="{{ route('admin.coupon-usage.index') }}">
-                                    <i class="icon">
-                                        <i class="bi bi-clipboard-data"></i>
-                                    </i>
-                                    <span class="item-name">Coupon Usage</span>
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     <li><hr class="hr-horizontal"></li>
                 @endcan
 
-                <!-- Discounts -->
-                @can('discount.read')
+                <!-- Coupons & Discounts -->
+                @canany(['coupon.read', 'discount.read'])
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.discounts.*') ? 'active' : '' }}"
-                            href="{{ route('admin.discounts.index') }}">
+                        <a class="nav-link {{ $isCouponSectionActive || $isDiscountSectionActive ? 'section-active' : 'collapsed' }}"
+                            data-bs-toggle="collapse" href="#sidebar-coupons-discounts" role="button"
+                            aria-expanded="{{ $isCouponSectionActive || $isDiscountSectionActive ? 'true' : 'false' }}"
+                            aria-controls="sidebar-coupons-discounts">
                             <i class="icon">
-                                <i class="bi bi-percent"></i>
+                                <i class="bi bi-tags"></i>
                             </i>
-                            <span class="item-name">Discounts</span>
+                            <span class="item-name">Coupons & Discounts</span>
+                            <i class="right-icon">
+                                <i class="bi bi-chevron-down"></i>
+                            </i>
                         </a>
+                        <ul class="sub-nav collapse {{ $isCouponSectionActive || $isDiscountSectionActive ? 'show' : '' }}"
+                            id="sidebar-coupons-discounts" data-bs-parent="#sidebar-menu">
+                            @can('coupon.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.coupons.index') }}">
+                                        <span class="item-name">Coupons</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('coupon.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.coupon-usage.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.coupon-usage.index') }}">
+                                    <span class="item-name">Coupon Usage</span>
+                                </a>
+                            </li>
+                            @endcan
+                            @can('discount.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.discounts.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.discounts.index') }}">
+                                        <span class="item-name">Discounts</span>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
                     </li>
                     <li><hr class="hr-horizontal"></li>
-                @endcan
+                @endcanany
 
                 <!-- User & Access -->
                 @canany(['user management.read', 'role.read'])
