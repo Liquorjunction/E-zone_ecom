@@ -41,9 +41,12 @@
     languageOpen: false,
     languageCloseTimeout: null,
     accountCloseTimeout: null,
-    pinned: false,
+    pinned: $persist(false),
     isLg: window.innerWidth >= 1024,
     init() {
+        if (this.pinned && this.isLg) {
+            this.sidebarCollapsed = false;
+        }
         const setHeaderHeight = () => {
             const header = document.querySelector('header');
             const h = header ? header.offsetHeight : 120;
@@ -54,9 +57,6 @@
             setHeaderHeight();
             this.isLg = window.innerWidth >= 1024;
         });
-        if (window.innerWidth >= 1024 && window.innerWidth < 1280) {
-            this.sidebarCollapsed = true;
-        }
     }
 }"
     @keydown.escape.window="accountOpen = false; languageOpen = false; mobileMenuOpen = false; mobileSidebarOpen = false"
@@ -69,7 +69,7 @@
 
         @include('client.partials.sidebar')
 
-        <div class="flex-1 w-full transition-all duration-300 relative z-0"
+        <div class="flex-1 w-full transition-[margin] duration-200 ease-out relative z-0 ml-0 lg:ml-16"
              :style="isLg ? (sidebarCollapsed ? 'margin-left: 4rem' : 'margin-left: 18rem') : 'margin-left: 0'">
 
             <div class="w-full">

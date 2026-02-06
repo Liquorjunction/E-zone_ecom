@@ -39,6 +39,16 @@ input[type="number"] {
     display: none !important;
 }
 
+/* Performance optimizations */
+aside {
+    will-change: width;
+    contain: layout style;
+}
+
+.main-content-wrapper {
+    will-change: margin-left;
+}
+
 @layer utilities {
     .animate-infinite-scroll {
         animation: infinite-scroll 25s linear infinite;
