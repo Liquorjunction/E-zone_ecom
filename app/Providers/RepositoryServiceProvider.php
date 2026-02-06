@@ -106,6 +106,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(NewsletterRepositoryInterface::class, NewsletterRepository::class);
 
         // Client Repositories
+        $this->app->bind(\App\Repositories\Client\Interfaces\AuthRepositoryInterface::class, \App\Repositories\Client\Repositories\AuthRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\AboutUsRepositoryInterface::class, \App\Repositories\Client\Repositories\AboutUsRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\BrandRepositoryInterface::class, \App\Repositories\Client\Repositories\BrandRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\HomeRepositoryInterface::class, \App\Repositories\Client\Repositories\HomeRepository::class);

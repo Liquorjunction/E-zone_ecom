@@ -41,7 +41,6 @@
                     {{-- Validation Errors --}}
                     @if ($errors->any())
                         <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl">
-                            <p class="text-sm text-red-700 font-medium">Please fix the following errors:</p>
                             <ul class="mt-1 list-disc list-inside text-sm text-red-600">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>

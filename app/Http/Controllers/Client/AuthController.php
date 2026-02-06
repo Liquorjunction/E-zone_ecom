@@ -3,46 +3,29 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Http\Requests\Client\Auth\RegisterRequest;
 use App\Http\Requests\Client\Auth\LoginRequest;
 use App\Http\Requests\Client\Auth\LogoutRequest;
+use App\Repositories\Client\Interfaces\AuthRepositoryInterface as AuthRepo;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class AuthController extends Controller
 {
-    // Handle Registration Form Submission
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request ,AuthRepo $authRepository)
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-            'is_active' => true,
-        ]);
+        $user = $authRepository->createUser($request->validated());
 
-        // Auto-login after registration
         Auth::login($user);
-
         $request->session()->regenerate();
-        if (config('session.driver') === 'database') {
-            DB::table('sessions')
-                ->where('id', $request->session()->getId())
-                ->update(['user_id' => $user->id]);
-        }
+
         return redirect()->route('home')->with('success', 'Account created successfully!');
     }
 
-    // Handle Login Form Submission
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request, AuthRepo $authRepository)
     {
         $credentials = $request->only(['email', 'password']);
 
-        $user = User::where('email', $request->email)->first();
+        $user = $authRepository->findUserByEmail($request->email);
 
         if ($user && !$user->is_active) {
             return back()->withErrors([
@@ -50,13 +33,9 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if ($authRepository->authenticateUser($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            if (config('session.driver') === 'database') {
-                DB::table('sessions')
-                    ->where('id', $request->session()->getId())
-                    ->update(['user_id' => Auth::id()]);
-            }
+
             return redirect()->intended(route('dashboard.overview'));
         }
 
@@ -65,7 +44,6 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Handle Logout
     public function logout(LogoutRequest $request)
     {
         Auth::logout();

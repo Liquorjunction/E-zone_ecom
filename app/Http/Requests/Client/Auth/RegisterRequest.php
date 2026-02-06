@@ -17,8 +17,15 @@ class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['required', 'string', 'max:20'], // You may want to add more validation
+            'phone' => ['required', 'string', 'max:20', 'unique:users,phone'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'phone.unique' => 'This phone number is already registered. Please use a different number or login to your existing account.',
         ];
     }
 }
