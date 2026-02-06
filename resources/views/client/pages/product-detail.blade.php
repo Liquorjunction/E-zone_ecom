@@ -890,69 +890,7 @@
                     <h2 class="text-3xl font-bold text-gray-900 mb-8">You Might Also Like</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         @foreach ($relatedProducts as $relatedProduct)
-                            <div
-                                class="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200">
-                                <a href="{{ route('products.detail', $relatedProduct->slug) }}"
-                                    class="block relative aspect-square bg-gray-100 overflow-hidden">
-                                    <img src="{{ $relatedProduct->cover_image ? asset('storage/' . $relatedProduct->cover_image) : asset('images/placeholder-product.jpg') }}"
-                                        alt="{{ is_array($relatedProduct->name) ? $relatedProduct->name[app()->getLocale()] ?? ($relatedProduct->name['en'] ?? '') : $relatedProduct->name }}"
-                                        class="w-full h-full object-contain p-4 transition-transform group-hover:scale-110 duration-300">
-                                    @if ($relatedProduct->created_at > now()->subDays(30))
-                                        <div class="absolute top-3 left-3">
-                                            <span
-                                                class="bg-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
-                                                NEW
-                                            </span>
-                                        </div>
-                                    @endif
-                                </a>
-
-                                <div class="p-4">
-                                    <a href="{{ route('products.detail', $relatedProduct->slug) }}">
-                                        <h3
-                                            class="font-bold text-gray-900 transition-colors line-clamp-2 group-hover:text-primary mb-2 min-h-12">
-                                            {{ is_array($relatedProduct->name) ? $relatedProduct->name[app()->getLocale()] ?? ($relatedProduct->name['en'] ?? '') : $relatedProduct->name }}
-                                        </h3>
-                                    </a>
-
-                                    <div class="flex items-center mb-3">
-                                        <div class="flex items-center text-yellow-400">
-                                            ★★★★★
-                                        </div>
-                                        <span class="ml-2 text-sm text-gray-500">(0)</span>
-                                    </div>
-
-                                    @php
-                                        $relatedDiscount = isset($relatedProduct->discountInfo) ? $relatedProduct->discountInfo : null;
-                                    @endphp
-
-                                    <div class="flex items-center justify-between">
-                                        @if ($relatedDiscount && $relatedDiscount['has_discount'])
-                                            <div class="flex flex-col">
-                                                <span class="text-sm text-gray-400 line-through">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($relatedDiscount['original_price'], 2) }}</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-xl font-bold text-red-600">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($relatedDiscount['final_price'], 2) }}</span>
-                                                    @if ($relatedDiscount['discount_percentage'] > 0)
-                                                        <span class="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">
-                                                            -{{ number_format($relatedDiscount['discount_percentage'], 0) }}%
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        @else
-                                            <span class="text-xl font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($relatedProduct->price, 2) }}</span>
-                                        @endif
-                                        <button
-                                            class="bg-primary hover:bg-primary-dark text-white p-2 rounded-lg transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                            @include('client.partials.product-card', ['product' => $relatedProduct, 'wishlistVariantIds' => $wishlistVariantIds ?? collect()])
                         @endforeach
                     </div>
                 </div>

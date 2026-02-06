@@ -1,5 +1,4 @@
 @php
-    // --- Data Preparation (supports Product or ProductVariant) ---
     $locale = app()->getLocale() ?? 'en';
     $isVariant = isset($product) && class_basename($product) === 'ProductVariant';
     $master = $isVariant ? $product->product : $product;
@@ -12,7 +11,6 @@
         $name .= ' - ' . $v;
     }
 
-    // Description handling
     $descRaw = $master?->getTranslation('description', $locale) ?? '';
     if (is_array($descRaw)) {
         $descRaw = implode(
@@ -24,7 +22,6 @@
     }
     $description = Str::limit(strip_tags((string) $descRaw), 120);
 
-    // Image Logic (prefer variant images, then product images, then cover, then placeholder)
     $variantImage = null;
     if ($isVariant) {
         $variantImage = optional($product->images()->ordered()->first())->image_path;
@@ -41,14 +38,12 @@
         $imagePath = 'https://via.placeholder.com/400x400?text=No+Image';
     }
 
-    // Get discount info
     $real = $isVariant
         ? $product->price ?? ($master->real_price ?? ($master->price ?? 0))
         : $master->real_price ?? ($master->price ?? 0);
     $itemDiscountInfo = $isVariant ? $product->getDiscountInfo() : $master->getDiscountInfo();
     $productDiscountInfo = $master->getDiscountInfo();
 
-    // Bestseller check
     $isBestseller = false;
     if ($isVariant) {
         $isBestseller = (bool) $product->is_bestseller;
@@ -57,11 +52,32 @@
         $isBestseller = $firstVariant && (bool) $firstVariant->is_bestseller;
     }
 
-    // Category
     $catRaw = $master->category?->name ?? 'General';
     $categoryName = is_array($catRaw) ? implode(' ', array_filter($catRaw)) : (string) $catRaw;
-    // Ensure $variantId is always defined for use in buttons
     $variantId = $isVariant ? $product->id ?? null : $master->productVariants()->first()?->id ?? null;
+
+    if ($isVariant) {
+        $reviews = $product->reviews ?? collect();
+    } else {
+        $reviews = collect();
+        if ($master->productVariants && $master->productVariants->count() > 0) {
+            foreach ($master->productVariants as $variant) {
+                if ($variant->reviews) {
+                    $reviews = $reviews->merge($variant->reviews);
+                }
+            }
+        } elseif ($master->reviews) {
+            $reviews = $master->reviews;
+        }
+    }
+
+    $approvedReviews = $reviews->where('is_approved', 'approved');
+    $reviewCount = $approvedReviews->count();
+    $averageRating = $reviewCount > 0 ? round($approvedReviews->avg('rating'), 1) : 0;
+
+    $warrantyRaw = $master->getTranslation('warranty', $locale) ?? '';
+    $warranty = is_array($warrantyRaw) ? implode(' ', array_filter($warrantyRaw)) : (string) $warrantyRaw;
+    $warranty = $warranty ?: '1 Year Warranty';
 @endphp
 
 <div
@@ -108,13 +124,23 @@
                     class="text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-primary transition">
                     {{ $categoryName }}
                 </a>
-                <div class="flex items-center gap-1">
-                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span class="text-xs font-medium text-gray-600">4.5</span>
-                </div>
+                @if($reviewCount > 0)
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span class="text-xs font-medium text-gray-600">{{ $averageRating }} ({{ $reviewCount }})</span>
+                    </div>
+                @else
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span class="text-xs font-medium text-gray-400">No reviews</span>
+                    </div>
+                @endif
             </div>
 
             <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">
@@ -127,6 +153,17 @@
             <p class="text-sm text-gray-500 line-clamp-2 mb-4">
                 {{ $description }}
             </p>
+
+            @if($warranty)
+                <div class="flex items-center gap-1.5 text-xs text-gray-600 mt-auto">
+                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">{{ $warranty }}</span>
+                </div>
+            @endif
         </div>
 
         <div
@@ -148,7 +185,6 @@
                     </div>
                 @endif
                 @php
-                    // Stock calculation (match grid card logic)
                     if ($isVariant) {
                         $stock = $product->getTotalStockAttribute() ?? 0;
                     } else {
