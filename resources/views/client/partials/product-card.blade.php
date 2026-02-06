@@ -72,7 +72,7 @@
             $reviews = $master->reviews;
         }
     }
-    
+
     $approvedReviews = $reviews->where('is_approved', 'approved');
     $reviewCount = $approvedReviews->count();
     $averageRating = $reviewCount > 0 ? round($approvedReviews->avg('rating'), 1) : 0;
