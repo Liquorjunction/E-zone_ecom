@@ -57,6 +57,7 @@ class CouponService
             ];
         }
 
+        // Check per-user usage limit
         if (Auth::check() && $coupon->usage_limit_per_user) {
             $userUsageCount = $coupon->usages()
                 ->where('user_id', Auth::id())
@@ -95,14 +96,13 @@ class CouponService
             ];
         }
 
+
         $discountAmount = $this->calculateDiscountAmount($coupon, $subtotal);
 
-        // Store coupon details in session
-        session()->put('cart.coupon', [
-            'id' => $coupon->id,
-            'code' => $coupon->code,
-            'discount_amount' => $discountAmount,
-        ]);
+        $cart->coupon_id = $coupon->id;
+        $cart->coupon_code = $coupon->code;
+        $cart->coupon_discount_amount = $discountAmount;
+        $cart->save();
 
         return [
             'success' => true,
@@ -162,10 +162,5 @@ class CouponService
         return Coupon::where('code', strtoupper($code))
             ->where('status', true)
             ->first();
-    }
-
-    public function removeCouponFromSession(): void
-    {
-        session()->forget('cart.coupon');
     }
 }

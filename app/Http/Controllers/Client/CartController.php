@@ -282,7 +282,7 @@ class CartController extends Controller
         if ($result['success']) {
             $totals = $cartRepo->calculateCartTotals($cart);
             $subtotalAfterItemDiscounts = $totals['total'];
-            $couponDiscount = session('cart.coupon.discount_amount', 0);
+            $couponDiscount = $cart->coupon_discount_amount;
             $totalAfterCoupon = max(0, $subtotalAfterItemDiscounts - $couponDiscount);
             $taxRate = config('tax.rate', 20.0);
             $tax = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
@@ -325,8 +325,8 @@ class CartController extends Controller
             ]);
         }
 
-        $couponService->removeCouponFromSession();
-        $logger->info('Coupon removed from session', ['cart_id' => $cart->id]);
+        $removed = $couponService->removeCoupon($cart);
+        $logger->info('Coupon removed from cart', ['cart_id' => $cart->id, 'success' => $removed]);
 
         $totals = $cartRepo->calculateCartTotals($cart);
         $taxRate = config('tax.rate', 20.0);
@@ -336,8 +336,8 @@ class CartController extends Controller
         $finalTotal = $totalWithTax + $shipping;
 
         return response()->json([
-            'success' => true,
-            'message' => 'Coupon removed.',
+            'success' => $removed,
+            'message' => $removed ? 'Coupon removed.' : 'Failed to remove coupon.',
             'summary' => [
                 'subtotal' => round($totals['subtotal'], 2),
                 'item_discount' => round($totals['total_discount'], 2),
