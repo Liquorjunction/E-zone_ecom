@@ -575,7 +575,7 @@
                                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                                     <span
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                    Contact Informationor
+                                    Contact Information
                                 </h2>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div>
