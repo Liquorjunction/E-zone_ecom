@@ -3,6 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAll = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
     const isEmpty = v => v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
 
+    const ensureModalInBody = (selector) => {
+        const modal = select(selector);
+        if (modal && modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+    };
+
     const quillEditors = {};
     function initQuill(id, hiddenId) {
         const container = select(`#${id}`);
@@ -39,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     ['en', 'fr', 'ar'].forEach(lang => initQuill(`quill-description-${lang}`, `description_${lang}`));
+
+    ensureModalInBody('#variantTranslationModal');
 
     function saveAllQuillContents() {
         Object.values(quillEditors).forEach(info => {

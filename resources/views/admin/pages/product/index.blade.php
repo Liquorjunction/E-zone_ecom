@@ -56,6 +56,14 @@
         <link rel="stylesheet" href="{{ asset('admin_assets/css/import-progress-notification.css') }}">
         <script src="{{ asset('admin_assets/js/import-progress-notification.js') }}"></script>
         <script src="{{ asset('admin_assets/js/import-detailed-report.js') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const modal = document.getElementById('importModal');
+                if (modal && modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+            });
+        </script>
         {{-- DataTable --}}
         <script src="{{ asset('admin_assets/js/datatableJs/products.js') }}"></script>
     @endpush
