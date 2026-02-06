@@ -16,8 +16,12 @@ class ProductRepository implements ProductRepositoryInterface
     {
         $query = Product::query()
             ->where('status', 'active')
-            ->with(['category', 'brand', 'images', 'productVariants' => function($q) {
-                $q->where('status', 'active');
+            ->with(['category', 'brand', 'images', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }, 'productVariants' => function($q) {
+                $q->where('status', 'active')->with(['reviews' => function($query) {
+                    $query->where('is_approved', 'approved');
+                }]);
             }]);
 
         if ($request->filled('category')) {
@@ -62,7 +66,9 @@ class ProductRepository implements ProductRepositoryInterface
     public function getDealVariants(Request $request, int $perPage = 12): LengthAwarePaginator {
         $query = ProductVariant::query()
             ->where('status', 'active')
-            ->with(['images', 'inventory', 'product' => function($q) {
+            ->with(['images', 'inventory', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }, 'product' => function($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
@@ -146,7 +152,9 @@ class ProductRepository implements ProductRepositoryInterface
     {
         $query = ProductVariant::query()
             ->where('status', 'active')
-            ->with(['images', 'inventory', 'product' => function($q) {
+            ->with(['images', 'inventory', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }, 'product' => function($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
@@ -236,7 +244,9 @@ class ProductRepository implements ProductRepositoryInterface
                 'images',
                 'productVariants' => function($q) {
                     $q->where('status', 'active')
-                      ->with(['images', 'inventory']);
+                      ->with(['images', 'inventory', 'reviews' => function($query) {
+                          $query->where('is_approved', 'approved');
+                      }]);
                 }
             ])
             ->firstOrFail();
@@ -247,7 +257,9 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::where('status', 'active')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->with('images')
+            ->with(['images', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }])
             ->take($limit)
             ->get();
     }
@@ -257,7 +269,9 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::where('status', 'active')
             ->where('name', 'LIKE', "%{$keyword}%")
             ->orWhere('description', 'LIKE', "%{$keyword}%")
-            ->with('images')
+            ->with(['images', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }])
             ->take($limit)
             ->get();
     }
@@ -271,7 +285,9 @@ class ProductRepository implements ProductRepositoryInterface
 
         $productVariants = ProductVariant::where('product_id', $productId)
             ->where('status', 'active')
-            ->with(['images', 'inventory'])
+            ->with(['images', 'inventory', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }])
             ->get();
 
         $productVariants->each(function (ProductVariant $variant) use ($product) {
@@ -285,8 +301,12 @@ class ProductRepository implements ProductRepositoryInterface
     {
         return Product::where('status', 'active')
             ->where('is_bestseller', true)
-            ->with(['category', 'brand', 'images', 'productVariants' => function($q) {
-                $q->where('status', 'active');
+            ->with(['category', 'brand', 'images', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }, 'productVariants' => function($q) {
+                $q->where('status', 'active')->with(['reviews' => function($query) {
+                    $query->where('is_approved', 'approved');
+                }]);
             }])
             ->latest()
             ->take($limit)
@@ -297,7 +317,9 @@ class ProductRepository implements ProductRepositoryInterface
     {
         return ProductVariant::where('status', 'active')
             ->where('is_bestseller', true)
-            ->with(['images', 'inventory', 'product' => function($q) {
+            ->with(['images', 'inventory', 'reviews' => function($q) {
+                $q->where('is_approved', 'approved');
+            }, 'product' => function($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {

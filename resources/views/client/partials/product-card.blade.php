@@ -6,8 +6,12 @@
     $nameRaw = $master?->getTranslation('name', $locale) ?? '';
     $variantName = $isVariant ? $product->getTranslation('variant_name', $locale) ?? '' : '';
     $name = $isVariant
-        ? (is_array($variantName) ? implode(' ', array_filter($variantName)) : (string) $variantName)
-        : (is_array($nameRaw) ? implode(' ', array_filter($nameRaw)) : (string) $nameRaw);
+        ? (is_array($variantName)
+            ? implode(' ', array_filter($variantName))
+            : (string) $variantName)
+        : (is_array($nameRaw)
+            ? implode(' ', array_filter($nameRaw))
+            : (string) $nameRaw);
 
     $catRaw = $master->category?->{'category-name'} ?? ($master->category?->name ?? 'Uncategorized');
     $categoryName = is_array($catRaw) ? implode(' ', array_filter($catRaw)) : (string) $catRaw;
@@ -53,6 +57,29 @@
             $stock = method_exists($master, 'getTotalStockAttribute') ? $master->getTotalStockAttribute() : 0;
         }
     }
+
+    if ($isVariant) {
+        $reviews = $product->reviews ?? collect();
+    } else {
+        $reviews = collect();
+        if ($master->productVariants && $master->productVariants->count() > 0) {
+            foreach ($master->productVariants as $variant) {
+                if ($variant->reviews) {
+                    $reviews = $reviews->merge($variant->reviews);
+                }
+            }
+        } elseif ($master->reviews) {
+            $reviews = $master->reviews;
+        }
+    }
+    
+    $approvedReviews = $reviews->where('is_approved', 'approved');
+    $reviewCount = $approvedReviews->count();
+    $averageRating = $reviewCount > 0 ? round($approvedReviews->avg('rating'), 1) : 0;
+
+    $warrantyRaw = $master->getTranslation('warranty', $locale) ?? '';
+    $warranty = is_array($warrantyRaw) ? implode(' ', array_filter($warrantyRaw)) : (string) $warrantyRaw;
+    $warranty = $warranty ?: '1 Year Warranty';
 @endphp
 
 <div
@@ -162,34 +189,58 @@
         </a>
 
         <div class="flex items-center gap-2 mb-4">
-            <div class="flex items-center">
-                @for ($i = 0; $i < 5; $i++)
-                    <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                        <path
-                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                @endfor
-            </div>
-            <span class="text-sm text-gray-600 font-medium">4.8 <span class="text-gray-400">(150)</span></span>
+            @if($reviewCount > 0)
+                <div class="flex items-center">
+                    @for ($i = 1; $i <= 5; $i++)
+                        @if($i <= floor($averageRating))
+                            <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        @elseif($i == ceil($averageRating) && $averageRating - floor($averageRating) >= 0.5)
+                            <svg class="w-4 h-4 text-yellow-400" viewBox="0 0 20 20">
+                                <defs>
+                                    <linearGradient id="half-fill-{{ $master->id }}-{{ $i }}">
+                                        <stop offset="50%" stop-color="currentColor" />
+                                        <stop offset="50%" stop-color="transparent" />
+                                    </linearGradient>
+                                </defs>
+                                <path fill="url(#half-fill-{{ $master->id }}-{{ $i }})" stroke="currentColor" stroke-width="1"
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        @else
+                            <svg class="w-4 h-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        @endif
+                    @endfor
+                </div>
+                <span class="text-sm text-gray-600 font-medium">{{ $averageRating }} <span class="text-gray-400">({{ $reviewCount }})</span></span>
+            @else
+                <div class="flex items-center">
+                    @for ($i = 0; $i < 5; $i++)
+                        <svg class="w-4 h-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    @endfor
+                </div>
+                <span class="text-sm text-gray-400 font-medium">No reviews yet</span>
+            @endif
         </div>
 
         <div class="flex gap-2 mb-4 pb-4 border-b border-gray-100">
-            <div class="flex items-center gap-1.5 text-xs text-gray-600">
-                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span class="font-medium">Free Shipping</span>
-            </div>
-            <div class="flex items-center gap-1.5 text-xs text-gray-600">
-                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span class="font-medium">1 Year Warranty</span>
-            </div>
+            @if($warranty)
+                <div class="flex items-center gap-1.5 text-xs text-gray-600">
+                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">{{ $warranty }}</span>
+                </div>
+            @endif
         </div>
 
         <div class="flex items-center justify-between gap-3">
@@ -244,8 +295,7 @@
             @elseif ($stock <= 0)
                 <button
                     class="shrink-0 w-12 h-12 rounded-xl bg-gray-300 flex items-center justify-center cursor-not-allowed"
-                    disabled
-                    title="Out of Stock">
+                    disabled title="Out of Stock">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round"

@@ -28,22 +28,29 @@ class HomeRepository implements HomeRepositoryInterface
                      ->orderBy('sort_order', 'asc')
                      ->get();
 
-        $newArrivals = ProductVariant::select('product_variants.*')
-            ->join('products', 'products.id', '=', 'product_variants.product_id')
-            ->where('products.status', 'active')
-            ->where('product_variants.status', 'active')
-            ->with(['product', 'images'])
-            ->orderBy('products.created_at', 'desc')
+        $newArrivals = ProductVariant::where('status', 'active')
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->with(['product', 'images', 'reviews' => function ($query) {
+                $query->where('is_approved', 'approved');
+            }])
+            ->get()
+            ->sortByDesc(function ($variant) {
+                return optional($variant->product)->created_at;
+            })
             ->take(12)
-            ->get();
+            ->values();
 
-        $bestSellers = ProductVariant::select('product_variants.*')
-            ->join('products', 'products.id', '=', 'product_variants.product_id')
-            ->where('products.status', 'active')
-            ->where('product_variants.is_bestseller', 1)
-            ->where('product_variants.status', 'active')
-            ->with(['product', 'images'])
-            ->orderBy('product_variants.updated_at', 'desc')
+        $bestSellers = ProductVariant::where('is_bestseller', 1)
+            ->where('status', 'active')
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->with(['product', 'images', 'reviews' => function ($query) {
+                $query->where('is_approved', 'approved');
+            }])
+            ->orderBy('updated_at', 'desc')
             ->take(8)
             ->get();
 
@@ -52,12 +59,14 @@ class HomeRepository implements HomeRepositoryInterface
             ->get();
 
         // Fetch discounted product variants (deals) using DiscountService
-        $allVariants = ProductVariant::select('product_variants.*')
-            ->join('products', 'products.id', '=', 'product_variants.product_id')
-            ->where('products.status', 'active')
-            ->where('product_variants.status', 'active')
-            ->with(['product', 'images'])
-            ->orderBy('product_variants.updated_at', 'desc')
+        $allVariants = ProductVariant::where('status', 'active')
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->with(['product', 'images', 'reviews' => function ($query) {
+                $query->where('is_approved', 'approved');
+            }])
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         // Use DiscountService to filter only discounted variants
