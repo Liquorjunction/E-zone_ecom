@@ -265,8 +265,13 @@ class DiscountController extends Controller
                 }
             })
             ->addColumn('action', function ($discount) use ($request) {
-                $data['edit_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.edit', ['id' => $discount->id]) : '';
-                $data['delete_url'] = $request->user() && $request->user()->can('discount.delete') ? route('admin.discounts.destroy', ['id' => $discount->id]) : '';
+                if(isset($discount->ends_at) && $discount->ends_at->isPast()) {
+                    $data['edit_url'] = '';
+                    $data['delete_url'] = '';
+                } else {
+                    $data['edit_url'] = $request->user() && $request->user()->can('discount.update') ? route('admin.discounts.edit', ['id' => $discount->id]) : '';
+                    $data['delete_url'] = $request->user() && $request->user()->can('discount.delete') ? route('admin.discounts.destroy', ['id' => $discount->id]) : '';
+                }
                 $data['view_url'] = $request->user() && $request->user()->can('discount.read') ? route('admin.discounts.show', ['id' => $discount->id]) : '';
                 $data['id'] = $discount->id;
                 return view('admin.partials.datatable-actions', $data)->render();
