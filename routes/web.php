@@ -15,6 +15,7 @@ use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\ReviewController;
 use App\Http\Controllers\Client\SecurityController;
+use App\Http\Controllers\Client\ShowroomController;
 use App\Http\Controllers\Client\ShippingAndReturnsController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\VerificationController;
@@ -50,7 +51,8 @@ Route::get('/terms', [TermsController::class, 'index'])->name('terms');
 Route::get('/shipping-returns', [ShippingAndReturnsController::class, 'index'])->name('shipping-returns');
 Route::view('/contact', 'client.pages.contact')->name('contact');
 Route::view('/support', 'client.pages.support')->name('support');
-Route::view('/showrooms', 'client.pages.showrooms')->name('showrooms');
+Route::get('/showrooms', [ShowroomController::class, 'index'])->name('showrooms');
+Route::get('/showrooms/{slug}', [ShowroomController::class, 'show'])->name('showrooms.show');
 Route::view('/sitemap', 'client.pages.sitemap')->name('sitemap');
 
 // Brands

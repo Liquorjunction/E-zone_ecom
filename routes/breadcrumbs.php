@@ -3,6 +3,7 @@
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 use Illuminate\Support\Str;
+use App\Models\Showrooms;
 
 // ============================================
 // FRONTEND / CLIENT ROUTES
@@ -113,6 +114,17 @@ Breadcrumbs::for('shipping-returns', function (BreadcrumbTrail $trail) {
 Breadcrumbs::for('showrooms', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
     $trail->push('Our Showrooms', route('showrooms'));
+});
+
+// Home > Showrooms > Showroom Detail
+Breadcrumbs::for('showrooms.show', function (BreadcrumbTrail $trail, $showroom) {
+    $trail->parent('showrooms');
+    $model = $showroom instanceof Showrooms ? $showroom : Showrooms::where('slug', $showroom)->first();
+    $name = $model?->getTranslation('name', app()->getLocale())
+        ?? $model?->name
+        ?? Str::title(str_replace('-', ' ', (string) $showroom))
+        ?? 'Showroom';
+    $trail->push($name, route('showrooms.show', $model?->slug ?? $showroom ?? ''));
 });
 
 // Home > Dashboard
