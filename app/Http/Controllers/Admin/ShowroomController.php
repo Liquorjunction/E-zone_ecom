@@ -190,7 +190,7 @@ class ShowroomController extends Controller
                         return view('components.datatable-status-badge', ['status' => $showroom->status])->render();
                     }
                 })
-                ->rawColumns(['action', 'is_active'])
+                ->rawColumns(['action', 'is_active', 'cover_image', 'description'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error($e);
