@@ -86,6 +86,7 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="{{ route('admin.profile.index') }}">Profile</a>
                             </li>
+                            <li><a class="dropdown-item" href="{{ route('admin.site-settings.index') }}">Settings</a></li>
                             <hr class="dropdown-divider">
                     </li>
                     <li>

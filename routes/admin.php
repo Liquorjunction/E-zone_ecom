@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingAndReturnController;
 use App\Http\Controllers\Admin\ShowroomController;
+use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\StockReportController;
 use App\Http\Controllers\Admin\StoreController;
@@ -414,6 +415,15 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         // Reports Routes
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/stock', [StockReportController::class, 'index'])->name('stock');
+        });
+
+        // Site Settings Routes
+        Route::prefix('site-settings')->name('site-settings.')->middleware('can:site_status.read,admin')->group(function () {
+            Route::get('/', [SiteSettingController::class, 'index'])->name('index'); // permission: site_status.read
+            Route::post('/', [SiteSettingController::class, 'store'])->name('store')->middleware('can:site_status.create,admin');
+            Route::put('/', [SiteSettingController::class, 'update'])->name('update')->middleware('can:site_status.update,admin');
+            Route::post('/toggle-status', [SiteSettingController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:site_status.update,admin');
+            Route::get('/status', [SiteSettingController::class, 'getStatus'])->name('status');
         });
     });
 });

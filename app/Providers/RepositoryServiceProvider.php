@@ -25,6 +25,7 @@ use App\Repositories\Admin\Interfaces\ReviewRepositoryInterface;
 use App\Repositories\Admin\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShippingAndReturnRepositoryInterface;
 use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface;
+use App\Repositories\Admin\Interfaces\SiteSettingsRepositoryInterface;
 use App\Repositories\Admin\Interfaces\SliderRepositoryInterface;
 use App\Repositories\Admin\Interfaces\StockReportRepositoryInterface;
 use App\Repositories\Admin\Interfaces\StoreRepositoryInterface;
@@ -56,6 +57,7 @@ use App\Repositories\Admin\Repositories\ReviewRepository;
 use App\Repositories\Admin\Repositories\RoleRepository;
 use App\Repositories\Admin\Repositories\ShippingAndReturnRepository;
 use App\Repositories\Admin\Repositories\ShowroomRepository;
+use App\Repositories\Admin\Repositories\SiteSettingsRepository;
 use App\Repositories\Admin\Repositories\SliderRepository;
 use App\Repositories\Admin\Repositories\StockReportRepository;
 use App\Repositories\Admin\Repositories\StoreRepository;
@@ -104,6 +106,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ManageCustomerRepositoryInterface::class, ManageCustomerRepository::class);
         $this->app->bind(ReviewRepositoryInterface::class, ReviewRepository::class);
         $this->app->bind(NewsletterRepositoryInterface::class, NewsletterRepository::class);
+        $this->app->bind(SiteSettingsRepositoryInterface::class, SiteSettingsRepository::class);
 
         // Client Repositories
         $this->app->bind(\App\Repositories\Client\Interfaces\AuthRepositoryInterface::class, \App\Repositories\Client\Repositories\AuthRepository::class);
