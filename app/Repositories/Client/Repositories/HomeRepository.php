@@ -30,7 +30,18 @@ class HomeRepository implements HomeRepositoryInterface
 
         $newArrivals = ProductVariant::where('status', 'active')
             ->whereHas('product', function ($query) {
-                $query->where('status', 'active');
+                $query->where('status', 'active')
+                  ->whereHas('brand', function ($brandquery) {
+                      $brandquery->where('status', 'active');
+                  })
+                  ->whereHas('category', function ($categoryquery) {
+                      $categoryquery->where('status', 'active');
+                  })
+                  ->where(function ($subquery) {
+                      $subquery->whereHas('subCategory', function ($scq) {
+                          $scq->where('status', 'active');
+                      })->orWhereNull('sub_category_id');
+                  });
             })
             ->with(['product', 'images', 'reviews' => function ($query) {
                 $query->where('is_approved', 'approved');
@@ -45,7 +56,18 @@ class HomeRepository implements HomeRepositoryInterface
         $bestSellers = ProductVariant::where('is_bestseller', 1)
             ->where('status', 'active')
             ->whereHas('product', function ($query) {
-                $query->where('status', 'active');
+                $query->where('status', 'active')
+                  ->whereHas('brand', function ($brandquery) {
+                      $brandquery->where('status', 'active');
+                  })
+                  ->whereHas('category', function ($categoryquery) {
+                      $categoryquery->where('status', 'active');
+                  })
+                  ->where(function ($subquery) {
+                      $subquery->whereHas('subCategory', function ($scq) {
+                          $scq->where('status', 'active');
+                      })->orWhereNull('sub_category_id');
+                  });
             })
             ->with(['product', 'images', 'reviews' => function ($query) {
                 $query->where('is_approved', 'approved');
@@ -61,7 +83,18 @@ class HomeRepository implements HomeRepositoryInterface
         // Fetch discounted product variants (deals) using DiscountService
         $allVariants = ProductVariant::where('status', 'active')
             ->whereHas('product', function ($query) {
-                $query->where('status', 'active');
+                $query->where('status', 'active')
+                  ->whereHas('brand', function ($brandquery) {
+                      $brandquery->where('status', 'active');
+                  })
+                  ->whereHas('category', function ($categoryquery) {
+                      $categoryquery->where('status', 'active');
+                  })
+                  ->where(function ($subquery) {
+                      $subquery->whereHas('subCategory', function ($scq) {
+                          $scq->where('status', 'active');
+                      })->orWhereNull('sub_category_id');
+                  });
             })
             ->with(['product', 'images', 'reviews' => function ($query) {
                 $query->where('is_approved', 'approved');

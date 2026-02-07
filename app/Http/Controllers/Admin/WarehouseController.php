@@ -169,14 +169,22 @@ class WarehouseController extends Controller
         try {
             $id = $request->validated()['id'];
             $warehouseRepo->updateStatus($id);
-            return redirect()->route('admin.warehouses.index')->with('success', 'Warehouse status updated successfully.');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Warehouse status toggled successfully.',
+            ]);
+
         } catch (\Exception $e) {
             Log::error('Failed to toggle warehouse status', [
                 'warehouse_id' => $request->validated()['id'] ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->route('admin.warehouses.index')->with('error', 'Failed to toggle warehouse status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to toggle status',
+            ], 500);
         }
     }
 

@@ -12,6 +12,13 @@ class EditQuickStatRequest extends FormRequest
         return Auth::guard('admin')->user()->can('quick_stats.update');
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'id' => $this->route('id'),
+        ]);
+    }
+
     public function rules(): array
     {
         return [

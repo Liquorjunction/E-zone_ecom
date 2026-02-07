@@ -16,6 +16,17 @@ class ProductRepository implements ProductRepositoryInterface
     {
         $query = Product::query()
             ->where('status', 'active')
+            ->whereHas('brand', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->whereHas('category', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->where(function (Builder $q) {
+                $q->whereHas('subCategory', function (Builder $scq) {
+                    $scq->where('status', 'active');
+                })->orWhereNull('sub_category_id');
+            })
             ->with(['category', 'brand', 'images', 'reviews' => function($q) {
                 $q->where('is_approved', 'approved');
             }, 'productVariants' => function($q) {
@@ -27,13 +38,13 @@ class ProductRepository implements ProductRepositoryInterface
         if ($request->filled('category')) {
             $categories = is_array($request->category) ? $request->category : [$request->category];
             $query->whereHas('category', function (Builder $q) use ($categories) {
-                $q->whereIn('slug', $categories);
+                $q->whereIn('slug', $categories)->where('status', 'active');
             });
         }
         if ($request->filled('brand')) {
             $brands = is_array($request->brand) ? $request->brand : [$request->brand];
             $query->whereHas('brand', function (Builder $q) use ($brands) {
-                $q->whereIn('slug', $brands);
+                $q->whereIn('slug', $brands)->where('status', 'active');
             });
         }
 
@@ -72,7 +83,18 @@ class ProductRepository implements ProductRepositoryInterface
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active');
+                $q->where('status', 'active')
+                  ->whereHas('brand', function (Builder $brandquery) {
+                      $brandquery->where('status', 'active');
+                  })
+                  ->whereHas('category', function (Builder $categoryquery) {
+                      $categoryquery->where('status', 'active');
+                  })
+                  ->where(function (Builder $subCategoryquery) {
+                      $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
+                          $scq->where('status', 'active');
+                      })->orWhereNull('sub_category_id');
+                  });
             });
 
         if ($request->filled('search')) {
@@ -158,7 +180,18 @@ class ProductRepository implements ProductRepositoryInterface
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active');
+                $q->where('status', 'active')
+                  ->whereHas('brand', function (Builder $brandquery) {
+                      $brandquery->where('status', 'active');
+                  })
+                  ->whereHas('category', function (Builder $categoryquery) {
+                      $categoryquery->where('status', 'active');
+                  })
+                  ->where(function (Builder $subCategoryquery) {
+                      $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
+                          $scq->where('status', 'active');
+                      })->orWhereNull('sub_category_id');
+                  });
             });
 
         if ($request->filled('search')) {
@@ -238,6 +271,17 @@ class ProductRepository implements ProductRepositoryInterface
     {
         return Product::where('slug', $slug)
             ->where('status', 'active')
+            ->whereHas('brand', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->whereHas('category', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->where(function (Builder $q) {
+                $q->whereHas('subCategory', function (Builder $scq) {
+                    $scq->where('status', 'active');
+                })->orWhereNull('sub_category_id');
+            })
             ->with([
                 'category',
                 'brand',
@@ -257,6 +301,17 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::where('status', 'active')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
+            ->whereHas('brand', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->whereHas('category', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->where(function (Builder $q) {
+                $q->whereHas('subCategory', function (Builder $scq) {
+                    $scq->where('status', 'active');
+                })->orWhereNull('sub_category_id');
+            })
             ->with(['images', 'reviews' => function($q) {
                 $q->where('is_approved', 'approved');
             }])
@@ -267,8 +322,21 @@ class ProductRepository implements ProductRepositoryInterface
     public function searchProducts(string $keyword, int $limit = 10): Collection
     {
         return Product::where('status', 'active')
-            ->where('name', 'LIKE', "%{$keyword}%")
-            ->orWhere('description', 'LIKE', "%{$keyword}%")
+            ->whereHas('brand', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->whereHas('category', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->where(function (Builder $q) {
+                $q->whereHas('subCategory', function (Builder $scq) {
+                    $scq->where('status', 'active');
+                })->orWhereNull('sub_category_id');
+            })
+            ->where(function (Builder $q) use ($keyword) {
+                $q->where('name', 'LIKE', "%{$keyword}%")
+                  ->orWhere('description', 'LIKE', "%{$keyword}%");
+            })
             ->with(['images', 'reviews' => function($q) {
                 $q->where('is_approved', 'approved');
             }])
@@ -280,6 +348,17 @@ class ProductRepository implements ProductRepositoryInterface
     {
         $product = Product::where('id', $productId)
             ->where('status', 'active')
+            ->whereHas('brand', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->whereHas('category', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->where(function (Builder $q) {
+                $q->whereHas('subCategory', function (Builder $scq) {
+                    $scq->where('status', 'active');
+                })->orWhereNull('sub_category_id');
+            })
             ->with(['category', 'brand', 'images'])
             ->firstOrFail();
 
@@ -301,6 +380,17 @@ class ProductRepository implements ProductRepositoryInterface
     {
         return Product::where('status', 'active')
             ->where('is_bestseller', true)
+            ->whereHas('brand', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->whereHas('category', function (Builder $q) {
+                $q->where('status', 'active');
+            })
+            ->where(function (Builder $q) {
+                $q->whereHas('subCategory', function (Builder $scq) {
+                    $scq->where('status', 'active');
+                })->orWhereNull('sub_category_id');
+            })
             ->with(['category', 'brand', 'images', 'reviews' => function($q) {
                 $q->where('is_approved', 'approved');
             }, 'productVariants' => function($q) {
@@ -323,7 +413,18 @@ class ProductRepository implements ProductRepositoryInterface
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active');
+                $q->where('status', 'active')
+                  ->whereHas('brand', function (Builder $brandquery) {
+                      $brandquery->where('status', 'active');
+                  })
+                  ->whereHas('category', function (Builder $categoryquery) {
+                      $categoryquery->where('status', 'active');
+                  })
+                  ->where(function (Builder $subCategoryquery) {
+                      $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
+                          $scq->where('status', 'active');
+                      })->orWhereNull('sub_category_id');
+                  });
             })
             ->latest()
             ->take($limit)

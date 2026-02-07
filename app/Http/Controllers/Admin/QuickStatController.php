@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\AboutUs\EditAboutUsRequest;
 use App\Http\Requests\Admin\QuickStat\DestroyQuickStatRequest;
+use App\Http\Requests\Admin\QuickStat\EditQuickStatRequest;
 use App\Http\Requests\Admin\QuickStat\ReadQuickStatRequest;
 use App\Http\Requests\Admin\QuickStat\StoreQuickStatRequest;
 use App\Http\Requests\Admin\QuickStat\UpdateQuickStatRequest;
@@ -120,7 +120,7 @@ class QuickStatController extends Controller
         }
     }
 
-    public function updateStatus(EditAboutUsRequest $request, QuickStatRepo $quickStatRepo)
+    public function updateStatus(EditQuickStatRequest $request, QuickStatRepo $quickStatRepo)
     {
         try {
             $id = $request->input('id');
@@ -131,6 +131,7 @@ class QuickStatController extends Controller
                 'message' => 'Quick Stat status updated successfully.',
             ]);
         } catch (\Exception $e) {
+            Log::error('Error updating Quick Stat status: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -161,7 +162,7 @@ class QuickStatController extends Controller
             })
             ->addColumn('status', function ($quickStat) use ($request) {
                 if ($request->user()->can('quick_stats.update')) {
-                    $data['toggle_url'] = $request->user()->can('quick_stats.update') ? route('admin.quick-stats.updateStatus') : null;
+                    $data['toggle_url'] = $request->user()->can('quick_stats.update') ? route('admin.quick-stats.updateStatus', ['id' => $quickStat->id]) : null;
                     $data['status'] = $quickStat->status;
                     $data['id'] = $quickStat->id;
 
