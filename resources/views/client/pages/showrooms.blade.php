@@ -102,10 +102,17 @@
                             @endif
                         </div>
 
-                        <a href="{{ route('showrooms.show', $showroom->slug) }}"
-                            class="block w-full px-6 py-3 bg-primary/10 text-primary text-center font-bold rounded-xl transition-all duration-300 hover:bg-primary hover:text-white mt-6">
-                            View Details
-                        </a>
+                        @if (!empty($showroom->slug))
+                            <a href="{{ route('showrooms.show', $showroom->slug) }}"
+                                class="block w-full px-6 py-3 bg-primary/10 text-primary text-center font-bold rounded-xl transition-all duration-300 hover:bg-primary hover:text-white mt-6">
+                                View Details
+                            </a>
+                        @else
+                            <span
+                                class="block w-full px-6 py-3 bg-gray-100 text-gray-500 text-center font-bold rounded-xl mt-6">
+                                View Details
+                            </span>
+                        @endif
                     </div>
                 @empty
                     <div class="col-span-full bg-white rounded-2xl border-2 border-gray-100 p-8 text-center text-gray-600">
