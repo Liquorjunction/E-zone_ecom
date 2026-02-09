@@ -1412,9 +1412,29 @@
                                                     </div>
                                                 @endif
                                                 <p class="text-xs text-gray-600">Qty: {{ $itm->quantity }}</p>
-                                                <p class="text-sm font-bold text-primary mt-1">
-                                                    {{ config('app.CURRENCY_SYMBOL') }}{{ number_format(($itm->final_price ?? ($itm->unit_price ?? ($itm->price ?? 0))) * $itm->quantity, 2) }}
-                                                </p>
+                                                @php
+                                                    $itemOriginalPrice = ($itm->unit_price ?? 0) * $itm->quantity;
+                                                    $itemDiscountedPrice = ($itm->final_price ?? ($itm->unit_price ?? 0)) * $itm->quantity;
+                                                    $hasItemDiscount = ($itm->discount_amount ?? 0) > 0;
+                                                @endphp
+                                                @if($hasItemDiscount)
+                                                    <div>
+                                                        <span class="text-xs text-gray-400 line-through">
+                                                            {{ config('app.CURRENCY_SYMBOL') }}
+                                                            {{ number_format($itemOriginalPrice, 2) }}
+                                                        </span>
+                                                        <br />
+                                                        <span class="summary-item-price text-sm font-bold text-red-600">
+                                                            {{ config('app.CURRENCY_SYMBOL') }}
+                                                            {{ number_format($itemDiscountedPrice, 2) }}
+                                                        </span>
+                                                    </div>
+                                                @else
+                                                    <p class="summary-item-price text-sm font-bold text-primary mt-1">
+                                                        {{ config('app.CURRENCY_SYMBOL') }}
+                                                        {{ number_format($itemDiscountedPrice, 2) }}
+                                                    </p>
+                                                @endif
                                             </div>
                                         </div>
                                     @endforeach
