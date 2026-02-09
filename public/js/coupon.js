@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(response) {
                 if (response.data.success) {
                     showMessage(response.data.message, 'success', messageEl);
+                    showUniversalPopup(response.data.message, 'success', 2000);
                     updateOrderSummary(response.data.summary);
 
                     // Replace input form with applied coupon display
@@ -132,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.data.success) {
                     const messageEl = document.getElementById('coupon-message' + prefix);
                     showMessage(response.data.message, 'success', messageEl);
+                    showUniversalPopup(response.data.message, 'success', 2000);
                     updateOrderSummary(response.data.summary);
 
                     // Replace applied coupon display with input form

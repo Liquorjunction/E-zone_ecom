@@ -633,13 +633,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         }));
                     }
 
-                    if (window.Toast && typeof window.Toast.success === 'function') {
+                    const msg = data.message || 'Item added to cart.';
+                    if (window.showUniversalPopup) {
+                        showUniversalPopup(msg, 'success', 2000);
+                    } else if (window.Toast && typeof window.Toast.success === 'function') {
                         window.Toast.success({
                             title: 'Success',
-                            message: data.message || 'Item added to cart.',
+                            message: msg,
                         });
                     } else {
-                        alert(data.message || 'Item added to cart.');
+                        alert(msg);
                     }
 
                     if (isBuyNow) {
@@ -648,25 +651,31 @@ document.addEventListener('DOMContentLoaded', function() {
                         }, 500);
                     }
                 } else {
-                    if (window.Toast && typeof window.Toast.error === 'function') {
+                    const msg = data.message || 'Could not add item to cart.';
+                    if (window.showUniversalPopup) {
+                        showUniversalPopup(msg, 'error', 3000);
+                    } else if (window.Toast && typeof window.Toast.error === 'function') {
                         window.Toast.error({
                             title: 'Error',
-                            message: data.message || 'Could not add item to cart.',
+                            message: msg,
                         });
                     } else {
-                        alert(data.message || 'Could not add item to cart.');
+                        alert(msg);
                     }
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                if (window.Toast && typeof window.Toast.error === 'function') {
+                const msg = 'An error occurred. Please try again.';
+                if (window.showUniversalPopup) {
+                    showUniversalPopup(msg, 'error', 3000);
+                } else if (window.Toast && typeof window.Toast.error === 'function') {
                     window.Toast.error({
                         title: 'Error',
-                        message: 'An error occurred. Please try again.',
+                        message: msg,
                     });
                 } else {
-                    alert('An error occurred. Please try again.');
+                    alert(msg);
                 }
             });
         });

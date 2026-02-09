@@ -16,49 +16,55 @@ function getCsrfToken(){
 
 // Set an address as default via AJAX
 async function setDefault(id){
-  if(!confirm('Set this address as your default?')) return;
-  const token = getCsrfToken();
-  try{
-    const res = await fetch('/client/addresses/default', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': token,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ id: id })
-    });
-    const json = await res.json();
-    if(!res.ok){
-      alert(json.message || 'Failed to set default address');
-      return;
-    }
+  showUniversalPopup('Set this address as your default?', 'success', 0, {
+    confirmation: true,
+    confirmText: 'Yes',
+    cancelText: 'No',
+    onConfirm: async () => {
+      const token = getCsrfToken();
+      try{
+        const res = await fetch('/client/addresses/default', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id: id })
+        });
+        const json = await res.json();
+        if(!res.ok){
+          showUniversalPopup(json.message || 'Failed to set default address', 'error', 3000);
+          return;
+        }
 
-    const newDefaultId = json.data?.id || id;
+        const newDefaultId = json.data?.id || id;
 
-    // Clear previous default badge/button
-    const prevBadge = document.querySelector('.address-card [data-default="1"]');
-    if(prevBadge){
-      const prevCard = prevBadge.closest('.address-card');
-      if(prevCard){
-        // replace badge with button
-        prevBadge.outerHTML = `<button onclick="setDefault(${prevCard.dataset.id})" class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>`;
-        try{ let obj = JSON.parse(prevCard.dataset.address || '{}'); obj.is_default = false; prevCard.dataset.address = JSON.stringify(obj); } catch(e){}
+        // Clear previous default badge/button
+        const prevBadge = document.querySelector('.address-card [data-default="1"]');
+        if(prevBadge){
+          const prevCard = prevBadge.closest('.address-card');
+          if(prevCard){
+            // replace badge with button
+            prevBadge.outerHTML = `<button onclick="setDefault(${prevCard.dataset.id})" class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-primary hover:bg-primary/10 rounded-full transition-colors duration-200">Set Default</button>`;
+            try{ let obj = JSON.parse(prevCard.dataset.address || '{}'); obj.is_default = false; prevCard.dataset.address = JSON.stringify(obj); } catch(e){}
+          }
+        }
+
+        // Set new default badge
+        const newCard = document.getElementById('address-card-' + newDefaultId);
+        if(newCard){
+          const btn = newCard.querySelector('button[onclick^="setDefault"]');
+          if(btn) btn.outerHTML = `<span data-default="1" class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>Default</span>`;
+          try{ let obj = JSON.parse(newCard.dataset.address || '{}'); obj.is_default = true; newCard.dataset.address = JSON.stringify(obj); } catch(e){}
+        }
+        showUniversalPopup('Address set as default', 'success', 2000);
+      }catch(e){
+        console.error(e);
+        showUniversalPopup('Failed to set default address', 'error', 3000);
       }
     }
-
-    // Set new default badge
-    const newCard = document.getElementById('address-card-' + newDefaultId);
-    if(newCard){
-      const btn = newCard.querySelector('button[onclick^="setDefault"]');
-      if(btn) btn.outerHTML = `<span data-default="1" class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/15 rounded-full flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>Default</span>`;
-      try{ let obj = JSON.parse(newCard.dataset.address || '{}'); obj.is_default = true; newCard.dataset.address = JSON.stringify(obj); } catch(e){}
-    }
-
-  }catch(e){
-    console.error(e);
-    alert('Failed to set default address');
-  }
+  });
 }
 
 // Open Add Modal
@@ -194,7 +200,11 @@ function openEditModal(data, cardElem){
   }
 
   if(!data || !data.id){
-    alert('Address id missing — cannot edit this address.');
+    if (typeof showUniversalPopup === 'function') {
+      showUniversalPopup('Address id missing — cannot edit this address.', 'error', 3000);
+    } else {
+      alert('Address id missing — cannot edit this address.');
+    }
     return;
   }
 
@@ -289,7 +299,7 @@ async function handleFormSubmit(e) {
 
     const json = await res.json();
     if(!res.ok){
-      alert(json.message || 'Failed to save address');
+      showUniversalPopup(json.message || 'Failed to save address', 'error', 3000);
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
       return;
@@ -325,9 +335,15 @@ async function handleFormSubmit(e) {
     if(isMobile) closeMobileForm();
     else closeModal();
 
+    showUniversalPopup('Address saved successfully!', 'success', 2000);
+
   }catch(err){
     console.error(err);
-    alert('An error occurred while saving the address.');
+    if (typeof showUniversalPopup === 'function') {
+      showUniversalPopup('An error occurred while saving the address.', 'error', 3000);
+    } else {
+      alert('An error occurred while saving the address.');
+    }
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalBtnHtml;
@@ -382,33 +398,40 @@ function renderAddressCardHTML(data){
 
 // Delete Address via AJAX
 async function deleteAddress(id){
-  if(!confirm('Are you sure you want to delete this address?')) return;
-  const token = getCsrfToken();
-  try{
-    const res = await fetch('/client/addresses/delete', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': token,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ id: id })
-    });
-    const json = await res.json();
-    if(!res.ok){
-      alert(json.message || 'Failed to delete address');
-      return;
+  showUniversalPopup('Are you sure you want to delete this address?', 'error', 0, {
+    confirmation: true,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    onConfirm: async () => {
+      const token = getCsrfToken();
+      try{
+        const res = await fetch('/client/addresses/delete', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id: id })
+        });
+        const json = await res.json();
+        if(!res.ok){
+          showUniversalPopup(json.message || 'Failed to delete address', 'error', 3000);
+          return;
+        }
+        const el = document.getElementById('address-card-' + id);
+        if(el) {
+          el.style.opacity = '0';
+          el.style.transform = 'scale(0.95)';
+          setTimeout(() => el.remove(), 300);
+        }
+        showUniversalPopup('Address deleted successfully', 'success', 2000);
+      }catch(e){
+        console.error(e);
+        showUniversalPopup('Failed to delete address', 'error', 3000);
+      }
     }
-    const el = document.getElementById('address-card-' + id);
-    if(el) {
-      el.style.opacity = '0';
-      el.style.transform = 'scale(0.95)';
-      setTimeout(() => el.remove(), 300);
-    }
-  }catch(e){
-    console.error(e);
-    alert('Failed to delete address');
-  }
+  });
 }
 
 // Close modal on backdrop click

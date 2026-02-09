@@ -24,10 +24,27 @@
             class="text-center text-lg sm:text-lg font-semibold mb-6 sm:mb-6 text-gray-800 leading-relaxed px-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
         </div>
 
-        <button id="universal-popup-close"
-            type="button"
-            class="w-full max-w-30 px-3 py-1 sm:px-4 sm:py-2 bg-primary text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95">
-            OK
-        </button>
+        <div id="universal-popup-actions" class="w-full flex flex-col gap-3">
+            <!-- Single OK button (default) -->
+            <button id="universal-popup-close"
+                type="button"
+                class="w-full max-w-30 mx-auto px-3 py-1 sm:px-4 sm:py-2 bg-primary text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95">
+                OK
+            </button>
+
+            <!-- Confirmation buttons (conditional) -->
+            <div id="universal-popup-confirm-buttons" class="hidden w-full flex gap-3">
+                <button id="universal-popup-cancel"
+                    type="button"
+                    class="flex-1 px-3 py-1 sm:px-4 sm:py-2 bg-gray-200 text-gray-700 rounded-full font-semibold shadow-md hover:shadow-lg hover:scale-105 focus:ring-4 focus:ring-gray-300/30 focus:outline-none border border-gray-300 transition-all duration-200 active:scale-95 hover:bg-gray-300">
+                    Cancel
+                </button>
+                <button id="universal-popup-confirm"
+                    type="button"
+                    class="flex-1 px-3 py-1 sm:px-4 sm:py-2 bg-primary text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95">
+                    Confirm
+                </button>
+            </div>
+        </div>
     </div>
 </div>

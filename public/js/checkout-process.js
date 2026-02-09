@@ -456,12 +456,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             } else {
                 console.error("Update failed:", data.message);
-                alert(data.message || "Could not update item.");
+                if (typeof showUniversalPopup === 'function') {
+                    showUniversalPopup(data.message || "Could not update item.", 'error', 3000);
+                } else {
+                    alert(data.message || "Could not update item.");
+                }
             }
         } catch (e) {
             console.error("AJAX Error:", e);
             if (e?.message) {
-                alert(e.message);
+                if (typeof showUniversalPopup === 'function') {
+                    showUniversalPopup(e.message, 'error', 3000);
+                } else {
+                    alert(e.message);
+                }
             }
         }
     }
@@ -837,7 +845,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error saving address. Please try again.');
+                    if (typeof showUniversalPopup === 'function') {
+                        showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
+                    } else {
+                        alert('Error saving address. Please try again.');
+                    }
                     // Re-enable submit button
                     if (submitBtn) {
                         submitBtn.disabled = false;

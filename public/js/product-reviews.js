@@ -415,7 +415,14 @@
     }
 
     function showNotification(type, message) {
-        // Using Toast if available
+        // Using universal popup if available
+        if (window.showUniversalPopup) {
+            const timeout = type === 'success' ? 2000 : 3000;
+            showUniversalPopup(message, type, timeout);
+            return;
+        }
+
+        // Fallback to Toast if available
         if (window.Toast) {
             if (type === 'success') {
                 window.Toast.success({ title: 'Success', message });

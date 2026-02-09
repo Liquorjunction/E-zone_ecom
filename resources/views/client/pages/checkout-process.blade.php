@@ -1748,5 +1748,101 @@
                 showServerErrorBanner(message, errorMessages);
             @endif
         });
+
+        // Warn user if leaving checkout page with coupon applied
+        let allowNavigation = false;
+
+        function isCouponApplied() {
+            // Check if coupon is currently applied (applied-coupon-display element exists)
+            return document.getElementById('applied-coupon-display') !== null ||
+                   document.getElementById('applied-coupon-display-step2') !== null ||
+                   document.getElementById('applied-coupon-display-step3') !== null ||
+                   document.getElementById('remove-coupon-btn') !== null ||
+                   document.getElementById('remove-coupon-btn-step2') !== null ||
+                   document.getElementById('remove-coupon-btn-step3') !== null;
+        }
+
+        // Handle navigation away from page
+        window.addEventListener('beforeunload', function(e) {
+            if (isCouponApplied() && !allowNavigation) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+
+        // Intercept link clicks to show confirmation popup
+        document.addEventListener('click', function(e) {
+            // Only process links that would navigate away
+            const link = e.target.closest('a');
+            if (link && isCouponApplied() && !allowNavigation) {
+                const href = link.getAttribute('href');
+                // Don't show warning for anchor links, empty links, or links to current page
+                if (href && href !== '#' && !href.startsWith('#') && href !== window.location.pathname) {
+                    e.preventDefault();
+
+                    showUniversalPopup('You have a coupon applied. Do you want to leave without completing your purchase?', 'error', 0, {
+                        confirmation: true,
+                        confirmText: 'Yes, Leave',
+                        cancelText: 'No, Stay',
+                        onConfirm: () => {
+                            allowNavigation = true;
+                            window.location.href = href;
+                        }
+                    });
+                }
+            }
+        }, true);
+
+        // Intercept page reload (F5, Ctrl+R, Cmd+R) to show confirmation popup
+        let allowReload = false;
+        document.addEventListener('keydown', function(e) {
+            if (isCouponApplied() && !allowReload) {
+                // F5 key
+                if (e.key === 'F5' || e.code === 'F5') {
+                    e.preventDefault();
+                    showUniversalPopup('You have a coupon applied. Do you want to reload the page and lose your coupon?', 'error', 0, {
+                        confirmation: true,
+                        confirmText: 'Yes, Reload',
+                        cancelText: 'No, Stay',
+                        onConfirm: () => {
+                            allowReload = true;
+                            window.location.reload();
+                        }
+                    });
+                    return false;
+                }
+                // Ctrl+R (Windows/Linux) or Cmd+R (Mac)
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R' || e.code === 'KeyR')) {
+                    e.preventDefault();
+                    showUniversalPopup('You have a coupon applied. Do you want to reload the page and lose your coupon?', 'error', 0, {
+                        confirmation: true,
+                        confirmText: 'Yes, Reload',
+                        cancelText: 'No, Stay',
+                        onConfirm: () => {
+                            allowReload = true;
+                            window.location.reload();
+                        }
+                    });
+                    return false;
+                }
+            }
+        }, true);
+
+        // Intercept browser reload and back button navigation to show confirmation popup
+        window.addEventListener('popstate', function(e) {
+            if (isCouponApplied() && !allowNavigation) {
+                e.preventDefault();
+                showUniversalPopup('You have a coupon applied. Do you want to leave without completing your purchase?', 'error', 0, {
+                    confirmation: true,
+                    confirmText: 'Yes, Leave',
+                    cancelText: 'No, Stay',
+                    onConfirm: () => {
+                        allowNavigation = true;
+                        history.back();
+                    }
+                });
+            }
+        });
     </script>
 @endpush

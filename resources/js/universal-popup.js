@@ -7,7 +7,7 @@
         }
     });
 
-    function showUniversalPopup(message, type = "success", timeout = 3000) {
+    function showUniversalPopup(message, type = "success", timeout = 3000, options = {}) {
         let popup = document.getElementById("universal-popup");
         let card = document.getElementById("universal-popup-card");
         let icon = document.getElementById("universal-popup-icon");
@@ -15,6 +15,16 @@
         let closeBtn = document.getElementById("universal-popup-close");
         let xBtn = document.getElementById("universal-popup-x");
         let overlay = document.getElementById("universal-popup-overlay");
+        let confirmButtons = document.getElementById("universal-popup-confirm-buttons");
+        let confirmBtn = document.getElementById("universal-popup-confirm");
+        let cancelBtn = document.getElementById("universal-popup-cancel");
+
+        // Extract options
+        const isConfirmation = options.confirmation || false;
+        const onConfirm = options.onConfirm || null;
+        const onCancel = options.onCancel || null;
+        const confirmText = options.confirmText || "Yes";
+        const cancelText = options.cancelText || "No";
 
         if (!popup) {
             fetch("client/components/universal-popup.blade.php")
@@ -23,7 +33,7 @@
                     const temp = document.createElement("div");
                     temp.innerHTML = html;
                     document.body.appendChild(temp.firstElementChild);
-                    showUniversalPopup(message, type, timeout);
+                    showUniversalPopup(message, type, timeout, options);
                 });
             return;
         }
@@ -67,6 +77,27 @@
 
         if (msg) msg.textContent = message;
 
+        // Toggle between single OK button and confirmation buttons
+        if (isConfirmation) {
+            if (closeBtn) closeBtn.classList.add("hidden");
+            if (confirmButtons) {
+                confirmButtons.classList.remove("hidden");
+                confirmButtons.classList.add("flex");
+            }
+            if (confirmBtn) confirmBtn.textContent = confirmText;
+            if (cancelBtn) cancelBtn.textContent = cancelText;
+            console.log("Confirmation mode enabled:", { closeBtn, confirmButtons, confirmBtn, cancelBtn });
+            // Disable auto-close for confirmation dialogs
+            timeout = 0;
+        } else {
+            if (closeBtn) closeBtn.classList.remove("hidden");
+            if (confirmButtons) {
+                confirmButtons.classList.add("hidden");
+                confirmButtons.classList.remove("flex");
+            }
+            console.log("Normal mode - showing OK button");
+        }
+
         // Show popup with animation (no .hidden/.flex)
         popup.classList.remove("opacity-0", "pointer-events-none");
         popup.classList.add("opacity-100", "pointer-events-auto");
@@ -78,7 +109,7 @@
         }
 
         // Close function
-        const closePopup = function () {
+        const closePopup = function (invokeCallback = false, isConfirmed = false) {
             if (card) {
                 card.classList.remove("scale-100", "opacity-100");
                 card.classList.add("scale-95", "opacity-0");
@@ -86,6 +117,15 @@
             setTimeout(() => {
                 popup.classList.remove("opacity-100", "pointer-events-auto");
                 popup.classList.add("opacity-0", "pointer-events-none");
+
+                // Invoke callbacks after popup is hidden
+                if (invokeCallback) {
+                    if (isConfirmed && onConfirm) {
+                        onConfirm();
+                    } else if (!isConfirmed && onCancel) {
+                        onCancel();
+                    }
+                }
             }, 200);
             if (window.__universalPopupTimeout) {
                 clearTimeout(window.__universalPopupTimeout);
@@ -93,9 +133,17 @@
         };
 
         // Close handlers
-        if (closeBtn) closeBtn.onclick = closePopup;
-        if (xBtn) xBtn.onclick = closePopup;
-        if (overlay) overlay.onclick = closePopup;
+        if (closeBtn) closeBtn.onclick = () => closePopup();
+        if (xBtn) xBtn.onclick = () => closePopup(isConfirmation, false);
+        if (overlay) overlay.onclick = () => closePopup(isConfirmation, false);
+
+        // Confirmation handlers
+        if (confirmBtn) {
+            confirmBtn.onclick = () => closePopup(true, true);
+        }
+        if (cancelBtn) {
+            cancelBtn.onclick = () => closePopup(true, false);
+        }
 
         // Auto-close after timeout
         if (timeout > 0) {
