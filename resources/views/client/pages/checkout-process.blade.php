@@ -582,13 +582,15 @@
                                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email
                                             Address *</label>
                                         <input type="email" id="email" name="email" value="{{ Auth::check() ? Auth::user()->email : '' }}" required
-                                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
+                                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                        <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
                                         <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone
                                             Number *</label>
-                                        <input type="tel" id="phone" name="phone" value="{{ Auth::check() ? Auth::user()->phone : '' }}" required
-                                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
+                                        <input type="tel" id="phone" name="phone" value="{{ Auth::check() ? Auth::user()->phone : '' }}" required pattern="[0-9\s\+\-\(\)]+"
+                                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                        <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                 </div>
                             </div>
@@ -1014,23 +1016,26 @@
                                         <label for="cardNumber"
                                             class="block text-sm font-semibold text-gray-700 mb-2">Card Number *</label>
                                         <input type="text" id="cardNumber" name="cardNumber"
-                                            placeholder="1234 5678 9012 3456"
-                                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
+                                            placeholder="1234 5678 9012 3456" required
+                                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                        <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div class="grid grid-cols-2 gap-5">
                                         <div>
                                             <label for="expiry"
                                                 class="block text-sm font-semibold text-gray-700 mb-2">Expiry Date
                                                 *</label>
-                                            <input type="text" id="expiry" name="expiry" placeholder="MM/YY"
-                                                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
+                                            <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required pattern="\d{2}/\d{2}"
+                                                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                         </div>
                                         <div>
                                             <label for="cvv"
                                                 class="block text-sm font-semibold text-gray-700 mb-2">CVV *</label>
-                                            <input type="text" id="cvv" name="cvv" maxlength="3"
+                                            <input type="text" id="cvv" name="cvv" maxlength="3" required pattern="[0-9]{3}"
                                                 placeholder="123"
-                                                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
+                                                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -1612,7 +1617,8 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
                             <div class="relative">
                                 <select id="modal_address_type" name="type" required
-                                    class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+                                    class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                    <option value="">Select Address Type</option>
                                     <option value="billing">Billing</option>
                                     <option value="shipping">Shipping</option>
                                 </select>
@@ -1622,13 +1628,15 @@
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Address Label <span
                                     class="text-gray-400 font-normal">(Optional)</span></label>
                             <input id="modal_address_label" name="address_label" placeholder="e.g., Home, Office"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                     </div>
 
@@ -1636,39 +1644,45 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
                             <input id="modal_first_name" name="first_name" required placeholder="John"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
                             <input id="modal_last_name" name="last_name" required placeholder="Doe"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Street Address *</label>
                         <input id="modal_street" name="street" required placeholder="123 Main Street"
-                            class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                        <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">City *</label>
                             <input id="modal_city" name="city" required placeholder="Casablanca"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">State / Region *</label>
                             <input id="modal_state" name="state" required placeholder="CA"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Postal Code *</label>
                             <input id="modal_postal_code" name="postal_code" required placeholder="20000"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                     </div>
 
@@ -1676,13 +1690,15 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Country *</label>
                             <input id="modal_country" name="country" required value="Morocco" placeholder="Morocco"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
                             <input id="modal_phone" name="phone" type="tel" placeholder="+1 (555) 123-4567"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all invalid:border-red-500 invalid:focus:ring-red-500/20" />
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                     </div>
 
@@ -1713,247 +1729,12 @@
         </div>
     </div>
 
-    <script>
-        // Initialize modal and button handlers
-        (function() {
-            const modal = document.getElementById('addAddressModal');
-            const openBillingBtn = document.getElementById('addBillingAddressBtn');
-            const openShippingBtn = document.getElementById('addShippingAddressBtn');
-            const closeBtn = document.getElementById('closeAddressModal');
-            const cancelBtn = document.getElementById('cancelAddressModal');
-            const form = document.getElementById('addAddressForm');
-            const typeField = document.getElementById('modal_address_type');
-            const submitBtn = document.getElementById('submitAddressBtn');
-
-            if (!modal) return;
-
-            // Function to open modal with type
-            const openModalWithType = function(type) {
-                if (typeField) typeField.value = type;
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                document.body.style.overflow = 'hidden';
-                if (form) form.reset();
-
-                // Animate content in
-                const content = document.getElementById('addAddressContent');
-                if (content) {
-                    setTimeout(() => {
-                        content.classList.remove('scale-95', 'opacity-0');
-                        content.classList.add('scale-100', 'opacity-100');
-                    }, 10);
-                }
-            };
-
-            // Open modal for billing address
-            if (openBillingBtn) {
-                openBillingBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    openModalWithType('billing');
-                });
-            }
-
-            // Open modal for shipping address
-            if (openShippingBtn) {
-                openShippingBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    openModalWithType('shipping');
-                });
-            }
-
-            // Close modal
-            const closeModal = function() {
-                const content = document.getElementById('addAddressContent');
-                if (content) {
-                    content.classList.add('scale-95', 'opacity-0');
-                    content.classList.remove('scale-100', 'opacity-100');
-                }
-
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.body.style.overflow = 'auto';
-                    if (form) form.reset();
-                }, 200);
-            };
-
-            if (closeBtn) closeBtn.addEventListener('click', closeModal);
-            if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
-            // Close on outside click
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) closeModal();
-            });
-
-            // Close on escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                    closeModal();
-                }
-            });
-
-            // Handle form submission
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    // Disable submit button to prevent double submission
-                    if (submitBtn) {
-                        submitBtn.disabled = true;
-                        submitBtn.innerHTML =
-                            '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Saving...</span>';
-                    }
-
-                    const formData = new FormData(form);
-                    const name = (formData.get('first_name') + ' ' + formData.get(
-                        'last_name')).trim();
-
-                    // Prepare data for submission
-                    const data = {
-                        _token: formData.get('_token'),
-                        type: formData.get('type'),
-                        address_label: formData.get('address_label'),
-                        name: name,
-                        street: formData.get('street'),
-                        city: formData.get('city'),
-                        state: formData.get('state'),
-                        postal_code: formData.get('postal_code'),
-                        country: formData.get('country'),
-                        phone: formData.get('phone'),
-                        is_default: formData.get('is_default') ? 1 : 0
-                    };
-
-                    // Submit via AJAX
-                    fetch('/client/addresses', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': data._token,
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify(data)
-                        })
-                        .then(response => response.json())
-                        .then(result => {
-                            if (result.success || result.data) {
-                                // Close modal
-                                closeModal();
-
-                                // Show success message
-                                alert(
-                                    'Address saved successfully! The page will reload to show your new address.'
-                                );
-
-                                // Reload page to refresh address list
-                                window.location.reload();
-                            } else {
-                                alert('Error saving address: ' + (result.message ||
-                                    'Unknown error'));
-                                // Re-enable submit button
-                                if (submitBtn) {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML =
-                                        '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Error saving address. Please try again.');
-                            // Re-enable submit button
-                            if (submitBtn) {
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML =
-                                    '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
-                            }
-                        });
-                });
-            }
-        })();
-
-        // Handle "Change" button clicks on address cards
-        (function() {
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('changeAddressBtn')) {
-                    e.preventDefault();
-                    // Find the parent card and get type
-                    const card = e.target.closest('div[id$="AddressPreview"]');
-                    if (card) {
-                        const isShipping = card.id === 'shippingAddressPreview';
-                        const isBilling = card.id === 'billingAddressPreview';
-
-                        // Reset the corresponding cards and show the address list again
-                        if (isShipping) {
-                            const cards = document.querySelectorAll('.shippingAddressCard');
-                            cards.forEach(c => {
-                                c.classList.remove('border-primary', 'bg-primary/5');
-                                c.querySelector('.shippingAddressRadio').classList.remove(
-                                    'border-primary', 'bg-primary');
-                                c.querySelector('.shippingAddressRadio div').classList.remove(
-                                    'bg-white');
-                            });
-                            card.classList.add('hidden');
-                        } else if (isBilling) {
-                            const cards = document.querySelectorAll('.billingAddressCard');
-                            cards.forEach(c => {
-                                c.classList.remove('border-primary', 'bg-primary/5');
-                                c.querySelector('.billingAddressRadio').classList.remove(
-                                    'border-primary', 'bg-primary');
-                                c.querySelector('.billingAddressRadio div').classList.remove(
-                                    'bg-white');
-                            });
-                            card.classList.add('hidden');
-                        }
-                    }
-                }
-            });
-        })();
-    </script>
 @endsection
 
 @push('scripts')
     <script src="{{ asset('js/coupon.js') }}"></script>
     <script src="{{ asset('js/checkout-process.js') }}"></script>
     <script src="{{ asset('js/checkout-address-dropdown.js') }}"></script>
-
-    <style>
-        @keyframes slide-down {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -100%);
-            }
-
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-5px);
-            }
-
-            75% {
-                transform: translateX(5px);
-            }
-        }
-
-        .animate-slide-down {
-            animation: slide-down 0.3s ease-out;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-
-        .animate-shake {
-            animation: shake 0.3s ease-in-out;
-        }
-    </style>
 
     <script>
         // Show Laravel validation errors on page load
@@ -1967,49 +1748,5 @@
                 showServerErrorBanner(message, errorMessages);
             @endif
         });
-
-        function showServerErrorBanner(title, errors) {
-            const banner = document.createElement('div');
-            banner.id = 'serverErrorBanner';
-            banner.className =
-                'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down';
-
-            let errorList = '';
-            if (errors.length > 1) {
-                errorList = '<ul class="mt-2 space-y-1 text-sm">';
-                errors.forEach(error => {
-                    errorList += `<li class="flex items-start gap-2"><span>•</span><span>${error}</span></li>`;
-                });
-                errorList += '</ul>';
-            }
-
-            banner.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-semibold">${title}</p>
-                        ${errorList}
-                    </div>
-                    <button onclick="this.closest('#serverErrorBanner').remove()" class="text-white hover:text-red-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            `;
-
-            document.body.appendChild(banner);
-
-            // Auto-remove after 10 seconds for server errors
-            setTimeout(() => {
-                if (banner.parentElement) {
-                    banner.style.opacity = '0';
-                    banner.style.transform = 'translate(-50%, -100%)';
-                    setTimeout(() => banner.remove(), 300);
-                }
-            }, 10000);
-        }
     </script>
 @endpush

@@ -54,3 +54,85 @@ input[type="radio"]:focus {
 .max-h-64::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+/* Inline styles from checkout-process.blade.php */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* Client-side form validation styles */
+input:invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+input:focus:invalid {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+
+input:valid {
+  border-color: #22c55e;
+}
+
+input:focus:valid {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
+}
+
+.error-message {
+  display: none;
+}
+
+.error-message.show {
+  display: block;
+  animation: slide-down 0.3s ease-out;
+}
+
+input.error-state {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+input.error-state:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+
+input.success-state {
+  border-color: #22c55e;
+  background-color: #f0fdf4;
+}
+
+input.success-state:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
+}

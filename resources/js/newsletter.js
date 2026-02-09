@@ -35,20 +35,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            const data = await response.json();
+            const contentType = response.headers.get('content-type') || '';
+            const isJson = contentType.includes('application/json');
+            const data = isJson ? await response.json() : null;
 
             if (response.ok) {
-                showUniversalPopup(data.message || 'Subscribed successfully!', 'success');
+                showUniversalPopup((data && data.message) || 'Subscribed successfully!', 'success');
                 emailInput.value = '';
                 newsletterCheckbox.checked = false;
+            } else if (data && data.errors) {
+                const errorMessage = Object.values(data.errors).flat().join(' ');
+                showUniversalPopup(errorMessage, 'error');
+            } else if (data && data.message) {
+                showUniversalPopup(data.message, 'error');
             } else {
-                // Handle validation errors
-                if (data.errors) {
-                    const errorMessage = Object.values(data.errors).flat().join(' ');
-                    showUniversalPopup(errorMessage, 'error');
-                } else {
-                    showUniversalPopup(data.message || 'An error occurred. Please try again.', 'error');
-                }
+                const fallbackText = isJson ? '' : await response.text();
+                console.error('Newsletter subscription error response:', response.status, fallbackText);
+                showUniversalPopup('An error occurred. Please try again.', 'error');
             }
         } catch (error) {
             console.error('Newsletter subscription error:', error);

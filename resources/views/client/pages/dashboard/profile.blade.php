@@ -20,7 +20,7 @@
                     <div class="relative group mb-4">
                         <div
                             class="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-xl ring-2 ring-primary/20">
-                            <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/150x150' }}"
+                            <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('images/avatar-placeholder.png') }}"
                                 alt="User Avatar" class="w-full h-full object-cover">
                         </div>
                         <button type="button"
