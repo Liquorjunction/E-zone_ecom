@@ -123,7 +123,7 @@
                             </div>
 
                             <div class="text-sm">
-                                <a href="#" class="font-medium text-primary hover:opacity-80 transition-opacity">
+                                <a href="#" id="forgotPasswordLink" class="font-medium text-primary hover:opacity-80 transition-opacity">
                                     Forgot password?
                                 </a>
                             </div>
@@ -221,6 +221,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Include Forgot Password Modal -->
+    @include('client.partials.forgotPassword-popup')
 </body>
 
 </html>
