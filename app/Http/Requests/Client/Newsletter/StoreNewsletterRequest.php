@@ -4,6 +4,7 @@ namespace App\Http\Requests\Client\Newsletter;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreNewsletterRequest extends FormRequest
 {
@@ -15,7 +16,12 @@ class StoreNewsletterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|unique:newsletter,email',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('newsletter', 'email')
+                    ->whereNull('deleted_at')
+            ],
         ];
     }
 
