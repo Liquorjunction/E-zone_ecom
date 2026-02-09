@@ -6,21 +6,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     newsletterForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-
-        // Validate checkbox
         if (!newsletterCheckbox.checked) {
             showUniversalPopup('Please accept the Terms & Conditions to subscribe.', 'error');
             return;
         }
 
-        // Validate email
         const email = emailInput.value.trim();
         if (!email) {
             showUniversalPopup('Please enter your email address.', 'error');
             return;
         }
 
-        // Disable submit button
         submitButton.disabled = true;
         submitButton.textContent = 'Subscribing...';
 
@@ -31,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 }
             });
@@ -50,14 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 showUniversalPopup(data.message, 'error');
             } else {
                 const fallbackText = isJson ? '' : await response.text();
-                console.error('Newsletter subscription error response:', response.status, fallbackText);
                 showUniversalPopup('An error occurred. Please try again.', 'error');
             }
         } catch (error) {
-            console.error('Newsletter subscription error:', error);
             showUniversalPopup('An error occurred. Please try again later.', 'error');
         } finally {
-            // Re-enable submit button
             submitButton.disabled = false;
             submitButton.textContent = 'Subscribe';
         }

@@ -83,6 +83,10 @@ Route::get('/cart', [CartController::class, 'show'])->name('cart');
 // Inventory (Public)
 Route::post('/inventory/transactions', [InventoryController::class, 'transactions'])->name('inventory.transactions');
 
+// Newsletter (Public)
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
 // Demo/Process Pages
 Route::view('/checkout-process', 'client.pages.checkout-process')->name('checkout-process');
 Route::view('/checkout-demo', 'client.pages.checkout')->name('checkout.demo');
@@ -98,10 +102,6 @@ Route::middleware('guest')->group(function () {
     Route::view('/register', 'client.auth.register')->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
-
-    // Newsletter Subscription
-    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
-    Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 });
 
 /*
