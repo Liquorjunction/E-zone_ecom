@@ -8,12 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ClientComposer
 {
-    /**
-     * Bind data to the view.
-     *
-     * @param  \Illuminate\View\View  $view
-     * @return void
-     */
     public function compose(View $view)
     {
         $activeBrands = ClientHelper::getActiveBrands();
@@ -33,6 +27,9 @@ class ClientComposer
             $wishlistVariantIds = \App\Models\Wishlist::where('user_id', Auth::id())->pluck('product_variant_id')->toArray();
             $wishlistCount = \App\Models\Wishlist::where('user_id', Auth::id())->count();
         }
+
+        $siteContent = ClientHelper::getSiteContent();
+        $view->with('siteContent', $siteContent);
 
         $view->with('wishlistVariantIds', $wishlistVariantIds);
 
