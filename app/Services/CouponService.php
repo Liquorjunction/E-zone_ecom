@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\Auth;
 class CouponService
 {
     protected CartRepositoryInterface $cartRepo;
+    protected SessionCouponService $sessionCoupon;
 
-    public function __construct(CartRepositoryInterface $cartRepo)
+    public function __construct(CartRepositoryInterface $cartRepo, SessionCouponService $sessionCoupon)
     {
         $this->cartRepo = $cartRepo;
+        $this->sessionCoupon = $sessionCoupon;
     }
 
     public function validateAndApplyCoupon(string $code, Cart $cart): array
@@ -99,9 +101,18 @@ class CouponService
 
         $discountAmount = $this->calculateDiscountAmount($coupon, $subtotal);
 
-        $cart->coupon_id = $coupon->id;
-        $cart->coupon_code = $coupon->code;
-        $cart->coupon_discount_amount = $discountAmount;
+        // Store coupon in session instead of database
+        $this->sessionCoupon->store(
+            $coupon->id,
+            $coupon->code,
+            $discountAmount,
+            $cart->id
+        );
+
+        // Clear any legacy database fields (optional, for backward compatibility)
+        $cart->coupon_id = null;
+        $cart->coupon_code = null;
+        $cart->coupon_discount_amount = 0;
         $cart->save();
 
         return [
@@ -140,11 +151,16 @@ class CouponService
 
     public function removeCoupon(Cart $cart): bool
     {
+        // Remove coupon from session instead of database
+        $this->sessionCoupon->remove();
+
+        // Clear any legacy database fields (optional, for backward compatibility)
         $cart->coupon_id = null;
         $cart->coupon_code = null;
         $cart->coupon_discount_amount = 0;
+        $cart->save();
 
-        return $cart->save();
+        return true;
     }
 
     public function recordUsage(int $couponId, int $orderId, ?int $userId = null): CouponUsage
@@ -162,5 +178,29 @@ class CouponService
         return Coupon::where('code', strtoupper($code))
             ->where('status', true)
             ->first();
+    }
+
+    /**
+     * Get the currently applied coupon from session
+     */
+    public function getAppliedCoupon(int $cartId): ?array
+    {
+        return $this->sessionCoupon->getForCart($cartId);
+    }
+
+    /**
+     * Get the discount amount from session for a cart
+     */
+    public function getDiscountAmount(int $cartId): float
+    {
+        return $this->sessionCoupon->getDiscountAmount($cartId);
+    }
+
+    /**
+     * Check if a coupon is currently applied
+     */
+    public function hasAppliedCoupon(int $cartId): bool
+    {
+        return $this->sessionCoupon->hasForCart($cartId);
     }
 }

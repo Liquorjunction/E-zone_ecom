@@ -8,10 +8,12 @@ use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 class PriceCalculatorService
 {
     protected CartRepositoryInterface $cartRepo;
+    protected SessionCouponService $sessionCoupon;
 
-    public function __construct(CartRepositoryInterface $cartRepo)
+    public function __construct(CartRepositoryInterface $cartRepo, SessionCouponService $sessionCoupon)
     {
         $this->cartRepo = $cartRepo;
+        $this->sessionCoupon = $sessionCoupon;
     }
 
     public function calculate(Cart $cart, string $shippingMethod = 'standard'): array
@@ -23,7 +25,8 @@ class PriceCalculatorService
 
         $subtotalAfterItemDiscount = $cartTotals['total'] ?? 0;
 
-        $couponDiscount = $cart->coupon_discount_amount ?? 0;
+        // Get coupon discount from session instead of database
+        $couponDiscount = $this->sessionCoupon->getDiscountAmount($cart->id);
         $totalAfterCoupon = max(0, $subtotalAfterItemDiscount - $couponDiscount);
 
         $taxRate = config('tax.rate', 20.0);

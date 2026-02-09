@@ -245,7 +245,6 @@ class OrderController extends Controller
                 $order = $orderRepo->getLatestOrderForUser(Auth::id(), ['items.product', 'items.variant']);
             }
 
-            // Fetch all orders for the user for step 3
             if (Auth::check()) {
                 $orders = $cartRepo->getAllOrdersForUser(Auth::id());
             }
@@ -301,7 +300,6 @@ class OrderController extends Controller
             abort(404, 'Order not found or access denied.');
         }
 
-        // Fetch user reviews for order items using ReviewRepository
         $userReviews = [];
         if (Auth::check()) {
             foreach ($order->items as $item) {
@@ -345,7 +343,6 @@ class OrderController extends Controller
         $reason = $request->input('reason');
         $ok = $orderRepo->cancelOrder($order->id, $reason);
 
-        // Handle AJAX requests
         if ($request->ajax() || $request->wantsJson()) {
             if ($ok) {
                 return response()->json([
@@ -361,7 +358,6 @@ class OrderController extends Controller
             ], 422);
         }
 
-        // Handle regular form submissions
         if ($ok) {
             return back()->with('success', 'Order cancelled successfully.');
         }

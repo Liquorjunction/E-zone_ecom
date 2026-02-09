@@ -9,6 +9,7 @@ use App\Models\Address;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
 use App\Services\CartService;
 use App\Services\CouponService;
+use App\Services\SessionCouponService;
 use App\Services\PriceCalculatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +54,7 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Item added to cart.');
     }
 
-    public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService)
+    public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService, SessionCouponService $sessionCoupon)
     {
         $cart = $cartService->getCart($request);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
@@ -80,7 +81,10 @@ class CartController extends Controller
             $addresses = Address::where('user_id', Auth::id())->get();
         }
 
-        return view('client.pages.checkout-process', compact('cart', 'step', 'totals', 'addresses'));
+        // Get applied coupon from session
+        $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
+
+        return view('client.pages.checkout-process', compact('cart', 'step', 'totals', 'addresses', 'appliedCoupon'));
     }
 
     public function update(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, \App\Services\PriceCalculatorService $priceService)
@@ -259,7 +263,7 @@ class CartController extends Controller
         return redirect()->route('cart')->with('success', 'Item removed from cart.');
     }
 
-    public function applyCoupon(ApplyCouponRequest $request, CartService $cartService, CouponService $couponService, LoggerInterface $logger, CartRepo $cartRepo)
+    public function applyCoupon(ApplyCouponRequest $request, CartService $cartService, CouponService $couponService, LoggerInterface $logger, CartRepo $cartRepo, SessionCouponService $sessionCoupon)
     {
         $cart = $cartService->getCart($request);
 
@@ -282,7 +286,9 @@ class CartController extends Controller
         if ($result['success']) {
             $totals = $cartRepo->calculateCartTotals($cart);
             $subtotalAfterItemDiscounts = $totals['total'];
-            $couponDiscount = $cart->coupon_discount_amount;
+
+            // Get coupon discount from session instead of database
+            $couponDiscount = $sessionCoupon->getDiscountAmount($cart->id);
             $totalAfterCoupon = max(0, $subtotalAfterItemDiscounts - $couponDiscount);
             $taxRate = config('tax.rate', 20.0);
             $tax = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
