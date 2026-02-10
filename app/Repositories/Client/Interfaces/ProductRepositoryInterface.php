@@ -18,4 +18,5 @@ interface ProductRepositoryInterface
     public function getDataforproductlisting(int $productId): Collection;
     public function getBestsellerProducts(int $limit = 12): Collection;
     public function getBestsellerVariants(int $limit = 12): Collection;
+    public function getAvailabilityCounts(): array;
 }

@@ -109,4 +109,9 @@ class ProductVariant extends Model
     {
         return $this->hasMany(Review::class, 'product_variant_id');
     }
+
+    public function discountTargets()
+    {
+        return $this->morphMany(DiscountTarget::class, 'target');
+    }
 }

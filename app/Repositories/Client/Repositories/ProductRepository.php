@@ -142,6 +142,50 @@ class ProductRepository implements ProductRepositoryInterface
             $query->where('price', '<=', $request->max_price);
         }
 
+        if ($request->filled('rating')) {
+            $ratings = is_array($request->rating) ? $request->rating : [$request->rating];
+            $minRating = min($ratings);
+            $query->whereHas('reviews', function (Builder $q) use ($minRating) {
+                $q->where('is_approved', 'approved')
+                  ->havingRaw('AVG(rating) >= ?', [$minRating])
+                  ->groupBy('product_variant_id');
+            }, '>=', 1);
+        }
+
+        if ($request->filled('availability')) {
+            $availability = is_array($request->availability) ? $request->availability : [$request->availability];
+            if (in_array('in_stock', $availability) && !in_array('out_of_stock', $availability)) {
+                $query->whereHas('inventory', function (Builder $q) {
+                    $q->where('quantity', '>', 0);
+                });
+            }
+            if (in_array('out_of_stock', $availability) && !in_array('in_stock', $availability)) {
+                $query->whereDoesntHave('inventory', function (Builder $q) {
+                    $q->where('quantity', '>', 0);
+                });
+            }
+        }
+
+        if ($request->filled('discount')) {
+            $discounts = is_array($request->discount) ? array_map('intval', $request->discount) : [intval($request->discount)];
+            $minDiscount = min($discounts);
+            $query->whereHas('discountTargets', function (Builder $q) use ($minDiscount) {
+                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
+                    $discountQuery->where('status', true)
+                                  ->where('value', '>=', $minDiscount)
+                                  ->where('starts_at', '<=', now())
+                                  ->where('ends_at', '>=', now());
+                });
+            })->orWhereHas('product.discountTargets', function (Builder $q) use ($minDiscount) {
+                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
+                    $discountQuery->where('status', true)
+                                  ->where('value', '>=', $minDiscount)
+                                  ->where('starts_at', '<=', now())
+                                  ->where('ends_at', '>=', now());
+                });
+            });
+        }
+
         switch ($request->get('sort')) {
             case 'price_asc':
                 $query->orderBy('price', 'asc');
@@ -237,6 +281,50 @@ class ProductRepository implements ProductRepositoryInterface
         }
         if ($request->filled('max_price')) {
             $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->filled('rating')) {
+            $ratings = is_array($request->rating) ? $request->rating : [$request->rating];
+            $minRating = min($ratings);
+            $query->whereHas('reviews', function (Builder $q) use ($minRating) {
+                $q->where('is_approved', 'approved')
+                  ->havingRaw('AVG(rating) >= ?', [$minRating])
+                  ->groupBy('product_variant_id');
+            }, '>=', 1);
+        }
+
+        if ($request->filled('availability')) {
+            $availability = is_array($request->availability) ? $request->availability : [$request->availability];
+            if (in_array('in_stock', $availability) && !in_array('out_of_stock', $availability)) {
+                $query->whereHas('inventory', function (Builder $q) {
+                    $q->where('quantity', '>', 0);
+                });
+            }
+            if (in_array('out_of_stock', $availability) && !in_array('in_stock', $availability)) {
+                $query->whereDoesntHave('inventory', function (Builder $q) {
+                    $q->where('quantity', '>', 0);
+                });
+            }
+        }
+
+        if ($request->filled('discount')) {
+            $discounts = is_array($request->discount) ? array_map('intval', $request->discount) : [intval($request->discount)];
+            $minDiscount = min($discounts);
+            $query->whereHas('discountTargets', function (Builder $q) use ($minDiscount) {
+                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
+                    $discountQuery->where('status', true)
+                                  ->where('value', '>=', $minDiscount)
+                                  ->where('starts_at', '<=', now())
+                                  ->where('ends_at', '>=', now());
+                });
+            })->orWhereHas('product.discountTargets', function (Builder $q) use ($minDiscount) {
+                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
+                    $discountQuery->where('status', true)
+                                  ->where('value', '>=', $minDiscount)
+                                  ->where('starts_at', '<=', now())
+                                  ->where('ends_at', '>=', now());
+                });
+            });
         }
 
         switch ($request->get('sort')) {
@@ -401,6 +489,38 @@ class ProductRepository implements ProductRepositoryInterface
             ->latest()
             ->take($limit)
             ->get();
+    }
+
+    public function getAvailabilityCounts(): array
+    {
+        // Count in-stock variants
+        $inStockCount = ProductVariant::query()
+            ->where('status', 'active')
+            ->whereHas('product', function(Builder $q) {
+                $q->where('status', 'active')
+                  ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
+                  ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
+                  ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
+            })
+            ->whereHas('inventory', fn($q) => $q->where('quantity', '>', 0))
+            ->count();
+
+        // Count out-of-stock variants
+        $outOfStockCount = ProductVariant::query()
+            ->where('status', 'active')
+            ->whereHas('product', function(Builder $q) {
+                $q->where('status', 'active')
+                  ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
+                  ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
+                  ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
+            })
+            ->whereDoesntHave('inventory', fn($q) => $q->where('quantity', '>', 0))
+            ->count();
+
+        return [
+            'in_stock' => $inStockCount,
+            'out_of_stock' => $outOfStockCount,
+        ];
     }
 
     public function getBestsellerVariants(int $limit = 12): Collection

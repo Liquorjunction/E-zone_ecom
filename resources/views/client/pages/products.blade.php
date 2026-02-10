@@ -17,7 +17,7 @@
 
                 <!-- Filters Sidebar -->
                 <aside class="lg:w-80 hidden lg:block">
-                    <x-filter :brands="$brands" :categories="$categories" :subCategories="$subCategories" />
+                    <x-filter :brands="$brands" :categories="$categories" :subCategories="$subCategories" :availabilityCounts="$availabilityCounts ?? []" />
                 </aside>
 
                 <!-- Products Grid -->
@@ -56,7 +56,7 @@
                     <!-- Results Count -->
                     <div class="mb-6">
                         <p class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-900">{{ $products->firstItem() }}-{{ $products->lastItem() }}</span> of
-                            <span class="font-semibold text-gray-900">{{ $products->total() }}</span> results</p>
+                            <span class="font-semibold text-gray-900">{{ $products->total() }}</span> variants</p>
                     </div>
 
                     <!-- Products Grid + Spinner -->
@@ -130,7 +130,7 @@
                         </div>
 
                         <div class="overflow-y-auto max-h-[calc(90vh-160px)]">
-                            <x-filter :brands="$brands" :categories="$categories" :subCategories="$subCategories" :isModal="true" />
+                            <x-filter :brands="$brands" :categories="$categories" :subCategories="$subCategories" :availabilityCounts="$availabilityCounts ?? []" :isModal="true" />
                         </div>
 
                         <div class="sticky bottom-0 bg-white border-t p-4 flex gap-3">

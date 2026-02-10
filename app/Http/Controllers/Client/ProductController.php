@@ -23,8 +23,9 @@ class ProductController extends Controller
         $products = $productRepository->getAllActiveVariants($request);
         $bestsellers = $productRepository->getBestsellerVariants(12);
         $bestsellersIds = $bestsellers->pluck('id')->toArray();
+        $availabilityCounts = $productRepository->getAvailabilityCounts();
 
-        return view('client.pages.products', compact('products', 'bestsellers', 'bestsellersIds'));
+        return view('client.pages.products', compact('products', 'bestsellers', 'bestsellersIds', 'availabilityCounts'));
     }
 
     public function deals(Request $request, ProductRepo $productRepository)
@@ -32,8 +33,9 @@ class ProductController extends Controller
         $products = $productRepository->getDealVariants($request);
         $bestsellers = $productRepository->getBestsellerVariants(12);
         $bestsellersIds = $bestsellers->pluck('id')->toArray();
+        $availabilityCounts = $productRepository->getAvailabilityCounts();
 
-        return view('client.pages.deals', compact('products', 'bestsellers', 'bestsellersIds'));
+        return view('client.pages.deals', compact('products', 'bestsellers', 'bestsellersIds', 'availabilityCounts'));
     }
 
     public function show($slug, ProductRepo $productRepository)
