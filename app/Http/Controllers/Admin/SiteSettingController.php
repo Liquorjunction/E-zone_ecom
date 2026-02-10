@@ -13,7 +13,7 @@ class SiteSettingController extends Controller
     public function index(SiteSettingsRepo $siteSettingsRepository)
     {
         $siteSetting = $siteSettingsRepository->getFirstSiteSetting();
-        return view('admin.site-settings.index', compact('siteSetting'));
+        return view('admin.pages.site-settings.index', compact('siteSetting'));
     }
 
     public function store(StoreSiteSettingRequest $request, SiteSettingsRepo $siteSettingsRepository)
