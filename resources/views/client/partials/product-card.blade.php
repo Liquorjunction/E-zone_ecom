@@ -22,8 +22,10 @@
     }
 
     $productImage = optional($master->images()->forProduct($master->id)->ordered()->first())->image_path;
-
-    $imagePath = asset('storage/' . $master->cover_image);
+    $imagePath = $variantImage ?? $productImage ?? asset('storage/' . $master->cover_image);
+    $imagePath = $imagePath && file_exists(public_path('storage/' . str_replace('storage/', '', $imagePath)))
+        ? asset('storage/' . str_replace('storage/', '', $imagePath))
+        : asset('icon/product-placeholder.jpg');
 
     $real = $isVariant
         ? $product->price ?? ($master->real_price ?? ($master->price ?? 0))
