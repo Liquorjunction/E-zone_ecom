@@ -25,7 +25,7 @@
     $imagePath = $variantImage ?? $productImage ?? asset('storage/' . $master->cover_image);
     $imagePath = $imagePath && file_exists(public_path('storage/' . str_replace('storage/', '', $imagePath)))
         ? asset('storage/' . str_replace('storage/', '', $imagePath))
-        : asset('icon/product-placeholder.jpg');
+        : asset('icon/product-placeholder-A.jpg');
 
     $real = $isVariant
         ? $product->price ?? ($master->real_price ?? ($master->price ?? 0))
