@@ -23,6 +23,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_newsletter_subscribed',
         'last_login_at',
         'email_verified_at',
+        'password_reset_token',
+        'password_reset_expires_at',
+        'password_reset_requested_at',
     ];
 
     protected $hidden = [
@@ -40,6 +43,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_active' => 'boolean',
             'is_newsletter_subscribed' => 'boolean',
             'last_login_at' => 'datetime',
+            'password_reset_expires_at' => 'datetime',
+            'password_reset_requested_at' => 'datetime',
         ];
     }
 

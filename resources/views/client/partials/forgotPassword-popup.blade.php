@@ -50,9 +50,9 @@
             </div>
         </div>
 
-        <form id="forgotPasswordForm" action="#" method="POST">
+        <form id="forgotPasswordForm" action="{{ route('password.email') }}" method="POST">
             @csrf
-            
+
             <div class="mb-6">
                 <label for="reset_email" class="block text-sm font-semibold text-gray-700 mb-2">
                     Email Address
@@ -63,10 +63,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                         </svg>
                     </div>
-                    <input 
-                        id="reset_email" 
-                        name="email" 
-                        type="email" 
+                    <input
+                        id="reset_email"
+                        name="email"
+                        type="email"
                         required
                         class="appearance-none block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/30 focus:border-primary transition-all duration-300"
                         placeholder="you@example.com">
@@ -75,8 +75,8 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-col gap-3">
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     id="submitBtn"
                     class="w-full px-6 py-3 text-base font-semibold text-white bg-primary rounded-full shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95 flex items-center justify-center">
                     <span id="submitBtnText">Send Reset Link</span>
@@ -88,8 +88,8 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </button>
-                <button 
-                    type="button" 
+                <button
+                    type="button"
                     id="cancelBtn"
                     class="w-full px-6 py-3 text-base font-semibold text-gray-700 bg-gray-200 rounded-full shadow-md hover:shadow-lg hover:scale-105 focus:ring-4 focus:ring-gray-300/30 focus:outline-none border border-gray-300 transition-all duration-200 active:scale-95 hover:bg-gray-300">
                     Cancel
@@ -100,7 +100,7 @@
         <!-- Footer Note -->
         <div class="mt-6 text-center">
             <p class="text-xs text-gray-500">
-                Remember your password? 
+                Remember your password?
                 <button type="button" id="backToLoginBtn" class="font-semibold text-primary hover:opacity-80 transition-opacity">
                     Back to Login
                 </button>
@@ -132,14 +132,14 @@
         function showModal() {
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100', 'pointer-events-auto');
-            
+
             if (modalCard) {
                 setTimeout(() => {
                     modalCard.classList.remove('scale-95', 'opacity-0');
                     modalCard.classList.add('scale-100', 'opacity-100');
                 }, 10);
             }
-            
+
             document.body.style.overflow = 'hidden';
             if (resetEmailInput) resetEmailInput.focus();
         }
@@ -150,12 +150,12 @@
                 modalCard.classList.remove('scale-100', 'opacity-100');
                 modalCard.classList.add('scale-95', 'opacity-0');
             }
-            
+
             setTimeout(() => {
                 modal.classList.remove('opacity-100', 'pointer-events-auto');
                 modal.classList.add('opacity-0', 'pointer-events-none');
                 document.body.style.overflow = 'auto';
-                
+
                 // Reset form and messages after animation
                 if (forgotPasswordForm) forgotPasswordForm.reset();
                 if (successMessage) successMessage.classList.add('hidden');
@@ -187,11 +187,11 @@
         if (forgotPasswordForm) {
             forgotPasswordForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 // Reset messages
                 if (successMessage) successMessage.classList.add('hidden');
                 if (errorMessage) errorMessage.classList.add('hidden');
-                
+
                 // Show loading state
                 submitBtn.disabled = true;
                 submitBtnText.textContent = 'Sending...';
@@ -200,7 +200,7 @@
 
                 // Get form data
                 const formData = new FormData(forgotPasswordForm);
-                
+
                 // Send AJAX request
                 fetch(forgotPasswordForm.action, {
                     method: 'POST',
@@ -220,7 +220,7 @@
                     if (data.status === 'success' || data.message) {
                         successMessage.classList.remove('hidden');
                         forgotPasswordForm.reset();
-                        
+
                         // Auto close after 3 seconds
                         setTimeout(() => {
                             hideModal();

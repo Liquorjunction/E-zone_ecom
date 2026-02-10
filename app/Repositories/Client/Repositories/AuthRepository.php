@@ -4,9 +4,7 @@ namespace App\Repositories\Client\Repositories;
 
 use App\Models\User;
 use App\Repositories\Client\Interfaces\AuthRepositoryInterface;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthRepository implements AuthRepositoryInterface

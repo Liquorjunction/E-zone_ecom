@@ -24,10 +24,22 @@ class Admin extends Authenticatable
         'remarks',
         'password',
         'status',
+        'password_reset_token',
+        'password_reset_expires_at',
+        'password_reset_requested_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+            'password_reset_expires_at' => 'datetime',
+            'password_reset_requested_at' => 'datetime',
+        ];
+    }
 }

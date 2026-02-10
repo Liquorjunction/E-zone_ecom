@@ -102,6 +102,9 @@ Route::middleware('guest')->group(function () {
     Route::view('/register', 'client.auth.register')->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 /*
