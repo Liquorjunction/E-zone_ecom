@@ -93,7 +93,7 @@
                                                value="{{ $siteSetting->facebook }}" placeholder="https://facebook.com/yourpage">
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                {{-- <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="twitter">
                                             <i class="fab fa-twitter"></i> Twitter URL
@@ -101,7 +101,7 @@
                                         <input type="url" class="form-control" id="twitter" name="twitter"
                                                value="{{ $siteSetting->twitter }}" placeholder="https://x.com/yourpage">
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="instagram">
