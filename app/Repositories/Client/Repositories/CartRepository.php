@@ -199,12 +199,6 @@ class CartRepository implements CartRepositoryInterface
                 ->orderByDesc('created_at')
                 ->get();
 
-            Log::debug('Fetched all orders for user', [
-                'user_id' => $userId,
-                'orders' => $orders->toArray(),
-                'order_count' => $orders->count()
-            ]);
-
             return $orders;
     }
 }

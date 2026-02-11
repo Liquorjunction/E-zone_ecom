@@ -59,7 +59,6 @@ class CartController extends Controller
         $cart = $cartService->getCart($request);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
         $step = (int) $request->get('step', 1);
-        Log::debug('CartController@show step value', ['step' => $step, 'request_step' => $request->get('step')]);
 
         $totals = $cart ? $priceService->calculate($cart) : [
             'subtotal' => 0,
