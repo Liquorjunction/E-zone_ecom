@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -78,14 +79,31 @@ class AuthController extends Controller
         }
     }
 
-    public function showResetForm(ShowResetFormRequest $request)
+    public function showResetForm(ShowResetFormRequest $request, PasswordResetService $resetService)
     {
         $email = $request->query('email');
         $token = $request->query('token');
+        $payload = $request->query('payload');
+
+        if ($payload) {
+            try {
+                $decoded = json_decode(Crypt::decryptString($payload), true);
+                $email = $decoded['email'] ?? null;
+                $token = $decoded['token'] ?? null;
+            } catch (\Throwable $e) {
+                return redirect()->route('login')->with('error', 'Invalid password reset link.');
+            }
+        }
 
         // Validate token and email exist
         if (!$token || !$email) {
             return redirect()->route('login')->with('error', 'Invalid password reset link.');
+        }
+
+        $validation = $resetService->validateResetToken($token, $email, 'user');
+
+        if (!$validation['valid']) {
+            return redirect()->route('login')->with('error', $validation['message'] ?? 'Invalid password reset link.');
         }
 
         return view('client.auth.reset-password', [
@@ -96,11 +114,19 @@ class AuthController extends Controller
 
     public function resetPassword(ResetPasswordRequest $request, PasswordResetService $resetService)
     {
+        $validation = $resetService->validateResetToken($request->token, $request->email, 'user');
+
+        if (!$validation['valid']) {
+            return back()->withErrors([
+                'email' => $validation['message'] ?? 'The reset link is invalid or has expired. Please request a new one.',
+            ])->withInput($request->only('email'));
+        }
+
         $isReset = $resetService->resetPassword($request->token, $request->email, $request->password, 'user');
 
         if (!$isReset) {
             return back()->withErrors([
-                'email' => 'The reset link is invalid or has expired. Please request a new one.',
+                'email' => 'Unable to reset password. Please try again.',
             ])->withInput($request->only('email'));
         }
 

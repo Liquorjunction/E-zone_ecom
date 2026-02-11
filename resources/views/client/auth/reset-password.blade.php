@@ -194,7 +194,7 @@
                                 </div>
                                 <div class="ml-3">
                                     <p class="text-sm text-blue-700">
-                                        This reset link will expire in 60 minutes. If it has expired, request a new one.
+                                        This reset link will expire in 5 minutes. If it has expired, request a new one.
                                     </p>
                                 </div>
                             </div>

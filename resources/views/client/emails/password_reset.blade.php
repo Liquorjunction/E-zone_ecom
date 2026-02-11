@@ -6,11 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{{ config('app.name') }} - Password Reset</title>
-    <!--[if mso]>
-    <style type="text/css">
-        body, table, td {font-family: Arial, sans-serif !important;}
-    </style>
-    <![endif]-->
 </head>
 
 <body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
@@ -128,22 +123,8 @@
                                 <tr>
                                     <td style="padding: 16px 18px;">
                                         <p style="margin: 0; padding: 0; color: #005f7f; font-size: 14px; line-height: 1.7; font-family: Arial, Helvetica, sans-serif;">
-                                            <strong>⏱ Time Sensitive:</strong> This password reset link will expire in 60 minutes for security reasons. If it expires, you can request a new reset link from the login page.
+                                            <strong>⏱ Time Sensitive:</strong> This password reset link will expire in 6 minutes for security reasons. If it expires, you can request a new reset link from the login page.
                                         </p>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <!-- Fallback Link Label -->
-                            <p style="margin: 24px 0 14px 0; padding: 0; color: #999999; font-size: 13px; text-align: center; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">
-                                Button not working? Copy and paste this link into your browser:
-                            </p>
-
-                            <!-- Fallback Link Box -->
-                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0f9fc; border: 2px solid #d6f1fa; border-radius: 8px;">
-                                <tr>
-                                    <td style="padding: 16px; word-break: break-all;">
-                                        <a href="{{ $resetUrl }}" style="color: #00a4d6; text-decoration: none; font-size: 12px; font-family: 'Courier New', monospace;">{{ $resetUrl }}</a>
                                     </td>
                                 </tr>
                             </table>

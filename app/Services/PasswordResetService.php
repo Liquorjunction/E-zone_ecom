@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 
 class PasswordResetService
 {
@@ -28,7 +29,7 @@ class PasswordResetService
             // Generate reset token and set expiration
             $token = Str::random(64);
             $user->password_reset_token = $token;
-            $user->password_reset_expires_at = Carbon::now()->addMinutes(60);
+            $user->password_reset_expires_at = Carbon::now()->addMinutes(5);
             $user->password_reset_requested_at = Carbon::now();
             $user->save();
 
@@ -54,7 +55,11 @@ class PasswordResetService
     {
         try {
             $routeName = $guardType === 'admin' ? 'admin.password.reset' : 'password.reset';
-            $resetUrl = route($routeName, ['token' => $token, 'email' => $user->email]);
+            $payload = Crypt::encryptString(json_encode([
+                'token' => $token,
+                'email' => $user->email,
+            ]));
+            $resetUrl = route($routeName, ['payload' => $payload]);
 
             // Send email logic here both for user and admin
             if ($guardType === 'admin') {
@@ -77,11 +82,11 @@ class PasswordResetService
         $user = $this->findUser($guardType, $email);
 
         if (!$user || $user->password_reset_token !== $token) {
-            return ['valid' => false, 'message' => 'Invalid reset token'];
+            return ['valid' => false, 'message' => 'Reset link is invalid or already used.'];
         }
 
         if (Carbon::parse($user->password_reset_expires_at)->isPast()) {
-            return ['valid' => false, 'message' => 'Reset link has expired'];
+            return ['valid' => false, 'message' => 'Reset link has expired.'];
         }
 
         return ['valid' => true, 'user' => $user];
