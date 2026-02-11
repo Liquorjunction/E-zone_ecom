@@ -26,6 +26,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'password_reset_token',
         'password_reset_expires_at',
         'password_reset_requested_at',
+        'email_verification_token',
+        'email_verification_expires_at',
+        'email_verification_requested_at',
     ];
 
     protected $hidden = [
@@ -45,6 +48,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => 'datetime',
             'password_reset_expires_at' => 'datetime',
             'password_reset_requested_at' => 'datetime',
+            'email_verification_expires_at' => 'datetime',
+            'email_verification_requested_at' => 'datetime',
         ];
     }
 

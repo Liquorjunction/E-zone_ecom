@@ -3,6 +3,7 @@
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\CheckSiteStatus;
 use App\Http\Middleware\ClientAuthenticate;
+use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.auth' => AdminAuthenticate::class,
             'client.auth' => ClientAuthenticate::class,
+            'verified.email' => EnsureEmailIsVerified::class,
         ]);
     })
     ->withMiddleware(function (Middleware $middleware) {

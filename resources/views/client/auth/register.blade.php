@@ -38,6 +38,25 @@
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100">
                 <div class="px-8 py-10">
 
+                    {{-- Success Message --}}
+                    @if (session('success'))
+                        <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-6 rounded-r-xl">
+                            <div class="flex items-start">
+                                <svg class="h-6 w-6 text-green-500 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-green-800">Account Created Successfully!</h3>
+                                    <p class="mt-2 text-sm text-green-700">{{ session('success') }}</p>
+                                    <p class="mt-3 text-sm text-green-700">
+                                        <strong>Didn't receive the email?</strong> Check your spam folder or
+                                        <a href="{{ route('login') }}" class="text-green-900 font-semibold hover:underline">go back to login</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Validation Errors --}}
                     @if ($errors->any())
                         <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl">
@@ -49,7 +68,7 @@
                         </div>
                     @endif
 
-                    <form class="space-y-6" action="{{ route('register.store') }}" method="POST">
+                    <form class="space-y-6 @if (session('success')) hidden @endif" action="{{ route('register.store') }}" method="POST">
                         @csrf
 
                         <!-- Name -->
@@ -170,7 +189,7 @@
                     </form>
                 </div>
 
-                <div class="px-8 py-6 bg-gray-50 border-t-2 border-gray-100">
+                <div class="px-8 py-6 bg-gray-50 border-t-2 border-gray-100 @if (session('success')) hidden @endif">
                     <p class="text-center text-sm text-gray-600">
                         Already have an account?
                         <a href="{{ route('login') }}"

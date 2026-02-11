@@ -17,6 +17,7 @@ class AuthRepository implements AuthRepositoryInterface
             'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
             'is_active' => true,
+            'email_verified_at' => null,
         ]);
     }
 

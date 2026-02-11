@@ -27,6 +27,9 @@ class Admin extends Authenticatable
         'password_reset_token',
         'password_reset_expires_at',
         'password_reset_requested_at',
+        'email_verification_token',
+        'email_verification_expires_at',
+        'email_verification_requested_at',
     ];
 
     protected $hidden = [
@@ -40,6 +43,8 @@ class Admin extends Authenticatable
             'password' => 'hashed',
             'password_reset_expires_at' => 'datetime',
             'password_reset_requested_at' => 'datetime',
+            'email_verification_expires_at' => 'datetime',
+            'email_verification_requested_at' => 'datetime',
         ];
     }
 }
