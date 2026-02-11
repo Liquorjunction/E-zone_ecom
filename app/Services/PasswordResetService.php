@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Admin;
+use App\Helpers\ClientHelper;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
@@ -60,14 +61,15 @@ class PasswordResetService
                 'email' => $user->email,
             ]));
             $resetUrl = route($routeName, ['payload' => $payload]);
+            $siteContent = ClientHelper::getSiteContent();
 
             // Send email logic here both for user and admin
             if ($guardType === 'admin') {
-                Mail::send('admin.emails.admin_password_reset', ['resetUrl' => $resetUrl, 'user' => $user], function ($message) use ($user) {
+                Mail::send('admin.emails.admin_password_reset', ['resetUrl' => $resetUrl, 'user' => $user, 'siteContent' => $siteContent], function ($message) use ($user) {
                     $message->to($user->email)->subject('Admin Password Reset Request');
                 });
             } else {
-                Mail::send('client.emails.password_reset', ['resetUrl' => $resetUrl, 'user' => $user], function ($message) use ($user) {
+                Mail::send('client.emails.password_reset', ['resetUrl' => $resetUrl, 'user' => $user, 'siteContent' => $siteContent], function ($message) use ($user) {
                     $message->to($user->email)->subject('Password Reset Request');
                 });
             }
