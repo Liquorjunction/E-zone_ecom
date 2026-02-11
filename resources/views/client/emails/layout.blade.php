@@ -109,7 +109,7 @@
                                 if (!empty($siteContent->facebook)) {
                                     $socialMedia['facebook'] = [
                                         'url' => $siteContent->facebook,
-                                        'icon' => '<img src="' . $fbicon . '" alt="Facebook" width="20" height="20">'s
+                                        'icon' => '<img src="' . $fbicon . '" alt="Facebook" width="20" height="20">'
                                     ];
                                 }
 
