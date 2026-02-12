@@ -76,11 +76,27 @@ class VerifyEmailService
         }
     }
 
-    public function resendVerificationEmail($user, $model)
+    public function resendVerificationEmail($user, $token, $guardType = 'user')
     {
         try {
-            $token = $this->generateVerificationToken($model, $user->email);
-            $this->sendVerificationEmail($user, $token, $model);
+            $routeName = $guardType === 'admin' ? 'admin.email.verify' : 'email.verify';
+            $payload = Crypt::encryptString(json_encode([
+                'token' => $token,
+                'email' => $user->email,
+            ]));
+            $verifyUrl = route($routeName, ['payload' => $payload]);
+            $siteContent = ClientHelper::getSiteContent();
+
+            if ($guardType === 'admin') {
+                Mail::send('admin.emails.admin_verify_email', ['user' => $user, 'verifyUrl' => $verifyUrl, 'siteContent' => $siteContent], function ($message) use ($user) {
+                    $message->to($user->email)->subject('Verify Your Admin Email Address');
+                });
+            } else {
+                Mail::send('client.emails.verify_email', ['user' => $user, 'verifyUrl' => $verifyUrl, 'siteContent' => $siteContent], function ($message) use ($user) {
+                    $message->to($user->email)->subject('Verify Your Email Address');
+                });
+            }
+
         } catch (\Exception $e) {
             Log::error('Error resending verification email: ' . $e->getMessage());
             throw $e;

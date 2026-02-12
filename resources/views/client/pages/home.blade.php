@@ -13,7 +13,7 @@
             @endphp
 
             @if ($stats->isNotEmpty())
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 py-6 sm:py-8">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 py-4 sm:py-6">
                     @foreach ($stats as $stat)
                         @php
                             $icon = $stat->icon ? asset('storage/' . ltrim($stat->icon, '/')) : null;
@@ -52,7 +52,7 @@
     @php
         $categoryChunks = $categories->chunk(6);
     @endphp
-    <section class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+    <section class="py-8 sm:py-12 lg:py-16 bg-gray-50" x-data="{
         currentSlide: 0,
         itemsPerPage: window.innerWidth >= 1280 ? 6 : window.innerWidth >= 1024 ? 5 : window.innerWidth >= 768 ? 4 : window.innerWidth >= 640 ? 3 : 2,
         totalItems: {{ $categories->count() }},
@@ -69,8 +69,8 @@
         }
     }">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-end justify-between mb-8 sm:mb-10">
-                <div>
+            <div class="flex items-end justify-between mb-6 sm:mb-8">
+                <div class="flex-1 text-center">
                     <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                         {{ gtrans('Shop by Category') }}
                     </h2>
@@ -152,7 +152,7 @@
         $bannerChunks = $cards->take(4)->chunk(2);
     @endphp
     @if ($cards->isNotEmpty())
-        <section class="py-8 sm:py-12 bg-white" x-data="{
+        <section class="py-8 sm:py-12 lg:py-16 bg-white" x-data="{
             currentSlide: 0,
             itemsPerPage: window.innerWidth >= 1024 ? 2 : 1,
             totalItems: {{ $cards->take(4)->count() }},
@@ -180,8 +180,8 @@
         }" @mouseenter="stopAutoplay()"
             @mouseleave="startAutoplay()">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-end justify-between mb-8 sm:mb-10">
-                    <div>
+                <div class="flex items-end justify-between mb-6 sm:mb-8">
+                    <div class="flex-1 text-center">
                         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                             {{ gtrans('Featured Promotions') }}
                         </h2>
@@ -272,7 +272,7 @@
             $dealsCount = ($deals ?? collect())->count();
         @endphp
         @if ($dealsCount > 0)
-            <section id="deals" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+            <section id="deals" class="py-8 sm:py-12 lg:py-16 bg-gray-50" x-data="{
                 currentSlide: 0,
                 itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
                 totalItems: {{ $dealsCount }},
@@ -291,9 +291,9 @@
                 }
             }">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-end justify-between mb-8 sm:mb-10">
-                        <div>
-                            <div class="flex items-center gap-2 mb-2">
+                    <div class="flex items-end justify-between mb-6 sm:mb-8">
+                        <div class="flex-1 text-center">
+                            <div class="flex items-center justify-center gap-2 mb-2">
                                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
                                     {{ gtrans('Deals & Discounts') }}
                                 </h2>
@@ -372,7 +372,7 @@
         @php
             $newArrivalsChunks = ($newArrivals ?? collect())->chunk(4);
         @endphp
-        <section id="new-arrivals" class="py-12 sm:py-16 lg:py-20 bg-white" x-data="{
+        <section id="new-arrivals" class="py-8 sm:py-12 lg:py-16 bg-white" x-data="{
             currentSlide: 0,
             itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
             totalItems: {{ isset($newArrivals) ? $newArrivals->count() : 0 }},
@@ -400,9 +400,9 @@
         }"
             @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-end justify-between mb-8 sm:mb-10">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
+                <div class="flex items-end justify-between mb-6 sm:mb-8">
+                    <div class="flex-1 text-center">
+                        <div class="flex items-center justify-center gap-2 mb-2">
                             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
                                 {{ gtrans('New Arrivals') }}
                             </h2>
@@ -463,7 +463,7 @@
             $bestSellerCount = ($bestSellers ?? collect())->count();
         @endphp
         @if ($bestSellerCount > 0)
-            <section id="bestsellers" class="py-12 sm:py-16 lg:py-20 bg-gray-50" x-data="{
+            <section id="bestsellers" class="py-8 sm:py-12 lg:py-16 bg-gray-50" x-data="{
                 currentSlide: 0,
                 itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
                 totalItems: {{ $bestSellerCount }},
@@ -480,9 +480,9 @@
                 }
             }">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-end justify-between mb-8 sm:mb-10">
-                        <div>
-                            <div class="flex items-center gap-2 mb-2">
+                    <div class="flex items-end justify-between mb-6 sm:mb-8">
+                        <div class="flex-1 text-center">
+                            <div class="flex items-center justify-center gap-2 mb-2">
                                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
                                     {{ gtrans('Best Sellers') }}
                                 </h2>
@@ -546,9 +546,9 @@
         @endif
 
         {{-- Brands Carousel (CSS marquee for smooth continuous scroll) --}}
-        <section id="brands" class="py-12 sm:py-16 bg-white border-y border-gray-100">
+        <section id="brands" class="py-8 sm:py-12 lg:py-16 bg-white border-y border-gray-100">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-10">
+                <div class="text-center mb-8">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                         {{ gtrans('Trusted Brands') }}
                     </h2>
@@ -651,9 +651,9 @@
         </section>
 
         {{-- Why Choose Section --}}
-        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <section class="py-8 sm:py-12 lg:py-16 bg-gray-50">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
+                <div class="text-center mb-8">
                     <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
                         {{ gtrans('Why Shop With Us?') }}
                     </h2>

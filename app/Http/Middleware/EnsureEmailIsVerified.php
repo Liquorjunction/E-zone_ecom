@@ -10,10 +10,9 @@ class EnsureEmailIsVerified
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated and email is not verified
         if ($request->user() && !$request->user()->email_verified_at) {
-            // Don't redirect if already on verification page
-            if ($request->route()->getName() !== 'verification.pending') {
+            $exemptedRoutes = ['verification.pending', 'email.verify', 'admin.email.verify'];
+            if (!in_array($request->route()->getName(), $exemptedRoutes)) {
                 return redirect()->route('verification.pending')->with('warning', 'Please verify your email address to continue.');
             }
         }

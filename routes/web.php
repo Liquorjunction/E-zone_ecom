@@ -92,6 +92,9 @@ Route::view('/checkout-process', 'client.pages.checkout-process')->name('checkou
 Route::view('/checkout-demo', 'client.pages.checkout')->name('checkout.demo');
 Route::view('/order-tracking', 'client.pages.order-tracking')->name('order-tracking');
 
+// Email & Password Routes (Accessible to all users - authenticated & guests)
+Route::get('/email/verify', [AuthController::class, 'verifyEmail'])->name('email.verify');
+
 /*
 |--------------------------------------------------------------------------
 | Guest Routes (Unauthenticated Users Only)
@@ -101,8 +104,8 @@ Route::middleware('guest')->group(function () {
     Route::view('/login', 'client.auth.login')->name('login');
     Route::view('/register', 'client.auth.register')->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+    Route::view('/register/success', 'client.partials.register-success')->name('register.success');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
-    Route::get('/email/verify', [AuthController::class, 'verifyEmail'])->name('email.verify');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
     Route::get('/reset-password', [AuthController::class, 'showResetForm'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');

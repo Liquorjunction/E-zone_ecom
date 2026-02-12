@@ -32,7 +32,7 @@ class AuthController extends Controller
             $token = $verifyEmailService->generateVerificationToken('user', $user->email);
             $verifyEmailService->sendVerificationEmail($user, $token, 'user');
 
-            return redirect()->route('login')->with('success', 'Account created successfully! Please check your email to verify your address.');
+            return redirect()->route('register.success')->with('email', $user->email);
         } catch (\Throwable $e) {
             Log::error('Registration error: ' . $e->getMessage(), [
                 'email' => $request->email,
@@ -195,7 +195,8 @@ class AuthController extends Controller
         }
 
         try {
-            $verifyEmailService->resendVerificationEmail($user, 'user');
+            $token = $verifyEmailService->generateVerificationToken('user', $user->email);
+            $verifyEmailService->resendVerificationEmail($user, $token, 'user');
             return back()->with('success', 'Verification email resent successfully! Please check your inbox.');
         } catch (\Throwable $e) {
             Log::error('Resend verification email error: ' . $e->getMessage(), [
@@ -239,7 +240,7 @@ class AuthController extends Controller
             }
         }
 
-        return view('client.pages.email-verification-pending');
+        return view('client.partials.email-verification-pending');
     }
 
     public function logout(LogoutRequest $request)
