@@ -50,7 +50,9 @@ class ProductRepository implements ProductRepositoryInterface
 
         if ($request->filled('subcategory')) {
             $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
-            $query->whereIn('sub_category_id', $subcategories);
+            $query->whereHas('subCategory', function (Builder $q) use ($subcategories) {
+                $q->whereIn('slug', $subcategories)->where('status', 'active');
+            });
         }
 
         if ($request->filled('bestseller') && $request->bestseller) {
@@ -126,8 +128,8 @@ class ProductRepository implements ProductRepositoryInterface
 
         if ($request->filled('subcategory')) {
             $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
-            $query->whereHas('product', function (Builder $q) use ($subcategories) {
-                $q->whereIn('sub_category_id', $subcategories);
+            $query->whereHas('product.subCategory', function (Builder $q) use ($subcategories) {
+                $q->whereIn('slug', $subcategories)->where('status', 'active');
             });
         }
 
@@ -267,8 +269,8 @@ class ProductRepository implements ProductRepositoryInterface
 
         if ($request->filled('subcategory')) {
             $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
-            $query->whereHas('product', function (Builder $q) use ($subcategories) {
-                $q->whereIn('sub_category_id', $subcategories);
+            $query->whereHas('product.subCategory', function (Builder $q) use ($subcategories) {
+                $q->whereIn('slug', $subcategories)->where('status', 'active');
             });
         }
 
@@ -549,5 +551,23 @@ class ProductRepository implements ProductRepositoryInterface
             ->latest()
             ->take($limit)
             ->get();
+    }
+
+    public function getMaxPrice(): float
+    {
+        $maxPrice = ProductVariant::query()
+            ->where('status', 'active')
+            ->whereHas('product', function (Builder $q) {
+                $q->where('status', 'active')
+                  ->whereHas('brand', function (Builder $brandQuery) {
+                      $brandQuery->where('status', 'active');
+                  })
+                  ->whereHas('category', function (Builder $categoryQuery) {
+                      $categoryQuery->where('status', 'active');
+                  });
+            })
+            ->max('price');
+
+        return $maxPrice ? round($maxPrice, 2) : 5000.00;
     }
 }

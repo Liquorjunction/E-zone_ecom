@@ -44,7 +44,8 @@
                 <li x-data="{ open: false }" class="group">
                     <div class="relative">
                         <a href="{{ route('products.index', ['category' => $category->slug]) }}"
-                           class="flex items-center py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-colors duration-150 hover:bg-gray-50 group-hover:shadow-md"
+                           data-category-link="{{ $category->slug }}"
+                           class="flex items-center py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-colors duration-150 hover:bg-gray-50 group-hover:shadow-md category-sidebar-link"
                            :class="{ 'px-2 justify-center': sidebarCollapsed, 'px-4': !sidebarCollapsed }">
 
                             <span class="shrink-0 text-primary w-6 h-6 flex items-center justify-center">
@@ -82,8 +83,10 @@
                             <div x-show="open" x-collapse.duration.200ms
                                  class="ml-9 mt-1.5 space-y-0.5 pl-4 border-l-2 border-gray-100">
                                 @foreach ($category->subcategories as $subcategory)
-                                    <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
-                                   class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-colors duration-150 hover:bg-gray-50 hover:pl-4 hover:font-medium hover:text-primary">
+                                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                                    data-subcategory-slug="{{ $subcategory->slug }}"
+                                       data-category-slug="{{ $category->slug }}"
+                                       class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-colors duration-150 hover:bg-gray-50 hover:pl-4 hover:font-medium hover:text-primary subcategory-sidebar-link">
                                         <span class="flex items-center">
                                             <span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-2.5 group-hover:bg-primary transition-colors"></span>
                                             {{ $subcategory->{'sub-category-name'} }}
@@ -156,7 +159,8 @@
                 <li x-data="{ open: false }" class="group">
                     <div class="relative">
                         <a href="{{ route('products.index', ['category' => $category->slug]) }}"
-                           class="flex items-center px-4 py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-colors duration-150 hover:bg-gray-50">
+                           data-category-link="{{ $category->slug }}"
+                           class="flex items-center px-4 py-3.5 text-sm font-medium text-gray-700 rounded-xl transition-colors duration-150 hover:bg-gray-50 category-sidebar-link">
                             <span class="shrink-0 text-primary w-6 h-6 flex items-center justify-center">
                                 @if($category->{'category-icon'} && \Illuminate\Support\Facades\Storage::disk('public')->exists($category->{'category-icon'}))
                                     <img src="{{ asset('storage/' . $category->{'category-icon'}) }}"
@@ -187,8 +191,10 @@
                              x-collapse.duration.200ms
                              class="ml-9 mt-1.5 space-y-0.5 pl-4 border-l-2 border-gray-100">
                             @foreach ($category->subcategories as $subcategory)
-                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
-                                   class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-colors duration-150 hover:bg-gray-50">
+                                            <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                                data-subcategory-slug="{{ $subcategory->slug }}"
+                                         data-category-slug="{{ $category->slug }}"
+                                         class="block px-3 py-2.5 text-sm text-gray-600 rounded-lg transition-colors duration-150 hover:bg-gray-50 subcategory-sidebar-link">
                                     <span class="flex items-center">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-2.5"></span>
                                         {{ $subcategory->{'sub-category-name'} }}
