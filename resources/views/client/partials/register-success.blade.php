@@ -43,8 +43,8 @@
                 <div class="space-y-6">
                     <div>
                         <h1 class="text-4xl font-bold mb-4">Welcome to E-Zone!</h1>
-                        <p class="text-lg text-white/90">Your account has been successfully created. Start your shopping
-                            journey today!</p>
+                        <p class="text-lg text-white/90">Complete your registration by verifying your email address to start
+                            your shopping journey!</p>
                     </div>
 
                     <!-- Features -->
@@ -57,8 +57,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-base">Account Created</h3>
-                                <p class="text-sm text-white/80 mt-1">Your E-Zone account is ready to use</p>
+                                <h3 class="font-semibold text-base">Registration Submitted</h3>
+                                <p class="text-sm text-white/80 mt-1">Your E-Zone account awaits email verification</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -69,8 +69,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-base">Verify Your Email</h3>
-                                <p class="text-sm text-white/80 mt-1">Check your inbox to activate your account</p>
+                                <h3 class="font-semibold text-base">Complete Registration</h3>
+                                <p class="text-sm text-white/80 mt-1">Verify your email to complete your registration</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -144,8 +144,8 @@
                             </div>
                         </div>
                     </div>
-                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2 text-center">Account Created!</h2>
-                    <p class="text-gray-600 text-center">Your registration was successful</p>
+                    <h2 class="text-3xl lg:text-3xl font-bold text-gray-900 mb-2 text-center">You're Almost There! 🎉</h2>
+                    <p class="text-gray-600 text-center">Just one final step to unlock your E-Zone account</p>
                 </div>
 
                 <!-- Success Message -->
@@ -159,10 +159,8 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-semibold text-green-800">Registration Successful!</p>
-                            <p class="text-sm text-green-700 mt-1">Your account has been created successfully. A
-                                verification email has been sent to confirm your email address. Click the link in the
-                                email to activate your account and start shopping.</p>
+                            <p class="text-sm font-semibold text-green-800">Welcome! ✓</p>
+                            <p class="text-sm text-green-700 mt-1">Great! We've received your registration. We've sent a confirmation email to verify your address. Simply click the link in that email, and you'll be ready to explore our amazing electronics collection!</p>
                         </div>
                     </div>
                 </div>
@@ -170,17 +168,16 @@
                 <!-- Email Display -->
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
                     <p class="text-sm text-blue-700">
-                        <span class="font-semibold">Verification Email:</span><br>
+                        <span class="font-semibold">Confirmation Email Sent To:</span><br>
                         <span
                             class="text-blue-900 font-medium">{{ session('email') ?? 'your-email@example.com' }}</span>
                     </p>
-                    <p class="text-xs text-blue-600 mt-2">Your account will be fully activated after email
-                        verification.</p>
+                    <p class="text-xs text-blue-600 mt-2">Check this inbox (including spam folder) for our email. Once you click the verification link, your account will be fully active!</p>
                 </div>
 
                 <!-- Instructions -->
                 <div class="space-y-4 mb-8">
-                    <h3 class="text-base font-semibold text-gray-900">What's Next?</h3>
+                    <h3 class="text-base font-semibold text-gray-900">Quick Steps to Get Started</h3>
 
                     <div class="flex items-start">
                         <div class="shrink-0">
@@ -190,9 +187,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-medium text-gray-900">Check Your Email</h4>
-                            <p class="mt-1 text-sm text-gray-600">We've sent a verification email to your inbox. Look
-                                for a message with the subject "Verify Your Email Address"</p>
+                            <h4 class="text-sm font-medium text-gray-900">📧 Find the Email</h4>
+                            <p class="mt-1 text-sm text-gray-600">Check your inbox (and spam folder just in case) for an email from E-Zone with the subject "Verify Your E-Zone Account"</p>
                         </div>
                     </div>
 
@@ -204,9 +200,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-medium text-gray-900">Verify Your Account</h4>
-                            <p class="mt-1 text-sm text-gray-600">Click the verification link in the email to confirm
-                                your email address. The link will expire in 5 minutes.</p>
+                            <h4 class="text-sm font-medium text-gray-900">✓ Click the Link</h4>
+                            <p class="mt-1 text-sm text-gray-600">Click the verification link to confirm your email and activate your account. That's it!</p>
                         </div>
                     </div>
                 </div>
@@ -223,8 +218,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
-                                <strong>Verification links expire in 5 minutes.</strong> Don't worry, you can request a
-                                new link after signing in if needed.
+                                <strong>⏰ Link expires in 5 minutes</strong> - But no worries! If you miss it, just sign in to your account and request a new verification email. We'll send as many as you need!
                             </p>
                         </div>
                     </div>
@@ -232,14 +226,6 @@
 
                 <!-- Primary Action Button -->
                 <div class="flex gap-3 pt-2">
-                    <a href="{{ route('login') }}"
-                        class="flex-1 flex justify-center items-center px-6 py-3.5 text-base font-semibold text-white bg-primary rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3h6a3 3 0 013 3v1" />
-                        </svg>
-                        Go to Login
-                    </a>
                     @if (session('token'))
                         <a href="{{ route('register.edit', ['token' => session('token')]) }}"
                             class="flex-1 flex justify-center items-center px-6 py-3.5 text-base font-semibold text-primary bg-gray-100 rounded-xl shadow-lg hover:bg-gray-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
@@ -255,7 +241,7 @@
                 <!-- Help Text -->
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <p class="text-sm text-gray-600 text-center font-semibold mb-3">
-                        Troubleshooting
+                        Can't Find the Email?
                     </p>
                     <div class="space-y-2 text-sm text-gray-600">
                         <div class="flex items-start">
@@ -265,7 +251,7 @@
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                                     clip-rule="evenodd" />
                             </svg>
-                            <span>Check your spam/junk folder for the verification email</span>
+                            <span><strong>Check Spam:</strong> Emails sometimes hide in the spam folder - look there first!</span>
                         </div>
                         <div class="flex items-start">
                             <svg class="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" fill="currentColor"
@@ -274,7 +260,7 @@
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                                     clip-rule="evenodd" />
                             </svg>
-                            <span>Make sure you entered the correct email address during registration</span>
+                            <span><strong>Verify Email:</strong> Double-check that the email address {{ session('email') ?? 'you provided' }} is correct</span>
                         </div>
                     </div>
                 </div>

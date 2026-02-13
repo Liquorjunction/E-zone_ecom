@@ -44,11 +44,7 @@ class OrderService
     {
         $this->logger->info('Creating order from cart', ['cart_id' => $cart->id]);
 
-        // Get applied coupon from session before creating order
         $appliedCoupon = $this->sessionCoupon->getForCart($cart->id);
-
-        // Save coupon data to cart at this safe point (before order creation)
-        // This persists the final coupon state to the database for record keeping
         if ($appliedCoupon) {
             $cart->coupon_id = $appliedCoupon['id'];
             $cart->coupon_code = $appliedCoupon['code'];
@@ -67,7 +63,6 @@ class OrderService
 
         $this->logger->info('Order created', ['order_id' => $order->id]);
 
-        // Record coupon usage if a coupon was applied
         if ($appliedCoupon) {
             try {
                 $this->couponService->recordUsage(
@@ -91,18 +86,14 @@ class OrderService
             }
         }
 
-        // Clear the coupon from session after order is safely created
         $this->sessionCoupon->remove();
 
-        // Attempt payment processing (stub). Real integration should be implemented here.
         try {
             $paymentResult = $this->paymentService->process($data, $order);
 
             if (!empty($paymentResult['success'])) {
-                // Save payment method if provided
                 $order->payment_method = $data['payment_method'] ?? $data['payment'] ?? $order->payment_method;
 
-                // If a transaction_id exists, consider the order paid
                 $order->status = !empty($paymentResult['transaction_id']) ? 'paid' : 'processing';
                 $order->save();
 
@@ -115,7 +106,6 @@ class OrderService
             }
         } catch (\Throwable $e) {
             $this->logger->error('Payment exception', ['exception' => $e]);
-            // keep order created but mark failed
             $order->status = $order->status ?? 'failed';
             $order->save();
             throw $e;
