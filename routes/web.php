@@ -104,6 +104,7 @@ Route::middleware('guest')->group(function () {
     Route::view('/login', 'client.auth.login')->name('login');
     Route::view('/register', 'client.auth.register')->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+    Route::get('/register/edit', [AuthController::class, 'editPendingRegistration'])->name('register.edit');
     Route::view('/register/success', 'client.partials.register-success')->name('register.success');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');

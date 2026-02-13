@@ -159,11 +159,14 @@
                 <!-- Registration Form -->
                 <form class="space-y-4 @if (session('success')) hidden @endif" action="{{ route('register.store') }}" method="POST">
                     @csrf
+                    @if (isset($token))
+                        <input type="hidden" name="token" value="{{ $token }}">
+                    @endif
 
                     <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                        <input type="text" name="name" id="name" value="{{ old('name', $prefilled['name'] ?? '') }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                             placeholder="John Doe">
                     </div>
@@ -171,7 +174,7 @@
                     <!-- Phone Number -->
                     <div>
                         <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                        <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" required
+                        <input type="tel" name="phone" id="phone" value="{{ old('phone', $prefilled['phone'] ?? '') }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                             placeholder="e.g. +212 612345678">
                         <input type="hidden" name="country_code" id="country_code" value="" style="height: 53px !important;">
@@ -180,7 +183,7 @@
                     <!-- Email -->
                     <div>
                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                        <input type="email" name="email" id="email" value="{{ old('email', $prefilled['email'] ?? '') }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                             placeholder="you@example.com">
                     </div>

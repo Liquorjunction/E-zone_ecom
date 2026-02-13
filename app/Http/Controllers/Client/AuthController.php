@@ -18,21 +18,38 @@ use App\Models\User;
 use App\Services\VerifyEmailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request, AuthRepo $authRepository, VerifyEmailService $verifyEmailService)
+    public function register(RegisterRequest $request, VerifyEmailService $verifyEmailService)
     {
         try {
-            $user = $authRepository->createUser($request->validated());
+            $data = $request->validated();
+            $token = $request->input('token') ?? Str::random(64);
+            
+            // Clear old pending data if resubmitting
+            if ($request->has('token')) {
+                $this->clearPendingRegistration($token);
+            }
+            
+            $this->storePendingRegistration($token, $data);
+
+            $pendingUser = new User([
+                'name' => $data['name'],
+                'email' => $data['email'],
+            ]);
 
             // Generate verification token and send email
-            $token = $verifyEmailService->generateVerificationToken('user', $user->email);
-            $verifyEmailService->sendVerificationEmail($user, $token, 'user');
+            $verifyEmailService->sendVerificationEmail($pendingUser, $token, 'user');
 
-            return redirect()->route('register.success')->with('email', $user->email);
+            return redirect()->route('register.success')->with([
+                'email' => $data['email'],
+                'token' => $token,
+            ]);
         } catch (\Throwable $e) {
             Log::error('Registration error: ' . $e->getMessage(), [
                 'email' => $request->email,
@@ -42,6 +59,30 @@ class AuthController extends Controller
                 'email' => 'Unable to complete registration. Please try again.',
             ])->withInput($request->except('password'));
         }
+    }
+
+    public function editPendingRegistration(Request $request)
+    {
+        $token = $request->query('token');
+
+        if (!$token) {
+            return redirect()->route('register')->with('error', 'Invalid session. Please register again.');
+        }
+
+        $pending = $this->getPendingRegistration($token);
+
+        if (!$pending) {
+            return redirect()->route('register')->with('error', 'Session expired. Please register again.');
+        }
+
+        return view('client.auth.register', [
+            'token' => $token,
+            'prefilled' => [
+                'name' => $pending['name'],
+                'email' => $pending['email'],
+                'phone' => $pending['phone'],
+            ],
+        ]);
     }
 
     public function login(LoginRequest $request, AuthRepo $authRepository)
@@ -147,7 +188,7 @@ class AuthController extends Controller
         return redirect()->route('login')->with('success', 'Your password has been reset successfully. Please log in with your new password.');
     }
 
-    public function verifyEmail(VerifyEmailRequest $request, VerifyEmailService $verifyEmailService)
+    public function verifyEmail(VerifyEmailRequest $request, VerifyEmailService $verifyEmailService, AuthRepo $authRepository)
     {
         $payload = $request->query('payload');
         $email = $request->query('email');
@@ -169,6 +210,38 @@ class AuthController extends Controller
             return redirect()->route('login')->with('error', 'Invalid verification link.');
         }
 
+        $pending = $this->getPendingRegistration($token);
+        if ($pending) {
+            if (!hash_equals($pending['email'], $email)) {
+                return redirect()->route('login')->with('error', 'Invalid verification link.');
+            }
+
+            if (User::where('email', $email)->exists()) {
+                $this->clearPendingRegistration($token);
+                return redirect()->route('login')->with('info', 'Account already exists. Please log in.');
+            }
+
+            try {
+                $pending['password'] = Crypt::decryptString($pending['password']);
+                $user = $authRepository->createUser($pending);
+                
+                // Mark email as verified upon creation
+                $user->update([
+                    'email_verified_at' => now(),
+                ]);
+                
+                $this->clearPendingRegistration($token);
+            } catch (\Throwable $e) {
+                Log::error('Pending registration verification error: ' . $e->getMessage(), [
+                    'email' => $email,
+                    'trace' => $e->getTraceAsString()
+                ]);
+                return redirect()->route('login')->with('error', 'Unable to create account. Please try again.');
+            }
+
+            return redirect()->route('login')->with('success', 'Email verified successfully! You can now log in.');
+        }
+
         // Validate the token
         $validation = $verifyEmailService->validateVerificationToken($token, $email, 'user');
 
@@ -184,6 +257,32 @@ class AuthController extends Controller
         }
 
         return redirect()->route('login')->with('success', 'Email verified successfully! You can now log in.');
+    }
+
+    private function storePendingRegistration(string $token, array $data): void
+    {
+        Cache::put($this->pendingRegistrationKey($token), [
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'password' => Crypt::encryptString($data['password']),
+        ], now()->addMinutes(5));
+    }
+
+    private function getPendingRegistration(string $token): ?array
+    {
+        $pending = Cache::get($this->pendingRegistrationKey($token));
+        return is_array($pending) ? $pending : null;
+    }
+
+    private function clearPendingRegistration(string $token): void
+    {
+        Cache::forget($this->pendingRegistrationKey($token));
+    }
+
+    private function pendingRegistrationKey(string $token): string
+    {
+        return 'pending_registration:' . $token;
     }
 
     public function resendVerificationEmail(ResendVerificationEmailRequest $request, VerifyEmailService $verifyEmailService)
