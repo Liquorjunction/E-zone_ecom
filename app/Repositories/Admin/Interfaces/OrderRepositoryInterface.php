@@ -10,4 +10,5 @@ interface OrderRepositoryInterface
     public function updateOrderStatus($id, $status);
     public function getDataForDataTable();
     public function getCustomerNameByOrderId($orderId);
+    public function cancelOrder($id, $cancelReason);
 }

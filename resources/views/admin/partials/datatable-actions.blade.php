@@ -53,3 +53,21 @@
         </span>
     </a>
 @endif
+@if (isset($cancel_url))
+    <button type="button" class="btn btn-sm btn-icon btn-secondary cancel-action"
+        data-cancel-url="{{ $cancel_url }}"
+        data-cancel-id="{{ $product_id ?? $id ?? $model_id ?? '' }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Cancel"
+        aria-label="Cancel"
+        data-bs-original-title="Cancel">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M6 18L18 6M6 6l12 12"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </button>
+@endif

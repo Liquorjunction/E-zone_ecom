@@ -22,6 +22,8 @@ class OrderRepository implements OrderRepositoryInterface
         $order = Order::find($id);
         if ($order) {
             $order->status = $status;
+            $order->status_updated_by = auth()->guard('admin')->id();
+            $order->status_updated_at = now();
             $order->save();
             return $order;
         }
@@ -46,5 +48,19 @@ class OrderRepository implements OrderRepositoryInterface
 
         // Fallback: if customer name is stored on order record under a different field
         return $order->customer_name ?? $order->shipping_address['name'] ?? null;
+    }
+
+    public function cancelOrder($id, $cancelReason)
+    {
+        $order = Order::find($id);
+        if ($order) {
+            $order->status = 'cancelled';
+            $order->cancel_reason = $cancelReason;
+            $order->cancelled_by = auth()->guard('admin')->id();
+            $order->cancelled_at = now();
+            $order->save();
+            return $order;
+        }
+        return null;
     }
 }

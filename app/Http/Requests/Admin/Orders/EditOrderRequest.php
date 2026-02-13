@@ -24,9 +24,8 @@ class EditOrderRequest extends FormRequest
     {
         return [
             'id' => 'required|exists:orders,id',
-            'status' => 'sometimes|string|in:pending,processing,completed,cancelled',
+            'status' => 'sometimes|string|in:pending,confirmed,processing,ready_to_ship,shipped,out_for_delivery,delivered,cancelled,completed',
             'tracking_number' => 'sometimes|nullable|string|max:255',
-            // Add other fields as necessary
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Orders\CancelOrderRequest;
 use App\Http\Requests\Admin\Orders\ReadOrderRequest;
 use App\Models\Order;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
@@ -65,6 +66,27 @@ class OrderController extends Controller
         }
     }
 
+    public function cancelOrder(CancelOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    {
+        try {
+            $id = $request->input('id', $request->route('id'));
+            $cancelReason = $request->input('cancel_reason');
+            $orderRepo->cancelOrder($id, $cancelReason);
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Order cancelled successfully.']);
+            }
+            
+            return redirect()->back()->with(['success' => true, 'message' => 'Order cancelled successfully.']);
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
+            
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function dataTable(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
     {
         try {
@@ -99,6 +121,7 @@ class OrderController extends Controller
                     return view('admin.partials.datatable-actions', [
                         'id' => $order->id,
                         'view_url' => $canRead ? route('admin.orders.show', ['id' => $order->id]) : null,
+                        'cancel_url' => $canUpdate ? route('admin.orders.cancel', ['id' => $order->id]) : null,
                     ])->render();
                 })
                 ->rawColumns(['action'])

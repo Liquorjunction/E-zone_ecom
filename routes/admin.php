@@ -307,6 +307,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [OrderController::class, 'show'])->name('show')->middleware('can:order.read,admin');
             Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
+            Route::post('/cancel', [OrderController::class, 'cancelOrder'])->name('cancel')->middleware('can:order.update,admin');
         });
 
         // Review Routes
