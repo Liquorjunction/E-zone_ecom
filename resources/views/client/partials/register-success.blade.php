@@ -240,7 +240,7 @@
                         </svg>
                         Go to Login
                     </a>
-                    {{-- @if (session('token')) --}}
+                    @if (session('token'))
                         <a href="{{ route('register.edit', ['token' => session('token')]) }}"
                             class="flex-1 flex justify-center items-center px-6 py-3.5 text-base font-semibold text-primary bg-gray-100 rounded-xl shadow-lg hover:bg-gray-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
                             title="Modify your registration details">
@@ -249,7 +249,7 @@
                             </svg>
                             Edit Details
                         </a>
-                    {{-- @endif --}}
+                    @endif
                 </div>
 
                 <!-- Help Text -->
