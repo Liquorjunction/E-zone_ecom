@@ -220,7 +220,7 @@
                                                 class="group relative overflow-hidden rounded-2xl bg-transparent min-h-70 sm:min-h-80 flex items-center">
                                                 <img src="{{ asset('storage/' . $card->image) }}"
                                                     alt="{{ $card->title }}"
-                                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                                    class="absolute inset-0 w-full h-full group-hover:scale-105 transition-transform duration-700 contain object-fill">
                                                 <div class="relative z-10 p-8 sm:p-10 lg:p-12">
                                                     <span
                                                         class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
