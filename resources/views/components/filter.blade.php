@@ -3,8 +3,9 @@
     'categories' => [],
     'subCategories' => [],
     'availabilityCounts' => ['in_stock' => 0, 'out_of_stock' => 0],
-    'isModal' => false,
+    'minPrice' => 0,
     'maxPrice' => 5000,
+    'isModal' => false,
 ])
 
 @php
@@ -12,7 +13,7 @@
 if (!isset($attributes) || !$attributes instanceof \Illuminate\View\ComponentAttributeBag) {
     $attributes = new \Illuminate\View\ComponentAttributeBag($attributes ?? []);
 }
-$attributes = $attributes->except(['brands', 'categories', 'subCategories', 'isModal', 'maxPrice']);
+$attributes = $attributes->except(['brands', 'categories', 'subCategories', 'isModal']);
 $passedClass = $attributes->get('class');
 if (is_array($passedClass)) {
     $attributes = $attributes->except('class')->merge(['class' => implode(' ', $passedClass)]);
@@ -57,97 +58,40 @@ $countActiveVariants = function ($products) {
         <div
             class="space-y-6 pr-2 @unless ($isModal ?? false) max-h-[calc(100vh-250px)] overflow-y-auto @endunless">
 
+            <!-- Price Range Filter -->
             <div class="border-b border-gray-100 pb-6">
                 <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
                     Price Range
                 </h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between text-sm font-medium text-gray-700">
-                        <span id="min-price-display">${{ request('min_price') ? number_format(request('min_price'), 0) : '0' }}</span>
-                        <span class="text-gray-400">-</span>
-                        <span id="max-price-display">${{ request('max_price') ? number_format(request('max_price'), 0) : number_format($maxPrice, 0) }}</span>
+                <div class="space-y-3" data-price-range data-default-min="{{ $minPrice }}" data-default-max="{{ $maxPrice }}" data-price-dirty="false">
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <span>${{ $minPrice }}</span>
+                        <span>${{ $maxPrice }}+</span>
                     </div>
-
-                    <!-- Dual Range Slider Container -->
-                    <div class="relative pt-2 pb-2">
-                        <!-- Background Track -->
-                        <div class="absolute w-full h-2 bg-gray-200 rounded-lg pointer-events-none"></div>
-
-                        <!-- Active Range Track -->
-                        <div id="price-range-track" class="absolute h-2 bg-primary rounded-lg pointer-events-none"
-                             style="left: {{ request('min_price') ? (request('min_price') / $maxPrice * 100) : 0 }}%; right: {{ request('max_price') ? (100 - (request('max_price') / $maxPrice * 100)) : 0 }}%;"></div>
-
-                        <!-- Min Price Slider -->
-                        <input type="range" id="min-price-range" min="0" max="{{ $maxPrice }}" step="10"
-                            value="{{ request('min_price', 0) }}"
-                            class="absolute w-full appearance-none cursor-pointer bg-transparent"
-                            style="top: 0; z-index: 5; pointer-events: auto; height: 2px;">
-
-                        <!-- Max Price Slider -->
-                        <input type="range" id="max-price-range" min="0" max="{{ $maxPrice }}" step="10"
+                    <div class="relative pt-6 pb-3 touch-none" data-range-root>
+                        <div class="absolute w-full h-2 bg-gray-200 rounded-lg top-2"></div>
+                        <div data-range-track class="absolute h-2 bg-primary rounded-lg top-2"></div>
+                        <input type="range" min="{{ $minPrice }}" max="{{ $maxPrice }}" step="50"
+                            value="{{ request('min_price', $minPrice) }}"
+                            data-range="min"
+                            class="absolute w-full h-2 top-2 appearance-none bg-transparent rounded-lg pointer-events-none">
+                        <input type="range" min="{{ $minPrice }}" max="{{ $maxPrice }}" step="50"
                             value="{{ request('max_price', $maxPrice) }}"
-                            class="absolute w-full appearance-none cursor-pointer bg-transparent"
-                            style="top: 0; z-index: 5; pointer-events: auto; height: 2px;">
+                            data-range="max"
+                            class="absolute w-full h-2 top-2 appearance-none bg-transparent rounded-lg pointer-events-none">
                     </div>
 
-                    <!-- Number Inputs -->
-                    <div class="flex items-center gap-2 pt-2">
-                        <input type="number" name="min_price" id="min-price" placeholder="Min"
-                            value="{{ request('min_price') }}" min="0" max="{{ $maxPrice }}" step="10"
+                    <div class="flex items-center gap-2 mt-3">
+                        <input type="number" placeholder="Min" data-input="min" data-name="min_price"
+                            value="{{ request('min_price') }}"
                             class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
                         <span class="text-gray-400">-</span>
-                        <input type="number" name="max_price" id="max-price" placeholder="Max"
-                            value="{{ request('max_price') }}" min="0" max="{{ $maxPrice }}" step="10"
+                        <input type="number" placeholder="Max" data-input="max" data-name="max_price"
+                            value="{{ request('max_price') }}"
                             class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
                     </div>
                 </div>
-
-                <style>
-                    /* Custom styling for range sliders */
-                    input[type="range"] {
-                        -webkit-appearance: none;
-                        appearance: none;
-                    }
-
-                    input[type="range"]::-webkit-slider-thumb {
-                        -webkit-appearance: none;
-                        appearance: none;
-                        width: 18px;
-                        height: 18px;
-                        border-radius: 50%;
-                        background: white;
-                        border: 2px solid #3b82f6;
-                        cursor: pointer;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                        position: relative;
-                        z-index: 10;
-                    }
-
-                    input[type="range"]::-moz-range-thumb {
-                        width: 18px;
-                        height: 18px;
-                        border-radius: 50%;
-                        background: white;
-                        border: 2px solid #3b82f6;
-                        cursor: pointer;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                    }
-
-                    input[type="range"]::-webkit-slider-thumb:hover {
-                        border-color: #2563eb;
-                        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-                    }
-
-                    input[type="range"]::-moz-range-thumb:hover {
-                        border-color: #2563eb;
-                        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-                    }
-
-                    input[type="range"]:focus {
-                        outline: none;
-                    }
-                </style>
             </div>
 
             <!-- Brand Filter -->

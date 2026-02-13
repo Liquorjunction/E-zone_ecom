@@ -553,6 +553,24 @@ class ProductRepository implements ProductRepositoryInterface
             ->get();
     }
 
+    public function getMinPrice(): float
+    {
+        $minPrice = ProductVariant::query()
+            ->where('status', 'active')
+            ->whereHas('product', function (Builder $q) {
+                $q->where('status', 'active')
+                  ->whereHas('brand', function (Builder $brandQuery) {
+                      $brandQuery->where('status', 'active');
+                  })
+                  ->whereHas('category', function (Builder $categoryQuery) {
+                      $categoryQuery->where('status', 'active');
+                  });
+            })
+            ->min('price');
+
+        return $minPrice ? round($minPrice, 2) : 0.00;
+    }
+
     public function getMaxPrice(): float
     {
         $maxPrice = ProductVariant::query()

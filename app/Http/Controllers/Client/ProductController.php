@@ -26,13 +26,14 @@ class ProductController extends Controller
         $bestsellers = $productRepository->getBestsellerVariants(12);
         $bestsellersIds = $bestsellers->pluck('id')->toArray();
         $availabilityCounts = $productRepository->getAvailabilityCounts();
+        $minPrice = $productRepository->getMinPrice();
         $maxPrice = $productRepository->getMaxPrice();
 
         $brands = Brand::where('status', 'active')->get();
         $categories = Categories::where('status', 'active')->with('subcategories')->get();
         $subCategories = [];
 
-        return view('client.pages.products', compact('products', 'bestsellers', 'bestsellersIds', 'availabilityCounts', 'brands', 'categories', 'subCategories', 'maxPrice'));
+        return view('client.pages.products', compact('products', 'bestsellers', 'bestsellersIds', 'availabilityCounts', 'brands', 'categories', 'subCategories', 'minPrice', 'maxPrice'));
     }
 
     public function deals(Request $request, ProductRepo $productRepository)
@@ -41,13 +42,14 @@ class ProductController extends Controller
         $bestsellers = $productRepository->getBestsellerVariants(12);
         $bestsellersIds = $bestsellers->pluck('id')->toArray();
         $availabilityCounts = $productRepository->getAvailabilityCounts();
+        $minPrice = $productRepository->getMinPrice();
         $maxPrice = $productRepository->getMaxPrice();
 
         $brands = Brand::where('status', 'active')->get();
         $categories = Categories::where('status', 'active')->with('subcategories')->get();
         $subCategories = [];
 
-        return view('client.pages.deals', compact('products', 'bestsellers', 'bestsellersIds', 'availabilityCounts', 'brands', 'categories', 'subCategories', 'maxPrice'));
+        return view('client.pages.deals', compact('products', 'bestsellers', 'bestsellersIds', 'availabilityCounts', 'brands', 'categories', 'subCategories', 'minPrice', 'maxPrice'));
     }
 
     public function show($slug, ProductRepo $productRepository)

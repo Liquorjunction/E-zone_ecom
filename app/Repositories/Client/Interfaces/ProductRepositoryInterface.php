@@ -19,5 +19,6 @@ interface ProductRepositoryInterface
     public function getBestsellerProducts(int $limit = 12): Collection;
     public function getBestsellerVariants(int $limit = 12): Collection;
     public function getAvailabilityCounts(): array;
+    public function getMinPrice(): float;
     public function getMaxPrice(): float;
 }

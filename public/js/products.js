@@ -103,9 +103,24 @@ const hideLoading = () => {
 const serializeForm = (form) => {
     const formData = new FormData(form);
     const params = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
-        if (value === null || value === undefined || value === '') continue;
-        params.append(key, value);
+        const priceRange = form.querySelector('[data-price-range]');
+        const defaultMin = priceRange ? parseFloat(priceRange.dataset.defaultMin) : null;
+        const defaultMax = priceRange ? parseFloat(priceRange.dataset.defaultMax) : null;
+        const isPriceDirty = priceRange && priceRange.dataset.priceDirty === 'true';
+
+        for (const [key, value] of formData.entries()) {
+            if (value === null || value === undefined || value === '') continue;
+
+            if (!isPriceDirty && (key === 'min_price' || key === 'max_price')) {
+                continue;
+            }
+
+            if ((key === 'min_price' && defaultMin !== null && parseFloat(value) === defaultMin) ||
+                (key === 'max_price' && defaultMax !== null && parseFloat(value) === defaultMax)) {
+                continue;
+            }
+
+            params.append(key, value);
     }
     return params;
 };
@@ -301,24 +316,8 @@ const attachRemoveFilterListeners = () => {
                 if (filterType === 'price') {
                     const minInput = form.querySelector('input[name="min_price"]');
                     const maxInput = form.querySelector('input[name="max_price"]');
-                    const minPriceRange = form.querySelector('#min-price-range');
-                    const maxPriceRange = form.querySelector('#max-price-range');
-                    const minPriceDisplay = form.querySelector('#min-price-display');
-                    const maxPriceDisplay = form.querySelector('#max-price-display');
-                    const priceRangeTrack = form.querySelector('#price-range-track');
-
                     if (minInput) minInput.value = '';
                     if (maxInput) maxInput.value = '';
-                    if (minPriceRange) minPriceRange.value = 0;
-                    if (maxPriceRange) maxPriceRange.value = maxPriceRange.max;
-                    if (minPriceDisplay) minPriceDisplay.textContent = '$0';
-                    if (maxPriceDisplay && maxPriceRange) {
-                        maxPriceDisplay.textContent = '$' + parseInt(maxPriceRange.max).toLocaleString();
-                    }
-                    if (priceRangeTrack) {
-                        priceRangeTrack.style.left = '0%';
-                        priceRangeTrack.style.right = '0%';
-                    }
                 } else {
                     const inputs = form.querySelectorAll(`input[name="${filterType}[]"]`);
                     inputs.forEach(input => {
@@ -441,31 +440,15 @@ if (clearFiltersBtn) {
         if (searchInput) searchInput.value = '';
         if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
         if (sortSelect) sortSelect.value = 'newest';
-
-        // Reset dual price range sliders
-        const minPriceRange = document.getElementById('min-price-range');
-        const maxPriceRange = document.getElementById('max-price-range');
-        const minPriceInput = document.getElementById('min-price');
-        const maxPriceInput = document.getElementById('max-price');
-        const minPriceDisplay = document.getElementById('min-price-display');
-        const maxPriceDisplay = document.getElementById('max-price-display');
-
-        if (minPriceInput) minPriceInput.value = '';
-        if (maxPriceInput) maxPriceInput.value = '';
-        if (minPriceRange) minPriceRange.value = 0;
-        if (maxPriceRange) maxPriceRange.value = maxPriceRange.max;
-        if (minPriceDisplay) minPriceDisplay.textContent = '$0';
-        if (maxPriceDisplay && maxPriceRange) {
-            maxPriceDisplay.textContent = '$' + parseInt(maxPriceRange.max).toLocaleString();
-        }
-
-        // Reset track
-        const priceRangeTrack = document.getElementById('price-range-track');
-        if (priceRangeTrack) {
-            priceRangeTrack.style.left = '0%';
-            priceRangeTrack.style.right = '0%';
-        }
-
+        const priceRange = document.getElementById('price-range');
+        if (priceRange) priceRange.value = 0;
+        document.querySelectorAll('[data-input="min"], [data-input="max"]').forEach(input => {
+            input.value = '';
+            input.removeAttribute('name');
+        });
+        document.querySelectorAll('[data-price-range]').forEach(container => {
+            container.dataset.priceDirty = 'false';
+        });
         submitFilters();
     });
 }
@@ -560,161 +543,6 @@ toggleButtons.forEach((btn) => {
     });
 });
 
-// Dual Range Price Slider
-const minPriceRange = document.getElementById('min-price-range');
-const maxPriceRange = document.getElementById('max-price-range');
-const minPriceInput = document.getElementById('min-price');
-const maxPriceInput = document.getElementById('max-price');
-const minPriceDisplay = document.getElementById('min-price-display');
-const maxPriceDisplay = document.getElementById('max-price-display');
-const priceRangeTrack = document.getElementById('price-range-track');
-
-// Update the colored track between sliders
-const updatePriceTrack = () => {
-    if (!minPriceRange || !maxPriceRange || !priceRangeTrack) return;
-
-    const rangeMax = parseInt(minPriceRange.max);
-    const minVal = parseInt(minPriceRange.value);
-    const maxVal = parseInt(maxPriceRange.value);
-
-    const minPercent = (minVal / rangeMax) * 100;
-    const maxPercent = (maxVal / rangeMax) * 100;
-
-    priceRangeTrack.style.left = minPercent + '%';
-    priceRangeTrack.style.right = (100 - maxPercent) + '%';
-
-    // Dynamically adjust z-index to bring active slider to front
-    if (minVal > (maxVal - (rangeMax * 0.05))) {
-        // When sliders are close, prioritize based on values
-        minPriceRange.style.zIndex = '6';
-        maxPriceRange.style.zIndex = '5';
-    } else {
-        minPriceRange.style.zIndex = '5';
-        maxPriceRange.style.zIndex = '6';
-    }
-};
-
-// Min range slider
-if (minPriceRange) {
-    // Bring to front on mousedown/touchstart
-    minPriceRange.addEventListener('mousedown', () => {
-        minPriceRange.style.zIndex = '7';
-    });
-
-    minPriceRange.addEventListener('touchstart', () => {
-        minPriceRange.style.zIndex = '7';
-    });
-
-    minPriceRange.addEventListener('input', function() {
-        const minVal = parseInt(this.value);
-        const maxVal = parseInt(maxPriceRange?.value || this.max);
-
-        // Ensure min doesn't exceed max (with small gap)
-        if (minVal >= maxVal) {
-            this.value = Math.max(0, maxVal - 10);
-        }
-
-        // Update displays and inputs
-        if (minPriceInput) minPriceInput.value = this.value;
-        if (minPriceDisplay) minPriceDisplay.textContent = '$' + parseInt(this.value).toLocaleString();
-
-        updatePriceTrack();
-    });
-
-    minPriceRange.addEventListener('change', debounce(() => submitFilters(), 300));
-
-    minPriceRange.addEventListener('mouseup', () => {
-        updatePriceTrack(); // Reset z-index after release
-    });
-}
-
-// Max range slider
-if (maxPriceRange) {
-    // Bring to front on mousedown/touchstart
-    maxPriceRange.addEventListener('mousedown', () => {
-        maxPriceRange.style.zIndex = '7';
-    });
-
-    maxPriceRange.addEventListener('touchstart', () => {
-        maxPriceRange.style.zIndex = '7';
-    });
-
-    maxPriceRange.addEventListener('input', function() {
-        const minVal = parseInt(minPriceRange?.value || 0);
-        const maxVal = parseInt(this.value);
-
-        // Ensure max doesn't go below min (with small gap)
-        if (maxVal <= minVal) {
-            this.value = Math.min(parseInt(this.max), minVal + 10);
-        }
-
-        // Update displays and inputs
-        if (maxPriceInput) maxPriceInput.value = this.value;
-        if (maxPriceDisplay) maxPriceDisplay.textContent = '$' + parseInt(this.value).toLocaleString();
-
-        updatePriceTrack();
-    });
-
-    maxPriceRange.addEventListener('change', debounce(() => submitFilters(), 300));
-
-    maxPriceRange.addEventListener('mouseup', () => {
-        updatePriceTrack(); // Reset z-index after release
-    });
-}
-
-// Min price input
-if (minPriceInput) {
-    minPriceInput.addEventListener('input', function() {
-        const minVal = parseInt(this.value || '0');
-        const maxVal = parseInt(maxPriceInput?.value || minPriceRange?.max || '5000');
-        const rangeMax = parseInt(minPriceRange?.max || '5000');
-
-        // Validate
-        if (minVal > maxVal) {
-            this.value = maxVal;
-        }
-        if (minVal > rangeMax) {
-            this.value = rangeMax;
-        }
-
-        // Update slider and display
-        if (minPriceRange) minPriceRange.value = this.value || '0';
-        if (minPriceDisplay) minPriceDisplay.textContent = '$' + (parseInt(this.value || '0')).toLocaleString();
-
-        updatePriceTrack();
-    });
-
-    minPriceInput.addEventListener('change', debounce(() => submitFilters(), 300));
-}
-
-// Max price input
-if (maxPriceInput) {
-    maxPriceInput.addEventListener('input', function() {
-        const minVal = parseInt(minPriceInput?.value || '0');
-        const maxVal = parseInt(this.value || maxPriceRange?.max || '5000');
-        const rangeMax = parseInt(maxPriceRange?.max || '5000');
-
-        // Validate
-        if (maxVal < minVal) {
-            this.value = minVal;
-        }
-        if (maxVal > rangeMax) {
-            this.value = rangeMax;
-        }
-
-        // Update slider and display
-        if (maxPriceRange) maxPriceRange.value = this.value || maxPriceRange.max;
-        if (maxPriceDisplay) maxPriceDisplay.textContent = '$' + (parseInt(this.value || maxPriceRange?.max || '5000')).toLocaleString();
-
-        updatePriceTrack();
-    });
-
-    maxPriceInput.addEventListener('change', debounce(() => submitFilters(), 300));
-}
-
-// Initialize track on page load
-updatePriceTrack();
-
 // Initialize remove filter buttons
 attachRemoveFilterListeners();
 
@@ -732,18 +560,15 @@ document.querySelectorAll('.category-sidebar-link').forEach(link => {
             });
         });
 
-        // Then check the selected category
+        // Then check the selected category and its subcategories
         forms.forEach(form => {
             const categoryCheckbox = form.querySelector(`input[name="category[]"][value="${categorySlug}"]`);
             if (categoryCheckbox) {
                 categoryCheckbox.checked = true;
             }
-        });
 
-        // Uncheck all subcategories
-        forms.forEach(form => {
-            form.querySelectorAll('input[name="subcategory[]"]').forEach(checkbox => {
-                checkbox.checked = false;
+            form.querySelectorAll(`input[name="subcategory[]"][data-category-slug="${categorySlug}"]`).forEach(checkbox => {
+                checkbox.checked = true;
             });
         });
 
