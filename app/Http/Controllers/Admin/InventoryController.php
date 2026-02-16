@@ -208,12 +208,11 @@ class InventoryController extends Controller
                     $canUpdate = $request->user()->can('inventories.update');
                     $canDelete = $request->user()->can('inventories.delete');
 
-                    // Check if any product in batch is sold
-                    $batchVariantIds = \App\Models\Inventory::where('batch_no', $row->batch_no)->pluck('product_variant_id')->toArray();
-                    $soldCount = \App\Models\OrderItem::whereIn('variant_id', $batchVariantIds)->count();
+                    // Use is_sold property from the batch query
+                    $isSold = $row->is_sold ?? false;
 
-                    $editUrl = ($canUpdate && $soldCount == 0) ? route('admin.inventory.edit', ['id' => $row->id]) : null;
-                    $deleteUrl = ($canDelete && $soldCount == 0) ? route('admin.inventory.destroy', ['id' => $row->id]) : null;
+                    $editUrl = $canUpdate && !$isSold ? route('admin.inventory.edit', ['id' => $row->id]) : null;
+                    $deleteUrl = $canDelete && !$isSold ? route('admin.inventory.destroy', ['id' => $row->id]) : null;
 
                     return view('admin.partials.datatable-actions', [
                         'id' => $row->id,

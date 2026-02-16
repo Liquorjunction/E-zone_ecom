@@ -1,7 +1,24 @@
 document.addEventListener('DOMContentLoaded', function () {
+    function initSelect2ForDropdowns(scope = document) {
+        const $jq = window.jQuery || window.$;
+        if (!$jq || typeof $jq.fn.select2 !== 'function') {
+            console.warn('Select2 is not loaded. Dropdown search will not be available.');
+            return;
+        }
+        $jq('.product-select', scope).select2({
+            width: '100%',
+            placeholder: 'Select Product',
+            allowClear: true
+        });
+        $jq('.variant-select', scope).select2({
+            width: '100%',
+            placeholder: 'Select Variant',
+            allowClear: true
+        });
+    }
+
     "use strict";
 
-    // --- Configuration & Selectors ---
     const config = {
         selectors: {
             batchForm: '#batch-form',
@@ -19,18 +36,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Helper functions
     const $ = (selector, scope = document) => scope.querySelector(selector);
     const $$ = (selector, scope = document) => scope.querySelectorAll(selector);
 
     const mainForm = $(config.selectors.batchForm);
-    if (!mainForm) return; // Exit if not on the correct page
+    if (!mainForm) return;
 
     const getVariantsUrl = mainForm.getAttribute('data-variants-url');
 
-    // ----------------------------------------------------------------------
-    // 1. Location Toggle Logic (Warehouse vs Store)
-    // ----------------------------------------------------------------------
     function initLocationToggle() {
         const radios = $$(config.selectors.locationRadio);
         const whDiv = $(config.selectors.warehouseDiv);
@@ -45,14 +58,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (whSelect) whSelect.required = true;
                 if (stSelect) {
                     stSelect.required = false;
-                    stSelect.value = ""; // Clear value
+                    stSelect.value = "";
                 }
             } else {
                 whDiv.style.display = 'none';
                 stDiv.style.display = '';
                 if (whSelect) {
                     whSelect.required = false;
-                    whSelect.value = ""; // Clear value
+                    whSelect.value = "";
                 }
                 if (stSelect) stSelect.required = true;
             }
@@ -60,57 +73,74 @@ document.addEventListener('DOMContentLoaded', function () {
 
         radios.forEach(radio => {
             radio.addEventListener('change', (e) => toggle(e.target.value));
-            // Run on init if checked
             if (radio.checked) toggle(radio.value);
         });
     }
 
-    // ----------------------------------------------------------------------
-    // 2. Variant Fetching (AJAX)
-    // ----------------------------------------------------------------------
     function fetchVariants(productId, variantSelect) {
-        // Reset UI
-        variantSelect.innerHTML = '<option value="">Loading...</option>';
-        variantSelect.disabled = true;
+        const $jq = window.jQuery || window.$;
+        if (!$jq) {
+            console.error('jQuery is required for dropdowns to work.');
+            return;
+        }
+        const $variantSelect = $jq(variantSelect);
+
+        if ($variantSelect.hasClass('select2-hidden-accessible')) {
+            $variantSelect.select2('destroy');
+        }
+
+        $variantSelect.empty().append('<option value="">Loading...</option>');
+        $variantSelect.prop('disabled', true);
+        $variantSelect.trigger('change.select2');
 
         if (!productId) {
-            variantSelect.innerHTML = '<option value="">Select Product First</option>';
+            $variantSelect.empty().append('<option value="">Select Product First</option>');
+            $variantSelect.prop('disabled', false);
+            $variantSelect.trigger('change.select2');
+            if (typeof $variantSelect.select2 === 'function') {
+                $variantSelect.select2({ width: '100%', placeholder: 'Select Variant', allowClear: true });
+            }
             return;
         }
 
         fetch(`${getVariantsUrl}?product_id=${productId}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                variantSelect.disabled = false;
+                $variantSelect.empty();
+                $variantSelect.prop('disabled', false);
+
                 if (data.length > 0) {
-                    let options = '<option value="">Select Variant</option>';
-                    // Get current locale from <html lang> or fallback
+                    $variantSelect.append('<option value="">Select Variant</option>');
+
                     let locale = document.documentElement.lang || 'en';
+
                     data.forEach(v => {
                         let name = v.variant_name;
                         if (typeof name === 'object' && name !== null) {
-                            // Try to get translation for current locale
                             name = name[locale] || name['en'] || Object.values(name)[0] || '';
                         }
-                        options += `<option value="${v.id}">${name}</option>`;
+                        const newOption = new Option(name, v.id, false, false);
+                        $variantSelect.append(newOption);
                     });
-                    variantSelect.innerHTML = options;
                 } else {
-                    variantSelect.innerHTML = '<option value="">No Variants Found</option>';
+                    $variantSelect.append('<option value="">No Variants Found</option>');
                 }
+
+                if (typeof $variantSelect.select2 === 'function') {
+                    $variantSelect.select2({ width: '100%', placeholder: 'Select Variant', allowClear: true });
+                }
+                $variantSelect.trigger('change.select2');
             })
             .catch(err => {
                 console.error(err);
-                variantSelect.innerHTML = '<option value="">Error</option>';
+                $variantSelect.empty().append('<option value="">Error Loading</option>');
+                if (typeof $variantSelect.select2 === 'function') {
+                    $variantSelect.select2({ width: '100%', placeholder: 'Select Variant', allowClear: true });
+                }
+                $variantSelect.trigger('change.select2');
             });
     }
 
-    // ----------------------------------------------------------------------
-    // 3. Batch Table Logic (Add/Remove Rows)
-    // ----------------------------------------------------------------------
     function initBatchTable() {
         const addBtn = $(config.selectors.addRowBtn);
         const tableBody = $(config.selectors.tableBody);
@@ -118,20 +148,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!addBtn || !tableBody || !template) return;
 
-        // Determine starting index based on existing rows (server rendered)
         let rowIdx = tableBody.querySelectorAll('tr').length;
 
         function addRow() {
-            // Replace INDEX placeholder with unique ID
             let html = template.innerHTML.replace(/INDEX/g, rowIdx);
             tableBody.insertAdjacentHTML('beforeend', html);
             rowIdx++;
+            const lastRow = tableBody.querySelector('tr:last-child');
+            if (lastRow) {
+                initSelect2ForDropdowns(lastRow);
+            }
         }
 
-        // Add Row Event
         addBtn.addEventListener('click', addRow);
 
-        // Remove Row Event (Delegation)
         tableBody.addEventListener('click', function (e) {
             if (e.target.closest(config.selectors.removeRowBtn)) {
                 const rows = tableBody.querySelectorAll('tr');
@@ -143,24 +173,33 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Variant Fetching Event (Delegation for dynamic rows)
-        tableBody.addEventListener('change', function (e) {
+        function handleProductSelectChange(e) {
             if (e.target.classList.contains('product-select')) {
                 const productId = e.target.value;
                 const row = e.target.closest('tr');
                 const variantSelect = row.querySelector(config.selectors.variantSelect);
-
                 fetchVariants(productId, variantSelect);
             }
-        });
+        }
+        tableBody.addEventListener('change', handleProductSelectChange);
 
-        // Init: Add first row if table is empty
+        const $jq = window.jQuery || window.$;
+        if ($jq) {
+            $jq(tableBody).on('select2:select', '.product-select', function (e) {
+                const productId = $jq(this).val();
+                const row = this.closest('tr');
+                const variantSelect = row.querySelector(config.selectors.variantSelect);
+                fetchVariants(productId, variantSelect);
+            });
+        }
+
         if (rowIdx === 0) {
             addRow();
         }
+        initSelect2ForDropdowns(tableBody);
     }
 
-    // --- Run Initialization ---
     initLocationToggle();
     initBatchTable();
+    initSelect2ForDropdowns(document);
 });

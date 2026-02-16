@@ -29,7 +29,7 @@
                 style="display: none;" {{-- Prevents flicker before Alpine loads --}}>
                 {{-- Background Image --}}
                 <img src="{{ asset('/storage/' . $slider->image) }}" alt="{{ $slider->title }}"
-                    class="absolute inset-0 w-full h-full object-cover z-0">
+                    class="absolute inset-0 w-full h-full object-fill z-0">
 
                 {{-- Dark Overlay --}}
                 <div

@@ -23,6 +23,7 @@ interface InventoryRepositoryInterface
     public function processReturn(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null);
     public function getDataforDataTable(array $filters = []);
     public function findByProduct(int $productId, ?int $variantId = null, ?int $warehouseId = null, ?int $storeId = null);
+    public function checkIsSoldFromBatch(int $batchId);
     public function getLowStock(array $filters = []);
     public function getBatchesForDataTable(array $filters = []);
 }

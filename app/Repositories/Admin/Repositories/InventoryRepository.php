@@ -531,9 +531,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->first();
     }
 
-    /**
-     * Retrieve items that are below a certain quantity threshold.
-     */
+    public function checkIsSoldFromBatch(int $batchId)
+    {
+        $batch = Inventory::find($batchId);
+        if (!$batch) return false;
+        return $this->isBatchSold($batch->batch_no);
+    }
+
     public function getLowStock(array $filters = [])
     {
         $threshold = $filters['threshold'] ?? 10;
