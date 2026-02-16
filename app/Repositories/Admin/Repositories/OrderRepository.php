@@ -3,6 +3,8 @@
 namespace App\Repositories\Admin\Repositories;
 use App\Models\Order;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class OrderRepository implements OrderRepositoryInterface
 {
@@ -22,8 +24,8 @@ class OrderRepository implements OrderRepositoryInterface
         $order = Order::find($id);
         if ($order) {
             $order->status = $status;
-            $order->status_updated_by = auth()->guard('admin')->id();
-            $order->status_updated_at = now();
+            $order->status_changed_by = Auth::guard('admin')->id();
+            $order->status_changed_at = Carbon::now();
             $order->save();
             return $order;
         }
@@ -56,8 +58,8 @@ class OrderRepository implements OrderRepositoryInterface
         if ($order) {
             $order->status = 'cancelled';
             $order->cancel_reason = $cancelReason;
-            $order->cancelled_by = auth()->guard('admin')->id();
-            $order->cancelled_at = now();
+            $order->cancelled_by = Auth::guard('admin')->id();
+            $order->cancelled_at = Carbon::now();
             $order->save();
             return $order;
         }
