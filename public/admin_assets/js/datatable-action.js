@@ -1,3 +1,17 @@
+// Global function to open the dispatch modal and set order_id
+window.openDispatchModal = function(orderId) {
+	// Set the order_id in the hidden input
+	$('#dispatch_order_id').val(orderId);
+	// Only reset if the form exists
+	var $form = $('#dispatchForm');
+	if ($form.length) {
+		$form[0].reset();
+	} else {
+		console.warn('Dispatch form not found in DOM. Modal may not be included on this page.');
+	}
+	// Show the modal
+	$('#dispatchModal').modal('show');
+};
 
 
 $(document).on('click', '.accept-action', function (e) {
@@ -47,6 +61,11 @@ $(document).on('click', '.accept-action', function (e) {
 							title: 'Accepted!',
 							text: data.message || 'Item has been accepted.'
 						}).then(() => {
+							// If backend signals to open dispatch modal, trigger it
+							if (data.open_dispatch_modal && typeof openDispatchModal === 'function') {
+								openDispatchModal(data.order_id || acceptId);
+								return;
+							}
 							if ($table.length && $.fn.DataTable.isDataTable($table)) {
 								$table.DataTable().ajax.reload(null, false);
 							} else {

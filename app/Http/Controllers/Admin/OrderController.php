@@ -60,8 +60,32 @@ class OrderController extends Controller
             $id = $request->input('id', $request->route('id'));
             $status = $request->input('status');
             $order = $orderRepo->updateOrderStatus($id, $status);
+
+            // If AJAX, return JSON for frontend to open dispatch modal
+            if ($request->ajax() || $request->wantsJson()) {
+                if ($status === 'accepted') {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Order accepted successfully.',
+                        'open_dispatch_modal' => true,
+                        'order_id' => $id,
+                    ]);
+                }
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order status updated successfully.'
+                ]);
+            }
+
+            // Fallback for non-AJAX
             return redirect()->back()->with(['success' => true, 'message' => 'Order status updated successfully.']);
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }

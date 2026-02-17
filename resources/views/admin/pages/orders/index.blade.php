@@ -39,6 +39,7 @@
         </div>
     </div>
 </div>
+@include('admin.pages.dispatch.create')
 @endsection
 
 @push('scripts')

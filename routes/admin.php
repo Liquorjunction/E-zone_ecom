@@ -310,6 +310,17 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::post('/cancel', [OrderController::class, 'cancelOrder'])->name('cancel')->middleware('can:order.update,admin');
         });
 
+        // Dispatch Routes
+        Route::prefix('dispatch')->name('dispatch.')->middleware('can:order.update,admin')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\DispatchController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\DispatchController::class, 'create'])->name('create');
+            Route::post('/store', [\App\Http\Controllers\Admin\DispatchController::class, 'store'])->name('store');
+            Route::get('/edit', [\App\Http\Controllers\Admin\DispatchController::class, 'edit'])->name('edit');
+            Route::put('/update', [\App\Http\Controllers\Admin\DispatchController::class, 'update'])->name('update');
+            Route::delete('/destroy', [\App\Http\Controllers\Admin\DispatchController::class, 'destroy'])->name('destroy');
+            Route::get('/data', [\App\Http\Controllers\Admin\DispatchController::class, 'data'])->name('data');
+        });
+
         // Review Routes
         Route::prefix('reviews')->name('reviews.')->group(function () {
             Route::get('/', [ReviewController::class, 'index'])->name('index');

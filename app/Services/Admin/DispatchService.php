@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Repositories\Admin\Interfaces\DispatchRepositoryInterface as DispatchRepo;
 use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface as InventoryRepo;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
+use App\Services\Admin\OrderStatusService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
@@ -14,35 +15,48 @@ class DispatchService
     protected $dispatchRepo;
     protected $orderRepo;
     protected $inventoryRepo;
+    protected $orderStatusService;
 
-    public function __construct(DispatchRepo $dispatchRepo, OrderRepo $orderRepo, InventoryRepo $inventoryRepo,)
-    {
+    public function __construct(
+        DispatchRepo $dispatchRepo,
+        OrderRepo $orderRepo,
+        InventoryRepo $inventoryRepo,
+        OrderStatusService $orderStatusService
+    ) {
         $this->dispatchRepo = $dispatchRepo;
         $this->orderRepo = $orderRepo;
         $this->inventoryRepo = $inventoryRepo;
+        $this->orderStatusService = $orderStatusService;
     }
 
-    public function createDispatch($request)
+    /**
+     * Create dispatches for order items and update order status using OrderStatusService.
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
+    public function createDispatch(array $data)
     {
         try {
             DB::beginTransaction();
-            $orderId = $request->input('order_id');
-            $items = $request->input('items');
+            $orderId = $data['order_id'];
+            $items = $data['items'];
             $allDispatched = true;
             $dispatchedItems = [];
 
             foreach ($items as $item) {
-                $dispatch = $this->dispatchRepo->createDispatch([
+                $dispatchData = [
                     'order_id' => $orderId,
                     'order_item_id' => $item['order_item_id'],
-                    'dispatch_qty' => $item['dispatch_qty'],
+                    'quantity' => $item['quantity'],
                     'inventory_id' => $item['inventory_id'],
-                    'dispatch_method' => $request->input('dispatch_method'),
-                    'remarks' => $request->input('remarks'),
-                ]);
+                    'dispatch_method' => $data['dispatch_method'] ?? null,
+                    'remarks' => $data['remarks'] ?? null,
+                ];
+                $dispatch = $this->dispatchRepo->createDispatch($dispatchData);
                 $dispatchedItems[] = $dispatch;
 
-                // Check if this item is fully dispatched using repository
+                // Check if this item is fully dispatched
                 $orderedQty = $this->dispatchRepo->getOrderItemQuantity($item['order_item_id']);
                 $totalDispatched = $this->dispatchRepo->getTotalDispatchedQuantity($item['order_item_id']);
                 if ($totalDispatched < $orderedQty) {
@@ -50,11 +64,12 @@ class DispatchService
                 }
             }
 
-            // Update order status using repository
+            // Use OrderStatusService for status change
+            $order = $this->orderRepo->getOrderById($orderId);
             if ($allDispatched) {
-                $this->orderRepo->updateOrderStatus($orderId, 'dispatched');
+                $this->orderStatusService->changeStatus($order, 'dispatched');
             } else {
-                $this->orderRepo->updateOrderStatus($orderId, 'partially_dispatched');
+                $this->orderStatusService->changeStatus($order, 'partially_dispatched');
             }
 
             DB::commit();

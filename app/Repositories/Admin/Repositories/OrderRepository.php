@@ -65,4 +65,17 @@ class OrderRepository implements OrderRepositoryInterface
         }
         return null;
     }
+
+    // Add getDataForDataTable for Store and Warehouse
+    // Store example:
+    public function getStoreDataForDataTable()
+    {
+        return \App\Models\Store::select(['id', 'store_name', 'location', 'status', 'created_at'])->orderBy('created_at', 'desc')->get();
+    }
+
+    // Warehouse example:
+    public function getWarehouseDataForDataTable()
+    {
+        return \App\Models\Warehouse::select(['id', 'warehouse_name', 'location', 'status', 'created_at'])->orderBy('created_at', 'desc')->get();
+    }
 }
