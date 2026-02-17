@@ -38,7 +38,6 @@
                 <option value="newest" @selected(request('sort') === 'newest' || !request('sort'))>Sort by: Newest</option>
                 <option value="price_asc" @selected(request('sort') === 'price_asc')>Price: Low to High</option>
                 <option value="price_desc" @selected(request('sort') === 'price_desc')>Price: High to Low</option>
-                <option value="featured" @selected(request('sort') === 'featured')>Featured</option>
             </select>
         </div>
 

@@ -198,7 +198,7 @@ $countActiveVariants = function ($products) {
                         <span class="ml-3 flex items-center">
                             <span class="text-yellow-400">★★★★</span><span class="text-gray-300">★</span>
                             <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">(4
-                                stars)</span>
+                                stars and up)</span>
                         </span>
                     </label>
                     <label class="flex items-center group cursor-pointer">
@@ -208,7 +208,7 @@ $countActiveVariants = function ($products) {
                         <span class="ml-3 flex items-center">
                             <span class="text-yellow-400">★★★</span><span class="text-gray-300">★★</span>
                             <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">(3
-                                stars)</span>
+                                stars and up )</span>
                         </span>
                     </label>
                 </div>
