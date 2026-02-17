@@ -84,6 +84,9 @@ class ProductRepository implements ProductRepositoryInterface
             }, 'product' => function($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
+            ->withAvg(['reviews as avg_rating' => function($q) {
+                $q->where('is_approved', 'approved');
+            }], 'rating')
             ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
                   ->whereHas('brand', function (Builder $brandquery) {
@@ -147,11 +150,7 @@ class ProductRepository implements ProductRepositoryInterface
         if ($request->filled('rating')) {
             $ratings = is_array($request->rating) ? $request->rating : [$request->rating];
             $minRating = min($ratings);
-            $query->whereHas('reviews', function (Builder $q) use ($minRating) {
-                $q->where('is_approved', 'approved')
-                  ->havingRaw('AVG(rating) >= ?', [$minRating])
-                  ->groupBy('product_variant_id');
-            }, '>=', 1);
+            $query->where('avg_rating', '>=', $minRating);
         }
 
         if ($request->filled('availability')) {
@@ -225,6 +224,9 @@ class ProductRepository implements ProductRepositoryInterface
             }, 'product' => function($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
+            ->withAvg(['reviews as avg_rating' => function($q) {
+                $q->where('is_approved', 'approved');
+            }], 'rating')
             ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
                   ->whereHas('brand', function (Builder $brandquery) {
@@ -288,11 +290,7 @@ class ProductRepository implements ProductRepositoryInterface
         if ($request->filled('rating')) {
             $ratings = is_array($request->rating) ? $request->rating : [$request->rating];
             $minRating = min($ratings);
-            $query->whereHas('reviews', function (Builder $q) use ($minRating) {
-                $q->where('is_approved', 'approved')
-                  ->havingRaw('AVG(rating) >= ?', [$minRating])
-                  ->groupBy('product_variant_id');
-            }, '>=', 1);
+            $query->where('avg_rating', '>=', $minRating);
         }
 
         if ($request->filled('availability')) {
