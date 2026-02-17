@@ -27,10 +27,10 @@ class ProductRepository implements ProductRepositoryInterface
                     $scq->where('status', 'active');
                 })->orWhereNull('sub_category_id');
             })
-            ->with(['category', 'brand', 'images', 'reviews' => function($q) {
+            ->with(['category', 'brand', 'images', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
-            }, 'productVariants' => function($q) {
-                $q->where('status', 'active')->with(['reviews' => function($query) {
+            }, 'productVariants' => function ($q) {
+                $q->where('status', 'active')->with(['reviews' => function ($query) {
                     $query->where('is_approved', 'approved');
                 }]);
             }]);
@@ -67,36 +67,46 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         switch ($request->get('sort')) {
-            case 'price_asc': $query->orderBy('price', 'asc'); break;
-            case 'price_desc': $query->orderBy('price', 'desc'); break;
-            case 'bestseller': $query->where('is_bestseller', true)->latest(); break;
-            case 'newest': default: $query->latest(); break;
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'bestseller':
+                $query->where('is_bestseller', true)->latest();
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
         }
 
         return $query->paginate($perPage)->withQueryString();
     }
 
-    public function getDealVariants(Request $request, int $perPage = 12): LengthAwarePaginator {
+    public function getDealVariants(Request $request, int $perPage = 12): LengthAwarePaginator
+    {
         $query = ProductVariant::query()
             ->where('status', 'active')
-            ->with(['images', 'inventory', 'reviews' => function($q) {
+            ->with(['images', 'inventory', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
-            }, 'product' => function($q) {
+            }, 'product' => function ($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
-                  ->whereHas('brand', function (Builder $brandquery) {
-                      $brandquery->where('status', 'active');
-                  })
-                  ->whereHas('category', function (Builder $categoryquery) {
-                      $categoryquery->where('status', 'active');
-                  })
-                  ->where(function (Builder $subCategoryquery) {
-                      $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
-                          $scq->where('status', 'active');
-                      })->orWhereNull('sub_category_id');
-                  });
+                    ->whereHas('brand', function (Builder $brandquery) {
+                        $brandquery->where('status', 'active');
+                    })
+                    ->whereHas('category', function (Builder $categoryquery) {
+                        $categoryquery->where('status', 'active');
+                    })
+                    ->where(function (Builder $subCategoryquery) {
+                        $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
+                            $scq->where('status', 'active');
+                        })->orWhereNull('sub_category_id');
+                    });
             });
 
         if ($request->filled('search')) {
@@ -104,11 +114,11 @@ class ProductRepository implements ProductRepositoryInterface
             $query->where(function (Builder $q) use ($keyword) {
                 $like = '%' . $keyword . '%';
                 $q->where('variant_name', 'LIKE', $like)
-                  ->orWhere('sku', 'LIKE', $like)
-                  ->orWhereHas('product', function (Builder $productQuery) use ($like) {
-                      $productQuery->where('name', 'LIKE', $like)
-                                   ->orWhere('description', 'LIKE', $like);
-                  });
+                    ->orWhere('sku', 'LIKE', $like)
+                    ->orWhereHas('product', function (Builder $productQuery) use ($like) {
+                        $productQuery->where('name', 'LIKE', $like)
+                            ->orWhere('description', 'LIKE', $like);
+                    });
             });
         }
 
@@ -149,8 +159,8 @@ class ProductRepository implements ProductRepositoryInterface
             $minRating = min($ratings);
             $query->whereHas('reviews', function (Builder $q) use ($minRating) {
                 $q->where('is_approved', 'approved')
-                  ->havingRaw('AVG(rating) >= ?', [$minRating])
-                  ->groupBy('product_variant_id');
+                    ->havingRaw('AVG(rating) >= ?', [$minRating])
+                    ->groupBy('product_variant_id');
             }, '>=', 1);
         }
 
@@ -174,16 +184,16 @@ class ProductRepository implements ProductRepositoryInterface
             $query->whereHas('discountTargets', function (Builder $q) use ($minDiscount) {
                 $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
                     $discountQuery->where('status', true)
-                                  ->where('value', '>=', $minDiscount)
-                                  ->where('starts_at', '<=', now())
-                                  ->where('ends_at', '>=', now());
+                        ->where('value', '>=', $minDiscount)
+                        ->where('starts_at', '<=', now())
+                        ->where('ends_at', '>=', now());
                 });
             })->orWhereHas('product.discountTargets', function (Builder $q) use ($minDiscount) {
                 $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
                     $discountQuery->where('status', true)
-                                  ->where('value', '>=', $minDiscount)
-                                  ->where('starts_at', '<=', now())
-                                  ->where('ends_at', '>=', now());
+                        ->where('value', '>=', $minDiscount)
+                        ->where('starts_at', '<=', now())
+                        ->where('ends_at', '>=', now());
                 });
             });
         }
@@ -220,24 +230,24 @@ class ProductRepository implements ProductRepositoryInterface
     {
         $query = ProductVariant::query()
             ->where('status', 'active')
-            ->with(['images', 'inventory', 'reviews' => function($q) {
+            ->with(['images', 'inventory', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
-            }, 'product' => function($q) {
+            }, 'product' => function ($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
-                  ->whereHas('brand', function (Builder $brandquery) {
-                      $brandquery->where('status', 'active');
-                  })
-                  ->whereHas('category', function (Builder $categoryquery) {
-                      $categoryquery->where('status', 'active');
-                  })
-                  ->where(function (Builder $subCategoryquery) {
-                      $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
-                          $scq->where('status', 'active');
-                      })->orWhereNull('sub_category_id');
-                  });
+                    ->whereHas('brand', function (Builder $brandquery) {
+                        $brandquery->where('status', 'active');
+                    })
+                    ->whereHas('category', function (Builder $categoryquery) {
+                        $categoryquery->where('status', 'active');
+                    })
+                    ->where(function (Builder $subCategoryquery) {
+                        $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
+                            $scq->where('status', 'active');
+                        })->orWhereNull('sub_category_id');
+                    });
             });
 
         if ($request->filled('search')) {
@@ -245,11 +255,11 @@ class ProductRepository implements ProductRepositoryInterface
             $query->where(function (Builder $q) use ($keyword) {
                 $like = '%' . $keyword . '%';
                 $q->where('variant_name', 'LIKE', $like)
-                  ->orWhere('sku', 'LIKE', $like)
-                  ->orWhereHas('product', function (Builder $productQuery) use ($like) {
-                      $productQuery->where('name', 'LIKE', $like)
-                                   ->orWhere('description', 'LIKE', $like);
-                  });
+                    ->orWhere('sku', 'LIKE', $like)
+                    ->orWhereHas('product', function (Builder $productQuery) use ($like) {
+                        $productQuery->where('name', 'LIKE', $like)
+                            ->orWhere('description', 'LIKE', $like);
+                    });
             });
         }
 
@@ -286,14 +296,18 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         if ($request->filled('rating')) {
-            $ratings = is_array($request->rating) ? $request->rating : [$request->rating];
+            $ratings   = is_array($request->rating) ? $request->rating : [$request->rating];
             $minRating = min($ratings);
+
             $query->whereHas('reviews', function (Builder $q) use ($minRating) {
-                $q->where('is_approved', 'approved')
-                  ->havingRaw('AVG(rating) >= ?', [$minRating])
-                  ->groupBy('product_variant_id');
-            }, '>=', 1);
+                $q->select('product_variant_id')
+                    ->where('is_approved', 'approved')
+                    ->whereNull('deleted_at')
+                    ->groupBy('product_variant_id')
+                    ->havingRaw('AVG(rating) >= ?', [$minRating]);
+            });
         }
+
 
         if ($request->filled('availability')) {
             $availability = is_array($request->availability) ? $request->availability : [$request->availability];
@@ -315,16 +329,16 @@ class ProductRepository implements ProductRepositoryInterface
             $query->whereHas('discountTargets', function (Builder $q) use ($minDiscount) {
                 $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
                     $discountQuery->where('status', true)
-                                  ->where('value', '>=', $minDiscount)
-                                  ->where('starts_at', '<=', now())
-                                  ->where('ends_at', '>=', now());
+                        ->where('value', '>=', $minDiscount)
+                        ->where('starts_at', '<=', now())
+                        ->where('ends_at', '>=', now());
                 });
             })->orWhereHas('product.discountTargets', function (Builder $q) use ($minDiscount) {
                 $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
                     $discountQuery->where('status', true)
-                                  ->where('value', '>=', $minDiscount)
-                                  ->where('starts_at', '<=', now())
-                                  ->where('ends_at', '>=', now());
+                        ->where('value', '>=', $minDiscount)
+                        ->where('starts_at', '<=', now())
+                        ->where('ends_at', '>=', now());
                 });
             });
         }
@@ -376,11 +390,11 @@ class ProductRepository implements ProductRepositoryInterface
                 'category',
                 'brand',
                 'images',
-                'productVariants' => function($q) {
+                'productVariants' => function ($q) {
                     $q->where('status', 'active')
-                      ->with(['images', 'inventory', 'reviews' => function($query) {
-                          $query->where('is_approved', 'approved');
-                      }]);
+                        ->with(['images', 'inventory', 'reviews' => function ($query) {
+                            $query->where('is_approved', 'approved');
+                        }]);
                 }
             ])
             ->firstOrFail();
@@ -402,7 +416,7 @@ class ProductRepository implements ProductRepositoryInterface
                     $scq->where('status', 'active');
                 })->orWhereNull('sub_category_id');
             })
-            ->with(['images', 'reviews' => function($q) {
+            ->with(['images', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
             }])
             ->take($limit)
@@ -425,9 +439,9 @@ class ProductRepository implements ProductRepositoryInterface
             })
             ->where(function (Builder $q) use ($keyword) {
                 $q->where('name', 'LIKE', "%{$keyword}%")
-                  ->orWhere('description', 'LIKE', "%{$keyword}%");
+                    ->orWhere('description', 'LIKE', "%{$keyword}%");
             })
-            ->with(['images', 'reviews' => function($q) {
+            ->with(['images', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
             }])
             ->take($limit)
@@ -454,7 +468,7 @@ class ProductRepository implements ProductRepositoryInterface
 
         $productVariants = ProductVariant::where('product_id', $productId)
             ->where('status', 'active')
-            ->with(['images', 'inventory', 'reviews' => function($q) {
+            ->with(['images', 'inventory', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
             }])
             ->get();
@@ -481,10 +495,10 @@ class ProductRepository implements ProductRepositoryInterface
                     $scq->where('status', 'active');
                 })->orWhereNull('sub_category_id');
             })
-            ->with(['category', 'brand', 'images', 'reviews' => function($q) {
+            ->with(['category', 'brand', 'images', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
-            }, 'productVariants' => function($q) {
-                $q->where('status', 'active')->with(['reviews' => function($query) {
+            }, 'productVariants' => function ($q) {
+                $q->where('status', 'active')->with(['reviews' => function ($query) {
                     $query->where('is_approved', 'approved');
                 }]);
             }])
@@ -498,11 +512,11 @@ class ProductRepository implements ProductRepositoryInterface
         // Count in-stock variants
         $inStockCount = ProductVariant::query()
             ->where('status', 'active')
-            ->whereHas('product', function(Builder $q) {
+            ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
-                  ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
-                  ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
-                  ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
+                    ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
+                    ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
+                    ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
             })
             ->whereHas('inventory', fn($q) => $q->where('quantity', '>', 0))
             ->count();
@@ -510,11 +524,11 @@ class ProductRepository implements ProductRepositoryInterface
         // Count out-of-stock variants
         $outOfStockCount = ProductVariant::query()
             ->where('status', 'active')
-            ->whereHas('product', function(Builder $q) {
+            ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
-                  ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
-                  ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
-                  ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
+                    ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
+                    ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
+                    ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
             })
             ->whereDoesntHave('inventory', fn($q) => $q->where('quantity', '>', 0))
             ->count();
@@ -529,24 +543,24 @@ class ProductRepository implements ProductRepositoryInterface
     {
         return ProductVariant::where('status', 'active')
             ->where('is_bestseller', true)
-            ->with(['images', 'inventory', 'reviews' => function($q) {
+            ->with(['images', 'inventory', 'reviews' => function ($q) {
                 $q->where('is_approved', 'approved');
-            }, 'product' => function($q) {
+            }, 'product' => function ($q) {
                 $q->where('status', 'active')->with(['category', 'brand', 'images']);
             }])
             ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
-                  ->whereHas('brand', function (Builder $brandquery) {
-                      $brandquery->where('status', 'active');
-                  })
-                  ->whereHas('category', function (Builder $categoryquery) {
-                      $categoryquery->where('status', 'active');
-                  })
-                  ->where(function (Builder $subCategoryquery) {
-                      $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
-                          $scq->where('status', 'active');
-                      })->orWhereNull('sub_category_id');
-                  });
+                    ->whereHas('brand', function (Builder $brandquery) {
+                        $brandquery->where('status', 'active');
+                    })
+                    ->whereHas('category', function (Builder $categoryquery) {
+                        $categoryquery->where('status', 'active');
+                    })
+                    ->where(function (Builder $subCategoryquery) {
+                        $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
+                            $scq->where('status', 'active');
+                        })->orWhereNull('sub_category_id');
+                    });
             })
             ->latest()
             ->take($limit)
@@ -559,12 +573,12 @@ class ProductRepository implements ProductRepositoryInterface
             ->where('status', 'active')
             ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
-                  ->whereHas('brand', function (Builder $brandQuery) {
-                      $brandQuery->where('status', 'active');
-                  })
-                  ->whereHas('category', function (Builder $categoryQuery) {
-                      $categoryQuery->where('status', 'active');
-                  });
+                    ->whereHas('brand', function (Builder $brandQuery) {
+                        $brandQuery->where('status', 'active');
+                    })
+                    ->whereHas('category', function (Builder $categoryQuery) {
+                        $categoryQuery->where('status', 'active');
+                    });
             })
             ->min('price');
 
@@ -577,12 +591,12 @@ class ProductRepository implements ProductRepositoryInterface
             ->where('status', 'active')
             ->whereHas('product', function (Builder $q) {
                 $q->where('status', 'active')
-                  ->whereHas('brand', function (Builder $brandQuery) {
-                      $brandQuery->where('status', 'active');
-                  })
-                  ->whereHas('category', function (Builder $categoryQuery) {
-                      $categoryQuery->where('status', 'active');
-                  });
+                    ->whereHas('brand', function (Builder $brandQuery) {
+                        $brandQuery->where('status', 'active');
+                    })
+                    ->whereHas('category', function (Builder $categoryQuery) {
+                        $categoryQuery->where('status', 'active');
+                    });
             })
             ->max('price');
 
