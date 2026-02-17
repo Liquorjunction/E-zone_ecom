@@ -53,7 +53,7 @@ class DispatchService
                     'dispatch_method' => $data['dispatch_method'] ?? null,
                     'remarks' => $data['remarks'] ?? null,
                 ];
-                $dispatch = $this->dispatchRepo->createDispatch($dispatchData);
+                $dispatch = $this->dispatchRepo->createDispatch($item['order_item_id'], $dispatchData);
                 $dispatchedItems[] = $dispatch;
 
                 // Check if this item is fully dispatched

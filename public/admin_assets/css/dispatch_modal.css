@@ -1,0 +1,213 @@
+/* Admin Panel Theme for Dispatch Modal */
+.dispatch-modal-content {
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(58, 87, 232, 0.12);
+    background: #fff;
+    border: 1.5px solid #e6e8f3;
+}
+.dispatch-modal-header {
+    background: linear-gradient(135deg, #3a57e8 0%, #5b73f0 100%);
+    color: #fff;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.dispatch-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.dispatch-icon-badge {
+    background: #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(58, 87, 232, 0.1);
+    margin-right: 0.75rem;
+}
+.dispatch-modal-title {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+}
+.dispatch-modal-subtitle {
+    color: #e0e7ff;
+    font-size: 0.95rem;
+}
+.dispatch-close-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    transition: color 0.2s;
+}
+.dispatch-close-btn:hover {
+    color: #b0bcf6;
+}
+.dispatch-modal-body {
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    background: #f8f9fa;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+.dispatch-section {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(58, 87, 232, 0.04);
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1rem;
+}
+.dispatch-section-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.dispatch-section-number {
+    background: #3a57e8;
+    color: #fff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 0.75rem;
+}
+.dispatch-section-text {
+    color: #001f4d;
+    font-weight: 500;
+    font-size: 1.08rem;
+}
+.dispatch-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.dispatch-table th {
+    background: #3a57e8;
+    color: #fff;
+    font-weight: 500;
+    padding: 0.75rem 0.5rem;
+    border: none;
+}
+.dispatch-table td {
+    background: #fff;
+    color: #001f4d;
+    padding: 0.7rem 0.5rem;
+    border-bottom: 1px solid #e6e8f3;
+}
+.dispatch-table tr:last-child td {
+    border-bottom: none;
+}
+.dispatch-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+.dispatch-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.dispatch-field-full {
+    grid-column: 1 / -1;
+}
+.dispatch-label {
+    color: #3a57e8;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.dispatch-select-wrapper {
+    position: relative;
+}
+.dispatch-select {
+    width: 100%;
+    padding: 0.5rem 2.2rem 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1.5px solid #b0bcf6;
+    background: #fff;
+    color: #001f4d;
+    font-size: 1rem;
+    appearance: none;
+    font-weight: 500;
+    transition: border 0.2s;
+}
+.dispatch-select:focus {
+    border-color: #3a57e8;
+    outline: none;
+}
+.dispatch-select-arrow {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #3a57e8;
+}
+.dispatch-textarea {
+    border-radius: 8px;
+    border: 1.5px solid #b0bcf6;
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #001f4d;
+    background: #fff;
+    transition: border 0.2s;
+    resize: vertical;
+}
+.dispatch-textarea:focus {
+    border-color: #3a57e8;
+    outline: none;
+}
+.dispatch-modal-footer {
+    background: #f8f9fa;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #e6e8f3;
+}
+.dispatch-btn {
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    transition:
+        background 0.2s,
+        color 0.2s;
+    cursor: pointer;
+}
+.dispatch-btn-cancel {
+    background: #fff;
+    color: #3a57e8;
+    border: 1.5px solid #3a57e8;
+}
+.dispatch-btn-cancel:hover {
+    background: #3a57e8;
+    color: #fff;
+}
+.dispatch-btn-submit {
+    background: linear-gradient(135deg, #3a57e8 0%, #5b73f0 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(58, 87, 232, 0.1);
+}
+.dispatch-btn-submit:hover {
+    background: linear-gradient(135deg, #2e46ba 0%, #3a57e8 100%);
+    color: #fff;
+}

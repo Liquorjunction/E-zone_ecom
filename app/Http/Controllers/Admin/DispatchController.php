@@ -9,13 +9,6 @@ use Illuminate\Http\Request;
 
 class DispatchController extends Controller
 {
-    protected $dispatchService;
-
-    public function __construct(DispatchService $dispatchService)
-    {
-        $this->dispatchService = $dispatchService;
-    }
-
     public function index()
     {
         // For Showing Dispatch History
@@ -28,7 +21,7 @@ class DispatchController extends Controller
         return view('admin.pages.dispatch.create');
     }
 
-    public function store(StoreDispatchRequest $request)
+    public function store(StoreDispatchRequest $request, DispatchService $dispatchService)
     {
         $data = $request->validated();
         if (isset($data['items'])) {
@@ -41,7 +34,7 @@ class DispatchController extends Controller
             unset($item);
         }
         try {
-            $dispatchedItems = $this->dispatchService->createDispatch($data);
+            $dispatchedItems = $dispatchService->createDispatch($data);
             return response()->json([
                 'success' => true,
                 'message' => 'Dispatch created successfully.',

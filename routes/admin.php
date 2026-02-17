@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CouponUsageController;
 use App\Http\Controllers\Admin\DiscountController;
+use App\Http\Controllers\Admin\DispatchController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\InventoryController;
@@ -260,6 +261,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [StoreController::class, 'index'])->name('index'); // permission: store.read
             Route::get('/data', [StoreController::class, 'getDataForDataTable'])->name('data');
             Route::get('/show', [StoreController::class, 'show'])->name('show')->middleware('can:store.read,admin');
+            Route::get('/list', [StoreController::class, 'getActiveStoreList'])->name('list')->middleware('can:store.read,admin');
             Route::get('/create', [StoreController::class, 'create'])->name('create')->middleware('can:store.create,admin');
             Route::post('/', [StoreController::class, 'store'])->name('store')->middleware('can:store.create,admin');
             Route::get('/edit', [StoreController::class, 'edit'])->name('edit')->middleware('can:store.update,admin');
@@ -273,6 +275,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [WarehouseController::class, 'index'])->name('index'); // permission: warehouse.read
             Route::get('/data', [WarehouseController::class, 'getDataForDataTable'])->name('data');
             Route::get('/show', [WarehouseController::class, 'show'])->name('show')->middleware('can:warehouse.read,admin');
+            Route::get('/list', [WarehouseController::class, 'getActiveWarehouseList'])->name('list')->middleware('can:warehouse.read,admin');
             Route::get('/create', [WarehouseController::class, 'create'])->name('create')->middleware('can:warehouse.create,admin');
             Route::post('/', [WarehouseController::class, 'store'])->name('store')->middleware('can:warehouse.create,admin');
             Route::get('/edit', [WarehouseController::class, 'edit'])->name('edit')->middleware('can:warehouse.update,admin');
@@ -308,17 +311,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
             Route::post('/cancel', [OrderController::class, 'cancelOrder'])->name('cancel')->middleware('can:order.update,admin');
+            Route::get('{order}/items', [OrderController::class, 'itemsForDispatch'])->name('items-for-dispatch');
         });
 
         // Dispatch Routes
         Route::prefix('dispatch')->name('dispatch.')->middleware('can:order.update,admin')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\DispatchController::class, 'index'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\DispatchController::class, 'create'])->name('create');
-            Route::post('/store', [\App\Http\Controllers\Admin\DispatchController::class, 'store'])->name('store');
-            Route::get('/edit', [\App\Http\Controllers\Admin\DispatchController::class, 'edit'])->name('edit');
-            Route::put('/update', [\App\Http\Controllers\Admin\DispatchController::class, 'update'])->name('update');
-            Route::delete('/destroy', [\App\Http\Controllers\Admin\DispatchController::class, 'destroy'])->name('destroy');
-            Route::get('/data', [\App\Http\Controllers\Admin\DispatchController::class, 'data'])->name('data');
+            Route::get('/', [DispatchController::class, 'index'])->name('index');
+            Route::get('/create', [DispatchController::class, 'create'])->name('create');
+            Route::post('/store', [DispatchController::class, 'store'])->name('store');
+            Route::get('/edit', [DispatchController::class, 'edit'])->name('edit');
+            Route::put('/update', [DispatchController::class, 'update'])->name('update');
+            Route::delete('/destroy', [DispatchController::class, 'destroy'])->name('destroy');
+            Route::get('/data', [DispatchController::class, 'data'])->name('data');
         });
 
         // Review Routes

@@ -27,6 +27,20 @@ class StoreController extends Controller
         }
     }
 
+    public function getActiveStorelist(StoreRepo $storeRepo)
+    {
+        try {
+            $stores = $storeRepo->getAllActiveStores();
+            return response()->json($stores);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch active stores list', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Failed to fetch active stores list'], 500);
+        }
+    }
+
     public function create()
     {
         try {

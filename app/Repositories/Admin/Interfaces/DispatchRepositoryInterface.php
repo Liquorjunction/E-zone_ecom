@@ -6,7 +6,7 @@ interface DispatchRepositoryInterface
 {
     public function getAllDispatches($filters = [], $perPage = 15);
     public function getDispatchById($id);
-    public function createDispatch($request);
+    public function createDispatch($id, $request);
     public function batchCreateDispatches($request);
     public function updateDispatch($id, $request);
     public function deleteDispatch($id);

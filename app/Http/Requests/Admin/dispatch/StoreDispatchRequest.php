@@ -15,59 +15,56 @@ class StoreDispatchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:order_dispatch,id',
             'order_id' => 'required|exists:orders,id',
-            'order_item_id' => 'required|exists:order_items,id',
-            'inventory_id' => 'required|exists:inventory,id',
-            'quantity' => 'required|integer|min:1',
-            'store_id' => 'required|exists:stores,id',
-            'warehouse_id' => 'required|exists:warehouses,id',
             'dispatch_method' => 'required|in:courier,pickup',
-            'dispatched_by' => 'required|exists:admins,id',
-            'dispatched_at' => 'required|date_format:Y-m-d H:i:s',
             'remarks' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.order_item_id' => 'required|exists:order_items,id',
+            'items.*.inventory_id' => 'required|exists:inventory,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.dispatch_from_store_id' => 'required|exists:stores,id',
+            'items.*.dispatch_from_warehouse_id' => 'required|exists:warehouses,id',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'id.required' => 'Dispatch ID is required.',
-            'id.exists' => 'The specified dispatch does not exist.',
             'order_id.required' => 'Order ID is required.',
             'order_id.exists' => 'The specified order does not exist.',
-            'order_item_id.required' => 'Order Item ID is required.',
-            'order_item_id.exists' => 'The specified order item does not exist.',
-            'inventory_id.required' => 'Inventory ID is required.',
-            'inventory_id.exists' => 'The specified inventory does not exist.',
-            'quantity.required' => 'Quantity is required.',
-            'quantity.integer' => 'Quantity must be an integer.',
-            'quantity.min' => 'Quantity must be at least 1.',
-            'store_id.required' => 'Store ID is required.',
-            'store_id.exists' => 'The specified store does not exist.',
-            'warehouse_id.required' => 'Warehouse ID is required.',
-            'warehouse_id.exists' => 'The specified warehouse does not exist.',
             'dispatch_method.required' => 'Dispatch method is required.',
             'dispatch_method.in' => 'Dispatch method must be either courier or pickup.',
-            'dispatched_by.required' => 'Dispatched by is required.',
-            'dispatched_by.exists' => 'The specified admin does not exist.',
-            'dispatched_at.required' => 'Dispatched at is required.',
-            'dispatched_at.date_format' => 'Dispatched at must be in the format Y-m-d H:i:s.',
             'remarks.string' => 'Remarks must be a string.',
+            'items.required' => 'At least one item is required.',
+            'items.array' => 'Items must be an array.',
+            'items.*.order_item_id.required' => 'Order Item ID is required for each item.',
+            'items.*.order_item_id.exists' => 'The specified order item does not exist.',
+            'items.*.inventory_id.required' => 'Inventory ID is required for each item.',
+            'items.*.inventory_id.exists' => 'The specified inventory does not exist.',
+            'items.*.quantity.required' => 'Quantity is required for each item.',
+            'items.*.quantity.integer' => 'Quantity must be an integer for each item.',
+            'items.*.quantity.min' => 'Quantity must be at least 1 for each item.',
+            'items.*.dispatch_from_store_id.required' => 'Store ID is required for each item.',
+            'items.*.dispatch_from_store_id.exists' => 'The specified store does not exist.',
+            'items.*.dispatch_from_warehouse_id.required' => 'Warehouse ID is required for each item.',
+            'items.*.dispatch_from_warehouse_id.exists' => 'The specified warehouse does not exist.',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'id' => 'dispatch ID',
+            'order_id' => 'order ID',
+            'dispatch_method' => 'dispatch method',
+            'remarks' => 'remarks',
+            'items' => 'items',
+            'items.*.order_item_id' => 'order item ID',
+            'items.*.inventory_id' => 'inventory ID',
+            'items.*.quantity' => 'quantity',
+            'items.*.dispatch_from_store_id' => 'store ID',
+            'items.*.dispatch_from_warehouse_id' => 'warehouse ID',
         ];
     }
 
-    public function prepareForValidation()
-    {
-        $this->merge([
-            'id' => $this->route('id') ?? $this->input('id'),
-        ]);
-    }
+    // No need to merge id, as we now use order_id and items array
 }

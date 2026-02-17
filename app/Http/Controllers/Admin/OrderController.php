@@ -147,7 +147,7 @@ class OrderController extends Controller
                     ];
 
                     // Define sets for statuses
-                    $viewOnlyStatuses = ['cancelled', 'delivered', 'accepted', 'processing', 'ready_to_ship', 'shipped', 'out_for_delivery' , 'completed'];
+                    $viewOnlyStatuses = ['cancelled', 'delivered', 'accepted', 'processing', 'ready_to_ship', 'shipped', 'out_for_delivery', 'completed'];
 
                     if ($order->status === 'pending') {
                         if ($canUpdate) {
@@ -175,5 +175,50 @@ class OrderController extends Controller
             Log::error('Order dataTable error: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['success' => false, 'message' => 'Failed to fetch orders data.'], 500);
         }
+    }
+
+    public function itemsForDispatch($orderId)
+    {
+        $order = \App\Models\Order::with(['items.product', 'items.variant'])->find($orderId);
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
+        }
+        $items = [];
+        foreach ($order->items as $item) {
+            // Fetch inventories for this product and variant, eager load store/warehouse
+            $inventories = \App\Models\Inventory::where('product_id', $item->product_id)
+                ->where('product_variant_id', $item->variant_id)
+                ->with(['store:id,store_name', 'warehouse:id,warehouse_name'])
+                ->get(['id', 'store_id', 'warehouse_id', 'location_type', 'quantity']);
+
+            // Map inventories to include display name
+            $inventories = $inventories->map(function ($inv) {
+                $name = null;
+                if ($inv->location_type === 'store' && $inv->store) {
+                    $name = $inv->store->store_name;
+                } elseif ($inv->location_type === 'warehouse' && $inv->warehouse) {
+                    $name = $inv->warehouse->warehouse_name;
+                } else {
+                    $name = 'Unknown';
+                }
+                return [
+                    'id' => $inv->id,
+                    'name' => $name,
+                    'location_type' => $inv->location_type,
+                    'quantity' => $inv->quantity,
+                    'store_id' => $inv->store_id,
+                    'warehouse_id' => $inv->warehouse_id,
+                ];
+            });
+
+            $items[] = [
+                'id' => $item->id,
+                'product_name' => $item->product->name ?? '',
+                'variant' => $item->variant->name ?? '',
+                'ordered_qty' => $item->quantity,
+                'inventories' => $inventories,
+            ];
+        }
+        return response()->json(['success' => true, 'items' => $items]);
     }
 }

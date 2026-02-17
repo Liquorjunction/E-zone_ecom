@@ -48,7 +48,7 @@
 
     {{-- Toast Notifications --}}
     @include('admin.components.toast')
-
+    @include('admin.pages.dispatch.create')
     @include('admin.essentials.scripts')
 
     {{-- Page-specific scripts --}}

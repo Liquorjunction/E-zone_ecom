@@ -21,10 +21,11 @@ class DispatchRespository implements DispatchRepositoryInterface
         return Dispatch::with(['order', 'orderItem', 'inventory', 'dispatchedBy', 'store', 'warehouse'])->findOrFail($id);
     }
 
-    public function createDispatch($request)
+    public function createDispatch($id, $request)
     {
         $data = $request->validated();
         $data['dispatched_by'] = Auth::guard('admin')->id();
+        $data['order_item_id'] = $id;
         return Dispatch::create($data);
     }
 

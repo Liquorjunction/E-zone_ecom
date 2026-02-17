@@ -1,18 +1,74 @@
-// Global function to open the dispatch modal and set order_id
 window.openDispatchModal = function(orderId) {
-	// Set the order_id in the hidden input
-	$('#dispatch_order_id').val(orderId);
-	// Only reset if the form exists
-	var $form = $('#dispatchForm');
-	if ($form.length) {
-		$form[0].reset();
-	} else {
-		console.warn('Dispatch form not found in DOM. Modal may not be included on this page.');
-	}
-	// Show the modal
-	$('#dispatchModal').modal('show');
+    // Redirect to the dispatch create page for the given order
+    if (orderId) {
+        window.open('/admin/dispatch/create/' + orderId, '_blank');
+    } else {
+        window.open('/admin/dispatch/create', '_blank');
+    }
 };
 
+// Intercept form submit to build items array and send via AJAX
+$(document).on('submit', '#dispatchForm', function(e) {
+	e.preventDefault();
+	var $form = $(this);
+	var orderId = $('#order_id').val();
+	var dispatchMethod = $('#dispatch_method').val();
+	var remarks = $('#remarks').val();
+	// Build items array from table rows
+	var items = [];
+	$('#dispatch-items-table tbody tr').each(function() {
+		var $row = $(this);
+		var order_item_id = $row.data('order-item-id');
+		var inventory_id = $row.find('.inventory-select').val();
+		var quantity = $row.find('.dispatch-qty-input').val();
+		var dispatch_from_store_id = $('#dispatch_from_store_id').val();
+		var dispatch_from_warehouse_id = $('#dispatch_from_warehouse_id').val();
+		if (order_item_id && inventory_id && quantity) {
+			items.push({
+				order_item_id: order_item_id,
+				inventory_id: inventory_id,
+				quantity: quantity,
+				dispatch_from_store_id: dispatch_from_store_id,
+				dispatch_from_warehouse_id: dispatch_from_warehouse_id
+			});
+		}
+	});
+	if (!items.length) {
+		Swal.fire({ icon: 'error', title: 'Error', text: 'Please add at least one item to dispatch.' });
+		return;
+	}
+	var payload = {
+		order_id: orderId,
+		dispatch_method: dispatchMethod,
+		remarks: remarks,
+		items: items
+	};
+	var url = $form.attr('action');
+	var csrfToken = $('meta[name="csrf-token"]').attr('content') || window.Laravel && window.Laravel.csrfToken;
+	$.ajax({
+		url: url,
+		type: 'POST',
+		data: JSON.stringify(payload),
+		contentType: 'application/json',
+		headers: {
+			'X-CSRF-TOKEN': csrfToken,
+			'Accept': 'application/json'
+		},
+		success: function(data) {
+			if (data.success) {
+				Swal.fire({ icon: 'success', title: 'Success', text: data.message || 'Dispatch created.' });
+				$('#dispatchModal').modal('hide');
+			} else {
+				Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to create dispatch.' });
+			}
+		},
+		error: function(xhr) {
+			let msg = 'Failed to create dispatch.';
+			if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+			Swal.fire({ icon: 'error', title: 'Error', text: msg });
+		}
+	});
+});
 
 $(document).on('click', '.accept-action', function (e) {
 	e.preventDefault();
@@ -59,17 +115,22 @@ $(document).on('click', '.accept-action', function (e) {
 						Swal.fire({
 							icon: 'success',
 							title: 'Accepted!',
-							text: data.message || 'Item has been accepted.'
-						}).then(() => {
-							// If backend signals to open dispatch modal, trigger it
-							if (data.open_dispatch_modal && typeof openDispatchModal === 'function') {
-								openDispatchModal(data.order_id || acceptId);
-								return;
-							}
-							if ($table.length && $.fn.DataTable.isDataTable($table)) {
-								$table.DataTable().ajax.reload(null, false);
-							} else {
-								location.reload();
+							html: (data.message ? data.message + '<br><br>' : '') + '<button id="open-dispatch-modal-btn" class="swal2-confirm swal2-styled" style="margin-top:10px;">Open Dispatch Modal</button>',
+							showConfirmButton: false,
+							willOpen: () => {
+								document.getElementById('open-dispatch-modal-btn').addEventListener('click', function() {
+									if (typeof openDispatchModal === 'function') {
+										openDispatchModal(data.order_id || acceptId);
+									}
+									Swal.close();
+								});
+							},
+							didClose: () => {
+								if ($table.length && $.fn.DataTable.isDataTable($table)) {
+									$table.DataTable().ajax.reload(null, false);
+								} else {
+									location.reload();
+								}
 							}
 						});
 					} else {
