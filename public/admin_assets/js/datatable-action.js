@@ -1,17 +1,11 @@
-// Global function to open the dispatch modal and set order_id
-window.openDispatchModal = function(orderId) {
-	// Set the order_id in the hidden input
-	$('#dispatch_order_id').val(orderId);
-	// Only reset if the form exists
-	var $form = $('#dispatchForm');
-	if ($form.length) {
-		$form[0].reset();
-	} else {
-		console.warn('Dispatch form not found in DOM. Modal may not be included on this page.');
+// Handle dispatch button click in datatable (redirect to dispatch page)
+$(document).on('click', '.dispatch-action', function (e) {
+	e.preventDefault();
+	var orderId = $(this).data('dispatch-id');
+	if (orderId) {
+		window.location.href = '/admin/dispatch/create?order_id=' + encodeURIComponent(orderId);
 	}
-	// Show the modal
-	$('#dispatchModal').modal('show');
-};
+});
 
 
 $(document).on('click', '.accept-action', function (e) {

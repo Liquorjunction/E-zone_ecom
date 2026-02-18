@@ -5,6 +5,8 @@ namespace App\Services\Admin;
 use App\Repositories\Admin\Interfaces\DispatchRepositoryInterface as DispatchRepo;
 use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface as InventoryRepo;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
+use App\Repositories\Admin\Interfaces\StoreRepositoryInterface;
+use App\Repositories\Admin\Interfaces\WarehouseRepositoryInterface;
 use App\Services\Admin\OrderStatusService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,17 +17,23 @@ class DispatchService
     protected $dispatchRepo;
     protected $orderRepo;
     protected $inventoryRepo;
+    protected $warehouseRepo;
+    protected $storeRepo;
     protected $orderStatusService;
 
     public function __construct(
         DispatchRepo $dispatchRepo,
         OrderRepo $orderRepo,
         InventoryRepo $inventoryRepo,
+        WarehouseRepositoryInterface $warehouseRepo,
+        StoreRepositoryInterface $storeRepo,
         OrderStatusService $orderStatusService
     ) {
         $this->dispatchRepo = $dispatchRepo;
         $this->orderRepo = $orderRepo;
         $this->inventoryRepo = $inventoryRepo;
+        $this->warehouseRepo = $warehouseRepo;
+        $this->storeRepo = $storeRepo;
         $this->orderStatusService = $orderStatusService;
     }
 
@@ -50,7 +58,11 @@ class DispatchService
                     'order_item_id' => $item['order_item_id'],
                     'quantity' => $item['quantity'],
                     'inventory_id' => $item['inventory_id'],
+                    'dispatch_from_store_id' => $item['dispatch_from_store_id'] ?? null,
+                    'dispatch_from_warehouse_id' => $item['dispatch_from_warehouse_id'] ?? null,
                     'dispatch_method' => $data['dispatch_method'] ?? null,
+                    'dispatched_by' => Auth::guard('admin')->id(),
+                    'dispatched_at' => Carbon::now(),
                     'remarks' => $data['remarks'] ?? null,
                 ];
                 $dispatch = $this->dispatchRepo->createDispatch($dispatchData);

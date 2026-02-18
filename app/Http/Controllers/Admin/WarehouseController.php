@@ -27,6 +27,26 @@ class WarehouseController extends Controller
         }
     }
 
+    public function getAllWarehouses(WarehouseRepo $warehouseRepo)
+    {
+        try {
+            $warehouses = $warehouseRepo->getActiveWarehouses();
+            return response()->json([
+                'success' => true,
+                'data' => $warehouses,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch all warehouses', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch warehouses: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function create()
     {
         try {
