@@ -15,12 +15,16 @@
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 
-    /* Adjusted OKLCH for better contrast and vibrancy */
     --color-primary: oklch(0.69 0.14 232.2);
     --color-background: oklch(0.69 0.14 232.2 / 0.05);
+    --color-secondary-bg: oklch(0.96 0.03 229.41);
     --color-primary-dark: oklch(0.5 0.12 232.2);
     --color-foreground: oklch(0.2 0.05 232.2);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Shared tokens & utilities
+   ═══════════════════════════════════════════════════════════════ */
 
 /* Hide the spin buttons in WebKit browsers */
 input::-webkit-outer-spin-button,
@@ -34,7 +38,7 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
-/* Alpine.js Cloak - Hide elements until Alpine loads */
+/* Alpine.js Cloak */
 [x-cloak] {
     display: none !important;
 }
@@ -49,163 +53,272 @@ aside {
     will-change: margin-left;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   UNIFIED CARD SYSTEM
+   All interactive cards share the same elevation/hover signature.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Base card — applies to section-cards, product cards, feature cards */
+.card,
+.section-card,
+.product-card {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s ease;
+}
+
+/* Unified hover lift: same feel everywhere */
+.section-card:hover,
+.product-card:hover {
+    transform: translateY(-6px);
+}
+
+/* Subtle primary tint shimmer on section-card hover */
+.section-card {
+    position: relative;
+    overflow: visible;
+}
+.section-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, transparent 40%, oklch(0.69 0.14 232.2 / 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.section-card:hover::before { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCT CARD — badges (no pulsing animations on badges)
+   ═══════════════════════════════════════════════════════════════ */
+.product-badge {
+    /* Badges are static — intentionally no pulse animation */
+    animation: none !important;
+    box-shadow: none !important;
+}
+
+/* Product card image zoom */
+.product-card .group:hover img,
+.product-card:hover img {
+    transform: scale(1.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROMO / BANNER CARDS
+   ═══════════════════════════════════════════════════════════════ */
+.promo-card {
+    position: relative;
+    isolation: isolate;
+}
+.promo-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid oklch(0.69 0.14 232.2 / 0);
+    box-shadow: inset 0 0 0 0 oklch(0.69 0.14 232.2 / 0),
+                0 0 0 0 oklch(0.69 0.14 232.2 / 0);
+    transition: border-color 0.3s ease, box-shadow 0.35s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+.promo-card:hover::after {
+    border-color: oklch(0.69 0.14 232.2 / 0.55);
+    box-shadow: inset 0 0 30px oklch(0.69 0.14 232.2 / 0.08),
+                0 16px 40px oklch(0.69 0.14 232.2 / 0.20);
+}
+.promo-card img {
+    transition: transform 0.6s ease, filter 0.35s ease;
+    filter: brightness(0.92);
+}
+.promo-card:hover img {
+    transform: scale(1.05);
+    filter: brightness(1.0);
+}
+.promo-cta-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: white;
+    transition: gap 0.25s ease;
+}
+.promo-card:hover .promo-cta-arrow { gap: 0.65rem; }
+
+/* ═══════════════════════════════════════════════════════════════
+   NAV BUTTONS (carousel prev/next)
+   ═══════════════════════════════════════════════════════════════ */
+.nav-btn {
+    position: relative;
+    overflow: hidden;
+}
+.nav-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    transform: scale(0);
+    transition: transform 0.25s cubic-bezier(.4, 0, .2, 1);
+    z-index: 0;
+}
+.nav-btn:not(:disabled):hover::after { transform: scale(1); }
+.nav-btn svg { position: relative; z-index: 1; transition: color 0.2s; }
+.nav-btn:not(:disabled):hover svg { color: white; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION HEADERS — unified across all home sections
+   ═══════════════════════════════════════════════════════════════ */
+.section-header-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    margin-top: 1.25rem;
+}
+.section-header-divider span:nth-child(1) {
+    display: block; width: 2rem; height: 3px; border-radius: 9999px;
+    background: var(--color-primary);
+}
+.section-header-divider span:nth-child(2) {
+    display: block; width: 0.75rem; height: 3px; border-radius: 9999px;
+    background: oklch(0.69 0.14 232.2 / 0.4);
+}
+.section-header-divider span:nth-child(3) {
+    display: block; width: 0.375rem; height: 3px; border-radius: 9999px;
+    background: oklch(0.69 0.14 232.2 / 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS — primary CTA consistency
+   ═══════════════════════════════════════════════════════════════ */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.5rem;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px oklch(0.69 0.14 232.2 / 0.25);
+}
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+    box-shadow: 0 8px 24px oklch(0.69 0.14 232.2 / 0.35);
+    transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0); }
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX: Remove unintended pulsing from ALL .bg-red-500 elements.
+   Only badge-pulse-dot class should pulse (in-stock indicator only).
+   ═══════════════════════════════════════════════════════════════ */
+.bg-red-500 {
+    animation: none;
+    box-shadow: none;
+}
+
+/* Retained intentional ping for in-stock dot — uses Tailwind's animate-ping */
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
 @layer utilities {
     .animate-infinite-scroll {
         animation: infinite-scroll 25s linear infinite;
     }
 
-    /* Cross-browser scrollbar hiding */
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
 
-    /* Responsive text scaling */
-    .text-responsive-xs {
-        font-size: clamp(0.75rem, 2vw, 0.875rem);
+    /* Custom scrollbar for sidebar */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: oklch(0.69 0.14 232.2 / 0.25);
+        border-radius: 9999px;
     }
-    .text-responsive-sm {
-        font-size: clamp(0.875rem, 2.5vw, 1rem);
-    }
-    .text-responsive-base {
-        font-size: clamp(1rem, 3vw, 1.125rem);
-    }
-    .text-responsive-lg {
-        font-size: clamp(1.125rem, 3.5vw, 1.25rem);
-    }
-    .text-responsive-xl {
-        font-size: clamp(1.25rem, 4vw, 1.5rem);
-    }
-    .text-responsive-2xl {
-        font-size: clamp(1.5rem, 5vw, 2rem);
-    }
-    .text-responsive-3xl {
-        font-size: clamp(2rem, 6vw, 3rem);
-    }
-    .text-responsive-4xl {
-        font-size: clamp(3rem, 8vw, 4rem);
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: oklch(0.69 0.14 232.2 / 0.5);
     }
 
-    /* Responsive spacing */
-    .space-responsive-x {
-        margin-left: clamp(0.5rem, 2vw, 1rem);
-        margin-right: clamp(0.5rem, 2vw, 1rem);
-    }
-    .space-responsive-y {
-        margin-top: clamp(0.5rem, 2vw, 1rem);
-        margin-bottom: clamp(0.5rem, 2vw, 1rem);
-    }
+    .text-responsive-xs  { font-size: clamp(0.75rem,  2vw,   0.875rem); }
+    .text-responsive-sm  { font-size: clamp(0.875rem, 2.5vw, 1rem); }
+    .text-responsive-base{ font-size: clamp(1rem,     3vw,   1.125rem); }
+    .text-responsive-lg  { font-size: clamp(1.125rem, 3.5vw, 1.25rem); }
+    .text-responsive-xl  { font-size: clamp(1.25rem,  4vw,   1.5rem); }
+    .text-responsive-2xl { font-size: clamp(1.5rem,   5vw,   2rem); }
+    .text-responsive-3xl { font-size: clamp(2rem,     6vw,   3rem); }
+    .text-responsive-4xl { font-size: clamp(3rem,     8vw,   4rem); }
 
-    /* Ensure pointer-events layering works (kept minimal) */
     #global-toasts,
     #global-toasts-mobile,
-    #global-toasts-desktop {
-        pointer-events: none;
-    }
+    #global-toasts-desktop { pointer-events: none; }
     #global-toasts-inner > .toast,
-    #global-toasts-mobile-inner > .toast {
-        pointer-events: auto;
-    }
-    .print\:hidden {
-        display: none !important;
-    }
-    .print\:block {
-        display: block !important;
-    }
-    .print\:text-black {
-        color: black !important;
-    }
+    #global-toasts-mobile-inner > .toast { pointer-events: auto; }
+
+    .print\:hidden  { display: none !important; }
+    .print\:block   { display: block !important; }
+    .print\:text-black { color: black !important; }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
 @keyframes infinite-scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
 }
 
-/* ---- */
-
-/* Add this to your app.css or create a separate home.css file */
-
-/* Smooth scrolling for the entire page */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Product card hover effects */
-.group:hover .group-hover\:scale-105 {
-    transform: scale(1.05);
-}
-
-/* Wishlist button pulse animation */
-@keyframes pulse-heart {
-    0%,
-    100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
-}
-
-.group:hover button svg {
-    animation: pulse-heart 0.5s ease-in-out;
-}
-
-/* Category icon hover effect */
-@keyframes bounce-gentle {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-5px);
-    }
-}
-
-/* Stats bar icon animation on hover */
-.hover\:bg-primary\/5:hover svg {
-    animation: bounce-gentle 0.6s ease-in-out;
-}
-
-/* Badge animations */
-@keyframes badge-pulse {
-    0%,
-    100% {
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-    }
-    50% {
-        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
-    }
-}
-
-.bg-red-500 {
-    animation: badge-pulse 2s infinite;
-}
-
-/* Gradient text effect for headings */
-.gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Loading skeleton animation */
 @keyframes shimmer {
-    0% {
-        background-position: -1000px 0;
-    }
-    100% {
-        background-position: 1000px 0;
-    }
+    0%   { background-position: -1000px 0; }
+    100% { background-position:  1000px 0; }
 }
+
+@keyframes count-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loading {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes ripple {
+    0%   { transform: scale(0); opacity: 1; }
+    100% { transform: scale(4); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BRAND MARQUEE
+   ═══════════════════════════════════════════════════════════════ */
+.brand-marquee-wrapper { overflow: hidden; position: relative; }
+.brand-marquee-inner {
+    display: flex; align-items: center; gap: 3rem;
+    width: max-content; will-change: transform;
+    animation: marquee linear infinite;
+}
+.brand-marquee { display: flex; align-items: center; gap: 3rem; }
+.brand-marquee a { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; padding: 0 0.25rem; }
+.brand-marquee img { display: block; height: 2.25rem; max-height: 2.5rem; width: auto; object-fit: contain; }
+.brand-marquee-inner:hover { animation-play-state: paused; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ═══════════════════════════════════════════════════════════════
+   MISC HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+
+html { scroll-behavior: smooth; }
 
 .skeleton {
     animation: shimmer 2s infinite;
@@ -213,281 +326,74 @@ html {
     background-size: 1000px 100%;
 }
 
-/* Improved shadow on scroll */
-.sticky-shadow {
-    transition: box-shadow 0.3s ease;
-}
-
-.sticky-shadow.scrolled {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Product grid responsive improvements */
-@media (min-width: 640px) and (max-width: 1023px) {
-    .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    }
-}
-
-/* Smooth transitions for interactive elements */
-button,
-a,
-.transition-all {
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
-}
-
-/* Focus states for accessibility */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-    outline: 2px solid #667eea;
-    outline-offset: 2px;
-}
-
-/* Image lazy loading blur effect */
-img[loading="lazy"] {
-    transition: filter 0.3s;
-}
-
-img[loading="lazy"].loaded {
-    filter: blur(0);
-}
-
-/* Newsletter input focus effect */
-input[type="email"]:focus {
-    transform: scale(1.02);
-    transition: transform 0.2s ease;
-}
-
-/* Add to cart button ripple effect */
-@keyframes ripple {
-    0% {
-        transform: scale(0);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(4);
-        opacity: 0;
-    }
-}
-
-.ripple-effect {
-    position: relative;
-    overflow: hidden;
-}
-
-.ripple-effect::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    transform: translate(-50%, -50%) scale(0);
-}
-
-.ripple-effect:active::after {
-    animation: ripple 0.6s ease-out;
-}
-
-/* Price strike-through animation */
-.line-through {
-    position: relative;
-}
-
-.line-through::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 100%;
-    height: 1px;
-    background: currentColor;
-}
-
-/* Featured banner parallax effect (optional) */
-@media (min-width: 1024px) {
-    .parallax-banner {
-        background-attachment: fixed;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
-}
-
-/* Improved mobile touch feedback */
-@media (hover: none) {
-    button:active,
-    a:active {
-        transform: scale(0.98);
-    }
-}
-
-/* Stats counter animation */
-@keyframes count-up {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.stat-item {
-    animation: count-up 0.5s ease-out forwards;
-}
-
-.stat-item:nth-child(1) {
-    animation-delay: 0.1s;
-}
-.stat-item:nth-child(2) {
-    animation-delay: 0.2s;
-}
-.stat-item:nth-child(3) {
-    animation-delay: 0.3s;
-}
-.stat-item:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-/* Brand logo hover effect */
-.brand-logo {
-    transition: all 0.3s ease;
-}
-
-.brand-logo:hover {
-    transform: translateY(-5px);
-    filter: grayscale(0) !important;
-    opacity: 1 !important;
-}
-
-/* Section fade-in on scroll (for JS implementation) */
-.fade-in-section {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.fade-in-section.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* Improve text rendering */
-body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-}
-
-/* Loading state for images */
 .image-loading {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
 }
 
-@keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+.stat-item { animation: count-up 0.5s ease-out forwards; }
+.stat-item:nth-child(1) { animation-delay: 0.1s; }
+.stat-item:nth-child(2) { animation-delay: 0.2s; }
+.stat-item:nth-child(3) { animation-delay: 0.3s; }
+.stat-item:nth-child(4) { animation-delay: 0.4s; }
+
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.fade-in-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-/* ----- Toast Styles ----- */
-
-/* Toast styles have been migrated to resources/css/toast.css and are imported at the top.
-   Keep only minimal interaction layering here so toasts don't block page interactions. */
-
-#global-toasts,
-#global-toasts-mobile,
-#global-toasts-desktop {
-    pointer-events: none;
+.ripple-effect { position: relative; overflow: hidden; }
+.ripple-effect::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%) scale(0);
 }
-#global-toasts-inner > .toast,
-#global-toasts-mobile-inner > .toast {
-    pointer-events: auto;
-}
+.ripple-effect:active::after { animation: ripple 0.6s ease-out; }
 
-/* small helper to color action by type (fallback to blue)
-   Specific colors are set inline in the SVG/inline styles generated by JS */
-
-/* Responsive font scaling */
-@media (max-width: 640px) {
-    html {
-        font-size: 14px;
-    }
+.gradient-text {
+    background: linear-gradient(135deg, oklch(0.69 0.14 232.2) 0%, oklch(0.5 0.12 232.2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-@media (min-width: 1920px) {
-    .container {
-        max-width: 1400px;
-    }
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL TRANSITIONS — keep smooth but not excessive
+   ═══════════════════════════════════════════════════════════════ */
+button,
+a {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
 }
 
-/* Print styles */
-@media print {
-    header,
-    footer,
-    .no-print {
-        display: none;
-    }
+/* Focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid oklch(0.69 0.14 232.2);
+    outline-offset: 2px;
 }
 
-/* Sidebar responsive layout fixes */
-main > div[style*="margin-left"] {
-    transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
-    will-change: margin-left;
+/* Newsletter email input */
+input[type="email"]:focus {
+    transform: scale(1.01);
+    transition: transform 0.2s ease;
 }
 
-body,
-html,
-main {
-    overflow-x: hidden;
-    width: 100%;
-}
-
-@media (min-width: 1024px) {
-    main > .flex-1 {
-        min-width: 0;
-    }
-}
-
-@media (max-width: 1023px) {
-    main > div[style*="margin-left"] {
-        margin-left: 0 !important;
-    }
-}
-
-/* Fix for prose content - ensure HTML from rich text editor renders properly */
+/* ═══════════════════════════════════════════════════════════════
+   PROSE / RICH TEXT
+   ═══════════════════════════════════════════════════════════════ */
 .prose-content h2,
 .prose-content h3,
 .prose-content h4,
@@ -499,35 +405,31 @@ main {
     margin-bottom: revert !important;
     line-height: revert !important;
 }
-
-.prose-content p {
-    margin-top: revert !important;
-    margin-bottom: revert !important;
-}
-
-.prose-content ol,
-.prose-content ul {
+.prose-content p { margin-top: revert !important; margin-bottom: revert !important; }
+.prose-content ol, .prose-content ul {
     list-style: revert !important;
     padding-left: revert !important;
     margin-top: revert !important;
     margin-bottom: revert !important;
 }
+.prose-content li { margin-top: revert !important; margin-bottom: revert !important; }
+.prose-content strong { font-weight: revert !important; }
 
-.prose-content li {
-    margin-top: revert !important;
-    margin-bottom: revert !important;
-}
+/* ═══════════════════════════════════════════════════════════════
+   TOASTS
+   ═══════════════════════════════════════════════════════════════ */
+#global-toasts,
+#global-toasts-mobile,
+#global-toasts-desktop { pointer-events: none; }
+#global-toasts-inner > .toast,
+#global-toasts-mobile-inner > .toast { pointer-events: auto; }
 
-.prose-content strong {
-    font-weight: revert !important;
-}
-
-/* Fixed header styles moved from inline Blade file */
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
 header {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     width: 100%;
     z-index: 50;
     backface-visibility: hidden;
@@ -537,4 +439,71 @@ header {
 .main-content-wrapper {
     transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1);
     padding-top: var(--header-height);
+}
+
+main > div[style*="margin-left"] {
+    transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: margin-left;
+}
+
+body, html, main {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+@media (min-width: 1024px) {
+    main > .flex-1 { min-width: 0; }
+}
+
+@media (max-width: 1023px) {
+    main > div[style*="margin-left"] { margin-left: 0 !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: oklch(0.69 0.14 232.2 / 0.35); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.69 0.14 232.2 / 0.6); }
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+    html { font-size: 14px; }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+}
+
+@media (min-width: 1920px) {
+    .container { max-width: 1400px; }
+}
+
+@media (hover: none) {
+    button:active, a:active { transform: scale(0.98); }
+}
+
+@media print {
+    header, footer, .no-print { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PARALLAX (large screens)
+   ═══════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+    .parallax-banner {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
 }

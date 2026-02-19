@@ -40,6 +40,7 @@ export default defineConfig({
                     colors: {
                         'primary': 'oklch(0.69 0.14 232.2)',
                         'background': 'oklch(0.69 0.14 232.2 / 0.05)',
+                        'secondary-bg': 'oklch(0.96 0.03 229.41)',
                     }
                 }
             }
