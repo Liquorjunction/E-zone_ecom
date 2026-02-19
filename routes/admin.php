@@ -261,7 +261,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [StoreController::class, 'index'])->name('index'); // permission: store.read
             Route::get('/data', [StoreController::class, 'getDataForDataTable'])->name('data');
             Route::get('/show', [StoreController::class, 'show'])->name('show')->middleware('can:store.read,admin');
-            Route::get('/list', [StoreController::class, 'getActiveStoreList'])->name('list')->middleware('can:store.read,admin');
+            Route::get('/list', [StoreController::class, 'getAllStores'])->name('list');
             Route::get('/create', [StoreController::class, 'create'])->name('create')->middleware('can:store.create,admin');
             Route::post('/', [StoreController::class, 'store'])->name('store')->middleware('can:store.create,admin');
             Route::get('/edit', [StoreController::class, 'edit'])->name('edit')->middleware('can:store.update,admin');
@@ -275,7 +275,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [WarehouseController::class, 'index'])->name('index'); // permission: warehouse.read
             Route::get('/data', [WarehouseController::class, 'getDataForDataTable'])->name('data');
             Route::get('/show', [WarehouseController::class, 'show'])->name('show')->middleware('can:warehouse.read,admin');
-            Route::get('/list', [WarehouseController::class, 'getActiveWarehouseList'])->name('list')->middleware('can:warehouse.read,admin');
+            Route::get('/list', [WarehouseController::class, 'getAllWarehouses'])->name('list');
             Route::get('/create', [WarehouseController::class, 'create'])->name('create')->middleware('can:warehouse.create,admin');
             Route::post('/', [WarehouseController::class, 'store'])->name('store')->middleware('can:warehouse.create,admin');
             Route::get('/edit', [WarehouseController::class, 'edit'])->name('edit')->middleware('can:warehouse.update,admin');
@@ -311,7 +311,9 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
             Route::post('/cancel', [OrderController::class, 'cancelOrder'])->name('cancel')->middleware('can:order.update,admin');
-            Route::get('{order}/items', [OrderController::class, 'itemsForDispatch'])->name('items-for-dispatch');
+                Route::get('/list', [OrderController::class, 'list'])->name('list');
+                Route::get('/items', [OrderController::class, 'items'])->name('items'); // query param: ?order_id=
+                Route::get('/order-items/inventories', [OrderController::class, 'orderItemInventories'])->name('orderItem.inventories'); // query param: ?order_item_id=
         });
 
         // Dispatch Routes

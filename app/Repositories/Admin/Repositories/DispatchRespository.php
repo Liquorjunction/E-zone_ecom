@@ -23,9 +23,8 @@ class DispatchRespository implements DispatchRepositoryInterface
 
     public function createDispatch($id, $request)
     {
-        $data = $request->validated();
-        $data['dispatched_by'] = Auth::guard('admin')->id();
-        $data['order_item_id'] = $id;
+        $data = $request;
+        // dispatched_by is set in service, so just create
         return Dispatch::create($data);
     }
 

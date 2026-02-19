@@ -1,3 +1,18 @@
+@if (!empty($dispatch_btn))
+    <button type="button" class="btn btn-sm btn-icon btn-primary dispatch-action"
+        data-dispatch-id="{{ $id }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Dispatch"
+        aria-label="Dispatch">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 10h10M7 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    </button>
+@endif
 @if (!empty($edit_url))
     <a class="btn btn-sm btn-icon btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-original-title="Edit"
         href="{{ $edit_url }}" aria-label="Edit" data-bs-original-title="Edit">

@@ -12,6 +12,55 @@ use Yajra\DataTables\Facades\DataTables;
 
 class OrderController extends Controller
 {
+    public function list(OrderRepositoryInterface $orderRepo)
+    {
+        $orders = $orderRepo->getAllOrders();
+        $result = [];
+        foreach ($orders as $order) {
+            $result[] = [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->user->name ?? ($order->user->email ?? 'N/A'),
+            ];
+        }
+        return response()->json($result);
+    }
+
+    // AJAX: Get order items for a given order (query param: ?order_id=)
+    public function items(OrderRepositoryInterface $orderRepo)
+    {
+        $orderId = request('order_id');
+        $order = $orderRepo->getOrderById($orderId);
+        if (!$order) return response()->json([]);
+        $items = [];
+        foreach ($order->items as $item) {
+            $items[] = [
+                'id' => $item->id,
+                'product_name' => $item->product->name ?? '',
+                'variant_name' => $item->variant->name ?? '',
+                'quantity' => $item->quantity,
+            ];
+        }
+        return response()->json($items);
+    }
+
+    // AJAX: Get inventories for a given order item (query param: ?order_item_id=)
+    public function orderItemInventories()
+    {
+        $orderItemId = request('order_item_id');
+        $item = \App\Models\OrderItem::with('inventories')->find($orderItemId);
+        if (!$item) return response()->json([]);
+        $inventories = [];
+        foreach ($item->inventories as $inv) {
+            $inventories[] = [
+                'id' => $inv->id,
+                'location' => $inv->location,
+                'quantity' => $inv->quantity,
+            ];
+        }
+        return response()->json($inventories);
+    }
+
     public function index()
     {
         return view('admin.pages.orders.index');
@@ -141,14 +190,18 @@ class OrderController extends Controller
                 ->addColumn('action', function ($order) use ($request) {
                     $canRead = $request->user()->can('order.read');
                     $canUpdate = $request->user()->can('order.update');
+                    $canDispatch = $request->user()->can('dispatch.create');
 
                     $actions = [
                         'id' => $order->id,
                     ];
 
                     // Define sets for statuses
-                    $viewOnlyStatuses = ['cancelled', 'delivered', 'accepted', 'processing', 'ready_to_ship', 'shipped', 'out_for_delivery', 'completed'];
+                    $viewOnlyStatuses = ['cancelled', 'delivered', 'processing', 'ready_to_ship', 'shipped', 'out_for_delivery', 'completed'];
 
+                    if ($order->status === 'accepted' && $canDispatch) {
+                        $actions['dispatch_btn'] = true;
+                    }
                     if ($order->status === 'pending') {
                         if ($canUpdate) {
                             $actions['accept_url'] = route('admin.orders.update-order-status', ['id' => $order->id, 'status' => 'accepted']);
