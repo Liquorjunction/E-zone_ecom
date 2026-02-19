@@ -457,6 +457,19 @@ body {
     text-rendering: optimizeLegibility;
 }
 
+/* Sidebar open button: always visible on mobile, above overlays */
+.sidebar-mobile-open-btn {
+     z-index: 1050 !important;
+     position: fixed !important;
+     bottom: 1.5rem;
+     left: 1.5rem;
+     pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+     .sidebar-mobile-open-btn { display: none !important; }
+}
+
 @media (min-width: 1024px) {
     main > .flex-1 { min-width: 0; }
 }
