@@ -14,11 +14,11 @@
             </x-breadcrumbs>
 
             <div
-                class="mb-8 bg-gray-200 rounded-2xl shadow-sm border-2 border-gray-100 h-96 flex items-center justify-center">
-                <p class="text-gray-500 font-semibold text-lg">[Worldwide Map Placeholder]</p>
+                class="mb-8 bg-gray-200 rounded-2xl shadow-sm border-2 border-gray-100 flex items-center justify-center">
+                <img src="{{ asset('icon/showroom.png') }}" alt="Worldwide Map" class="object-contain w-full h-auto rounded-2xl">
             </div>
 
-            <form method="GET" action="{{ route('showrooms') }}" class="mb-6 bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-4">
+            {{-- <form method="GET" action="{{ route('showrooms') }}" class="mb-6 bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-4">
                 <div class="flex flex-col lg:flex-row gap-4">
                     <div class="flex-1">
                         <div class="relative">
@@ -124,7 +124,7 @@
 
             <div class="mt-8">
                 {{ $showrooms->links() }}
-            </div>
+            </div> --}}
         </div>
     </div>
 @endsection

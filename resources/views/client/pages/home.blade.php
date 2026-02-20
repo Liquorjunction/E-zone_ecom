@@ -75,6 +75,9 @@
                     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
                         {{ gtrans('Featured Promotions') }}
                     </h2>
+                    <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
+                        {{ gtrans('Handpicked deals just for you') }}
+                    </p>
                     <div class="section-header-divider">
                         <span></span><span></span><span></span>
                     </div>
