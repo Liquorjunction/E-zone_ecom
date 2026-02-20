@@ -144,13 +144,20 @@
                                 </div>
                             @else
                                 @if(request('view') === 'list')
-                                    <div class="space-y-6">
+                                    <div class="space-y-4">
                                         @foreach($products as $product)
                                             @include('client.partials.product-card-list', ['product' => $product])
                                         @endforeach
                                     </div>
                                 @else
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {{-- Mobile: 2-col grid with mobile card --}}
+                                    <div class="grid grid-cols-2 gap-3 sm:hidden">
+                                        @foreach($products as $product)
+                                            @include('client.partials.product-card-mobile', ['product' => $product])
+                                        @endforeach
+                                    </div>
+                                    {{-- Tablet+: standard grid with desktop card --}}
+                                    <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                         @foreach($products as $product)
                                             @include('client.partials.product-card', ['product' => $product])
                                         @endforeach

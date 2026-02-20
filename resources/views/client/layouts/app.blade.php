@@ -32,16 +32,6 @@
         {!! json_encode($organizationLd, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
     </script>
 
-    {{--
-        FIX: Dynamically sync --header-height with the real header's offsetHeight.
-        This ensures the sidebar top and main padding-top are always correct,
-        whether or not the announcement bar is visible.
-
-        We use ResizeObserver so it reacts instantly any time the header
-        grows or shrinks (e.g. announcement bar toggled, font loaded, resize).
-        The fallback listeners (DOMContentLoaded, load, resize) cover
-        browsers without ResizeObserver support.
-    --}}
     <script>
         (function () {
             function syncHeaderHeight() {
@@ -53,34 +43,19 @@
                     );
                 }
             }
-
-            // Run as early as possible on DOM ready
             document.addEventListener('DOMContentLoaded', function () {
                 syncHeaderHeight();
-
-                // ResizeObserver watches the header for any size changes
-                // (announcement bar show/hide, font load, content change, resize)
                 var header = document.querySelector('header');
                 if (header && window.ResizeObserver) {
                     new ResizeObserver(syncHeaderHeight).observe(header);
                 }
             });
-
-            // Also sync on full page load and window resize as fallback
             window.addEventListener('load', syncHeaderHeight);
             window.addEventListener('resize', syncHeaderHeight);
         })();
     </script>
-
 </head>
 
-{{--
-    FIX: Removed the hardcoded style="--header-height:65px;" from <body>.
-    That static value was causing the sidebar and main content to use the
-    wrong offset when the announcement bar was visible (real height ~101px).
-    The JS above now sets the correct value dynamically on <html> instead,
-    which cascades down to all elements using var(--header-height).
---}}
 <body x-data="{
     sidebarCollapsed: true,
     mobileSidebarOpen: false,
@@ -110,8 +85,15 @@
         @include('client.partials.sidebar')
 
         <div class="flex-1 w-full transition-[margin-left] duration-300 ease-out relative z-0"
-             style="margin-left: 4.5rem"
+             id="main-content-inner"
+             style="margin-left: 0"
              x-bind:style="isLg ? (sidebarCollapsed ? 'margin-left:4.5rem' : 'margin-left:17rem') : 'margin-left:0'">
+        <script>
+            (function(){
+                var el = document.getElementById('main-content-inner');
+                if (el && window.innerWidth >= 1024) el.style.marginLeft = '4.5rem';
+            })();
+        </script>
 
             <div class="w-full">
                 @yield('content')

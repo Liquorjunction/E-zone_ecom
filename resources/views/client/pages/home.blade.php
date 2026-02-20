@@ -232,7 +232,14 @@
                             @foreach ($dealsChunks as $chunk)
                                 @if ($chunk->count() > 0)
                                     <div class="w-full shrink-0">
-                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
+                                        {{-- Mobile: compact 2-col grid --}}
+                                        <div class="grid grid-cols-2 gap-3 px-1 md:hidden">
+                                            @foreach ($chunk as $productVariant)
+                                                @include('client.partials.product-card-mobile', ['product' => $productVariant])
+                                            @endforeach
+                                        </div>
+                                        {{-- Desktop: full grid --}}
+                                        <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
                                             @foreach ($chunk as $productVariant)
                                                 @include('client.partials.product-card', ['product' => $productVariant])
                                             @endforeach
@@ -342,7 +349,14 @@
                         @foreach ($newArrivalsChunks as $chunk)
                             @if ($chunk->count() > 0)
                                 <div class="w-full shrink-0">
-                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
+                                    {{-- Mobile: compact 2-col grid --}}
+                                    <div class="grid grid-cols-2 gap-3 px-1 md:hidden">
+                                        @foreach ($chunk as $productVariant)
+                                            @include('client.partials.product-card-mobile', ['product' => $productVariant])
+                                        @endforeach
+                                    </div>
+                                    {{-- Desktop: full grid --}}
+                                    <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
                                         @foreach ($chunk as $productVariant)
                                             @include('client.partials.product-card', ['product' => $productVariant])
                                         @endforeach
@@ -438,7 +452,14 @@
                             @foreach ($bestSellerChunks as $chunk)
                                 @if ($chunk->count() > 0)
                                     <div class="w-full shrink-0">
-                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
+                                        {{-- Mobile: compact 2-col grid --}}
+                                        <div class="grid grid-cols-2 gap-3 px-1 md:hidden">
+                                            @foreach ($chunk as $productVariant)
+                                                @include('client.partials.product-card-mobile', ['product' => $productVariant])
+                                            @endforeach
+                                        </div>
+                                        {{-- Desktop: full grid --}}
+                                        <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
                                             @foreach ($chunk as $productVariant)
                                                 @include('client.partials.product-card', ['product' => $productVariant])
                                             @endforeach

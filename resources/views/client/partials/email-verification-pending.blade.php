@@ -8,6 +8,7 @@
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
+    @vite('resources/js/timer.js')
 </head>
 
 <body class="bg-white min-h-screen">
@@ -202,7 +203,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
-                                <strong>Verification links expire in 5 minutes.</strong> If yours expired, request a new one below.
+                                <strong>Verification links expire in <span id="timer">5:00</span>.</strong> If yours expired, request a new one below.
                             </p>
                         </div>
                     </div>

@@ -93,7 +93,7 @@
         <tr>
             <td style="padding: 16px 18px;">
                 <p style="margin: 0; padding: 0; color: #1a3a52; font-size: 14px; line-height: 1.7; font-family: Arial, Helvetica, sans-serif;">
-                    <strong>Time Sensitive:</strong> This verification link will expire in 24 hours for security reasons. If it expires, you can request a new verification email from your account settings.
+                    <strong>Time Sensitive:</strong> This verification link will expire in 5 minutes for security reasons. If it expires, you can request a new verification email from your account settings.
                 </p>
             </td>
         </tr>
