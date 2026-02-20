@@ -205,6 +205,12 @@ Breadcrumbs::for('brand.products', function (BreadcrumbTrail $trail, $slug) {
     $trail->push(Str::title($slug), route('brand.products', $slug));
 });
 
+// Home > Products > [Category Name]
+Breadcrumbs::for('category.products', function (BreadcrumbTrail $trail, $slug) {
+    $trail->parent('products.index');
+    $trail->push(Str::title($slug), route('category.products', $slug));
+});
+
 // Home > Order Tracking
 Breadcrumbs::for('order-tracking', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
@@ -222,6 +228,12 @@ Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail) {
 Breadcrumbs::for('brands', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
     $trail->push('All Brands', route('brands'));
+});
+
+// Home > All Categories
+Breadcrumbs::for('categories', function (BreadcrumbTrail $trail) {
+    $trail->parent('home');
+    $trail->push('All Categories', route('categories'));
 });
 
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\Client\AddressController;
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\BrandController;
 use App\Http\Controllers\Client\CartController;
+use App\Http\Controllers\Client\CategoryController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\InventoryController;
@@ -58,6 +59,10 @@ Route::view('/sitemap', 'client.pages.sitemap')->name('sitemap');
 // Brands
 Route::get('/brands', [BrandController::class, 'index'])->name('brands');
 Route::get('/brand/{slug}', [BrandController::class, 'productsByBrand'])->name('brand.products');
+
+// Categories
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
+Route::get('/category/{slug}', [CategoryController::class, 'productsByCategory'])->name('category.products');
 
 // Products
 Route::prefix('products')->name('products.')->group(function () {

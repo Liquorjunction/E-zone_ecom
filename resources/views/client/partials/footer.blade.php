@@ -46,6 +46,7 @@
                 <h4 class="text-lg font-semibold text-white">Shop By</h4>
                 <ul class="space-y-3">
                     <li><a href="{{ route('brands') }}" class="hover:text-white transition-colors">Brands</a></li>
+                    <li><a href="{{ route('categories') }}" class="hover:text-white transition-colors">Categories</a></li>
                 </ul>
             </div>
 
