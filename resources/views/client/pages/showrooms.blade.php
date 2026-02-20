@@ -13,9 +13,15 @@
                 <x-slot:content>Discover our showrooms across the globe.</x-slot:content>
             </x-breadcrumbs>
 
-            <div
-                class="mb-8 bg-gray-200 rounded-2xl shadow-sm border-2 border-gray-100 flex items-center justify-center">
-                <img src="{{ asset('icon/showroom.png') }}" alt="Worldwide Map" class="object-contain w-full h-auto rounded-2xl">
+            <div class="mb-8 flex items-center justify-center">
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden w-full max-w-7xl p-0 flex items-center justify-center">
+                    <img
+                        src="{{ asset('icon/showroom.png') }}"
+                        alt="Worldwide Map"
+                        class="w-full h-150 object-fill transition-transform duration-300 hover:scale-105"
+                        style="background: linear-gradient(135deg, #f3f4f6 0%, #fff 100%);"
+                    >
+                </div>
             </div>
 
             {{-- <form method="GET" action="{{ route('showrooms') }}" class="mb-6 bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-4">

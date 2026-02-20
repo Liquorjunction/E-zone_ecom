@@ -352,7 +352,7 @@
                                             </li>
                                         @endcan
 
-                                        @can('showrooms.read')
+                                        {{-- @can('showrooms.read')
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request()->routeIs('admin.showrooms.*') ? 'active' : '' }}"
                                                     href="{{ route('admin.showrooms.index') }}">
@@ -362,7 +362,7 @@
                                                     <span class="item-name">Showrooms</span>
                                                 </a>
                                             </li>
-                                        @endcan
+                                        @endcan --}}
 
                                         @can('privacy_policies.read')
                                             <li class="nav-item">
@@ -514,6 +514,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}"
                                         href="{{ route('admin.coupons.index') }}">
+                                        <i class="icon">
+                                            <i class="bi bi-ticket-perforated"></i>
+                                        </i>
                                         <span class="item-name">Coupons</span>
                                     </a>
                                 </li>
@@ -522,14 +525,20 @@
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.coupon-usage.*') ? 'active' : '' }}"
                                         href="{{ route('admin.coupon-usage.index') }}">
-                                    <span class="item-name">Coupon Usage</span>
-                                </a>
-                            </li>
+                                        <i class="icon">
+                                            <i class="bi bi-clipboard-check"></i>
+                                        </i>
+                                        <span class="item-name">Coupon Usage</span>
+                                    </a>
+                                </li>
                             @endcan
                             @can('discount.read')
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.discounts.*') ? 'active' : '' }}"
                                         href="{{ route('admin.discounts.index') }}">
+                                        <i class="icon">
+                                            <i class="bi bi-percent"></i>
+                                        </i>
                                         <span class="item-name">Discounts</span>
                                     </a>
                                 </li>
