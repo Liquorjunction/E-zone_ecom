@@ -21,7 +21,7 @@
         $variantImage = optional($product->images()->ordered()->first())->image_path;
     }
 
-    $imagePath = $master->cover_image 
+    $imagePath = $master->cover_image
         ? asset('storage/' . $master->cover_image)
         : asset('icon/product-placeholder-A.jpg');
 
@@ -152,6 +152,18 @@
                         d="M12.1 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.35 1.31z" />
                 </svg>
             @endif
+        </button>
+
+        <!-- Compare Product Icon Button -->
+        <button type="button" aria-label="Compare product" data-product-variant-id="{{ $variantId }}"
+            class="compare-btn no-toast absolute top-16 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none opacity-0 group-hover:opacity-100"
+            @if (!$variantId) disabled @endif>
+            <svg class="w-5 h-5 text-blue-500 transition-all duration-200 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-200"/>
+                <rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="text-blue-400"/>
+                <rect x="3" y="7" width="7" height="13" rx="2" stroke="currentColor"/>
+                <rect x="14" y="3" width="7" height="17" rx="2" stroke="currentColor"/>
+            </svg>
         </button>
     </div>
 

@@ -17,7 +17,7 @@
 
     --color-primary: oklch(0.69 0.14 232.2);
     --color-background: oklch(0.69 0.14 232.2 / 0.05);
-    --color-secondary-bg: oklch(0.96 0.03 229.41);
+    --color-secondary-bg: oklch(0.97 0.01 224.6);
     --color-primary-dark: oklch(0.5 0.12 232.2);
     --color-foreground: oklch(0.2 0.05 232.2);
 }
@@ -76,6 +76,9 @@ aside {
 /* Subtle primary tint shimmer on section-card hover */
 .section-card {
     position: relative;
+    /* NOTE: Do NOT set overflow:hidden here - it would clip the card's own
+       box-shadow and border-radius hover effects. Instead we rely on
+       carousel-track overflow:hidden to clip the slide viewport. */
     overflow: visible;
 }
 .section-card::before {
@@ -168,6 +171,20 @@ aside {
 .nav-btn:not(:disabled):hover::after { transform: scale(1); }
 .nav-btn svg { position: relative; z-index: 1; transition: color 0.2s; }
 .nav-btn:not(:disabled):hover svg { color: white; }
+
+/* ═══════════════════════════════════════════════════════════════
+   CAROUSEL TRACK — clips slide pages so only current slide shows
+   ═══════════════════════════════════════════════════════════════ */
+.carousel-track {
+    overflow: hidden;   /* ← THE FIX: hides next/prev slide pages */
+    position: relative; /* establishes stacking context for z-index children */
+    /* Extra vertical padding gives room for card hover lift (translateY -6px)
+       and box-shadow so they aren't hard-clipped by overflow:hidden */
+    padding-top: 8px;
+    padding-bottom: 12px;
+    margin-top: -8px;
+    margin-bottom: -12px;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    SECTION HEADERS — unified across all home sections
@@ -438,7 +455,7 @@ header {
 
 .main-content-wrapper {
     transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    padding-top: var(--header-height);
+    /* padding-top is on <main> inline style only — do not add here */
 }
 
 main > div[style*="margin-left"] {
@@ -519,4 +536,22 @@ body {
         background-repeat: no-repeat;
         background-size: cover;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO SLIDER — always fills exactly the remaining viewport
+   The slider is the first child inside the content wrapper.
+   No matter what the header height is (with or without the
+   announcement bar), this ensures zero gap at the bottom.
+   ═══════════════════════════════════════════════════════════════ */
+.main-content-wrapper > div > div:first-child,
+.main-content-wrapper > div > section:first-child {
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Swiper container inside the hero section */
+.main-content-wrapper > div > div:first-child .swiper,
+.main-content-wrapper > div > section:first-child .swiper {
+    height: calc(100vh - var(--header-height)) !important;
+    min-height: calc(100vh - var(--header-height)) !important;
 }

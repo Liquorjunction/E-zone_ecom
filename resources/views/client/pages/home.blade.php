@@ -84,7 +84,7 @@
                 <div class="relative flex items-center gap-3 sm:gap-4">
                     <button @click="prev()" :disabled="!canGoPrev"
                         :class="!canGoPrev ? 'opacity-30 cursor-not-allowed' : ''"
-                        class="nav-btn hidden md:flex shrink-0 w-11 h-11 rounded-full border-2 border-gray-200 bg-white items-center justify-center shadow-sm">
+                        class="nav-btn hidden md:flex shrink-0 w-11 h-11 rounded-full border-2 border-gray-200 bg-white items-center justify-center shadow-sm z-0">
                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                         </svg>
@@ -104,7 +104,7 @@
                                                 @endphp
                                                 <a href="{{ $card->link ?? '#' }}"
                                                     class="promo-card group relative overflow-hidden rounded-2xl bg-gray-900 min-h-70 sm:min-h-80 flex items-center
-                                                           shadow-[0_4px_16px_rgba(0,0,0,0.10)] transition-shadow duration-300">
+                                                    hover:transition-shadow duration-300">
                                                     <img src="{{ asset('storage/' . $card->image) }}"
                                                         alt="{{ $card->title }}"
                                                         class="absolute inset-0 w-full h-full object-fill z-0">
@@ -138,7 +138,7 @@
 
                     <button @click="next()" :disabled="!canGoNext"
                         :class="!canGoNext ? 'opacity-30 cursor-not-allowed' : ''"
-                        class="nav-btn hidden md:flex shrink-0 w-11 h-11 rounded-full border-2 border-gray-200 bg-white items-center justify-center shadow-sm">
+                        class="nav-btn hidden md:flex shrink-0 w-11 h-11 rounded-full border-2 border-gray-200 bg-white items-center justify-center shadow-sm z-0">
                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                         </svg>
@@ -146,7 +146,7 @@
                 </div>
 
                 {{-- Dots --}}
-                <div class="flex items-center justify-center gap-4 mt-8" x-show="totalSlides > 1">
+                <div class="flex items-center justify-center gap-4 mt-8 z-0" x-show="totalSlides > 1">
                     <button @click="prev()" :disabled="!canGoPrev"
                         :class="!canGoPrev ? 'opacity-30 cursor-not-allowed' : ''"
                         class="md:hidden nav-btn w-9 h-9 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center shadow-sm">
@@ -183,40 +183,35 @@
             currentSlide: 0,
             itemsPerPage: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2,
             totalItems: {{ $dealsCount }},
+            autoplay: null,
             get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
             get canGoNext() { return this.currentSlide < this.totalSlides - 1 },
             get canGoPrev() { return this.currentSlide > 0 },
             next() { if (this.canGoNext) this.currentSlide++; else this.currentSlide = 0 },
             prev() { if (this.canGoPrev) this.currentSlide--; else this.currentSlide = this.totalSlides - 1 },
             init() {
+                this.startAutoplay && this.startAutoplay();
                 window.addEventListener('resize', () => {
                     this.itemsPerPage = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 2;
                     if (this.currentSlide >= this.totalSlides) this.currentSlide = Math.max(0, this.totalSlides - 1);
                 });
-            }
-        }">
+            },
+            startAutoplay() { this.autoplay = setInterval(() => { this.next(); }, 9000); },
+            stopAutoplay()  { clearInterval(this.autoplay); }
+        }" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
 
                 {{-- Section Header --}}
-                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-14">
-                    <div>
-                        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                            {{ gtrans('Deals & Discounts') }}
-                        </h2>
-                        <p class="mt-2 text-sm sm:text-base text-gray-400 leading-relaxed">
-                            {{ gtrans('Grab the best offers on top products') }}
-                        </p>
-                        <div class="section-header-divider justify-start mt-4">
-                            <span></span><span></span><span></span>
-                        </div>
+                <div class="text-center mb-10 sm:mb-14">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
+                        {{ gtrans('Deals & Discounts') }}
+                    </h2>
+                    <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
+                        {{ gtrans('Grab the best offers on top products') }}
+                    </p>
+                    <div class="section-header-divider">
+                        <span></span><span></span><span></span>
                     </div>
-                    <a href="{{ route('products.deals') }}"
-                       class="btn-primary shrink-0 self-start sm:self-auto">
-                        {{ gtrans('View All Deals') }}
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
                 </div>
 
                 {{-- Slider --}}
@@ -228,13 +223,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <div class="flex-1 overflow-hidden">
+                    <div class="flex-1 carousel-track">
                         <div class="flex transition-transform duration-500 ease-in-out"
                             :style="`transform: translateX(-${currentSlide * 100}%)`">
                             @foreach ($dealsChunks as $chunk)
                                 @if ($chunk->count() > 0)
                                     <div class="w-full shrink-0">
-                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 py-2 px-0.5">
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
                                             @foreach ($chunk as $productVariant)
                                                 @include('client.partials.product-card', ['product' => $productVariant])
                                             @endforeach
@@ -276,6 +271,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
+                </div>
+
+                {{-- View All Deals Button Below Cards --}}
+                <div class="flex justify-center mt-8">
+                    <a href="{{ route('products.deals') }}"
+                       class="btn-primary inline-flex items-center">
+                        {{ gtrans('View All Deals') }}
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
                 </div>
             </div>
         </section>
@@ -327,13 +333,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
-                <div class="flex-1 overflow-hidden">
+                <div class="flex-1 carousel-track">
                     <div class="flex transition-transform duration-500 ease-in-out"
                         :style="`transform: translateX(-${currentSlide * 100}%)`">
                         @foreach ($newArrivalsChunks as $chunk)
                             @if ($chunk->count() > 0)
                                 <div class="w-full shrink-0">
-                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 py-2 px-0.5">
+                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
                                         @foreach ($chunk as $productVariant)
                                             @include('client.partials.product-card', ['product' => $productVariant])
                                         @endforeach
@@ -422,14 +428,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <div class="flex-1 overflow-hidden">
+                    <div class="flex-1 carousel-track">
                         <div class="flex transition-transform duration-500 ease-in-out"
                             :style="`transform: translateX(-${currentSlide * 100}%)`">
                             @php $bestSellerChunks = ($bestSellers ?? collect())->chunk(4); @endphp
                             @foreach ($bestSellerChunks as $chunk)
                                 @if ($chunk->count() > 0)
                                     <div class="w-full shrink-0">
-                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 py-2 px-0.5">
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 px-1">
                                             @foreach ($chunk as $productVariant)
                                                 @include('client.partials.product-card', ['product' => $productVariant])
                                             @endforeach

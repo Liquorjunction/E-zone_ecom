@@ -84,7 +84,7 @@
 
 <div class="product-card group bg-white rounded-2xl overflow-hidden transition-all duration-300
             border border-gray-100 hover:border-primary/20
-            shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]
+            shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.06)]
             hover:-translate-y-1.5 relative">
 
     {{-- Image area --}}
@@ -98,7 +98,7 @@
         </a>
 
         {{-- Gradient overlay on hover --}}
-        <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent
+        <div class="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent
                     opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
 
         {{-- Badges --}}
@@ -185,7 +185,7 @@
 
         {{-- Product name --}}
         <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
-            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-2.5 group-hover:text-primary transition-colors duration-200 leading-snug min-h-[2.5rem]">
+            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-2.5 group-hover:text-primary transition-colors duration-200 leading-snug min-h-10">
                 {{ $name }}
             </h3>
         </a>

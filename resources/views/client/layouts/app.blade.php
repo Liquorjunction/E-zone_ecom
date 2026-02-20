@@ -32,8 +32,55 @@
         {!! json_encode($organizationLd, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
     </script>
 
+    {{--
+        FIX: Dynamically sync --header-height with the real header's offsetHeight.
+        This ensures the sidebar top and main padding-top are always correct,
+        whether or not the announcement bar is visible.
+
+        We use ResizeObserver so it reacts instantly any time the header
+        grows or shrinks (e.g. announcement bar toggled, font loaded, resize).
+        The fallback listeners (DOMContentLoaded, load, resize) cover
+        browsers without ResizeObserver support.
+    --}}
+    <script>
+        (function () {
+            function syncHeaderHeight() {
+                var header = document.querySelector('header');
+                if (header) {
+                    document.documentElement.style.setProperty(
+                        '--header-height',
+                        header.getBoundingClientRect().height + 'px'
+                    );
+                }
+            }
+
+            // Run as early as possible on DOM ready
+            document.addEventListener('DOMContentLoaded', function () {
+                syncHeaderHeight();
+
+                // ResizeObserver watches the header for any size changes
+                // (announcement bar show/hide, font load, content change, resize)
+                var header = document.querySelector('header');
+                if (header && window.ResizeObserver) {
+                    new ResizeObserver(syncHeaderHeight).observe(header);
+                }
+            });
+
+            // Also sync on full page load and window resize as fallback
+            window.addEventListener('load', syncHeaderHeight);
+            window.addEventListener('resize', syncHeaderHeight);
+        })();
+    </script>
+
 </head>
 
+{{--
+    FIX: Removed the hardcoded style="--header-height:65px;" from <body>.
+    That static value was causing the sidebar and main content to use the
+    wrong offset when the announcement bar was visible (real height ~101px).
+    The JS above now sets the correct value dynamically on <html> instead,
+    which cascades down to all elements using var(--header-height).
+--}}
 <body x-data="{
     sidebarCollapsed: true,
     mobileSidebarOpen: false,
@@ -48,20 +95,12 @@
         if (this.pinned && this.isLg) {
             this.sidebarCollapsed = false;
         }
-        const setHeaderHeight = () => {
-            const header = document.querySelector('header');
-            const h = header ? header.offsetHeight : 120;
-            document.documentElement.style.setProperty('--header-height', h + 'px');
-        };
-        setHeaderHeight();
         window.addEventListener('resize', () => {
-            setHeaderHeight();
             this.isLg = window.innerWidth >= 1024;
         });
     }
 }"
     @keydown.escape.window="accountOpen = false; languageOpen = false; mobileMenuOpen = false; mobileSidebarOpen = false"
-    style="--header-height:140px;"
     class="font-sans antialiased bg-gray-50 text-slate-800">
 
     @include('client.partials.header')
@@ -70,8 +109,9 @@
 
         @include('client.partials.sidebar')
 
-        <div class="flex-1 w-full transition-[margin] duration-200 ease-out relative z-0 ml-0 lg:ml-16"
-             :style="isLg ? (sidebarCollapsed ? 'margin-left: 4rem' : 'margin-left: 18rem') : 'margin-left: 0'">
+        <div class="flex-1 w-full transition-[margin-left] duration-300 ease-out relative z-0"
+             style="margin-left: 4.5rem"
+             x-bind:style="isLg ? (sidebarCollapsed ? 'margin-left:4.5rem' : 'margin-left:17rem') : 'margin-left:0'">
 
             <div class="w-full">
                 @yield('content')
