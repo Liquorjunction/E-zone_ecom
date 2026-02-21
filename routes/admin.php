@@ -316,6 +316,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         // Dispatch Routes
         Route::prefix('dispatch')->name('dispatch.')->middleware('can:dispatch.read,admin')->group(function () {
             Route::get('/', [DispatchController::class, 'index'])->name('index')->middleware('can:dispatch.read,admin');
+            Route::get('/data', [DispatchController::class, 'datatable'])->name('data');
             Route::get('/create', [DispatchController::class, 'create'])->name('create')->middleware('can:dispatch.create,admin');
             Route::post('/store', [DispatchController::class, 'store'])->name('store')->middleware('can:dispatch.create,admin');
             Route::put('/{id}/status', [DispatchController::class, 'updateStatus'])->name('update-status')->middleware('can:dispatch.update,admin');

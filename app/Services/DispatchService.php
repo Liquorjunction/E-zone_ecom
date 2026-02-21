@@ -30,8 +30,18 @@ class DispatchService
                 }
 
                 $orderItem = OrderItem::findOrFail($orderItemId);
-                $inventory = Inventory::findOrFail($inventoryId);
+                $inventory = Inventory::where('id', $inventoryId)->lockForUpdate()->first();
+
+                $alreadyDispatched = Dispatch::where('order_item_id', $orderItemId)
+                    ->whereIn('status', ['dispatched', 'delivered'])
+                    ->sum('quantity');
+                    
+                $remainingToDispatch = $orderItem->quantity - $alreadyDispatched;
                 
+                if ($quantity > $remainingToDispatch) {
+                    throw new Exception("Quantity exceeds remaining dispatchable quantity for Product ID {$orderItem->product_id}. Remaining: {$remainingToDispatch}");
+                }
+
                 if ($inventory->quantity < $quantity) {
                      throw new Exception("Insufficient inventory for Product ID {$orderItem->product_id}. Available: {$inventory->quantity}");
                 }

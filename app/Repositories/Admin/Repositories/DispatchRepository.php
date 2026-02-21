@@ -46,4 +46,10 @@ class DispatchRepository implements DispatchRepositoryInterface
     {
         return Dispatch::with(['orderItem', 'inventory'])->where('order_id', $orderId)->get();
     }
+
+    public function getDataforDatatable()
+    {
+        return Dispatch::with(['order', 'orderItem.product', 'inventory.store', 'inventory.warehouse', 'dispatchedBy'])
+            ->select('order_dispatch.*');
+    }
 }

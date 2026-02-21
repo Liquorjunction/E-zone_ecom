@@ -9,4 +9,5 @@ interface DispatchRepositoryInterface
     public function createDispatch(array $data);
     public function updateDispatch(int $id, array $data);
     public function getDispatchesByOrderId(int $orderId);
+    public function getDataforDatatable();
 }
