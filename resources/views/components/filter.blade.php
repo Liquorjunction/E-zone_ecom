@@ -102,7 +102,7 @@ $countActiveVariants = function ($products) {
                 </h3>
                 <div class="space-y-2 max-h-48 overflow-y-auto">
                     @foreach ($brands as $brand)
-                        @if (is_object($brand))
+                        @if (is_object($brand) && $countActiveVariants($brand->products) > 0)
                             <label class="flex items-center group cursor-pointer">
                                 <input type="checkbox" name="brand[]" value="{{ $brand->slug }}"
                                     {{ in_array($brand->slug, (array) request('brand', [])) ? 'checked' : '' }}
@@ -125,7 +125,7 @@ $countActiveVariants = function ($products) {
                 </h3>
                 <div class="space-y-2">
                     @foreach ($categories as $category)
-                        @if (is_object($category))
+                        @if (is_object($category) && $countActiveVariants($category->products) > 0)
                             <div class="category-item">
                                 <label class="flex items-center group cursor-pointer">
                                     <input type="checkbox" name="category[]" value="{{ $category->slug }}"

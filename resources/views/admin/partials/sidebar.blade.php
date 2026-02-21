@@ -588,6 +588,17 @@
                                     </a>
                                 </li>
                             @endcan
+                            @can('site_status.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.site-settings.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.site-settings.index') }}">
+                                        <i class="icon">
+                                            <i class="bi bi-gear"></i>
+                                        </i>
+                                        <span class="item-name">Site Settings</span>
+                                    </a>
+                                </li>
+                            @endcan
                         </ul>
                     </li>
                     <li><hr class="hr-horizontal"></li>

@@ -11,7 +11,7 @@
 
     {{-- ─── Page wrapper ────────────────────────────────────────────────── --}}
     <div class="min-h-screen bg-gray-50/70 py-8 pb-16">
-        <div class="container mx-auto px-4 max-w-screen-xl">
+        <div class="container mx-auto px-4 max-w-7xl">
 
             {{-- Breadcrumbs --}}
             <div class="mb-6">
@@ -217,7 +217,7 @@
                         $discountName = $discountInfo['discount_name'] ?? '';
                     @endphp
                     <div id="price-box"
-                        class="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-5 shadow-sm">
+                        class="bg-linear-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-5 shadow-sm">
                         <div class="flex items-start justify-between flex-wrap gap-4">
                             <div class="flex items-baseline gap-3" id="price-flex-row">
                                 <div class="flex flex-col gap-1.5" id="js-price-wrapper">
@@ -555,7 +555,7 @@
                                 {{-- Action buttons --}}
                                 <div class="flex-1 flex gap-3">
                                     <button id="add-to-cart-btn" type="submit" name="add_to_cart" value="1"
-                                        class="flex-1 bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-bold py-3 px-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2 active:translate-y-0">
+                                        class="flex-1 bg-linear-to-r from-primary to-primary-dark text-white text-sm font-bold py-3 px-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2 active:translate-y-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
