@@ -1,12 +1,5 @@
-
 # Dispatch, Inventory & Order Status Service: Developer Implementation Guide
-
-This document is a comprehensive guide for implementing product-wise dispatch, inventory management, and a centralized order status service in your Laravel e-commerce platform. It covers models, flows, service design, best practices, and actionable steps for robust, auditable, and scalable order fulfillment.
-
-
 ---
-
-
 ## 1. Key Concepts & Models
 
 ### OrderStatusService (Core Service)
@@ -202,27 +195,56 @@ This document is a comprehensive guide for implementing product-wise dispatch, i
 
 
 
-## 6. Implementation Roadmap
+
+## 6. Implementation Roadmap (Layered Architecture)
 
 ### Phase 1: Core Models & Migrations
 - Define models: Order, OrderItem, Dispatch, Inventory, InventoryTransaction, Store, Warehouse.
-- Create migrations and seeders (Dispatch table only, no DispatchItem).
+- Create migrations and seeders (Dispatch table only).
 
-### Phase 2: Service Layer
-- Implement `OrderStatusService` with allowed transitions and validation.
-- Implement `DispatchService` and `InventoryService`.
+### Phase 2: Request Classes
+- Create Form Request classes for validation and authorization:
+  - e.g., `CreateDispatchRequest`, `UpdateDispatchStatusRequest`.
 
-### Phase 3: Business Logic & API
-- Build controller logic for order placement, dispatch, returns, and status updates.
-- Expose RESTful API endpoints for admin and customer UIs.
+### Phase 3: Repository Layer
+- Define repository interfaces for Dispatch, Inventory, Order, etc.
+- Implement repository classes using Eloquent/Query Builder.
 
-### Phase 4: UI & Notifications
+### Phase 4: Service Layer
+- Implement `OrderStatusService` for status transitions.
+- Implement `DispatchService` for business logic:
+  - Validate inventory, handle DB transactions, call repositories, update statuses.
+- Implement `InventoryService` as needed.
+
+### Phase 5: Controller Layer
+- Build controllers to handle requests and responses:
+  - Inject services, call service methods, return API/JSON responses.
+
+### Phase 6: UI & Notifications
 - Build admin UI for dispatch/inventory management.
 - Integrate notifications for status changes (email, SMS, in-app, etc.).
 
-### Phase 5: Testing & Monitoring
+### Phase 7: Testing & Monitoring
 - Write unit and feature tests for all flows and edge cases.
 - Set up monitoring/auditing for inventory and status changes.
+
+---
+
+### Step-by-Step Implementation Example (Dispatch Flow)
+1. **Create Request Class:**
+  - e.g., `CreateDispatchRequest` for validating dispatch creation input.
+2. **Define Repository Interface:**
+  - e.g., `DispatchRepositoryInterface` with methods like `createDispatch`, `updateDispatchStatus`, `getDispatchesByOrder`.
+3. **Implement Repository:**
+  - e.g., `DispatchRepository` using Eloquent.
+4. **Implement Service:**
+  - e.g., `DispatchService` to handle business logic, inventory validation, DB transactions, and status updates.
+5. **Build Controller:**
+  - e.g., `DispatchController` to accept requests, call service, and return responses.
+6. **Connect to UI:**
+  - Expose endpoints in admin/customer UI.
+7. **Write Tests:**
+  - Test all edge cases and flows.
 
 ---
 

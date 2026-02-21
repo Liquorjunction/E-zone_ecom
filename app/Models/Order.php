@@ -52,6 +52,13 @@ class Order extends Model
         'cancelled_at' => 'datetime',
     ];
 
+
+    // Alias for compatibility with code expecting 'orderItems' relationship
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Orders\CancelOrderRequest;
 use App\Http\Requests\Admin\Orders\ReadOrderRequest;
 use App\Models\Order;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
@@ -53,13 +54,38 @@ class OrderController extends Controller
         }
     }
 
+    public function cancelOrder(CancelOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    {
+        try {
+            $id = $request->input('id', $request->route('id'));
+            $cancelReason = $request->input('cancel_reason');
+            $orderRepo->cancelOrder($id, $cancelReason);
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Order cancelled successfully.']);
+            }
+
+            return redirect()->back()->with(['success' => true, 'message' => 'Order cancelled successfully.']);
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
+
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function updateOrderStatus(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
     {
         try {
             $id = $request->input('id', $request->route('id'));
-            $status = $request->input('status');
+                $status = $request->input('status', $request->route('status') ?? 'accepted');
             $order = $orderRepo->updateOrderStatus($id, $status);
-            return redirect()->back()->with(['success' => true, 'message' => 'Order status updated successfully.']);
+                $message = 'Order status updated successfully.';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => true, 'message' => $message, 'order_id' => $id, 'status' => $status]);
+                }
+                return redirect()->back()->with(['success' => true, 'message' => $message]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
         }
@@ -95,11 +121,37 @@ class OrderController extends Controller
                 ->addColumn('action', function ($order) use ($request) {
                     $canRead = $request->user()->can('order.read');
                     $canUpdate = $request->user()->can('order.update');
+                    $canDispatch = $request->user()->can('dispatch.create');
 
-                    return view('admin.partials.datatable-actions', [
+                    $actions = [
                         'id' => $order->id,
-                        'view_url' => $canRead ? route('admin.orders.show', ['id' => $order->id]) : null,
-                    ])->render();
+                    ];
+
+                    // Define sets for statuses
+                    $viewOnlyStatuses = ['cancelled', 'delivered', 'processing', 'ready_to_ship', 'shipped', 'out_for_delivery', 'completed'];
+
+                    if (($order->status === 'accepted' || $order->status === 'partially_dispatched') && $canDispatch) {
+                        $actions['dispatch_btn'] = true;
+                    }
+                    if ($order->status === 'pending') {
+                        if ($canUpdate) {
+                            $actions['accept_url'] = route('admin.orders.update-order-status', ['id' => $order->id, 'status' => 'accepted']);
+                            $actions['cancel_url'] = route('admin.orders.cancel', ['id' => $order->id]);
+                        }
+                    } elseif (in_array($order->status, $viewOnlyStatuses, true)) {
+                        if ($canRead) {
+                            $actions['view_url'] = route('admin.orders.show', ['id' => $order->id]);
+                        }
+                    } else {
+                        if ($canRead) {
+                            $actions['view_url'] = route('admin.orders.show', ['id' => $order->id]);
+                        }
+                        if ($canUpdate) {
+                            $actions['cancel_url'] = route('admin.orders.cancel', ['id' => $order->id]);
+                        }
+                    }
+
+                    return view('admin.partials.datatable-actions', $actions)->render();
                 })
                 ->rawColumns(['action'])
                 ->make(true);

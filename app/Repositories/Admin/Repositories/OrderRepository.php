@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Repositories\Admin\Repositories;
+
 use App\Models\Order;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class OrderRepository implements OrderRepositoryInterface
 {
@@ -15,6 +18,20 @@ class OrderRepository implements OrderRepositoryInterface
     {
         // Eager load items, product, and variant for admin order details
         return Order::with(['items.product', 'items.variant', 'user'])->find($id);
+    }
+
+    public function cancelOrder($id, $cancelReason)
+    {
+        $order = Order::find($id);
+        if ($order) {
+            $order->status = 'cancelled';
+            $order->cancel_reason = $cancelReason;
+            $order->cancelled_by = Auth::guard('admin')->id();
+            $order->cancelled_at = Carbon::now();
+            $order->save();
+            return $order;
+        }
+        return null;
     }
 
     public function updateOrderStatus($id, $status)
@@ -46,5 +63,10 @@ class OrderRepository implements OrderRepositoryInterface
 
         // Fallback: if customer name is stored on order record under a different field
         return $order->customer_name ?? $order->shipping_address['name'] ?? null;
+    }
+
+    public function getOrderWithItemsAndInventory($orderId)
+    {
+        return Order::with(['orderItems.product', 'orderItems.variant.inventories'])->find($orderId);
     }
 }

@@ -1,3 +1,18 @@
+@if (!empty($dispatch_btn))
+    <button type="button" class="btn btn-sm btn-icon btn-primary dispatch-action"
+        data-dispatch-id="{{ $id }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Dispatch"
+        aria-label="Dispatch">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 10h10M7 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    </button>
+@endif
 @if (!empty($edit_url))
     <a class="btn btn-sm btn-icon btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-original-title="Edit"
         href="{{ $edit_url }}" aria-label="Edit" data-bs-original-title="Edit">
@@ -52,4 +67,40 @@
             </svg>
         </span>
     </a>
+@endif
+@if (isset($accept_url))
+    <button type="button" class="btn btn-sm btn-icon btn-success accept-action"
+        data-accept-url="{{ $accept_url }}"
+        data-accept-id="{{ $product_id ?? $id ?? $model_id ?? '' }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Accept"
+        aria-label="Accept"
+        data-bs-original-title="Accept">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M5 13L9 17L19 7"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </button>
+@endif
+@if (isset($cancel_url))
+    <button type="button" class="btn btn-sm btn-icon btn-danger cancel-action"
+        data-cancel-url="{{ $cancel_url }}"
+        data-cancel-id="{{ $product_id ?? $id ?? $model_id ?? '' }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Cancel"
+        aria-label="Cancel"
+        data-bs-original-title="Cancel">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M6 18L18 6M6 6l12 12"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </button>
 @endif
