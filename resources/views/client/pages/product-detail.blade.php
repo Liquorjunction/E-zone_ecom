@@ -675,21 +675,47 @@
                                     ? $product->description[app()->getLocale()] ?? ($product->description['en'] ?? '')
                                     : $product->description !!}
                             </div>
-                            @if ($product->warranty)
-                                <div class="mt-8 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
-                                    <h4 class="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                        </svg>
-                                        Warranty Information
-                                    </h4>
-                                    <div class="text-gray-700 text-sm">
-                                        {!! is_array($product->warranty)
-                                            ? $product->warranty[app()->getLocale()] ?? ($product->warranty['en'] ?? '')
-                                            : $product->warranty !!}
-                                    </div>
+                            @php
+                                $hasWarranty = !empty($product->warranty);
+                                $hasDimensions = !empty($product->dimensions);
+                                $count = ($hasWarranty ? 1 : 0) + ($hasDimensions ? 1 : 0);
+                            @endphp
+                            @if ($hasWarranty || $hasDimensions)
+                                <div class="grid grid-cols-1 {{ $count > 1 ? 'md:grid-cols-2 gap-6' : '' }} mt-8">
+                                    @if ($hasWarranty)
+                                        <div class="p-5 bg-blue-50 border border-blue-200 rounded-2xl col-span-1">
+                                            <h4 class="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                                </svg>
+                                                Warranty Information
+                                            </h4>
+                                            <div class="text-gray-700 text-sm">
+                                                {!! is_array($product->warranty)
+                                                    ? $product->warranty[app()->getLocale()] ?? ($product->warranty['en'] ?? '')
+                                                    : $product->warranty !!}
+                                            </div>
+                                        </div>
+                                    @endif
+                                    @if ($hasDimensions)
+                                        <div class="p-5 bg-gray-50/60 border border-gray-200 rounded-2xl col-span-1">
+                                            <h4 class="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                                </svg>
+                                                Product Dimensions
+                                            </h4>
+                                            <div class="text-gray-700 text-sm">
+                                                {!! is_array($product->dimensions)
+                                                    ? $product->dimensions[app()->getLocale()] ?? ($product->dimensions['en'] ?? '')
+                                                    : $product->dimensions !!}
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
                         </div>
