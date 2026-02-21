@@ -24,7 +24,11 @@ class Order extends Model
         'taxable_amount',
         'total',
         'status',
+        'status_changed_at',
+        'status_changed_by',
         'cancel_reason',
+        'cancelled_by',
+        'cancelled_at',
         'shipping_address',
         'billing_address',
         'phone_no',
@@ -44,6 +48,8 @@ class Order extends Model
         'tax_percentage' => 'decimal:2',
         'taxable_amount' => 'decimal:2',
         'total' => 'decimal:2',
+        'status_changed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     public function items()
