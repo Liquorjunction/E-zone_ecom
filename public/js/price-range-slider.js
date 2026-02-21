@@ -201,25 +201,27 @@
 
     priceRanges.forEach(setupPriceRange);
 
-    // Remove min_price/max_price from form submission if unchanged from default
+    // Remove min_price/max_price from form submission if unchanged from default (works for both normal and AJAX submits)
+    function handlePriceRangeFormSubmit(e) {
+        var form = e.target;
+        var priceRange = form.querySelector('[data-price-range]');
+        if (!priceRange) return;
+        var minInput = priceRange.querySelector('[data-input="min"]');
+        var maxInput = priceRange.querySelector('[data-input="max"]');
+        var defaultMin = parseFloat(priceRange.dataset.defaultMin);
+        var defaultMax = parseFloat(priceRange.dataset.defaultMax);
+        var minVal = parseFloat(minInput.value);
+        var maxVal = parseFloat(maxInput.value);
+        if (minInput && Math.abs(minVal - defaultMin) < 0.01) {
+            minInput.name = '';
+        }
+        if (maxInput && Math.abs(maxVal - defaultMax) < 0.01) {
+            maxInput.name = '';
+        }
+    }
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('form').forEach(function(form) {
-            form.addEventListener('submit', function () {
-                var priceRange = form.querySelector('[data-price-range]');
-                if (!priceRange) return;
-                var minInput = priceRange.querySelector('[data-input="min"]');
-                var maxInput = priceRange.querySelector('[data-input="max"]');
-                var defaultMin = parseFloat(priceRange.dataset.defaultMin);
-                var defaultMax = parseFloat(priceRange.dataset.defaultMax);
-                var minVal = parseFloat(minInput.value);
-                var maxVal = parseFloat(maxInput.value);
-                if (minInput && Math.abs(minVal - defaultMin) < 0.01) {
-                    minInput.name = '';
-                }
-                if (maxInput && Math.abs(maxVal - defaultMax) < 0.01) {
-                    maxInput.name = '';
-                }
-            });
+            form.addEventListener('submit', handlePriceRangeFormSubmit, true);
         });
     });
 })();
