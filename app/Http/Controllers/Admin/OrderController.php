@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Orders\CancelOrderRequest;
 use App\Http\Requests\Admin\Orders\ReadOrderRequest;
-use App\Models\Order;
-use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
+use App\Services\OrderStatusService as OrderStatus;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -17,143 +18,167 @@ class OrderController extends Controller
         return view('admin.pages.orders.index');
     }
 
-    public function show(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    public function show(ReadOrderRequest $request, OrderRepo $orderRepo, OrderStatus $orderStatusService)
     {
         try {
             $id = $request->input('id');
             $order = $orderRepo->getOrderById($id);
-
-            return view('admin.pages.orders.show', compact('order'));
+            // Get allowed transitions for the current status
+            $statusLabels = [
+                'pending' => 'Pending',
+                'order_confirmation' => 'Order Confirmation',
+                'processing' => 'Processing',
+                'ready_to_ship' => 'Ready to Ship',
+                'shipped' => 'Shipped',
+                'partially_shipped' => 'Partially Shipped',
+                'out_for_delivery' => 'Out for Delivery',
+                'delivered' => 'Delivered',
+                'completed' => 'Completed',
+                'cancelled' => 'Cancelled',
+                'returned' => 'Returned',
+                'failed_delivery' => 'Failed Delivery',
+            ];
+            $service = $orderStatusService;
+            $transitions = $service->getAvailableTransitions($order->status);
+            $availableStatuses = array_unique(array_merge([$order->status], $transitions));
+            return view('admin.pages.orders.show', compact('order', 'availableStatuses', 'statusLabels'));
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-    public function edit(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    public function edit(ReadOrderRequest $request, OrderRepo $orderRepo)
     {
         try {
             $id = $request->input('id');
             $order = $orderRepo->getOrderById($id);
-
             return view('admin.pages.orders.edit', compact('order'));
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-    public function update(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    public function cancelOrder(CancelOrderRequest $request, OrderRepo $orderRepo, OrderStatus $orderStatusService)
     {
         try {
             $id = $request->input('id');
-            $status = $request->input('status');
-            $order = $orderRepo->updateOrderStatus($id, $status);
-
-            return redirect()->back()->with(['success' => true, 'message' => 'Order status updated successfully.']);
-        } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-
-    public function cancelOrder(CancelOrderRequest $request, OrderRepositoryInterface $orderRepo)
-    {
-        try {
-            $id = $request->input('id', $request->route('id'));
             $cancelReason = $request->input('cancel_reason');
-            $orderRepo->cancelOrder($id, $cancelReason);
+            $order = $orderRepo->getOrderById($id);
 
-            if ($request->ajax()) {
-                return response()->json(['success' => true, 'message' => 'Order cancelled successfully.']);
+            if (!$order) {
+                return redirect()->back()->with(['success' => false, 'message' => 'Order not found.'], 404);
             }
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Order cancelled successfully.']);
+            $adminId = Auth::guard('admin')->id();
+            $orderStatusService->changeStatus($order, 'cancelled', $cancelReason, false, $adminId);
+
+            $message = 'Order cancelled successfully.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => $message, 'order_id' => $id]);
+            }
+            return redirect()->back()->with(['success' => true, 'message' => $message]);
         } catch (\Exception $e) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-            }
-
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error('Cancel order error: ' . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()->with(['success' => false, 'message' => 'Failed to cancel order.'], 500);
         }
     }
 
-    public function updateOrderStatus(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    public function updateOrderStatus(ReadOrderRequest $request, OrderRepo $orderRepo, OrderStatus $orderStatusService)
     {
         try {
             $id = $request->input('id', $request->route('id'));
-                $status = $request->input('status', $request->route('status') ?? 'accepted');
-            $order = $orderRepo->updateOrderStatus($id, $status);
-                $message = 'Order status updated successfully.';
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json(['success' => true, 'message' => $message, 'order_id' => $id, 'status' => $status]);
-                }
-                return redirect()->back()->with(['success' => true, 'message' => $message]);
+            $status = $request->input('status');
+            $order = $orderRepo->getOrderById($id);
+
+            if (!$order) {
+                return redirect()->back()->with(['success' => false, 'message' => 'Order not found.'], 404);
+            }
+
+            $adminId = Auth::guard('admin')->id();
+            $orderStatusService->changeStatus($order, $status, null, false, $adminId);
+
+            $message = 'Order status updated successfully.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => $message, 'order_id' => $id, 'status' => $status]);
+            }
+            return redirect()->back()->with(['success' => true, 'message' => $message]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error('Update order status error: ' . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()->with(['success' => false, 'message' => 'Failed to update status.'], 500);
         }
     }
 
-    public function dataTable(ReadOrderRequest $request, OrderRepositoryInterface $orderRepo)
+    public function dataTable(ReadOrderRequest $request, OrderRepo $orderRepo, OrderStatus $orderStatusService)
     {
         try {
+            $statusLabels = [
+                'pending' => 'Pending',
+                'order_confirmation' => 'Order Confirmation',
+                'processing' => 'Processing',
+                'ready_to_ship' => 'Ready to Ship',
+                'shipped' => 'Shipped',
+                'partially_shipped' => 'Partially Shipped',
+                'out_for_delivery' => 'Out for Delivery',
+                'delivered' => 'Delivered',
+                'completed' => 'Completed',
+                'cancelled' => 'Cancelled',
+                'returned' => 'Returned',
+                'failed_delivery' => 'Failed Delivery',
+            ];
             return DataTables::of($orderRepo->getDataForDataTable())
                 ->addIndexColumn()
-                ->addColumn('order_number', function ($order) {
-                    return $order->order_number ?? 'N/A';
-                })
-                ->addColumn('created_at', function ($order) {
-                    return $order->created_at->format('d M Y, h:i A');
-                })
+                ->addColumn('order_number', fn($order) => $order->order_number ?? 'N/A')
+                ->addColumn('created_at', fn($order) => $order->created_at->format('d M Y, h:i A'))
                 ->addColumn('customer_name', function ($order) use ($orderRepo) {
-                    $customerName = $orderRepo->getCustomerNameByOrderId($order->id);
-                    return $customerName ?? 'N/A';
+                    return $orderRepo->getCustomerNameByOrderId($order->id) ?? 'N/A';
                 })
-                ->addColumn('total', function ($order) {
-                    return $order->total ?? 'N/A';
+                ->addColumn('total', fn($order) => $order->total ?? 'N/A')
+                ->addColumn('cancel_reason', fn($order) => $order->cancel_reason ?? 'N/A')
+                ->addColumn('payment_method', fn($order) => $order->payment_method ?? 'N/A')
+                ->addColumn('status', function ($order) use ($orderStatusService, $statusLabels, $request) {
+                    // Only show dropdown for users with permission and for allowed transitions
+                    $service = $orderStatusService;
+                    $transitions = $service->getAvailableTransitions($order->status);
+                    $availableStatuses = array_unique(array_merge([$order->status], $transitions));
+                    return view('admin.partials.datatable-orderStatus', [
+                        'order' => $order,
+                        'statusLabels' => $statusLabels,
+                        'availableStatuses' => $availableStatuses,
+                        'canUpdate' => $request->user()->can('order.update'),
+                    ])->render();
                 })
-                ->addColumn('status', function ($order) {
-                    return $order->status ?? 'N/A';
-                })
-                ->addColumn('cancel_reason', function ($order) {
-                    return $order->cancel_reason ?? 'N/A';
-                })
-                ->addColumn('payment_method', function ($order) {
-                    return $order->payment_method ?? 'N/A';
-                })
-                ->addColumn('action', function ($order) use ($request) {
+                ->addColumn('action', function ($order) use ($request, $orderStatusService) {
                     $canRead = $request->user()->can('order.read');
                     $canUpdate = $request->user()->can('order.update');
                     $canDispatch = $request->user()->can('dispatch.create');
 
-                    $actions = [
-                        'id' => $order->id,
-                    ];
+                    $actions = ['id' => $order->id];
 
-                    // Define sets for statuses
-                    $viewOnlyStatuses = ['cancelled', 'delivered', 'processing', 'ready_to_ship', 'shipped', 'out_for_delivery', 'completed'];
+                    $service = $orderStatusService;
+                    $transitions = $service->getAvailableTransitions($order->status);
 
-                    if (($order->status === 'accepted' || $order->status === 'partially_dispatched') && $canDispatch) {
+                    if (in_array('dispatched', $transitions, true) && $canDispatch) {
                         $actions['dispatch_btn'] = true;
                     }
-                    if ($order->status === 'pending') {
-                        if ($canUpdate) {
-                            $actions['accept_url'] = route('admin.orders.update-order-status', ['id' => $order->id, 'status' => 'accepted']);
-                            $actions['cancel_url'] = route('admin.orders.cancel', ['id' => $order->id]);
+
+                    if ($canUpdate) {
+                        foreach ($transitions as $transition) {
+                            if ($transition === 'order_confirmation') {
+                                $actions['accept_url'] = route('admin.orders.update-order-status', ['id' => $order->id, 'status' => 'order_confirmation']);
+                            }
+                            if ($transition === 'cancelled') {
+                                $actions['cancel_url'] = route('admin.orders.cancel', ['id' => $order->id]);
+                            }
                         }
-                    } elseif (in_array($order->status, $viewOnlyStatuses, true)) {
-                        if ($canRead) {
-                            $actions['view_url'] = route('admin.orders.show', ['id' => $order->id]);
-                        }
-                    } else {
-                        if ($canRead) {
-                            $actions['view_url'] = route('admin.orders.show', ['id' => $order->id]);
-                        }
-                        if ($canUpdate) {
-                            $actions['cancel_url'] = route('admin.orders.cancel', ['id' => $order->id]);
-                        }
+                    }
+
+                    if ($canRead) {
+                        $actions['view_url'] = route('admin.orders.show', ['id' => $order->id]);
                     }
 
                     return view('admin.partials.datatable-actions', $actions)->render();
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['status', 'action'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error('Order dataTable error: ' . $e->getMessage(), ['exception' => $e]);

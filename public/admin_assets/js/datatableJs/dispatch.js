@@ -18,7 +18,6 @@ $(document).ready(function () {
             { data: 'location', name: 'location', orderable: false, searchable: false },
             { data: 'status_badge', name: 'status' },
             { data: 'date', name: 'dispatched_at' },
-            { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-end' }
         ],
         order: [[0, 'desc']],
         language: {
@@ -34,7 +33,7 @@ $(document).ready(function () {
     $('#filter_status, #filter_order_number').on('keyup change', function () {
         table.draw();
     });
-    
+
     // Clear Filters Button
     $('#clear_filters').on('click', function(e) {
         e.preventDefault();

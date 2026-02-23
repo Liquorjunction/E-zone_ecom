@@ -9,6 +9,7 @@ interface ProductRepositoryInterface
     public function getProductVariants($productId);
     public function getProductVarientCount($productId);
     public function getProductById($id);
+    public function getVariantsByProductId(int $productId);
     public function getDataforDataTable();
 
     public function createProduct($request, $data = null);

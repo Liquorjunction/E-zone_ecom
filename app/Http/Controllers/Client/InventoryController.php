@@ -6,15 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Inventory;
 use App\Models\InventoryTransaction;
-use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface as InventoryRepo;
-use Illuminate\Support\Facades\Auth;
+use App\Services\InventoryService;
 
 class InventoryController extends Controller
 {
-    /**
-     * Return transactions for a given variant or product.
-     * Accepts `variant_id` or `product_id` in request.
-     */
     public function transactions(Request $request)
     {
         $variantId = $request->input('variant_id');
@@ -38,7 +33,7 @@ class InventoryController extends Controller
     }
 
     /** Reserve stock for a user/action */
-    public function reserve(Request $request, InventoryRepo $repo)
+    public function reserve(Request $request, InventoryService $service)
     {
         $data = $request->validate([
             'product_id' => 'required_without:variant_id|nullable|integer',
@@ -48,12 +43,12 @@ class InventoryController extends Controller
             'reference_id' => 'nullable|integer',
         ]);
 
-        $reserved = $repo->reserveStock($data['product_id'] ?? 0, $data['variant_id'] ?? null, (float)$data['quantity'], $data['reference_type'] ?? null, $data['reference_id'] ?? null);
+        $reserved = $service->reserveStock($data['product_id'] ?? 0, $data['variant_id'] ?? null, (float)$data['quantity'], $data['reference_type'] ?? null, $data['reference_id'] ?? null);
 
         return response()->json(['success' => true, 'reserved' => $reserved]);
     }
 
-    public function release(Request $request, InventoryRepo $repo)
+    public function release(Request $request, InventoryService $service)
     {
         $data = $request->validate([
             'product_id' => 'required_without:variant_id|nullable|integer',
@@ -63,12 +58,12 @@ class InventoryController extends Controller
             'reference_id' => 'nullable|integer',
         ]);
 
-        $released = $repo->releaseReservation($data['product_id'] ?? 0, $data['variant_id'] ?? null, (float)$data['quantity'], $data['reference_type'] ?? null, $data['reference_id'] ?? null);
+        $released = $service->releaseReservation($data['product_id'] ?? 0, $data['variant_id'] ?? null, (float)$data['quantity'], $data['reference_type'] ?? null, $data['reference_id'] ?? null);
 
         return response()->json(['success' => true, 'released' => $released]);
     }
 
-    public function processReturn(Request $request, InventoryRepo $repo)
+    public function processReturn(Request $request, InventoryService $service)
     {
         $data = $request->validate([
             'product_id' => 'required_without:variant_id|nullable|integer',
@@ -78,7 +73,7 @@ class InventoryController extends Controller
             'reference_id' => 'nullable|integer',
         ]);
 
-        $inv = $repo->processReturn($data['product_id'] ?? 0, $data['variant_id'] ?? null, (float)$data['quantity'], $data['reference_type'] ?? null, $data['reference_id'] ?? null);
+        $inv = $service->processReturn($data['product_id'] ?? 0, $data['variant_id'] ?? null, (float)$data['quantity'], $data['reference_type'] ?? null, $data['reference_id'] ?? null);
 
         return response()->json(['success' => true, 'inventory' => $inv]);
     }

@@ -1,35 +1,38 @@
 @php
     // Determine section active states
-    $isProductSectionActive = request()->routeIs('admin.brands.*') ||
+    $isProductSectionActive =
+        request()->routeIs('admin.brands.*') ||
         request()->routeIs('admin.category-subcategory.categories.*') ||
         request()->routeIs('admin.category-subcategory.subcategories.*') ||
         request()->routeIs('admin.products.*');
 
-    $isInventorySectionActive = request()->routeIs('admin.stores.*') ||
+    $isInventorySectionActive =
+        request()->routeIs('admin.stores.*') ||
         request()->routeIs('admin.warehouses.*') ||
         request()->routeIs('admin.inventory.*') ||
         request()->routeIs('admin.inventory-transactions.*');
 
     $isCustomerSectionActive = request()->routeIs('admin.customers.*');
 
-    $isHomeMgmtActive = request()->routeIs('admin.hero-slider.*') ||
+    $isHomeMgmtActive =
+        request()->routeIs('admin.hero-slider.*') ||
         request()->routeIs('admin.cards.*') ||
         request()->routeIs('admin.quick-stats.*') ||
         request()->routeIs('admin.whyshopwithus.*');
 
-    $isCMSActive = request()->routeIs('admin.about_us.*') ||
+    $isCMSActive =
+        request()->routeIs('admin.about_us.*') ||
         request()->routeIs('admin.showrooms.*') ||
         request()->routeIs('admin.privacy-policy.*') ||
         request()->routeIs('admin.tncs.*') ||
         request()->routeIs('admin.shipping-return.*');
 
-    $isFAQActive = request()->routeIs('admin.faq-categories.*') ||
-        request()->routeIs('admin.faqs.*');
+    $isFAQActive = request()->routeIs('admin.faq-categories.*') || request()->routeIs('admin.faqs.*');
 
     $isPagesSectionActive = $isHomeMgmtActive || $isCMSActive || $isFAQActive;
 
-    $isUserSectionActive = request()->routeIs('admin.user-management.*') ||
-        request()->routeIs('admin.roles-permissions.*');
+    $isUserSectionActive =
+        request()->routeIs('admin.user-management.*') || request()->routeIs('admin.roles-permissions.*');
 
     $isOrdersSectionActive = request()->routeIs('admin.orders.*');
 
@@ -37,8 +40,7 @@
 
     $isReportsSectionActive = request()->routeIs('admin.reports.*');
 
-    $isCouponSectionActive = request()->routeIs('admin.coupons.*') ||
-        request()->routeIs('admin.coupon-usage.*');
+    $isCouponSectionActive = request()->routeIs('admin.coupons.*') || request()->routeIs('admin.coupon-usage.*');
 
     $isDiscountSectionActive = request()->routeIs('admin.discounts.*');
     $isNewsletterSectionActive = request()->routeIs('admin.newsletter-subscribers.*');
@@ -81,7 +83,9 @@
                     </a>
                 </li>
 
-                <li><hr class="hr-horizontal"></li>
+                <li>
+                    <hr class="hr-horizontal">
+                </li>
 
                 <!-- Product Management -->
                 @canany(['brands.read', 'category.read', 'subcategory.read', 'products.read'])
@@ -98,8 +102,8 @@
                                 <i class="bi bi-chevron-right"></i>
                             </i>
                         </a>
-                        <ul class="sub-nav collapse {{ $isProductSectionActive ? 'show' : '' }}"
-                            id="sidebar-products" data-bs-parent="#sidebar-menu">
+                        <ul class="sub-nav collapse {{ $isProductSectionActive ? 'show' : '' }}" id="sidebar-products"
+                            data-bs-parent="#sidebar-menu">
                             @can('brands.read')
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}"
@@ -149,7 +153,9 @@
                             @endcan
                         </ul>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcanany
 
                 <!-- Inventory -->
@@ -167,8 +173,8 @@
                                 <i class="bi bi-chevron-right"></i>
                             </i>
                         </a>
-                        <ul class="sub-nav collapse {{ $isInventorySectionActive ? 'show' : '' }}"
-                            id="sidebar-inventory" data-bs-parent="#sidebar-menu">
+                        <ul class="sub-nav collapse {{ $isInventorySectionActive ? 'show' : '' }}" id="sidebar-inventory"
+                            data-bs-parent="#sidebar-menu">
                             @can('inventories.read')
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}"
@@ -218,7 +224,9 @@
                             @endcan
                         </ul>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcanany
 
                 <!-- Manage Customers -->
@@ -232,7 +240,9 @@
                             <span class="item-name">Customers</span>
                         </a>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcan
 
                 <!-- Pages -->
@@ -241,8 +251,7 @@
                     <li class="nav-item">
                         <a class="nav-link {{ $isPagesSectionActive ? 'section-active' : 'collapsed' }}"
                             data-bs-toggle="collapse" href="#sidebar-pages" role="button"
-                            aria-expanded="{{ $isPagesSectionActive ? 'true' : 'false' }}"
-                            aria-controls="sidebar-pages">
+                            aria-expanded="{{ $isPagesSectionActive ? 'true' : 'false' }}" aria-controls="sidebar-pages">
                             <i class="icon">
                                 <i class="bi bi-file-earmark-text"></i>
                             </i>
@@ -252,8 +261,8 @@
                             </i>
                         </a>
 
-                        <ul class="sub-nav collapse {{ $isPagesSectionActive ? 'show' : '' }}"
-                            id="sidebar-pages" data-bs-parent="#sidebar-menu">
+                        <ul class="sub-nav collapse {{ $isPagesSectionActive ? 'show' : '' }}" id="sidebar-pages"
+                            data-bs-parent="#sidebar-menu">
 
                             <!-- Home Page -->
                             @canany(['slider.read', 'card.read', 'quick_stats.read', 'why_choose_us.read'])
@@ -270,8 +279,8 @@
                                             <i class="bi bi-chevron-right"></i>
                                         </i>
                                     </a>
-                                    <ul class="sub-nav collapse {{ $isHomeMgmtActive ? 'show' : '' }}"
-                                        id="sidebar-homepage" data-bs-parent="#sidebar-pages">
+                                    <ul class="sub-nav collapse {{ $isHomeMgmtActive ? 'show' : '' }}" id="sidebar-homepage"
+                                        data-bs-parent="#sidebar-pages">
                                         @can('slider.read')
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request()->routeIs('admin.hero-slider.*') ? 'active' : '' }}"
@@ -324,12 +333,12 @@
                             @endcanany
 
                             <!-- CMS Pages -->
-                            @canany(['about_us.read', 'showrooms.read', 'privacy_policies.read', 'tnc.read', 'shipping_return.read'])
+                            @canany(['about_us.read', 'showrooms.read', 'privacy_policies.read', 'tnc.read',
+                                'shipping_return.read'])
                                 <li class="nav-item">
                                     <a class="nav-link {{ $isCMSActive ? 'section-active' : 'collapsed' }}"
                                         data-bs-toggle="collapse" href="#sidebar-cms" role="button"
-                                        aria-expanded="{{ $isCMSActive ? 'true' : 'false' }}"
-                                        aria-controls="sidebar-cms">
+                                        aria-expanded="{{ $isCMSActive ? 'true' : 'false' }}" aria-controls="sidebar-cms">
                                         <i class="icon">
                                             <i class="bi bi-file-text"></i>
                                         </i>
@@ -338,8 +347,8 @@
                                             <i class="bi bi-chevron-right"></i>
                                         </i>
                                     </a>
-                                    <ul class="sub-nav collapse {{ $isCMSActive ? 'show' : '' }}"
-                                        id="sidebar-cms" data-bs-parent="#sidebar-pages">
+                                    <ul class="sub-nav collapse {{ $isCMSActive ? 'show' : '' }}" id="sidebar-cms"
+                                        data-bs-parent="#sidebar-pages">
                                         @can('about_us.read')
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request()->routeIs('admin.about_us.*') ? 'active' : '' }}"
@@ -408,8 +417,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link {{ $isFAQActive ? 'section-active' : 'collapsed' }}"
                                         data-bs-toggle="collapse" href="#sidebar-faq" role="button"
-                                        aria-expanded="{{ $isFAQActive ? 'true' : 'false' }}"
-                                        aria-controls="sidebar-faq">
+                                        aria-expanded="{{ $isFAQActive ? 'true' : 'false' }}" aria-controls="sidebar-faq">
                                         <i class="icon">
                                             <i class="bi bi-question-circle-fill"></i>
                                         </i>
@@ -418,8 +426,8 @@
                                             <i class="bi bi-chevron-right"></i>
                                         </i>
                                     </a>
-                                    <ul class="sub-nav collapse {{ $isFAQActive ? 'show' : '' }}"
-                                        id="sidebar-faq" data-bs-parent="#sidebar-pages">
+                                    <ul class="sub-nav collapse {{ $isFAQActive ? 'show' : '' }}" id="sidebar-faq"
+                                        data-bs-parent="#sidebar-pages">
                                         @can('faqs.read')
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request()->routeIs('admin.faq-categories.*') ? 'active' : '' }}"
@@ -448,22 +456,61 @@
                             @endcanany
                         </ul>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcanany
 
-                <!-- Orders -->
-                @can('order.read')
+                <!-- Orders and Dispatch -->
+                @canany(['order.read', 'dispatch.read'])
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
-                            href="{{ route('admin.orders.index') }}">
+                        <a class="nav-link {{ $isOrdersSectionActive ? 'section-active' : 'collapsed' }}"
+                            data-bs-toggle="collapse" href="#sidebar-orders" role="button"
+                            aria-expanded="{{ $isOrdersSectionActive ? 'true' : 'false' }}"
+                            aria-controls="sidebar-orders">
                             <i class="icon">
-                                <i class="bi bi-cart-check"></i>
+                                <i class="bi bi-receipt"></i>
                             </i>
-                            <span class="item-name">Orders</span>
+                            <span class="item-name">Orders & Dispatch</span>
+                            <i class="right-icon">
+                                <i class="bi bi-chevron-right"></i>
+                            </i>
                         </a>
+                        <ul class="sub-nav collapse {{ $isOrdersSectionActive ? 'show' : '' }}" id="sidebar-orders"
+                            data-bs-parent="#sidebar-menu">
+                            @can('order.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.orders.index') }}">
+                                        <i class="icon">
+                                            <i class="bi bi-cart-check"></i>
+                                        </i>
+                                        <span class="item-name">Orders</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="hr-horizontal">
+                                </li>
+                            @endcan
+
+                            @can('dispatch.read')
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('admin.dispatch.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.dispatch.index') }}">
+                                        <i class="icon">
+                                            <i class="bi bi-truck"></i>
+                                        </i>
+                                        <span class="item-name">Dispatch</span>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
-                @endcan
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
+                @endcanany
+
 
                 <!-- Reviews -->
                 @can('reviews.read')
@@ -476,7 +523,9 @@
                             <span class="item-name">Reviews</span>
                         </a>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcan
 
                 <!-- Newsletter -->
@@ -490,7 +539,9 @@
                             <span class="item-name">Newsletter</span>
                         </a>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcan
 
                 <!-- Coupons & Discounts -->
@@ -545,7 +596,9 @@
                             @endcan
                         </ul>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcanany
 
                 <!-- User & Access -->
@@ -553,8 +606,7 @@
                     <li class="nav-item">
                         <a class="nav-link {{ $isUserSectionActive ? 'section-active' : 'collapsed' }}"
                             data-bs-toggle="collapse" href="#sidebar-users" role="button"
-                            aria-expanded="{{ $isUserSectionActive ? 'true' : 'false' }}"
-                            aria-controls="sidebar-users">
+                            aria-expanded="{{ $isUserSectionActive ? 'true' : 'false' }}" aria-controls="sidebar-users">
                             <i class="icon">
                                 <i class="bi bi-shield-check"></i>
                             </i>
@@ -563,8 +615,8 @@
                                 <i class="bi bi-chevron-right"></i>
                             </i>
                         </a>
-                        <ul class="sub-nav collapse {{ $isUserSectionActive ? 'show' : '' }}"
-                            id="sidebar-users" data-bs-parent="#sidebar-menu">
+                        <ul class="sub-nav collapse {{ $isUserSectionActive ? 'show' : '' }}" id="sidebar-users"
+                            data-bs-parent="#sidebar-menu">
                             @can('user management.read')
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('admin.user-management.*') ? 'active' : '' }}"
@@ -601,7 +653,9 @@
                             @endcan
                         </ul>
                     </li>
-                    <li><hr class="hr-horizontal"></li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
                 @endcanany
 
                 <!-- Reports -->

@@ -7,29 +7,28 @@ use App\Http\Requests\Admin\Dispatch\ReadDispatchRequest;
 use App\Http\Requests\Admin\Dispatch\EditDispatchRequest;
 use App\Http\Requests\Admin\Dispatch\StoreDispatchRequest;
 use App\Http\Requests\Admin\Dispatch\UpdateDispatchStatusRequest;
-use App\Models\Store;
-use App\Models\Warehouse;
 use App\Repositories\Admin\Interfaces\DispatchRepositoryInterface as DispatchRepo;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
+use App\Repositories\Admin\Interfaces\StoreRepositoryInterface as StoreRepo;
+use App\Repositories\Admin\Interfaces\WarehouseRepositoryInterface as WarehouseRepo;
 use App\Services\DispatchService;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class DispatchController extends Controller
 {
-    public function index(ReadDispatchRequest $request, DispatchRepo $dispatchRepository)
+    public function index()
     {
-        $filters = $request->only(['status', 'order_number']);
-        $dispatches = $dispatchRepository->getAllDispatches($filters);
-
-        return view('admin.pages.dispatch.index', compact('dispatches'));
+        return view('admin.pages.dispatch.index');
     }
 
-    public function create(EditDispatchRequest $request, OrderRepo $orderRepository)
+    public function create(EditDispatchRequest $request, OrderRepo $orderRepository, StoreRepo $storeRepo, WarehouseRepo $warehouseRepo)
     {
         $order = $orderRepository->getOrderWithItemsAndInventory($request->order_id);
-        $stores = Store::all();
-        $warehouses = Warehouse::all();
+
+        $stores = $storeRepo->getAllActiveStores();
+        $warehouses = $warehouseRepo->getActiveWarehouses();
+
         return view('admin.pages.dispatch.create', compact('order', 'stores', 'warehouses'));
     }
 
@@ -99,7 +98,7 @@ class DispatchController extends Controller
                     return '<span class="text-muted">—</span>';
                 })
                 ->addColumn('status_badge', function ($dispatch) {
-                    $statusClass = match (strtolower($dispatch->status)) {
+                    $statusClass = match (strtolower($dispatch->status ?? '')) {
                         'dispatched' => 'bg-info',
                         'delivered' => 'bg-success',
                         'returned' => 'bg-warning text-dark',
@@ -113,35 +112,10 @@ class DispatchController extends Controller
                     $by = optional($dispatch->dispatchedBy)->name ?? 'System';
                     return '<div class="small fw-medium">' . $date . '</div><div class="small text-muted mt-1">By: ' . $by . '</div>';
                 })
-                ->addColumn('action', function ($dispatch) {
-                    if (strtolower($dispatch->status) === 'dispatched') {
-                        $deliverUrl = route('admin.dispatch.update-status', $dispatch->id);
-                        $csrf = csrf_field();
-                        $method = method_field('PUT');
-                        return '
-                        <div class="btn-group">
-                            <form action="' . $deliverUrl . '" method="POST" class="d-inline">
-                                ' . $csrf . $method . '
-                                <input type="hidden" name="status" value="delivered">
-                                <button type="submit" class="btn btn-sm btn-outline-success" title="Mark Delivered" onclick="return confirm(\'Confirm delivery of this package?\')">
-                                    <i class="bi bi-check2-circle"></i> Deliver
-                                </button>
-                            </form>
-                            <form action="' . $deliverUrl . '" method="POST" class="d-inline ms-1">
-                                ' . $csrf . $method . '
-                                <input type="hidden" name="status" value="returned">
-                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Mark Returned (RTO)" onclick="return confirm(\'Confirm return? This will automatically restock the inventory back to its source location.\')">
-                                    <i class="bi bi-arrow-return-left"></i> Return
-                                </button>
-                            </form>
-                        </div>';
-                    }
-                    return '';
-                })
-                ->rawColumns(['dispatch_id', 'order_number', 'product', 'location', 'status_badge', 'date', 'action'])
+                ->rawColumns(['dispatch_id', 'order_number', 'product', 'location', 'status_badge', 'date'])
                 ->make(true);
-        }
 
-        return view('admin.pages.dispatch.index');
+            return $datatables;
+        }
     }
 }

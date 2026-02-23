@@ -2,26 +2,44 @@
 
 namespace App\Services;
 
-use App\Models\Dispatch;
-use App\Models\Inventory;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\InventoryTransaction;
+use App\Repositories\Admin\Interfaces\DispatchRepositoryInterface;
+use App\Repositories\Admin\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface;
+use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 class DispatchService
 {
+    protected $dispatchRepository;
+    protected $orderRepository;
+    protected $orderStatusService;
+    protected $inventoryRepo;
+    protected $transactionRepo;
+
+    public function __construct(
+        DispatchRepositoryInterface $dispatchRepository,
+        OrderRepositoryInterface $orderRepository,
+        OrderStatusService $orderStatusService,
+        InventoryRepositoryInterface $inventoryRepo,
+        InventoryTransactionsRepositoryInterface $transactionRepo
+    ) {
+        $this->dispatchRepository = $dispatchRepository;
+        $this->orderRepository = $orderRepository;
+        $this->orderStatusService = $orderStatusService;
+        $this->inventoryRepo = $inventoryRepo;
+        $this->transactionRepo = $transactionRepo;
+    }
+
     public function processBatchDispatch(array $data, int $adminId)
     {
         DB::beginTransaction();
-        
+
         try {
             $orderId = $data['order_id'];
             $itemsDispatched = 0;
 
             foreach ($data['order_item_id'] as $index => $orderItemId) {
-                
                 $inventoryId = $data['inventory_id'][$index] ?? null;
                 $quantity = $data['quantity'][$index] ?? 0;
 
@@ -29,31 +47,34 @@ class DispatchService
                     continue;
                 }
 
-                $orderItem = OrderItem::findOrFail($orderItemId);
-                $inventory = Inventory::where('id', $inventoryId)->lockForUpdate()->first();
+                $orderItem = $this->orderRepository->getOrderItemById($orderItemId);
+                $inventory = $this->inventoryRepo->findWithLock($inventoryId);
 
-                $alreadyDispatched = Dispatch::where('order_item_id', $orderItemId)
+                $alreadyDispatched = $this->dispatchRepository
+                    ->getDispatchesByOrderId($orderId)
+                    ->where('order_item_id', $orderItemId)
                     ->whereIn('status', ['dispatched', 'delivered'])
                     ->sum('quantity');
-                    
+
                 $remainingToDispatch = $orderItem->quantity - $alreadyDispatched;
-                
+
                 if ($quantity > $remainingToDispatch) {
                     throw new Exception("Quantity exceeds remaining dispatchable quantity for Product ID {$orderItem->product_id}. Remaining: {$remainingToDispatch}");
                 }
 
                 if ($inventory->quantity < $quantity) {
-                     throw new Exception("Insufficient inventory for Product ID {$orderItem->product_id}. Available: {$inventory->quantity}");
+                    throw new Exception("Insufficient inventory for Product ID {$orderItem->product_id}. Available: {$inventory->quantity}");
                 }
-                
+
                 $beforeQty = $inventory->quantity;
-                $inventory->decrement('quantity', $quantity);
-                
-                InventoryTransaction::create([
+                $this->inventoryRepo->update($inventory->id, ['quantity' => $beforeQty - $quantity]);
+
+                $this->transactionRepo->create([
                     'batch_no' => $inventory->batch_no,
                     'inventory_id' => $inventory->id,
-                    'type' => 'sale',
+                    'type' => 'dispatch',
                     'quantity' => $quantity,
+                    'rate' => $inventory->cost_price ?? 0,
                     'created_by' => $adminId,
                     'reference_type' => 'order',
                     'reference_id' => $orderId,
@@ -62,8 +83,8 @@ class DispatchService
                     'quantity_change' => -$quantity,
                     'description' => "Item dispatched for Order #{$orderId}",
                 ]);
-                
-                Dispatch::create([
+
+                $this->dispatchRepository->createDispatch([
                     'order_id' => $orderId,
                     'order_item_id' => $orderItemId,
                     'inventory_id' => $inventoryId,
@@ -83,12 +104,11 @@ class DispatchService
             if ($itemsDispatched === 0) {
                 throw new Exception("No valid items were selected for dispatch.");
             }
-            
-            $this->syncOrderStatus($orderId);
+
+            $this->syncOrderStatus($orderId, $adminId);
 
             DB::commit();
             return true;
-            
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
@@ -97,31 +117,75 @@ class DispatchService
 
     public function updateStatus(int $id, string $status, int $adminId)
     {
-        $dispatch = Dispatch::findOrFail($id);
-        $dispatch->status = $status;
-        $dispatch->status_updated_by = $adminId;
-        $dispatch->status_updated_at = now();
-        $dispatch->save();
+        DB::beginTransaction();
+        try {
+            $dispatch = $this->dispatchRepository->getDispatchById($id);
+            $oldStatus = $dispatch->status;
 
-        $this->syncOrderStatus($dispatch->order_id);
-        return $dispatch;
+            $dispatch->status = $status;
+            $dispatch->status_updated_by = $adminId;
+            $dispatch->status_updated_at = now();
+            $dispatch->save();
+
+            if ($status === 'returned' && $oldStatus !== 'returned') {
+                $inventory = $this->inventoryRepo->findWithLock($dispatch->inventory_id);
+
+                if ($inventory) {
+                    $beforeQty = $inventory->quantity;
+                    $this->inventoryRepo->update($inventory->id, ['quantity' => $beforeQty + $dispatch->quantity]);
+
+                    $this->transactionRepo->create([
+                        'batch_no' => $inventory->batch_no,
+                        'inventory_id' => $inventory->id,
+                        'type' => 'rto_restock',
+                        'quantity' => $dispatch->quantity,
+                        'rate' => $inventory->cost_price ?? 0,
+                        'created_by' => $adminId,
+                        'reference_type' => 'dispatch',
+                        'reference_id' => $dispatch->id,
+                        'before_quantity' => $beforeQty,
+                        'after_quantity' => $beforeQty + $dispatch->quantity,
+                        'quantity_change' => $dispatch->quantity,
+                        'description' => "RTO Restock for Dispatch #{$dispatch->id}",
+                    ]);
+                }
+            }
+
+            $this->syncOrderStatus($dispatch->order_id, $adminId);
+
+            DB::commit();
+            return $dispatch;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
-    protected function syncOrderStatus(int $orderId)
+    protected function syncOrderStatus(int $orderId, int $adminId)
     {
-         $order = Order::with('orderItems')->findOrFail($orderId);
-         $dispatches = Dispatch::where('order_id', $orderId)->get();
-         
-         $totalOrdered = $order->orderItems->sum('quantity');
-         $totalDispatched = $dispatches->whereIn('status', ['dispatched', 'delivered'])->sum('quantity');
-         $totalDelivered = $dispatches->where('status', 'delivered')->sum('quantity');
+        $order = $this->orderRepository->getOrderWithItemsAndInventory($orderId);
+        $dispatches = $this->dispatchRepository->getDispatchesByOrderId($orderId);
 
-         if ($totalDelivered >= $totalOrdered) {
-             $order->update(['status' => 'delivered']);
-         } elseif ($totalDispatched >= $totalOrdered) {
-             $order->update(['status' => 'dispatched']);
-         } elseif ($totalDispatched > 0) {
-             $order->update(['status' => 'partially_dispatched']);
-         }
+        $totalOrdered = $order->orderItems->sum('quantity');
+        $totalDispatched = $dispatches->whereIn('status', ['dispatched', 'delivered'])->sum('quantity');
+        $totalDelivered = $dispatches->where('status', 'delivered')->sum('quantity');
+
+        $targetStatus = null;
+
+        if ($totalDelivered >= $totalOrdered) {
+            $targetStatus = 'delivered';
+        } elseif ($totalDispatched >= $totalOrdered) {
+            $targetStatus = 'shipped';
+        } elseif ($totalDispatched > 0) {
+            $targetStatus = 'partially_shipped';
+        }
+
+        if ($targetStatus && $order->status !== $targetStatus) {
+            if ($this->orderStatusService->canTransition($order->status, $targetStatus)) {
+                $this->orderStatusService->changeStatus($order, $targetStatus, null, false, $adminId);
+            } else {
+                $this->orderStatusService->changeStatus($order, $targetStatus, null, true, $adminId);
+            }
+        }
     }
 }

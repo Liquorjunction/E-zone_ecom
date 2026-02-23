@@ -52,7 +52,6 @@
                             <th class="text-uppercase text-muted small fw-semibold">Source Location</th>
                             <th class="text-uppercase text-muted small fw-semibold">Status</th>
                             <th class="text-uppercase text-muted small fw-semibold">Dispatch Date</th>
-                            <th class="text-uppercase text-muted small fw-semibold text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

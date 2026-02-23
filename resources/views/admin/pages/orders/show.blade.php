@@ -301,23 +301,17 @@
                                             <div class="mb-3">
                                                 <label class="form-label fw-semibold">Order Status</label>
                                                 <div class="d-flex flex-wrap gap-2">
-                                                    @php
-                                                        $statuses = [
-                                                            'pending' => 'Pending',
-                                                            'processing' => 'Processing',
-                                                            'completed' => 'Completed',
-                                                            'cancelled' => 'Cancelled',
-                                                        ];
-                                                    @endphp
-                                                    @foreach ($statuses as $value => $label)
+                                                    @foreach ($availableStatuses as $value)
+                                                        @if(isset($statusLabels[$value]))
                                                         <div class="form-check form-check-inline">
                                                             <input class="form-check-input" type="radio" name="status"
                                                                 id="status_{{ $value }}"
                                                                 value="{{ $value }}"
                                                                 {{ $order->status == $value ? 'checked' : '' }} required>
                                                             <label class="form-check-label"
-                                                                for="status_{{ $value }}">{{ $label }}</label>
+                                                                for="status_{{ $value }}">{{ $statusLabels[$value] }}</label>
                                                         </div>
+                                                        @endif
                                                     @endforeach
                                                 </div>
                                                 <div class="invalid-feedback">

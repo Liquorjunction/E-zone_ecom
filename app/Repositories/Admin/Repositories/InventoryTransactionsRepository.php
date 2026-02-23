@@ -6,6 +6,7 @@ use App\Models\InventoryTransaction;
 use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class InventoryTransactionsRepository implements InventoryTransactionsRepositoryInterface
 {
@@ -17,6 +18,18 @@ class InventoryTransactionsRepository implements InventoryTransactionsRepository
     public function find(int $id): ?InventoryTransaction
     {
         return InventoryTransaction::find($id);
+    }
+
+    public function create(array $data): InventoryTransaction
+    {
+        return  InventoryTransaction::create($data);
+    }
+
+    public function getByBatchNo(string $batchNo): Collection
+    {
+        return InventoryTransaction::where('batch_no', $batchNo)
+            ->orderBy('created_at', 'asc')
+            ->get();
     }
 
     public function getdataforDataTable(array $filters = [])

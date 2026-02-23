@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Order;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Exception;
 
 class OrderStatusService
 {
@@ -20,23 +20,24 @@ class OrderStatusService
         'completed' => ['returned'],
     ];
 
-    public function changeStatus(Order $order, string $toStatus, ?string $reason = null)
+    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, int $adminId = 1 )
     {
-        if (!$this->canTransition($order->status, $toStatus)) {
-            return null;
+        if (!$force && !$this->canTransition($order->status, $toStatus)) {
+            throw new Exception("Invalid order transition from '{$order->status}' to '{$toStatus}'.");
         }
 
         $order->status = $toStatus;
-        $order->status_changed_by = Auth::guard('admin')->id() ?? 1;
+        $order->status_changed_by = $adminId;
         $order->status_changed_at = Carbon::now();
 
         if ($toStatus === 'cancelled') {
             $order->cancel_reason = $reason;
-            $order->cancelled_by = Auth::guard('admin')->id();
+            $order->cancelled_by = $adminId;
             $order->cancelled_at = Carbon::now();
         }
 
         $order->save();
+
         return $order;
     }
 
@@ -46,5 +47,10 @@ class OrderStatusService
 
         return isset($this->allowedTransitions[$from]) &&
             in_array($to, $this->allowedTransitions[$from]);
+    }
+
+    public function getAvailableTransitions(string $currentStatus): array
+    {
+        return $this->allowedTransitions[$currentStatus] ?? [];
     }
 }

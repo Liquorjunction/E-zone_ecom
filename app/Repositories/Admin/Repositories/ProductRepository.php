@@ -31,8 +31,14 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getProductVarientCount($productId)
     {
-        $count = ProductVariant::where('product_id', $productId)->count();
-        dd($count);
+        return ProductVariant::where('product_id', $productId)->count();
+    }
+
+    public function getVariantsByProductId(int $productId)
+    {
+        return ProductVariant::where('product_id', $productId)
+            ->select('id', 'variant_name')
+            ->get();
     }
 
     public function getProductById($id)

@@ -13,6 +13,7 @@ $(document).on('click', '.accept-action', function (e) {
 	var button = $(this);
 	var acceptUrl = button.data('accept-url');
 	var acceptId = button.data('accept-id');
+	var status = 'order_confirmation';
 	var $table = button.closest('table');
 	var csrfToken = window.Laravel && window.Laravel.csrfToken ? window.Laravel.csrfToken : $('meta[name="csrf-token"]').attr('content');
 
@@ -39,6 +40,7 @@ $(document).on('click', '.accept-action', function (e) {
 			if (typeof axios !== 'undefined') {
 				const formData = new URLSearchParams();
 				formData.append('id', acceptId);
+				formData.append('status', status);
 				formData.append('_token', csrfToken);
 
 				axios.post(acceptUrl, formData, {
@@ -89,6 +91,7 @@ $(document).on('click', '.accept-action', function (e) {
 			} else if (window.fetch) {
 				const formData = new URLSearchParams();
 				formData.append('id', acceptId);
+				formData.append('status', status);
 				formData.append('_token', csrfToken);
 
 				fetch(acceptUrl, {
@@ -142,6 +145,7 @@ $(document).on('click', '.accept-action', function (e) {
 					type: 'POST',
 					data: {
 						id: acceptId,
+						status: status,
 						_token: csrfToken
 					},
 					success: function (data) {
