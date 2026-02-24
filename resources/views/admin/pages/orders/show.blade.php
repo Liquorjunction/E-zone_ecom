@@ -288,7 +288,7 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div class="card border-0 shadow-sm h-100 mt-3">
+                                {{-- <div class="card border-0 shadow-sm h-100 mt-3">
                                     <div class="card-header bg-light py-2 d-flex align-items-center">
                                         <i class="bi bi-pencil-square me-2 text-primary"></i>
                                         <h5 class="mb-0">Edit Status</h5>
@@ -325,7 +325,7 @@
                                             </button>
                                         </form>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>

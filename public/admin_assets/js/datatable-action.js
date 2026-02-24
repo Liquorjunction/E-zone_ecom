@@ -55,13 +55,11 @@ $(document).on('click', '.accept-action', function (e) {
 						Swal.fire({
 							icon: 'success',
 							title: 'Accepted!',
-							html: (data.message ? data.message + '<br><br>' : '') + '<button id="open-dispatch-modal-btn" class="swal2-confirm swal2-styled" style="margin-top:10px;">Open Dispatch Modal</button>',
+							html: (data.message ? data.message + '<br><br>' : '') + '<button id="open-dispatch-modal-btn" class="swal2-confirm swal2-styled" style="margin-top:10px;">Dispatch Now</button>',
 							showConfirmButton: false,
 							willOpen: () => {
-								document.getElementById('open-dispatch-modal-btn').addEventListener('click', function() {
-									if (typeof openDispatchModal === 'function') {
-										openDispatchModal(data.order_id || acceptId);
-									}
+                                document.getElementById('open-dispatch-modal-btn').addEventListener('click', function() {
+                                    window.open('/admin/dispatch/create?order_id=' + encodeURIComponent(acceptId), '_blank');
 									Swal.close();
 								});
 							},

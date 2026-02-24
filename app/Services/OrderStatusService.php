@@ -8,16 +8,28 @@ use Exception;
 
 class OrderStatusService
 {
+    // protected $allowedTransitions = [
+    //     'pending' => ['order_confirmation', 'cancelled'],
+    //     'order_confirmation' => ['processing', 'cancelled'],
+    //     'processing' => ['ready_to_ship', 'shipped', 'partially_shipped', 'dispatched', 'cancelled'],
+    //     'ready_to_ship' => ['shipped', 'partially_shipped', 'dispatched', 'cancelled'],
+    //     'partially_shipped' => ['shipped', 'dispatched', 'cancelled'],
+    //     'dispatched' => ['shipped', 'out_for_delivery', 'delivered', 'returned'],
+    //     'shipped' => ['out_for_delivery', 'delivered', 'returned'],
+    //     'out_for_delivery' => ['delivered', 'returned', 'failed_delivery'],
+    //     'delivered' => ['completed', 'returned'],
+    //     'completed' => ['returned'],
+    // ];
+
     protected $allowedTransitions = [
         'pending' => ['order_confirmation', 'cancelled'],
-        'order_confirmation' => ['processing', 'cancelled'],
-        'processing' => ['ready_to_ship', 'shipped', 'partially_shipped', 'cancelled'],
-        'ready_to_ship' => ['shipped', 'partially_shipped', 'cancelled'],
-        'partially_shipped' => ['shipped', 'cancelled'],
-        'shipped' => ['out_for_delivery', 'delivered', 'returned'],
-        'out_for_delivery' => ['delivered', 'returned', 'failed_delivery'],
+        'order_confirmation' => ['partially_dispatched', 'dispatched', 'cancelled'],
+        'partially_dispatched' => ['dispatched', 'cancelled'],
+        'dispatched' => ['ready_to_ship', 'cancelled'],
+        'ready_to_ship' => ['shipped'],
+        'shipped' => ['out_for_delivery', 'delivered'],
+        'out_for_delivery' => ['delivered', 'failed_delivery'],
         'delivered' => ['completed', 'returned'],
-        'completed' => ['returned'],
     ];
 
     public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, int $adminId = 1 )

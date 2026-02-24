@@ -13,6 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="{{ asset('admin_assets/js/datatable-status-toggle.js') }}"></script>
 <script src="{{ asset('admin_assets/js/datatable-action.js') }}"></script>
+<script src="{{ asset('admin_assets/js/datatable-orderStatus.js') }}"></script>
 <script src="{{ asset('admin_assets/js/sidebar.js') }}"></script>
 <script src="{{ asset('admin_assets/js/datatableJs/batchOperations.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

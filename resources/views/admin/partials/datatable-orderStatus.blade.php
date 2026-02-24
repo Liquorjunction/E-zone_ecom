@@ -1,5 +1,4 @@
 @php
-    // $order, $statusLabels, $availableStatuses, $canUpdate must be passed to this partial
     $currentStatus = $order->status ?? '';
 @endphp
 
@@ -18,9 +17,12 @@
                     @foreach($availableStatuses as $value)
                         @if($value !== $currentStatus && isset($statusLabels[$value]))
                             <li>
-                                <a class="dropdown-item change-order-status-action" href="#" data-order-id="{{ $order->id }}" data-status="{{ $value }}">
+                                <button type="button" class="dropdown-item change-order-status-action"
+                                    data-order-id="{{ $order->id }}"
+                                    data-status="{{ $value }}"
+                                    data-url="{{ route('admin.orders.update-order-status') }}">
                                     {{ $statusLabels[$value] }}
-                                </a>
+                                </button>
                             </li>
                         @endif
                     @endforeach
