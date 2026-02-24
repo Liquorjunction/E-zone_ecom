@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\DTOs\CartIdentifier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Cart\CartAddRequest;
 use App\Http\Requests\Client\Coupon\ApplyCouponRequest;
 use App\Models\Address;
+use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
 use App\Services\CartService;
 use App\Services\CouponService;
@@ -21,8 +23,9 @@ class CartController extends Controller
     public function add(CartAddRequest $request, CartService $cartService, LoggerInterface $logger)
     {
         $data = $request->validated();
+        $cartId = CartIdentifier::fromRequest($request);
         try {
-            $item = $cartService->addItem($request, $data);
+            $item = $cartService->addItem($cartId, $data);
         } catch (\Exception $e) {
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
@@ -35,7 +38,7 @@ class CartController extends Controller
         $logger->info('Added item to cart via controller', ['item_id' => $item->id ?? null]);
 
         if ($request->wantsJson() || $request->ajax()) {
-            $cart = $cartService->getCart($request);
+            $cart = $cartService->getCart($cartId);
             $itemCount = $cart ? (int) $cart->items->sum('quantity') : 0;
             return response()->json([
                 'success' => true,
@@ -54,9 +57,10 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Item added to cart.');
     }
 
-    public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService, SessionCouponService $sessionCoupon)
+    public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService, SessionCouponService $sessionCoupon, AddressRepo $addressRepo)
     {
-        $cart = $cartService->getCart($request);
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart = $cartService->getCart($cartId);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
         $step = (int) $request->get('step', 1);
 
@@ -75,18 +79,14 @@ class CartController extends Controller
             'items' => []
         ];
 
-        $addresses = collect();
-        if (Auth::check()) {
-            $addresses = Address::where('user_id', Auth::id())->get();
-        }
-
-        // Get applied coupon from session
+        $addresses = Auth::check() ? $addressRepo->getAddressesByUserId(Auth::id()) : collect();
+        $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
         $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
 
         return view('client.pages.checkout-process', compact('cart', 'step', 'totals', 'addresses', 'appliedCoupon'));
     }
 
-    public function update(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, \App\Services\PriceCalculatorService $priceService)
+    public function update(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService)
     {
         $itemId = (int) $request->input('item_id');
         $data = $request->only(['quantity']);
@@ -106,11 +106,12 @@ class CartController extends Controller
             return 0;
         };
 
+        $cartId = CartIdentifier::fromRequest($request);
         try {
-            $item = $cartService->updateItem($request, $itemId, $data);
+            $item = $cartService->updateItem($cartId, $itemId, $data);
         } catch (\Exception $e) {
             if ($request->wantsJson() || $request->ajax()) {
-                $cart = $cartService->getCart($request);
+                $cart = $cartService->getCart($cartId);
                 $currentItem = $cart ? $cart->items->firstWhere('id', $itemId) : null;
                 $maxStock = $getAvailableStock($currentItem);
                 return response()->json([
@@ -129,7 +130,7 @@ class CartController extends Controller
 
         $logger->info('Updated cart item via controller', ['item_id' => $item->id ?? null]);
 
-        $cart = $cartService->getCart($request);
+        $cart = $cartService->getCart($cartId);
         $shippingMethod = $request->input('shipping_method', 'standard');
         $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : [
             'subtotal' => 0,
@@ -208,10 +209,11 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'Item ID is missing.']);
         }
 
-        $ok = $cartService->removeItem($request, $itemId);
+        $cartId = CartIdentifier::fromRequest($request);
+        $ok = $cartService->removeItem($cartId, $itemId);
         $logger->info('Removed cart item via controller', ['item_id' => $itemId, 'success' => $ok]);
 
-        $cart = $cartService->getCart($request);
+        $cart = $cartService->getCart($cartId);
         $shippingMethod = $request->input('shipping_method', 'standard');
         $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : [
             'subtotal' => 0,
@@ -264,7 +266,8 @@ class CartController extends Controller
 
     public function applyCoupon(ApplyCouponRequest $request, CartService $cartService, CouponService $couponService, LoggerInterface $logger, CartRepo $cartRepo, SessionCouponService $sessionCoupon)
     {
-        $cart = $cartService->getCart($request);
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart = $cartService->getCart($cartId);
 
         if (!$cart || $cart->items->isEmpty()) {
             return response()->json([
@@ -321,7 +324,8 @@ class CartController extends Controller
 
     public function removeCoupon(Request $request, CartService $cartService, CouponService $couponService, LoggerInterface $logger, CartRepo $cartRepo)
     {
-        $cart = $cartService->getCart($request);
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart = $cartService->getCart($cartId);
 
         if (!$cart) {
             return response()->json([

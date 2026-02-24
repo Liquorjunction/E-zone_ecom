@@ -286,7 +286,8 @@ class InventoryService
             $remaining -= $take;
         }
 
-        return $quantity - $remaining;
+        $reserved = $quantity - $remaining;
+        return $reserved;
     }
 
     // LIFO Style Release

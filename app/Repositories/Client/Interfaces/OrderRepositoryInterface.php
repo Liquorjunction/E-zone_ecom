@@ -7,7 +7,9 @@ use App\Services\PriceCalculatorService;
 
 interface OrderRepositoryInterface
 {
-    public function createOrderFromCart(Cart $cart, array $data, CartRepositoryInterface $cartRepo, PriceCalculatorService $priceService);
+    public function create(array $data);
+    public function createItem(array $data);
+    public function update(int $orderId, array $data);
     public function cancelOrder(int $orderId, ?string $reason = null);
     public function getOrdersWithRelations(array $filters, array $relations = [], int $perPage = 10);
     public function findOrderWithRelations(int $orderId, array $relations = []);

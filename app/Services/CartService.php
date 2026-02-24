@@ -3,30 +3,31 @@
 namespace App\Services;
 
 use App\Repositories\Client\Interfaces\CartRepositoryInterface;
-use Illuminate\Http\Request;
+use App\Repositories\Client\Interfaces\ProductRepositoryInterface;
+use App\DTOs\CartIdentifier;
 use Psr\Log\LoggerInterface;
 
 class CartService
 {
     protected $repo;
+    protected $productRepo;
     protected $logger;
 
-    public function __construct(CartRepositoryInterface $repo, LoggerInterface $logger)
+    public function __construct(CartRepositoryInterface $repo, ProductRepositoryInterface $productRepo, LoggerInterface $logger)
     {
         $this->repo = $repo;
+        $this->productRepo = $productRepo;
         $this->logger = $logger;
     }
 
-    public function addItem(Request $request, array $payload)
+    public function addItem(CartIdentifier $cartId, array $payload)
     {
-        $cart = $this->repo->getCartForUserOrSession($request);
+        $cart = $this->repo->getCartForUserOrSession($cartId);
 
         $productId = $payload['product_id'] ?? null;
         $variantId = $payload['variant_id'] ?? null;
 
-        $product = $productId ? \App\Models\Product::with(['productVariants' => function ($q) {
-            $q->withTrashed();
-        }])->withTrashed()->find($productId) : null;
+        $product = $productId ? $this->productRepo->getProductWithVariants($productId) : null;
 
         $variant = $variantId && $product
             ? $product->productVariants->firstWhere('id', $variantId)
@@ -60,9 +61,9 @@ class CartService
         return $item;
     }
 
-    public function updateItem(Request $request, int $itemId, array $data)
+    public function updateItem(CartIdentifier $cartId, int $itemId, array $data)
     {
-        $cart = $this->repo->getCartForUserOrSession($request);
+        $cart = $this->repo->getCartForUserOrSession($cartId);
         $item = $cart->items->firstWhere('id', $itemId);
         if ($item) {
             $variant = $item->variant ?? null;
@@ -78,17 +79,17 @@ class CartService
         return $item;
     }
 
-    public function removeItem(Request $request, int $itemId)
+    public function removeItem(CartIdentifier $cartId, int $itemId)
     {
-        $cart = $this->repo->getCartForUserOrSession($request);
+        $cart = $this->repo->getCartForUserOrSession($cartId);
         $ok = $this->repo->removeItem($cart, $itemId);
         $this->logger->info('Cart item removed', ['cart_id' => $cart->id ?? null, 'item_id' => $itemId, 'success' => $ok]);
         return $ok;
     }
 
-    public function getCart(Request $request)
+    public function getCart(CartIdentifier $cartId)
     {
-        return $this->repo->getCartForUserOrSession($request);
+        return $this->repo->getCartForUserOrSession($cartId);
     }
 
     public function clearCart($cart)

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Coupon;
+use App\Repositories\Admin\Interfaces\CouponRepositoryInterface;
 use App\Models\Cart;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 use App\Models\CouponUsage;
@@ -13,18 +13,24 @@ class CouponService
 {
     protected CartRepositoryInterface $cartRepo;
     protected SessionCouponService $sessionCoupon;
+    protected CouponRepositoryInterface $couponRepo;
 
-    public function __construct(CartRepositoryInterface $cartRepo, SessionCouponService $sessionCoupon)
-    {
+    public function __construct(
+        CartRepositoryInterface $cartRepo,
+        SessionCouponService $sessionCoupon,
+        CouponRepositoryInterface $couponRepo
+    ) {
         $this->cartRepo = $cartRepo;
         $this->sessionCoupon = $sessionCoupon;
+        $this->couponRepo = $couponRepo;
     }
 
     public function validateAndApplyCoupon(string $code, Cart $cart): array
     {
-        $coupon = Coupon::where('code', strtoupper($code))
-            ->where('status', true)
-            ->first();
+        $coupon = $this->couponRepo->getAllCoupons([
+            'code' => strtoupper($code),
+            'status' => true
+        ])->first();
 
         if (!$coupon) {
             return [
@@ -59,7 +65,6 @@ class CouponService
             ];
         }
 
-        // Check per-user usage limit
         if (Auth::check() && $coupon->usage_limit_per_user) {
             $userUsageCount = $coupon->usages()
                 ->where('user_id', Auth::id())
@@ -91,7 +96,8 @@ class CouponService
             return [
                 'success' => false,
                 'message' => sprintf(
-                    'Minimum order amount of $%s required to use this coupon.',
+                    'Minimum order amount of %s%s required to use this coupon.',
+                    config('app.CURRENCY_SYMBOL'),
                     number_format($coupon->min_order_amount, 2)
                 ),
                 'discount' => null,
@@ -101,7 +107,6 @@ class CouponService
 
         $discountAmount = $this->calculateDiscountAmount($coupon, $subtotal);
 
-        // Store coupon in session instead of database
         $this->sessionCoupon->store(
             $coupon->id,
             $coupon->code,
@@ -109,7 +114,6 @@ class CouponService
             $cart->id
         );
 
-        // Clear any legacy database fields (optional, for backward compatibility)
         $cart->coupon_id = null;
         $cart->coupon_code = null;
         $cart->coupon_discount_amount = 0;
@@ -117,7 +121,7 @@ class CouponService
 
         return [
             'success' => true,
-            'message' => sprintf('Coupon applied! You saved $%s', number_format($discountAmount, 2)),
+            'message' => sprintf('Coupon applied! You saved %s%s', config('app.CURRENCY_SYMBOL'), number_format($discountAmount, 2)),
             'discount' => $discountAmount,
             'coupon' => [
                 'id' => $coupon->id,
@@ -127,15 +131,13 @@ class CouponService
         ];
     }
 
-    protected function calculateDiscountAmount(Coupon $coupon, float $subtotal): float
+    protected function calculateDiscountAmount($coupon, float $subtotal): float
     {
         $discount = 0;
 
         if ($coupon->coupon_type === 'discount') {
-            // Percentage discount
             $discount = ($subtotal * $coupon->value) / 100;
         } elseif ($coupon->coupon_type === 'flat_amount') {
-            // Fixed amount discount
             $discount = min($coupon->value, $subtotal);
         }
 
@@ -143,7 +145,6 @@ class CouponService
             $discount = $coupon->max_discount;
         }
 
-        // Ensure discount doesn't exceed subtotal
         $discount = min($discount, $subtotal);
 
         return round($discount, 2);
@@ -151,10 +152,8 @@ class CouponService
 
     public function removeCoupon(Cart $cart): bool
     {
-        // Remove coupon from session instead of database
         $this->sessionCoupon->remove();
 
-        // Clear any legacy database fields (optional, for backward compatibility)
         $cart->coupon_id = null;
         $cart->coupon_code = null;
         $cart->coupon_discount_amount = 0;
@@ -173,11 +172,12 @@ class CouponService
         ]);
     }
 
-    public function getCouponByCode(string $code): ?Coupon
+    public function getCouponByCode(string $code): ?object
     {
-        return Coupon::where('code', strtoupper($code))
-            ->where('status', true)
-            ->first();
+        return $this->couponRepo->getAllCoupons([
+            'code' => strtoupper($code),
+            'status' => true
+        ])->first();
     }
 
     /**

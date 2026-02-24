@@ -60,4 +60,12 @@ class InventoryTransactionsRepository implements InventoryTransactionsRepository
 
         return $query;
     }
+
+    public function getByReference(string $referenceType, int $referenceId, string $type)
+    {
+        return InventoryTransaction::where('reference_type', $referenceType)
+            ->where('reference_id', $referenceId)
+            ->where('type', $type)
+            ->get();
+    }
 }

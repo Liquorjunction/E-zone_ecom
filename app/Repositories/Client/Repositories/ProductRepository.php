@@ -371,6 +371,17 @@ class ProductRepository implements ProductRepositoryInterface
         return $paginator;
     }
 
+    public function getProductWithVariants($id)
+    {
+        return Product::with([
+            'productVariants' => function ($q) {
+                $q->withTrashed();
+            }
+        ])
+            ->withTrashed()
+            ->find($id);
+    }
+
     public function findActiveBySlug(string $slug): ?Product
     {
         return Product::where('slug', $slug)

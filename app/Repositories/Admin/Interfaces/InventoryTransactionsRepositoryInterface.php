@@ -9,4 +9,5 @@ interface InventoryTransactionsRepositoryInterface
     public function create(array $data);
     public function getByBatchNo(string $batchNo);
     public function getdataforDataTable(array $filters = []);
+    public function getByReference(string $referenceType, int $referenceId, string $type);
 }

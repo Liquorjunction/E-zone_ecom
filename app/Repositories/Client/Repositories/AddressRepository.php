@@ -57,4 +57,23 @@ class AddressRepository implements AddressRepositoryInterface
     {
         return Address::where('user_id', $userId)->get();
     }
+
+    public function findByIdAndUser(int $id, int $userId)
+    {
+        return Address::where('id', $id)->where('user_id', $userId)->first();
+    }
+
+    public function getAddressesByType(int $userId, string $type)
+    {
+        return Address::where('user_id', $userId)
+            ->where(function($q) use ($type) {
+                $q->where('type', $type)->orWhereNull('type');
+            })
+            ->get();
+    }
+
+    public function firstOrCreateAddress(array $matchAttributes, array $fillAttributes)
+    {
+        return Address::firstOrCreate($matchAttributes, $fillAttributes);
+    }
 }

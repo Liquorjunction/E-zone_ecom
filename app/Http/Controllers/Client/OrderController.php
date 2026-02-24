@@ -2,367 +2,160 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\DTOs\CartIdentifier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Orders\OrderCheckoutRequest;
 use App\Http\Requests\Client\Orders\OrderShowRequest;
 use App\Http\Requests\Client\Orders\OrderCancelRequest;
 use App\Http\Requests\Client\Orders\OrderDetailRequest;
 use App\Http\Requests\Client\Orders\OrderInvoiceRequest;
-use App\Models\Cart;
 use App\Services\CartService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Arr;
-use App\Models\Address;
+use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepo;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
 use App\Repositories\Client\Interfaces\ReviewRepositoryInterface;
-use App\Services\PriceCalculatorService;
 
 class OrderController extends Controller
 {
-
     public function index(Request $request, OrderRepo $orderRepo)
     {
         if (!Auth::check()) {
-            if ($request->ajax()) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
+            if ($request->ajax()) return response()->json(['error' => 'Unauthorized'], 401);
             return redirect()->route('login');
         }
 
         $status = $request->query('status');
-        $search = $request->query('search');
-        $dateFrom = $request->query('date_from');
-        $dateTo = $request->query('date_to');
-        $sort = $request->query('sort', 'latest');
-
-        $allowedStatuses = ['processing', 'shipped', 'delivered', 'cancelled'];
         $filters = ['user_id' => Auth::id()];
-        if ($status && in_array($status, $allowedStatuses)) {
+        if ($status && in_array($status, ['processing', 'shipped', 'delivered', 'cancelled'])) {
             $filters['status'] = $status;
         }
 
         $orders = $orderRepo->getOrdersWithRelations($filters, ['items.product', 'items.variant'], 10, [
-            'search' => $search,
-            'date_from' => $dateFrom,
-            'date_to' => $dateTo,
-            'sort' => $sort,
+            'search' => $request->query('search'),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $request->query('sort', 'latest'),
         ]);
 
         if ($request->ajax()) {
-            $html = view('client.pages.dashboard.partials.orders-list', [
-                'orders' => $orders,
-                'currentStatus' => $status,
-            ])->render();
+            $html = view('client.pages.dashboard.partials.orders-list', compact('orders', 'status'))->render();
             return response()->json(['html' => $html]);
         }
 
-        return view('client.pages.dashboard.orders', [
-            'orders' => $orders,
-            'currentStatus' => $status,
-        ]);
+        return view('client.pages.dashboard.orders', ['orders' => $orders, 'currentStatus' => $status]);
     }
 
-    public function checkout(OrderCheckoutRequest $request, OrderService $orders, PriceCalculatorService $priceService)
+    public function checkout(OrderCheckoutRequest $request, OrderService $orderService, CartService $cartService)
     {
-        if (Auth::check()) {
-            $cart = Cart::with('items')->where('user_id', Auth::id())->first();
-        } else {
-            $cart = Cart::with('items')->where('session_id', $request->session()->getId())->first();
-        }
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart = $cartService->getCart($cartId);
 
         if (!$cart || $cart->items->isEmpty()) {
             return back()->withErrors(['cart' => 'Your cart is empty.']);
         }
 
-        $data = $request->validated();
-        $data['payment_method'] = $data['payment_method'] ?? $data['payment'] ?? null;
-        $data['shipping_method'] = $data['shipping_method'] ?? 'standard';
+        try {
+            $order = $orderService->processCheckout(
+                $cart,
+                $request->validated(),
+                Auth::id(),
+                Auth::user()?->email
+            );
 
-        if (!isset($data['email']) || empty($data['email'])) {
-            $data['email'] = Auth::user()?->email ?? null;
+            Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id()]);
+            return redirect()->route('checkout', ['step' => 3])->with('order_id', $order->id ?? null);
+
+        } catch (\Exception $e) {
+            Log::error('Checkout failed', ['error' => $e->getMessage()]);
+            return back()->withInput()->withErrors(['checkout' => $e->getMessage()]);
         }
-
-        $data['cardNumber'] = $data['cardNumber'] ?? null;
-        $data['expiry'] = $data['expiry'] ?? null;
-        $data['cvv'] = $data['cvv'] ?? null;
-
-        if (empty($data['shipping_address']) || !is_array($data['shipping_address'])) {
-            $data['shipping_address'] = [
-                'name' => trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) ?: null,
-                'street' => $data['address'] ?? null,
-                'city' => $data['city'] ?? null,
-                'state' => $data['state'] ?? null,
-                'postal_code' => $data['zip'] ?? $data['postal_code'] ?? null,
-                'country' => $data['country'] ?? null,
-            ];
-        }
-
-        $phone = $data['phone'] ?? Arr::get($data, 'shipping_address.phone');
-        if ($phone) {
-            $data['shipping_address']['phone'] = $phone;
-        }
-        $data['phone_no'] = $phone ?? ($data['phone_no'] ?? null);
-
-        $billingSame = (bool) ($data['billing_same_as_shipping'] ?? false);
-        if ($billingSame) {
-            $data['billing_address'] = $data['shipping_address'] ?? null;
-        } else {
-            if (Auth::check()) {
-                $savedBillingAddressId = $data['saved_billing_address_id'] ?? null;
-
-                if (!empty($savedBillingAddressId)) {
-                    $savedBilling = Address::where('id', $savedBillingAddressId)
-                        ->where('user_id', Auth::id())
-                        ->first();
-                    if ($savedBilling) {
-                        $data['billing_address'] = [
-                            'name' => $savedBilling->name,
-                            'street' => $savedBilling->street,
-                            'city' => $savedBilling->city,
-                            'state' => $savedBilling->state,
-                            'postal_code' => $savedBilling->postal_code,
-                            'country' => $savedBilling->country,
-                            'phone' => $savedBilling->phone,
-                        ];
-                    }
-                }
-            }
-        }
-
-        if (empty($data['billing_address']) || !is_array($data['billing_address'])) {
-            $billingName = trim(($data['billing_firstName'] ?? '') . ' ' . ($data['billing_lastName'] ?? '')) ?: null;
-
-            $data['billing_address'] = [
-                'name' => $billingName ?: ($data['shipping_address']['name'] ?? null),
-                'street' => $data['billing_address_line'] ?? $data['billing_address'] ?? null,
-                'city' => $data['billing_city'] ?? null,
-                'state' => $data['billing_state'] ?? null,
-                'postal_code' => $data['billing_zip'] ?? $data['billing_postal_code'] ?? null,
-                'country' => $data['billing_country'] ?? null,
-            ];
-        }
-
-        $billingPhone = $data['billing_phone'] ?? Arr::get($data, 'billing_address.phone') ?? Arr::get($data, 'shipping_address.phone');
-        if ($billingPhone) {
-            $data['billing_address']['phone'] = $billingPhone;
-        }
-
-        if (Auth::check()) {
-            $savedAddressId = $data['saved_address_id'] ?? null;
-
-            if (!empty($savedAddressId)) {
-                $saved = Address::where('id', $savedAddressId)->where('user_id', Auth::id())->first();
-                if ($saved) {
-                    $data['shipping_address'] = [
-                        'name' => $saved->name,
-                        'street' => $saved->street,
-                        'city' => $saved->city,
-                        'state' => $saved->state,
-                        'postal_code' => $saved->postal_code,
-                        'country' => $saved->country,
-                    ];
-                }
-            } else {
-                $shouldSaveAddress = (bool) ($data['save_address'] ?? false);
-
-                if (!empty($data['shipping_address']) && is_array($data['shipping_address']) && $shouldSaveAddress) {
-                    $addrData = $data['shipping_address'];
-                    $country = $addrData['country'] ?? $data['country'] ?? '';
-
-                    $exists = Address::where('user_id', Auth::id())
-                        ->where('street', $addrData['street'] ?? '')
-                        ->where('city', $addrData['city'] ?? '')
-                        ->where('state', $addrData['state'] ?? '')
-                        ->where('postal_code', $addrData['postal_code'] ?? $addrData['zip'] ?? '')
-                        ->where('country', $country)
-                        ->first();
-
-                    if (! $exists) {
-                        $address = new Address();
-                        $address->user_id = Auth::id();
-                        $address->name = $addrData['name'] ?? null;
-                        $address->street = $addrData['street'] ?? null;
-                        $address->city = $addrData['city'] ?? null;
-                        $address->state = $addrData['state'] ?? null;
-                        $address->postal_code = $addrData['postal_code'] ?? $addrData['zip'] ?? null;
-                        $address->country = $country ?: '';
-                        $address->save();
-                    }
-                }
-            }
-        }
-
-        $order = $orders->createFromCart($cart, $data, $priceService);
-
-        Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id()]);
-
-        return redirect()->route('checkout', ['step' => 3])->with('order_id', $order->id ?? null);
     }
 
-
-    public function show(OrderShowRequest $request, CartService $cartService, CartRepo $cartRepo, OrderRepo $orderRepo)
+    public function show(OrderShowRequest $request, CartService $cartService, CartRepo $cartRepo, OrderRepo $orderRepo, AddressRepo $addressRepo)
     {
         $step = (int) $request->get('step', 1);
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart = $cartService->getCart($cartId);
 
-        $cart = null;
-        if ($step === 1 || $step === 2) {
-            $cart = $cartService->getCart($request);
-
-            if (!$cart || $cart->items->isEmpty()) {
-                return redirect()->route('cart')->withErrors(['cart' => 'Your cart is empty.']);
-            }
-        } else {
-            $cart = $cartService->getCart($request);
+        if (($step === 1 || $step === 2) && (!$cart || $cart->items->isEmpty())) {
+            return redirect()->route('cart')->withErrors(['cart' => 'Your cart is empty.']);
         }
 
         $addresses = collect();
         $billingAddresses = collect();
+
         if (Auth::check()) {
-            $addresses = Address::where('user_id', Auth::id())
-                ->where('type', 'shipping')
-                ->orWhereNull('type')
-                ->get();
-
-            $billingAddresses = Address::where('user_id', Auth::id())
-                ->where('type', 'billing')
-                ->orWhereNull('type')
-                ->get();
+            $addresses = $addressRepo->getAddressesByType(Auth::id(), 'shipping');
+            $billingAddresses = $addressRepo->getAddressesByType(Auth::id(), 'billing');
         }
-
         $order = null;
         $orders = collect();
         if ($step === 3) {
             $orderId = $request->session()->get('order_id');
             if ($orderId) {
                 $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
-            }
-
-            if (!$order && Auth::check()) {
+            } elseif (Auth::check()) {
                 $order = $orderRepo->getLatestOrderForUser(Auth::id(), ['items.product', 'items.variant']);
             }
-
-            if (Auth::check()) {
-                $orders = $cartRepo->getAllOrdersForUser(Auth::id());
-            }
+            if (Auth::check()) $orders = $cartRepo->getAllOrdersForUser(Auth::id());
         }
 
-        if ($cart) {
-            $totals = $cartRepo->calculateCartTotals($cart);
-        } elseif ($order && $order->relationLoaded('items')) {
-            $totals = [
-                'subtotal' => $order->subtotal ?? 0,
-                'total_discount' => $order->discount_amount ?? 0,
-                'coupon_discount' => $order->coupon_discount_amount ?? 0,
-                'tax' => $order->tax_amount ?? 0,
-                'shipping' => $order->shipping_cost ?? 0,
-                'total' => $order->total ?? 0,
-                'items' => [],
-            ];
-        } else {
-            $totals = [
-                'subtotal' => 0,
-                'total_discount' => 0,
-                'coupon_discount' => 0,
-                'tax' => 0,
-                'shipping' => 0,
-                'total' => 0,
-                'items' => []
-            ];
-        }
+        $totals = $cart ? $cartRepo->calculateCartTotals($cart) : [
+            'subtotal' => $order->subtotal ?? 0, 'total_discount' => $order->discount_amount ?? 0,
+            'coupon_discount' => $order->coupon_discount_amount ?? 0, 'tax' => $order->tax_amount ?? 0,
+            'shipping' => $order->shipping_cost ?? 0, 'total' => $order->total ?? 0, 'items' => []
+        ];
 
         $itemsForView = $cart ? $cart->items : ($order ? $order->items : collect());
 
-        return view('client.pages.checkout-process', [
-            'cart' => $cart,
-            'step' => $step,
-            'addresses' => $addresses,
-            'billingAddresses' => $billingAddresses,
-            'order' => $order,
-            'orders' => $orders,
-            'totals' => $totals,
-            'itemsForView' => $itemsForView,
-        ]);
+        return view('client.pages.checkout-process', compact('cart', 'step', 'addresses', 'billingAddresses', 'order', 'orders', 'totals', 'itemsForView'));
     }
 
     public function detail(OrderDetailRequest $request, OrderRepo $orderRepo, ReviewRepositoryInterface $reviewRepo)
     {
-        if (! Auth::check()) {
-            return redirect()->route('login');
-        }
+        if (!Auth::check()) return redirect()->route('login');
 
-        $orderId = $request->input('order');
-        $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
-        if (!$order || $order->user_id !== Auth::id()) {
-            abort(404, 'Order not found or access denied.');
-        }
+        $order = $orderRepo->findOrderWithRelations($request->input('order'), ['items.product', 'items.variant']);
+        if (!$order || $order->user_id !== Auth::id()) abort(404, 'Order not found or access denied.');
 
         $userReviews = [];
-        if (Auth::check()) {
-            foreach ($order->items as $item) {
-                $review = $reviewRepo->getUserReviewByOrderItem(Auth::id(), $item->id);
-                if ($review) {
-                    $userReviews[$item->id] = $review;
-                }
+        foreach ($order->items as $item) {
+            if ($review = $reviewRepo->getUserReviewByOrderItem(Auth::id(), $item->id)) {
+                $userReviews[$item->id] = $review;
             }
         }
 
-        return view('client.pages.order-detail', ['order' => $order, 'userReviews' => $userReviews]);
+        return view('client.pages.order-detail', compact('order', 'userReviews'));
     }
 
     public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo)
     {
-        if (! Auth::check()) {
-            return redirect()->route('login');
-        }
+        if (!Auth::check()) return redirect()->route('login');
 
-        $orderId = $request->input('id');
-        $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
-        if (!$order || $order->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $order = $orderRepo->findOrderWithRelations($request->input('id'), ['items.product', 'items.variant']);
+        if (!$order || $order->user_id !== Auth::id()) abort(403);
 
-        return view('client.pages.order-invoice', ['order' => $order]);
+        return view('client.pages.order-invoice', compact('order'));
     }
 
-    public function cancel(OrderCancelRequest $request, OrderRepo $orderRepo)
+    public function cancel(OrderCancelRequest $request, OrderService $orderService)
     {
-        if (! Auth::check()) {
-            return redirect()->route('login');
-        }
+        if (!Auth::check()) return redirect()->route('login');
 
-        $orderId = $request->input('id');
-        $order = $orderRepo->findOrder($orderId);
-        if (!$order || $order->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $reason = $request->input('reason');
-        $ok = $orderRepo->cancelOrder($order->id, $reason);
+        $ok = $orderService->cancelClientOrder($request->input('id'), $request->input('reason'), Auth::id());
 
         if ($request->ajax() || $request->wantsJson()) {
-            if ($ok) {
-                return response()->json([
-                    'success' => true,
-                    'status' => 'success',
-                    'message' => 'Order cancelled successfully.'
-                ]);
-            }
             return response()->json([
-                'success' => false,
-                'status' => 'error',
-                'message' => 'Unable to cancel the order.'
-            ], 422);
+                'success' => $ok,
+                'status' => $ok ? 'success' : 'error',
+                'message' => $ok ? 'Order cancelled successfully.' : 'Unable to cancel the order.'
+            ], $ok ? 200 : 422);
         }
 
-        if ($ok) {
-            return back()->with('success', 'Order cancelled successfully.');
-        }
-
-        return back()->withErrors(['cancel' => 'Unable to cancel the order.']);
+        return $ok ? back()->with('success', 'Order cancelled successfully.') : back()->withErrors(['cancel' => 'Unable to cancel the order.']);
     }
 }
-

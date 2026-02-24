@@ -19,4 +19,5 @@ interface InventoryRepositoryInterface
     public function getDataforDataTable(array $filters = []);
     public function getBatchesForDataTable(array $filters = []);
     public function getLowStock(array $filters = []);
+    public function getLockedForCheckout(int $productId, ?int $variantId);
 }

@@ -26,15 +26,15 @@ class OrderRepository implements OrderRepositoryInterface
 
         if (!empty($extra['search'])) {
             $search = $extra['search'];
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%$search%")
-                  ->orWhereHas('items.product', function($q2) use ($search) {
-                      $q2->where('name', 'like', "%$search%") ;
-                  })
-                  ->orWhereHas('items.variant', function($q3) use ($search) {
-                      $q3->where('variant_name', 'like', "%$search%")
-                          ->orWhereRaw("CONCAT(variant_name, ' ', sku) like ?", ["%$search%"]);
-                  });
+                    ->orWhereHas('items.product', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%$search%");
+                    })
+                    ->orWhereHas('items.variant', function ($q3) use ($search) {
+                        $q3->where('variant_name', 'like', "%$search%")
+                            ->orWhereRaw("CONCAT(variant_name, ' ', sku) like ?", ["%$search%"]);
+                    });
             });
         }
 
@@ -89,174 +89,24 @@ class OrderRepository implements OrderRepositoryInterface
         return Order::find($orderId);
     }
 
-    public function createOrderFromCart(Cart $cart, array $data, CartRepo $cartRepo, PriceCalculatorService $priceService)
+    public function create(array $data)
     {
-        $order = null;
+        return Order::create($data);
+    }
 
-        DB::transaction(function () use ($cart, $data, &$order, $priceService) {
-            $shippingMethod = $data['shipping_method'] ?? 'standard';
-            $pricing = $priceService->calculate($cart, $shippingMethod);
+    public function createItem(array $data)
+    {
+        return OrderItem::create($data);
+    }
 
-            $order = Order::create([
-                'user_id' => $cart->user_id ?? null,
-                'subtotal' => $pricing['subtotal'],
-                'discount_amount' => $pricing['total_item_discount'],
-                'coupon_id' => $cart->coupon_id ?? null,
-                'coupon_code' => $cart->coupon_code ?? null,
-                'coupon_discount_amount' => $pricing['coupon_discount'],
-                'shipping_method' => $shippingMethod,
-                'shipping_cost' => $pricing['shipping_cost'],
-                'tax_amount' => $pricing['tax_amount'],
-                'tax_percentage' => $pricing['tax_rate'],
-                'taxable_amount' => $pricing['taxable_amount'],
-                'total' => $pricing['final_total'],
-                'status' => 'pending',
-                'shipping_address' => $data['shipping_address'] ?? null,
-                'billing_address' => $data['billing_address'] ?? ($data['shipping_address'] ?? null),
-                'phone_no' => $data['phone_no'] ?? null,
-                'email' => $data['email'] ?? Auth::user()?->email ?? null,
-                'payment_method' => $data['payment_method'] ?? null,
-                'order_number' => 'EZMA/ORD/' . uniqid(),
-            ]);
-
-            $orderItems = [];
-            $inventoryTxns = [];
-
-            foreach ($cart->items as $item) {
-                $variant = $item->variant ?: ProductVariant::withTrashed()->find($item->variant_id);
-
-                $unitPriceOriginal = $item->unit_price ?? 0;
-                $discountPerUnit = $item->discount_amount ?? 0;
-                $unitPriceFinal = $item->final_price ?? 0;
-
-                $lineSubtotal = round($unitPriceOriginal * $item->quantity, 2);
-                $lineDiscount = round($discountPerUnit * $item->quantity, 2);
-                $lineFinal = round($unitPriceFinal * $item->quantity, 2);
-
-                $orderItems[] = [
-                    'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'variant_id' => $item->variant_id,
-                    'quantity' => $item->quantity,
-                    'unit_price' => $unitPriceFinal,
-                    'unit_price_original' => round($unitPriceOriginal, 2),
-                    'discount_amount' => round($discountPerUnit, 2),
-                    'line_subtotal' => $lineSubtotal,
-                    'line_discount' => $lineDiscount,
-                    'total_price' => $lineFinal,
-                    'line_total' => $lineFinal,
-                ];
-
-                $remaining = $item->quantity;
-
-                $inventories = Inventory::where('product_variant_id', $item->variant_id)
-                    ->orderBy('created_at', 'asc')
-                    ->lockForUpdate()
-                    ->get();
-
-                if ($inventories->isEmpty()) {
-                    $inventories = Inventory::where('product_id', $item->product_id)
-                        ->orderBy('created_at', 'asc')
-                        ->lockForUpdate()
-                        ->get();
-                }
-
-                foreach ($inventories as $inv) {
-                    if ($remaining <= 0) break;
-
-                    $available = (float) $inv->quantity;
-                    if ($available <= 0) continue;
-
-                    $deduct = min($available, $remaining);
-                    $before = $available;
-                    $after = $before - $deduct;
-
-                    $inv->quantity = $after;
-                    $inv->reserved_quantity = ($inv->reserved_quantity ?? 0) + $deduct;
-                    $inv->save();
-
-                    $inventoryTxns[] = [
-                        'inventory_id' => $inv->id,
-                        'type' => 'sale',
-                        'quantity' => $deduct,
-                        'rate' => $item->unit_price ?? 0,
-                        'batch_no' => $inv->batch_no,
-                        'created_by' => Auth::id() ?? ($order->user_id ?? null),
-                        'description_type' => 'normal',
-                        'reference_type' => 'order',
-                        'reference_id' => $order->id,
-                        'before_quantity' => $before,
-                        'after_quantity' => $after,
-                        'quantity_change' => -1 * $deduct,
-                    ];
-
-                    $remaining -= $deduct;
-                }
-
-                if ($remaining > 0) {
-                    $placeholder = Inventory::firstOrCreate([
-                        'product_id' => $item->product_id,
-                        'product_variant_id' => $item->variant_id,
-                        'location_type' => 'warehouse',
-                    ], [
-                        'warehouse_id' => null,
-                        'store_id' => null,
-                        'quantity' => 0,
-                        'reserved_quantity' => 0,
-                        'cost_price' => $item->unit_price ?? 0,
-                        'status' => 'active',
-                    ]);
-
-                    $placeholder = Inventory::where('id', $placeholder->id)->lockForUpdate()->first();
-
-                    $before = (float) $placeholder->quantity;
-                    $placeholder->quantity = $before - $remaining;
-                    $placeholder->reserved_quantity = ($placeholder->reserved_quantity ?? 0) + $remaining;
-                    $placeholder->save();
-
-                    $inventoryTxns[] = [
-                        'inventory_id' => $placeholder->id,
-                        'type' => 'sale',
-                        'quantity' => $remaining,
-                        'rate' => $item->unit_price ?? 0,
-                        'batch_no' => $placeholder->batch_no,
-                        'created_by' => Auth::id() ?? ($order->user_id ?? null),
-                        'description_type' => 'backorder',
-                        'reference_type' => 'order',
-                        'reference_id' => $order->id,
-                        'before_quantity' => $before,
-                        'after_quantity' => $placeholder->quantity,
-                        'quantity_change' => -1 * $remaining,
-                    ];
-                }
-            }
-
-            foreach ($orderItems as $oi) {
-                OrderItem::create($oi);
-            }
-
-            $order->order_number = 'EZMA/ORD/' . str_pad($order->id, 4, '0', STR_PAD_LEFT);
-            $order->save();
-
-            foreach ($inventoryTxns as $txn) {
-                try {
-                    $desc = $txn['description_type'] === 'backorder'
-                        ? 'Order #' . $order->order_number . ' (backorder)'
-                        : 'Order #' . $order->order_number;
-                    $txnData = $txn;
-                    unset($txnData['description_type']);
-                    $txnData['description'] = $desc;
-                    InventoryTransaction::create($txnData);
-                } catch (\Throwable $e) {
-                    Log::error($e->getMessage());
-                }
-            }
-
-            $cart->items()->delete();
-            $cart->delete();
-        });
-
-        return $order;
+    public function update(int $orderId, array $data)
+    {
+        $order = Order::find($orderId);
+        if ($order) {
+            $order->update($data);
+            return $order;
+        }
+        return false;
     }
 
     public function cancelOrder(int $orderId, ?string $reason = null)
@@ -305,9 +155,9 @@ class OrderRepository implements OrderRepositoryInterface
                     Log::error($e->getMessage());
                 }
             }
-                $order->status = 'cancelled';
-                $order->cancel_reason = $reason;
-                $order->save();
+            $order->status = 'cancelled';
+            $order->cancel_reason = $reason;
+            $order->save();
         });
 
         return true;

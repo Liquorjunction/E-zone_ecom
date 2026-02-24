@@ -11,4 +11,7 @@ interface AddressRepositoryInterface
     public function setDefaultAddress(int $userId, int $addressId);
     public function getDefaultAddress(int $userId);
     public function getAddressesByUserId(int $userId);
+    public function findByIdAndUser(int $id, int $userId);
+    public function getAddressesByType(int $userId, string $type);
+    public function firstOrCreateAddress(array $matchAttributes, array $fillAttributes);
 }

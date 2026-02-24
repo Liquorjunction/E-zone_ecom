@@ -165,4 +165,15 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         return $query->get();
     }
+
+    public function getLockedForCheckout(int $productId, ?int $variantId)
+    {
+        $query = Inventory::query();
+        if ($variantId) {
+            $query->where('product_variant_id', $variantId);
+        } else {
+            $query->where('product_id', $productId);
+        }
+        return $query->orderBy('created_at', 'asc')->lockForUpdate()->get();
+    }
 }

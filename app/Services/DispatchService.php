@@ -67,7 +67,12 @@ class DispatchService
                 }
 
                 $beforeQty = $inventory->quantity;
-                $this->inventoryRepo->update($inventory->id, ['quantity' => $beforeQty - $quantity]);
+                $beforeReserved = $inventory->reserved_quantity ?? 0;
+
+                $this->inventoryRepo->update($inventory->id, [
+                    'quantity' => $beforeQty - $quantity,
+                    'reserved_quantity' => max(0, $beforeReserved - $quantity)
+                ]);
 
                 $this->transactionRepo->create([
                     'batch_no' => $inventory->batch_no,
@@ -175,9 +180,9 @@ class DispatchService
         if ($totalDelivered >= $totalOrdered) {
             $targetStatus = 'delivered';
         } elseif ($totalDispatched >= $totalOrdered) {
-            $targetStatus = 'shipped';
+            $targetStatus = 'ready_to_ship';
         } elseif ($totalDispatched > 0) {
-            $targetStatus = 'partially_shipped';
+            $targetStatus = 'partially_dispatched';
         }
 
         if ($targetStatus && $order->status !== $targetStatus) {

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Client\Repositories;
 
+use App\DTOs\CartIdentifier;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
@@ -14,13 +15,15 @@ use Illuminate\Support\Facades\Log;
 
 class CartRepository implements CartRepositoryInterface
 {
-    public function getCartForUserOrSession(Request $request)
+    public function getCartForUserOrSession(CartIdentifier $identifier)
     {
-        if (Auth::check()) {
-            return Cart::with('items.product', 'items.variant')->firstOrCreate(['user_id' => Auth::id()]);
+        if ($identifier->userId) {
+            return Cart::with('items.product', 'items.variant')
+                ->firstOrCreate(['user_id' => $identifier->userId]);
         }
 
-        return Cart::with('items.product', 'items.variant')->firstOrCreate(['session_id' => $request->session()->getId()]);
+        return Cart::with('items.product', 'items.variant')
+            ->firstOrCreate(['session_id' => $identifier->sessionId]);
     }
 
     public function addItem($cart, array $data)
@@ -194,11 +197,11 @@ class CartRepository implements CartRepositoryInterface
             ->orderByDesc('created_at')
             ->get();
 
-            $orders = Order::with(['items.product', 'items.variant'])
-                ->where('user_id', $userId)
-                ->orderByDesc('created_at')
-                ->get();
+        $orders = Order::with(['items.product', 'items.variant'])
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
 
-            return $orders;
+        return $orders;
     }
 }
