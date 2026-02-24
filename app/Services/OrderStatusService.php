@@ -32,6 +32,13 @@ class OrderStatusService
         'delivered' => ['completed', 'returned'],
     ];
 
+    protected $mailTriggerService;
+
+    public function __construct(MailTriggerService $mailTriggerService)
+    {
+        $this->mailTriggerService = $mailTriggerService;
+    }
+
     public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, int $adminId = 1 )
     {
         if (!$force && !$this->canTransition($order->status, $toStatus)) {
@@ -49,6 +56,7 @@ class OrderStatusService
         }
 
         $order->save();
+        $this->mailTriggerService->sendOrderStatusUpdate($order, $toStatus);
 
         return $order;
     }
