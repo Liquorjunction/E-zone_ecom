@@ -11,7 +11,7 @@ class MailTriggerService
 {
     public function sendOrderStatusUpdate(Order $order, string $newStatus)
     {
-        $mailableStatuses = ['confirmed', 'dispatched', 'delivered', 'cancelled'];
+        $mailableStatuses = ['order_confirmation', 'delivered', 'cancelled', 'order_placed', 'shipped', 'out_for_delivery'];
 
         if (!in_array(strtolower($newStatus), $mailableStatuses)) {
             return false;

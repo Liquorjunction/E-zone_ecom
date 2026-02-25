@@ -163,6 +163,12 @@ class OrderService
                 'order_number' => 'EZMA/ORD/' . str_pad($order->id, 4, '0', STR_PAD_LEFT)
             ]);
 
+            // Send order placed and thanks emails at pending status
+            if (isset($order->user)) {
+                $mailTrigger = app(\App\Services\MailTriggerService::class);
+                $mailTrigger->sendOrderStatusUpdate($order, 'order_placed');
+            }
+
             $this->cartRepo->clearCart($cart);
 
             return $this->processPayment($order, $data, $cart);

@@ -22,12 +22,12 @@
                 <td style="padding: 0 12px;">
                     <p
                         style="margin: 0; padding: 0; color: #666666; font-size: 13px; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">
-                        Secure Encryption</p>
+                        Cryptage sécurisé</p>
                 </td>
                 <td style="padding: 0 12px;">
                     <p
                         style="margin: 0; padding: 0; color: #666666; font-size: 13px; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">
-                        Privacy Protected</p>
+                        Protection de la vie privée</p>
                 </td>
             </tr>
         </table>
@@ -89,24 +89,24 @@
         <p
             style="margin: 14px 0; padding: 0; color: #777777; font-size: 12px; line-height: 1.8; font-family: Arial, Helvetica, sans-serif;">
             <a href="{{ route('privacy-policy') }}"
-                style="color: #00BFFF; text-decoration: none; font-weight: 600;">Privacy
-                Policy</a>
+                style="color: #00BFFF; text-decoration: none; font-weight: 600;">Politique
+                de confidentialité</a>
             &nbsp;•&nbsp;
             <a href="{{ route('terms') }}"
-                style="color: #00BFFF; text-decoration: none; font-weight: 600;">Terms
-                of Service</a>
+                style="color: #00BFFF; text-decoration: none; font-weight: 600;">Conditions
+                d'utilisation</a>
             &nbsp;•&nbsp;
             <a href="{{ route('contact') }}"
-                style="color: #00BFFF; text-decoration: none; font-weight: 600;">Contact
-                Support</a>
+                style="color: #00BFFF; text-decoration: none; font-weight: 600;">Contacter
+                l'assistance</a>
         </p>
 
         <!-- Copyright -->
         <p
             style="margin: 14px 0 0 0; padding: 0; color: #999999; font-size: 11px; line-height: 1.6; font-family: Arial, Helvetica, sans-serif;">
-            © {{ now()->year }} {{ config('app.name') }}. All rights reserved.
+            © {{ now()->year }} {{ config('app.name') }}. Tous droits réservés.
             <br>
-            This is an automated message. Please do not reply to this email.
+            Ceci est un message automatique. Veuillez ne pas répondre à ce courriel.
         </p>
 
     </td>

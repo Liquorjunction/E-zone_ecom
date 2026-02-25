@@ -10,7 +10,7 @@
 
     <!-- Main Message -->
     <p style="margin: 0 0 16px 0; padding: 0; color: #555555; font-size: 15px; line-height: 1.7; font-family: Arial, Helvetica, sans-serif;">
-        We're thrilled to have you on board! Your account has been successfully created on <strong>{{ config('app.name') }}</strong>. You're just one click away from exploring our products and placing your first order.
+       Nous sommes ravis de vous compter parmi nous ! Votre compte a été créé avec succès sur<strong>{{ config('app.name') }}</strong>. Il vous suffit d'un clic pour découvrir nos produits et passer votre première commande.
     </p>
 
     <!-- CTA Button -->
@@ -20,7 +20,7 @@
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                     <tr>
                         <td style="border-radius: 8px; background: linear-gradient(135deg, #00BFFF 0%, #0099CC 100%); background-color: #00BFFF; box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);">
-                            <a href="{{ $loginUrl ?? url('/login') }}" target="_blank" style="display: inline-block; padding: 16px 48px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 700; font-family: Arial, Helvetica, sans-serif; border-radius: 8px; letter-spacing: 0.5px;">Login to Your Account</a>
+                            <a href="{{ $loginUrl ?? url('/login') }}" target="_blank" style="display: inline-block; padding: 16px 48px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 700; font-family: Arial, Helvetica, sans-serif; border-radius: 8px; letter-spacing: 0.5px;">Connectez-vous à votre compte</a>
                         </td>
                     </tr>
                 </table>
@@ -33,7 +33,7 @@
         <tr>
             <td style="padding: 24px;">
 
-                <p style="margin: 0 0 18px 0; padding: 0; color: #1a3a52; font-size: 15px; font-weight: 700; line-height: 1.3; font-family: Arial, Helvetica, sans-serif;">What You Can Do Now</p>
+                <p style="margin: 0 0 18px 0; padding: 0; color: #1a3a52; font-size: 15px; font-weight: 700; line-height: 1.3; font-family: Arial, Helvetica, sans-serif;">Que pouvez-vous faire maintenant ?</p>
 
                 <!-- Item 1 -->
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 14px;">
@@ -46,7 +46,7 @@
                             </table>
                         </td>
                         <td valign="top" style="padding-top: 5px;">
-                            <p style="margin: 0; padding: 0; color: #555555; font-size: 14px; font-weight: 500; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">Browse and shop from our wide range of products</p>
+                            <p style="margin: 0; padding: 0; color: #555555; font-size: 14px; font-weight: 500; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">Parcourez et achetez parmi notre large gamme de produits</p>
                         </td>
                     </tr>
                 </table>
@@ -62,7 +62,7 @@
                             </table>
                         </td>
                         <td valign="top" style="padding-top: 5px;">
-                            <p style="margin: 0; padding: 0; color: #555555; font-size: 14px; font-weight: 500; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">Track your orders and deliveries in real time</p>
+                            <p style="margin: 0; padding: 0; color: #555555; font-size: 14px; font-weight: 500; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">Suivez vos commandes et livraisons en temps réel</p>
                         </td>
                     </tr>
                 </table>
@@ -78,7 +78,7 @@
                             </table>
                         </td>
                         <td valign="top" style="padding-top: 5px;">
-                            <p style="margin: 0; padding: 0; color: #555555; font-size: 14px; font-weight: 500; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">Manage your profile and preferences from your dashboard</p>
+                            <p style="margin: 0; padding: 0; color: #555555; font-size: 14px; font-weight: 500; line-height: 1.5; font-family: Arial, Helvetica, sans-serif;">Gérez votre profil et vos préférences depuis votre tableau de bord</p>
                         </td>
                     </tr>
                 </table>
@@ -92,7 +92,7 @@
         <tr>
             <td style="padding: 16px 18px;">
                 <p style="margin: 0; padding: 0; color: #8b5a00; font-size: 14px; line-height: 1.7; font-family: Arial, Helvetica, sans-serif;">
-                    <strong>Security Reminder:</strong> If you did not create this account, please contact our support team immediately to secure your information.
+                    <strong>Rappel de sécurité :</strong> Si vous n'avez pas créé ce compte, veuillez contacter immédiatement notre équipe d'assistance pour sécuriser vos informations.
                 </p>
             </td>
         </tr>

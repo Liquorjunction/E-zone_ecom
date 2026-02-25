@@ -180,7 +180,7 @@ class DispatchService
         if ($totalDelivered >= $totalOrdered) {
             $targetStatus = 'delivered';
         } elseif ($totalDispatched >= $totalOrdered) {
-            $targetStatus = 'ready_to_ship';
+            $targetStatus = 'dispatched';
         } elseif ($totalDispatched > 0) {
             $targetStatus = 'partially_dispatched';
         }
