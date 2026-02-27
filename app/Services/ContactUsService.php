@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ContactThankYouMail;
+use Illuminate\Support\Facades\Log;
 
 class ContactUsService
 {
@@ -86,6 +89,23 @@ class ContactUsService
             $idPart = str_pad($contact->id, 7, '0', STR_PAD_LEFT);
             $contact->ticket_number = $prefix . '/TKT/' . $idPart;
             $contact->save();
+
+            try {
+                Mail::to($contact->email)->queue(new ContactThankYouMail(
+                    $contact->name,
+                    $contact->ticket_number,
+                    $contact->subject_label,
+                    $contact->message,
+                    $contact->order_number,
+                    $contact->product_sku
+                ));
+            } catch (\Exception $e) {
+                Log::error('Failed to queue contact thank you mail', [
+                    'error' => $e->getMessage(),
+                    'contact_id' => $contact->id,
+                ]);
+            }
+
             return $contact;
         });
     }
