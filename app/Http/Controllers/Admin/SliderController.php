@@ -31,6 +31,16 @@ class SliderController extends Controller
     public function store(StoreSliderRequest $request, SliderRepo $sliderRepo)
     {
         try {
+            // Debug image upload info
+            $image = $request->file('image');
+            Log::info('Slider image upload debug', [
+                'file' => $image,
+                'size' => $image?->getSize(),
+                'mime' => $image?->getMimeType(),
+                'isValid' => $image?->isValid(),
+                'error' => $image?->getError(),
+            ]);
+
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
@@ -53,8 +63,6 @@ class SliderController extends Controller
             // ----------------------------------
 
             // Pass modified data (with translations) to Repository
-            // We merge it back into request or pass explicitly depending on repo design.
-            // Since we updated the Repo to accept a second $data argument:
             $sliderRepo->storeSlider($request, $data);
 
             return redirect()->route('admin.hero-slider.index')->with('success', 'Slider created successfully.');
