@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Slider;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class StoreSliderRequest extends FormRequest
 {
@@ -14,6 +15,11 @@ class StoreSliderRequest extends FormRequest
 
     public function rules(): array
     {
+        Log::info('StoreSliderRequest@rules called', [
+            'all_files' => $this->allFiles(),
+            'all' => $this->all(),
+            'hasFile_image' => $this->hasFile('image'),
+        ]);
         return [
             // Translatable Fields (Arrays)
             'title' => 'required|array',
