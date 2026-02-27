@@ -414,8 +414,11 @@
                                                                         Images</label>
                                                                     <input type="file"
                                                                         name="variants[{{ $index }}][images][]"
-                                                                        multiple class="form-control form-control-sm"
+                                                                        multiple class="form-control form-control-sm variant-image-input"
+                                                                        data-variant-index="{{ $index }}"
                                                                         accept="image/*">
+                                                                    <div class="variant-image-preview-list mt-2 d-flex gap-2 flex-wrap"
+                                                                        id="variant-image-preview-list-{{ $index }}"></div>
                                                                 </td>
                                                                 <td>
                                                                     <label
@@ -605,7 +608,6 @@
 
     @push('scripts')
         @php
-            // Provide a complete list of subcategories to the JS so edit mode can refresh correctly
             $__allSubCats = \App\Models\SubCategories::all()->map(function ($s) {
                 return [
                     'id' => $s->id,
@@ -617,38 +619,12 @@
         <script>
             window.__ALL_SUBCATEGORIES = {!! json_encode($__allSubCats) !!};
         </script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
         <script src="{{ asset('admin_assets/js/product-form.js') }}"></script>
+        <script src="{{ asset('admin_assets/js/variant-image-preview.js') }}"></script>
         <script src="{{ asset('admin_assets/js/variant-image-sort.js') }}"></script>
         <script>
             window.variantImageReorderUrl = '{{ route('admin.products.reorderVariantImages') }}';
             window.csrfToken = '{{ csrf_token() }}';
-        </script>
-        <script>
-            $(document).on('click', '.delete-variant-image', function(e) {
-                e.preventDefault();
-                var btn = $(this);
-                var imageId = btn.data('image-id');
-                if (!confirm('Are you sure you want to delete this image?')) return;
-                $.ajax({
-                    url: '{{ route('admin.products.deleteVariantImage') }}',
-                    type: 'POST',
-                    data: {
-                        image_id: imageId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            btn.closest('.variant-image-wrapper').remove();
-                        } else {
-                            alert(response.message || 'Failed to delete image.');
-                        }
-                    },
-                    error: function(xhr) {
-                        alert(xhr.responseJSON?.message || 'Failed to delete image.');
-                    }
-                });
-            });
         </script>
     @endpush
 @endsection

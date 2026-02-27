@@ -291,7 +291,8 @@
                                                                             Upload Images <span class="text-muted">(You can select multiple)</span>
                                                                             <span class="text-danger">*</span>
                                                                         </label>
-                                                                        <input type="file" name="variants[{{ $index }}][images][]" class="form-control form-control-sm" multiple accept="image/*">
+                                                                        <input type="file" name="variants[{{ $index }}][images][]" class="form-control form-control-sm variant-image-input" data-variant-index="{{ $index }}" multiple accept="image/*">
+                                                                        <div class="variant-image-preview-list mt-2 d-flex gap-2 flex-wrap" id="variant-image-preview-list-{{ $index }}"></div>
                                                                         <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
                                                                         <span class="text-danger d-block">Max size per image: 2MB.</span>
                                                                     </div>
@@ -427,5 +428,7 @@
 
     @push('scripts')
         <script src="{{ asset('admin_assets/js/product-form.js') }}"></script>
+        <script src="{{ asset('admin_assets/js/variant-image-preview.js') }}"></script>
+        <script src="{{ asset('admin_assets/js/variant-image-sort.js') }}"></script>
     @endpush
 @endsection
