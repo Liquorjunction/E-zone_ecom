@@ -44,6 +44,7 @@
 
     $isDiscountSectionActive = request()->routeIs('admin.discounts.*');
     $isNewsletterSectionActive = request()->routeIs('admin.newsletter-subscribers.*');
+    $isContactUsSectionActive = request()->routeIs('admin.contact-us.*');
 @endphp
 
 <aside class="sidebar" role="navigation" aria-label="Admin Sidebar">
@@ -657,6 +658,22 @@
                         <hr class="hr-horizontal">
                     </li>
                 @endcanany
+
+                <!-- Contact Us -->
+                @can('contact_us.read')
+                    <li class="nav-item">
+                        <a class="nav-link {{ $isContactUsSectionActive ? 'active' : '' }}"
+                            href="{{ route('admin.contact-us.index') }}">
+                            <i class="icon">
+                                <i class="bi bi-envelope-at"></i>
+                            </i>
+                            <span class="item-name">Contact Us</span>
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
+                @endcan
 
                 <!-- Reports -->
                 @can('reports.read')
