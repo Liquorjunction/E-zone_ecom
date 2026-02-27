@@ -126,4 +126,6 @@ return [
 
     'CURRENCY_SYMBOL' => env('CURRENCY_SYMBOL', '$'),
     'CURRENCY_CODE' => env('CURRENCY_CODE', 'USD'),
+
+    'PREFIX' => env('PREFIX', 'EZ'),
 ];

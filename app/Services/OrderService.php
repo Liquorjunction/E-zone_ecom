@@ -127,7 +127,7 @@ class OrderService
                 'phone_no' => $data['shipping_address']['phone'] ?? $data['phone_no'] ?? null,
                 'email' => $data['email'] ?? null,
                 'payment_method' => $data['payment_method'] ?? null,
-                'order_number' => 'EZMA/ORD/' . uniqid(),
+                'order_number' => config('app.PREFIX') . '/ORD/' . uniqid(),
             ]);
 
             foreach ($cart->items as $item) {
@@ -160,7 +160,7 @@ class OrderService
             }
 
             $this->orders->update($order->id, [
-                'order_number' => 'EZMA/ORD/' . str_pad($order->id, 4, '0', STR_PAD_LEFT)
+                'order_number' => config('app.PREFIX') . '/ORD/' . str_pad($order->id, 4, '0', STR_PAD_LEFT)
             ]);
 
             // Send order placed and thanks emails at pending status

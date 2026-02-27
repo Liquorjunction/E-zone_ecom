@@ -6,6 +6,7 @@ use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\BrandController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\CategoryController;
+use App\Http\Controllers\Client\ContactUsController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\InventoryController;
@@ -50,7 +51,6 @@ Route::get('/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 Route::get('/terms', [TermsController::class, 'index'])->name('terms');
 Route::get('/shipping-returns', [ShippingAndReturnsController::class, 'index'])->name('shipping-returns');
-Route::view('/contact', 'client.pages.contact')->name('contact');
 Route::view('/support', 'client.pages.support')->name('support');
 Route::get('/showrooms', [ShowroomController::class, 'index'])->name('showrooms');
 Route::get('/showrooms/{slug}', [ShowroomController::class, 'show'])->name('showrooms.show');
@@ -99,6 +99,10 @@ Route::view('/order-tracking', 'client.pages.order-tracking')->name('order-track
 
 // Email & Password Routes (Accessible to all users - authenticated & guests)
 Route::get('/email/verify', [AuthController::class, 'verifyEmail'])->name('email.verify');
+
+// Contact Us Form Submission (Public)
+Route::get('/contact', [ContactUsController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactUsController::class, 'store'])->name('contact.submit');
 
 /*
 |--------------------------------------------------------------------------
