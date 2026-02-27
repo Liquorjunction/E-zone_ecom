@@ -430,5 +430,9 @@
         <script src="{{ asset('admin_assets/js/product-form.js') }}"></script>
         <script src="{{ asset('admin_assets/js/variant-image-preview.js') }}"></script>
         <script src="{{ asset('admin_assets/js/variant-image-sort.js') }}"></script>
+        <script>
+            window.variantImageDeleteUrl = '{{ route('admin.products.deleteVariantImage') }}';
+            window.csrfToken = '{{ csrf_token() }}';
+        </script>
     @endpush
 @endsection

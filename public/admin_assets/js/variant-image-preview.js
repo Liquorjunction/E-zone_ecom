@@ -35,7 +35,7 @@ $(function() {
         order.forEach(idx => dt.items.add(files[idx]));
         input.files = dt.files;
     }
-    // Remove image from preview and input
+    // Remove image from preview and input (unsaved images)
     $(document).on('click', '.remove-variant-image', function() {
         const wrapper = $(this).closest('.variant-image-preview-wrapper');
         const previewList = wrapper.parent();
@@ -47,6 +47,35 @@ $(function() {
         files.forEach(f => dt.items.add(f));
         input.files = dt.files;
         handleVariantImageInput(input, $(input).data('variant-index'));
+    });
+
+    // Delete saved image from DB and remove preview (edit view)
+    $(document).on('click', '.delete-variant-image', function() {
+        const btn = $(this);
+        const wrapper = btn.closest('.variant-image-preview-wrapper');
+        const imageId = btn.data('image-id');
+        if (!imageId) return;
+        btn.prop('disabled', true);
+        $.ajax({
+            url: window.variantImageDeleteUrl || '/admin/products/deleteVariantImage',
+            method: 'POST',
+            data: {
+                image_id: imageId,
+                _token: window.csrfToken
+            },
+            success: function(resp) {
+                if (resp.success) {
+                    wrapper.remove();
+                } else {
+                    btn.prop('disabled', false);
+                    alert(resp.message || 'Failed to delete image.');
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false);
+                alert('Error deleting image.');
+            }
+        });
     });
     // On file input change
     $(document).on('change', '.variant-image-input', function() {

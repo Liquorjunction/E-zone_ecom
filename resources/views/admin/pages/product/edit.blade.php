@@ -394,7 +394,7 @@
                                                                                 Images:</small>
                                                                             <div class="d-flex gap-2 flex-wrap">
                                                                                 @foreach ($variant->images->sortBy(fn($img) => $img->sort_order ?? $img->id) as $img)
-                                                                                    <div class="position-relative d-inline-block me-1 mb-1 variant-image-wrapper"
+                                                                                    <div class="variant-image-preview-wrapper position-relative d-inline-block me-1 mb-1"
                                                                                         data-image-id="{{ $img->id }}">
                                                                                         <img src="{{ asset('storage/' . $img->image_path) }}"
                                                                                             class="rounded border"
@@ -624,6 +624,7 @@
         <script src="{{ asset('admin_assets/js/variant-image-sort.js') }}"></script>
         <script>
             window.variantImageReorderUrl = '{{ route('admin.products.reorderVariantImages') }}';
+            window.variantImageDeleteUrl = '{{ route('admin.products.deleteVariantImage') }}';
             window.csrfToken = '{{ csrf_token() }}';
         </script>
     @endpush
