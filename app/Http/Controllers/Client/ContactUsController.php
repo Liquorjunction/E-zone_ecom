@@ -18,7 +18,11 @@ class ContactUsController extends Controller
     public function store(StoreContactUsRequest $request, ContactUsService $service)
     {
         try {
-            $service->submitContactForm($request);
+            Log::info('ContactUsController@store called', [
+                'request' => $request->all(),
+                'files' => $request->allFiles(),
+            ]);
+                $service->submitContactForm($request);
             return response()->json(['status' => true, 'message' => 'Your message has been submitted successfully.An Confirmation email will be sent to you.']);
         } catch (\Exception $e) {
             Log::error('Contact form error', [
