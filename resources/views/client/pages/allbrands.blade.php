@@ -91,10 +91,13 @@
                     'flex flex-col gap-4'">
                 @forelse ($brands as $brand)
                     {{-- Brand Card --}}
-                    <div x-show="search === '' || '{{ strtolower($brand->name) }}'.includes(search.toLowerCase())"
+                    <a x-show="search === '' || '{{ strtolower($brand->name) }}'.includes(search.toLowerCase())"
                         data-brand-name="{{ strtolower($brand->name) }}"
-                        class="group bg-white rounded-2xl p-6 sm:p-6 text-center border border-gray-100 transition-all duration-300 overflow-hidden shadow-sm hover:border-primary hover:shadow-lg hover:-translate-y-1 focus-within:border-primary focus-within:shadow-lg"
-                        :class="view === 'list' ? 'flex items-center gap-5' : 'flex flex-col'">
+                        href="{{ route('brand.products', $brand->slug) }}"
+                        class="group bg-white rounded-2xl p-6 sm:p-6 text-center border border-gray-100 transition-all duration-300 overflow-hidden shadow-sm hover:border-primary hover:shadow-lg hover:-translate-y-1 focus-within:border-primary focus-within:shadow-lg cursor-pointer outline-none"
+                        :class="view === 'list' ? 'flex items-center gap-5' : 'flex flex-col'"
+                        tabindex="0"
+                        aria-label="Browse {{ $brand->name }} collection">
 
                         {{-- Logo wrap --}}
                         <div class="rounded-2xl bg-gray-50 flex items-center justify-center shrink-0 transition-all duration-300"
@@ -114,18 +117,17 @@
                                 {{ $brand->name }}
                             </h2>
                             <div class="mt-3">
-                                <a href="{{ route('brand.products', $brand->slug) }}"
-                                    class="inline-flex items-center text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
+                                <span class="inline-flex items-center text-sm font-semibold text-primary group-hover:text-primary-dark transition-colors">
                                     <span>Browse Collection</span>
                                     <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                                     </svg>
-                                </a>
+                                </span>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @empty
                     <div class="col-span-full py-16 text-center">
                         <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
