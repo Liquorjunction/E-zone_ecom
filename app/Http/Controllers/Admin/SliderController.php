@@ -31,41 +31,12 @@ class SliderController extends Controller
     public function store(StoreSliderRequest $request, SliderRepo $sliderRepo)
     {
         try {
-            // --- Debug: Check if file present ---
-            if (!$request->hasFile('image')) {
-                Log::error('Slider upload: No file uploaded');
-                return redirect()->back()->withErrors(['error' => 'No file uploaded'])->withInput();
-            }
-            $image = $request->file('image');
-            if (!$image) {
-                Log::error('Slider upload: File object is null');
-                return redirect()->back()->withErrors(['error' => 'File object is null'])->withInput();
-            }
-            // --- Debug: File info ---
-            Log::info('Slider image upload debug', [
-                'original_name' => $image->getClientOriginalName(),
-                'size' => $image->getSize(),
-                'mime' => $image->getMimeType(),
-                'isValid' => $image->isValid(),
-                'error' => $image->getError(),
-                'errorMessage' => $image->getErrorMessage(),
-                'extension' => $image->getClientOriginalExtension(),
-                'request_files' => $request->allFiles(),
-                'request_data' => $request->all(),
-            ]);
-            if (!$image->isValid()) {
-                Log::error('Slider upload: File upload error: ' . $image->getErrorMessage());
-                return redirect()->back()->withErrors(['error' => 'File upload error: ' . $image->getErrorMessage()])->withInput();
-            }
-
             $data = $request->validated();
-            Log::info('Slider validated data', $data);
 
             // --- Smart Auto-Translate Logic ---
             foreach (['title', 'subtitle', 'button_text'] as $field) {
                 // Skip if English value is missing (should be caught by validation, but safe check)
                 if (! isset($data[$field]['en'])) {
-                    Log::warning('Slider upload: Missing EN value for ' . $field);
                     continue;
                 }
 
@@ -79,16 +50,13 @@ class SliderController extends Controller
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
                 }
             }
-            Log::info('Slider data after translation', $data);
             // ----------------------------------
 
             // Pass modified data (with translations) to Repository
-            $result = $sliderRepo->storeSlider($request, $data);
-            Log::info('SliderRepo storeSlider result', ['result' => $result]);
+            $sliderRepo->storeSlider($request, $data);
 
             return redirect()->route('admin.hero-slider.index')->with('success', 'Slider created successfully.');
         } catch (\Exception $e) {
-            Log::error('Slider upload exception: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }

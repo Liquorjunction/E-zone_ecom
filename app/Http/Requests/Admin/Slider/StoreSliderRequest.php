@@ -15,11 +15,7 @@ class StoreSliderRequest extends FormRequest
 
     public function rules(): array
     {
-        Log::info('StoreSliderRequest@rules called', [
-            'all_files' => $this->allFiles(),
-            'all' => $this->all(),
-            'hasFile_image' => $this->hasFile('image'),
-        ]);
+        // ...existing code...
         return [
             // Translatable Fields (Arrays)
             'title' => 'required|array',
