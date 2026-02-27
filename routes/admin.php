@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ContactUsController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CouponUsageController;
 use App\Http\Controllers\Admin\DiscountController;
@@ -439,6 +440,15 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/', [SiteSettingController::class, 'update'])->name('update')->middleware('can:site_status.update,admin');
             Route::post('/toggle-status', [SiteSettingController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:site_status.update,admin');
             Route::get('/status', [SiteSettingController::class, 'getStatus'])->name('status');
+        });
+
+        // Contact Messages Routes
+        Route::prefix('contact-us')->name('contact-us.')->middleware('can:contact_us.read,admin')->group(function () {
+            Route::get('/', [ContactUsController::class, 'index'])->name('index'); // permission: contact_us.read
+            Route::get('/data', [ContactUsController::class, 'datatable'])->name('data');
+            Route::get('/show', [ContactUsController::class, 'show'])->name('show')->middleware('can:contact_us.read,admin');
+            Route::post('/update-status', [ContactUsController::class, 'updateStatus'])->name('updateStatus')->middleware('can:contact_us.update,admin');
+            Route::post('/add-note', [ContactUsController::class, 'AddAdminNotes'])->name('addNote')->middleware('can:contact_us.update,admin');
         });
     });
 });
