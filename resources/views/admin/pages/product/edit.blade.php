@@ -23,13 +23,16 @@
                             {{-- Navigation Pills --}}
                             <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab-product" role="tablist">
                                 <li class="nav-item">
-                                    <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab">Step 1: Basic Info</button>
+                                    <button class="nav-link active" id="step1-tab" data-bs-toggle="pill"
+                                        data-bs-target="#step1" type="button" role="tab">Step 1: Basic Info</button>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab">Step 2: Specifications (Attributes)</button>
+                                    <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2"
+                                        type="button" role="tab">Step 2: Specifications (Attributes)</button>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab">Step 3: Variants & Images</button>
+                                    <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3"
+                                        type="button" role="tab">Step 3: Variants & Images</button>
                                 </li>
                             </ul>
 
@@ -43,9 +46,15 @@
                                                 <label class="form-label mb-0"><strong>Product Details</strong> <span
                                                         class="text-danger">*</span></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabBasic" role="tablist">
-                                                    <li class="nav-item"><button class="nav-link active py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-en" type="button">English</button></li>
-                                                    <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-fr" type="button">French</button></li>
-                                                    <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#basic-ar" type="button">Arabic</button></li>
+                                                    <li class="nav-item"><button class="nav-link active py-1 px-3"
+                                                            data-bs-toggle="tab" data-bs-target="#basic-en"
+                                                            type="button">English</button></li>
+                                                    <li class="nav-item"><button class="nav-link py-1 px-3"
+                                                            data-bs-toggle="tab" data-bs-target="#basic-fr"
+                                                            type="button">French</button></li>
+                                                    <li class="nav-item"><button class="nav-link py-1 px-3"
+                                                            data-bs-toggle="tab" data-bs-target="#basic-ar"
+                                                            type="button">Arabic</button></li>
                                                 </ul>
                                             </div>
 
@@ -53,7 +62,8 @@
                                                 {{-- EN --}}
                                                 <div class="tab-pane fade show active" id="basic-en">
                                                     <div class="d-flex justify-content-end mb-3">
-                                                        <button type="button" class="btn btn-sm btn-primary btn-translate-all"
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-primary btn-translate-all"
                                                             data-url="{{ route('admin.translate.batch') }}"
                                                             data-fields='["name","description","dimensions","warranty","specifications"]'>
                                                             <i class="bi bi-translate me-2"></i> Translate All Fields
@@ -111,9 +121,9 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                                @if (!empty($product->cover_image))
-                                                    <input type="hidden" data-has-cover-image="1" value="1">
-                                                @endif
+                                            @if (!empty($product->cover_image))
+                                                <input type="hidden" data-has-cover-image="1" value="1">
+                                            @endif
                                         </div>
 
                                         {{-- Relations --}}
@@ -164,10 +174,12 @@
                                         </div>
 
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Update Cover Image <span class="text-muted">(Recommended: 800x800px)</span></label>
+                                            <label class="form-label">Update Cover Image <span
+                                                    class="text-muted">(Recommended: 800x800px)</span></label>
                                             <input type="file" name="cover_image" class="form-control"
                                                 accept="image/*">
-                                            <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp, ico, tiff, avif.</small>
+                                            <small class="text-muted">Supported formats: jpeg, png, jpg, webp, gif, bmp,
+                                                ico, tiff, avif.</small>
                                             <span class="text-danger d-block">Max size: 5MB.</span>
                                             @if ($product->cover_image)
                                                 <div class="mt-2">
@@ -213,9 +225,15 @@
                                                 <label class="form-label mb-0"><strong>Technical
                                                         Specifications</strong></label>
                                                 <ul class="nav nav-pills nav-pills-sm" id="langTabSpecs" role="tablist">
-                                                    <li class="nav-item"><button class="nav-link active py-1 px-3" data-bs-toggle="tab" data-bs-target="#specs-en" type="button">English</button></li>
-                                                    <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#specs-fr" type="button">French</button></li>
-                                                    <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="tab" data-bs-target="#specs-ar" type="button">Arabic</button></li>
+                                                    <li class="nav-item"><button class="nav-link active py-1 px-3"
+                                                            data-bs-toggle="tab" data-bs-target="#specs-en"
+                                                            type="button">English</button></li>
+                                                    <li class="nav-item"><button class="nav-link py-1 px-3"
+                                                            data-bs-toggle="tab" data-bs-target="#specs-fr"
+                                                            type="button">French</button></li>
+                                                    <li class="nav-item"><button class="nav-link py-1 px-3"
+                                                            data-bs-toggle="tab" data-bs-target="#specs-ar"
+                                                            type="button">Arabic</button></li>
                                                 </ul>
                                             </div>
 
@@ -236,7 +254,8 @@
                                                             <div class="col-md-6 mb-3">
                                                                 <label class="form-label">Warranty
                                                                     ({{ strtoupper($lang) }})</label>
-                                                                <input type="text" name="warranty[{{ $lang }}]"
+                                                                <input type="text"
+                                                                    name="warranty[{{ $lang }}]"
                                                                     class="form-control"
                                                                     value="{{ $product->getTranslation('warranty', $lang, false) }}">
                                                             </div>
@@ -262,8 +281,14 @@
                                                                     </thead>
                                                                     <tbody>
                                                                         @php
-                                                                            $rawSpecs = $product->getTranslation('specifications', $lang, false);
-                                                                            $specs = is_array($rawSpecs) ? $rawSpecs : json_decode($rawSpecs, true) ?? [];
+                                                                            $rawSpecs = $product->getTranslation(
+                                                                                'specifications',
+                                                                                $lang,
+                                                                                false,
+                                                                            );
+                                                                            $specs = is_array($rawSpecs)
+                                                                                ? $rawSpecs
+                                                                                : json_decode($rawSpecs, true) ?? [];
                                                                         @endphp
                                                                         @foreach ($specs as $key => $entry)
                                                                             <tr>
@@ -307,7 +332,8 @@
                                             <div class="d-flex justify-content-between align-items-center mb-4">
                                                 <div>
                                                     <h5 class="mb-1"><strong>Product Variants</strong></h5>
-                                                    <p class="text-muted small mb-0">Manage variant details, pricing, and images</p>
+                                                    <p class="text-muted small mb-0">Manage variant details, pricing, and
+                                                        images</p>
                                                 </div>
                                                 <button type="button" class="btn btn-success" id="add-variant-btn">
                                                     <i class="bi bi-plus-circle me-2"></i> Add Variant
@@ -318,69 +344,136 @@
                                                 <table class="table table-hover table-sm mb-4" id="variants-table">
                                                     <thead>
                                                         <tr class="border-bottom">
-                                                            <th style="width: 28%" class="text-uppercase small fw-semibold">Details & Images</th>
-                                                            <th style="width: 14%" class="text-uppercase small fw-semibold">Price</th>
-                                                            <th style="width: 10%" class="text-center text-uppercase small fw-semibold">Bestseller</th>
-                                                            <th style="width: 10%" class="text-center text-uppercase small fw-semibold">Status</th>
-                                                            <th style="width: 12%" class="text-uppercase small fw-semibold">Attributes</th>
-                                                            <th style="width: 14%" class="text-uppercase small fw-semibold">SKU</th>
-                                                            <th style="width: 8%" class="text-center text-uppercase small fw-semibold">Action</th>
+                                                            <th style="width: 28%"
+                                                                class="text-uppercase small fw-semibold">Details & Images
+                                                            </th>
+                                                            <th style="width: 14%"
+                                                                class="text-uppercase small fw-semibold">Price</th>
+                                                            <th style="width: 10%"
+                                                                class="text-center text-uppercase small fw-semibold">
+                                                                Bestseller</th>
+                                                            <th style="width: 10%"
+                                                                class="text-center text-uppercase small fw-semibold">Status
+                                                            </th>
+                                                            <th style="width: 12%"
+                                                                class="text-uppercase small fw-semibold">Attributes</th>
+                                                            <th style="width: 14%"
+                                                                class="text-uppercase small fw-semibold">SKU</th>
+                                                            <th style="width: 8%"
+                                                                class="text-center text-uppercase small fw-semibold">Action
+                                                            </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($product->productVariants as $index => $variant)
                                                             <tr class="align-middle">
                                                                 <td>
-                                                                    <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant->id }}">
+                                                                    <input type="hidden"
+                                                                        name="variants[{{ $index }}][id]"
+                                                                        value="{{ $variant->id }}">
                                                                     <div class="mb-2">
-                                                                        <label class="form-label small fw-semibold mb-1">Variant Name</label>
-                                                                        <input type="text" name="variants[{{ $index }}][name][en]" class="form-control form-control-sm" placeholder="e.g. Red / Large" value="{{ $variant->getTranslation('variant_name', 'en', false) }}" required>
-                                                                        <input type="hidden" name="variants[{{ $index }}][name][fr]" value="{{ $variant->getTranslation('variant_name', 'fr', false) }}">
-                                                                        <input type="hidden" name="variants[{{ $index }}][name][ar]" value="{{ $variant->getTranslation('variant_name', 'ar', false) }}">
+                                                                        <label
+                                                                            class="form-label small fw-semibold mb-1">Variant
+                                                                            Name</label>
+                                                                        <input type="text"
+                                                                            name="variants[{{ $index }}][name][en]"
+                                                                            class="form-control form-control-sm"
+                                                                            placeholder="e.g. Red / Large"
+                                                                            value="{{ $variant->getTranslation('variant_name', 'en', false) }}"
+                                                                            required>
+                                                                        <input type="hidden"
+                                                                            name="variants[{{ $index }}][name][fr]"
+                                                                            value="{{ $variant->getTranslation('variant_name', 'fr', false) }}">
+                                                                        <input type="hidden"
+                                                                            name="variants[{{ $index }}][name][ar]"
+                                                                            value="{{ $variant->getTranslation('variant_name', 'ar', false) }}">
                                                                     </div>
                                                                     @if ($variant->images->count() > 0)
                                                                         <div class="mb-2">
-                                                                            <small class="d-block text-muted mb-1">Current Images:</small>
+                                                                            <small class="d-block text-muted mb-1">Current
+                                                                                Images:</small>
                                                                             <div class="d-flex gap-2 flex-wrap">
-                                                                                @foreach ($variant->images as $img)
-                                                                                    <img src="{{ asset('storage/' . $img->image_path) }}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;" title="Image">
+                                                                                @foreach ($variant->images->sortBy(fn($img) => $img->sort_order ?? $img->id) as $img)
+                                                                                    <div class="position-relative d-inline-block me-1 mb-1 variant-image-wrapper"
+                                                                                        data-image-id="{{ $img->id }}">
+                                                                                        <img src="{{ asset('storage/' . $img->image_path) }}"
+                                                                                            class="rounded border"
+                                                                                            style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
+                                                                                            title="Image">
+                                                                                        <button type="button"
+                                                                                            class="btn btn-sm btn-danger position-absolute top-0 end-0 p-1 delete-variant-image"
+                                                                                            data-image-id="{{ $img->id }}"
+                                                                                            style="font-size: 0.7rem; line-height: 1; border-radius: 50%;"><i
+                                                                                                class="bi bi-x"></i></button>
+                                                                                    </div>
                                                                                 @endforeach
                                                                             </div>
                                                                         </div>
                                                                     @endif
-                                                                    <label class="form-label small fw-semibold mb-1">Add Images</label>
-                                                                    <input type="file" name="variants[{{ $index }}][images][]" multiple class="form-control form-control-sm" accept="image/*">
+                                                                    <label class="form-label small fw-semibold mb-1">Add
+                                                                        Images</label>
+                                                                    <input type="file"
+                                                                        name="variants[{{ $index }}][images][]"
+                                                                        multiple class="form-control form-control-sm"
+                                                                        accept="image/*">
                                                                 </td>
                                                                 <td>
-                                                                    <label class="form-label small fw-semibold mb-1">Price</label>
+                                                                    <label
+                                                                        class="form-label small fw-semibold mb-1">Price</label>
                                                                     <div class="input-group input-group-sm">
-                                                                        <span class="input-group-text">{{ config('app.CURRENCY_SYMBOL') }}</span>
-                                                                        <input type="number" name="variants[{{ $index }}][price]" step="0.01" min="0" class="form-control" value="{{ $variant->price }}" required>
+                                                                        <span
+                                                                            class="input-group-text">{{ config('app.CURRENCY_SYMBOL') }}</span>
+                                                                        <input type="number"
+                                                                            name="variants[{{ $index }}][price]"
+                                                                            step="0.01" min="0"
+                                                                            class="form-control"
+                                                                            value="{{ $variant->price }}" required>
                                                                     </div>
                                                                 </td>
                                                                 <td class="text-center">
-                                                                    <div class="form-check form-switch justify-content-center d-flex">
-                                                                        <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][is_bestseller]" value="1" id="bestseller-{{ $index }}" {{ $variant->is_bestseller ? 'checked' : '' }}>
+                                                                    <div
+                                                                        class="form-check form-switch justify-content-center d-flex">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            name="variants[{{ $index }}][is_bestseller]"
+                                                                            value="1"
+                                                                            id="bestseller-{{ $index }}"
+                                                                            {{ $variant->is_bestseller ? 'checked' : '' }}>
                                                                     </div>
                                                                 </td>
                                                                 <td class="text-center">
-                                                                    <div class="form-check form-switch justify-content-center d-flex">
-                                                                        <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][status]" value="active" id="status-{{ $index }}" {{ $variant->status === 'active' ? 'checked' : '' }}>
+                                                                    <div
+                                                                        class="form-check form-switch justify-content-center d-flex">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            name="variants[{{ $index }}][status]"
+                                                                            value="active"
+                                                                            id="status-{{ $index }}"
+                                                                            {{ $variant->status === 'active' ? 'checked' : '' }}>
                                                                     </div>
                                                                 </td>
                                                                 <td>
-                                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-variant-attributes" data-index="{{ $index }}">
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-outline-primary edit-variant-attributes"
+                                                                        data-index="{{ $index }}">
                                                                         <i class="bi bi-pencil"></i> Edit
                                                                     </button>
-                                                                    <input type="hidden" name="variants[{{ $index }}][attributes][en]" value="{{ json_encode($variant->getTranslation('attributes', 'en', false) ?? []) }}">
-                                                                    <input type="hidden" name="variants[{{ $index }}][attributes][fr]" value="{{ json_encode($variant->getTranslation('attributes', 'fr', false) ?? []) }}">
-                                                                    <input type="hidden" name="variants[{{ $index }}][attributes][ar]" value="{{ json_encode($variant->getTranslation('attributes', 'ar', false) ?? []) }}">
+                                                                    <input type="hidden"
+                                                                        name="variants[{{ $index }}][attributes][en]"
+                                                                        value="{{ json_encode($variant->getTranslation('attributes', 'en', false) ?? []) }}">
+                                                                    <input type="hidden"
+                                                                        name="variants[{{ $index }}][attributes][fr]"
+                                                                        value="{{ json_encode($variant->getTranslation('attributes', 'fr', false) ?? []) }}">
+                                                                    <input type="hidden"
+                                                                        name="variants[{{ $index }}][attributes][ar]"
+                                                                        value="{{ json_encode($variant->getTranslation('attributes', 'ar', false) ?? []) }}">
                                                                 </td>
                                                                 <td>
-                                                                    <span class="badge bg-light text-dark border">{{ $variant->sku }}</span>
+                                                                    <span
+                                                                        class="badge bg-light text-dark border">{{ $variant->sku }}</span>
                                                                 </td>
                                                                 <td class="text-center">
-                                                                    <button type="button" class="btn btn-sm btn-danger remove-variant" title="Delete Variant">
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-danger remove-variant"
+                                                                        title="Delete Variant">
                                                                         <i class="bi bi-trash"></i>
                                                                     </button>
                                                                 </td>
@@ -407,7 +500,8 @@
     </div>
 
     <!-- Variant Translation & Attribute Modal -->
-    <div class="modal fade" id="variantTranslationModal" tabindex="-1" aria-labelledby="variantTranslationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="variantTranslationModal" tabindex="-1" aria-labelledby="variantTranslationModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -417,24 +511,36 @@
                 <div class="modal-body">
                     <input type="hidden" id="modal-variant-index">
                     <ul class="nav nav-tabs mb-3" id="variantLangTab" role="tablist">
-                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#variant-en" type="button">English</button></li>
-                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#variant-fr" type="button">French</button></li>
-                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#variant-ar" type="button">Arabic</button></li>
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab"
+                                data-bs-target="#variant-en" type="button">English</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#variant-fr"
+                                type="button">French</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#variant-ar"
+                                type="button">Arabic</button></li>
                     </ul>
                     <div class="tab-content">
                         <!-- EN -->
                         <div class="tab-pane fade show active" id="variant-en">
                             <div class="mb-3">
-                                <label class="form-label">Variant Name (EN) <span class="badge bg-secondary align-middle">Not Editable</span></label>
-                                <input type="text" class="form-control" id="modal-variant-name-en" readonly tabindex="-1" style="background-color: #b6b7b8 !important; pointer-events: none;">
+                                <label class="form-label">Variant Name (EN) <span
+                                        class="badge bg-secondary align-middle">Not Editable</span></label>
+                                <input type="text" class="form-control" id="modal-variant-name-en" readonly
+                                    tabindex="-1" style="background-color: #b6b7b8 !important; pointer-events: none;">
                             </div>
                             <div class="mb-2 d-flex justify-content-between align-items-center">
                                 <label class="form-label mb-0">Attributes (EN)</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn" data-lang="en">Add Attribute</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn"
+                                    data-lang="en">Add Attribute</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered" id="variant-attr-table-en">
-                                    <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -447,11 +553,18 @@
                             </div>
                             <div class="mb-2 d-flex justify-content-between align-items-center">
                                 <label class="form-label mb-0">Attributes (FR)</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn" data-lang="fr">Add Attribute</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn"
+                                    data-lang="fr">Add Attribute</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered" id="variant-attr-table-fr">
-                                    <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -464,11 +577,18 @@
                             </div>
                             <div class="mb-2 d-flex justify-content-between align-items-center">
                                 <label class="form-label mb-0">Attributes (AR)</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn" data-lang="ar">Add Attribute</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-variant-attr-btn"
+                                    data-lang="ar">Add Attribute</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered" id="variant-attr-table-ar">
-                                    <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -486,7 +606,7 @@
     @push('scripts')
         @php
             // Provide a complete list of subcategories to the JS so edit mode can refresh correctly
-            $__allSubCats = \App\Models\SubCategories::all()->map(function($s){
+            $__allSubCats = \App\Models\SubCategories::all()->map(function ($s) {
                 return [
                     'id' => $s->id,
                     'text' => $s->getTranslation('sub-category-name', 'en'),
@@ -497,6 +617,38 @@
         <script>
             window.__ALL_SUBCATEGORIES = {!! json_encode($__allSubCats) !!};
         </script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
         <script src="{{ asset('admin_assets/js/product-form.js') }}"></script>
+        <script src="{{ asset('admin_assets/js/variant-image-sort.js') }}"></script>
+        <script>
+            window.variantImageReorderUrl = '{{ route('admin.products.reorderVariantImages') }}';
+            window.csrfToken = '{{ csrf_token() }}';
+        </script>
+        <script>
+            $(document).on('click', '.delete-variant-image', function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var imageId = btn.data('image-id');
+                if (!confirm('Are you sure you want to delete this image?')) return;
+                $.ajax({
+                    url: '{{ route('admin.products.deleteVariantImage') }}',
+                    type: 'POST',
+                    data: {
+                        image_id: imageId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            btn.closest('.variant-image-wrapper').remove();
+                        } else {
+                            alert(response.message || 'Failed to delete image.');
+                        }
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON?.message || 'Failed to delete image.');
+                    }
+                });
+            });
+        </script>
     @endpush
 @endsection

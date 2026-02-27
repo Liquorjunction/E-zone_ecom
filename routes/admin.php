@@ -249,6 +249,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::patch('/variant-toggle-bestseller', [ProductController::class, 'toggleVariantBestseller'])->name('variantToggleBestseller')->middleware('can:products.update,admin');
             Route::patch('/variant-destroy', [ProductController::class, 'destroyVariant'])->name('variantDestroy')->middleware('can:products.delete,admin');
             Route::get('/show', [ProductController::class, 'show'])->name('show')->middleware('can:products.read,admin');
+            Route::post('/variant-image-delete', [ProductController::class, 'deleteVariantImage'])->name('deleteVariantImage')->middleware('can:products.update,admin');
+            Route::post('/variant-image-reorder', [ProductController::class, 'reorderVariantImages'])->name('reorderVariantImages')->middleware('can:products.update,admin');
             Route::post('/import', [ProductController::class, 'import'])->name('import')->middleware('can:products.create,admin');
             Route::get('/template', [ProductController::class, 'downloadTemplate'])->name('template');
             Route::get('import/progress/{batchId}', [ProductController::class, 'importProgress'])->name('import.progress');

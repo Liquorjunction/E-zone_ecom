@@ -21,4 +21,6 @@ interface ProductRepositoryInterface
 
     public function updateProductVariantStatus($variantId);
     public function updateProductVariantBestseller($variantId);
+    public function deleteVariantImage($imageId);
+    public function reorderVariantImages($variantId, array $order);
 }

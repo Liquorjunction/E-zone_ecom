@@ -242,6 +242,25 @@ class ProductController extends Controller
         }
     }
 
+    public function deleteVariantImage(Request $request, ProductRepo $productRepo)
+    {
+        $request->validate([
+            'image_id' => 'required|exists:product_images,id',
+        ]);
+        try {
+            $imageId = $request->input('image_id');
+            $success = $productRepo->deleteVariantImage($imageId);
+            if ($success) {
+                return response()->json(['success' => true, 'message' => 'Image deleted successfully.']);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Image not found.'], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('ProductController.deleteVariantImage: Failed to delete variant image', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to delete image.'], 500);
+        }
+    }
+
     public function destroyVariant(Request $request)
     {
         $request->validate([
@@ -552,6 +571,24 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             Log::error('ProductController.dataTable: ' . $e->getMessage());
             throw $e;
+        }
+    }
+
+    public function reorderVariantImages(Request $request, ProductRepo $productRepo)
+    {
+        $request->validate([
+            'variant_id' => 'required|exists:product_variants,id',
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:product_images,id',
+        ]);
+        try {
+            $variantId = $request->input('variant_id');
+            $order = $request->input('order');
+            $productRepo->reorderVariantImages($variantId, $order);
+            return response()->json(['success' => true, 'message' => 'Image order updated.']);
+        } catch (\Exception $e) {
+            Log::error('ProductController.reorderVariantImages: Failed to reorder images', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to reorder images.'], 500);
         }
     }
 }

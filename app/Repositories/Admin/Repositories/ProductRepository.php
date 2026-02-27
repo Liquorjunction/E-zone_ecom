@@ -41,6 +41,20 @@ class ProductRepository implements ProductRepositoryInterface
             ->get();
     }
 
+    public function deleteVariantImage($imageId)
+    {
+        $image = ProductImage::find($imageId);
+        if (!$image) {
+            return false;
+        }
+        // Delete image file from storage if exists
+        if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+        $image->delete();
+        return true;
+    }
+
     public function getProductById($id)
     {
         return Product::with(['productVariants.images', 'productVariants.inventory'])->findOrFail($id);
@@ -518,6 +532,16 @@ class ProductRepository implements ProductRepositoryInterface
                     $variant->delete();
                 }
             }
+        }
+    }
+
+    public function reorderVariantImages($variantId, array $order)
+    {
+        // Assumes ProductImage has a 'sort_order' column
+        foreach ($order as $idx => $imageId) {
+            ProductImage::where('id', $imageId)
+                ->where('product_variant_id', $variantId)
+                ->update(['sort_order' => $idx + 1]);
         }
     }
 
