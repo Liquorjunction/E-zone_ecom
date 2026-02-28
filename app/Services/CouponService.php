@@ -8,6 +8,7 @@ use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 use App\Models\CouponUsage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CouponService
 {
@@ -27,10 +28,24 @@ class CouponService
 
     public function validateAndApplyCoupon(string $code, Cart $cart): array
     {
+        // Remove coupon if cart is empty
+        if ($cart->items()->count() === 0) {
+            $this->sessionCoupon->remove();
+            return [
+                'success' => false,
+                'message' => 'Cannot apply a coupon to an empty cart.',
+                'discount' => null,
+            ];
+        }
         $coupon = $this->couponRepo->getAllCoupons([
             'code' => strtoupper($code),
             'status' => true
         ])->first();
+
+        Log::debug('CouponService: Attempting to apply coupon', [
+            'code' => $code,
+            'cart_id' => $cart->id,
+        ]);
 
         if (!$coupon) {
             return [
@@ -153,12 +168,10 @@ class CouponService
     public function removeCoupon(Cart $cart): bool
     {
         $this->sessionCoupon->remove();
-
         $cart->coupon_id = null;
         $cart->coupon_code = null;
         $cart->coupon_discount_amount = 0;
         $cart->save();
-
         return true;
     }
 
@@ -179,26 +192,30 @@ class CouponService
             'status' => true
         ])->first();
     }
+    public static function clearCouponIfCartEmpty(Cart $cart, SessionCouponService $sessionCoupon)
+    {
+        if ($cart->items()->count() === 0) {
+            $sessionCoupon->remove();
+        }
+    }
 
-    /**
-     * Get the currently applied coupon from session
-     */
     public function getAppliedCoupon(int $cartId): ?array
     {
+        $cart = \App\Models\Cart::find($cartId);
+        if ($cart) {
+            self::clearCouponIfCartEmpty($cart, $this->sessionCoupon);
+            if ($cart->items()->count() === 0) {
+                return null;
+            }
+        }
         return $this->sessionCoupon->getForCart($cartId);
     }
 
-    /**
-     * Get the discount amount from session for a cart
-     */
     public function getDiscountAmount(int $cartId): float
     {
         return $this->sessionCoupon->getDiscountAmount($cartId);
     }
 
-    /**
-     * Check if a coupon is currently applied
-     */
     public function hasAppliedCoupon(int $cartId): bool
     {
         return $this->sessionCoupon->hasForCart($cartId);

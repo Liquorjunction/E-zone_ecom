@@ -6,7 +6,6 @@ use App\DTOs\CartIdentifier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Cart\CartAddRequest;
 use App\Http\Requests\Client\Coupon\ApplyCouponRequest;
-use App\Models\Address;
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
 use App\Services\CartService;
@@ -20,33 +19,73 @@ use Psr\Log\LoggerInterface;
 
 class CartController extends Controller
 {
+    // ─────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Build the summary array that is sent back in every JSON response.
+     * Tax is intentionally excluded from the checkout flow.
+     */
+    private function buildSummary(array $totals, $cart = null): array
+    {
+        return [
+            'subtotal'                     => round($totals['subtotal'] ?? 0, 2),
+            'item_discount'                => round($totals['total_item_discount'] ?? 0, 2),
+            'subtotal_after_item_discount' => round($totals['subtotal_after_item_discount'] ?? 0, 2),
+            'coupon_discount'              => round($totals['coupon_discount'] ?? 0, 2),
+            'total_after_coupon'           => round($totals['total_after_coupon'] ?? 0, 2),
+            'shipping'                     => round($totals['shipping_cost'] ?? 0, 2),
+            'total'                        => round($totals['final_total'] ?? 0, 2),
+            'itemCount'                    => $cart ? (int) $cart->items->sum('quantity') : 0,
+            'items'                        => $totals['items'] ?? [],
+        ];
+    }
+
+    private function emptyTotals(string $shippingMethod = 'standard'): array
+    {
+        return [
+            'subtotal'                     => 0,
+            'total_item_discount'          => 0,
+            'subtotal_after_item_discount' => 0,
+            'coupon_discount'              => 0,
+            'total_after_coupon'           => 0,
+            'shipping_method'              => $shippingMethod,
+            'shipping_cost'                => 0,
+            'final_total'                  => 0,
+            'items'                        => [],
+        ];
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Add item
+    // ─────────────────────────────────────────────────────────────
+
     public function add(CartAddRequest $request, CartService $cartService, LoggerInterface $logger)
     {
-        $data = $request->validated();
+        $data   = $request->validated();
         $cartId = CartIdentifier::fromRequest($request);
+
         try {
             $item = $cartService->addItem($cartId, $data);
         } catch (\Exception $e) {
             if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                ], 400);
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
             }
             return redirect()->back()->with('error', $e->getMessage());
         }
+
         $logger->info('Added item to cart via controller', ['item_id' => $item->id ?? null]);
 
         if ($request->wantsJson() || $request->ajax()) {
-            $cart = $cartService->getCart($cartId);
+            $cart      = $cartService->getCart($cartId);
             $itemCount = $cart ? (int) $cart->items->sum('quantity') : 0;
+
             return response()->json([
                 'success' => true,
                 'message' => 'Item added to cart.',
                 'item_id' => $item->id ?? null,
-                'summary' => [
-                    'itemCount' => $itemCount,
-                ],
+                'summary' => ['itemCount' => $itemCount],
             ]);
         }
 
@@ -57,71 +96,64 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Item added to cart.');
     }
 
-    public function show(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService, SessionCouponService $sessionCoupon, AddressRepo $addressRepo)
-    {
+    // ─────────────────────────────────────────────────────────────
+    // Show cart / checkout page
+    // ─────────────────────────────────────────────────────────────
+
+    public function show(
+        Request $request,
+        CartService $cartService,
+        LoggerInterface $logger,
+        PriceCalculatorService $priceService,
+        SessionCouponService $sessionCoupon,
+        AddressRepo $addressRepo
+    ) {
         $cartId = CartIdentifier::fromRequest($request);
-        $cart = $cartService->getCart($cartId);
+        $cart   = $cartService->getCart($cartId);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
-        $step = (int) $request->get('step', 1);
 
-        $totals = $cart ? $priceService->calculate($cart) : [
-            'subtotal' => 0,
-            'total_item_discount' => 0,
-            'subtotal_after_item_discount' => 0,
-            'coupon_discount' => 0,
-            'total_after_coupon' => 0,
-            'tax_rate' => config('tax.rate', 20.0),
-            'tax_amount' => 0,
-            'taxable_amount' => 0,
-            'shipping_method' => 'standard',
-            'shipping_cost' => 0,
-            'final_total' => 0,
-            'items' => []
-        ];
-
-        $addresses = Auth::check() ? $addressRepo->getAddressesByUserId(Auth::id()) : collect();
-        $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
+        $totals        = $cart ? $priceService->calculate($cart) : $this->emptyTotals();
+        $addresses     = Auth::check() ? $addressRepo->getAddressesByUserId(Auth::id()) : collect();
         $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
 
-        return view('client.pages.checkout-process', compact('cart', 'step', 'totals', 'addresses', 'appliedCoupon'));
+        return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'appliedCoupon'));
     }
 
-    public function update(Request $request, CartService $cartService, LoggerInterface $logger, CartRepo $cartRepo, PriceCalculatorService $priceService)
-    {
-        $itemId = (int) $request->input('item_id');
-        $data = $request->only(['quantity']);
+    // ─────────────────────────────────────────────────────────────
+    // Update quantity
+    // ─────────────────────────────────────────────────────────────
 
-        $getAvailableStock = function ($cartItem) {
-            if (!$cartItem) {
-                return 0;
-            }
+    public function update(
+        Request $request,
+        CartService $cartService,
+        LoggerInterface $logger,
+        PriceCalculatorService $priceService
+    ) {
+        $itemId         = (int) $request->input('item_id');
+        $shippingMethod = $request->input('shipping_method', 'standard');
+        $cartId         = CartIdentifier::fromRequest($request);
+
+        $getStock = function ($cartItem) {
+            if (! $cartItem) return 0;
             $variant = $cartItem->variant ?? null;
             $product = $cartItem->product ?? null;
-            if ($variant) {
-                return (int) ($variant->getTotalStockAttribute() ?? 0);
-            }
-            if ($product) {
-                return (int) ($product->productVariants()->sum('inventory.quantity') ?? 0);
-            }
+            if ($variant) return (int) ($variant->getTotalStockAttribute() ?? 0);
+            if ($product) return (int) ($product->productVariants()->sum('inventory.quantity') ?? 0);
             return 0;
         };
 
-        $cartId = CartIdentifier::fromRequest($request);
         try {
-            $item = $cartService->updateItem($cartId, $itemId, $data);
+            $item = $cartService->updateItem($cartId, $itemId, $request->only(['quantity']));
         } catch (\Exception $e) {
             if ($request->wantsJson() || $request->ajax()) {
-                $cart = $cartService->getCart($cartId);
+                $cart        = $cartService->getCart($cartId);
                 $currentItem = $cart ? $cart->items->firstWhere('id', $itemId) : null;
-                $maxStock = $getAvailableStock($currentItem);
+                $maxStock    = $getStock($currentItem);
+
                 return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'item' => [
-                        'id' => $currentItem->id ?? $itemId,
-                        'quantity' => $currentItem->quantity ?? null,
-                        'max_stock' => $maxStock,
-                    ],
+                    'success'   => false,
+                    'message'   => $e->getMessage(),
+                    'item'      => ['id' => $currentItem->id ?? $itemId, 'quantity' => $currentItem->quantity ?? null, 'max_stock' => $maxStock],
                     'max_stock' => $maxStock,
                 ], 400);
             }
@@ -130,235 +162,179 @@ class CartController extends Controller
 
         $logger->info('Updated cart item via controller', ['item_id' => $item->id ?? null]);
 
-        $cart = $cartService->getCart($cartId);
-        $shippingMethod = $request->input('shipping_method', 'standard');
-        $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : [
-            'subtotal' => 0,
-            'total_item_discount' => 0,
-            'subtotal_after_item_discount' => 0,
-            'coupon_discount' => 0,
-            'total_after_coupon' => 0,
-            'tax_rate' => config('tax.rate', 20.0),
-            'tax_amount' => 0,
-            'taxable_amount' => 0,
-            'shipping_method' => $shippingMethod,
-            'shipping_cost' => 0,
-            'final_total' => 0,
-            'items' => []
-        ];
+        $cart   = $cartService->getCart($cartId);
+        $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : $this->emptyTotals($shippingMethod);
 
+        // Build per-item discount info for the updated item
         $itemDiscount = null;
         if ($item && isset($totals['items'][$item->id])) {
-            $itemInfo = $totals['items'][$item->id];
+            $info         = $totals['items'][$item->id];
             $itemDiscount = [
-                'has_discount' => $itemInfo['discount_amount'] > 0,
-                'discount_amount' => $itemInfo['discount_amount'],
-                'line_total_after_discount' => $itemInfo['line_total_after_discount'] ?? null,
+                'has_discount'              => $info['discount_amount'] > 0,
+                'discount_amount'           => $info['discount_amount'],
+                'line_total_after_discount' => $info['line_final'] ?? null,
             ];
         }
 
         if ($request->wantsJson() || $request->ajax()) {
-            $maxStock = $getAvailableStock($item);
-            $items = [];
+            // Build keyed items map for the JS updater
+            $itemsMap = [];
             if ($cart) {
                 foreach ($cart->items as $cartItem) {
-                    $items[$cartItem->id] = [
-                        'id' => $cartItem->id,
-                        'quantity' => $cartItem->quantity,
-                        'unit_price' => $cartItem->unit_price,
-                        'final_price' => $cartItem->final_price ?? $cartItem->unit_price,
+                    $itemsMap[$cartItem->id] = [
+                        'id'              => $cartItem->id,
+                        'quantity'        => $cartItem->quantity,
+                        'unit_price'      => $cartItem->unit_price,
+                        'final_price'     => $cartItem->final_price ?? $cartItem->unit_price,
                         'discount_amount' => $cartItem->discount_amount ?? 0,
-                        'max_stock' => $getAvailableStock($cartItem),
+                        'max_stock'       => $getStock($cartItem),
                     ];
                 }
             }
 
+            $summary          = $this->buildSummary($totals, $cart);
+            $summary['items'] = $itemsMap;
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cart updated.',
-                'item' => [
-                    'id' => $item->id ?? null,
-                    'quantity' => $item->quantity ?? null,
+                'item'    => [
+                    'id'        => $item->id ?? null,
+                    'quantity'  => $item->quantity ?? null,
                     'unit_price' => $item->unit_price ?? null,
                     'line_total' => isset($item->quantity, $item->unit_price) ? ($item->quantity * $item->unit_price) : null,
-                    'discount' => $itemDiscount,
-                    'max_stock' => $maxStock,
+                    'discount'  => $itemDiscount,
+                    'max_stock' => $getStock($item),
                 ],
-                'summary' => [
-                    'subtotal' => round($totals['subtotal'] ?? 0, 2),
-                    'total_discount' => round($totals['total_item_discount'] ?? 0, 2),
-                    'subtotal_after_discount' => round($totals['subtotal_after_item_discount'] ?? 0, 2),
-                    'coupon_discount' => round($totals['coupon_discount'] ?? 0, 2),
-                    'tax' => round($totals['tax_amount'] ?? 0, 2),
-                    'shipping' => round($totals['shipping_cost'] ?? 0, 2),
-                    'total' => round($totals['final_total'] ?? 0, 2),
-                    'itemCount' => $cart ? (int) $cart->items->sum('quantity') : 0,
-                    'items' => $items,
-                ],
+                'summary' => $summary,
             ]);
         }
 
         return redirect()->back()->with('success', 'Cart updated.');
     }
 
-    public function remove(Request $request, CartService $cartService, LoggerInterface $logger, PriceCalculatorService $priceService)
-    {
+    // ─────────────────────────────────────────────────────────────
+    // Remove item
+    // ─────────────────────────────────────────────────────────────
+
+    public function remove(
+        Request $request,
+        CartService $cartService,
+        LoggerInterface $logger,
+        PriceCalculatorService $priceService
+    ) {
         $itemId = (int) ($request->input('id') ?? $request->input('item_id'));
 
-        if (!$itemId) {
+        if (! $itemId) {
             return response()->json(['success' => false, 'message' => 'Item ID is missing.']);
         }
 
-        $cartId = CartIdentifier::fromRequest($request);
-        $ok = $cartService->removeItem($cartId, $itemId);
+        $cartId         = CartIdentifier::fromRequest($request);
+        $shippingMethod = $request->input('shipping_method', 'standard');
+        $ok             = $cartService->removeItem($cartId, $itemId);
         $logger->info('Removed cart item via controller', ['item_id' => $itemId, 'success' => $ok]);
 
-        $cart = $cartService->getCart($cartId);
-        $shippingMethod = $request->input('shipping_method', 'standard');
-        $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : [
-            'subtotal' => 0,
-            'total_item_discount' => 0,
-            'subtotal_after_item_discount' => 0,
-            'coupon_discount' => 0,
-            'total_after_coupon' => 0,
-            'tax_rate' => config('tax.rate', 20.0),
-            'tax_amount' => 0,
-            'taxable_amount' => 0,
-            'shipping_method' => $shippingMethod,
-            'shipping_cost' => 0,
-            'final_total' => 0,
-            'items' => []
-        ];
+        $cart   = $cartService->getCart($cartId);
+        $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : $this->emptyTotals($shippingMethod);
 
         if ($request->wantsJson() || $request->ajax()) {
-            $items = [];
+            // Build keyed items map
+            $itemsMap = [];
             if ($cart) {
                 foreach ($cart->items as $cartItem) {
-                    $items[$cartItem->id] = [
-                        'id' => $cartItem->id,
-                        'quantity' => $cartItem->quantity,
-                        'unit_price' => $cartItem->unit_price,
-                        'final_price' => $cartItem->final_price ?? $cartItem->unit_price,
+                    $itemsMap[$cartItem->id] = [
+                        'id'              => $cartItem->id,
+                        'quantity'        => $cartItem->quantity,
+                        'unit_price'      => $cartItem->unit_price,
+                        'final_price'     => $cartItem->final_price ?? $cartItem->unit_price,
                         'discount_amount' => $cartItem->discount_amount ?? 0,
                     ];
                 }
             }
 
+            $summary          = $this->buildSummary($totals, $cart);
+            $summary['items'] = $itemsMap;
+
             return response()->json([
                 'success' => (bool) $ok,
                 'message' => $ok ? 'Item removed from cart.' : 'Failed to remove item.',
-                'summary' => [
-                    'subtotal' => round($totals['subtotal'] ?? 0, 2),
-                    'total_discount' => round($totals['total_item_discount'] ?? 0, 2),
-                    'subtotal_after_discount' => round($totals['subtotal_after_item_discount'] ?? 0, 2),
-                    'coupon_discount' => round($totals['coupon_discount'] ?? 0, 2),
-                    'tax' => round($totals['tax_amount'] ?? 0, 2),
-                    'shipping' => round($totals['shipping_cost'] ?? 0, 2),
-                    'total' => round($totals['final_total'] ?? 0, 2),
-                    'itemCount' => $cart ? (int) $cart->items->sum('quantity') : 0,
-                    'items' => $items,
-                ],
+                'summary' => $summary,
             ]);
         }
 
         return redirect()->route('cart')->with('success', 'Item removed from cart.');
     }
 
-    public function applyCoupon(ApplyCouponRequest $request, CartService $cartService, CouponService $couponService, LoggerInterface $logger, CartRepo $cartRepo, SessionCouponService $sessionCoupon)
-    {
-        $cartId = CartIdentifier::fromRequest($request);
-        $cart = $cartService->getCart($cartId);
+    // ─────────────────────────────────────────────────────────────
+    // Apply coupon
+    // ─────────────────────────────────────────────────────────────
 
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Your cart is empty.',
-            ]);
+    public function applyCoupon(
+        ApplyCouponRequest $request,
+        CartService $cartService,
+        CouponService $couponService,
+        LoggerInterface $logger,
+        PriceCalculatorService $priceService
+    ) {
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart   = $cartService->getCart($cartId);
+
+        if (! $cart || $cart->items->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Your cart is empty.']);
         }
 
-        $code = strtoupper($request->input('code'));
+        $code   = strtoupper($request->input('code'));
         $result = $couponService->validateAndApplyCoupon($code, $cart);
 
         $logger->info('Coupon application attempt', [
             'cart_id' => $cart->id,
-            'code' => $code,
+            'code'    => $code,
             'success' => $result['success'],
         ]);
 
         if ($result['success']) {
-            $totals = $cartRepo->calculateCartTotals($cart);
-            $subtotalAfterItemDiscounts = $totals['total'];
-
-            // Get coupon discount from session instead of database
-            $couponDiscount = $sessionCoupon->getDiscountAmount($cart->id);
-            $totalAfterCoupon = max(0, $subtotalAfterItemDiscounts - $couponDiscount);
-            $taxRate = config('tax.rate', 20.0);
-            $tax = round($totalAfterCoupon * ($taxRate / (100 + $taxRate)), 2);
-            $shipping = 0.00;
-            $finalTotal = $totalAfterCoupon + $shipping;
+            $shippingMethod = $request->input('shipping_method', 'standard');
+            $totals         = $priceService->calculate($cart, $shippingMethod);
 
             return response()->json([
                 'success' => true,
                 'message' => $result['message'],
-                'coupon' => $result['coupon'],
-                'summary' => [
-                    'subtotal' => round($totals['subtotal'], 2),
-                    'item_discount' => round($totals['total_discount'], 2),
-                    'subtotal_after_item_discount' => round($subtotalAfterItemDiscounts, 2),
-                    'coupon_discount' => round($couponDiscount, 2),
-                    'total_after_coupon' => round($totalAfterCoupon, 2),
-                    'taxable_amount' => round($totalAfterCoupon - $tax, 2),
-                    'tax_amount' => round($tax, 2),
-                    'tax' => $tax,
-                    'shipping' => $shipping,
-                    'total' => round($finalTotal, 2),
-                ],
+                'coupon'  => $result['coupon'],
+                'summary' => $this->buildSummary($totals, $cart),
             ]);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => $result['message'],
-        ]);
+        return response()->json(['success' => false, 'message' => $result['message']]);
     }
 
-    public function removeCoupon(Request $request, CartService $cartService, CouponService $couponService, LoggerInterface $logger, CartRepo $cartRepo)
-    {
-        $cartId = CartIdentifier::fromRequest($request);
-        $cart = $cartService->getCart($cartId);
+    // ─────────────────────────────────────────────────────────────
+    // Remove coupon
+    // ─────────────────────────────────────────────────────────────
 
-        if (!$cart) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cart not found.',
-            ]);
+    public function removeCoupon(
+        Request $request,
+        CartService $cartService,
+        CouponService $couponService,
+        LoggerInterface $logger,
+        PriceCalculatorService $priceService
+    ) {
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart   = $cartService->getCart($cartId);
+
+        if (! $cart) {
+            return response()->json(['success' => false, 'message' => 'Cart not found.']);
         }
 
         $removed = $couponService->removeCoupon($cart);
         $logger->info('Coupon removed from cart', ['cart_id' => $cart->id, 'success' => $removed]);
 
-        $totals = $cartRepo->calculateCartTotals($cart);
-        $taxRate = config('tax.rate', 20.0);
-        $totalWithTax = $totals['total'];
-        $tax = round($totalWithTax * ($taxRate / (100 + $taxRate)), 2);
-        $shipping = 0.00;
-        $finalTotal = $totalWithTax + $shipping;
+        $shippingMethod = $request->input('shipping_method', 'standard');
+        $totals         = $priceService->calculate($cart, $shippingMethod);
 
         return response()->json([
             'success' => $removed,
             'message' => $removed ? 'Coupon removed.' : 'Failed to remove coupon.',
-            'summary' => [
-                'subtotal' => round($totals['subtotal'], 2),
-                'item_discount' => round($totals['total_discount'], 2),
-                'subtotal_after_item_discount' => round($totals['total'], 2),
-                'coupon_discount' => 0,
-                'total_after_coupon' => round($totals['total'], 2),
-                'taxable_amount' => round($totalWithTax - $tax, 2),
-                'tax_amount' => round($tax, 2),
-                'tax' => $tax,
-                'shipping' => $shipping,
-                'total' => round($finalTotal, 2),
-            ],
+            'summary' => $this->buildSummary($totals, $cart),
         ]);
     }
 }

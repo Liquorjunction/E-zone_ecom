@@ -141,10 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (summaryIncreaseBtn) {
             e.preventDefault();
 
-            const isStep3 = document.querySelector('.text-xl.font-extrabold.text-gray-900.mb-4')?.textContent.includes('Order Successfully Placed');
-            if (isStep3) {
-                return;
-            }
+            // Disable qty changes on step 3 (order confirmed) using a data attribute on the root
+            if (root.dataset.step === '3') return;
 
             const id = summaryIncreaseBtn.dataset.itemId;
             const quantityDisplay = document.querySelector(
@@ -178,10 +176,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (summaryDecreaseBtn) {
             e.preventDefault();
 
-            const isStep3 = document.querySelector('.text-xl.font-extrabold.text-gray-900.mb-4')?.textContent.includes('Order Successfully Placed');
-            if (isStep3) {
-                return;
-            }
+            // Disable qty changes on step 3 (order confirmed) using a data attribute on the root
+            if (root.dataset.step === '3') return;
 
             const id = summaryDecreaseBtn.dataset.itemId;
             const quantityDisplay = document.querySelector(
@@ -318,6 +314,10 @@ document.addEventListener("DOMContentLoaded", function () {
     async function updateItem(id, quantity) {
         if (!updateUrl) return;
 
+        // Read the currently selected shipping method so the server recalculates shipping correctly
+        const shippingMethodEl = document.querySelector('input[name="shipping_method"]:checked');
+        const shippingMethod = shippingMethodEl ? shippingMethodEl.value : 'standard';
+
         try {
             const resp = await fetch(updateUrl, {
                 method: "POST",
@@ -330,6 +330,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     id: id,
                     item_id: id,
                     quantity: quantity,
+                    shipping_method: shippingMethod,
                 }),
             });
 
@@ -566,16 +567,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!summary) return;
 
         const map = {
-            subtotal: [".order-subtotal", "order-subtotal"],
-            total_discount: [".order-discount", "order-discount"],
-            subtotal_after_discount: [
-                ".order-subtotal-after-discount",
-                "order-subtotal-after-discount",
-            ],
-            tax: [".order-tax", "order-tax"],
-            total: [".order-total", "order-total", "summary-total"],
-            itemCount: [".order-item-count", "order-item-count"],
-            shipping: [".order-shipping", "order-shipping"],
+            subtotal:                     [".order-subtotal",                  "order-subtotal"],
+            item_discount:                [".order-discount",                  "order-discount"],
+            subtotal_after_item_discount: [".order-subtotal-after-discount",   "order-subtotal-after-discount"],
+            coupon_discount:              [".order-coupon-discount",            "order-coupon-discount"],
+            tax:                          [".order-tax",                        "order-tax"],
+            total:                        [".order-total",                      "order-total",    "summary-total"],
+            itemCount:                    [".order-item-count",                 "order-item-count"],
+            shipping:                     [".order-shipping",                   "order-shipping"],
         };
 
         for (const [key, selectors] of Object.entries(map)) {
@@ -595,8 +594,17 @@ document.addEventListener("DOMContentLoaded", function () {
                                 : "FREE";
                     } else if (key === "itemCount") {
                         el.textContent = summary[key];
-                    } else if (key === "total_discount") {
-                        el.textContent = "-" + formatMoney(summary[key]);
+                    } else if (key === "item_discount" || key === "coupon_discount") {
+                        if (summary[key] > 0) {
+                            el.textContent = "-" + formatMoney(summary[key]);
+                            // Show parent row if it was hidden
+                            const row = el.closest('[id$="-discount-row"], .discount-row');
+                            if (row) row.style.display = '';
+                        } else {
+                            // Hide the row when discount becomes 0
+                            const row = el.closest('[id$="-discount-row"], .discount-row');
+                            if (row) row.style.display = 'none';
+                        }
                     } else {
                         el.textContent = formatMoney(summary[key]);
                     }

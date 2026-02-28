@@ -17,7 +17,7 @@ class CouponRepository implements CouponRepositoryInterface
         }
 
         if (isset($filters['code'])) {
-            $query->where('code', 'like', '%' . $filters['code'] . '%');
+            $query->where('code', $filters['code']);
         }
 
         return $query->get();
@@ -33,7 +33,7 @@ class CouponRepository implements CouponRepositoryInterface
         return Coupon::find($id);
     }
 
-    public function storeCoupon($request , $data = null)
+    public function storeCoupon($request, $data = null)
     {
         $payload = $this->buildPayload($request, $data);
 
@@ -78,8 +78,8 @@ class CouponRepository implements CouponRepositoryInterface
             $search = $filters['search']['value'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                  ->orWhere('code', 'like', "%$search%")
-                  ->orWhere('coupon_type', 'like', "%$search%");
+                    ->orWhere('code', 'like', "%$search%")
+                    ->orWhere('coupon_type', 'like', "%$search%");
             });
         }
 
@@ -118,5 +118,4 @@ class CouponRepository implements CouponRepositoryInterface
 
         return $payload;
     }
-
 }

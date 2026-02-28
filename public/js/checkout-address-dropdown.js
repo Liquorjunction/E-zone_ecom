@@ -12,21 +12,15 @@ document.addEventListener('DOMContentLoaded', function() {
         shippingSelect.addEventListener('change', function() {
             const option = this.options[this.selectedIndex];
             if (!option || !option.dataset.addr) {
-                // Clear fields if no valid selection
                 clearShippingFields();
                 if (shippingDisplay) shippingDisplay.classList.add('hidden');
                 return;
             }
-
             try {
                 const addr = JSON.parse(option.dataset.addr);
-
-                // Parse name into first and last
                 const nameParts = addr.name ? addr.name.split(' ') : ['', ''];
                 const firstName = nameParts[0] || '';
                 const lastName = nameParts.slice(1).join(' ') || '';
-
-                // Populate hidden fields for form submission
                 setFieldValue('firstName', firstName);
                 setFieldValue('lastName', lastName);
                 setFieldValue('address', addr.street || '');
@@ -34,15 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 setFieldValue('state', addr.state || '');
                 setFieldValue('zip', addr.postal_code || '');
                 setFieldValue('country', addr.country || 'Morocco');
-
-                // Update selected address display
                 if (shippingDisplay) {
                     document.getElementById('displayShippingName').textContent = addr.name || '';
                     document.getElementById('displayShippingStreet').textContent = addr.street || '';
                     document.getElementById('displayShippingCity').textContent = `${addr.city || ''}, ${addr.state || ''} ${addr.postal_code || ''}`;
                     shippingDisplay.classList.remove('hidden');
                 }
-
                 // If billing same as shipping is checked, copy the shipping data immediately
                 const billingSameCheckbox = document.getElementById('billingSameAsShipping');
                 if (billingSameCheckbox && billingSameCheckbox.checked) {
@@ -60,12 +51,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error parsing shipping address:', e);
             }
         });
-
         // Trigger change on load if default is selected
         if (shippingSelect.value) {
             shippingSelect.dispatchEvent(new Event('change'));
         }
     }
+
+    // Removed logic for toggling manual address fields and Add/Use Different Address button
+
 
     // Billing Address Dropdown Handler
     const billingSelect = document.getElementById('billingAddressSelect');
