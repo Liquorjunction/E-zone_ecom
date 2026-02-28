@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Order;
@@ -22,9 +23,24 @@ class MailTriggerService
                 new OrderStatusMail($order->user, $order, $newStatus)
             );
             return true;
-
         } catch (\Exception $e) {
             Log::error("Failed to send {$newStatus} email for Order #{$order->order_number}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function sendAdminNewOrderMail(Order $order)
+    {
+        try {
+            $adminEmail = config('mail.admin_address', config('mail.from.address'));
+            $orderUrl = route('admin.orders.show', $order->id);
+            Mail::to($adminEmail)->queue(new \App\Mail\NewOrderReceived($order, $orderUrl));
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to queue admin new order mail', [
+                'error' => $e->getMessage(),
+                'order_id' => $order->id,
+            ]);
             return false;
         }
     }

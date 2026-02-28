@@ -9,6 +9,7 @@ use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class OrderService
 {
@@ -168,6 +169,11 @@ class OrderService
                 $mailTrigger = app(\App\Services\MailTriggerService::class);
                 $mailTrigger->sendOrderStatusUpdate($order, 'order_placed');
             }
+
+
+            // Send admin new order notification via MailTriggerService
+            $mailTrigger = app(\App\Services\MailTriggerService::class);
+            $mailTrigger->sendAdminNewOrderMail($order);
 
             $this->cartRepo->clearCart($cart);
 
