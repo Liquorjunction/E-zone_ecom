@@ -29,6 +29,8 @@
             ? $master->productVariants->first()->id
             : $master->id);
     $isWishlisted = isset($wishlistVariantIds) && $variantId ? in_array($variantId, $wishlistVariantIds) : false;
+    $compareVariantIds = collect(session('compare_variant_ids', []))->map(fn($id) => (int) $id)->all();
+    $isCompared = $variantId ? in_array((int) $variantId, $compareVariantIds, true) : false;
 
     $isBestseller = false;
     if ($isVariant) {
@@ -175,6 +177,23 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
             @endif
+        </button>
+
+        {{-- ── Compare button (bottom-left of image, always visible on mobile) ── --}}
+        <button type="button"
+                aria-label="Compare product"
+                data-product-variant-id="{{ $variantId }}"
+                data-init-compared="{{ $isCompared ? '1' : '0' }}"
+                class="compare-btn no-toast absolute bottom-2 left-2 z-10
+                       w-8 h-8 rounded-full {{ $isCompared ? 'bg-blue-50 border-blue-200 is-compared' : 'bg-white/90 border-white/60' }} backdrop-blur-sm border shadow-md
+                       flex items-center justify-center transition-all duration-200 active:scale-95 focus:outline-none"
+                @if (!$variantId) disabled @endif>
+            <svg class="w-4 h-4 {{ $isCompared ? 'text-blue-700' : 'text-blue-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-100"/>
+                <rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="{{ $isCompared ? 'text-blue-500' : 'text-blue-300' }}"/>
+                <rect x="3" y="7" width="7" height="13" rx="2"/>
+                <rect x="14" y="3" width="7" height="17" rx="2"/>
+            </svg>
         </button>
     </div>
 

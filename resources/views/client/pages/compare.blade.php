@@ -2,41 +2,80 @@
 
 @section('content')
     @php
-        // FOR DESIGNING: Set this to `[]` to see the empty state.
-        $products = [
-            [
-                'name' => 'Premium Wireless Headphones',
-                'image' => 'https://via.placeholder.com/300x300?text=Product+1',
-                'price' => '299.99',
-                'rating' => 4.5,
-                'reviews' => 247,
-                'specs' => [
-                    'Brand' => 'AudioMax',
-                    'Color' => 'Midnight Black',
-                    'ANC' => 'Yes',
-                    'Battery' => '30 Hours',
-                    'Bluetooth' => '5.0',
-                    'Weight' => '290g',
-                ],
-            ],
-            [
-                'name' => 'Pro Gamer Headset',
-                'image' => 'https://via.placeholder.com/300x300?text=Product+2',
-                'price' => '199.99',
-                'rating' => 4.2,
-                'reviews' => 188,
-                'specs' => [
-                    'Brand' => 'GamerPro',
-                    'Color' => 'Carbon Fiber',
-                    'ANC' => 'No',
-                    'Battery' => 'N/A (Wired)',
-                    'Bluetooth' => 'N/A',
-                    'Weight' => '350g',
-                ],
-            ],
-        ];
+        $locale = app()->getLocale() ?? 'en';
+        $compareVariants = $compareVariants ?? collect();
+        $features = $features ?? ['Brand', 'Category', 'SKU'];
+        $maxCompare = 4;
 
-        $features = ['Brand', 'Color', 'ANC', 'Battery', 'Bluetooth', 'Weight'];
+        $products = $compareVariants->map(function ($variant) use ($locale) {
+            $product = $variant->product;
+
+            $productName = $product?->getTranslation('name', $locale)
+                ?? $product?->name
+                ?? $variant->getTranslation('variant_name', $locale)
+                ?? $variant->variant_name
+                ?? 'Product';
+
+            if (is_array($productName)) {
+                $productName = implode(' ', array_filter($productName));
+            }
+
+            $productLink = $product && $product->slug
+                ? route('products.detail', $product->slug) . ($variant->slug ? ('?variant=' . $variant->slug) : '')
+                : '#';
+
+            $image = $product?->cover_image
+                ? asset('storage/' . $product->cover_image)
+                : asset('icon/product-placeholder-A.jpg');
+
+            $discount = method_exists($variant, 'getDiscountInfo')
+                ? $variant->getDiscountInfo()
+                : ['final_price' => $variant->price ?? 0];
+
+            $reviews = $variant->reviews ?? collect();
+            $approved = $reviews->where('is_approved', 'approved');
+            $reviewCount = $approved->count();
+            $averageRating = $reviewCount > 0 ? round($approved->avg('rating'), 1) : 0;
+
+            $specs = [
+                'Brand' => (string) ($product?->brand?->name ?? '—'),
+                'Category' => (string) ($product?->category?->name ?? '—'),
+                'SKU' => (string) ($variant->sku ?? '—'),
+            ];
+
+            $attributes = $variant->getTranslation('attributes', $locale) ?? $variant->attributes;
+            $productSpecs = $product?->getTranslation('specifications', $locale) ?? $product?->specifications;
+
+            foreach ([$attributes, $productSpecs] as $source) {
+                if (!is_array($source)) {
+                    continue;
+                }
+
+                foreach ($source as $key => $value) {
+                    if (!is_string($key) || trim($key) === '') {
+                        continue;
+                    }
+
+                    if (is_array($value)) {
+                        $value = implode(', ', array_filter(array_map('strval', $value)));
+                    }
+
+                    $specs[$key] = (string) ($value ?: '—');
+                }
+            }
+
+            return [
+                'id' => $variant->id,
+                'product_id' => $product?->id,
+                'name' => (string) $productName,
+                'link' => $productLink,
+                'image' => $image,
+                'price' => (float) ($discount['final_price'] ?? $variant->price ?? 0),
+                'rating' => $averageRating,
+                'reviews' => $reviewCount,
+                'specs' => $specs,
+            ];
+        })->values();
     @endphp
 
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
@@ -47,7 +86,7 @@
                 <x-slot:content>Compare products side by side.</x-slot:content>
             </x-breadcrumbs>
 
-            @if (!empty($products))
+            @if ($products->count() > 0)
                 <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 overflow-x-auto">
                     <div class="min-w-max lg:min-w-full">
                         <table class="w-full text-sm text-left">
@@ -57,45 +96,52 @@
 
                                     <th class="sticky left-0 bg-white p-6 min-w-[200px] z-10">
                                         <h3 class="text-xl font-bold text-gray-900">Features</h3>
-                                        <p class="text-gray-500 text-sm">Products ({{ count($products) }} of 4)</p>
+                                        <p class="text-gray-500 text-sm">Products ({{ $products->count() }} of {{ $maxCompare }})</p>
                                     </th>
 
                                     @foreach ($products as $product)
                                         <th class="p-4 w-1/4 min-w-[300px] text-center border-l-2 border-gray-100">
                                             <div class="flex justify-end mb-2">
-                                                <button class="text-gray-400 hover:text-red-500 transition-colors">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
+                                                <form action="{{ route('compare.remove') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="product_variant_id" value="{{ $product['id'] }}">
+                                                    <button class="text-gray-400 hover:text-red-500 transition-colors" type="submit" aria-label="Remove from compare">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <a href="#"
+                                            <a href="{{ $product['link'] }}"
                                                 class="block relative aspect-square bg-gray-100 rounded-xl overflow-hidden group mb-4">
                                                 <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
                                                     class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
                                             </a>
-                                            <a href="#"
+                                            <a href="{{ $product['link'] }}"
                                                 class="font-semibold text-gray-900 transition-colors hover:text-primary mb-2 line-clamp-2">
                                                 {{ $product['name'] }}
                                             </a>
                                             <div class="flex items-center justify-center text-yellow-400 text-sm my-2">
-                                                ★★★★☆ <span
+                                                {{ str_repeat('★', (int) floor($product['rating'])) . str_repeat('☆', max(0, 5 - (int) floor($product['rating']))) }} <span
                                                     class="ml-2 text-sm text-gray-500">({{ $product['reviews'] }})</span>
                                             </div>
-                                            <p class="text-xl font-bold text-primary mb-3">${{ $product['price'] }}</p>
+                                            <p class="text-xl font-bold text-primary mb-3">{{ config('app.CURRENCY_SYMBOL') }}{{ number_format($product['price'], 2) }}</p>
                                             <button
-                                                class="w-full px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
+                                                class="add-to-cart-btn w-full px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                                                data-product-variant-id="{{ $product['id'] }}"
+                                                data-product-id="{{ $product['product_id'] }}"
+                                                onclick="addToCart('{{ $product['id'] }}', '{{ $product['product_id'] }}')">
                                                 Add to Cart
                                             </button>
                                         </th>
                                     @endforeach
 
-                                    @for ($i = count($products); $i < 4; $i++)
+                                    @for ($i = $products->count(); $i < $maxCompare; $i++)
                                         <th class="p-4 w-1/4 min-w-[300px] text-center border-l-2 border-gray-100">
                                             <div class="flex items-center justify-center h-full">
-                                                <a href="{{-- route('products') --}}"
+                                                <a href="{{ route('products.index') }}"
                                                     class="flex flex-col items-center justify-center w-full h-full aspect-square border-4 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-primary hover:text-primary transition-colors">
                                                     <svg class="w-16 h-16" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
@@ -124,7 +170,7 @@
                                             </td>
                                         @endforeach
 
-                                        @for ($i = count($products); $i < 4; $i++)
+                                        @for ($i = $products->count(); $i < $maxCompare; $i++)
                                             <td class="p-4 text-gray-400 border-b border-l-2 border-gray-100 text-center">
                                                 —
                                             </td>
@@ -147,7 +193,7 @@
                         <h2 class="text-3xl font-bold text-gray-900 mb-4">Nothing to Compare</h2>
                         <p class="text-gray-600 mb-8">You haven't added any products to compare. Start browsing and add
                             products to see a side-by-side comparison.</p>
-                        <a href="{{-- route('products') --}}"
+                        <a href="{{ route('products.index') }}"
                             class="inline-flex items-center px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

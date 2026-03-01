@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\BrandController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\CategoryController;
 use App\Http\Controllers\Client\ContactUsController;
+use App\Http\Controllers\Client\CompareController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\InventoryController;
@@ -76,7 +77,14 @@ Route::prefix('products')->name('products.')->group(function () {
 Route::view('/search', 'client.pages.search-results')->name('search');
 Route::view('/new-arrivals', 'client.pages.new-arrivals')->name('new-arrivals');
 Route::view('/best-sellers', 'client.pages.best-sellers')->name('best-sellers');
-Route::view('/product-compare', 'client.pages.compare')->name('product-compare');
+Route::get('/product-compare', [CompareController::class, 'index'])->name('product-compare');
+Route::prefix('compare')->group(function () {
+    Route::post('/add', [CompareController::class, 'add'])->name('compare.add');
+    Route::post('/remove', [CompareController::class, 'remove'])->name('compare.remove');
+    Route::post('/get', [CompareController::class, 'get'])->name('compare.get');
+    Route::post('/count', [CompareController::class, 'count'])->name('compare.count');
+    Route::post('/clear', [CompareController::class, 'clear'])->name('compare.clear');
+});
 
 // Reviews (Public Read)
 Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
