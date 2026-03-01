@@ -127,10 +127,9 @@ class OrderService
                 'coupon_discount_amount' => $pricing['coupon_discount'],
                 'shipping_method'        => $shippingMethod,
                 'shipping_cost'          => $pricing['shipping_cost'],
-                // Tax removed from checkout flow
-                'tax_amount'             => 0,
-                'tax_percentage'         => 0,
-                'taxable_amount'         => $pricing['final_total'],
+                'tax_amount'             => $pricing['tax_amount'] ?? 0,
+                'tax_percentage'         => $pricing['tax_rate'] ?? 0,
+                'taxable_amount'         => $pricing['taxable_amount'] ?? ($pricing['final_total'] ?? 0),
                 'total'                  => $pricing['final_total'],
                 'status'                 => 'pending',
                 'shipping_address'       => $data['shipping_address'] ?? null,

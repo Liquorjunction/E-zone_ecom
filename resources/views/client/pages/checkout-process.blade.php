@@ -975,6 +975,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            window.__checkoutSubmitting = false;
+
             // Show Laravel validation errors on page load
             @if ($errors->any())
                 const errorMessages = @json($errors->all());
@@ -999,6 +1001,15 @@
                     e.returnValue = '';
                 }
             });
+
+            document.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (!(form instanceof HTMLFormElement)) return;
+                if (form.action === @json(route('checkout.process'))) {
+                    allowNavigation = true;
+                    window.__checkoutSubmitting = true;
+                }
+            }, true);
 
             document.addEventListener('click', function (e) {
                 const link = e.target.closest('a');
