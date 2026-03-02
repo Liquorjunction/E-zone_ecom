@@ -15,6 +15,7 @@ Alpine.start();
 
 import './toast';
 import './wishlist';
+import './compare';
 import './pages/security';
 import './pagination';
 import './ajax-cart';

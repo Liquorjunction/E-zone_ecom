@@ -37,6 +37,8 @@
             ? $master->productVariants->first()->id
             : $master->id);
     $isWishlisted = isset($wishlistVariantIds) && $variantId ? in_array($variantId, $wishlistVariantIds) : false;
+    $compareVariantIds = collect(session('compare_variant_ids', []))->map(fn($id) => (int) $id)->all();
+    $isCompared = $variantId ? in_array((int) $variantId, $compareVariantIds, true) : false;
 
     $isBestseller = false;
     if ($isVariant) {
@@ -156,11 +158,12 @@
 
         <!-- Compare Product Icon Button -->
         <button type="button" aria-label="Compare product" data-product-variant-id="{{ $variantId }}"
-            class="compare-btn no-toast absolute top-16 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none opacity-0 group-hover:opacity-100"
+            data-init-compared="{{ $isCompared ? '1' : '0' }}"
+            class="compare-btn no-toast absolute top-16 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none {{ $isCompared ? 'opacity-100 is-compared' : 'opacity-0 group-hover:opacity-100' }}"
             @if (!$variantId) disabled @endif>
-            <svg class="w-5 h-5 text-blue-500 transition-all duration-200 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-200"/>
-                <rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="text-blue-400"/>
+            <svg class="w-5 h-5 {{ $isCompared ? 'text-blue-700' : 'text-blue-500 group-hover:text-blue-700' }} transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="{{ $isCompared ? 'text-blue-200' : 'text-blue-200' }}"/>
+                <rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="{{ $isCompared ? 'text-blue-500' : 'text-blue-400' }}"/>
                 <rect x="3" y="7" width="7" height="13" rx="2" stroke="currentColor"/>
                 <rect x="14" y="3" width="7" height="17" rx="2" stroke="currentColor"/>
             </svg>

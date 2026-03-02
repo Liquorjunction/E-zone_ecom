@@ -17,6 +17,20 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    let isCheckoutSubmitting = false;
+
+    document.addEventListener(
+        "submit",
+        function (e) {
+            const form = e.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (form.action && form.action.includes("/checkout/process")) {
+                isCheckoutSubmitting = true;
+            }
+        },
+        true,
+    );
+
     // ─── Helpers ────────────────────────────────────────────────────────────────
 
     function currency() {
@@ -238,15 +252,19 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("apply-coupon-btn" + suffix)?.click();
     });
 
-    // Remove coupon from session if user leaves or refreshes the checkout page
-    window.addEventListener("beforeunload", function (e) {
-        // Only remove if coupon is applied (element exists)
+    // Remove coupon from session when user leaves or reloads checkout page.
+    // Skip auto-removal while checkout form submission is in progress.
+    window.addEventListener("beforeunload", function () {
+        if (isCheckoutSubmitting || window.__checkoutSubmitting === true) return;
+
         if (document.querySelector('[id^="applied-coupon-display"]')) {
-            navigator.sendBeacon(REMOVE_URL, new URLSearchParams({
-                shipping_method: getShippingMethod(),
-                _token: csrfToken,
-            }));
-            e.preventDefault();
+            navigator.sendBeacon(
+                REMOVE_URL,
+                new URLSearchParams({
+                    shipping_method: getShippingMethod(),
+                    _token: csrfToken,
+                }),
+            );
         }
     });
 
