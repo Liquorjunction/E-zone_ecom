@@ -39,28 +39,144 @@
 
             $specs = [
                 'Brand' => (string) ($product?->brand?->name ?? '—'),
-                'Category' => (string) ($product?->category?->name ?? '—'),
+                'Category' => (function () use ($product, $locale) {
+                    $category = $product?->category;
+
+                    if (!$category) {
+                        return '—';
+                    }
+
+                    if (method_exists($category, 'getTranslation') && method_exists($category, 'getTranslatableAttributes')) {
+                        $translatable = $category->getTranslatableAttributes();
+
+                        if (in_array('category-name', $translatable, true)) {
+                            $translated = $category->getTranslation('category-name', $locale);
+                            if (is_string($translated) && trim($translated) !== '') {
+                                return $translated;
+                            }
+                        }
+                    }
+
+                    $raw = $category->getAttribute('category-name') ?? $category->getAttribute('name');
+
+                    if (is_array($raw)) {
+                        $picked = $raw[$locale] ?? ($raw['en'] ?? reset($raw));
+                        return is_string($picked) && trim($picked) !== '' ? $picked : '—';
+                    }
+
+                    return is_string($raw) && trim($raw) !== '' ? $raw : '—';
+                })(),
                 'SKU' => (string) ($variant->sku ?? '—'),
             ];
 
-            $attributes = $variant->getTranslation('attributes', $locale) ?? $variant->attributes;
-            $productSpecs = $product?->getTranslation('specifications', $locale) ?? $product?->specifications;
+            $normalize = function ($source) {
+                $locale = app()->getLocale() ?? 'en';
 
-            foreach ([$attributes, $productSpecs] as $source) {
-                if (!is_array($source)) {
-                    continue;
+                if (is_string($source)) {
+                    $decoded = json_decode($source, true);
+                    $source = json_last_error() === JSON_ERROR_NONE ? $decoded : null;
                 }
 
+                if (!is_array($source)) {
+                    return [];
+                }
+
+                $isLocaleBucket = function (array $arr) use ($locale) {
+                    $keys = array_keys($arr);
+                    $knownLocales = ['en', 'fr', 'ar', $locale];
+
+                    return !empty($keys)
+                        && count(array_filter($keys, fn ($key) => is_string($key) && in_array($key, $knownLocales, true))) >= 1
+                        && count(array_filter($keys, fn ($key) => is_string($key) && !in_array($key, $knownLocales, true))) === 0;
+                };
+
+                $normalizeDisplay = function ($value) use ($locale, $isLocaleBucket) {
+                    if (is_array($value)) {
+                        if ($isLocaleBucket($value)) {
+                            $picked = $value[$locale] ?? ($value['en'] ?? reset($value));
+
+                            if (is_array($picked)) {
+                                return implode(', ', array_filter(array_map('strval', $picked)));
+                            }
+
+                            return trim((string) $picked);
+                        }
+
+                        return implode(', ', array_filter(array_map('strval', $value)));
+                    }
+
+                    if (is_bool($value)) {
+                        return $value ? 'Yes' : 'No';
+                    }
+
+                    if (is_null($value)) {
+                        return '—';
+                    }
+
+                    return trim((string) $value);
+                };
+
+                if ($isLocaleBucket($source)) {
+                    $source = $source[$locale] ?? ($source['en'] ?? reset($source));
+
+                    if (!is_array($source)) {
+                        return [];
+                    }
+                }
+
+                $result = [];
                 foreach ($source as $key => $value) {
+                    if (is_array($value) && (isset($value['title']) || isset($value['label']) || isset($value['value']) || isset($value['description']))) {
+                        $title = $value['title'] ?? ($value['label'] ?? (is_string($key) ? $key : null));
+                        $displayValue = $value['value'] ?? ($value['description'] ?? null);
+
+                        $title = $normalizeDisplay($title);
+                        $displayValue = $normalizeDisplay($displayValue);
+
+                        if ($title !== '' && $displayValue !== '') {
+                            $result[$title] = $displayValue;
+                        }
+
+                        continue;
+                    }
+
                     if (!is_string($key) || trim($key) === '') {
                         continue;
                     }
 
-                    if (is_array($value)) {
-                        $value = implode(', ', array_filter(array_map('strval', $value)));
-                    }
+                    $displayValue = $normalizeDisplay($value);
+                    $result[$key] = $displayValue !== '' ? $displayValue : '—';
+                }
 
-                    $specs[$key] = (string) ($value ?: '—');
+                return $result;
+            };
+
+            $localizedAttribute = function ($model, $attribute) use ($locale) {
+                if (!$model) {
+                    return null;
+                }
+
+                if (method_exists($model, 'getTranslation') && method_exists($model, 'getTranslatableAttributes')) {
+                    $translatable = $model->getTranslatableAttributes();
+
+                    if (in_array($attribute, $translatable, true)) {
+                        return $model->getTranslation($attribute, $locale);
+                    }
+                }
+
+                return $model->{$attribute} ?? null;
+            };
+
+            $sources = [
+                $localizedAttribute($variant, 'attributes'),
+                $localizedAttribute($variant, 'specifications'),
+                $localizedAttribute($product, 'attributes'),
+                $localizedAttribute($product, 'specifications'),
+            ];
+
+            foreach ($sources as $source) {
+                foreach ($normalize($source) as $key => $value) {
+                    $specs[$key] = $value;
                 }
             }
 
@@ -138,7 +254,7 @@
                                         </th>
                                     @endforeach
 
-                                    @for ($i = $products->count(); $i < $maxCompare; $i++)
+                                    @if ($products->count() < $maxCompare)
                                         <th class="p-4 w-1/4 min-w-[300px] text-center border-l-2 border-gray-100">
                                             <div class="flex items-center justify-center h-full">
                                                 <a href="{{ route('products.index') }}"
@@ -152,7 +268,7 @@
                                                 </a>
                                             </div>
                                         </th>
-                                    @endfor
+                                    @endif
                                 </tr>
                             </thead>
 
@@ -170,11 +286,11 @@
                                             </td>
                                         @endforeach
 
-                                        @for ($i = $products->count(); $i < $maxCompare; $i++)
+                                        @if ($products->count() < $maxCompare)
                                             <td class="p-4 text-gray-400 border-b border-l-2 border-gray-100 text-center">
                                                 —
                                             </td>
-                                        @endfor
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
