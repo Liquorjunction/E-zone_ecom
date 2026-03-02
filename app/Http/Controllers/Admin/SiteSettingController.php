@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SiteSetting\AddMapSiteSettingRequest;
+use App\Http\Requests\Admin\SiteSetting\AddOpeningHoursSiteSettingRequest;
 use App\Http\Requests\Admin\SiteSetting\StoreSiteSettingRequest;
 use App\Http\Requests\Admin\SiteSetting\UpdateSiteSettingRequest;
 use App\Repositories\Admin\Interfaces\SiteSettingsRepositoryInterface as SiteSettingsRepo;
@@ -68,6 +70,74 @@ class SiteSettingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update site settings: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function AddOpeningHours(AddOpeningHoursSiteSettingRequest $request, SiteSettingsRepo $siteSettingsRepository)
+    {
+        try {
+            $id = $request->query('id');
+            if (!$id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Site setting ID is required'
+                ], 400);
+            }
+
+            $data = $request->validated();
+            $siteSetting = $siteSettingsRepository->updateSiteSetting($id, ['opening_hours' => $data['opening_hours']]);
+
+            if (!$siteSetting) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Site settings not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Opening hours updated successfully',
+                'data' => $siteSetting
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update opening hours: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+     public function AddMap(AddMapSiteSettingRequest $request, SiteSettingsRepo $siteSettingsRepository)
+    {
+        try {
+            $id = $request->query('id');
+            if (!$id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Site setting ID is required'
+                ], 400);
+            }
+
+            $data = $request->validated();
+            $siteSetting = $siteSettingsRepository->updateSiteSetting($id, ['map_iframe' => $data['map_iframe']]);
+
+            if (!$siteSetting) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Site settings not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Map iframe updated successfully',
+                'data' => $siteSetting
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update map iframe: ' . $e->getMessage()
             ], 500);
         }
     }

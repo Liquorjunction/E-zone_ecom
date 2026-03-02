@@ -20,6 +20,23 @@
         });
     }
 
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.content : '';
+    }
+
+    function showLoading(title, text) {
+        Swal.fire({
+            title,
+            text,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    }
+
     window.toggleSiteStatus = async function(newStatus) {
         const form = document.getElementById('siteSettingsForm');
         if (!form) {
@@ -62,7 +79,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({ status: newStatus })
@@ -111,22 +128,14 @@
             delete data._method;
             delete data._token;
 
-            Swal.fire({
-                title: 'Updating...',
-                text: 'Please wait while we update the settings',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+            showLoading('Updating...', 'Please wait while we update the settings');
 
             try {
                 const response = await fetch(`/admin/site-settings?id=${siteId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-TOKEN': getCsrfToken(),
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify(data)
@@ -160,6 +169,182 @@
         });
     }
 
+    function toggleDayInputs(row, isClosed) {
+        const timeInputs = row.querySelectorAll('.day-time-input');
+        timeInputs.forEach((input) => {
+            input.disabled = isClosed;
+            if (isClosed) {
+                input.value = '';
+            }
+        });
+    }
+
+    function buildOpeningHoursJson(form) {
+        const rows = form.querySelectorAll('tbody tr[data-day]');
+        const openingHours = {};
+
+        for (const row of rows) {
+            const day = row.dataset.day;
+            const openInput = row.querySelector('[data-field="open"]');
+            const closeInput = row.querySelector('[data-field="close"]');
+            const closedCheckbox = row.querySelector('.day-closed-checkbox');
+
+            const isClosed = closedCheckbox ? closedCheckbox.checked : false;
+            const open = openInput ? openInput.value : '';
+            const close = closeInput ? closeInput.value : '';
+
+            if (isClosed) {
+                openingHours[day] = {
+                    is_closed: true,
+                    open: null,
+                    close: null
+                };
+                continue;
+            }
+
+            if (!open || !close) {
+                throw new Error(`Please set both open and close time for ${day}.`);
+            }
+
+            openingHours[day] = {
+                is_closed: false,
+                open,
+                close
+            };
+        }
+
+        return JSON.stringify(openingHours);
+    }
+
+    function initOpeningHoursForm() {
+        const form = document.getElementById('openingHoursForm');
+        if (!form) return;
+
+        const rows = form.querySelectorAll('tbody tr[data-day]');
+        rows.forEach((row) => {
+            const checkbox = row.querySelector('.day-closed-checkbox');
+            if (!checkbox) return;
+            checkbox.addEventListener('change', function() {
+                toggleDayInputs(row, this.checked);
+            });
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const siteId = this.dataset.siteId;
+            const hiddenOpeningHours = document.getElementById('opening_hours');
+
+            let openingHoursJson = '';
+            try {
+                openingHoursJson = buildOpeningHoursJson(this);
+            } catch (validationError) {
+                showAlert('error', validationError.message);
+                return;
+            }
+
+            if (hiddenOpeningHours) {
+                hiddenOpeningHours.value = openingHoursJson;
+            }
+
+            showLoading('Updating...', 'Saving opening hours');
+
+            try {
+                const response = await fetch(`/admin/site-settings/opening-hours?id=${siteId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ opening_hours: openingHoursJson })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: result.message || 'Failed to update opening hours'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to update opening hours. Please try again.'
+                });
+            }
+        });
+    }
+
+    function initMapIframeForm() {
+        const form = document.getElementById('mapIframeForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const siteId = this.dataset.siteId;
+            const mapIframeElement = document.getElementById('map_iframe');
+            const mapIframe = mapIframeElement ? mapIframeElement.value.trim() : '';
+
+            if (!mapIframe) {
+                showAlert('error', 'Map iframe is required.');
+                return;
+            }
+
+            showLoading('Updating...', 'Saving map iframe');
+
+            try {
+                const response = await fetch(`/admin/site-settings/add-mapIframe?id=${siteId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ map_iframe: mapIframe })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: result.message || 'Failed to update map iframe'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to update map iframe. Please try again.'
+                });
+            }
+        });
+    }
+
     window.createInitialSettings = async function() {
         const result = await Swal.fire({
             title: 'Create Site Settings',
@@ -188,22 +373,14 @@
             site_status: 'active'
         };
 
-        Swal.fire({
-            title: 'Creating...',
-            text: 'Setting up initial site settings',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
+        showLoading('Creating...', 'Setting up initial site settings');
 
         try {
             const response = await fetch('/admin/site-settings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify(data)
@@ -239,9 +416,15 @@
     };
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSiteSettingsForm);
+        document.addEventListener('DOMContentLoaded', function() {
+            initSiteSettingsForm();
+            initOpeningHoursForm();
+            initMapIframeForm();
+        });
     } else {
         initSiteSettingsForm();
+        initOpeningHoursForm();
+        initMapIframeForm();
     }
 
 })();

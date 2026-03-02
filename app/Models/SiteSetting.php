@@ -15,6 +15,8 @@ class SiteSetting extends Model
         'twitter',
         'instagram',
         'infotext',
+        'opening_hours',
+        'map_iframe',
         'site_status',
     ];
 

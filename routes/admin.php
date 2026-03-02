@@ -438,6 +438,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [SiteSettingController::class, 'index'])->name('index'); // permission: site_status.read
             Route::post('/', [SiteSettingController::class, 'store'])->name('store')->middleware('can:site_status.create,admin');
             Route::put('/', [SiteSettingController::class, 'update'])->name('update')->middleware('can:site_status.update,admin');
+            Route::post('/opening-hours', [SiteSettingController::class, 'AddOpeningHours'])->name('addOpeningHours')->middleware('can:site_status.update,admin');
+            Route::post('/add-mapIframe', [SiteSettingController::class, 'AddMap'])->name('addMapIframe')->middleware('can:site_status.update,admin');
             Route::post('/toggle-status', [SiteSettingController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:site_status.update,admin');
             Route::get('/status', [SiteSettingController::class, 'getStatus'])->name('status');
         });

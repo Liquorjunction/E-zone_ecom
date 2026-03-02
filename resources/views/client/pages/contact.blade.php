@@ -259,6 +259,15 @@
                             Contact Info
                         </h2>
                         <div class="space-y-4">
+                            @php
+                                $addressText = trim((string) ($siteContent->address ?? ''));
+                                $phoneText = trim((string) ($siteContent->phone ?? ''));
+                                $emailText = trim((string) ($siteContent->email ?? ''));
+
+                                $hasAddress = $addressText !== '';
+                                $hasPhone = $phoneText !== '';
+                                $hasEmail = $emailText !== '';
+                            @endphp
                             <div class="flex items-start gap-3">
                                 <div
                                     class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -272,7 +281,8 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-gray-900 text-sm">Address</h3>
-                                    <p class="text-gray-600 text-sm mt-0.5">123 E-commerce St.<br>Jaipur, Rajasthan, 302001
+                                    <p class="text-gray-600 text-sm mt-0.5">
+                                        {{ $hasAddress ? $addressText : 'N/A' }}
                                     </p>
                                 </div>
                             </div>
@@ -287,8 +297,11 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-gray-900 text-sm">Phone</h3>
-                                    <a href="tel:+911234567890" class="text-primary text-sm hover:underline">+91 (123)
-                                        456-7890</a>
+                                    @if($hasPhone)
+                                        <a href="tel:{{ preg_replace('/\s+/', '', $phoneText) }}" class="text-primary text-sm hover:underline">{{ $phoneText }}</a>
+                                    @else
+                                        <p class="text-gray-600 text-sm">N/A</p>
+                                    @endif
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
@@ -302,8 +315,12 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-gray-900 text-sm">Email</h3>
-                                    <a href="mailto:support@example.com"
-                                        class="text-primary text-sm hover:underline">support@example.com</a>
+                                    @if($hasEmail)
+                                        <a href="mailto:{{ $emailText }}"
+                                            class="text-primary text-sm hover:underline">{{ $emailText }}</a>
+                                    @else
+                                        <p class="text-gray-600 text-sm">N/A</p>
+                                    @endif
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
@@ -327,8 +344,43 @@
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-5 flex items-center">
                             <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
-                            Our Showroom
+                            Visit Our Showroom
                         </h2>
+
+                        @php
+                            $weekdayOrder = [
+                                'monday' => 'Monday',
+                                'tuesday' => 'Tuesday',
+                                'wednesday' => 'Wednesday',
+                                'thursday' => 'Thursday',
+                                'friday' => 'Friday',
+                                'saturday' => 'Saturday',
+                                'sunday' => 'Sunday',
+                            ];
+
+                            $openingHoursData = [];
+                            if (!empty($siteContent?->opening_hours)) {
+                                $decodedOpeningHours = json_decode($siteContent->opening_hours, true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($decodedOpeningHours)) {
+                                    $openingHoursData = $decodedOpeningHours;
+                                }
+                            }
+
+                            $mapIframeRaw = trim((string) ($siteContent?->map_iframe ?? ''));
+                            $mapUrl = null;
+                            if ($mapIframeRaw !== '') {
+                                if (stripos($mapIframeRaw, '<iframe') !== false && preg_match('/src=["\']([^"\']+)["\']/i', $mapIframeRaw, $iframeSrcMatch)) {
+                                    $mapUrl = $iframeSrcMatch[1];
+                                } elseif (filter_var($mapIframeRaw, FILTER_VALIDATE_URL)) {
+                                    $mapUrl = $mapIframeRaw;
+                                }
+                            }
+
+                            $openInMapsUrl = $mapUrl;
+                            if (str_contains($mapUrl, 'output=embed')) {
+                                $openInMapsUrl = str_replace('output=embed', '', $mapUrl);
+                            }
+                        @endphp
 
                         <div class="space-y-4">
                             {{-- Working Hours --}}
@@ -342,34 +394,34 @@
                                     Working Hours
                                 </h3>
                                 <div class="space-y-1.5 text-sm">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600">Monday</span>
-                                        <span class="font-medium text-gray-900">9:00 AM – 7:00 PM</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600">Tuesday</span>
-                                        <span class="font-medium text-gray-900">9:00 AM – 7:00 PM</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600">Wednesday</span>
-                                        <span class="font-medium text-gray-900">9:00 AM – 7:00 PM</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600">Thursday</span>
-                                        <span class="font-medium text-gray-900">9:00 AM – 7:00 PM</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600">Friday</span>
-                                        <span class="font-medium text-gray-900">9:00 AM – 7:00 PM</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600">Saturday</span>
-                                        <span class="font-medium text-gray-900">10:00 AM – 5:00 PM</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600">Sunday</span>
-                                        <span class="font-medium text-red-500">Closed</span>
-                                    </div>
+                                    @if(!empty($openingHoursData))
+                                        @foreach($weekdayOrder as $dayKey => $dayLabel)
+                                            @php
+                                                $dayInfo = $openingHoursData[$dayKey] ?? [];
+                                                $isClosed = filter_var($dayInfo['is_closed'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                                                $openTime = $dayInfo['open'] ?? null;
+                                                $closeTime = $dayInfo['close'] ?? null;
+
+                                                $timeLabel = 'Closed';
+                                                if (!$isClosed && !empty($openTime) && !empty($closeTime)) {
+                                                    $formattedOpen = date('g:i A', strtotime($openTime));
+                                                    $formattedClose = date('g:i A', strtotime($closeTime));
+                                                    $timeLabel = $formattedOpen . ' – ' . $formattedClose;
+                                                }
+                                            @endphp
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-gray-600">{{ $dayLabel }}</span>
+                                                <span class="font-medium {{ $timeLabel === 'Closed' ? 'text-red-500' : 'text-gray-900' }}">{{ $timeLabel }}</span>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        @foreach($weekdayOrder as $dayLabel)
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-gray-600">{{ $dayLabel }}</span>
+                                                <span class="font-medium text-gray-500">N/A</span>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
 
@@ -385,20 +437,25 @@
                                 </h3>
                                 <div
                                     class="aspect-video bg-gray-200 rounded-xl overflow-hidden relative group cursor-pointer">
-                                    {{-- Replace src with real Google Maps embed URL --}}
-                                    <iframe
-                                        src="https://maps.google.com/maps?q=Jaipur,Rajasthan&t=&z=13&ie=UTF8&iwloc=&output=embed"
-                                        class="w-full h-full border-0" allowfullscreen="" loading="lazy"
-                                        referrerpolicy="no-referrer-when-downgrade" title="Showroom Location">
-                                    </iframe>
-                                    <a href="https://goo.gl/maps/your-link-here" target="_blank"
-                                        class="absolute bottom-3 right-3 bg-white text-xs font-semibold text-primary px-3 py-1.5 rounded-lg shadow hover:shadow-md transition-all duration-200 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                        Open in Maps
-                                    </a>
+                                    @if(!empty($mapUrl))
+                                        <iframe
+                                            src="{{ $mapUrl }}"
+                                            class="w-full h-full border-0" allowfullscreen="" loading="lazy"
+                                            referrerpolicy="no-referrer-when-downgrade" title="Showroom Location">
+                                        </iframe>
+                                        <a href="{{ $openInMapsUrl }}" target="_blank"
+                                            class="absolute bottom-3 right-3 bg-white text-xs font-semibold text-primary px-3 py-1.5 rounded-lg shadow hover:shadow-md transition-all duration-200 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                            Open in Maps
+                                        </a>
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-sm text-gray-600 bg-gray-100">
+                                            Map not available (N/A)
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
