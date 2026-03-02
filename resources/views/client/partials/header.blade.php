@@ -111,6 +111,9 @@
                         <rect x="14" y="3" width="7" height="17" rx="2"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 15h4"/>
                     </svg>
+                    <span class="compare-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
+                                 bg-blue-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
+                                 leading-none shadow-sm {{ ($compareCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $compareCount ?? 0 }}</span>
                     <span class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ gtrans('Compare') }}</span>
                 </a>
 
@@ -312,13 +315,16 @@
                 {{ gtrans('Wishlist') }}
             </a>
             <a href="{{ route('product-compare') }}"
-               class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors">
+               class="relative flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <rect x="3" y="7" width="7" height="13" rx="2"/>
                     <rect x="14" y="3" width="7" height="17" rx="2"/>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 15h4"/>
                 </svg>
                 {{ gtrans('Compare') }}
+                <span class="compare-counter ml-auto min-w-4.25 h-4.25 px-0.5
+                             bg-blue-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
+                             leading-none shadow-sm {{ ($compareCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $compareCount ?? 0 }}</span>
             </a>
         </div>
 
@@ -416,6 +422,24 @@
                     }
                 } catch (err) {}
                 if (count !== null) updateWishlistCounter(count);
+            });
+            function updateCompareCounter(count) {
+                document.querySelectorAll('.compare-counter').forEach(function (el) {
+                    var n = (count === null || count === undefined) ? 0 : count;
+                    el.textContent = n;
+                    el.classList.toggle('hidden', n == 0);
+                });
+            }
+            window.addEventListener('compare:changed', function (e) {
+                var data = e && e.detail ? e.detail : null, count = null;
+                try {
+                    if (data) {
+                        if (typeof data.count !== 'undefined') count = data.count;
+                        else if (Array.isArray(data.ids)) count = data.ids.length;
+                        else if (typeof data === 'number') count = data;
+                    }
+                } catch (err) {}
+                if (count !== null) updateCompareCounter(count);
             });
         })();
     </script>

@@ -2,6 +2,7 @@
 
 namespace App\View\Composers;
 
+use App\DTOs\CartIdentifier;
 use App\Helpers\ClientHelper;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -33,10 +34,20 @@ class ClientComposer
 
         $view->with('wishlistVariantIds', $wishlistVariantIds);
 
+        $compareCount = 0;
+        try {
+            $compareService = app(\App\Services\CompareService::class);
+            $compareState = $compareService->getCount();
+            $compareCount = (int) ($compareState['count'] ?? 0);
+        } catch (\Throwable $e) {
+            $compareCount = 0;
+        }
+
         $cartItemCount = 0;
         try {
             $cartService = app(\App\Services\CartService::class);
-            $cart = $cartService->getCart(request());
+            $cartId = CartIdentifier::fromRequest(request());
+            $cart = $cartService->getCart($cartId);
             if ($cart && $cart->relationLoaded('items')) {
                 $cartItemCount = (int) $cart->items->sum('quantity');
             } elseif ($cart) {
@@ -48,5 +59,6 @@ class ClientComposer
 
         $view->with('cartItemCount', $cartItemCount);
         $view->with('wishlistCount', $wishlistCount);
+        $view->with('compareCount', $compareCount);
     }
 }
