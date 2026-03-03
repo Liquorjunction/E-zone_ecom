@@ -40,7 +40,7 @@
                     <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">
                         @if ($step == 1) Shopping Cart
                         @elseif ($step == 2) Checkout
-                        @else Order Confirmed
+                        @else Order Placed
                         @endif
                     </h1>
                     <p class="text-gray-600 text-lg">
@@ -65,7 +65,7 @@
                         <span class="text-primary font-semibold">
                             @if ($step == 1) Cart
                             @elseif ($step == 2) Checkout
-                            @else Confirmed
+                            @else Placed
                             @endif
                         </span>
                     </div>
@@ -393,7 +393,7 @@
                                             </button>
                                         </div>
                                         <div class="relative">
-                                            <select id="billingAddressSelect" name="billing_address_id"
+                                            <select id="billingAddressSelect" name="saved_billing_address_id"
                                                 class="block w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none bg-white pr-12 text-gray-900 font-medium">
                                                 <option value="">-- Select billing address --</option>
                                                 @foreach ($billingAddresses as $addr)
@@ -977,14 +977,67 @@
         document.addEventListener('DOMContentLoaded', function () {
             window.__checkoutSubmitting = false;
 
-            // Show Laravel validation errors on page load
+            // Show Laravel validation errors as field-level messages only (no top banner)
             @if ($errors->any())
-                const errorMessages = @json($errors->all());
-                const message = errorMessages.length > 1
-                    ? `${errorMessages.length} validation errors found`
-                    : errorMessages[0];
-                if (typeof showServerErrorBanner === 'function') {
-                    showServerErrorBanner(message, errorMessages);
+                const fieldErrors = @json($errors->getMessages());
+
+                const fieldAliasMap = {
+                    saved_address_id: 'shippingAddressSelect',
+                    saved_billing_address_id: 'billingAddressSelect',
+                    billing_address_id: 'billingAddressSelect',
+                };
+
+                const hasBillingErrors = Object.keys(fieldErrors).some((key) =>
+                    key.startsWith('billing_') || key.startsWith('billing_address')
+                );
+
+                if (hasBillingErrors) {
+                    const billingSameCheckbox = document.getElementById('billingSameAsShipping');
+                    if (billingSameCheckbox && billingSameCheckbox.checked) {
+                        billingSameCheckbox.checked = false;
+                        billingSameCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+
+                function setFieldError(field, message) {
+                    if (!field || !message) return;
+
+                    field.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500/20', 'bg-red-50');
+
+                    const wrapper = field.closest('div');
+                    let msgEl = wrapper ? wrapper.querySelector('.error-message') : null;
+                    if (!msgEl && wrapper) {
+                        msgEl = document.createElement('span');
+                        msgEl.className = 'error-message text-red-500 text-sm mt-1 font-medium';
+                        wrapper.appendChild(msgEl);
+                    }
+                    if (msgEl) {
+                        msgEl.textContent = message;
+                        msgEl.classList.remove('hidden');
+                    }
+                }
+
+                function findFieldByKey(key) {
+                    const mapped = fieldAliasMap[key] || key;
+                    return document.getElementById(mapped)
+                        || document.querySelector(`[name="${mapped}"]`)
+                        || document.querySelector(`[name="${key}"]`);
+                }
+
+                let firstErroredField = null;
+
+                Object.entries(fieldErrors).forEach(([key, messages]) => {
+                    const msg = Array.isArray(messages) ? messages[0] : messages;
+                    const field = findFieldByKey(key);
+                    if (!field) return;
+
+                    setFieldError(field, msg);
+                    if (!firstErroredField) firstErroredField = field;
+                });
+
+                if (firstErroredField) {
+                    firstErroredField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstErroredField.focus({ preventScroll: true });
                 }
             @endif
 

@@ -231,9 +231,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (hasErrors) {
                 e.preventDefault();
 
-                // Show error notification banner
-                showErrorNotification('Please fix the errors below before continuing');
-
                 // Scroll to first error
                 const firstError = document.querySelector('.validation-error');
                 if (firstError) {
@@ -320,40 +317,5 @@ document.addEventListener('DOMContentLoaded', function() {
         if (banner) {
             banner.remove();
         }
-    }
-
-    function showErrorNotification(message) {
-        // Remove existing banner
-        const existingBanner = document.getElementById('validationErrorBanner');
-        if (existingBanner) {
-            existingBanner.remove();
-        }
-
-        // Create notification banner
-        const banner = document.createElement('div');
-        banner.id = 'validationErrorBanner';
-        banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-down';
-        banner.innerHTML = `
-            <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-            <span class="flex-1 font-semibold">${message}</span>
-            <button onclick="this.parentElement.remove()" class="text-white hover:text-red-100">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        `;
-
-        document.body.appendChild(banner);
-
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (banner.parentElement) {
-                banner.style.opacity = '0';
-                banner.style.transform = 'translate(-50%, -100%)';
-                setTimeout(() => banner.remove(), 300);
-            }
-        }, 5000);
     }
 });

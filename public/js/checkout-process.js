@@ -1193,7 +1193,10 @@ function showServerErrorBanner(title, errors) {
 
             if (!isValid) {
                 e.preventDefault();
-                showWarningBanner('Please fix the address validation errors');
+                const firstInvalid = addressForm.querySelector('.error-state');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                }
             }
         });
     }
@@ -1220,31 +1223,11 @@ function showServerErrorBanner(title, errors) {
 
             if (!isValid) {
                 e.preventDefault();
-                showWarningBanner('Please fix the validation errors above');
+                const firstInvalid = form.querySelector('.error-state');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                }
             }
         });
     }
 })();
-
-function showWarningBanner(message) {
-    const banner = document.createElement('div');
-    banner.className =
-        'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-amber-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down flex items-center justify-between';
-    banner.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" class="text-white hover:text-amber-100 ml-4">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
-    `;
-    document.body.appendChild(banner);
-
-    setTimeout(() => {
-        if (banner.parentElement) {
-            banner.style.opacity = '0';
-            banner.style.transform = 'translate(-50%, -100%)';
-            setTimeout(() => banner.remove(), 300);
-        }
-    }, 5000);
-}
