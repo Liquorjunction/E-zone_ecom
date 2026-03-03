@@ -50,7 +50,6 @@
                                 <option value="shipped" @if (request('status') == 'shipped') selected @endif>Shipped</option>
                                 <option value="out_for_delivery" @if (request('status') == 'out_for_delivery') selected @endif>Out For Delivery</option>
                                 <option value="delivered" @if (request('status') == 'delivered') selected @endif>Delivered</option>
-                                <option value="completed" @if (request('status') == 'completed') selected @endif>Completed</option>
                                 <option value="cancelled" @if (request('status') == 'cancelled') selected @endif>Cancelled</option>
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
@@ -222,7 +221,7 @@
                     'shipped' => 'Shipped',
                     'out_for_delivery' => 'Out For Delivery',
                     'delivered' => 'Delivered',
-                    'completed' => 'Completed',
+                    'completed' => 'Delivered',
                     'cancelled' => 'Cancelled',
                 ][$status] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $status));
                 $statusStyles = [
@@ -339,7 +338,7 @@
                     'shipped' => 'Shipped',
                     'out_for_delivery' => 'Out For Delivery',
                     'delivered' => 'Delivered',
-                    'completed' => 'Completed',
+                    'completed' => 'Delivered',
                     'cancelled' => 'Cancelled',
                 ][$status] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $status));
                 $statusStyles = [

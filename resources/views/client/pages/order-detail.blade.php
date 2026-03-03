@@ -22,6 +22,9 @@
                 $clientStatus = in_array($status, ['partially_dispatched', 'dispatched', 'ready_to_ship'], true)
                     ? 'order_confirmation'
                     : $status;
+                if ($clientStatus === 'completed') {
+                    $clientStatus = 'delivered';
+                }
                 $statusLabel = \Illuminate\Support\Str::title(str_replace('_', ' ', $clientStatus));
                 $stages = [
                     'pending',

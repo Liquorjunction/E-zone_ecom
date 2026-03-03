@@ -22,14 +22,21 @@
         </div>
 
         <div class="flex items-center justify-between mb-8 border-b pb-4">
+            @php
+                $clientStatus = strtolower($order->status ?? 'pending');
+                if ($clientStatus === 'completed') {
+                    $clientStatus = 'delivered';
+                }
+                $statusTone = $clientStatus === 'delivered' ? 'green' : ($clientStatus === 'pending' ? 'yellow' : 'red');
+            @endphp
             <div>
                 <h2 class="text-3xl font-extrabold tracking-tight text-primary">Invoice</h2>
                 <p class="text-base text-gray-500 mt-1">Order #{{ $order->order_number ?? $order->id }}</p>
             </div>
             <div class="text-right">
                 <p class="text-sm text-gray-400">Placed: <span class="font-medium text-gray-700">{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span></p>
-                <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-{{ $order->status === 'completed' ? 'green' : ($order->status === 'pending' ? 'yellow' : 'red') }}-100 text-{{ $order->status === 'completed' ? 'green' : ($order->status === 'pending' ? 'yellow' : 'red') }}-700">
-                    Status: {{ ucfirst($order->status) }}
+                <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-{{ $statusTone }}-100 text-{{ $statusTone }}-700">
+                    Status: {{ \Illuminate\Support\Str::title(str_replace('_', ' ', $clientStatus)) }}
                 </span>
             </div>
         </div>
