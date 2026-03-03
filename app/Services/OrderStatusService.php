@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Admin;
 use App\Models\Order;
 use Illuminate\Support\Carbon;
 use Exception;
@@ -39,19 +40,21 @@ class OrderStatusService
         $this->mailTriggerService = $mailTriggerService;
     }
 
-    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, int $adminId = 1 )
+    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null )
     {
         if (!$force && !$this->canTransition($order->status, $toStatus)) {
             throw new Exception("Invalid order transition from '{$order->status}' to '{$toStatus}'.");
         }
 
+        $statusActorId = $this->resolveAdminId($adminId);
+
         $order->status = $toStatus;
-        $order->status_changed_by = $adminId;
+        $order->status_changed_by = $statusActorId;
         $order->status_changed_at = Carbon::now();
 
         if ($toStatus === 'cancelled') {
             $order->cancel_reason = $reason;
-            $order->cancelled_by = $adminId;
+            $order->cancelled_by = $statusActorId;
             $order->cancelled_at = Carbon::now();
         }
 
@@ -72,5 +75,14 @@ class OrderStatusService
     public function getAvailableTransitions(string $currentStatus): array
     {
         return $this->allowedTransitions[$currentStatus] ?? [];
+    }
+
+    protected function resolveAdminId(?int $adminId): ?int
+    {
+        if (!$adminId) {
+            return null;
+        }
+
+        return Admin::where('id', $adminId)->exists() ? $adminId : null;
     }
 }

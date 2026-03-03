@@ -215,7 +215,7 @@ class OrderService
                 );
             }
 
-            $this->orderStatusService->changeStatus($order, 'cancelled', $reason, false, $userId ?? 1);
+            $this->orderStatusService->changeStatus($order, 'cancelled', $reason, false, null);
         });
 
         return true;
