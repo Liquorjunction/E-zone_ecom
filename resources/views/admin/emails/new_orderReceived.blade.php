@@ -107,7 +107,7 @@
                     <tr>
                         <td style="padding: 4px 16px;">
                             <p style="margin: 0; color: #9ca3af; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Remise: <span style="color: #16a34a; font-weight: 500; margin-left: 16px;">−{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->discount_amount, 2) }}</span>
+                                Remise sur le prix catalogue: <span style="color: #16a34a; font-weight: 500; margin-left: 16px;">−{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->discount_amount, 2) }}</span>
                             </p>
                         </td>
                     </tr>

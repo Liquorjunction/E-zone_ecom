@@ -89,7 +89,7 @@
                     <tr>
                         <td style="padding: 10px 16px 4px 16px;">
                             <p style="margin: 0; padding: 0; color: #888888; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Subtotal: <span style="color: #1a1a1a; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}} {{ number_format($order->subtotal ?? $order->total, 2) }}</span>
+                                Sous-total: <span style="color: #1a1a1a; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}} {{ number_format($order->subtotal ?? $order->total, 2) }}</span>
                             </p>
                         </td>
                     </tr>
@@ -98,7 +98,7 @@
                     <tr>
                         <td style="padding: 4px 16px;">
                             <p style="margin: 0; padding: 0; color: #888888; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Discount: <span style="color: #22c55e; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->discount_amount, 2) }}</span>
+                                Remise sur le prix catalogue: <span style="color: #22c55e; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->discount_amount, 2) }}</span>
                             </p>
                         </td>
                     </tr>
@@ -108,7 +108,7 @@
                     <tr>
                         <td style="padding: 4px 16px;">
                             <p style="margin: 0; padding: 0; color: #888888; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Coupon Discount: <span style="color: #22c55e; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->coupon_discount_amount, 2) }}</span>
+                                Remise de coupon: <span style="color: #22c55e; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->coupon_discount_amount, 2) }}</span>
                             </p>
                         </td>
                     </tr>
@@ -128,7 +128,7 @@
                     <tr>
                         <td style="padding: 10px 16px 14px 16px; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0; padding: 0; font-size: 15px; font-family: Arial, Helvetica, sans-serif; text-align: right; color: #1a3a52;">
-                                Total: <span style="font-weight: 700; font-size: 17px; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->total, 2) }}</span>
+                                Total général: <span style="font-weight: 700; font-size: 17px; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->total, 2) }}</span>
                             </p>
                         </td>
                     </tr>
