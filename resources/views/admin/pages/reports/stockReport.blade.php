@@ -51,7 +51,7 @@
                                                 <span title="Total = Available + Reserved + Sold">{{ $report->total_qty }}</span>
                                             </td>
                                             <td>
-                                                <span title="Sold (Completed/Paid/Delivered orders)">{{ $report->sold_qty }}</span>
+                                                <span title="Sold (Dispatched quantity from this inventory)">{{ $report->sold_qty }}</span>
                                             </td>
                                             <td>
                                                 <span title="Reserved (Pending/Processing orders)">{{ $report->reserved_qty }}</span>

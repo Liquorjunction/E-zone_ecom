@@ -16,26 +16,23 @@ class StockReportRepository implements StockReportRepositoryInterface
             'variant',
             'warehouse',
             'store',
-            'orderItems.order'
+            'transactions'
         ])->orderByDesc('updated_at')->get();
 
         $inventories->transform(function ($inventory) {
             $reservedQty = (float) ($inventory->reserved_quantity ?? 0);
 
-            $filteredOrderItems = $inventory->orderItems->filter(function ($item) use ($inventory) {
-                return $item->product_id == $inventory->product_id && $item->variant_id == $inventory->product_variant_id;
-            });
-            $soldQty = $filteredOrderItems
-                ->filter(function ($item) {
-                    return $item->order && in_array($item->order->status, ['completed', 'paid', 'delivered']);
-                })
-                ->sum('quantity');
+            $soldQty = (float) abs(
+                $inventory->transactions
+                    ->where('type', 'dispatch')
+                    ->sum('quantity_change')
+            );
 
-            $returnedQty = $inventory->transactions
-                ->where('type', 'return')
+            $returnedQty = (float) $inventory->transactions
+                ->whereIn('type', ['return', 'rto_restock'])
                 ->sum('quantity_change');
 
-            $availableQty = (float) $inventory->quantity;
+            $availableQty = max(0, (float) $inventory->quantity - $reservedQty);
 
             $totalQty = $availableQty + $reservedQty + $soldQty;
 

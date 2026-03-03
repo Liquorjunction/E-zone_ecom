@@ -678,13 +678,30 @@
                 <!-- Reports -->
                 @can('reports.read')
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
-                            href="{{ route('admin.reports.stock') }}">
+                        <a class="nav-link {{ $isReportsSectionActive ? 'section-active' : 'collapsed' }}"
+                            data-bs-toggle="collapse" href="#sidebar-reports" role="button"
+                            aria-expanded="{{ $isReportsSectionActive ? 'true' : 'false' }}"
+                            aria-controls="sidebar-reports">
                             <i class="icon">
                                 <i class="bi bi-file-earmark-bar-graph"></i>
                             </i>
-                            <span class="item-name">Stock Reports</span>
+                            <span class="item-name">Reports</span>
+                            <i class="right-icon">
+                                <i class="bi bi-chevron-right"></i>
+                            </i>
                         </a>
+                        <ul class="sub-nav collapse {{ $isReportsSectionActive ? 'show' : '' }}" id="sidebar-reports"
+                            data-bs-parent="#sidebar-menu">
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
+                                    href="{{ route('admin.reports.stock') }}">
+                                    <i class="icon">
+                                        <i class="bi bi-file-earmark-bar-graph"></i>
+                                    </i>
+                                    <span class="item-name">Stock Report</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 @endcan
             </ul>
