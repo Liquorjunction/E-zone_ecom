@@ -113,7 +113,7 @@
                     <tr>
                         <td style="padding: 4px 16px;">
                             <p style="margin: 0; padding: 0; color: #888888; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Réduction avec coupon: <span style="color: #22c55e; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->coupon_discount_amount, 2) }}</span>
+                                Remise de coupon: <span style="color: #22c55e; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->coupon_discount_amount, 2) }}</span>
                             </p>
                         </td>
                     </tr>
