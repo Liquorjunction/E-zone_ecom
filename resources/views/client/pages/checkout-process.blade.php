@@ -534,15 +534,10 @@
                                 Payment Method
                             </h2>
                             <div class="space-y-4 mb-6">
-                                <label class="flex items-center p-4 border-2 border-primary rounded-xl cursor-pointer bg-primary/5">
-                                    <input type="radio" name="payment_method" value="card" checked
-                                        class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
-                                    <span class="ml-4 font-semibold text-gray-900">Credit / Debit Card</span>
-                                </label>
                                 <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                                     <input type="radio" name="payment_method" value="paypal"
                                         class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
-                                    <span class="ml-4 font-semibold text-gray-900">PayPal</span>
+                                    <span class="ml-4 font-semibold text-gray-900">NAPS</span>
                                 </label>
                                 <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                                     <input type="radio" name="payment_method" value="cod"
