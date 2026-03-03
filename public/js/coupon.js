@@ -318,17 +318,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
-            // Shipping
-            if (summary.shipping_cost !== undefined) {
+            // Shipping (supports both `shipping` and legacy `shipping_cost`)
+            const shippingValue =
+                summary.shipping !== undefined
+                    ? summary.shipping
+                    : summary.shipping_cost;
+            if (shippingValue !== undefined) {
                 const shippingText =
-                    summary.shipping_cost > 0
-                        ? formatMoney(summary.shipping_cost)
+                    shippingValue > 0
+                        ? formatMoney(shippingValue)
                         : "FREE";
                 setText("order-shipping" + s, shippingText);
             }
 
-            if (summary.final_total !== undefined) {
-                const totalText = formatMoney(summary.final_total);
+            // Total (supports both `total` and legacy `final_total`)
+            const totalValue =
+                summary.total !== undefined
+                    ? summary.total
+                    : summary.final_total;
+            if (totalValue !== undefined) {
+                const totalText = formatMoney(totalValue);
                 setText("order-total" + s, totalText);
             }
         });
