@@ -29,7 +29,6 @@
                     'shipped',
                     'out_for_delivery',
                     'delivered',
-                    'completed',
                 ];
                 $stageLabels = [
                     'pending' => 'Pending',
@@ -37,7 +36,6 @@
                     'shipped' => 'Shipped',
                     'out_for_delivery' => 'Out For Delivery',
                     'delivered' => 'Delivered',
-                    'completed' => 'Completed',
                 ];
                 $cancelableStatuses = ['pending'];
                 $currentIndex = array_search($clientStatus, $stages, true);

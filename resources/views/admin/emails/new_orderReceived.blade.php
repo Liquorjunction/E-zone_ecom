@@ -133,16 +133,6 @@
                     </tr>
                     @endif
 
-                    @if (!empty($order->tax_amount) && $order->tax_amount > 0)
-                    <tr>
-                        <td style="padding: 4px 16px;">
-                            <p style="margin: 0; color: #9ca3af; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Taxe: <span style="color: #374151; font-weight: 500; margin-left: 16px;">₹{{ number_format($order->tax_amount, 2) }}</span>
-                            </p>
-                        </td>
-                    </tr>
-                    @endif
-
                     <!-- Grand Total -->
                     <tr>
                         <td style="padding: 10px 16px 14px 16px; border-top: 1px solid #e0e4f0;">
