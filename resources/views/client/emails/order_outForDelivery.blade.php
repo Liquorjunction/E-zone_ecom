@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Out for Delivery')
-@section('header_title', 'Out for Delivery!')
-@section('header_subtitle', 'Your order is almost there')
+@section('title', config('app.name') . ' - En cours de livraison')
+@section('header_title', 'En cours de livraison!')
+@section('header_subtitle', 'Votre commande arrive bientôt')
 
 @section('content')
     <!-- Greeting -->

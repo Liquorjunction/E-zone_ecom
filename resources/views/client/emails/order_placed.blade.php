@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Order Placed')
-@section('header_title', 'Order Placed Successfully')
-@section('header_subtitle', 'We\'ve received your order')
+@section('title', config('app.name') . ' - Commande Passée')
+@section('header_title', 'Commande Passée avec Succès')
+@section('header_subtitle', 'Nous avons reçu votre commande')
 
 @section('content')
     <!-- Greeting -->

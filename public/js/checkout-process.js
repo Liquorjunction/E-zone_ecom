@@ -567,14 +567,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!summary) return;
 
         const map = {
-            subtotal:                     [".order-subtotal",                  "order-subtotal"],
-            item_discount:                [".order-discount",                  "order-discount"],
-            subtotal_after_item_discount: [".order-subtotal-after-discount",   "order-subtotal-after-discount"],
-            coupon_discount:              [".order-coupon-discount",            "order-coupon-discount"],
-            tax:                          [".order-tax",                        "order-tax"],
-            total:                        [".order-total",                      "order-total",    "summary-total"],
-            itemCount:                    [".order-item-count",                 "order-item-count"],
-            shipping:                     [".order-shipping",                   "order-shipping"],
+            subtotal:                     [".order-subtotal",                  "order-subtotal", "order-subtotal-step2"],
+            item_discount:                [".order-discount",                  "order-discount", "order-discount-step2"],
+            subtotal_after_item_discount: [".order-subtotal-after-discount",   "order-subtotal-after-discount", "order-subtotal-after-discount-step2"],
+            coupon_discount:              [".order-coupon-discount",            "order-coupon-discount", "order-coupon-discount-step2"],
+            tax:                          [".order-tax",                        "order-tax", "order-tax-step2"],
+            total:                        [".order-total",                      "order-total", "order-total-step2", "summary-total"],
+            itemCount:                    [".order-item-count",                 "order-item-count", "order-item-count-step2"],
+            shipping:                     [".order-shipping",                   "order-shipping", "order-shipping-step2"],
         };
 
         for (const [key, selectors] of Object.entries(map)) {

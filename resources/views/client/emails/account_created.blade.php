@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Account Created')
-@section('header_title', 'Welcome to ' . config('app.name'))
-@section('header_subtitle', 'Your account has been successfully created')
+@section('title', config('app.name') . ' - Compte Créé')
+@section('header_title', 'Bienvenue sur ' . config('app.name'))
+@section('header_subtitle', 'Votre compte a été créé avec succès')
 
 @section('content')
     <!-- Greeting -->

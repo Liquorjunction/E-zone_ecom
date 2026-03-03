@@ -195,7 +195,11 @@ class OrderService
             return false;
         }
 
-        if (in_array($order->status, ['cancelled', 'refunded'])) {
+        if (in_array($order->status, ['cancelled', 'refunded'], true)) {
+            return false;
+        }
+
+        if (! in_array(strtolower($order->status ?? ''), ['pending'], true)) {
             return false;
         }
 

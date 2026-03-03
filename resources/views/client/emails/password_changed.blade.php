@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Password Changed')
-@section('header_title', 'Password Updated')
-@section('header_subtitle', 'Your account password has been changed')
+@section('title', config('app.name') . ' - Mot de passe modifié')
+@section('header_title', 'Mot de passe mis à jour')
+@section('header_subtitle', 'Le mot de passe de votre compte a été modifié')
 
 @section('content')
     <!-- Greeting -->

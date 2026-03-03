@@ -45,9 +45,12 @@
                                 id="status"
                                 class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white cursor-pointer">
                                 <option value="">All Statuses</option>
-                                <option value="processing" @if (request('status') == 'processing') selected @endif>Processing</option>
+                                <option value="pending" @if (request('status') == 'pending') selected @endif>Pending</option>
+                                <option value="order_confirmation" @if (request('status') == 'order_confirmation') selected @endif>Order Confirmation</option>
                                 <option value="shipped" @if (request('status') == 'shipped') selected @endif>Shipped</option>
+                                <option value="out_for_delivery" @if (request('status') == 'out_for_delivery') selected @endif>Out For Delivery</option>
                                 <option value="delivered" @if (request('status') == 'delivered') selected @endif>Delivered</option>
+                                <option value="completed" @if (request('status') == 'completed') selected @endif>Completed</option>
                                 <option value="cancelled" @if (request('status') == 'cancelled') selected @endif>Cancelled</option>
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
@@ -210,6 +213,30 @@
                 $itemsCount = $order->items->count();
                 $itemsLabel = $itemsCount > 1 ? $title . ' + ' . ($itemsCount - 1) . ' more' : $title;
                 $status = strtolower($order->status ?? 'pending');
+                $statusLabel = [
+                    'pending' => 'Pending',
+                    'order_confirmation' => 'Order Confirmation',
+                    'partially_dispatched' => 'Order Confirmation',
+                    'dispatched' => 'Order Confirmation',
+                    'ready_to_ship' => 'Order Confirmation',
+                    'shipped' => 'Shipped',
+                    'out_for_delivery' => 'Out For Delivery',
+                    'delivered' => 'Delivered',
+                    'completed' => 'Completed',
+                    'cancelled' => 'Cancelled',
+                ][$status] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $status));
+                $statusStyles = [
+                    'pending' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'order_confirmation' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'partially_dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'ready_to_ship' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'shipped' => ['text-amber-700 bg-amber-100', 'bg-amber-600'],
+                    'out_for_delivery' => ['text-indigo-700 bg-indigo-100', 'bg-indigo-600'],
+                    'delivered' => ['text-green-700 bg-green-100', 'bg-green-600'],
+                    'completed' => ['text-green-700 bg-green-100', 'bg-green-600'],
+                    'cancelled' => ['text-red-700 bg-red-100', 'bg-red-600'],
+                ][$status] ?? ['text-gray-700 bg-gray-100', 'bg-gray-600'];
             @endphp
             <div class="flex items-center border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-all duration-200 p-4">
                 <div class="flex-1 min-w-0 pr-4">
@@ -229,32 +256,10 @@
                             </svg>
                             {{ optional($order->created_at)->format('M d, Y') }}
                         </span>
-                        @if ($status === 'processing')
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
-                                <span class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
-                                Processing
-                            </span>
-                        @elseif($status === 'cancelled')
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">
-                                <span class="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
-                                Cancelled
-                            </span>
-                        @elseif($status === 'shipped')
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full">
-                                <span class="w-1.5 h-1.5 bg-amber-600 rounded-full"></span>
-                                Shipped
-                            </span>
-                        @elseif($status === 'delivered')
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
-                                <span class="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-                                Delivered
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
-                                <span class="w-1.5 h-1.5 bg-gray-600 rounded-full"></span>
-                                {{ ucfirst($status) }}
-                            </span>
-                        @endif
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full {{ $statusStyles[0] }}">
+                            <span class="w-1.5 h-1.5 rounded-full {{ $statusStyles[1] }}"></span>
+                            {{ $statusLabel }}
+                        </span>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -270,8 +275,8 @@
                             View Details
                         </a>
                         @if (Auth::check() &&
-                                $order->user_id === Auth::id() &&
-                                !in_array(strtolower($order->status ?? ''), ['cancelled', 'shipped', 'delivered', 'completed']))
+                            $order->user_id === Auth::id() &&
+                            in_array($status, ['pending'], true))
                             <button type="button"
                                 class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-all duration-200 open-cancel-modal-btn"
                                 data-order-id="{{ $order->id }}"
@@ -325,6 +330,30 @@
                         : $firstName)
                     : $itemsCount . ' item' . ($itemsCount > 1 ? 's' : '');
                 $status = strtolower($order->status ?? 'pending');
+                $statusLabel = [
+                    'pending' => 'Pending',
+                    'order_confirmation' => 'Order Confirmation',
+                    'partially_dispatched' => 'Order Confirmation',
+                    'dispatched' => 'Order Confirmation',
+                    'ready_to_ship' => 'Order Confirmation',
+                    'shipped' => 'Shipped',
+                    'out_for_delivery' => 'Out For Delivery',
+                    'delivered' => 'Delivered',
+                    'completed' => 'Completed',
+                    'cancelled' => 'Cancelled',
+                ][$status] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $status));
+                $statusStyles = [
+                    'pending' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'order_confirmation' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'partially_dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'ready_to_ship' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'shipped' => ['text-amber-700 bg-amber-100', 'bg-amber-600'],
+                    'out_for_delivery' => ['text-indigo-700 bg-indigo-100', 'bg-indigo-600'],
+                    'delivered' => ['text-green-700 bg-green-100', 'bg-green-600'],
+                    'completed' => ['text-green-700 bg-green-100', 'bg-green-600'],
+                    'cancelled' => ['text-red-700 bg-red-100', 'bg-red-600'],
+                ][$status] ?? ['text-gray-700 bg-gray-100', 'bg-gray-600'];
             @endphp
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between mb-3 pb-3 border-b border-gray-100">
@@ -338,32 +367,10 @@
                             {{ optional($order->created_at)->format('M d, Y') }}
                         </p>
                     </div>
-                    @if ($status === 'processing')
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
-                            Processing
-                        </span>
-                    @elseif($status === 'cancelled')
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
-                            Cancelled
-                        </span>
-                    @elseif($status === 'shipped')
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-amber-600 rounded-full"></span>
-                            Shipped
-                        </span>
-                    @elseif($status === 'delivered')
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-                            Delivered
-                        </span>
-                    @else
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-gray-600 rounded-full"></span>
-                            {{ ucfirst($status) }}
-                        </span>
-                    @endif
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full {{ $statusStyles[0] }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $statusStyles[1] }}"></span>
+                        {{ $statusLabel }}
+                    </span>
                 </div>
                 <div class="mb-4">
                     <div class="text-sm text-gray-800 font-medium mb-2">{{ $itemsLabel }}</div>
@@ -379,9 +386,9 @@
                         </svg>
                         View
                     </a>
-                    @if (Auth::check() &&
+                        @if (Auth::check() &&
                             $order->user_id === Auth::id() &&
-                            !in_array(strtolower($order->status ?? ''), ['cancelled', 'shipped', 'delivered']))
+                            in_array($status, ['pending'], true))
                         <button type="button"
                             class="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-all duration-200 open-cancel-modal-btn"
                             data-order-id="{{ $order->id }}"

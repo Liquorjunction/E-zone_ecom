@@ -21,6 +21,7 @@
             $itemsCount = $order->items->count();
             $itemsLabel = $itemsCount > 1 ? $title . ' + ' . ($itemsCount - 1) . ' more' : $title;
             $status = strtolower($order->status ?? 'pending');
+            $canCancel = in_array($status, ['pending'], true);
           @endphp
           <div class="flex items-center border-b-2 border-gray-100 hover:bg-gray-50 transition-colors py-4 px-6">
             <div class="flex-1 min-w-0">
@@ -40,7 +41,7 @@
             <span class="font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</span>
             <div class="flex items-center gap-2 ml-4">
               <a href="{{ route('order-detail', ['order' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors">View Details</a>
-              @if (Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled', 'shipped', 'delivered']))
+              @if (Auth::check() && $order->user_id === Auth::id() && $canCancel)
                 <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');">
                   @csrf
                   <button type="submit" class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">Cancel</button>
@@ -67,7 +68,10 @@
                 <p class="text-sm font-semibold text-primary">{{ $order->order_number ?? '#' . $order->id }}</p>
                 <p class="text-xs text-gray-600 mt-1">{{ optional($order->created_at)->format('M d, Y') }}</p>
               </div>
-              @php $status = strtolower($order->status ?? 'pending'); @endphp
+              @php
+                $status = strtolower($order->status ?? 'pending');
+                $canCancel = in_array($status, ['pending'], true);
+              @endphp
               @if ($status === 'processing')
                 <span class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">Processing</span>
               @elseif($status === 'cancelled')
@@ -92,7 +96,7 @@
               </div>
               <div class="flex items-center gap-2">
                 <a href="{{ route('order-detail', ['order' => $order->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">View Details</a>
-                @if (Auth::check() && $order->user_id === Auth::id() && !in_array(strtolower($order->status ?? ''), ['cancelled', 'shipped', 'delivered']))
+                @if (Auth::check() && $order->user_id === Auth::id() && $canCancel)
                   <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');">
                     @csrf
                     <button type="submit" class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">Cancel</button>

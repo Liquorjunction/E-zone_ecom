@@ -13,13 +13,34 @@
                 $status = strtolower($order->status ?? 'pending');
                 $statusClass = match ($status) {
                     'delivered', 'completed' => 'text-green-700 bg-green-100',
-                    'shipped' => 'text-primary bg-primary/10',
-                    'processing' => 'text-yellow-700 bg-yellow-100',
+                    'shipped', 'out_for_delivery' => 'text-primary bg-primary/10',
+                    'pending', 'order_confirmation' => 'text-yellow-700 bg-yellow-100',
+                    'partially_dispatched', 'dispatched', 'ready_to_ship' => 'text-yellow-700 bg-yellow-100',
                     'cancelled' => 'text-red-700 bg-red-100',
                     default => 'text-gray-700 bg-gray-100',
                 };
-                $stages = ['placed', 'processing', 'shipped', 'delivered', 'completed'];
-                $currentIndex = array_search($status, $stages, true);
+                $clientStatus = in_array($status, ['partially_dispatched', 'dispatched', 'ready_to_ship'], true)
+                    ? 'order_confirmation'
+                    : $status;
+                $statusLabel = \Illuminate\Support\Str::title(str_replace('_', ' ', $clientStatus));
+                $stages = [
+                    'pending',
+                    'order_confirmation',
+                    'shipped',
+                    'out_for_delivery',
+                    'delivered',
+                    'completed',
+                ];
+                $stageLabels = [
+                    'pending' => 'Pending',
+                    'order_confirmation' => 'Order Confirmation',
+                    'shipped' => 'Shipped',
+                    'out_for_delivery' => 'Out For Delivery',
+                    'delivered' => 'Delivered',
+                    'completed' => 'Completed',
+                ];
+                $cancelableStatuses = ['pending'];
+                $currentIndex = array_search($clientStatus, $stages, true);
                 if ($currentIndex === false) {
                     $currentIndex = 0;
                 }
@@ -33,7 +54,7 @@
                             <h1 class="text-xl lg:text-2xl font-bold text-gray-900">Order
                                 #{{ $order->order_number ?? $order->id }}</h1>
                             <span class="px-3 py-1.5 text-xs lg:text-sm font-semibold rounded-full {{ $statusClass }}">
-                                {{ ucfirst($order->status ?? 'Pending') }}
+                                {{ $statusLabel }}
                             </span>
                         </div>
                         <p class="text-sm text-gray-600">Placed on
@@ -54,7 +75,7 @@
                         @endif
                         @if (Auth::check() &&
                                 $order->user_id === Auth::id() &&
-                                in_array(strtolower($order->status ?? ''), ['pending', 'processing']))
+                                in_array($status, $cancelableStatuses, true))
                             <button type="button"
                                 class="px-4 py-2.5 border-2 border-red-200 text-red-700 font-semibold rounded-lg hover:bg-red-50 transition-colors text-sm open-cancel-modal-btn"
                                 data-order-id="{{ $order->id }}"
@@ -119,161 +140,124 @@
                             Order Tracking
                         </h2>
 
-                        {{-- Desktop Timeline: horizontal stepper --}}
-                        <div class="hidden md:block">
-                            <div class="relative py-6">
-                                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                    <div class="w-full border-t-2 border-gray-200"></div>
+                        @if ($status === 'cancelled')
+                            @php
+                                $cancelledAt = $order->cancelled_at ?? $order->updated_at;
+                            @endphp
+                            <div class="mt-2 rounded-xl border-2 border-red-100 bg-red-50 p-5 lg:p-6">
+                                <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-base lg:text-lg font-bold text-red-900">Order Cancelled</p>
+                                        @if ($cancelledAt)
+                                            <p class="text-sm text-red-700 mt-1">
+                                                Cancelled on {{ optional($cancelledAt)->format('M j, Y \a\t g:i A') }}
+                                            </p>
+                                        @endif
+                                    </div>
                                 </div>
+                            </div>
+                        @else
+                            {{-- Desktop Timeline: horizontal stepper --}}
+                            <div class="hidden md:block">
+                                <div class="relative py-6">
+                                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                                        <div class="w-full border-t-2 border-gray-200"></div>
+                                    </div>
 
-                                <div class="relative flex justify-between items-start">
+                                    <div class="relative flex justify-between items-start">
+                                        @foreach ($stages as $idx => $stage)
+                                            @php
+                                                $isActive = $idx <= $currentIndex;
+                                                $label = $stageLabels[$stage] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $stage));
+                                                $tsField = $stage . '_at';
+                                                $ts = $order->{$tsField} ?? null;
+                                                if (!$ts) {
+                                                    $ts =
+                                                        $stage === 'pending'
+                                                            ? $order->created_at
+                                                            : ($isActive
+                                                                ? $order->updated_at
+                                                                : null);
+                                                }
+                                            @endphp
+
+                                            <div class="flex-1 min-w-0 text-center px-2">
+                                                <div
+                                                    class="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 {{ $isActive ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-500' }}">
+                                                    @if ($isActive)
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    @else
+                                                        <span class="text-sm font-semibold">{{ $idx + 1 }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="text-xs font-semibold text-gray-900">{{ $label }}</div>
+                                                <div class="text-xs text-gray-500 mt-1">
+                                                    @if ($ts)
+                                                        {{ optional($ts)->format('M j, g:i A') }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Mobile Timeline: stacked steps --}}
+                            <div class="md:hidden space-y-4">
+                                @foreach ($stages as $idx => $stage)
                                     @php
-                                        $displayStages = $stages;
-                                        if (strtolower($order->status ?? '') === 'cancelled') {
-                                            $displayStages[] = 'cancelled';
+                                        $isActive = $idx <= $currentIndex;
+                                        $label = $stageLabels[$stage] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $stage));
+                                        $tsField = $stage . '_at';
+                                        $ts = $order->{$tsField} ?? null;
+                                        if (!$ts) {
+                                            $ts =
+                                                $stage === 'pending'
+                                                    ? $order->created_at
+                                                    : ($isActive
+                                                        ? $order->updated_at
+                                                        : null);
                                         }
                                     @endphp
-
-                                    @foreach ($displayStages as $idx => $stage)
-                                        @php
-                                            $isActive =
-                                                $idx <= $currentIndex ||
-                                                strtolower($order->status ?? '') === 'cancelled';
-                                            $isCancelled = $stage === 'cancelled';
-                                            $label = ucfirst($stage);
-                                            $tsField = $stage . '_at';
-                                            $ts = $order->{$tsField} ?? null;
-                                            if (!$ts) {
-                                                $ts =
-                                                    $stage === 'placed'
-                                                        ? $order->created_at
-                                                        : ($isActive
-                                                            ? $order->updated_at
-                                                            : null);
-                                            }
-                                        @endphp
-
-                                        <div class="flex-1 min-w-0 text-center px-2">
+                                    <div class="flex gap-4">
+                                        <div class="flex flex-col items-center w-12 shrink-0">
                                             <div
-                                                class="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 {{ $isCancelled ? 'bg-red-100 text-red-600' : ($isActive ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-500') }}">
-                                                @if ($isCancelled)
+                                                class="w-10 h-10 rounded-full flex items-center justify-center {{ $isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500' }}">
+                                                @if ($isActive)
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                @elseif ($isActive)
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 @else
                                                     <span class="text-sm font-semibold">{{ $idx + 1 }}</span>
                                                 @endif
                                             </div>
-                                            <div
-                                                class="text-xs font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">
-                                                {{ $label }}</div>
+                                            @if (!$loop->last)
+                                                <div class="w-px h-8 bg-gray-200 mt-2"></div>
+                                            @endif
+                                        </div>
+                                        <div class="flex-1 pb-2">
+                                            <div class="text-sm font-semibold text-gray-900">{{ $label }}</div>
                                             <div class="text-xs text-gray-500 mt-1">
                                                 @if ($ts)
                                                     {{ optional($ts)->format('M j, g:i A') }}
                                                 @endif
                                             </div>
-                                            @if ($isCancelled && $order->cancellation_reason)
-                                                <div class="text-xs text-red-600 font-medium mt-2 px-1">
-                                                    {{ Str::limit($order->cancellation_reason, 50) }}
-                                                </div>
-                                            @endif
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Mobile Timeline: stacked steps --}}
-                        <div class="md:hidden space-y-4">
-                            @php
-                                $displayStages = $stages;
-                                if (strtolower($order->status ?? '') === 'cancelled') {
-                                    $displayStages[] = 'cancelled';
-                                }
-                            @endphp
-                            @foreach ($displayStages as $idx => $stage)
-                                @php
-                                    $isActive =
-                                        $idx <= $currentIndex || strtolower($order->status ?? '') === 'cancelled';
-                                    $isCancelled = $stage === 'cancelled';
-                                    $label = ucfirst($stage);
-                                    $tsField = $stage . '_at';
-                                    $ts = $order->{$tsField} ?? null;
-                                    if (!$ts) {
-                                        $ts =
-                                            $stage === 'placed'
-                                                ? $order->created_at
-                                                : ($isActive
-                                                    ? $order->updated_at
-                                                    : null);
-                                    }
-                                @endphp
-                                <div class="flex gap-4">
-                                    <div class="flex flex-col items-center w-12 shrink-0">
-                                        <div
-                                            class="w-10 h-10 rounded-full flex items-center justify-center {{ $isCancelled ? 'bg-red-100 text-red-600' : ($isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500') }}">
-                                            @if ($isCancelled)
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            @elseif ($isActive)
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            @else
-                                                <span class="text-sm font-semibold">{{ $idx + 1 }}</span>
-                                            @endif
-                                        </div>
-                                        @if (!$loop->last)
-                                            <div class="w-px h-8 bg-gray-200 mt-2"></div>
-                                        @endif
                                     </div>
-                                    <div class="flex-1 pb-2">
-                                        <div
-                                            class="text-sm font-semibold {{ $isCancelled ? 'text-red-600' : 'text-gray-900' }}">
-                                            {{ $label }}</div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                            @if ($ts)
-                                                {{ optional($ts)->format('M j, g:i A') }}
-                                            @endif
-                                        </div>
-                                        @if ($isCancelled && $order->cancellation_reason)
-                                            <div class="text-xs text-red-600 font-medium mt-2">
-                                                {{ Str::limit($order->cancellation_reason, 50) }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        {{-- Cancellation Notice --}}
-                        @if (strtolower($order->status ?? '') === 'cancelled' && $order->cancel_reason)
-                            <div class="mt-6 p-4 bg-red-50 border-2 border-red-100 rounded-xl">
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="currentColor"
-                                        viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    <div>
-                                        <p class="text-sm font-semibold text-red-900">Order Cancelled</p>
-                                        <p class="text-xs text-red-800 mt-1">{{ $order->cancel_reason }}</p>
-                                    </div>
-                                </div>
+                                @endforeach
                             </div>
                         @endif
 

@@ -30,15 +30,15 @@ class ContactThankYouMail extends Mailable implements ShouldQueue
 
     public function build()
     {
-        return $this->subject('Thank you for contacting ' . config('app.name') . ' Support')
+        return $this->subject('Merci de nous avoir contactés - Support ' . config('app.name'))
             ->view('client.emails.contact_thank_you')
             ->with([
-                'name' => $this->name,
-                'ticket_number' => $this->ticket_number,
-                'subject_label' => $this->subject_label,
-                'user_message' => $this->user_message,
-                'order_number' => $this->order_number,
-                'product_sku' => $this->product_sku,
+            'name' => $this->name,
+            'ticket_number' => $this->ticket_number,
+            'subject_label' => $this->subject_label,
+            'user_message' => $this->user_message,
+            'order_number' => $this->order_number,
+            'product_sku' => $this->product_sku,
             ]);
-    }
+        }
 }

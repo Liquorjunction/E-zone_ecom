@@ -32,7 +32,7 @@ class NewOrderReceived extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Order Received - #' . ($this->order->order_number ?? ''),
+            subject: 'Nouvelle Commande Reçue - #' . ($this->order->order_number ?? ''),
         );
     }
 

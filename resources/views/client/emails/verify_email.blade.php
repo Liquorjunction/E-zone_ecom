@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Email Verification')
-@section('header_title', 'Verify Your Email Address')
-@section('header_subtitle', 'Secure Your Account')
+@section('title', config('app.name') . ' - Vérification d\'Email')
+@section('header_title', 'Vérifiez Votre Adresse E-mail')
+@section('header_subtitle', 'Sécurisez Votre Compte')
 
 @section('content')
     <!-- Greeting -->

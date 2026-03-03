@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Order Confirmed')
-@section('header_title', 'Order Confirmed')
-@section('header_subtitle', 'Your order is being prepared')
+@section('title', config('app.name') . ' - Commande Confirmée')
+@section('header_title', 'Commande Confirmée')
+@section('header_subtitle', 'Votre commande a été confirmée et est en cours de préparation pour expédition.')
 
 @section('content')
     <!-- Greeting -->

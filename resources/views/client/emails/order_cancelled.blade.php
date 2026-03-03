@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Order Cancelled')
-@section('header_title', 'Order Cancelled')
-@section('header_subtitle', 'Your order has been cancelled')
+@section('title', config('app.name') . ' - Commande Annulée')
+@section('header_title', 'Commande Annulée')
+@section('header_subtitle', 'Votre commande a été annulée')
 
 @section('content')
     <!-- Greeting -->

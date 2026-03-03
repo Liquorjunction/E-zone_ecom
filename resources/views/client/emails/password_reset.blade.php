@@ -1,8 +1,8 @@
 @extends('client.emails.layout')
 
-@section('title', config('app.name') . ' - Password Reset')
-@section('header_title', 'Password Reset Request')
-@section('header_subtitle', 'Secure Your Account')
+@section('title', config('app.name') . ' - Réinitialisation du mot de passe')
+@section('header_title', 'Demande de réinitialisation du mot de passe')
+@section('header_subtitle', 'Sécurisez votre compte')
 
 @section('content')
     <!-- Greeting -->

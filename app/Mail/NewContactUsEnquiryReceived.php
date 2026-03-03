@@ -59,7 +59,7 @@ class NewContactUsEnquiryReceived extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Enquiry Received' . ($this->ticket_number ? " - {$this->ticket_number}" : ''),
+            subject: 'Nouvelle demande reçue' . ($this->ticket_number ? " - {$this->ticket_number}" : ''),
         );
     }
 
