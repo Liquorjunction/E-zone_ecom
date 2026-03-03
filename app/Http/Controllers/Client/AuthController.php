@@ -30,12 +30,12 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
             $token = $request->input('token') ?? Str::random(64);
-            
+
             // Clear old pending data if resubmitting
             if ($request->has('token')) {
                 $this->clearPendingRegistration($token);
             }
-            
+
             $this->storePendingRegistration($token, $data);
 
             $pendingUser = new User([
@@ -100,7 +100,7 @@ class AuthController extends Controller
         if ($authRepository->authenticateUser($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard.overview'));
+            return redirect()->intended(route('home'));
         }
 
         return back()->withErrors([
@@ -224,12 +224,12 @@ class AuthController extends Controller
             try {
                 $pending['password'] = Crypt::decryptString($pending['password']);
                 $user = $authRepository->createUser($pending);
-                
+
                 // Mark email as verified upon creation
                 $user->update([
                     'email_verified_at' => now(),
                 ]);
-                
+
                 $this->clearPendingRegistration($token);
             } catch (\Throwable $e) {
                 Log::error('Pending registration verification error: ' . $e->getMessage(), [
