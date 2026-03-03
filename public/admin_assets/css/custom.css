@@ -818,6 +818,23 @@ body.uikit .btn-download {
   top: 50% !important;
 }
 
+/* Keep status dropdown menus visible inside DataTables/table wrappers */
+.dataTables_wrapper,
+.table-responsive {
+  overflow-y: visible !important;
+}
+
+table.dataTable,
+.table.dataTable,
+#orders-table,
+#contactUsTable {
+  overflow: visible !important;
+}
+
+.datatable-status-dropdown .dropdown-menu {
+  z-index: 2000 !important;
+}
+
 [dir=rtl] .text-muted {
   padding-left: 10px;
 }

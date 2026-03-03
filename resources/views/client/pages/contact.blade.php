@@ -20,7 +20,7 @@
                     <div>
                         <h3 class="font-bold text-green-800 text-lg">Message Received!</h3>
                         <p class="text-green-700 text-sm mt-1">
-                            Your ticket <strong>#{{ session('ticket_number', 'TKT-XXXXXX') }}</strong> has been created.
+                            Your ticket <strong>#{{ session('ticket_number', 'ENQ-XXXXXX') }}</strong> has been created.
                             We've sent a confirmation to your email. Our team will respond within <strong>24–48
                                 hours</strong>.
                         </p>

@@ -1,0 +1,16 @@
+/* Ensure status dropdowns are not clipped in DataTables */
+.dataTables_wrapper,
+.table-responsive {
+  overflow-y: visible !important;
+}
+
+table.dataTable,
+.table.dataTable,
+#orders-table,
+#contactUsTable {
+  overflow: visible !important;
+}
+
+.datatable-status-dropdown .dropdown-menu {
+  z-index: 2000 !important;
+}

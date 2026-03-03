@@ -17,7 +17,7 @@
             {{ $statusLabels[$currentStatus] ?? ucfirst($currentStatus) }}
         </span>
         @if($canUpdate && count($availableStatuses) > 1 && count($transitions) > 0)
-            <div class="dropdown">
+            <div class="dropdown datatable-status-dropdown">
                 <button class="btn btn-link p-0 border-0 text-secondary dropdown-toggle" type="button" id="enquiryStatusDropdown{{ $enquiry->id }}" data-bs-toggle="dropdown" aria-expanded="false" title="Change Status">
                     <i class="bi bi-pencil-square fs-5"></i>
                 </button>

@@ -88,7 +88,7 @@ class ContactUsService
             $contact = $this->contactUsRepository->createContactUs($contactData);
             $prefix = config('app.PREFIX');
             $idPart = str_pad($contact->id, 7, '0', STR_PAD_LEFT);
-            $contact->ticket_number = $prefix . '/TKT/' . $idPart;
+            $contact->ticket_number = $prefix . '/ENQ/' . $idPart;
             $contact->save();
 
 
