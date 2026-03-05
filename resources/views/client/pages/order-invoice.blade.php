@@ -2,116 +2,478 @@
 
 @section('content')
 
-<link rel="stylesheet" href="/css/invoice-print.css">
-<div class="min-h-screen invoice-bg py-12 px-2">
-    <div class="max-w-2xl mx-auto bg-white shadow-2xl rounded-2xl p-8 border border-gray-200 relative overflow-hidden">
-        <!-- Logo and Company Info -->
-        <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone" class="h-12 w-12 object-contain rounded-lg border border-gray-200 bg-white shadow-sm">
-                <div>
-                    <div class="text-xl font-bold text-primary tracking-wide">E-Zone</div>
-                    <div class="text-xs text-gray-500">www.ezone.com</div>
+    @php
+        $sym = config('app.CURRENCY_SYMBOL', '$');
+        $orderNum = $order->order_number ?? $order->id;
+
+        $ship = is_array($order->shipping_address)
+            ? $order->shipping_address
+            : json_decode($order->shipping_address, true) ?? [];
+        $bill = is_array($order->billing_address)
+            ? $order->billing_address
+            : json_decode($order->billing_address, true) ?? [];
+
+        $subtotal = (float) ($order->subtotal ?? 0);
+        $shippingCost = (float) ($order->shipping_cost ?? 0);
+        $shippingAmount = (float) ($order->shipping_amount ?? ($order->shipping_cost ?? 0));
+        $couponDiscount = (float) ($order->coupon_discount_amount ?? 0);
+        $tax = (float) ($order->tax_amount ?? ($order->tax ?? 0));
+        $total = (float) ($order->total ?? 0);
+        $amountBeforeTax = max($total - $tax, 0);
+        $summarySubtotal = isset($order->coupon_id) ? (float) ($order->subtotal ?? 0) : (float) ($order->total ?? 0);
+        $taxableAmount = $order->taxable_amount ?? null;
+        $taxRate = $order->tax_percentage ?? null;
+        $couponCode = $order->coupon_code ?? null;
+        $shippingMethod = ucfirst(str_replace('_', ' ', $order->shipping_method ?? 'Standard'));
+        $paymentMethod = ucfirst(str_replace('_', ' ', $order->payment_method ?? 'N/A'));
+        $paymentStatus = ucfirst($order->payment_status ?? 'Pending');
+        $orderStatus = ucfirst($order->status ?? 'Processing');
+
+        $shipName = $ship['name'] ?? trim(($ship['first_name'] ?? '') . ' ' . ($ship['last_name'] ?? ''));
+        $shipStreet = $ship['street'] ?? ($ship['address'] ?? ($ship['address_line'] ?? ''));
+        $shipCity = $ship['city'] ?? '';
+        $shipState = $ship['state'] ?? '';
+        $shipZip = $ship['postal_code'] ?? ($ship['zip'] ?? '');
+        $shipCountry = $ship['country'] ?? '';
+        $shipPhone = $ship['phone'] ?? '';
+
+        $billName = $bill['name'] ?? trim(($bill['first_name'] ?? '') . ' ' . ($bill['last_name'] ?? ''));
+        $billStreet = $bill['street'] ?? ($bill['address'] ?? ($bill['address_line'] ?? ''));
+        $billCity = $bill['city'] ?? '';
+        $billState = $bill['state'] ?? '';
+        $billZip = $bill['postal_code'] ?? ($bill['zip'] ?? '');
+        $billCountry = $bill['country'] ?? '';
+        $billPhone = $bill['phone'] ?? '';
+    @endphp
+
+    {{-- Only the print styles change — everything else is the original design --}}
+    <style>
+        .invoice-card>div {
+            margin-left: 6px;
+            margin-right: 6px;
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .invoice-card>div {
+                margin-left: 3px !important;
+                margin-right: 3px !important;
+                margin-bottom: 30px !important;
+            }
+
+            html,
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                font-size: 12px !important;
+                line-height: 1.35 !important;
+            }
+
+            header,
+            aside,
+            footer,
+            #global-toasts,
+            .sidebar-mobile-open-btn,
+            .floating-action-btn,
+            .no-print {
+                display: none !important;
+            }
+
+            main.main-content-wrapper {
+                min-height: auto !important;
+                padding-top: 0 !important;
+            }
+
+            #main-content-inner {
+                margin-left: 0 !important;
+            }
+
+            .invoice-bg {
+                background: #fff !important;
+                min-height: auto !important;
+                padding: 0 !important;
+            }
+
+            .invoice-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                overflow: visible !important;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: calc(297mm - 20mm) !important;
+            }
+
+            .invoice-section,
+            .print-avoid-break {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .print-mb-2 {
+                margin-bottom: 6px !important;
+            }
+
+            .print-mb-4 {
+                margin-bottom: 8px !important;
+            }
+
+            .print-p-3 {
+                padding: 10px !important;
+            }
+
+            .print-text-xs {
+                font-size: 11px !important;
+            }
+
+            .print-text-sm {
+                font-size: 12px !important;
+            }
+
+            h2 {
+                font-size: 24px !important;
+            }
+
+            h3 {
+                font-size: 15px !important;
+            }
+
+            h4 {
+                font-size: 13px !important;
+            }
+
+            .invoice-info-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+            }
+
+            table td,
+            table th {
+                padding: 6px 9px !important;
+            }
+
+            .print-footer-bottom {
+                margin-top: auto !important;
+            }
+
+            .invoice-header-top {
+                background: linear-gradient(135deg, #1a3a52 0%, #0d1f2d 100%) !important;
+                border-bottom: 4px solid #00bfff !important;
+            }
+
+            .invoice-header-meta {
+                background: #f8fafc !important;
+                border-top: 1px solid #e2e8f0 !important;
+            }
+
+            .invoice-chip {
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+
+            .invoice-surface {
+                background: #ffffff !important;
+                border: 1px solid #e5e7eb !important;
+                box-shadow: none !important;
+            }
+
+            .invoice-items-wrap {
+                border: 1px solid #e5e7eb !important;
+            }
+
+            .invoice-items-head {
+                background: #f8fafc !important;
+            }
+
+            .invoice-items tbody tr:nth-child(even) {
+                background: #f9fafb !important;
+            }
+
+            .invoice-total-highlight {
+                background: #eef6ff !important;
+            }
+        }
+    </style>
+
+    <div class="min-h-screen invoice-bg py-12 px-2">
+        <div
+            class="invoice-card max-w-2xl mx-auto bg-white shadow-xl rounded-2xl p-8 border border-gray-200/80 ring-1 ring-gray-100 relative overflow-hidden">
+
+            <!-- Email-style Invoice Header -->
+            <div class="mb-10 print-mb-4 rounded-xl overflow-hidden border border-primary/20 shadow-sm invoice-section">
+                <div
+                    class="bg-linear-to-br from-primary-dark to-slate-900 px-6 py-6 border-b-4 border-cyan-400 invoice-header-top">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <div class="inline-flex items-center gap-3 bg-white rounded-xl px-4 py-2 shadow-sm">
+                                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="{{ config('app.name') }}"
+                                    class="h-10 w-auto object-contain">
+                            </div>
+                            <h2 class="text-3xl font-extrabold tracking-tight text-white mt-5">Invoice</h2>
+                            <p class="text-xs font-semibold tracking-widest uppercase text-cyan-300 mt-1">Order
+                                #{{ $orderNum }}</p>
+                        </div>
+                        <div class="text-right text-xs text-slate-200 leading-relaxed">
+                            <div>{{ $siteContent->address ?? 'Not available' }}</div>
+                            @if ($siteContent->phone ?? null)
+                                <div>{{ $siteContent->phone }}</div>
+                            @endif
+                            <div>{{ $siteContent->email ?? 'support@ezone.com' }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="bg-slate-50 px-6 py-3 flex flex-wrap items-center justify-between gap-2 text-sm border-t border-white/30 invoice-header-meta">
+                    <div
+                        class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
+                        Placed: <span
+                            class="font-semibold text-slate-700">{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span>
+                    </div>
+                    <div
+                        class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
+                        Order Status: <span class="font-semibold text-slate-700">{{ $orderStatus }}</span></div>
+                    <div
+                        class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
+                        Payment: <span class="font-semibold text-slate-700">{{ $paymentMethod }}
+                            ({{ $paymentStatus }})</span></div>
+                    <div
+                        class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
+                        Shipping: <span class="font-semibold text-slate-700">{{ $shippingMethod }}</span></div>
                 </div>
             </div>
-            <div class="text-right text-xs text-gray-500">
-                <div>123 Market Street</div>
-                <div>City, Country 12345</div>
-                <div>support@ezone.com</div>
-            </div>
-        </div>
 
-        <div class="flex items-center justify-between mb-8 border-b pb-4">
-            @php
-                $clientStatus = strtolower($order->status ?? 'pending');
-                if ($clientStatus === 'completed') {
-                    $clientStatus = 'delivered';
-                }
-                $statusTone = $clientStatus === 'delivered' ? 'green' : ($clientStatus === 'pending' ? 'yellow' : 'red');
-            @endphp
-            <div>
-                <h2 class="text-3xl font-extrabold tracking-tight text-primary">Invoice</h2>
-                <p class="text-base text-gray-500 mt-1">Order #{{ $order->order_number ?? $order->id }}</p>
-            </div>
-            <div class="text-right">
-                <p class="text-sm text-gray-400">Placed: <span class="font-medium text-gray-700">{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span></p>
-                <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-{{ $statusTone }}-100 text-{{ $statusTone }}-700">
-                    Status: {{ \Illuminate\Support\Str::title(str_replace('_', ' ', $clientStatus)) }}
-                </span>
-            </div>
-        </div>
+            <!-- Billing/Shipping summary above item list -->
+            <div class="invoice-info-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 print-mb-4 invoice-section">
 
-        <div class="mb-8">
-            <h3 class="font-semibold text-gray-800 mb-3 text-lg border-l-4 border-primary pl-2">Order Items</h3>
-            <div class="overflow-x-auto rounded-lg border border-gray-100">
-                <table class="min-w-full bg-white">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Product</th>
-                            <th class="px-4 py-2 text-center text-xs font-semibold text-gray-600">Qty</th>
-                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600">Unit Price</th>
-                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($order->items as $item)
-                            @php
-                                $title = $item->variant && $item->variant->variant_name ? $item->variant->variant_name : ($item->product->name ?? 'Product');
-                            @endphp
-                            <tr class="border-b last:border-b-0 hover:bg-gray-50">
-                                <td class="px-4 py-3 font-medium text-gray-800">{{ $title }}</td>
-                                <td class="px-4 py-3 text-center text-gray-600">{{ $item->quantity }}</td>
-                                <td class="px-4 py-3 text-right text-gray-700">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->unit_price, 2) }}</td>
-                                <td class="px-4 py-3 text-right text-gray-900 font-semibold">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->total_price ?? ($item->unit_price * $item->quantity), 2) }}</td>
+                <div
+                    class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm print-avoid-break invoice-surface">
+                    <h4 class="font-semibold text-gray-700 mb-1 text-sm">Shipping Address</h4>
+                    @if (!empty($ship))
+                        <p class="text-sm text-gray-800 font-medium print-text-xs">{{ $shipName }}</p>
+                        @if ($shipStreet)
+                            <p class="text-sm text-gray-600 print-text-xs">{{ $shipStreet }}</p>
+                        @endif
+                        @if ($shipCity || $shipZip)
+                            <p class="text-sm text-gray-600 print-text-xs">
+                                {{ $shipCity }}{{ $shipCity && $shipState ? ', ' . $shipState : '' }}
+                                {{ $shipZip }}</p>
+                        @endif
+                        @if ($shipCountry)
+                            <p class="text-sm text-gray-600 print-text-xs">{{ $shipCountry }}</p>
+                        @endif
+                        @if ($shipPhone)
+                            <p class="text-xs text-gray-400 mt-1">📞 {{ $shipPhone }}</p>
+                        @endif
+                    @else
+                        <p class="text-sm text-gray-400 italic">No shipping address on record.</p>
+                    @endif
+                </div>
+
+                <div
+                    class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm print-avoid-break invoice-surface">
+                    <h4 class="font-semibold text-gray-700 mb-1 text-sm">Billing Address</h4>
+                    @if (!empty($bill))
+                        <p class="text-sm text-gray-800 font-medium print-text-xs">{{ $billName }}</p>
+                        @if ($billStreet)
+                            <p class="text-sm text-gray-600 print-text-xs">{{ $billStreet }}</p>
+                        @endif
+                        @if ($billCity || $billZip)
+                            <p class="text-sm text-gray-600 print-text-xs">
+                                {{ $billCity }}{{ $billCity && $billState ? ', ' . $billState : '' }}
+                                {{ $billZip }}</p>
+                        @endif
+                        @if ($billCountry)
+                            <p class="text-sm text-gray-600 print-text-xs">{{ $billCountry }}</p>
+                        @endif
+                        @if ($billPhone)
+                            <p class="text-xs text-gray-400 mt-1">📞 {{ $billPhone }}</p>
+                        @endif
+                    @elseif (!empty($ship))
+                        <p class="text-sm text-gray-800 font-medium print-text-xs">{{ $shipName }}</p>
+                        <p class="text-xs text-gray-400 italic">Same as shipping address</p>
+                    @else
+                        <p class="text-sm text-gray-400 italic">No billing address on record.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="mb-10 print-mb-4 invoice-section">
+                <h3 class="font-semibold text-gray-800 mb-3 text-lg border-l-4 border-primary pl-2">Order Items</h3>
+                <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm invoice-items-wrap">
+                    <table class="min-w-full bg-white invoice-items">
+                        <thead class="bg-gray-50/80 invoice-items-head">
+                            <tr>
+                                <th
+                                    class="px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    Product</th>
+                                <th
+                                    class="px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    SKU</th>
+                                <th
+                                    class="px-4 py-2.5 text-center text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    Qty</th>
+                                <th
+                                    class="px-4 py-2.5 text-right text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    Unit Price</th>
+                                <th
+                                    class="px-4 py-2.5 text-right text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    Total</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach ($order->items as $item)
+                                @php
+                                    $productName = $item->product->name ?? 'Product';
+                                    $variantName = $item->variant->variant_name ?? null;
+                                    $sku = $item->variant->sku ?? ($item->product->sku ?? '—');
+                                    $qty = (float) ($item->quantity ?? 1);
+                                    $safeQty = $qty > 0 ? $qty : 1;
+                                    $unitPrice = (float) ($item->unit_price ?? ($item->price ?? 0));
+                                    $lineDiscount = (float) ($item->discount_amount ?? ($item->line_discount ?? 0));
+                                    $lineSubtotal = (float) ($item->line_subtotal ?? $safeQty * $unitPrice);
+                                    $lineTotal = (float) ($item->line_total ?? $lineSubtotal - $lineDiscount);
+                                    $originalUnitPrice =
+                                        $lineDiscount > 0 ? $unitPrice + $lineDiscount / $safeQty : $unitPrice;
+                                @endphp
+                                <tr class="border-b last:border-b-0 odd:bg-white even:bg-gray-50/50">
+                                    <td class="px-4 py-2 font-medium text-gray-800 print-text-sm">
+                                        {{ $productName }}
+                                        @if ($variantName)
+                                            <span
+                                                class="block text-xs text-gray-400 font-normal">{{ $variantName }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-2 text-xs text-gray-400">{{ $sku }}</td>
+                                    <td class="px-4 py-2 text-center text-gray-600">{{ $qty }}</td>
+                                    <td class="px-4 py-2 text-right text-gray-700">
+                                        @if ($lineDiscount > 0)
+                                            <span class="text-xs text-gray-400 line-through mr-1">{{ $sym }}
+                                                {{ number_format($originalUnitPrice, 2) }}</span>
+                                        @endif
+                                        <span>{{ $sym }} {{ number_format($unitPrice, 2) }}</span>
+                                    </td>
+                                    <td class="px-4 py-2 text-right text-gray-900 font-semibold">
+                                        <span>{{ $sym }} {{ number_format($lineTotal, 2) }}</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div class="bg-gray-50 rounded-lg p-5 border border-gray-100">
-                <h4 class="font-semibold text-gray-700 mb-2">Shipping Address</h4>
-                @php $addr = $order->shipping_address ?? []; @endphp
-                <p class="text-sm text-gray-800">{{ $addr['name'] ?? '' }}</p>
-                <p class="text-sm text-gray-800">{{ $addr['street'] ?? '' }}</p>
-                <p class="text-sm text-gray-800">{{ ($addr['city'] ?? '') }} {{ $addr['postal_code'] ?? '' }}</p>
-                <p class="text-sm text-gray-800">{{ $addr['country'] ?? '' }}</p>
+            <!-- Tax Summary and Order Summary -->
+            <div class="invoice-info-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 print-mb-4 invoice-section">
+                <div
+                    class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm print-avoid-break invoice-surface">
+                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">Tax Summary</h4>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">Taxable Amount :</span>
+                        <span class="font-medium">
+                            @if ($taxableAmount !== null)
+                                {{ $sym }} {{ number_format((float) $taxableAmount, 2) }}
+                            @else
+                                -
+                            @endif
+                        </span>
+                    </div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">VAT {{ number_format((float) $taxRate, 0) }}% :</span>
+                        <span class="font-medium">
+                            <span class="font-semibold">{{ $tax > 0 ? $sym . ' ' . number_format($tax, 2) : '-' }}</span>
+                        </span>
+                    </div>
+                    <div class="flex justify-between text-sm border-t pt-2 mt-2"></div>
+                    <div class="flex justify-between text-sm mt-1">
+                        <span class="text-gray-600">Total Tax Inclusive Amount :</span>
+                        <span class="font-medium">{{ $sym }} {{ number_format($total, 2) }}</span>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm self-start print-avoid-break invoice-surface">
+                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">Order Summary</h4>
+
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">Subtotal ({{ $order->items->sum('quantity') }} items) :</span>
+                        <span class="font-medium">{{ $sym }} {{ number_format($summarySubtotal, 2) }}</span>
+                    </div>
+
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">Shipping ({{ $shippingMethod }}) :</span>
+                        @if ($shippingAmount > 0)
+                            <span>{{ $sym }} {{ number_format($shippingAmount, 2) }}</span>
+                        @else
+                            <span class="text-green-600 font-medium">Free</span>
+                        @endif
+                    </div>
+
+                    @if ($couponCode)
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-600">
+                                Coupon Discount:
+                                <span class="ml-1 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">{{ strtoupper($couponCode) }}</span>
+                            </span>
+                            <span class="text-green-600 font-medium">{{ $couponDiscount > 0 ? '− ' . $sym . ' ' . number_format($couponDiscount, 2) : '-' }}</span>
+                        </div>
+                    @endif
+
+                    <div
+                        class="flex justify-between text-base mt-3 border-t pt-2 font-bold bg-primary/5 rounded-lg px-2 py-1 invoice-total-highlight">
+                        <span class="text-gray-800">Total :</span>
+                        <span class="text-primary text-lg">{{ $sym }} {{ number_format($total, 2) }}</span>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-50 rounded-lg p-5 border border-gray-100">
-                <h4 class="font-semibold text-gray-700 mb-2">Order Summary</h4>
-                <div class="flex justify-between text-sm mb-1">
-                    <span class="text-gray-600">Subtotal:</span>
-                    <span class="font-medium">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($order->subtotal ?? ($order->total ?? 0) - ($order->tax ?? 0) - ($order->shipping_cost ?? 0), 2) }}</span>
-                </div>
-                <div class="flex justify-between text-sm mb-1">
-                    <span class="text-gray-600">Shipping:</span>
-                    <span>{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($order->shipping_cost ?? 0, 2) }}</span>
-                </div>
-                <div class="flex justify-between text-sm mb-1">
-                    <span class="text-gray-600">Tax:</span>
-                    <span>{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($order->tax ?? 0, 2) }}</span>
-                </div>
-                <div class="flex justify-between text-base mt-3 border-t pt-2 font-bold">
-                    <span class="text-gray-800">Total:</span>
-                    <span class="text-primary text-lg">{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($order->total ?? 0, 2) }}</span>
-                </div>
-                <div class="flex justify-between text-sm mt-4">
-                    <span class="text-gray-600">Payment Method:</span>
-                    <span class="font-medium text-gray-700">{{ ucfirst($order->payment_method ?? 'N/A') }}</span>
-                </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center justify-between mt-8 no-print">
+                <button onclick="window.print()"
+                    class="px-6 py-2 bg-primary hover:bg-primary-dark transition text-white rounded-lg font-semibold shadow">
+                    Print Invoice
+                </button>
+                <a href="{{ route('dashboard.overview') }}"
+                    class="text-sm text-gray-500 hover:text-primary underline">&larr; Back to dashboard</a>
             </div>
-        </div>
 
-        <div class="flex items-center justify-between mt-6 no-print">
-            <button onclick="window.print()" class="px-6 py-2 bg-primary hover:bg-primary-dark transition text-white rounded-lg font-semibold shadow">Print Invoice</button>
-            <a href="{{ route('dashboard.overview') }}" class="text-sm text-gray-500 hover:text-primary underline">&larr; Back to dashboard</a>
-        </div>
+            <div class="mt-6 text-center text-xs text-gray-400 print-footer-bottom">
+                Thank you for shopping with {{ config('app.name') }}. If you have any questions about your order,
+                contact us at
+                <a href="mailto:{{ $siteContent->email ?? 'support@ezone.com' }}"
+                    class="text-primary underline">{{ $siteContent->email ?? 'support@ezone.com' }}</a>.
+            </div>
 
-        <div class="mt-10 text-center text-xs text-gray-400">
-            Thank you for shopping with E-Zone. If you have any questions about your order, contact us at <a href="mailto:support@ezone.com" class="text-primary underline">support@ezone.com</a>.
         </div>
     </div>
-</div>
+
 @endsection
