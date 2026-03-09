@@ -9,7 +9,9 @@ class OrderInvoiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::guard('admin')->user()->can('order.read');
+        $admin = Auth::guard('admin')->user();
+
+        return $admin ? $admin->can('order.read') : false;
     }
 
     public function rules(): array

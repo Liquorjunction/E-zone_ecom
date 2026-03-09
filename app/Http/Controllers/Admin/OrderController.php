@@ -191,13 +191,15 @@ class OrderController extends Controller
 
     public function downloadInvoice(OrderInvoiceRequest $request, OrderRepo $orderRepo, InvoiceExportService $invoiceExportService)
     {
-        if (! Auth::check()) {
-            return redirect()->route('login');
+        if (! Auth::guard('admin')->check()) {
+            return redirect()->route('admin.login');
         }
 
         $order = $orderRepo->findOrderWithRelations($request->input('id'), ['items.product', 'items.variant', 'user']);
 
-        if (! $order || $order->user_id !== Auth::id()) {
+        // This endpoint is for admin users; permission middleware/request authorization
+        // already enforce access. Do not compare admin ID with customer user_id.
+        if (! $order) {
             abort(403);
         }
 
