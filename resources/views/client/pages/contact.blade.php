@@ -77,7 +77,7 @@
                                     </label>
                                     <input type="tel" id="mobile" name="mobile" required value="{{ old('mobile') }}"
                                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 @error('mobile') border-red-400 @enderror"
-                                        placeholder="+91 98765 43210">
+                                        placeholder="+212 123 456 789">
                                     @error('mobile')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
