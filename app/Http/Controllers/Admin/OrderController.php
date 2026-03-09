@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Orders\CancelOrderRequest;
 use App\Http\Requests\Admin\Orders\ReadOrderRequest;
-use App\Http\Requests\Client\Orders\OrderInvoiceRequest;
+use App\Http\Requests\Admin\Orders\OrderInvoiceRequest;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
 use App\Services\InvoiceExportService;
 use App\Services\OrderStatusService as OrderStatus;
