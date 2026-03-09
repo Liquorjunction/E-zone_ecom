@@ -161,7 +161,7 @@ class OrderController extends Controller
         return view('client.pages.order-detail', compact('order', 'userReviews'));
     }
 
-    public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo)
+    public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo, PriceCalculatorService $priceCalculator)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
@@ -173,7 +173,9 @@ class OrderController extends Controller
             abort(403);
         }
 
-        return view('client.pages.order-invoice', compact('order'));
+        $totals = $priceCalculator->calculate($order);
+
+        return view('client.pages.order-invoice', compact('order', 'totals'));
     }
 
     public function cancel(OrderCancelRequest $request, OrderService $orderService)

@@ -13,18 +13,21 @@
             ? $order->billing_address
             : json_decode($order->billing_address, true) ?? [];
 
-        $subtotal = (float) ($order->subtotal ?? 0);
-        $shippingCost = (float) ($order->shipping_cost ?? 0);
-        $shippingAmount = (float) ($order->shipping_amount ?? ($order->shipping_cost ?? 0));
-        $couponDiscount = (float) ($order->coupon_discount_amount ?? 0);
-        $tax = (float) ($order->tax_amount ?? ($order->tax ?? 0));
-        $total = (float) ($order->total ?? 0);
-        $amountBeforeTax = max($total - $tax, 0);
-        $summarySubtotal = isset($order->coupon_id) ? (float) ($order->subtotal ?? 0) : (float) ($order->total ?? 0);
-        $taxableAmount = $order->taxable_amount ?? null;
-        $taxRate = $order->tax_percentage ?? null;
+        // Use pre-calculated totals from PriceCalculatorService
+        $subtotal = (float) ($totals['subtotal'] ?? 0);
+        $totalItemDiscount = (float) ($totals['total_item_discount'] ?? 0);
+        $subtotalAfterDiscount = (float) ($totals['subtotal_after_item_discount'] ?? 0);
+        $couponDiscount = (float) ($totals['coupon_discount'] ?? 0);
+        $totalAfterCoupon = (float) ($totals['total_after_coupon'] ?? 0);
+        $taxRate = (float) ($totals['tax_rate'] ?? 0);
+        $tax = (float) ($totals['tax_amount'] ?? 0);
+        $taxableAmount = (float) ($totals['taxable_amount'] ?? 0);
+        $shippingMethod = ucfirst(str_replace('_', ' ', $totals['shipping_method'] ?? 'Standard'));
+        $shippingCost = (float) ($totals['shipping_cost'] ?? 0);
+        $total = (float) ($totals['final_total'] ?? 0);
+
+        // Order metadata
         $couponCode = $order->coupon_code ?? null;
-        $shippingMethod = ucfirst(str_replace('_', ' ', $order->shipping_method ?? 'Standard'));
         $paymentMethod = ucfirst(str_replace('_', ' ', $order->payment_method ?? 'N/A'));
         $paymentStatus = ucfirst($order->payment_status ?? 'Pending');
         $orderStatus = ucfirst($order->status ?? 'Processing');
@@ -367,11 +370,11 @@
                                 @endphp
                                 <tr class="border-b last:border-b-0 odd:bg-white even:bg-gray-50/50">
                                     <td class="px-4 py-2 font-medium text-gray-800 print-text-sm">
-                                        {{ $productName }}
-                                        @if ($variantName)
+                                        {{ $variantName }}
+                                        {{-- @if ($variantName)
                                             <span
                                                 class="block text-xs text-gray-400 font-normal">{{ $variantName }}</span>
-                                        @endif
+                                        @endif --}}
                                     </td>
                                     <td class="px-4 py-2 text-xs text-gray-400">{{ $sku }}</td>
                                     <td class="px-4 py-2 text-center text-gray-600">{{ $qty }}</td>
@@ -416,7 +419,7 @@
                     <div class="flex justify-between text-sm border-t pt-2 mt-2"></div>
                     <div class="flex justify-between text-sm mt-1">
                         <span class="text-gray-600">Total Tax Inclusive Amount :</span>
-                        <span class="font-medium">{{ $sym }} {{ number_format($total, 2) }}</span>
+                        <span class="font-medium">{{ $sym }} {{ number_format($totalAfterCoupon, 2) }}</span>
                     </div>
                 </div>
 
@@ -426,27 +429,29 @@
 
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-600">Subtotal ({{ $order->items->sum('quantity') }} items) :</span>
-                        <span class="font-medium">{{ $sym }} {{ number_format($summarySubtotal, 2) }}</span>
-                    </div>
-
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600">Shipping ({{ $shippingMethod }}) :</span>
-                        @if ($shippingAmount > 0)
-                            <span>{{ $sym }} {{ number_format($shippingAmount, 2) }}</span>
-                        @else
-                            <span class="text-green-600 font-medium">Free</span>
-                        @endif
+                        <span class="font-medium">{{ $sym }} {{ number_format($subtotal, 2) }}</span>
                     </div>
 
                     @if ($couponCode)
                         <div class="flex justify-between text-sm mb-1">
                             <span class="text-gray-600">
                                 Coupon Discount:
-                                <span class="ml-1 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">{{ strtoupper($couponCode) }}</span>
+                                <span
+                                    class="ml-1 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">{{ strtoupper($couponCode) }}</span>
                             </span>
-                            <span class="text-green-600 font-medium">{{ $couponDiscount > 0 ? '− ' . $sym . ' ' . number_format($couponDiscount, 2) : '-' }}</span>
+                            <span
+                                class="text-green-600 font-medium">{{ $couponDiscount > 0 ? '− ' . $sym . ' ' . number_format($couponDiscount, 2) : '-' }}</span>
                         </div>
                     @endif
+
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">Shipping ({{ $shippingMethod }}) :</span>
+                        @if ($shippingCost > 0)
+                            <span>{{ $sym }} {{ number_format($shippingCost, 2) }}</span>
+                        @else
+                            <span class="text-green-600 font-medium">Free</span>
+                        @endif
+                    </div>
 
                     <div
                         class="flex justify-between text-base mt-3 border-t pt-2 font-bold bg-primary/5 rounded-lg px-2 py-1 invoice-total-highlight">
