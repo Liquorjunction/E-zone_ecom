@@ -10,5 +10,6 @@ interface OrderRepositoryInterface
     public function getOrderItemById($id);
     public function getDataForDataTable();
     public function getCustomerNameByOrderId($orderId);
+    public function findOrderWithRelations(int $orderId, array $relations = []);
     public function getOrderWithItemsAndInventory($orderId);
 }

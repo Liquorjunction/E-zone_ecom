@@ -311,9 +311,11 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index'); // permission: order.read
             Route::get('/data', [OrderController::class, 'dataTable'])->name('data');
             Route::get('/show', [OrderController::class, 'show'])->name('show')->middleware('can:order.read,admin');
+            Route::get('/download-invoice', [OrderController::class, 'downloadInvoice'])->name('download-invoice')->middleware('can:order.read,admin');
             Route::post('/cancel', [OrderController::class, 'cancelOrder'])->name('cancel')->middleware('can:order.update,admin');
             Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
+            Route::get('/pdf', [OrderController::class, 'downloadInvoice'])->name('downloadInvoice')->middleware('can:order.read,admin');
         });
 
         // Dispatch Routes

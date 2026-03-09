@@ -44,6 +44,15 @@ class OrderRepository implements OrderRepositoryInterface
         return $order->customer_name ?? $order->shipping_address['name'] ?? null;
     }
 
+    public function findOrderWithRelations(int $orderId, array $relations = [])
+    {
+        $query = Order::query();
+        if (!empty($relations)) {
+            $query->with($relations);
+        }
+        return $query->find($orderId);
+    }
+
     public function getOrderWithItemsAndInventory($orderId)
     {
         return Order::with(['orderItems.product', 'orderItems.variant.inventories'])->find($orderId);

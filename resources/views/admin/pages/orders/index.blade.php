@@ -24,6 +24,7 @@
                                     <th>Date</th>
                                     <th>Customer</th>
                                     <th>Total</th>
+                                    <th>Cancel Reason</th>
                                     <th>Status</th>
                                     <th>Payment</th>
                                     <th class="text-center" style="width: 100px;">Actions</th>

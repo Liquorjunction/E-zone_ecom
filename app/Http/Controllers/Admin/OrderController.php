@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Orders\CancelOrderRequest;
 use App\Http\Requests\Admin\Orders\ReadOrderRequest;
+use App\Http\Requests\Client\Orders\OrderInvoiceRequest;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
+use App\Services\InvoiceExportService;
 use App\Services\OrderStatusService as OrderStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -174,6 +176,7 @@ class OrderController extends Controller
 
                     if ($canRead) {
                         $actions['view_url'] = route('admin.orders.show', ['id' => $order->id]);
+                        $actions['invoice_url'] = route('admin.orders.download-invoice', ['id' => $order->id]);
                     }
 
                     return view('admin.partials.datatable-actions', $actions)->render();
@@ -184,5 +187,26 @@ class OrderController extends Controller
             Log::error('Order dataTable error: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['success' => false, 'message' => 'Failed to fetch orders data.'], 500);
         }
+    }
+
+    public function downloadInvoice(OrderInvoiceRequest $request, OrderRepo $orderRepo, InvoiceExportService $invoiceExportService)
+    {
+        if (! Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $order = $orderRepo->findOrderWithRelations($request->input('id'), ['items.product', 'items.variant', 'user']);
+
+        if (! $order || $order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $pdf = $invoiceExportService->renderInvoicePdf($order);
+        $filename = $invoiceExportService->filename($order);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }

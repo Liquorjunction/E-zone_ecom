@@ -4,9 +4,11 @@ namespace App\Mail;
 
 use App\Models\User;
 use App\Models\Order;
+use App\Services\InvoiceExportService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class OrderStatusMail extends Mailable
 {
@@ -46,8 +48,27 @@ class OrderStatusMail extends Mailable
 
         $view = $templateMap[$this->status] ?? 'client.emails.order_confirmed';
 
-        return $this->subject('Order ' . ucfirst(str_replace('_', ' ', $this->status)) . ' - #' . $this->order->order_number)
-                ->view($view)
-                ->with(['trackingUrl' => $this->trackingUrl]);
+        $mail = $this->subject('Order ' . ucfirst(str_replace('_', ' ', $this->status)) . ' - #' . $this->order->order_number)
+            ->view($view)
+            ->with(['trackingUrl' => $this->trackingUrl]);
+
+        if ($this->status === 'delivered') {
+            try {
+                $invoiceExportService = app(InvoiceExportService::class);
+                $pdf = $invoiceExportService->renderInvoicePdf($this->order);
+                $filename = $invoiceExportService->filename($this->order);
+
+                $mail->attachData($pdf, $filename, ['mime' => 'application/pdf']);
+            } catch (\Throwable $e) {
+                // Do not block order delivered emails if PDF generation fails.
+                Log::warning('Unable to attach invoice PDF to delivered order email.', [
+                    'order_id' => $this->order->id ?? null,
+                    'order_number' => $this->order->order_number ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $mail;
     }
 }

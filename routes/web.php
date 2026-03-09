@@ -175,6 +175,7 @@ Route::middleware('client.auth')->group(function () {
         Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
         Route::get('/order-detail', [OrderController::class, 'detail'])->name('order-detail');
         Route::get('/client/orders/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
+        Route::get('/client/orders/invoice/download', [OrderController::class, 'downloadInvoice'])->name('client.orders.invoice.download');
         Route::post('/client/orders/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
 
         // Cart Operations

@@ -26,13 +26,7 @@
                     $clientStatus = 'delivered';
                 }
                 $statusLabel = \Illuminate\Support\Str::title(str_replace('_', ' ', $clientStatus));
-                $stages = [
-                    'pending',
-                    'order_confirmation',
-                    'shipped',
-                    'out_for_delivery',
-                    'delivered',
-                ];
+                $stages = ['pending', 'order_confirmation', 'shipped', 'out_for_delivery', 'delivered'];
                 $stageLabels = [
                     'pending' => 'Pending',
                     'order_confirmation' => 'Order Confirmation',
@@ -63,20 +57,22 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         @if ($status === 'delivered' || $status === 'completed')
-                            <a href="{{ route('client.orders.invoice', ['id' => $order->id]) ?? '#' }}"
+                            <a href="{{ route('client.orders.invoice.download', ['id' => $order->id]) ?? '#' }}"
                                 class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
                                 <span class="flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
+                                    <i class="fa fa-download w-4 h-4"></i>
                                     Download Invoice
                                 </span>
                             </a>
+                            <a href="{{ route('client.orders.invoice', ['id' => $order->id]) ?? '#' }}"
+                                class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa fa-eye w-4 h-4"></i>
+                                    View Invoice
+                                </span>
+                            </a>
                         @endif
-                        @if (Auth::check() &&
-                                $order->user_id === Auth::id() &&
-                                in_array($status, $cancelableStatuses, true))
+                        @if (Auth::check() && $order->user_id === Auth::id() && in_array($status, $cancelableStatuses, true))
                             <button type="button"
                                 class="px-4 py-2.5 border-2 border-red-200 text-red-700 font-semibold rounded-lg hover:bg-red-50 transition-colors text-sm open-cancel-modal-btn"
                                 data-order-id="{{ $order->id }}"
@@ -176,7 +172,9 @@
                                         @foreach ($stages as $idx => $stage)
                                             @php
                                                 $isActive = $idx <= $currentIndex;
-                                                $label = $stageLabels[$stage] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $stage));
+                                                $label =
+                                                    $stageLabels[$stage] ??
+                                                    \Illuminate\Support\Str::title(str_replace('_', ' ', $stage));
                                                 $tsField = $stage . '_at';
                                                 $ts = $order->{$tsField} ?? null;
                                                 if (!$ts) {
@@ -219,7 +217,9 @@
                                 @foreach ($stages as $idx => $stage)
                                     @php
                                         $isActive = $idx <= $currentIndex;
-                                        $label = $stageLabels[$stage] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $stage));
+                                        $label =
+                                            $stageLabels[$stage] ??
+                                            \Illuminate\Support\Str::title(str_replace('_', ' ', $stage));
                                         $tsField = $stage . '_at';
                                         $ts = $order->{$tsField} ?? null;
                                         if (!$ts) {
@@ -238,8 +238,8 @@
                                                 @if ($isActive)
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M5 13l4 4L19 7" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 @else
                                                     <span class="text-sm font-semibold">{{ $idx + 1 }}</span>
@@ -350,14 +350,22 @@
                                                 @if (!empty($userReviews[$item->id]))
                                                     @php
                                                         $userReview = $userReviews[$item->id];
-                                                        $reviewStatus = strtolower($userReview->is_approved ?? 'pending');
+                                                        $reviewStatus = strtolower(
+                                                            $userReview->is_approved ?? 'pending',
+                                                        );
                                                         $reviewImages = $userReview->images
-                                                            ? $userReview->images->map(function ($image) {
-                                                                $path = $image->image_path ?? '';
-                                                                return \Illuminate\Support\Str::startsWith($path, ['http', 'https', '/'])
-                                                                    ? $path
-                                                                    : asset('storage/' . ltrim($path, '/'));
-                                                            })->values()
+                                                            ? $userReview->images
+                                                                ->map(function ($image) {
+                                                                    $path = $image->image_path ?? '';
+                                                                    return \Illuminate\Support\Str::startsWith($path, [
+                                                                        'http',
+                                                                        'https',
+                                                                        '/',
+                                                                    ])
+                                                                        ? $path
+                                                                        : asset('storage/' . ltrim($path, '/'));
+                                                                })
+                                                                ->values()
                                                             : collect();
                                                     @endphp
                                                     @if ($reviewStatus === 'approved')

@@ -10,6 +10,7 @@ use App\Http\Requests\Client\Orders\OrderCancelRequest;
 use App\Http\Requests\Client\Orders\OrderDetailRequest;
 use App\Http\Requests\Client\Orders\OrderInvoiceRequest;
 use App\Services\CartService;
+use App\Services\InvoiceExportService;
 use App\Services\OrderService;
 use App\Services\PriceCalculatorService;
 use Illuminate\Http\Request;
@@ -176,6 +177,27 @@ class OrderController extends Controller
         $totals = $priceCalculator->calculate($order);
 
         return view('client.pages.order-invoice', compact('order', 'totals'));
+    }
+
+    public function downloadInvoice(OrderInvoiceRequest $request, OrderRepo $orderRepo, InvoiceExportService $invoiceExportService)
+    {
+        if (! Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $order = $orderRepo->findOrderWithRelations($request->input('id'), ['items.product', 'items.variant', 'user']);
+
+        if (! $order || $order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $pdf = $invoiceExportService->renderInvoicePdf($order);
+        $filename = $invoiceExportService->filename($order);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     public function cancel(OrderCancelRequest $request, OrderService $orderService)

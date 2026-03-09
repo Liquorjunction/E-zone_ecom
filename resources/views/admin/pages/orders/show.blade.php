@@ -10,9 +10,14 @@
                             <h4 class="card-title">Order Details - #{{ $order->order_number ?? $order->id }}</h4>
                             <small class="text-muted">View detailed information about the order</small>
                         </div>
-                        <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-arrow-left"> </i>Back
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('admin.orders.downloadInvoice', ['id' => $order->id]) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-download"></i> Download Invoice
+                            </a>
+                            <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body">
                         @php
