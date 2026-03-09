@@ -4,6 +4,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Invoice Font Toggle
+    |--------------------------------------------------------------------------
+    |
+    | Custom TTF loading can fail on some shared hosting environments.
+    | Keep this disabled unless you have verified the font files are readable
+    | and Dompdf can parse them in production.
+    |
+    */
+    'use_custom_invoice_font' => env('DOMPDF_USE_CUSTOM_INVOICE_FONT', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Settings
     |--------------------------------------------------------------------------
     |

@@ -6,53 +6,48 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Invoice #{{ $order->order_number ?? $order->id }}</title>
     @php
+        // Custom invoice fonts can be fragile on some shared hosting setups.
+        // Keep them opt-in and verify each file before exposing it to Dompdf.
+        $useCustomFonts = (bool) config('dompdf.use_custom_invoice_font', false);
         $fontDir = public_path('fonts/instrument-sans');
-        $has400 = file_exists("{$fontDir}/InstrumentSans-400.ttf");
-        $has500 = file_exists("{$fontDir}/InstrumentSans-500.ttf");
-        $has600 = file_exists("{$fontDir}/InstrumentSans-600.ttf");
-        $has700 = file_exists("{$fontDir}/InstrumentSans-700.ttf");
-        $hasFont = $has400 || $has600 || $has700;
 
-        // Build file:// URIs — DomPDF resolves these from the server filesystem
-        $f400 = 'file:///' . str_replace('\\', '/', realpath("{$fontDir}/InstrumentSans-400.ttf") ?: '');
-        $f500 = 'file:///' . str_replace('\\', '/', realpath("{$fontDir}/InstrumentSans-500.ttf") ?: $f400);
-        $f600 = 'file:///' . str_replace('\\', '/', realpath("{$fontDir}/InstrumentSans-600.ttf") ?: '');
-        $f700 = 'file:///' . str_replace('\\', '/', realpath("{$fontDir}/InstrumentSans-700.ttf") ?: $f600);
+        $fontFiles = [
+            400 => "{$fontDir}/InstrumentSans-400.ttf",
+            500 => "{$fontDir}/InstrumentSans-500.ttf",
+            600 => "{$fontDir}/InstrumentSans-600.ttf",
+            700 => "{$fontDir}/InstrumentSans-700.ttf",
+        ];
+
+        $fontUris = [];
+        if ($useCustomFonts) {
+            foreach ($fontFiles as $weight => $filePath) {
+                $real = realpath($filePath);
+                if ($real === false || !is_file($real) || !is_readable($real)) {
+                    continue;
+                }
+
+                // Guard against empty/truncated uploads that crash FontLib on some hosts.
+                if (filesize($real) < 1024) {
+                    continue;
+                }
+
+                $fontUris[$weight] = 'file:///' . str_replace('\\', '/', $real);
+            }
+        }
+
+        $hasFont = !empty($fontUris);
     @endphp
     <style>
         @if ($hasFont)
-            {{-- ── Instrument Sans — loaded from local filesystem ── --}} @if ($has400)
+            {{-- Instrument Sans loaded from verified local filesystem paths. --}}
+            @foreach ($fontUris as $weight => $fontUri)
                 @font-face {
                     font-family: 'Instrument Sans';
-                    src: url('{{ $f400 }}') format('truetype');
-                    font-weight: 400;
+                    src: url('{{ $fontUri }}') format('truetype');
+                    font-weight: {{ $weight }};
                     font-style: normal;
                 }
-            @endif
-            @if ($has500)
-                @font-face {
-                    font-family: 'Instrument Sans';
-                    src: url('{{ $f500 }}') format('truetype');
-                    font-weight: 500;
-                    font-style: normal;
-                }
-            @endif
-            @if ($has600)
-                @font-face {
-                    font-family: 'Instrument Sans';
-                    src: url('{{ $f600 }}') format('truetype');
-                    font-weight: 600;
-                    font-style: normal;
-                }
-            @endif
-            @if ($has700)
-                @font-face {
-                    font-family: 'Instrument Sans';
-                    src: url('{{ $f700 }}') format('truetype');
-                    font-weight: 700;
-                    font-style: normal;
-                }
-            @endif
+            @endforeach
         @endif
 
         /* ─────────────────────────────────────────

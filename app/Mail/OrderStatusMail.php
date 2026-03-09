@@ -53,6 +53,8 @@ class OrderStatusMail extends Mailable
             ->with(['trackingUrl' => $this->trackingUrl]);
 
         if ($this->status === 'delivered') {
+            $filename = 'invoice-' . ($this->order->order_number ?: ('ORDER-' . $this->order->id)) . '.pdf';
+
             try {
                 $invoiceExportService = app(InvoiceExportService::class);
                 $pdf = $invoiceExportService->renderInvoicePdf($this->order);
@@ -60,15 +62,61 @@ class OrderStatusMail extends Mailable
 
                 $mail->attachData($pdf, $filename, ['mime' => 'application/pdf']);
             } catch (\Throwable $e) {
-                // Do not block order delivered emails if PDF generation fails.
-                Log::warning('Unable to attach invoice PDF to delivered order email.', [
+                // Keep attachment behavior resilient even if the full invoice template fails.
+                Log::warning('Primary invoice PDF generation failed for delivered order email; using fallback PDF.', [
                     'order_id' => $this->order->id ?? null,
                     'order_number' => $this->order->order_number ?? null,
                     'error' => $e->getMessage(),
                 ]);
+
+                try {
+                    $fallbackPdf = $this->buildFallbackInvoicePdf();
+                    $mail->attachData($fallbackPdf, $filename, ['mime' => 'application/pdf']);
+                } catch (\Throwable $fallbackError) {
+                    Log::error('Fallback invoice PDF generation also failed for delivered order email.', [
+                        'order_id' => $this->order->id ?? null,
+                        'order_number' => $this->order->order_number ?? null,
+                        'primary_error' => $e->getMessage(),
+                        'fallback_error' => $fallbackError->getMessage(),
+                    ]);
+                }
             }
         }
 
         return $mail;
     }
+
+        private function buildFallbackInvoicePdf(): string
+        {
+                $sym = config('app.CURRENCY_SYMBOL', '$');
+                $total = number_format((float) ($this->order->total ?? 0), 2);
+                $orderNumber = e($this->order->order_number ?: ('ORDER-' . $this->order->id));
+                $customerName = e($this->user->name ?? 'Customer');
+                $date = e(optional($this->order->created_at)->format('F j, Y, g:i A') ?: now()->format('F j, Y, g:i A'));
+
+                $html = "<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>
+        body { font-family: DejaVu Sans, Arial, sans-serif; color: #1f2937; font-size: 12px; }
+        .wrap { border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; }
+        h1 { margin: 0 0 12px; font-size: 20px; }
+        p { margin: 6px 0; }
+    </style>
+</head>
+<body>
+    <div class='wrap'>
+        <h1>Invoice</h1>
+        <p><strong>Order #:</strong> {$orderNumber}</p>
+        <p><strong>Customer:</strong> {$customerName}</p>
+        <p><strong>Date:</strong> {$date}</p>
+        <p><strong>Total:</strong> {$sym} {$total}</p>
+    </div>
+</body>
+</html>";
+
+                $pdf = app('dompdf.wrapper');
+                return $pdf->loadHTML($html)->setPaper('a4', 'portrait')->output();
+        }
 }
