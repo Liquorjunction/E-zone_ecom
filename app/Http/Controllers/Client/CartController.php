@@ -133,6 +133,35 @@ class CartController extends Controller
         $shippingMethod = $request->input('shipping_method', 'standard');
         $cartId         = CartIdentifier::fromRequest($request);
 
+        // Support totals-only refresh requests (e.g. shipping method change on checkout step 2)
+        if ($itemId <= 0 && ($request->wantsJson() || $request->ajax())) {
+            $cart   = $cartService->getCart($cartId);
+            $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : $this->emptyTotals($shippingMethod);
+
+            $itemsMap = [];
+            if ($cart) {
+                foreach ($cart->items as $cartItem) {
+                    $itemsMap[$cartItem->id] = [
+                        'id'              => $cartItem->id,
+                        'quantity'        => $cartItem->quantity,
+                        'unit_price'      => $cartItem->unit_price,
+                        'final_price'     => $cartItem->final_price ?? $cartItem->unit_price,
+                        'discount_amount' => $cartItem->discount_amount ?? 0,
+                    ];
+                }
+            }
+
+            $summary          = $this->buildSummary($totals, $cart);
+            $summary['items'] = $itemsMap;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Summary refreshed.',
+                'item'    => null,
+                'summary' => $summary,
+            ]);
+        }
+
         $getStock = function ($cartItem) {
             if (! $cartItem) return 0;
             $variant = $cartItem->variant ?? null;

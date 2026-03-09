@@ -311,12 +311,61 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 500);
     }
 
+    function getCurrentShippingMethod() {
+        const shippingMethodEl = document.querySelector('input[name="shipping_method"]:checked');
+        return shippingMethodEl ? shippingMethodEl.value : 'standard';
+    }
+
+    async function refreshTotalsForShipping() {
+        const firstCartInput = root.querySelector('.cart-quantity-input[data-item-id]');
+        if (!firstCartInput) {
+            await requestSummaryRefresh();
+            return;
+        }
+
+        const itemId = firstCartInput.dataset.itemId;
+        const quantity = Number(firstCartInput.value || 1);
+        if (!itemId) return;
+
+        await updateItem(itemId, quantity);
+    }
+
+    async function requestSummaryRefresh() {
+        if (!updateUrl) return;
+
+        try {
+            const resp = await fetch(updateUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrf,
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    shipping_method: getCurrentShippingMethod(),
+                }),
+            });
+
+            const data = await resp.json();
+            if (resp.ok && data?.success && data?.summary) {
+                updateSummary(data.summary);
+            }
+        } catch (e) {
+            console.error("Failed to refresh summary for shipping", e);
+        }
+    }
+
+    document
+        .querySelectorAll('input[name="shipping_method"]')
+        .forEach((radio) => {
+            radio.addEventListener("change", refreshTotalsForShipping);
+        });
+
     async function updateItem(id, quantity) {
         if (!updateUrl) return;
 
         // Read the currently selected shipping method so the server recalculates shipping correctly
-        const shippingMethodEl = document.querySelector('input[name="shipping_method"]:checked');
-        const shippingMethod = shippingMethodEl ? shippingMethodEl.value : 'standard';
+        const shippingMethod = getCurrentShippingMethod();
 
         try {
             const resp = await fetch(updateUrl, {
@@ -489,6 +538,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({
                     id: id,
                     item_id: id,
+                    shipping_method: getCurrentShippingMethod(),
                 }),
             });
 

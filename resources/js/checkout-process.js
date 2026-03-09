@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return "$" + Number(n).toFixed(2);
     }
 
+    function getCurrentShippingMethod() {
+        const shippingMethodEl = document.querySelector('input[name="shipping_method"]:checked');
+        return shippingMethodEl ? shippingMethodEl.value : 'standard';
+    }
+
     // Saved address populate
     const addressSelect = document.getElementById("savedAddressSelect");
     if (addressSelect) {
@@ -135,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({
                     item_id: itemId,
                     quantity: Number(quantity),
+                    shipping_method: getCurrentShippingMethod(),
                 }),
             });
             const data = await resp.json();
@@ -186,6 +192,38 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    async function refreshTotalsForShipping() {
+        if (!updateUrl) return;
+
+        const firstInput = document.querySelector('.cart-quantity-input[data-item-id]');
+        if (firstInput) {
+            await updateItem(firstInput.dataset.itemId, Math.max(1, Number(firstInput.value || 1)));
+            return;
+        }
+
+        try {
+            const resp = await fetch(updateUrl, {
+                method: "POST",
+                credentials: 'same-origin',
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrf,
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    shipping_method: getCurrentShippingMethod(),
+                }),
+            });
+
+            const data = await resp.json();
+            if (resp.ok && data && data.success) {
+                updateSummary(data.summary);
+            }
+        } catch (e) {
+            console.error("Failed to refresh summary for shipping", e);
+        }
+    }
+
     // Remove item via AJAX, fallback to hidden form submit
     async function removeItem(itemId) {
         if (!removeUrl) return submitFallback(itemId);
@@ -198,7 +236,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     "X-CSRF-TOKEN": csrf,
                     Accept: "application/json",
                 },
-                body: JSON.stringify({ item_id: itemId }),
+                body: JSON.stringify({
+                    item_id: itemId,
+                    shipping_method: getCurrentShippingMethod(),
+                }),
             });
             const data = await resp.json();
             if (data && data.success) {
@@ -298,6 +339,10 @@ document.addEventListener("DOMContentLoaded", function () {
             this.value = val;
             updateItem(id, val);
         });
+    });
+
+    document.querySelectorAll('input[name="shipping_method"]').forEach((radio) => {
+        radio.addEventListener("change", refreshTotalsForShipping);
     });
 
     // Remove handlers — support both old and new button class names

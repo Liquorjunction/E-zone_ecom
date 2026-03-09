@@ -212,7 +212,10 @@
                                                     </td>
                                                 @else
                                                     <td>
-                                                        {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
+                                                        @php
+                                                            $totalWithoutShipping = $order->total - $order->shipping_cost;
+                                                        @endphp
+                                                        {{ isset($totalWithoutShipping) ? number_format($totalWithoutShipping, 2) : '-' }}
                                                     </td>
                                                 @endif
                                             </tr>
