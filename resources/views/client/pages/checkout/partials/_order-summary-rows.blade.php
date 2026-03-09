@@ -71,12 +71,14 @@
     </div>
 
     {{-- Shipping --}}
-    <div class="flex justify-between text-gray-600 text-base">
-        <span>Shipping</span>
-        <span id="{{ $shippingId }}" class="font-bold text-green-600">
-            {{ ($totals['shipping_cost'] ?? 0) > 0 ? $sym . ' ' . number_format($totals['shipping_cost'], 2) : 'FREE' }}
-        </span>
-    </div>
+    @if ($step !== 1)
+        <div class="flex justify-between text-gray-600 text-base">
+            <span>Shipping</span>
+            <span id="{{ $shippingId }}" class="font-bold text-green-600">
+                {{ ($totals['shipping_cost'] ?? 0) > 0 ? $sym . ' ' . number_format($totals['shipping_cost'], 2) : 'FREE' }}
+            </span>
+        </div>
+    @endif
 
     {{-- Grand total --}}
     <div class="border-t-2 border-gray-100 pt-4">

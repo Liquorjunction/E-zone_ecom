@@ -25,6 +25,7 @@
         $shippingMethod = ucfirst(str_replace('_', ' ', $totals['shipping_method'] ?? 'Standard'));
         $shippingCost = (float) ($totals['shipping_cost'] ?? 0);
         $total = (float) ($totals['final_total'] ?? 0);
+        $totalWithoutShipping = $total - $shippingCost;
 
         // Order metadata
         $couponCode = $order->coupon_code ?? null;
@@ -419,7 +420,7 @@
                     <div class="flex justify-between text-sm border-t pt-2 mt-2"></div>
                     <div class="flex justify-between text-sm mt-1">
                         <span class="text-gray-600">Total Tax Inclusive Amount :</span>
-                        <span class="font-medium">{{ $sym }} {{ number_format($totalAfterCoupon, 2) }}</span>
+                        <span class="font-medium">{{ $sym }} {{ number_format($totalWithoutShipping, 2) }}</span>
                     </div>
                 </div>
 
