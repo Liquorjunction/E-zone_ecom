@@ -214,6 +214,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/price-range-slider.js') }}"></script>
-    <script src="{{ asset('js/products.js') }}"></script>
+    <script src="{{ asset('js/price-range-slider.js') }}?v={{ @filemtime(public_path('js/price-range-slider.js')) }}"></script>
+    <script src="{{ asset('js/products.js') }}?v={{ @filemtime(public_path('js/products.js')) }}"></script>
 @endpush

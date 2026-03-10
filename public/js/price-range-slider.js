@@ -214,12 +214,21 @@
         var parsedDefaultMax = parseFloat(priceRange.dataset.defaultMax);
         var fallbackDefaultMin = minRange ? parseFloat(minRange.min) : NaN;
         var fallbackDefaultMax = maxRange ? parseFloat(maxRange.max) : NaN;
+        var parsedStep = minRange ? parseFloat(minRange.step) : NaN;
+        var tolerance = Number.isFinite(parsedStep) && parsedStep > 0 ? parsedStep / 2 : 0.01;
         var defaultMin = Number.isFinite(parsedDefaultMin) ? parsedDefaultMin : fallbackDefaultMin;
         var defaultMax = Number.isFinite(parsedDefaultMax) ? parsedDefaultMax : fallbackDefaultMax;
         var minVal = minInput ? parseFloat(minInput.value) : NaN;
         var maxVal = maxInput ? parseFloat(maxInput.value) : NaN;
-        var minChanged = Number.isFinite(minVal) && Number.isFinite(defaultMin) && Math.abs(minVal - defaultMin) >= 0.01;
-        var maxChanged = Number.isFinite(maxVal) && Number.isFinite(defaultMax) && Math.abs(maxVal - defaultMax) >= 0.01;
+        var isNear = function (a, b) {
+            return Math.abs(a - b) <= tolerance;
+        };
+        var minAtDataDefault = Number.isFinite(minVal) && Number.isFinite(defaultMin) && isNear(minVal, defaultMin);
+        var maxAtDataDefault = Number.isFinite(maxVal) && Number.isFinite(defaultMax) && isNear(maxVal, defaultMax);
+        var minAtRangeDefault = Number.isFinite(minVal) && Number.isFinite(fallbackDefaultMin) && isNear(minVal, fallbackDefaultMin);
+        var maxAtRangeDefault = Number.isFinite(maxVal) && Number.isFinite(fallbackDefaultMax) && isNear(maxVal, fallbackDefaultMax);
+        var minChanged = Number.isFinite(minVal) && !(minAtDataDefault || minAtRangeDefault);
+        var maxChanged = Number.isFinite(maxVal) && !(maxAtDataDefault || maxAtRangeDefault);
 
         if (minInput) {
             if (minChanged) {
