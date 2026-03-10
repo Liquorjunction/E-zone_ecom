@@ -68,4 +68,9 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function cancelledBy()
+    {
+        return $this->belongsTo(Admin::class, 'cancelled_by');
+    }
 }

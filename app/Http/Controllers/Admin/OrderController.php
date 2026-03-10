@@ -135,6 +135,9 @@ class OrderController extends Controller
                     return $orderRepo->getCustomerNameByOrderId($order->id) ?? 'N/A';
                 })
                 ->addColumn('total', fn($order) => $order->total ?? 'N/A')
+                ->addColumn('cancelled_by', function ($order) {
+                    return optional($order->cancelledBy)->name ?? 'N/A';
+                })
                 ->addColumn('cancel_reason', fn($order) => $order->cancel_reason ?? 'N/A')
                 ->addColumn('payment_method', fn($order) => $order->payment_method ?? 'N/A')
                 ->addColumn('status', function ($order) use ($orderStatusService, $statusLabels, $request) {

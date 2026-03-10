@@ -9,6 +9,7 @@ $(document).ready(function () {
             { data: 'created_at', name: 'created_at' },
             { data: 'customer_name', name: 'customer_name' },
             { data: 'total', name: 'total' },
+            { data: 'cancelled_by', name: 'cancelled_by' },
             { data: 'cancel_reason', name: 'cancel_reason' },
             { data: 'status', name: 'status' },
             { data: 'payment_method', name: 'payment_method' },
