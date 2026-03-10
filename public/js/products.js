@@ -103,24 +103,37 @@ const hideLoading = () => {
 const serializeForm = (form) => {
     const formData = new FormData(form);
     const params = new URLSearchParams();
-        const priceRange = form.querySelector('[data-price-range]');
-        const defaultMin = priceRange ? parseFloat(priceRange.dataset.defaultMin) : null;
-        const defaultMax = priceRange ? parseFloat(priceRange.dataset.defaultMax) : null;
-        const isPriceDirty = priceRange && priceRange.dataset.priceDirty === 'true';
+    const priceRange = form.querySelector('[data-price-range]');
+    const minRangeInput = priceRange ? priceRange.querySelector('[data-range="min"]') : null;
+    const maxRangeInput = priceRange ? priceRange.querySelector('[data-range="max"]') : null;
 
-        for (const [key, value] of formData.entries()) {
-            if (value === null || value === undefined || value === '') continue;
+    // Fall back to slider bounds when data attributes are missing/stale in production caches.
+    const parsedDefaultMin = priceRange ? parseFloat(priceRange.dataset.defaultMin) : NaN;
+    const parsedDefaultMax = priceRange ? parseFloat(priceRange.dataset.defaultMax) : NaN;
+    const fallbackDefaultMin = minRangeInput ? parseFloat(minRangeInput.min) : NaN;
+    const fallbackDefaultMax = maxRangeInput ? parseFloat(maxRangeInput.max) : NaN;
+    const defaultMin = Number.isFinite(parsedDefaultMin) ? parsedDefaultMin : fallbackDefaultMin;
+    const defaultMax = Number.isFinite(parsedDefaultMax) ? parsedDefaultMax : fallbackDefaultMax;
+    const isPriceDirty = priceRange && priceRange.dataset.priceDirty === 'true';
+    const isNear = (a, b, tolerance = 0.01) => Math.abs(a - b) <= tolerance;
 
-            if (!isPriceDirty && (key === 'min_price' || key === 'max_price')) {
+    for (const [key, value] of formData.entries()) {
+        if (value === null || value === undefined || value === '') continue;
+
+        if (key === 'min_price' || key === 'max_price') {
+            const numericValue = parseFloat(value);
+            if (!Number.isFinite(numericValue)) continue;
+
+            const isDefaultMin = key === 'min_price' && Number.isFinite(defaultMin) && isNear(numericValue, defaultMin);
+            const isDefaultMax = key === 'max_price' && Number.isFinite(defaultMax) && isNear(numericValue, defaultMax);
+
+            // Never submit unchanged price bounds even if dirty flag desyncs.
+            if (isDefaultMin || isDefaultMax || !isPriceDirty) {
                 continue;
             }
+        }
 
-            if ((key === 'min_price' && defaultMin !== null && parseFloat(value) === defaultMin) ||
-                (key === 'max_price' && defaultMax !== null && parseFloat(value) === defaultMax)) {
-                continue;
-            }
-
-            params.append(key, value);
+        params.append(key, value);
     }
     return params;
 };

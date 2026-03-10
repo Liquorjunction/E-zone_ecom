@@ -208,15 +208,33 @@
         if (!priceRange) return;
         var minInput = priceRange.querySelector('[data-input="min"]');
         var maxInput = priceRange.querySelector('[data-input="max"]');
-        var defaultMin = parseFloat(priceRange.dataset.defaultMin);
-        var defaultMax = parseFloat(priceRange.dataset.defaultMax);
-        var minVal = parseFloat(minInput.value);
-        var maxVal = parseFloat(maxInput.value);
-        if (minInput && Math.abs(minVal - defaultMin) < 0.01) {
-            minInput.name = '';
+        var minRange = priceRange.querySelector('[data-range="min"]');
+        var maxRange = priceRange.querySelector('[data-range="max"]');
+        var parsedDefaultMin = parseFloat(priceRange.dataset.defaultMin);
+        var parsedDefaultMax = parseFloat(priceRange.dataset.defaultMax);
+        var fallbackDefaultMin = minRange ? parseFloat(minRange.min) : NaN;
+        var fallbackDefaultMax = maxRange ? parseFloat(maxRange.max) : NaN;
+        var defaultMin = Number.isFinite(parsedDefaultMin) ? parsedDefaultMin : fallbackDefaultMin;
+        var defaultMax = Number.isFinite(parsedDefaultMax) ? parsedDefaultMax : fallbackDefaultMax;
+        var minVal = minInput ? parseFloat(minInput.value) : NaN;
+        var maxVal = maxInput ? parseFloat(maxInput.value) : NaN;
+        var minChanged = Number.isFinite(minVal) && Number.isFinite(defaultMin) && Math.abs(minVal - defaultMin) >= 0.01;
+        var maxChanged = Number.isFinite(maxVal) && Number.isFinite(defaultMax) && Math.abs(maxVal - defaultMax) >= 0.01;
+
+        if (minInput) {
+            if (minChanged) {
+                minInput.name = minInput.dataset.name || 'min_price';
+            } else {
+                minInput.removeAttribute('name');
+            }
         }
-        if (maxInput && Math.abs(maxVal - defaultMax) < 0.01) {
-            maxInput.name = '';
+
+        if (maxInput) {
+            if (maxChanged) {
+                maxInput.name = maxInput.dataset.name || 'max_price';
+            } else {
+                maxInput.removeAttribute('name');
+            }
         }
     }
     document.addEventListener('DOMContentLoaded', function () {
