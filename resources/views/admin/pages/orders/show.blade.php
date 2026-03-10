@@ -22,6 +22,10 @@
                     <div class="card-body">
                         @php
                             $items = $order->items ?? collect();
+                            $rawStatus = (string) ($order->status ?? '');
+                            $normalizedStatus = strtolower(trim(str_replace(['-', ' '], '_', $rawStatus)));
+                            $isCancelled = in_array($normalizedStatus, ['cancelled', 'canceled'], true);
+                            $statusLabel = $rawStatus !== '' ? ucwords(str_replace('_', ' ', $rawStatus)) : 'N/A';
                             $shipping = [];
                             if (is_array($order->shipping_address)) {
                                 $shipping = $order->shipping_address;
@@ -45,7 +49,13 @@
                                     </tr>
                                     <tr>
                                         <th>Status</th>
-                                        <td>{{ $order->status ?? 'N/A' }}</td>
+                                        <td>
+                                            @if ($isCancelled)
+                                                <span class="badge bg-danger">{{ $statusLabel }}</span>
+                                            @else
+                                                <span class="badge bg-secondary">{{ $statusLabel }}</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Payment</th>
@@ -79,12 +89,23 @@
                             </div>
                         </div>
 
-                        @if (isset($order->status) && $order->status === 'cancelled' && !empty($order->cancel_reason))
+                        @if ($isCancelled)
                             <div class="row mb-4">
                                 <div class="col-12">
-                                    <h6>Cancel Reason</h6>
-                                    <div class="border rounded p-3">
-                                        <div>{{ $order->cancel_reason ?? 'N/A' }}</div>
+                                    <h6 class="text-danger mb-2">Cancellation Details</h6>
+                                    <div class="border border-danger rounded p-3 bg-light">
+                                        <div class="mb-2">
+                                            <strong>Reason:</strong>
+                                            {{ !empty($order->cancel_reason) ? $order->cancel_reason : 'No cancellation reason was provided.' }}
+                                        </div>
+                                        <div>
+                                            <strong>Cancelled At:</strong>
+                                            {{ optional($order->cancelled_at ?? $order->updated_at)->format('d M Y, h:i A') ?? 'N/A' }}
+                                        </div>
+                                        <div class="mt-2">
+                                            <strong>Cancelled By:</strong>
+                                            {{ optional($order->cancelledBy)->name ?? (!empty($order->cancelled_by) ? 'Admin #' . $order->cancelled_by : 'N/A') }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
