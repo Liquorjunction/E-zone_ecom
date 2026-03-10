@@ -6,9 +6,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Invoice #{{ $order->order_number ?? $order->id }}</title>
     @php
-        // Custom invoice fonts can be fragile on some shared hosting setups.
-        // Keep them opt-in and verify each file before exposing it to Dompdf.
-        $useCustomFonts = (bool) config('dompdf.use_custom_invoice_font', false);
+        $forceSystemInvoiceFont = (bool) ($forceSystemInvoiceFont ?? false);
+        $useCustomFonts = !$forceSystemInvoiceFont && (bool) config('dompdf.use_custom_invoice_font', false);
         $fontDir = public_path('fonts/instrument-sans');
 
         $fontFiles = [
@@ -26,7 +25,6 @@
                     continue;
                 }
 
-                // Guard against empty/truncated uploads that crash FontLib on some hosts.
                 if (filesize($real) < 1024) {
                     continue;
                 }
@@ -39,7 +37,6 @@
     @endphp
     <style>
         @if ($hasFont)
-            {{-- Instrument Sans loaded from verified local filesystem paths. --}}
             @foreach ($fontUris as $weight => $fontUri)
                 @font-face {
                     font-family: 'Instrument Sans';
@@ -50,9 +47,6 @@
             @endforeach
         @endif
 
-        /* ─────────────────────────────────────────
-           RESET  (same as your @media print reset)
-        ───────────────────────────────────────── */
         * {
             margin: 0;
             padding: 0;
@@ -61,11 +55,6 @@
             print-color-adjust: exact;
         }
 
-        /* ─────────────────────────────────────────
-           BODY
-           font-family falls back to DejaVu Sans if
-           Instrument Sans TTF not yet downloaded
-        ───────────────────────────────────────── */
         body {
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
             font-size: 12px;
@@ -74,9 +63,6 @@
             background: #fff;
         }
 
-        /* ─────────────────────────────────────────
-           OUTER CARD
-        ───────────────────────────────────────── */
         .invoice-card {
             width: 96%;
             margin: 14px auto;
@@ -86,11 +72,6 @@
             overflow: hidden;
         }
 
-        /* ─────────────────────────────────────────
-           HEADER TOP
-           Original: bg-linear-to-br from-primary-dark to-slate-900
-                     border-b-4 border-cyan-400
-        ───────────────────────────────────────── */
         .invoice-header-top {
             background: #1a3a52;
             border-bottom: 4px solid #22d3ee;
@@ -137,7 +118,6 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* h2 — text-3xl font-extrabold text-white mt-5 */
         .hdr-title {
             font-size: 28px;
             font-weight: 700;
@@ -147,7 +127,6 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* Order # — text-xs font-semibold tracking-widest uppercase text-cyan-300 */
         .hdr-ordernum {
             font-size: 10px;
             font-weight: 600;
@@ -158,7 +137,6 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* Company info — text-right text-xs text-slate-200 leading-relaxed */
         .hdr-company {
             font-size: 11px;
             font-weight: 400;
@@ -168,9 +146,6 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* ─────────────────────────────────────────
-           META BAR
-        ───────────────────────────────────────── */
         .invoice-header-meta {
             background: #f8fafc;
             border-top: 1px solid #e2e8f0;
@@ -208,16 +183,10 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* ─────────────────────────────────────────
-           BODY WRAP
-        ───────────────────────────────────────── */
         .body-wrap {
             padding: 24px 24px 10px 24px;
         }
 
-        /* ─────────────────────────────────────────
-           TWO-COLUMN GRID
-        ───────────────────────────────────────── */
         .info-grid {
             width: 100%;
             border-collapse: collapse;
@@ -239,9 +208,6 @@
             padding-left: 12px;
         }
 
-        /* ─────────────────────────────────────────
-           SURFACE CARD
-        ───────────────────────────────────────── */
         .invoice-surface {
             background: #ffffff;
             border: 1px solid #e5e7eb;
@@ -288,9 +254,6 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* ─────────────────────────────────────────
-           SECTION HEADING
-        ───────────────────────────────────────── */
         .section-heading {
             border-left: 4px solid #3b82f6;
             padding-left: 9px;
@@ -304,9 +267,6 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* ─────────────────────────────────────────
-           ITEMS TABLE
-        ───────────────────────────────────────── */
         .invoice-items-wrap {
             border: 1px solid #e5e7eb;
             border-radius: 12px;
@@ -397,9 +357,6 @@
             margin-right: 3px;
         }
 
-        /* ─────────────────────────────────────────
-           SUMMARY ROWS
-        ───────────────────────────────────────── */
         .sum-table {
             width: 100%;
             border-collapse: collapse;
@@ -429,7 +386,6 @@
             margin: 8px 0;
         }
 
-        /* Total highlight */
         .total-row-wrap {
             background: #eff6ff;
             border-radius: 8px;
@@ -455,7 +411,6 @@
             font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
         }
 
-        /* Coupon badge */
         .coupon-badge {
             display: inline-block;
             background: #dcfce7;
@@ -473,9 +428,6 @@
             font-weight: 500;
         }
 
-        /* ─────────────────────────────────────────
-           FOOTER
-        ───────────────────────────────────────── */
         .invoice-footer {
             text-align: center;
             font-size: 10.5px;
@@ -548,8 +500,6 @@
     @endphp
 
     <div class="invoice-card">
-
-        {{-- ══ HEADER TOP ══ --}}
         <div class="invoice-header-top">
             <table class="hdr-flex">
                 <tr>
@@ -577,7 +527,6 @@
             </table>
         </div>
 
-        {{-- ══ META CHIP BAR ══ --}}
         <div class="invoice-header-meta">
             <table class="meta-flex">
                 <tr>
@@ -606,8 +555,6 @@
         </div>
 
         <div class="body-wrap">
-
-            {{-- ══ ADDRESSES ══ --}}
             <table class="info-grid">
                 <tr>
                     <td class="col-l">
@@ -666,7 +613,6 @@
                 </tr>
             </table>
 
-            {{-- ══ ORDER ITEMS ══ --}}
             <div class="section-heading">
                 <h3>Order Items</h3>
             </div>
@@ -718,7 +664,6 @@
                 </table>
             </div>
 
-            {{-- ══ TAX + ORDER SUMMARY ══ --}}
             <table class="info-grid">
                 <tr>
                     <td class="col-l">
@@ -795,9 +740,8 @@
                 </tr>
             </table>
 
-        </div>{{-- /body-wrap --}}
+        </div>
 
-        {{-- ══ FOOTER ══ --}}
         <div class="invoice-footer">
             Thank you for shopping with {{ config('app.name') }}.
             If you have any questions about your order, contact us at
