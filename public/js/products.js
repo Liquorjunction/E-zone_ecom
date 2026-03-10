@@ -6,16 +6,17 @@ const getFilterForm = () => {
     return modalForm && !document.getElementById('mobile-filter-modal').classList.contains('hidden') ? modalForm : (sidebarForm || document.getElementById('filter-form'));
 };
 
-const syncFormsData = () => {
-    // Sync data between all filter forms
-    const forms = document.querySelectorAll('#filter-form');
-    if (forms.length <= 1) return;
+const getFilterForms = () => Array.from(document.querySelectorAll('#filter-form'));
 
-    const primaryForm = forms[0];
-    const formData = new FormData(primaryForm);
+const syncFormsData = (sourceForm = getFilterForm()) => {
+    // Sync data between all filter forms
+    const forms = getFilterForms();
+    if (forms.length <= 1 || !sourceForm) return;
+
+    const formData = new FormData(sourceForm);
 
     forms.forEach(form => {
-        if (form === primaryForm) return;
+        if (form === sourceForm) return;
 
         // Clear all inputs in secondary form
         form.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
@@ -58,7 +59,7 @@ const updateSidebarActiveState = (url) => {
     });
 };
 
-const filterForm = document.getElementById('filter-form');
+const filterForms = getFilterForms();
 const resultsContainer = document.getElementById('products-results');
 const activeFiltersContainer = document.getElementById('active-filters-container');
 const paginationContainer = document.getElementById('products-pagination');
@@ -68,7 +69,6 @@ const clearSearchBtn = document.getElementById('clear-search');
 const sortSelect = document.getElementById('products-sort');
 const viewGridBtn = document.getElementById('view-grid-btn');
 const viewListBtn = document.getElementById('view-list-btn');
-const viewInput = document.getElementById('view-input');
 const clearFiltersBtn = document.getElementById('clear-filters');
 const applyFiltersBtn = document.getElementById('apply-mobile-filters');
 const filterBtn = document.getElementById('mobile-filter-btn');
@@ -270,10 +270,11 @@ const fetchAndRender = async (url) => {
 };
 
 const submitFilters = (event) => {
-    const form = getFilterForm();
+    const sourceForm = event?.target?.closest('#filter-form') || getFilterForm();
+    const form = sourceForm || getFilterForm();
     if (!form) return;
     if (event) event.preventDefault();
-    syncFormsData();
+    syncFormsData(form);
     autoExpandCheckedCategories(); // Auto-expand after syncing forms
     const params = serializeForm(form);
     const url = `${form.action}?${params.toString()}`;
@@ -281,8 +282,12 @@ const submitFilters = (event) => {
 };
 
 const setActiveView = (view) => {
-    if (!viewInput) return;
-    viewInput.value = view;
+    getFilterForms().forEach(form => {
+        const formViewInput = form.querySelector('input[name="view"]');
+        if (formViewInput) {
+            formViewInput.value = view;
+        }
+    });
     if (view === 'list') {
         if (viewListBtn) {
             viewListBtn.classList.add('bg-primary', 'text-white');
@@ -333,28 +338,34 @@ const attachRemoveFilterListeners = () => {
 };
 
 // Bind events
-if (filterForm) {
-    filterForm.addEventListener('submit', submitFilters);
+if (filterForms.length) {
+    filterForms.forEach(form => {
+        form.addEventListener('submit', submitFilters);
 
-    // Auto-submit when any filter input changes
-    filterForm.addEventListener('change', (e) => {
-        const target = e.target;
-        if (!target) return;
-        if (target.matches('input, select')) {
-            submitFilters();
-        }
+        // Auto-submit when any filter input changes
+        form.addEventListener('change', (e) => {
+            const target = e.target;
+            if (!target) return;
+            if (target.matches('input, select')) {
+                syncFormsData(form);
+                submitFilters(e);
+            }
+        });
     });
 }
 
 // Sync all forms when any change
 document.querySelectorAll('#filter-form input, #filter-form select').forEach(input => {
-    input.addEventListener('change', syncFormsData);
+    input.addEventListener('change', (e) => {
+        const sourceForm = e.target?.closest('#filter-form') || getFilterForm();
+        syncFormsData(sourceForm);
+    });
 });
 
 // Mobile filter modal controls
 const openModal = () => {
     if (!filterModal) return;
-    syncFormsData();
+    syncFormsData(getFilterForm());
     const modalContent = document.getElementById('modal-content');
     filterModal.classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
@@ -478,8 +489,9 @@ if (viewListBtn) {
 }
 
 // Initialize view state from hidden input
-if (viewInput) {
-    setActiveView(viewInput.value || 'grid');
+const initialViewInput = document.querySelector('#filter-form input[name="view"]');
+if (initialViewInput) {
+    setActiveView(initialViewInput.value || 'grid');
 }
 
 // Ensure loading overlay is hidden on page load
