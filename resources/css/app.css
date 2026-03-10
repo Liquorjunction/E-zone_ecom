@@ -574,12 +574,37 @@ input[type="email"]:focus {
     margin-top: revert !important;
     margin-bottom: revert !important;
 }
-.prose-content ol,
 .prose-content ul {
-    list-style: revert !important;
-    padding-left: revert !important;
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
     margin-top: revert !important;
     margin-bottom: revert !important;
+}
+.prose-content ol {
+    list-style-type: decimal !important;
+    padding-left: 1.5rem !important;
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+.prose-content ul ul {
+    list-style-type: circle !important;
+}
+.prose-content ul ul ul {
+    list-style-type: square !important;
+}
+.prose-content ol ol {
+    list-style-type: lower-alpha !important;
+}
+.prose-content ol ol ol {
+    list-style-type: lower-roman !important;
+}
+
+/* Quill often stores bullet lists as <ol><li data-list="bullet">...</li></ol>. */
+.prose-content ol li[data-list="bullet"] {
+    list-style-type: disc !important;
+}
+.prose-content ol li[data-list="ordered"] {
+    list-style-type: decimal !important;
 }
 .prose-content li {
     margin-top: revert !important;
@@ -587,6 +612,162 @@ input[type="email"]:focus {
 }
 .prose-content strong {
     font-weight: revert !important;
+}
+
+.prose-content {
+    color: #374151;
+    line-height: 1.75;
+    word-break: break-word;
+}
+.prose-content a {
+    color: oklch(0.69 0.14 232.2);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.prose-content h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #111827;
+}
+.prose-content h2 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    margin-top: 1.25rem;
+    margin-bottom: 0.65rem;
+    color: #111827;
+}
+.prose-content h3 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    margin-top: 1rem;
+    margin-bottom: 0.6rem;
+    color: #111827;
+}
+.prose-content h4,
+.prose-content h5,
+.prose-content h6 {
+    color: #111827;
+    margin-top: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+.prose-content blockquote {
+    border-left: 4px solid #d1d5db;
+    margin: 1rem 0;
+    padding: 0.25rem 0 0.25rem 1rem;
+    color: #4b5563;
+    font-style: italic;
+}
+.prose-content hr {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 1.5rem 0;
+}
+.prose-content pre,
+.prose-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.prose-content pre {
+    background: #111827;
+    color: #f9fafb;
+    padding: 0.875rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    line-height: 1.6;
+}
+.prose-content code {
+    background: #f3f4f6;
+    color: #111827;
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.35rem;
+}
+.prose-content pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+}
+.prose-content img,
+.prose-content video,
+.prose-content iframe {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+.prose-content .prose-media-wrap {
+    margin: 1rem 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+}
+.prose-content .prose-media-wrap iframe {
+    width: 100%;
+    min-height: 320px;
+}
+.prose-content .prose-table-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+.prose-content table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+}
+.prose-content th,
+.prose-content td {
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+}
+.prose-content th {
+    background: #f9fafb;
+    color: #111827;
+}
+
+/* Quill indentation support for nested list items. */
+.prose-content .ql-indent-1 {
+    margin-left: 1.5rem;
+}
+.prose-content .ql-indent-2 {
+    margin-left: 3rem;
+}
+.prose-content .ql-indent-3 {
+    margin-left: 4.5rem;
+}
+.prose-content .ql-indent-4 {
+    margin-left: 6rem;
+}
+.prose-content .ql-indent-5 {
+    margin-left: 7.5rem;
+}
+.prose-content .ql-indent-6 {
+    margin-left: 9rem;
+}
+
+/* Quill checklist compatibility on frontend. */
+.prose-content li.prose-li-check,
+.prose-content li[data-list="check"],
+.prose-content li[data-list="checked"],
+.prose-content li[data-list="unchecked"] {
+    list-style: none !important;
+    position: relative;
+    padding-left: 1.4rem;
+}
+.prose-content li.prose-li-check::before,
+.prose-content li[data-list="check"]::before,
+.prose-content li[data-list="unchecked"]::before {
+    content: "\2610";
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
+    color: #6b7280;
+}
+.prose-content li[data-list="checked"]::before {
+    content: "\2611";
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
+    color: #6b7280;
 }
 
 /* ═══════════════════════════════════════════════════════════════
