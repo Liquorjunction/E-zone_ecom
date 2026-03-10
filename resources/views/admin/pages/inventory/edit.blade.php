@@ -27,8 +27,8 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.inventory.update', $inventory->id) }}" method="POST" id="edit-form"
-                          data-variants-url="{{ route('admin.inventory.variants') }}">
+                      <form action="{{ route('admin.inventory.update', $inventory->id) }}" method="POST" id="edit-form"
+                          data-variants-url="{{ route('admin.inventory.get-variants') }}">
                         @csrf
                         @method('PUT')
 
