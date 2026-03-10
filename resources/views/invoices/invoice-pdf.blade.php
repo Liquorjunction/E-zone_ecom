@@ -664,7 +664,7 @@
                                     <td class="sum-label">
                                         Subtotal ({{ $order->items->sum('quantity') }} items) :
                                     </td>
-                                    <td class="sum-val">{{ $sym }} {{ number_format($totalWithoutShipping, 2) }}</td>
+                                    <td class="sum-val">{{ $sym }} {{ number_format($subtotal, 2) }}</td>
                                 </tr>
                                 @if ($couponCode)
                                     <tr>
