@@ -4,15 +4,15 @@ $(document).ready(function () {
         serverSide: true,
         ajax: $('#orders-table').data('route'),
         columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'order_number', name: 'order_number' },
-            { data: 'created_at', name: 'created_at' },
             { data: 'customer_name', name: 'customer_name' },
+            { data: 'email', name: 'email' },
             { data: 'total', name: 'total' },
-            { data: 'cancelled_by', name: 'cancelled_by' },
-            { data: 'cancel_reason', name: 'cancel_reason' },
+            { data: 'created_at', name: 'created_at' },
             { data: 'status', name: 'status' },
+            { data: 'cancelled_by', name: 'cancelled_by' },
             { data: 'payment_method', name: 'payment_method' },
+            { data: 'payment_status', name: 'payment_status' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ]
     });

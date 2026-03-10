@@ -19,15 +19,15 @@
                             data-route="{{ route('admin.orders.data') }}">
                             <thead class="bg-light text-uppercase small">
                                 <tr>
-                                    <th>#</th>
                                     <th>Order ID</th>
+                                    <th>Customer Name</th>
+                                    <th>Email</th>
+                                    <th>Amount</th>
                                     <th>Date</th>
-                                    <th>Customer</th>
-                                    <th>Total</th>
+                                    <th>Order Status</th>
                                     <th>Cancelled By</th>
-                                    <th>Cancel Reason</th>
-                                    <th>Status</th>
-                                    <th>Payment</th>
+                                    <th>Payment Mode</th>
+                                    <th>Payment Status</th>
                                     <th class="text-center" style="width: 100px;">Actions</th>
                                 </tr>
                             </thead>

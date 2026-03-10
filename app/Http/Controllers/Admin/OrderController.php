@@ -128,18 +128,13 @@ class OrderController extends Controller
                 'failed_delivery' => 'Failed Delivery',
             ];
             return DataTables::of($orderRepo->getDataForDataTable())
-                ->addIndexColumn()
                 ->addColumn('order_number', fn($order) => $order->order_number ?? 'N/A')
-                ->addColumn('created_at', fn($order) => $order->created_at->format('d M Y, h:i A'))
                 ->addColumn('customer_name', function ($order) use ($orderRepo) {
                     return $orderRepo->getCustomerNameByOrderId($order->id) ?? 'N/A';
                 })
+                ->addColumn('email', fn($order) => $order->email ?? optional($order->user)->email ?? 'N/A')
                 ->addColumn('total', fn($order) => $order->total ?? 'N/A')
-                ->addColumn('cancelled_by', function ($order) {
-                    return optional($order->cancelledBy)->name ?? 'N/A';
-                })
-                ->addColumn('cancel_reason', fn($order) => $order->cancel_reason ?? 'N/A')
-                ->addColumn('payment_method', fn($order) => $order->payment_method ?? 'N/A')
+                ->addColumn('created_at', fn($order) => $order->created_at->format('d M Y, h:i A'))
                 ->addColumn('status', function ($order) use ($orderStatusService, $statusLabels, $request) {
                     // Only show dropdown for users with permission and for allowed transitions
                     $service = $orderStatusService;
@@ -151,6 +146,17 @@ class OrderController extends Controller
                         'availableStatuses' => $availableStatuses,
                         'canUpdate' => $request->user()->can('order.update'),
                     ])->render();
+                })
+                ->addColumn('cancelled_by', function ($order) {
+                    return optional($order->cancelledBy)->name ?? 'N/A';
+                })
+                ->addColumn('payment_method', fn($order) => $order->payment_method ?? 'N/A')
+                ->addColumn('payment_status', function ($order) {
+                    if (!empty($order->transaction_id)) {
+                        return 'Paid';
+                    }
+
+                    return 'Pending';
                 })
                 ->addColumn('action', function ($order) use ($request, $orderStatusService) {
                     $canRead = $request->user()->can('order.read');

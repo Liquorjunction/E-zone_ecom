@@ -28,7 +28,7 @@ class OrderRepository implements OrderRepositoryInterface
     public function getDataForDataTable()
     {
         return Order::with(['cancelledBy:id,name'])
-            ->select(['id', 'order_number', 'user_id', 'total', 'status', 'payment_method', 'cancel_reason', 'cancelled_by', 'created_at'])
+            ->select(['id', 'order_number', 'user_id', 'email', 'total', 'status', 'payment_method', 'transaction_id', 'cancel_reason', 'cancelled_by', 'created_at'])
             ->orderBy('created_at', 'desc');
     }
 
