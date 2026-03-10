@@ -208,42 +208,15 @@
         if (!priceRange) return;
         var minInput = priceRange.querySelector('[data-input="min"]');
         var maxInput = priceRange.querySelector('[data-input="max"]');
-        var minRange = priceRange.querySelector('[data-range="min"]');
-        var maxRange = priceRange.querySelector('[data-range="max"]');
-        var parsedDefaultMin = parseFloat(priceRange.dataset.defaultMin);
-        var parsedDefaultMax = parseFloat(priceRange.dataset.defaultMax);
-        var fallbackDefaultMin = minRange ? parseFloat(minRange.min) : NaN;
-        var fallbackDefaultMax = maxRange ? parseFloat(maxRange.max) : NaN;
-        var parsedStep = minRange ? parseFloat(minRange.step) : NaN;
-        var tolerance = Number.isFinite(parsedStep) && parsedStep > 0 ? parsedStep / 2 : 0.01;
-        var defaultMin = Number.isFinite(parsedDefaultMin) ? parsedDefaultMin : fallbackDefaultMin;
-        var defaultMax = Number.isFinite(parsedDefaultMax) ? parsedDefaultMax : fallbackDefaultMax;
-        var minVal = minInput ? parseFloat(minInput.value) : NaN;
-        var maxVal = maxInput ? parseFloat(maxInput.value) : NaN;
-        var isNear = function (a, b) {
-            return Math.abs(a - b) <= tolerance;
-        };
-        var minAtDataDefault = Number.isFinite(minVal) && Number.isFinite(defaultMin) && isNear(minVal, defaultMin);
-        var maxAtDataDefault = Number.isFinite(maxVal) && Number.isFinite(defaultMax) && isNear(maxVal, defaultMax);
-        var minAtRangeDefault = Number.isFinite(minVal) && Number.isFinite(fallbackDefaultMin) && isNear(minVal, fallbackDefaultMin);
-        var maxAtRangeDefault = Number.isFinite(maxVal) && Number.isFinite(fallbackDefaultMax) && isNear(maxVal, fallbackDefaultMax);
-        var minChanged = Number.isFinite(minVal) && !(minAtDataDefault || minAtRangeDefault);
-        var maxChanged = Number.isFinite(maxVal) && !(maxAtDataDefault || maxAtRangeDefault);
-
-        if (minInput) {
-            if (minChanged) {
-                minInput.name = minInput.dataset.name || 'min_price';
-            } else {
-                minInput.removeAttribute('name');
-            }
+        var defaultMin = parseFloat(priceRange.dataset.defaultMin);
+        var defaultMax = parseFloat(priceRange.dataset.defaultMax);
+        var minVal = parseFloat(minInput.value);
+        var maxVal = parseFloat(maxInput.value);
+        if (minInput && Math.abs(minVal - defaultMin) < 0.01) {
+            minInput.name = '';
         }
-
-        if (maxInput) {
-            if (maxChanged) {
-                maxInput.name = maxInput.dataset.name || 'max_price';
-            } else {
-                maxInput.removeAttribute('name');
-            }
+        if (maxInput && Math.abs(maxVal - defaultMax) < 0.01) {
+            maxInput.name = '';
         }
     }
     document.addEventListener('DOMContentLoaded', function () {
