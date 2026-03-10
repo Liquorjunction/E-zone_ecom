@@ -6,12 +6,136 @@ document.addEventListener('DOMContentLoaded', () => {
     if(modal) document.body.appendChild(modal);
     if(mobileForm) document.body.appendChild(mobileForm);
     if(mobileFab) document.body.appendChild(mobileFab);
+
+    // Allow closing overlays with Escape for better accessibility.
+    document.addEventListener('keydown', (e) => {
+      if(e.key !== 'Escape') return;
+      const desktopOpen = modal && !modal.classList.contains('hidden');
+      const mobileOpen = mobileForm && !mobileForm.classList.contains('translate-y-full');
+      if(desktopOpen) closeModal();
+      if(mobileOpen) closeMobileForm();
+    });
 });
+
+const REQUIRED_FIELDS = ['type', 'name', 'street', 'city', 'state', 'postal_code', 'country'];
 
 // Helper to get CSRF token
 function getCsrfToken(){
   const t = document.querySelector('input[name="_token"]');
   return t ? t.value : '';
+}
+
+function getErrorBox(isMobile){
+  return document.getElementById(isMobile ? 'mobile-address-form-errors' : 'address-form-errors');
+}
+
+function setFieldError(input, message){
+  if(!input) return;
+
+  input.classList.add('border-red-300', 'focus:border-red-500', 'focus:ring-red-200');
+  input.setAttribute('aria-invalid', 'true');
+
+  let errorEl = input.parentElement.querySelector('.js-field-error');
+  if(!errorEl){
+    errorEl = document.createElement('p');
+    errorEl.className = 'js-field-error mt-1.5 text-xs font-medium text-red-600';
+    input.parentElement.appendChild(errorEl);
+  }
+  errorEl.textContent = message;
+}
+
+function clearFieldError(input){
+  if(!input) return;
+
+  input.classList.remove('border-red-300', 'focus:border-red-500', 'focus:ring-red-200');
+  input.removeAttribute('aria-invalid');
+  const errorEl = input.parentElement.querySelector('.js-field-error');
+  if(errorEl) errorEl.remove();
+}
+
+function clearFormErrors(form, isMobile){
+  const box = getErrorBox(isMobile);
+  if(box){
+    box.classList.add('hidden');
+    box.textContent = '';
+  }
+
+  form.querySelectorAll('input[name], select[name], textarea[name]').forEach((el) => {
+    clearFieldError(el);
+  });
+}
+
+function renderValidationErrors(form, errors, isMobile){
+  clearFormErrors(form, isMobile);
+
+  const box = getErrorBox(isMobile);
+  if(box){
+    box.classList.remove('hidden');
+
+    const allMessages = [];
+    Object.keys(errors || {}).forEach((field) => {
+      const msgs = Array.isArray(errors[field]) ? errors[field] : [errors[field]];
+      msgs.forEach((msg) => allMessages.push(String(msg)));
+    });
+
+    if(allMessages.length > 0){
+      box.innerHTML = `<strong class="block mb-1">Please fix the following:</strong><ul class="list-disc pl-5 space-y-0.5">${allMessages.map((m) => `<li>${m}</li>`).join('')}</ul>`;
+    }
+  }
+
+  Object.keys(errors || {}).forEach((field) => {
+    const input = form.querySelector(`[name="${field}"]`);
+    const msgs = Array.isArray(errors[field]) ? errors[field] : [errors[field]];
+    if(input && msgs.length > 0){
+      setFieldError(input, String(msgs[0]));
+    }
+  });
+}
+
+function validateAddressForm(form, isMobile){
+  const errors = {};
+
+  REQUIRED_FIELDS.forEach((field) => {
+    const input = form.querySelector(`[name="${field}"]`);
+    const value = input ? String(input.value || '').trim() : '';
+    if(!value){
+      errors[field] = ['This field is required.'];
+    }
+  });
+
+  const postal = form.querySelector('[name="postal_code"]');
+  if(postal && String(postal.value || '').trim().length > 0 && String(postal.value || '').trim().length < 3){
+    errors.postal_code = ['Postal code looks too short.'];
+  }
+
+  if(Object.keys(errors).length > 0){
+    renderValidationErrors(form, errors, isMobile);
+    const firstInvalid = form.querySelector('[aria-invalid="true"]');
+    if(firstInvalid) firstInvalid.focus();
+    return false;
+  }
+
+  clearFormErrors(form, isMobile);
+  return true;
+}
+
+function bindInlineValidation(form, isMobile){
+  if(!form) return;
+
+  form.addEventListener('input', (e) => {
+    if(!e.target || !e.target.name) return;
+    clearFieldError(e.target);
+  });
+
+  form.addEventListener('change', (e) => {
+    if(!e.target || !e.target.name) return;
+    clearFieldError(e.target);
+  });
+
+  const box = getErrorBox(isMobile);
+  if(box){
+    box.classList.add('hidden');
+  }
 }
 
 // Set an address as default via AJAX
@@ -86,6 +210,8 @@ function openAddModal(){
     const defaultType = document.getElementById('field-type');
     if (defaultType) defaultType.value = 'shipping';
 
+    clearFormErrors(document.getElementById('address-form'), false);
+
     // Unique IDs
     const modal = document.getElementById('addr-unique-modal');
     const content = document.getElementById('addr-unique-content');
@@ -100,6 +226,8 @@ function openAddModal(){
             content.classList.add('scale-100', 'opacity-100');
         });
     });
+
+    document.body.style.overflow = 'hidden';
   }
 }
 
@@ -117,6 +245,8 @@ function openMobileAddForm(){
   const mobileDefaultType = document.getElementById('mobile-field-type');
   if (mobileDefaultType) mobileDefaultType.value = 'shipping';
 
+  clearFormErrors(document.getElementById('mobile-address-form-element'), true);
+
   const form = document.getElementById('mobile-address-form');
   form.classList.remove('translate-y-full');
   document.body.style.overflow = 'hidden';
@@ -126,6 +256,7 @@ function openMobileAddForm(){
 function closeMobileForm(){
   const form = document.getElementById('mobile-address-form');
   form.classList.add('translate-y-full');
+  clearFormErrors(document.getElementById('mobile-address-form-element'), true);
   document.body.style.overflow = '';
 }
 
@@ -223,6 +354,7 @@ function openEditModal(data, cardElem){
   setVal('field-state', data.state);
   setVal('field-postal_code', data.postal_code);
   setVal('field-country', data.country);
+  clearFormErrors(document.getElementById('address-form'), false);
 
   const modal = document.getElementById('addr-unique-modal');
   const content = document.getElementById('addr-unique-content');
@@ -235,6 +367,8 @@ function openEditModal(data, cardElem){
             content.classList.add('scale-100', 'opacity-100');
         });
     });
+
+    document.body.style.overflow = 'hidden';
 }
 
 // Mobile Edit Form
@@ -254,6 +388,7 @@ function openMobileEditForm(data){
   setVal('mobile-field-state', data.state);
   setVal('mobile-field-postal_code', data.postal_code);
   setVal('mobile-field-country', data.country);
+  clearFormErrors(document.getElementById('mobile-address-form-element'), true);
 
   const form = document.getElementById('mobile-address-form');
   form.classList.remove('translate-y-full');
@@ -268,6 +403,8 @@ function closeModal(){
   setTimeout(() => {
     document.getElementById('addr-unique-modal').classList.add('hidden');
     document.getElementById('addr-unique-modal').classList.remove('flex');
+    clearFormErrors(document.getElementById('address-form'), false);
+    document.body.style.overflow = '';
   }, 300);
 }
 
@@ -282,6 +419,10 @@ async function handleFormSubmit(e) {
   const fd = new FormData(form);
   const submitBtn = isMobile ? document.getElementById('mobile-form-submit-btn') : document.getElementById('form-submit');
   const originalBtnHtml = submitBtn.innerHTML;
+
+  if(!validateAddressForm(form, isMobile)){
+    return;
+  }
 
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5 inline mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
@@ -299,6 +440,9 @@ async function handleFormSubmit(e) {
 
     const json = await res.json();
     if(!res.ok){
+      if(json && json.errors){
+        renderValidationErrors(form, json.errors, isMobile);
+      }
       showUniversalPopup(json.message || 'Failed to save address', 'error', 3000);
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
@@ -335,6 +479,7 @@ async function handleFormSubmit(e) {
     if(isMobile) closeMobileForm();
     else closeModal();
 
+    clearFormErrors(form, isMobile);
     showUniversalPopup('Address saved successfully!', 'success', 2000);
 
   }catch(err){
@@ -352,6 +497,8 @@ async function handleFormSubmit(e) {
 
 document.getElementById('address-form').addEventListener('submit', handleFormSubmit);
 document.getElementById('mobile-address-form-element').addEventListener('submit', handleFormSubmit);
+bindInlineValidation(document.getElementById('address-form'), false);
+bindInlineValidation(document.getElementById('mobile-address-form-element'), true);
 
 function renderAddressCardHTML(data){
   const label = data.address_label || (data.type === 'billing' ? 'Billing' : (data.type === 'shipping' ? 'Shipping' : 'Address'));

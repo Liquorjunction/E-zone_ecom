@@ -170,15 +170,6 @@
             Add Address
           </button>
         </div>
-      @elseif($shipping->count() > 0 && $billing->count() > 0)
-        <div class="flex items-center justify-center">
-          <button type="button" onclick="openAddModal()" class="group flex flex-col items-center justify-center min-h-30 w-full max-w-xs border-3 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
-            <div class="bg-gray-100 group-hover:bg-primary/10 p-4 rounded-full mb-3 transition-colors duration-300">
-              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-            </div>
-            <span class="font-semibold text-base">Add New Address</span>
-          </button>
-        </div>
       @endif
     </div>
   </div>
@@ -202,17 +193,19 @@
         </button>
       </div>
 
-      <form id="address-form" method="POST" action="{{ url('/client/addresses') }}" class="max-h-[calc(90vh-180px)] overflow-y-auto">
+      <form id="address-form" method="POST" action="{{ url('/client/addresses') }}" class="max-h-[calc(90vh-180px)] overflow-y-auto" novalidate>
         @csrf
         <input type="hidden" name="_method" id="form-method" value="POST">
         <input type="hidden" name="id" id="address-id" value="">
 
         <div class="px-8 py-6 space-y-6">
+          <div id="address-form-errors" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
               <div class="relative">
-                <select id="field-type" name="type" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+                <select id="field-type" name="type" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white" required>
                   <option value="billing">Billing</option>
                   <option value="shipping">Shipping</option>
                 </select>
@@ -230,35 +223,35 @@
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-            <input id="field-name" name="name" placeholder="John Doe" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            <input id="field-name" name="name" placeholder="John Doe" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required />
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Street Address</label>
-            <input id="field-street" name="street" placeholder="123 Main Street, Apt 4B" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            <input id="field-street" name="street" placeholder="123 Main Street, Apt 4B" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required />
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
-              <input id="field-city" name="city" placeholder="New York" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+              <input id="field-city" name="city" placeholder="New York" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required />
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">State / Province</label>
-              <input id="field-state" name="state" placeholder="NY" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Region</label>
+              <input id="field-state" name="state" placeholder="NY" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Postal Code</label>
-              <input id="field-postal_code" name="postal_code" placeholder="10001" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+              <input id="field-postal_code" name="postal_code" placeholder="10001" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required />
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-              <input id="field-country" name="country" placeholder="United States" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+              <input id="field-country" name="country" placeholder="United States" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required />
             </div>
           </div>
         </div>
@@ -292,15 +285,17 @@
     </div>
 
     <div class="overflow-y-auto h-[calc(100vh-73px)] pb-24">
-      <form id="mobile-address-form-element" method="POST" action="{{ url('/client/addresses') }}" class="p-4 space-y-5">
+      <form id="mobile-address-form-element" method="POST" action="{{ url('/client/addresses') }}" class="p-4 space-y-5" novalidate>
         @csrf
         <input type="hidden" name="_method" id="mobile-form-method" value="POST">
         <input type="hidden" name="id" id="mobile-address-id" value="">
 
+        <div id="mobile-address-form-errors" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
           <div class="relative">
-            <select id="mobile-field-type" name="type" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base">
+            <select id="mobile-field-type" name="type" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base" required>
               <option value="billing">Billing</option>
               <option value="shipping">Shipping</option>
             </select>
@@ -317,32 +312,32 @@
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-          <input id="mobile-field-name" name="name" placeholder="John Doe" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+          <input id="mobile-field-name" name="name" placeholder="John Doe" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" required />
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Street Address</label>
-          <input id="mobile-field-street" name="street" placeholder="123 Main Street, Apt 4B" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+          <input id="mobile-field-street" name="street" placeholder="123 Main Street, Apt 4B" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" required />
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
-          <input id="mobile-field-city" name="city" placeholder="New York" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+          <input id="mobile-field-city" name="city" placeholder="New York" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" required />
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">State / Province</label>
-          <input id="mobile-field-state" name="state" placeholder="NY" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+          <input id="mobile-field-state" name="state" placeholder="NY" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" required />
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Postal Code</label>
-          <input id="mobile-field-postal_code" name="postal_code" placeholder="10001" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+          <input id="mobile-field-postal_code" name="postal_code" placeholder="10001" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" required />
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-          <input id="mobile-field-country" name="country" placeholder="United States" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+          <input id="mobile-field-country" name="country" placeholder="United States" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" required />
         </div>
       </form>
     </div>
