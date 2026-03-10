@@ -24,8 +24,10 @@ class InvoiceExportService
         $siteContent = function_exists('get_site_setting') ? get_site_setting() : null;
 
         $pdf = app('dompdf.wrapper');
-        $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
-        $pdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->set_option('isRemoteEnabled', true);
+        $dompdf->set_option('isHtml5ParserEnabled', true);
+        $dompdf->set_option('defaultFont', 'Helvetica');
 
         return $pdf->loadView('invoices.invoice-pdf', [
             'order' => $order,

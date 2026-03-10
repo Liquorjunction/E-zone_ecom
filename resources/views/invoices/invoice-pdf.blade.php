@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
             font-size: 12px;
             line-height: 1.35;
             color: #1e293b;
@@ -74,7 +74,7 @@
             font-size: 18px;
             font-weight: 700;
             color: #1a3a52;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .hdr-title {
@@ -83,7 +83,7 @@
             color: #ffffff;
             margin-top: 14px;
             letter-spacing: -0.5px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .hdr-ordernum {
@@ -93,7 +93,7 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             margin-top: 4px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .hdr-company {
@@ -102,7 +102,7 @@
             color: #e2e8f0;
             line-height: 1.8;
             text-align: right;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .invoice-header-meta {
@@ -133,13 +133,13 @@
             font-size: 11px;
             font-weight: 400;
             color: #64748b;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .invoice-chip span {
             font-weight: 600;
             color: #334155;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .body-wrap {
@@ -179,14 +179,14 @@
             font-weight: 600;
             color: #374151;
             margin-bottom: 6px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .addr-name {
             font-size: 12px;
             font-weight: 600;
             color: #1f2937;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .addr-line {
@@ -194,7 +194,7 @@
             font-weight: 400;
             color: #4b5563;
             line-height: 1.6;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .addr-phone {
@@ -202,7 +202,7 @@
             font-weight: 400;
             color: #9ca3af;
             margin-top: 5px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .addr-muted {
@@ -210,7 +210,7 @@
             font-weight: 400;
             color: #9ca3af;
             font-style: italic;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .section-heading {
@@ -223,7 +223,7 @@
             font-size: 15px;
             font-weight: 600;
             color: #1f2937;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .invoice-items-wrap {
@@ -252,7 +252,7 @@
             color: #6b7280;
             border-bottom: 1px solid #e5e7eb;
             text-align: left;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .invoice-items td {
@@ -261,7 +261,7 @@
             font-weight: 400;
             color: #374151;
             border-bottom: 1px solid #f3f4f6;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .invoice-items tr.row-even td {
@@ -283,7 +283,7 @@
         .td-product {
             font-weight: 500;
             color: #1f2937;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .td-sku {
@@ -305,7 +305,7 @@
         .td-total {
             font-weight: 600;
             color: #111827;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .price-original {
@@ -325,7 +325,7 @@
             padding: 3px 0;
             border: none;
             font-size: 12px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .sum-label {
@@ -353,7 +353,7 @@
 
         .total-row-wrap td {
             padding: 8px 10px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .total-label {
@@ -367,7 +367,7 @@
             font-size: 16px;
             font-weight: 700;
             color: #2563eb;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .coupon-badge {
@@ -379,7 +379,7 @@
             padding: 1px 8px;
             border-radius: 999px;
             margin-left: 4px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .text-green {
@@ -395,7 +395,7 @@
             padding: 16px 24px 22px;
             border-top: 1px solid #f1f5f9;
             margin-top: 8px;
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         .invoice-footer a {
@@ -534,7 +534,7 @@
                                     <div class="addr-line">{{ $shipCountry }}</div>
                                 @endif
                                 @if ($shipPhone)
-                                    <div class="addr-phone">&#128222; {{ $shipPhone }}</div>
+                                    <div class="addr-phone">Phone: {{ $shipPhone }}</div>
                                 @endif
                             @else
                                 <div class="addr-muted">No shipping address on record.</div>
@@ -559,7 +559,7 @@
                                     <div class="addr-line">{{ $billCountry }}</div>
                                 @endif
                                 @if ($billPhone)
-                                    <div class="addr-phone">&#128222; {{ $billPhone }}</div>
+                                    <div class="addr-phone">Phone: {{ $billPhone }}</div>
                                 @endif
                             @elseif(!empty($ship))
                                 <div class="addr-name">{{ $shipName }}</div>
