@@ -5,56 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Invoice #{{ $order->order_number ?? $order->id }}</title>
-    @php
-        $forceSystemInvoiceFont = (bool) ($forceSystemInvoiceFont ?? false);
-        $allowProdCustomFont = (bool) config('dompdf.allow_custom_invoice_font_in_production', false);
-        $canUseCustomByEnvironment = !app()->environment('production') || $allowProdCustomFont;
-        $useCustomFonts =
-            !$forceSystemInvoiceFont &&
-            $canUseCustomByEnvironment &&
-            (bool) config('dompdf.use_custom_invoice_font', false);
-        $fontDir = public_path('fonts/instrument-sans');
-        $minimumLikelyTtfBytes = 50 * 1024;
-
-        $fontFiles = [
-            400 => "{$fontDir}/InstrumentSans-400.ttf",
-            500 => "{$fontDir}/InstrumentSans-500.ttf",
-            600 => "{$fontDir}/InstrumentSans-600.ttf",
-            700 => "{$fontDir}/InstrumentSans-700.ttf",
-        ];
-
-        $fontUris = [];
-        if ($useCustomFonts) {
-            foreach ($fontFiles as $weight => $filePath) {
-                $real = realpath($filePath);
-                if ($real === false || !is_file($real) || !is_readable($real)) {
-                    continue;
-                }
-
-                if (filesize($real) < $minimumLikelyTtfBytes) {
-                    continue;
-                }
-
-                $fontUris[$weight] = 'file:///' . str_replace('\\', '/', $real);
-            }
-        }
-
-        $hasAllWeights = count($fontUris) === count($fontFiles);
-        $hasFont = $hasAllWeights;
-        $baseFontFamily = $hasFont ? "'Instrument Sans', DejaVu Sans, sans-serif" : 'DejaVu Sans, sans-serif';
-    @endphp
     <style>
-        @if ($hasFont)
-            @foreach ($fontUris as $weight => $fontUri)
-                @font-face {
-                    font-family: 'Instrument Sans';
-                    src: url('{{ $fontUri }}') format('truetype');
-                    font-weight: {{ $weight }};
-                    font-style: normal;
-                }
-            @endforeach
-        @endif
-
         * {
             margin: 0;
             padding: 0;
@@ -64,7 +15,7 @@
         }
 
         body {
-            font-family: {!! $baseFontFamily !!};
+            font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
             line-height: 1.35;
             color: #1e293b;

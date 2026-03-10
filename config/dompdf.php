@@ -16,16 +16,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Production Custom Invoice Font Toggle
-    |--------------------------------------------------------------------------
-    |
-    | Keep false on shared hosting unless custom fonts have been validated.
-    |
-    */
-    'allow_custom_invoice_font_in_production' => env('DOMPDF_ALLOW_CUSTOM_INVOICE_FONT_IN_PRODUCTION', false),
-
-    /*
-    |--------------------------------------------------------------------------
     | Settings
     |--------------------------------------------------------------------------
     |

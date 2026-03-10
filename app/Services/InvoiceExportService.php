@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Order;
-use Throwable;
 
 class InvoiceExportService
 {
@@ -28,34 +27,14 @@ class InvoiceExportService
         $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
         $pdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
 
-        $viewData = [
+        return $pdf->loadView('invoices.invoice-pdf', [
             'order' => $order,
             'totals' => $totals,
             'sym' => $sym,
             'ship' => $ship,
             'bill' => $bill,
             'siteContent' => $siteContent,
-            'forceSystemInvoiceFont' => false,
-        ];
-
-        try {
-            return $pdf->loadView('invoices.invoice-pdf', $viewData)
-                ->setPaper('a4', 'portrait')
-                ->output();
-        } catch (Throwable $e) {
-            // Shared hosting environments can fail while parsing custom fonts.
-            report($e);
-
-            $fallbackPdf = app('dompdf.wrapper');
-            $fallbackPdf->getDomPDF()->set_option('isRemoteEnabled', true);
-            $fallbackPdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
-
-            $viewData['forceSystemInvoiceFont'] = true;
-
-            return $fallbackPdf->loadView('invoices.invoice-pdf', $viewData)
-                ->setPaper('a4', 'portrait')
-                ->output();
-        }
+        ])->setPaper('a4', 'portrait')->output();
     }
 
     public function filename(Order $order): string
