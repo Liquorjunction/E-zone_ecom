@@ -8,7 +8,6 @@
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-    @vite('resources/js/timer.js')
 </head>
 
 <body class="bg-white min-h-screen">

@@ -23,6 +23,7 @@ import './add-to-cart-global';
 import './universal-popup';
 import './newsletter';
 import './prose';
+import './timer';
 
 axios.interceptors.response.use(function (response) {
     try {
