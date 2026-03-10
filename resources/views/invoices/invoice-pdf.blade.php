@@ -7,8 +7,14 @@
     <title>Invoice #{{ $order->order_number ?? $order->id }}</title>
     @php
         $forceSystemInvoiceFont = (bool) ($forceSystemInvoiceFont ?? false);
-        $useCustomFonts = !$forceSystemInvoiceFont && (bool) config('dompdf.use_custom_invoice_font', false);
+        $allowProdCustomFont = (bool) config('dompdf.allow_custom_invoice_font_in_production', false);
+        $canUseCustomByEnvironment = !app()->environment('production') || $allowProdCustomFont;
+        $useCustomFonts =
+            !$forceSystemInvoiceFont &&
+            $canUseCustomByEnvironment &&
+            (bool) config('dompdf.use_custom_invoice_font', false);
         $fontDir = public_path('fonts/instrument-sans');
+        $minimumLikelyTtfBytes = 50 * 1024;
 
         $fontFiles = [
             400 => "{$fontDir}/InstrumentSans-400.ttf",
@@ -25,7 +31,7 @@
                     continue;
                 }
 
-                if (filesize($real) < 1024) {
+                if (filesize($real) < $minimumLikelyTtfBytes) {
                     continue;
                 }
 
@@ -33,7 +39,9 @@
             }
         }
 
-        $hasFont = !empty($fontUris);
+        $hasAllWeights = count($fontUris) === count($fontFiles);
+        $hasFont = $hasAllWeights;
+        $baseFontFamily = $hasFont ? "'Instrument Sans', DejaVu Sans, sans-serif" : 'DejaVu Sans, sans-serif';
     @endphp
     <style>
         @if ($hasFont)
@@ -56,7 +64,7 @@
         }
 
         body {
-            font-family: 'Instrument Sans', DejaVu Sans, sans-serif;
+            font-family: {!! $baseFontFamily !!};
             font-size: 12px;
             line-height: 1.35;
             color: #1e293b;
