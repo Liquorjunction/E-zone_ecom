@@ -154,6 +154,8 @@ class OrderController extends Controller
                 ->addColumn('payment_status', function ($order) {
                     if (!empty($order->transaction_id)) {
                         return 'Paid';
+                    } else if ($order->status === 'delivered' || $order->payment_method === 'cod') {
+                        return 'Paid';
                     }
 
                     return 'Pending';
