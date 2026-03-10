@@ -218,7 +218,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
-                                <strong>⏰ Link expires in <span id="timer">5:00</span></strong> - You have 5 minutes to complete the verification process before the link expires.
+                                <strong>⏰ Time remaining: <span id="timer" data-timer-seconds="300" data-expired-label="0:00" data-timer-storage-key="register-success-{{ md5((string) (session('token') ?? session('email') ?? request()->path())) }}" data-expired-message-target="register-timer-message" data-expired-message="The verification window has ended. Please register again to receive a fresh verification email.">5:00</span></strong><span class="mx-1">-</span><span id="register-timer-message">Please complete verification before the timer ends.</span>
                             </p>
                         </div>
                     </div>

@@ -430,7 +430,7 @@
 
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-600">{{ gtrans('Subtotal') }} ({{ $order->items->sum('quantity') }} {{ gtrans('items') }}) :</span>
-                        <span class="font-medium">{{ $sym }} {{ number_format($subtotal, 2) }}</span>
+                        <span class="font-medium">{{ $sym }} {{ number_format($totalWithoutShipping, 2) }}</span>
                     </div>
 
                     @if ($couponCode)

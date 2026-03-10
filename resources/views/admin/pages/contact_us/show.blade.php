@@ -74,15 +74,23 @@
                 <div class="card-body p-3 p-md-4">
                     <h5 class="mb-3">Enquiry Status</h5>
                     <div class="mb-3">
-                        @include('admin.partials.datatable-enquiryStatus', [
-                            'enquiry' => $enquiry,
-                            'statusLabels' => $statusLabels,
-                            'availableStatuses' => array_keys($statusLabels),
-                            'canUpdate' => auth()->user()->can('contact_us.update'),
-                        ])
+                        <div class="text-uppercase text-muted small fw-semibold mb-1">Current Status</div>
+                        <span class="badge text-bg-primary">{{ $statusLabels[$enquiry->status] ?? ucfirst(str_replace('_', ' ', $enquiry->status ?? 'unknown')) }}</span>
                     </div>
-                    <div class="small text-muted">
-                        You can update status based on your role permissions.
+
+                    <div class="list-group list-group-flush border rounded overflow-hidden">
+                        @foreach($statusLabels as $key => $label)
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ $label }}</span>
+                                @if($enquiry->status === $key)
+                                    <span class="badge text-bg-success">Current</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="alert alert-light border mt-3 mb-0 py-2 px-3 small text-muted">
+                        Status is read-only on this page.
                     </div>
                 </div>
             </div>
