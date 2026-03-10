@@ -127,6 +127,7 @@ class OrderController extends Controller
                 'returned' => 'Returned',
                 'failed_delivery' => 'Failed Delivery',
             ];
+            $markPaidStatuses = ['delivered', 'completed'];
             return DataTables::of($orderRepo->getDataForDataTable())
                 ->addColumn('order_number', fn($order) => $order->order_number ?? 'N/A')
                 ->addColumn('customer_name', function ($order) use ($orderRepo) {
@@ -151,10 +152,10 @@ class OrderController extends Controller
                     return optional($order->cancelledBy)->name ?? 'N/A';
                 })
                 ->addColumn('payment_method', fn($order) => $order->payment_method ?? 'N/A')
-                ->addColumn('payment_status', function ($order) {
+                ->addColumn('payment_status', function ($order) use ($markPaidStatuses) {
                     if (!empty($order->transaction_id)) {
                         return 'Paid';
-                    } else if ($order->status === 'delivered' || $order->payment_method === 'cod') {
+                    } else if (in_array($order->status, $markPaidStatuses) && $order->payment_method === 'cod') {
                         return 'Paid';
                     }
 
