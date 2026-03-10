@@ -8,6 +8,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const shippingSelect = document.getElementById('shippingAddressSelect');
     const shippingDisplay = document.getElementById('selectedShippingDisplay');
 
+    function syncShippingRequirementMode() {
+        const manualShippingIds = ['firstName', 'lastName', 'address', 'city', 'state', 'zip', 'country'];
+        const usingSavedAddressDropdown = !!shippingSelect;
+
+        manualShippingIds.forEach((id) => {
+            const input = document.getElementById(id);
+            if (!input) return;
+
+            // Avoid native browser validation on hidden manual fields.
+            input.required = !usingSavedAddressDropdown;
+        });
+
+        if (shippingSelect) {
+            shippingSelect.required = true;
+        }
+    }
+
+    // Ensure required attributes match visible/active shipping UI mode on load.
+    syncShippingRequirementMode();
+
     if (shippingSelect) {
         shippingSelect.addEventListener('change', function() {
             const option = this.options[this.selectedIndex];
@@ -162,8 +182,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Form Validation on Submit
-    const checkoutForm = document.querySelector('form[action*="checkout.process"]');
+    // Bind to the actual checkout form element rendered on the page.
+    const checkoutForm = (shippingSelect && shippingSelect.closest('form')) || document.querySelector('#checkout-root form[action]');
     if (checkoutForm) {
+        checkoutForm.setAttribute('novalidate', 'novalidate');
+
         checkoutForm.addEventListener('submit', function(e) {
             // Clear previous validation errors
             clearValidationErrors();
@@ -173,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Only validate if we're on step 2 (shipping/billing address fields exist)
             const isStep2 = shippingSelect && shippingSelect.offsetParent !== null;
 
-            // --- FIX: Added the missing IF statement here ---
+            // Keep billing and shipping independent unless "Same as shipping" is checked.
             if (isStep2) {
                 const shippingData = {
                     firstName: document.getElementById('firstName')?.value || '',
@@ -186,22 +209,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     phone: document.getElementById('phone')?.value || ''
                 };
 
-                // Only copy if shipping has actual data
-                if (shippingData.firstName && shippingData.lastName && shippingData.address) {
-                    setFieldValue('billing_firstName', shippingData.firstName);
-                    setFieldValue('billing_lastName', shippingData.lastName);
-                    setFieldValue('billing_address_line', shippingData.address);
-                    setFieldValue('billing_city', shippingData.city);
-                    setFieldValue('billing_state', shippingData.state);
-                    setFieldValue('billing_zip', shippingData.zip);
-                    setFieldValue('billing_country', shippingData.country);
-                    setFieldValue('billing_phone', shippingData.phone);
-                } else {
-                    showValidationError(shippingSelect, 'Please select a shipping address first');
-                    hasErrors = true;
+                if (billingSameCheckbox && billingSameCheckbox.checked) {
+                    if (shippingData.firstName && shippingData.lastName && shippingData.address) {
+                        setFieldValue('billing_firstName', shippingData.firstName);
+                        setFieldValue('billing_lastName', shippingData.lastName);
+                        setFieldValue('billing_address_line', shippingData.address);
+                        setFieldValue('billing_city', shippingData.city);
+                        setFieldValue('billing_state', shippingData.state);
+                        setFieldValue('billing_zip', shippingData.zip);
+                        setFieldValue('billing_country', shippingData.country);
+                        setFieldValue('billing_phone', shippingData.phone);
+                    } else {
+                        showValidationError(shippingSelect, 'Please select a shipping address first');
+                        hasErrors = true;
+                    }
                 }
             }
-            // --- End FIX ---
 
             // Validate shipping address
             if (shippingSelect && !shippingSelect.value) {
