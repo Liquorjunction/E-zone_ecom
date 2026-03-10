@@ -157,6 +157,8 @@ class OrderController extends Controller
                         return 'Paid';
                     } else if (in_array($order->status, $markPaidStatuses) && $order->payment_method === 'cod') {
                         return 'Paid';
+                    } else if ($order->status === 'cancelled') {
+                        return 'Cancelled';
                     }
 
                     return 'Pending';
