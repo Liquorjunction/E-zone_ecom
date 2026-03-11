@@ -36,7 +36,7 @@ class PaymentService
             }
             $paymentData['orderid'] = $order->order_number;
             $paymentData['amount'] = $order->total;
-
+            // dd($paymentData);
             $result = $this->mxPlus->authorizePayment($paymentData);
             $innerResponse = $result['response'] ?? [];
             if (empty($innerResponse) && isset($result['statuscode'])) {

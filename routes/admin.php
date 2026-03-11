@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AboutUsController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\BrandController;
@@ -453,6 +454,12 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [ContactUsController::class, 'show'])->name('show')->middleware('can:contact_us.read,admin');
             Route::post('/update-status', [ContactUsController::class, 'updateStatus'])->name('updateStatus')->middleware('can:contact_us.update,admin');
             Route::post('/add-note', [ContactUsController::class, 'AddAdminNotes'])->name('addNote')->middleware('can:contact_us.update,admin');
+        });
+
+        Route::prefix('naps-log')->name('naps-log.')->group(function () {
+            Route::get('/', [ActivityLogController::class, 'index'])->name('index');
+            Route::get('/data', [ActivityLogController::class, 'datatable'])->name('data');
+            Route::get('/show/{id}', [ActivityLogController::class, 'show'])->name('show');
         });
     });
 });

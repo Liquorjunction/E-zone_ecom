@@ -284,8 +284,9 @@
                     <span class="font-bold text-gray-900 text-lg">{{ money_format_number($order->total ?? 0) }}</span>
                     <div class="flex items-center gap-2">
                         @if ($order->payment_method == 'card')
-                            <a href="{{ route('naps-order-detail', ['order' => $order->id]) }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-all duration-200">
+                            <a href="javascript:void(0)"
+                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-all duration-200 naps-status-btn"
+                                data-order-id="{{ $order->id }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -305,7 +306,7 @@
                             </svg>
                             View Details
                         </a>
-                        @if (Auth::check() && $order->user_id === Auth::id() && in_array($status, ['pending'], true))
+                        @if (Auth::check() && $order->user_id === Auth::id() && in_array($status, ['pending', 'paid'], true))
                             <button type="button"
                                 class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-all duration-200 open-cancel-modal-btn"
                                 data-order-id="{{ $order->id }}"
@@ -512,4 +513,101 @@
 @push('scripts')
     <script src="{{ asset('js/orders-filter.js') }}"></script>
     <script src="{{ asset('js/order-cancel-popup.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle NAPS Status button click
+            document.querySelectorAll('.naps-status-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var orderId = this.getAttribute('data-order-id');
+                    var url = '{{ route('naps-order-detail', ['order' => 'ORDER_ID']) }}'.replace(
+                        'ORDER_ID', orderId);
+
+                    fetch(url, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.modal_html) {
+                                // Remove existing modal if any
+                                var existingModal = document.getElementById(
+                                    'naps-modal-container');
+                                if (existingModal) {
+                                    existingModal.remove();
+                                }
+
+                                // Create modal container
+                                var modalContainer = document.createElement('div');
+                                modalContainer.id = 'naps-modal-container';
+                                modalContainer.innerHTML = data.modal_html;
+                                document.body.appendChild(modalContainer);
+
+                                // Show modal manually (without Bootstrap JS)
+                                var modalElement = document.getElementById('napsModal');
+                                if (modalElement) {
+                                    modalElement.classList.add('show');
+                                    modalElement.style.display = 'block';
+                                    document.body.classList.add('modal-open');
+
+                                    // Add backdrop
+                                    var backdrop = document.createElement('div');
+                                    backdrop.className = 'modal-backdrop fade show';
+                                    backdrop.id = 'naps-modal-backdrop';
+                                    document.body.appendChild(backdrop);
+
+                                    // Handle close button
+                                    var closeBtn = modalElement.querySelector('.btn-close');
+                                    if (closeBtn) {
+                                        closeBtn.addEventListener('click', function() {
+                                            closeNapsModal();
+                                        });
+                                    }
+
+                                    // Handle backdrop click
+                                    backdrop.addEventListener('click', function() {
+                                        closeNapsModal();
+                                    });
+
+                                    // Handle ESC key
+                                    document.addEventListener('keydown', function(e) {
+                                        if (e.key === 'Escape') {
+                                            closeNapsModal();
+                                        }
+                                    });
+                                }
+                            } else {
+                                alert(data.message || 'Failed to load payment status');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while loading payment status');
+                        });
+                });
+            });
+
+            function closeNapsModal() {
+                var modalElement = document.getElementById('napsModal');
+                var backdrop = document.getElementById('naps-modal-backdrop');
+                var container = document.getElementById('naps-modal-container');
+
+                if (modalElement) {
+                    modalElement.classList.remove('show');
+                    modalElement.style.display = 'none';
+                }
+
+                if (backdrop) {
+                    backdrop.remove();
+                }
+
+                document.body.classList.remove('modal-open');
+
+                if (container) {
+                    container.remove();
+                }
+            }
+        });
+    </script>
 @endpush

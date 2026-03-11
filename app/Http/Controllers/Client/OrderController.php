@@ -172,6 +172,67 @@ class OrderController extends Controller
         return view('client.pages.order-detail', compact('order', 'userReviews'));
     }
 
+    public function napsOrerDetail(Request $request, OrderRepo $orderRepo, MXPlusService $mXPlusService)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $orderId = $request->input('order');
+        $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
+
+        // Prepare data for the API call
+        // Ensure these fields exist in your Order model/table
+        $statusData = [
+            'orderid' => $order->order_number,
+            'amount' => $order->total,
+            'authnumber' => $order->naps_auth_number ?? '', // Saved during payment
+            'paymentid' => $order->transaction_id ?? '', // Saved during payment
+        ];
+
+        try {
+            $apiResponse = $mXPlusService->getPaymentStatus($statusData);
+            Log::error('MXPlus Payment Status API Response', [
+                'response' => $apiResponse,
+            ]);
+            // API Returns statuscode: 00=Paid, 01=Declined, 02=Captured, 03=Settled, 07=Refunded
+            if (isset($apiResponse['status'])) {
+                $currentStatus = $apiResponse['status']; // e.g., "Paid"
+
+                if (isset($apiResponse['statuscode']) && ($apiResponse['statuscode'] === '00' || $apiResponse['statuscode'] === '02')) {
+                    // UPDATE THE DATABASE HERE
+                    $order->update([
+                        'status' => 'paid',
+                        'payment_status' => $apiResponse['status'] ?? 'Paid',
+                        // 'transaction_id' => $apiResponse['transactionid'] ?? $order->transaction_id,
+                        'naps_auth_number' => $apiResponse['authnumber'] ?? $order->naps_auth_number, // Save it now so it's there for next time
+                    ]);
+                }
+
+                // Return JSON response with modal HTML for AJAX display
+                $modalHtml = view('admin.partials.payment-status-modal', [
+                    'order' => $order,
+                    'napsStatus' => $apiResponse
+                ])->render();
+
+                return response()->json([
+                    'success' => true,
+                    'modal_html' => $modalHtml
+                ]);
+            }
+            return $request->ajax() || $request->wantsJson()
+                ? response()->json(['success' => false, 'message' => 'Could not retrieve status from NAPS.'])
+                : back()->with('error', 'Could not retrieve status from NAPS.');
+
+        } catch (\Exception $e) {
+            Log::error('NAPS Status API Error', ['error' => $e->getMessage()]);
+
+            return $request->ajax() || $request->wantsJson()
+                ? response()->json(['success' => false, 'message' => 'API Error: ' . $e->getMessage()])
+                : back()->with('error', 'API Error: ' . $e->getMessage());
+        }
+    }
+
     public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo, PriceCalculatorService $priceCalculator)
     {
         if (!Auth::check()) {

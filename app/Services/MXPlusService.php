@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\Log;
 class MXPlusService
 {
     protected $config;
+    protected $napsApiLogService;
 
-    public function __construct()
+    public function __construct(NapsApiLogService $napsApiLogService)
     {
         $this->config = config('mxplus');
+        $this->napsApiLogService = $napsApiLogService;
     }
 
     /**
@@ -23,13 +25,19 @@ class MXPlusService
         return Cache::remember('mxplus_token', now()->addHours(23), function () {
             $url = $this->config['base_url'] . 'napspayment/createtocken24';
             $macValue = md5($this->config['institution_id'] . $this->config['cx_user']);
-            $response = Http::post($url, [
+            $payload = [
                 'institution_id' => $this->config['institution_id'],
                 'cx_user' => $this->config['cx_user'],
                 'cx_password' => $this->config['cx_password'],
                 'cx_reason' => '00',
                 'mac_value' => $macValue,
-            ]);
+            ];
+            $response = Http::post($url, $payload);
+
+            $responseData = $response->json() ?? [];
+
+            // Log the API response
+            $this->napsApiLogService->logApiResponse(null, $responseData, 'token');
 
             if ($response->successful()) {
                 $token = $response->json('securtoken_24') ?? $response->json('securtoken_24');
@@ -97,11 +105,16 @@ class MXPlusService
 
         $response = Http::post($url, $payload);
 
+        $responseData = $response->json() ?? [];
+
+        // Log the API response
+        $this->napsApiLogService->logApiResponse($data['orderid'] ?? null, $responseData, 'authorization');
+
         if ($response->failed()) {
             Log::error('MXPlus Payment Call Failed', ['res' => $response->body()]);
         }
 
-        return $response->json();
+        return $responseData;
     }
 
     /**
@@ -137,11 +150,16 @@ class MXPlusService
 
         $response = Http::post($url, $payload);
 
+        $responseData = $response->json() ?? [];
+
+        // Log the API response
+        $this->napsApiLogService->logApiResponse($data['orderid'] ?? null, $responseData, 'refund');
+
         if ($response->failed()) {
             Log::error('MXPlus Refund Failed', ['res' => $response->body()]);
         }
 
-        return $response->json();
+        return $responseData;
     }
 
     public function getPaymentStatus(array $data)
@@ -165,10 +183,15 @@ class MXPlusService
 
         $response = Http::post($url, $payload);
 
+        $responseData = $response->json() ?? [];
+
+        // Log the API response
+        $this->napsApiLogService->logApiResponse($data['orderid'] ?? null, $responseData, 'status');
+
         if ($response->failed()) {
             Log::error('MXPlus Status Check Failed', ['res' => $response->body()]);
         }
 
-        return $response->json();
+        return $responseData;
     }
 }

@@ -20,6 +20,12 @@ class OrderCheckoutRequest extends FormRequest
             'cardNumber' => $this->cardNumber ? str_replace(' ', '', $this->cardNumber) : null,
             'cvv' => $this->cvv ? preg_replace('/\D/', '', $this->cvv) : null,
         ]);
+
+        if ($this->filled('billing_address_id') && !$this->filled('saved_billing_address_id')) {
+            $this->merge([
+                'saved_billing_address_id' => $this->input('billing_address_id'),
+            ]);
+        }
     }
 
     public function rules()
@@ -94,14 +100,14 @@ class OrderCheckoutRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
-    {
-        if ($this->filled('billing_address_id') && !$this->filled('saved_billing_address_id')) {
-            $this->merge([
-                'saved_billing_address_id' => $this->input('billing_address_id'),
-            ]);
-        }
-    }
+    // protected function prepareForValidation(): void
+    // {
+    //     if ($this->filled('billing_address_id') && !$this->filled('saved_billing_address_id')) {
+    //         $this->merge([
+    //             'saved_billing_address_id' => $this->input('billing_address_id'),
+    //         ]);
+    //     }
+    // }
 
     public function messages(): array
     {

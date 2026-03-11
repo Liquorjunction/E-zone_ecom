@@ -675,6 +675,21 @@
                     </li>
                 @endcan
 
+                {{-- @can('contact_us.read') --}}
+                <li class="nav-item">
+                    <a class="nav-link {{ $isContactUsSectionActive ? 'active' : '' }}"
+                        href="{{ route('admin.naps-log.index') }}">
+                        <i class="icon">
+                            <i class="bi bi-envelope-at"></i>
+                        </i>
+                        <span class="item-name">NAPS Payment Logs</span>
+                    </a>
+                </li>
+                <li>
+                    <hr class="hr-horizontal">
+                </li>
+                {{-- @endcan --}}
+
                 <!-- Reports -->
                 @can('reports.read')
                     <li class="nav-item">

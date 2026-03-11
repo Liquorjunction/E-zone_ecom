@@ -180,7 +180,7 @@ class OrderService
             $this->orders->update($order->id, [
                 'order_number' => config('app.PREFIX') . '/ORD/' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
             ]);
-
+            $order->refresh();
             // Send confirmation emails
             if (isset($order->user)) {
                 $mailTrigger = app(\App\Services\MailTriggerService::class);
@@ -190,7 +190,6 @@ class OrderService
             $mailTrigger->sendAdminNewOrderMail($order);
 
             $this->cartRepo->clearCart($cart);
-
             return $this->processPayment($order, $data, $appliedCoupon);
         });
     }
