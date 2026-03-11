@@ -9,6 +9,10 @@ class NapsApiLog extends Model
 {
     use HasFactory;
 
+    protected $connection = 'mysql_logs';
+
+    protected $table = 'naps_api_logs';
+
     /**
      * The attributes that are mass assignable.
      *

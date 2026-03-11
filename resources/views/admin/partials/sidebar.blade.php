@@ -680,7 +680,7 @@
                     <a class="nav-link {{ $isContactUsSectionActive ? 'active' : '' }}"
                         href="{{ route('admin.naps-log.index') }}">
                         <i class="icon">
-                            <i class="bi bi-envelope-at"></i>
+                            <i class="bi bi-activity"></i>
                         </i>
                         <span class="item-name">NAPS Payment Logs</span>
                     </a>

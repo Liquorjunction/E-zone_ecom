@@ -24,6 +24,7 @@ class OrderStatusService
 
     protected $allowedTransitions = [
         'pending' => ['order_confirmation', 'cancelled'],
+        'paid' => ['order_confirmation', 'cancelled', 'refunded'],
         'order_confirmation' => ['partially_dispatched', 'dispatched', 'cancelled'],
         'partially_dispatched' => ['dispatched', 'cancelled'],
         'dispatched' => ['ready_to_ship', 'cancelled'],
@@ -40,7 +41,7 @@ class OrderStatusService
         $this->mailTriggerService = $mailTriggerService;
     }
 
-    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null )
+    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null)
     {
         if (!$force && !$this->canTransition($order->status, $toStatus)) {
             throw new Exception("Invalid order transition from '{$order->status}' to '{$toStatus}'.");
@@ -66,7 +67,8 @@ class OrderStatusService
 
     public function canTransition(string $from, string $to): bool
     {
-        if ($from === $to) return true;
+        if ($from === $to)
+            return true;
 
         return isset($this->allowedTransitions[$from]) &&
             in_array($to, $this->allowedTransitions[$from]);

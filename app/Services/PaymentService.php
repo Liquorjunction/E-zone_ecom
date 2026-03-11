@@ -61,6 +61,10 @@ class PaymentService
                     'message' => 'Payment Successful'
                 ];
             }
+            return [
+                'success' => false,
+                'message' => $inner['status'] ?? 'Payment declined by bank.'
+            ];
 
             // Simulate successful card charge
         }

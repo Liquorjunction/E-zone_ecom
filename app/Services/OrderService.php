@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Illuminate\Support\Facades\DB;
 use App\Services\PaymentService;
 use App\Services\CouponService;
+use App\Services\MXPlusService;
 use App\Services\SessionCouponService;
 use App\Services\PriceCalculatorService;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,8 @@ class OrderService
     protected SessionCouponService $sessionCoupon;
     protected OrderStatusService $orderStatusService;
 
+    protected MXPlusService $mXPlusService;
+
     public function __construct(
         OrderRepositoryInterface $orders,
         CartRepositoryInterface $cartRepo,
@@ -40,7 +43,8 @@ class OrderService
         CouponService $couponService,
         SessionCouponService $sessionCoupon,
         OrderStatusService $orderStatusService,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        MXPlusService $mXPlusService
     ) {
         $this->orders = $orders;
         $this->cartRepo = $cartRepo;
@@ -52,6 +56,7 @@ class OrderService
         $this->sessionCoupon = $sessionCoupon;
         $this->orderStatusService = $orderStatusService;
         $this->logger = $logger;
+        $this->mXPlusService = $mXPlusService;
     }
 
     public function processCheckout(Cart $cart, array $data, ?int $userId, ?string $userEmail)
@@ -196,6 +201,7 @@ class OrderService
 
     public function cancelClientOrder(int $orderId, ?string $reason, ?int $userId)
     {
+        $refundId = null;
         $order = $this->orders->findOrderWithRelations($orderId, ['items']);
         if (!$order || ($userId && $order->user_id !== $userId)) {
             return false;
@@ -205,11 +211,35 @@ class OrderService
             return false;
         }
 
-        if (!in_array(strtolower($order->status ?? ''), ['pending'], true)) {
+        if (!in_array(strtolower($order->status ?? ''), ['pending', 'paid'], true)) {
             return false;
         }
+        $currentStatus = strtolower($order->status);
+        if ($currentStatus === 'paid') {
+            $refundData = [
+                'orderid' => $order->order_number,
+                'amount' => $order->total,
+                'authnumber' => $order->naps_auth_number, // Ensure this column exists in DB
+                'paymentid' => $order->transaction_id,   // Ensure this column exists in DB
+                'firstName' => $order->shipping_address['name'] ?? 'Customer',
+                'email' => $order->email,
+            ];
 
-        DB::transaction(function () use ($order, $reason, $userId) {
+            $apiResult = $this->mXPlusService->refund($refundData);
+
+            // Handle nested response structure
+            $res = $apiResult;
+
+            // Status '07' or '00' usually indicates success in refund/status checks
+            if (isset($res['statuscode']) && in_array($res['statuscode'], ['00', '07'])) {
+                // Capture the new paymentid/refundid returned by NAPS
+                $refundId = $res['refundid'] ?? $res['operation_id'] ?? null;
+            } else {
+                throw new \Exception("Refund failed: " . ($res['status'] ?? 'API Error'));
+            }
+        }
+
+        DB::transaction(function () use ($order, $reason, $userId, $refundId) {
             foreach ($order->items as $item) {
                 $this->inventoryService->releaseReservation(
                     $item->product_id,
@@ -221,7 +251,20 @@ class OrderService
                 );
             }
 
-            $this->orderStatusService->changeStatus($order, 'cancelled', $reason, false, null);
+            // Determine final status
+            $finalStatus = ($order->status === 'paid') ? 'refunded' : 'cancelled';
+
+            // Update the Refund ID column ONLY if we got one from the API
+            if ($refundId) {
+                $updateFields['naps_refund_id'] = $refundId;
+            }
+
+            $order->update($updateFields);
+
+            // Record status history
+            $this->orderStatusService->changeStatus($order, $finalStatus, $reason, false, null);
+
+            //$this->orderStatusService->changeStatus($order, 'cancelled', $reason, false, null);
         });
 
         return true;

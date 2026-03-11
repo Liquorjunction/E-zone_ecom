@@ -29,7 +29,22 @@
         <div id="checkout-root" class="container mx-auto px-4 max-w-7xl" data-remove-url="{{ route('cart.remove') }}"
             data-update-url="{{ route('cart.update') }}" data-step="{{ $step }}"
             data-shipping-method="{{ $totals['shipping_method'] ?? 'standard' }}">
-
+            @if ($errors->has('checkout'))
+                <div id="checkout-error-banner"
+                    class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-center shadow-sm">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-bold text-red-800">Payment Failed</p>
+                        <p class="text-sm text-red-700">{{ $errors->first('checkout') }}</p>
+                    </div>
+                </div>
+            @endif
             {{-- ══════════ PAGE HEADER ══════════ --}}
             <div class="mb-10">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
