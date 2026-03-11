@@ -34,7 +34,9 @@ class Order extends Model
         'phone_no',
         'email',
         'payment_method',
-        'transaction_id'
+        'transaction_id',
+        'naps_auth_number',
+        'naps_refund_id',
     ];
 
     protected $casts = [

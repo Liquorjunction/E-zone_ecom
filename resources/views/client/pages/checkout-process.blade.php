@@ -563,12 +563,39 @@
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
+<<<<<<< Updated upstream
                                     <div>
                                         <label for="cvv" class="block text-sm font-semibold text-gray-700 mb-2">CVV *</label>
                                         <input type="text" id="cvv" name="cvv"
                                             placeholder="123" maxlength="3" required pattern="[0-9]{3}"
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
+=======
+                                    <div class="grid grid-cols-2 gap-5">
+                                        <div>
+                                            <label for="expiry"
+                                                class="block text-sm font-semibold text-gray-700 mb-2">Expiry Date
+                                                *</label>
+                                            <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required pattern="\d{2}/\d{2}"
+                                                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
+                                        </div>
+                                        <div>
+                                            <label for="cvv"
+                                                class="block text-sm font-semibold text-gray-700 mb-2">CVV *</label>
+                                            <input type="text" id="cvv" name="cvv" maxlength="3" required pattern="[0-9]{3}"
+                                                placeholder="123"
+                                                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 invalid:border-red-500 invalid:focus:ring-red-500/20">
+                                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
+                                        </div>
+                                        <div class="flex items-center space-x-3 mt-4">
+                                            <input type="checkbox" id="save_card" name="save_card" value="1"
+                                                class="w-5 h-5 text-primary border-2 border-gray-300 rounded focus:ring-primary transition-all duration-300">
+                                            <label for="save_card" class="text-sm font-semibold text-gray-700">
+                                                Save this card for future payments
+                                            </label>
+                                        </div>
+>>>>>>> Stashed changes
                                     </div>
                                 </div>
                             </div>

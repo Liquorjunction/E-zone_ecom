@@ -70,7 +70,7 @@ class DiscountController extends Controller
                     if (!empty($target['target_type']) && !empty($target['target_id'])) {
                         $targetsToInsert[] = [
                             'target_type' => $target['target_type'],
-                            'target_id'   => $target['target_id'],
+                            'target_id' => $target['target_id'],
                         ];
                     }
                 }
@@ -103,7 +103,7 @@ class DiscountController extends Controller
                 if (!empty($target['target_type']) && !empty($target['target_id'])) {
                     $toAssign[] = [
                         'target_type' => $target['target_type'],
-                        'target_id'   => $target['target_id'],
+                        'target_id' => $target['target_id'],
                     ];
                 }
             }
@@ -265,7 +265,7 @@ class DiscountController extends Controller
                 }
             })
             ->addColumn('action', function ($discount) use ($request) {
-                if(isset($discount->ends_at) && $discount->ends_at->isPast()) {
+                if (isset($discount->ends_at) && $discount->ends_at->isPast()) {
                     $data['edit_url'] = '';
                     $data['delete_url'] = '';
                 } else {
