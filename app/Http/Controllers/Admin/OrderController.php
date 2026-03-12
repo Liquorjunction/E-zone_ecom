@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Naps\ReadNapsRequest;
 use App\Http\Requests\Admin\Orders\CancelOrderRequest;
 use App\Http\Requests\Admin\Orders\ReadOrderRequest;
 use App\Http\Requests\Admin\Orders\OrderInvoiceRequest;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
 use App\Services\InvoiceExportService;
+use App\Services\MXPlusService;
 use App\Services\OrderStatusService as OrderStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -149,7 +151,20 @@ class OrderController extends Controller
                     ])->render();
                 })
                 ->addColumn('cancelled_by', function ($order) {
-                    return optional($order->cancelledBy)->name ?? 'N/A';
+                    if (($order->status ?? null) !== 'cancelled') {
+                        return '<span class="badge bg-light text-muted border">Not Cancelled</span>';
+                    }
+
+                    $adminName = optional($order->cancelledBy)->name;
+                    if (!empty($adminName)) {
+                        return '<span class="badge bg-primary-subtle text-primary border border-primary-subtle">Admin: ' . e($adminName) . '</span>';
+                    }
+
+                    if (!empty($order->cancelled_by)) {
+                        return '<span class="badge bg-primary-subtle text-primary border border-primary-subtle">Admin #' . e((string) $order->cancelled_by) . '</span>';
+                    }
+
+                    return '<span class="badge bg-warning-subtle text-dark border border-warning-subtle">Client</span>';
                 })
                 ->addColumn('payment_method', fn($order) => $order->payment_method ?? 'N/A')
                 ->addColumn('payment_status', function ($order) use ($markPaidStatuses) {
@@ -193,9 +208,13 @@ class OrderController extends Controller
                         $actions['invoice_url'] = route('admin.orders.download-invoice', ['id' => $order->id]);
                     }
 
+                    if ($order->payment_method === 'card' && $request->user()->can('napsStatus.read')) {
+                        $actions['naps_status_url'] = route('admin.orders.naps-order-detail', ['order' => $order->id]);
+                    }
+
                     return view('admin.partials.datatable-actions', $actions)->render();
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['status', 'cancelled_by', 'action'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error('Order dataTable error: ' . $e->getMessage(), ['exception' => $e]);
@@ -224,5 +243,65 @@ class OrderController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
+    }
+
+    public function napsOrderDetail(ReadNapsRequest $request, OrderRepo $orderRepo, MXPlusService $mXPlusService)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $orderId = $request->input('order');
+        $order = $orderRepo->findOrderWithRelations($orderId, ['items.product', 'items.variant']);
+
+        // Prepare data for the API call
+        // Ensure these fields exist in your Order model/table
+        $statusData = [
+            'orderid' => $order->order_number,
+            'amount' => $order->total,
+            'authnumber' => $order->naps_auth_number ?? '', // Saved during payment
+            'paymentid' => $order->transaction_id ?? '', // Saved during payment
+        ];
+
+        try {
+            $apiResponse = $mXPlusService->getPaymentStatus($statusData);
+            Log::error('MXPlus Payment Status API Response', [
+                'response' => $apiResponse,
+            ]);
+            // API Returns statuscode: 00=Paid, 01=Declined, 02=Captured, 03=Settled, 07=Refunded
+            if (isset($apiResponse['status'])) {
+                $currentStatus = $apiResponse['status']; // e.g., "Paid"
+
+                if (isset($apiResponse['statuscode']) && ($apiResponse['statuscode'] === '00' || $apiResponse['statuscode'] === '02')) {
+                    // UPDATE THE DATABASE HERE
+                    $order->update([
+                        'status' => 'paid',
+                        'payment_status' => $apiResponse['status'] ?? 'Paid',
+                        // 'transaction_id' => $apiResponse['transactionid'] ?? $order->transaction_id,
+                        'naps_auth_number' => $apiResponse['authnumber'] ?? $order->naps_auth_number, // Save it now so it's there for next time
+                    ]);
+                }
+
+                // Return JSON response with modal HTML for AJAX display
+                $modalHtml = view('admin.partials.payment-status-modal', [
+                    'order' => $order,
+                    'napsStatus' => $apiResponse
+                ])->render();
+
+                return response()->json([
+                    'success' => true,
+                    'modal_html' => $modalHtml
+                ]);
+            }
+            return $request->ajax() || $request->wantsJson()
+                ? response()->json(['success' => false, 'message' => 'Could not retrieve status from NAPS.'])
+                : back()->with('error', 'Could not retrieve status from NAPS.');
+        } catch (\Exception $e) {
+            Log::error('NAPS Status API Error', ['error' => $e->getMessage()]);
+
+            return $request->ajax() || $request->wantsJson()
+                ? response()->json(['success' => false, 'message' => 'API Error: ' . $e->getMessage()])
+                : back()->with('error', 'API Error: ' . $e->getMessage());
+        }
     }
 }

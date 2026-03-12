@@ -1,19 +1,3 @@
-<!-- Bootstrap CSS for Modal -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    .modal {
-        background-color: rgba(0, 0, 0, 0.4);
-    }
-
-    .modal.show {
-        display: block !important;
-    }
-
-    .modal-backdrop.show {
-        opacity: 0.5;
-    }
-</style>
-
 <div class="modal fade" id="napsModal" tabindex="-1" aria-labelledby="napsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

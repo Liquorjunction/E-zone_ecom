@@ -302,7 +302,7 @@ class OrderService
                     'response' => $paymentResult,
                 ]);
 
-                $order->status = !empty($paymentResult['transaction_id']) ? 'paid' : 'processing';
+                $order->status = !empty($paymentResult['transaction_id']) ? 'paid' : 'pending';
                 $order->transaction_id = $paymentResult['transaction_id'] ?? null;
                 $order->naps_auth_number = $paymentResult['auth_number'] ?? null;
                 $order->save();

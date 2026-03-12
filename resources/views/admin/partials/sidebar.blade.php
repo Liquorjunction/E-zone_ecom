@@ -675,7 +675,7 @@
                     </li>
                 @endcan
 
-                {{-- @can('contact_us.read') --}}
+                @can('napsLogs.read')
                 <li class="nav-item">
                     <a class="nav-link {{ $isContactUsSectionActive ? 'active' : '' }}"
                         href="{{ route('admin.naps-log.index') }}">
@@ -688,7 +688,7 @@
                 <li>
                     <hr class="hr-horizontal">
                 </li>
-                {{-- @endcan --}}
+                @endcan
 
                 <!-- Reports -->
                 @can('reports.read')

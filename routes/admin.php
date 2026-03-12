@@ -309,7 +309,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
 
         // Order Routes
         Route::prefix('orders')->name('orders.')->middleware('can:order.read,admin')->group(function () {
-            Route::get('/', [OrderController::class, 'index'])->name('index'); // permission: order.read
+            Route::get('/', [OrderController::class, 'index'])->name('index');
             Route::get('/data', [OrderController::class, 'dataTable'])->name('data');
             Route::get('/show', [OrderController::class, 'show'])->name('show')->middleware('can:order.read,admin');
             Route::get('/download-invoice', [OrderController::class, 'downloadInvoice'])->name('download-invoice')->middleware('can:order.read,admin');
@@ -317,6 +317,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::post('/update-order-status', [OrderController::class, 'updateOrderStatus'])->name('update-order-status')->middleware('can:order.update,admin');
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
             Route::get('/pdf', [OrderController::class, 'downloadInvoice'])->name('downloadInvoice')->middleware('can:order.read,admin');
+            Route::get('/naps-order-detail', [OrderController::class, 'napsOrderDetail'])->name('naps-order-detail')->middleware('can:napsStatus.read,admin');
         });
 
         // Dispatch Routes
@@ -456,10 +457,11 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::post('/add-note', [ContactUsController::class, 'AddAdminNotes'])->name('addNote')->middleware('can:contact_us.update,admin');
         });
 
-        Route::prefix('naps-log')->name('naps-log.')->group(function () {
+        // Activity Logs Routes
+        Route::prefix('naps-log')->name('naps-log.')->middleware('can:napsLogs.read,admin')->group(function () {
             Route::get('/', [ActivityLogController::class, 'index'])->name('index');
-            Route::get('/data', [ActivityLogController::class, 'datatable'])->name('data');
-            Route::get('/show/{id}', [ActivityLogController::class, 'show'])->name('show');
+            Route::get('/data', [ActivityLogController::class, 'datatable'])->name('data')->middleware('can:napsLogs.read,admin');
+            Route::get('/show/{id}', [ActivityLogController::class, 'show'])->name('show')->middleware('can:napsLogs.read,admin');
         });
     });
 });

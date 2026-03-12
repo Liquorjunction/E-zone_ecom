@@ -11,6 +11,14 @@
                             <small class="text-muted">View detailed information about the order</small>
                         </div>
                         <div class="d-flex gap-2">
+                            @if($order->payment_method === 'card')
+                                @can('napsStatus.read', 'admin')
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="naps-status-btn"
+                                    data-naps-url="{{ route('admin.orders.naps-order-detail', ['order' => $order->id]) }}">
+                                    <i class="bi bi-credit-card"></i> NAPS Payment Status
+                                </button>
+                                @endcan
+                            @endif
                             <a href="{{ route('admin.orders.downloadInvoice', ['id' => $order->id]) }}" class="btn btn-sm btn-outline-secondary">
                                 <i class="bi bi-download"></i> Download Invoice
                             </a>
@@ -104,7 +112,7 @@
                                         </div>
                                         <div class="mt-2">
                                             <strong>Cancelled By:</strong>
-                                            {{ optional($order->cancelledBy)->name ?? (!empty($order->cancelled_by) ? 'Admin #' . $order->cancelled_by : 'N/A') }}
+                                            {{ optional($order->cancelledBy)->name ?? (!empty($order->cancelled_by) ? 'Admin #' . $order->cancelled_by : 'Client') }}
                                         </div>
                                     </div>
                                 </div>
@@ -369,4 +377,44 @@
         </div>
     </div>
     </div>
+
+{{-- NAPS Payment Status Modal Container --}}
+<div id="naps-modal-container"></div>
+
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('naps-status-btn') && document.getElementById('naps-status-btn').addEventListener('click', function () {
+        var url = this.dataset.napsUrl;
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Loading...';
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (response) {
+            if (response.success === false) {
+                alert(response.message || 'Could not retrieve NAPS status.');
+                return;
+            }
+            document.getElementById('naps-modal-container').innerHTML = response.modal_html;
+            var el = document.getElementById('napsModal');
+            if (el && el.parentElement !== document.body) {
+                document.body.appendChild(el);
+            }
+            var modal = new bootstrap.Modal(el);
+            modal.show();
+        })
+        .catch(function () {
+            alert('Failed to fetch NAPS status.');
+        })
+        .finally(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-credit-card"></i> NAPS Payment Status';
+        });
+    });
+</script>
+@endpush

@@ -8,7 +8,9 @@ use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -33,5 +35,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $exception, Request $request) {
+            if (! $request->is('admin') && ! $request->is('admin/*')) {
+                return null;
+            }
+
+            $statusCode = $exception instanceof HttpExceptionInterface
+                ? $exception->getStatusCode()
+                : 500;
+
+            $supportedErrorPages = [401, 403, 404, 419, 429, 500, 503];
+
+            if (! in_array($statusCode, $supportedErrorPages, true)) {
+                $statusCode = 500;
+            }
+
+            return response()->view("admin.errors.{$statusCode}", [
+                'exception' => $exception,
+            ], $statusCode);
+        });
     })->create();

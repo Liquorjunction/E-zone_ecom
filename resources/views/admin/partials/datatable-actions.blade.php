@@ -104,3 +104,19 @@
         </span>
     </button>
 @endif
+@if (isset($naps_status_url))
+    <button type="button" class="btn btn-sm btn-icon btn-secondary naps-status-action"
+        data-naps-url="{{ $naps_status_url }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="NAPS Payment Status"
+        aria-label="NAPS Payment Status"
+        data-bs-original-title="NAPS Payment Status">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 6v6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    </button>
+@endif

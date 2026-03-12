@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Admin;
 use App\Models\Order;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class OrderStatusService
@@ -81,7 +82,11 @@ class OrderStatusService
 
     protected function resolveAdminId(?int $adminId): ?int
     {
-        if (!$adminId) {
+        if (! $adminId) {
+            $adminId = Auth::guard('admin')->id();
+        }
+
+        if (! $adminId) {
             return null;
         }
 
