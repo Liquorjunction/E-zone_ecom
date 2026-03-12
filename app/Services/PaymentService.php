@@ -4,14 +4,20 @@ namespace App\Services;
 
 use App\Models\Order;
 use Psr\Log\LoggerInterface;
+use App\Services\MXPlusService;
+use Illuminate\Support\Facades\Log;
+
+
 
 class PaymentService
 {
     protected $logger;
+    protected $mxPlus;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, MXPlusService $mxPlus)
     {
         $this->logger = $logger;
+        $this->mxPlus = $mxPlus;
     }
 
     /**
@@ -23,15 +29,44 @@ class PaymentService
     {
         $method = $paymentData['payment_method'] ?? $paymentData['payment'] ?? null;
         $this->logger->info('Processing payment', ['method' => $method, 'order_id' => $order->id]);
-
         if ($method === 'card') {
             // Basic validation for demo purposes
             if (empty($paymentData['cardNumber'])) {
                 return ['success' => false, 'transaction_id' => null, 'message' => 'Card number missing'];
             }
+            $paymentData['orderid'] = $order->order_number;
+            $paymentData['amount'] = $order->total;
+            // dd($paymentData);
+            $result = $this->mxPlus->authorizePayment($paymentData);
+            $innerResponse = $result['response'] ?? [];
+            if (empty($innerResponse) && isset($result['statuscode'])) {
+                $innerResponse = $result;
+            }
+            Log::info('Checking extracted data', [
+                'auth' => $innerResponse['authnumber'] ?? 'MISSING',
+                'pid' => $innerResponse['paymentid'] ?? 'MISSING'
+            ]);
+            Log::error('MXPlus Payment API Response', [
+                'response' => $result,
+            ]);
+            Log::error('MXPlus Payment API iNNER Response', [
+                'innerResponse' => $innerResponse,
+            ]);
+            if (isset($innerResponse['statuscode']) && $innerResponse['statuscode'] === '00') {
+                return [
+                    'success' => true,
+                    'transaction_id' => $innerResponse['paymentid'] ?? null,
+                    'auth_number' => $innerResponse['authnumber'] ?? null,
+                    'raw_response' => $innerResponse, // Pass this back so OrderService can use it
+                    'message' => 'Payment Successful'
+                ];
+            }
+            return [
+                'success' => false,
+                'message' => $inner['status'] ?? 'Payment declined by bank.'
+            ];
 
             // Simulate successful card charge
-            return ['success' => true, 'transaction_id' => 'TX-' . uniqid(), 'message' => 'Charged (simulated)'];
         }
 
         // Support COD / other methods as successful but unpaid

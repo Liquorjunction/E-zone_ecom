@@ -112,13 +112,14 @@ class OrderRepository implements OrderRepositoryInterface
     public function cancelOrder(int $orderId, ?string $reason = null)
     {
         $order = Order::with('items')->find($orderId);
-        if (! $order) return false;
+        if (!$order)
+            return false;
 
         if (in_array($order->status, ['cancelled', 'refunded'], true)) {
             return false;
         }
 
-        if (! in_array(strtolower($order->status ?? ''), ['pending'], true)) {
+        if (!in_array(strtolower($order->status ?? ''), ['pending'], true)) {
             return false;
         }
 
@@ -132,7 +133,8 @@ class OrderRepository implements OrderRepositoryInterface
             foreach ($txns as $inventoryId => $group) {
                 $sum = $group->sum('quantity');
                 $inv = Inventory::find($inventoryId);
-                if (! $inv) continue;
+                if (!$inv)
+                    continue;
 
                 $before = $inv->quantity;
                 $beforeReserved = $inv->reserved_quantity ?? 0;
