@@ -201,7 +201,8 @@ class CartController extends Controller
             $itemDiscount = [
                 'has_discount'              => $info['discount_amount'] > 0,
                 'discount_amount'           => $info['discount_amount'],
-                'line_total_after_discount' => $info['line_final'] ?? null,
+                'line_total_after_discount' => $info['line_total_after_discount']
+                    ?? (($item->final_price ?? $item->unit_price ?? 0) * ($item->quantity ?? 1)),
             ];
         }
 

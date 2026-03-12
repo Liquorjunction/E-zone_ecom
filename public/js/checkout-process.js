@@ -435,8 +435,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
                 if (lineTotalEl && data.item?.discount) {
                     if (data.item.discount.has_discount) {
-                        lineTotalEl.textContent = formatMoney(
+                        const discountedLineTotal =
                             data.item.discount.line_total_after_discount
+                            ?? data.item.line_total
+                            ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
+                        lineTotalEl.textContent = formatMoney(
+                            discountedLineTotal
                         );
                     } else {
                         lineTotalEl.textContent = formatMoney(
@@ -484,8 +488,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
                 if (summaryItemPrice && data.item?.discount) {
                     if (data.item.discount.has_discount) {
-                        summaryItemPrice.textContent = formatMoney(
+                        const discountedLineTotal =
                             data.item.discount.line_total_after_discount
+                            ?? data.item.line_total
+                            ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
+                        summaryItemPrice.textContent = formatMoney(
+                            discountedLineTotal
                         );
                     } else {
                         summaryItemPrice.textContent = formatMoney(
