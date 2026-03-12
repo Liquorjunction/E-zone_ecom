@@ -186,7 +186,10 @@
                                                         ($item->product_name ?? ($item->name ?? 'N/A'));
                                                     $qty = $item->quantity ?? 1;
                                                     $unitPrice = $item->unit_price ?? ($item->price ?? 0);
-                                                    $discount = $item->discount_amount ?? ($item->line_discount ?? 0);
+                                                    $unitPriceOriginal = $item->unit_price_original ?? 0;
+                                                    $lineSubtotal = $item->line_subtotal ?? 0;
+                                                    $lineTotal = $item->line_total ?? 0;
+                                                    $discount = $item->discount_amount ?? 0;
                                                     $lineSubtotal = $item->line_subtotal ?? $qty * $unitPrice;
                                                     $lineTotal = $item->line_total ?? $lineSubtotal - $discount;
                                                 @endphp
@@ -202,7 +205,7 @@
                                                     <td>{{ $qty }}</td>
                                                     <td>
                                                         @if (isset($discount) && $discount > 0)
-                                                            <del>{{ number_format($unitPrice + $discount / $qty, 2) }}</del>
+                                                            <del>{{ number_format($unitPriceOriginal, 2) }}</del>
                                                             <br>
                                                             {{ number_format($unitPrice, 2) }}
                                                         @else

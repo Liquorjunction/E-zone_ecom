@@ -142,5 +142,7 @@
                     </svg>
                     <p class="text-gray-500 font-medium">You have no recent orders.</p>
                 </div>
+            @endif
         </div>
-    @endsection
+    </div>
+@endsection

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 
 class PriceCalculatorService
@@ -78,13 +79,11 @@ class PriceCalculatorService
     {
         // Use stored order data for calculations
         $subtotal = (float) ($order->subtotal ?? 0);
-        $totalItemDiscount = (float) ($order->items->sum(function ($item) {
-            return $item->discount_amount ?? 0;
-        }));
+        $totalItemDiscount = (float) ($order->discount_amount ?? 0);
 
         $subtotalAfterItemDiscount = (float) ($order->subtotal ?? 0);
         $couponDiscount = (float) ($order->coupon_discount_amount ?? 0);
-        $totalAfterCoupon = max(0, $subtotalAfterItemDiscount - $couponDiscount);
+        $totalAfterCoupon = max(0, $subtotal - $couponDiscount);
 
         $taxRate = (float) ($order->tax_percentage ?? config('tax.rate', 20.0));
         $taxAmount = (float) ($order->tax_amount ?? 0);
@@ -94,6 +93,18 @@ class PriceCalculatorService
         $shippingCost = (float) ($order->shipping_cost ?? ($order->shipping_amount ?? 0));
 
         $finalTotal = (float) ($order->total ?? 0);
+
+        // Format order items with table data
+        $items = $order->items->map(function (OrderItem $item) {
+            return [
+                'id' => $item->id,
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'discount_amount' => $item->discount_amount,
+                'total_price' => $item->total_price,
+            ];
+        })->toArray();
 
         return [
             'subtotal' => round($subtotal, 2),
@@ -112,7 +123,7 @@ class PriceCalculatorService
 
             'final_total' => round($finalTotal, 2),
 
-            'items' => $order->items ?? []
+            'items' => $items
         ];
     }
 }

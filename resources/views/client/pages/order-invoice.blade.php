@@ -13,25 +13,23 @@
             ? $order->billing_address
             : json_decode($order->billing_address, true) ?? [];
 
-        // Use pre-calculated totals from PriceCalculatorService
         $subtotal = (float) ($totals['subtotal'] ?? 0);
         $totalItemDiscount = (float) ($totals['total_item_discount'] ?? 0);
-        $subtotalAfterDiscount = (float) ($totals['subtotal_after_item_discount'] ?? 0);
+        $subtotalAfterDiscount = (float) $subtotal - $totalItemDiscount;
         $couponDiscount = (float) ($totals['coupon_discount'] ?? 0);
         $totalAfterCoupon = (float) ($totals['total_after_coupon'] ?? 0);
         $taxRate = (float) ($totals['tax_rate'] ?? 0);
         $tax = (float) ($totals['tax_amount'] ?? 0);
         $taxableAmount = (float) ($totals['taxable_amount'] ?? 0);
-        $shippingMethod = ucfirst(str_replace('_', ' ', $totals['shipping_method'] ?? gtrans('Standard')));
+        $shippingMethod = ucfirst(str_replace('_', ' ', $totals['shipping_method'] ?? 'Standard'));
         $shippingCost = (float) ($totals['shipping_cost'] ?? 0);
         $total = (float) ($totals['final_total'] ?? 0);
         $totalWithoutShipping = $total - $shippingCost;
 
-        // Order metadata
         $couponCode = $order->coupon_code ?? null;
-        $paymentMethod = ucfirst(str_replace('_', ' ', $order->payment_method ?? gtrans('N/A')));
-        $paymentStatus = ucfirst($order->payment_status ?? gtrans('Pending'));
-        $orderStatus = ucfirst($order->status ?? gtrans('Processing'));
+        $paymentMethod = ucfirst(str_replace('_', ' ', $order->payment_method ?? 'N/A'));
+        $paymentStatus = ucfirst($order->payment_status ?? 'Pending');
+        $orderStatus = ucfirst($order->status ?? 'Processing');
 
         $shipName = $ship['name'] ?? trim(($ship['first_name'] ?? '') . ' ' . ($ship['last_name'] ?? ''));
         $shipStreet = $ship['street'] ?? ($ship['address'] ?? ($ship['address_line'] ?? ''));
@@ -48,6 +46,11 @@
         $billZip = $bill['postal_code'] ?? ($bill['zip'] ?? '');
         $billCountry = $bill['country'] ?? '';
         $billPhone = $bill['phone'] ?? '';
+
+        $logoPath = public_path('icon/Ezone-Logo-New-2025-Website.png');
+        $logoSrc = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
     @endphp
 
     {{-- Only the print styles change — everything else is the original design --}}
@@ -357,21 +360,24 @@
                         <tbody>
                             @foreach ($order->items as $item)
                                 @php
-                                    $productName = $item->product->name ?? 'Product';
-                                    $variantName = $item->variant->variant_name ?? null;
-                                    $sku = $item->variant->sku ?? ($item->product->sku ?? '—');
+                                    $productName = $item->product_name ?? ($item->name ?? ($item->product->name ?? 'N/A'));
+                                    $variantName = $item->variant_name ?? ($item->variant->variant_name ?? null);
+                                    $sku = $item->sku ?? ($item->variant->sku ?? ($item->product->sku ?? '—'));
                                     $qty = (float) ($item->quantity ?? 1);
                                     $safeQty = $qty > 0 ? $qty : 1;
                                     $unitPrice = (float) ($item->unit_price ?? ($item->price ?? 0));
-                                    $lineDiscount = (float) ($item->discount_amount ?? ($item->line_discount ?? 0));
+                                    $unitPriceOriginal = (float) ($item->unit_price_original ?? 0);
+                                    $lineDiscount = (float) ($item->discount_amount ?? 0);
                                     $lineSubtotal = (float) ($item->line_subtotal ?? $safeQty * $unitPrice);
                                     $lineTotal = (float) ($item->line_total ?? $lineSubtotal - $lineDiscount);
                                     $originalUnitPrice =
-                                        $lineDiscount > 0 ? $unitPrice + $lineDiscount / $safeQty : $unitPrice;
+                                        $unitPriceOriginal > 0
+                                            ? $unitPriceOriginal
+                                            : ($lineDiscount > 0 ? $unitPrice + $lineDiscount / $safeQty : $unitPrice);
                                 @endphp
                                 <tr class="border-b last:border-b-0 odd:bg-white even:bg-gray-50/50">
                                     <td class="px-4 py-2 font-medium text-gray-800 print-text-sm">
-                                        {{ $variantName }}
+                                        {{ $variantName ?? $productName }}
                                         {{-- @if ($variantName)
                                             <span
                                                 class="block text-xs text-gray-400 font-normal">{{ $variantName }}</span>
@@ -430,7 +436,11 @@
 
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-600">{{ gtrans('Subtotal') }} ({{ $order->items->sum('quantity') }} {{ gtrans('items') }}) :</span>
-                        <span class="font-medium">{{ $sym }} {{ number_format($subtotal, 2) }}</span>
+                        @if ($couponCode)
+                            <span class="font-medium">{{ $sym }} {{ number_format($subtotal, 2) }}</span>
+                        @else
+                            <span class="font-medium">{{ $sym }} {{ number_format($subtotalAfterDiscount, 2) }}</span>
+                        @endif
                     </div>
 
                     @if ($couponCode)

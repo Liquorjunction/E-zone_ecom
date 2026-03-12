@@ -420,7 +420,7 @@
 
         $subtotal = (float) ($totals['subtotal'] ?? 0);
         $totalItemDiscount = (float) ($totals['total_item_discount'] ?? 0);
-        $subtotalAfterDiscount = (float) ($totals['subtotal_after_item_discount'] ?? 0);
+        $subtotalAfterDiscount = (float) $subtotal - $totalItemDiscount;
         $couponDiscount = (float) ($totals['coupon_discount'] ?? 0);
         $totalAfterCoupon = (float) ($totals['total_after_coupon'] ?? 0);
         $taxRate = (float) ($totals['tax_rate'] ?? 0);
@@ -588,19 +588,51 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $invoiceItemDebug = [];
+                        @endphp
                         @foreach ($order->items as $i => $item)
                             @php
-                                $productName = $item->product->name ?? 'Product';
-                                $variantName = $item->variant->variant_name ?? null;
-                                $sku = $item->variant->sku ?? ($item->product->sku ?? '—');
+                                $productName = $item->product_name ?? ($item->name ?? ($item->product->name ?? 'N/A'));
+                                $variantName = $item->variant_name ?? ($item->variant->variant_name ?? null);
+                                $sku = $item->sku ?? ($item->variant->sku ?? ($item->product->sku ?? '—'));
                                 $qty = (float) ($item->quantity ?? 1);
                                 $safeQty = $qty > 0 ? $qty : 1;
                                 $unitPrice = (float) ($item->unit_price ?? ($item->price ?? 0));
-                                $lineDiscount = (float) ($item->discount_amount ?? ($item->line_discount ?? 0));
+                                $unitPriceOriginal = (float) ($item->unit_price_original ?? 0);
+                                $lineDiscount = (float) ($item->discount_amount ?? 0);
                                 $lineSubtotal = (float) ($item->line_subtotal ?? $safeQty * $unitPrice);
                                 $lineTotal = (float) ($item->line_total ?? $lineSubtotal - $lineDiscount);
                                 $originalUnitPrice =
-                                    $lineDiscount > 0 ? $unitPrice + $lineDiscount / $safeQty : $unitPrice;
+                                    $unitPriceOriginal > 0
+                                        ? $unitPriceOriginal
+                                        : ($lineDiscount > 0 ? $unitPrice + $lineDiscount / $safeQty : $unitPrice);
+
+                                $invoiceItemDebug[] = [
+                                    'order_id' => $order->id ?? null,
+                                    'order_number' => $order->order_number ?? null,
+                                    'item_index' => $i,
+                                    'order_item_id' => $item->id ?? null,
+                                    'product_id' => $item->product->id ?? null,
+                                    'product_name' => $productName,
+                                    'variant_id' => $item->variant->id ?? null,
+                                    'variant_name' => $variantName,
+                                    'sku' => $sku,
+                                    'raw_quantity' => $item->quantity ?? null,
+                                    'qty' => $qty,
+                                    'safe_qty' => $safeQty,
+                                    'raw_unit_price' => $item->unit_price ?? ($item->price ?? null),
+                                    'unit_price' => $unitPrice,
+                                    'raw_unit_price_original' => $item->unit_price_original ?? null,
+                                    'unit_price_original' => $unitPriceOriginal,
+                                    'raw_discount_amount' => $item->discount_amount ?? null,
+                                    'line_discount' => $lineDiscount,
+                                    'raw_line_subtotal' => $item->line_subtotal ?? null,
+                                    'line_subtotal' => $lineSubtotal,
+                                    'raw_line_total' => $item->line_total ?? null,
+                                    'line_total' => $lineTotal,
+                                    'original_unit_price' => $originalUnitPrice,
+                                ];
                             @endphp
                             <tr
                                 class="{{ ($i + 1) % 2 === 0 ? 'row-even' : '' }} {{ $loop->last ? 'row-last' : '' }}">
@@ -664,7 +696,11 @@
                                     <td class="sum-label">
                                         Subtotal ({{ $order->items->sum('quantity') }} items) :
                                     </td>
-                                    <td class="sum-val">{{ $sym }} {{ number_format($subtotal, 2) }}</td>
+                                    @if($couponCode)
+                                        <td class="sum-val">{{ $sym }} {{ number_format($subtotal, 2) }}</td>
+                                    @else
+                                        <td class="sum-val">{{ $sym }} {{ number_format($subtotalAfterDiscount, 2) }}</td>
+                                    @endif
                                 </tr>
                                 @if ($couponCode)
                                     <tr>
@@ -673,7 +709,7 @@
                                             <span class="coupon-badge">{{ strtoupper($couponCode) }}</span>
                                         </td>
                                         <td class="sum-val text-green">
-                                            {{ $couponDiscount > 0 ? '− ' . $sym . ' ' . number_format($couponDiscount, 2) : '-' }}
+                                            {{ $couponDiscount > 0 ? '- ' . $sym . ' ' . number_format($couponDiscount, 2) : '-' }}
                                         </td>
                                     </tr>
                                 @endif
