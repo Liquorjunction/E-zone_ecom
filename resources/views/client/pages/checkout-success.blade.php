@@ -72,10 +72,10 @@
                 <span class="font-semibold text-gray-700">Payment Method:</span>
                 <span class="text-gray-900">{{ $order->payment_method ?? 'Credit Card' }}</span>
               </div>
-              <div>
+              {{-- <div>
                 <span class="font-semibold text-gray-700">Shipping Method:</span>
                 <span class="text-gray-900">{{ $order->shipping_method ?? 'Standard Shipping (FREE)' }}</span>
-              </div>
+              </div> --}}
               <div class="md:col-span-2">
                 <span class="font-semibold text-gray-700">Shipping Address:</span>
                 <span class="text-gray-900 block mt-1">
@@ -189,10 +189,10 @@
               <span>Subtotal</span>
               <span class="font-semibold">${{ number_format($subtotal, 2) }}</span>
             </div>
-            <div class="flex justify-between text-gray-600">
+            {{-- <div class="flex justify-between text-gray-600">
               <span>Shipping</span>
               <span class="font-semibold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
-            </div>
+            </div> --}}
             <div class="flex justify-between text-gray-600">
               <span>{{ config('tax.label', 'VAT') }} ({{ config('tax.rate', 20) }}% included)</span>
               <span class="font-semibold">${{ number_format($tax, 2) }}</span>
@@ -267,7 +267,7 @@
         <p class="text-sm text-gray-600">Your payment information is encrypted and secure with industry-standard protocols</p>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 text-center">
+      {{-- <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
           <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -275,7 +275,7 @@
         </div>
         <h3 class="font-bold text-gray-900 mb-2">Free Shipping</h3>
         <p class="text-sm text-gray-600">Enjoy free standard shipping on all orders over $50 with no hidden fees</p>
-      </div>
+      </div> --}}
 
       <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">

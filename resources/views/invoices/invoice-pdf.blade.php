@@ -471,7 +471,7 @@
                             @endif
                         </div>
                         <div class="hdr-title">Invoice</div>
-                        <div class="hdr-ordernum">Order #{{ $orderNum }}</div>
+                        <div class="hdr-ordernum">Order: {{ $orderNum }}</div>
                     </td>
                     <td class="hdr-right">
                         <div class="hdr-company">
@@ -488,28 +488,18 @@
 
         <div class="invoice-header-meta">
             <table class="meta-flex">
-                <tr>
-                    <td>
-                        <span class="invoice-chip">
-                            Placed: <span>{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span>
-                        </span>
-                    </td>
-                    <td>
-                        <span class="invoice-chip">
-                            Order Status: <span>{{ $orderStatus }}</span>
-                        </span>
-                    </td>
-                    <td>
-                        <span class="invoice-chip">
-                            Payment: <span>{{ $paymentMethod }} ({{ $paymentStatus }})</span>
-                        </span>
-                    </td>
-                    <td>
-                        <span class="invoice-chip">
-                            Shipping: <span>{{ $shippingMethod }}</span>
-                        </span>
-                    </td>
-                </tr>
+            <tr>
+                <td style="width: 50%; text-align: left;">
+                <span class="invoice-chip">
+                    Placed: <span>{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span>
+                </span>
+                </td>
+                <td style="width: 50%; text-align: right;">
+                <span class="invoice-chip">
+                    Payment: <span>{{ $paymentMethod }}</span>
+                </span>
+                </td>
+            </tr>
             </table>
         </div>
 
@@ -713,7 +703,7 @@
                                         </td>
                                     </tr>
                                 @endif
-                                <tr>
+                                {{-- <tr>
                                     <td class="sum-label">Shipping ({{ $shippingMethod }}) :</td>
                                     <td class="sum-val">
                                         @if ($shippingCost > 0)
@@ -722,7 +712,7 @@
                                             <span class="text-green">Free</span>
                                         @endif
                                     </td>
-                                </tr>
+                                </tr> --}}
                             </table>
                             <table class="sum-table total-row-wrap">
                                 <tr>

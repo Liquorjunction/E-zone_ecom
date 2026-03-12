@@ -600,8 +600,9 @@
                                 </div>
                             </div>
 
+                            {{-- NO Requirement now We Will implement this later --}}
                             {{-- Shipping Method --}}
-                            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
+                            {{-- <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                                     <span
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
@@ -629,7 +630,7 @@
                                         <span class="font-bold text-gray-900">{{ $sym }} 12.99</span>
                                     </label>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             {{-- Payment Method --}}
                             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
@@ -784,8 +785,8 @@
                                             {{ $order?->created_at?->format('M d, Y') ?? date('M d, Y') }}</div>
                                         <div><span class="font-semibold text-gray-700 mr-2">Payment Method:</span>
                                             {{ $order->payment_method ?? '—' }}</div>
-                                        <div><span class="font-semibold text-gray-700 mr-2">Shipping Method:</span>
-                                            {{ $order->shipping_method ?? 'Standard Shipping' }}</div>
+                                        {{-- <div><span class="font-semibold text-gray-700 mr-2">Shipping Method:</span>
+                                            {{ $order->shipping_method ?? 'Standard Shipping' }}</div> --}}
                                     </div>
                                 </div>
 
@@ -853,7 +854,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="bg-amber-50 rounded-2xl p-6 border border-amber-200">
+                                    {{-- <div class="bg-amber-50 rounded-2xl p-6 border border-amber-200">
                                         <h3 class="font-bold text-gray-900 text-lg mb-3">Shipping Method</h3>
                                         <p class="text-lg font-semibold text-gray-900 capitalize">
                                             {{ $order->shipping_method ?? 'Standard Shipping' }}
@@ -863,7 +864,7 @@
                                                 <span class="text-green-600 text-sm font-normal">(Free)</span>
                                             @endif
                                         </p>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             @endif
 
@@ -934,12 +935,12 @@
                                         </div>
                                     @endif
 
-                                    <div class="flex justify-between text-gray-600 text-base">
+                                    {{-- <div class="flex justify-between text-gray-600 text-base">
                                         <span>Shipping</span>
                                         <span class="font-bold text-green-600">
                                             {{ ($order->shipping_cost ?? 0) > 0 ? $sym . number_format($order->shipping_cost, 2) : 'FREE' }}
                                         </span>
-                                    </div>
+                                    </div> --}}
 
                                     <div class="border-t-2 border-gray-100 pt-4">
                                         <div class="flex justify-between items-center">

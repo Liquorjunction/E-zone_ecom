@@ -272,9 +272,9 @@
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
                         {{ gtrans('Payment') }}: <span class="font-semibold text-slate-700">{{ $paymentMethod }}
                             ({{ $paymentStatus }})</span></div>
-                    <div
+                    {{-- <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
-                        {{ gtrans('Shipping') }}: <span class="font-semibold text-slate-700">{{ $shippingMethod }}</span></div>
+                        {{ gtrans('Shipping') }}: <span class="font-semibold text-slate-700">{{ $shippingMethod }}</span></div> --}}
                 </div>
             </div>
 
@@ -455,14 +455,14 @@
                         </div>
                     @endif
 
-                    <div class="flex justify-between text-sm mb-1">
+                    {{-- <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-600">{{ gtrans('Shipping') }} ({{ $shippingMethod }}) :</span>
                         @if ($shippingCost > 0)
                             <span>{{ $sym }} {{ number_format($shippingCost, 2) }}</span>
                         @else
                             <span class="text-green-600 font-medium">{{ gtrans('Free') }}</span>
                         @endif
-                    </div>
+                    </div> --}}
 
                     <div
                         class="flex justify-between text-base mt-3 border-t pt-2 font-bold bg-primary/5 rounded-lg px-2 py-1 invoice-total-highlight">

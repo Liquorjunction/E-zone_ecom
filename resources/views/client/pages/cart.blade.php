@@ -88,14 +88,14 @@
                                             </svg>
                                             In Stock
                                         </p>
-                                        <p class="flex items-center">
+                                        {{-- <p class="flex items-center">
                                             <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                             </svg>
                                             Free Shipping
-                                        </p>
+                                        </p> --}}
                                     </div>
 
                                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -169,10 +169,10 @@
                                     <span>Subtotal (1 item)</span>
                                     <span class="font-semibold">$29.99</span>
                                 </div>
-                                <div class="flex justify-between text-gray-600">
+                                {{-- <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
                                     <span class="font-semibold text-green-600">FREE</span>
-                                </div>
+                                </div> --}}
                                 <div class="flex justify-between text-gray-600">
                                     <span>Tax (8%)</span>
                                     <span class="font-semibold">$2.40</span>

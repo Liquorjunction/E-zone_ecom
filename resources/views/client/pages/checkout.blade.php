@@ -214,7 +214,7 @@
                         </div>
 
                         <!-- Shipping Method -->
-                        <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
+                        {{-- <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                                 <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
                                 Shipping Method
@@ -266,7 +266,7 @@
                                     </div>
                                 </label>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <!-- Payment Method -->
                         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
@@ -411,10 +411,10 @@
                                     <span>Subtotal</span>
                                     <span class="font-semibold">$798.99</span>
                                 </div>
-                                <div class="flex justify-between text-gray-600">
+                                {{-- <div class="flex justify-between text-gray-600">
                                     <span>Shipping</span>
                                     <span class="font-semibold text-green-600">FREE</span>
-                                </div>
+                                </div> --}}
                                 <div class="flex justify-between text-gray-600">
                                     <span>Tax (8%)</span>
                                     <span class="font-semibold">$63.92</span>
@@ -513,7 +513,7 @@
                     <p class="text-sm text-gray-600">Your payment information is encrypted and secure with
                         industry-standard protocols</p>
                 </div>
-
+{{--
                 <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 text-center">
                     <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
                         <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -524,7 +524,7 @@
                     <h3 class="font-bold text-gray-900 mb-2">Free Shipping</h3>
                     <p class="text-sm text-gray-600">Enjoy free standard shipping on all orders over $50 with no hidden
                         fees</p>
-                </div>
+                </div> --}}
 
                 <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 text-center">
                     <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">

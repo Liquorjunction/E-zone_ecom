@@ -250,14 +250,14 @@
                                             </tr>
                                             <tr>
                                                 <th>Coupon Discount</th>
-                                                <td>-{{ isset($order->coupon_discount_amount) ? number_format($order->coupon_discount_amount, 2) : '-' }}
+                                                    <td>-{{ isset($order->coupon_discount_amount) ? number_format($order->coupon_discount_amount, 2) : '-' }}
                                                 </td>
                                             </tr>
-                                            <tr>
+                                            {{-- <tr>
                                                 <th>Shipping</th>
-                                                <td>{{ isset($order->shipping_amount) ? number_format($order->shipping_amount, 2) : (isset($order->shipping_cost) ? number_format($order->shipping_cost, 2) : '-') }}
+                                                    <td>{{ isset($order->shipping_amount) ? number_format($order->shipping_amount, 2) : (isset($order->shipping_cost) ? number_format($order->shipping_cost, 2) : '-') }}
                                                 </td>
-                                            </tr>
+                                            </tr> --}}
                                             <tr class="table-active font-weight-bold">
                                                 <th>Total</th>
                                                 <td class="font-weight-bold">

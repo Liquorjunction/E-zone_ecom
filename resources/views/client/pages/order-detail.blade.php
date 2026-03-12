@@ -503,7 +503,7 @@
                                             class="font-semibold">{{ $order->coupon_code }}</span></p>
                                 @endif
                             @endif
-
+{{--
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">Shipping</span>
                                 <span class="font-semibold text-gray-900">
@@ -517,7 +517,7 @@
                                         @endif
                                     @endif
                                 </span>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="flex items-center justify-between mb-4">

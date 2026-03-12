@@ -277,10 +277,10 @@
                 <span class="text-gray-600">Subtotal</span>
                 <span class="font-semibold text-gray-900">$598.99</span>
               </div>
-              <div class="flex justify-between">
+              {{-- <div class="flex justify-between">
                 <span class="text-gray-600">Shipping</span>
                 <span class="font-semibold text-green-600">FREE</span>
-              </div>
+              </div> --}}
               <div class="flex justify-between">
                 <span class="text-gray-600">Tax (8%)</span>
                 <span class="font-semibold text-gray-900">$47.92</span>
