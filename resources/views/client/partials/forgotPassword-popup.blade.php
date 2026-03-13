@@ -23,10 +23,10 @@
 
         <!-- Title -->
         <h3 class="text-center text-2xl font-bold text-gray-800 mb-2" id="modal-title">
-            Forgot Password?
+            {{ statictranslations('Forgot Password?') }}
         </h3>
         <p class="text-center text-sm text-gray-600 mb-6">
-            No worries! Enter your email and we'll send you reset instructions.
+            {{ statictranslations("No worries! Enter your email and we'll send you reset instructions.") }}
         </p>
 
         <!-- Modal Body -->
@@ -36,7 +36,7 @@
                 <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-sm text-green-700 font-semibold">Reset link sent! Check your email.</p>
+                <p class="text-sm text-green-700 font-semibold">{{ statictranslations('Reset link sent! Check your email.') }}</p>
             </div>
         </div>
 
@@ -46,7 +46,7 @@
                 <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-sm text-red-700 font-semibold" id="errorText">Something went wrong. Please try again.</p>
+                <p class="text-sm text-red-700 font-semibold" id="errorText">{{ statictranslations('Something went wrong. Please try again.') }}</p>
             </div>
         </div>
 
@@ -55,7 +55,7 @@
 
             <div class="mb-6">
                 <label for="reset_email" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Email Address
+                    {{ statictranslations('Email Address') }}
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -69,7 +69,7 @@
                         type="email"
                         required
                         class="appearance-none block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/30 focus:border-primary transition-all duration-300"
-                        placeholder="you@example.com">
+                        placeholder="{{ statictranslations('you@example.com') }}">
                 </div>
             </div>
 
@@ -79,7 +79,7 @@
                     type="submit"
                     id="submitBtn"
                     class="w-full px-6 py-3 text-base font-semibold text-white bg-primary rounded-full shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95 flex items-center justify-center">
-                    <span id="submitBtnText">Send Reset Link</span>
+                    <span id="submitBtnText">{{ statictranslations('Send Reset Link') }}</span>
                     <svg id="submitBtnIcon" class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -92,7 +92,7 @@
                     type="button"
                     id="cancelBtn"
                     class="w-full px-6 py-3 text-base font-semibold text-gray-700 bg-gray-200 rounded-full shadow-md hover:shadow-lg hover:scale-105 focus:ring-4 focus:ring-gray-300/30 focus:outline-none border border-gray-300 transition-all duration-200 active:scale-95 hover:bg-gray-300">
-                    Cancel
+                    {{ statictranslations('Cancel') }}
                 </button>
             </div>
         </form>
@@ -100,9 +100,9 @@
         <!-- Footer Note -->
         <div class="mt-6 text-center">
             <p class="text-xs text-gray-500">
-                Remember your password?
+                {{ statictranslations('Remember your password?') }}
                 <button type="button" id="backToLoginBtn" class="font-semibold text-primary hover:opacity-80 transition-opacity">
-                    Back to Login
+                    {{ statictranslations('Back to Login') }}
                 </button>
             </p>
         </div>
@@ -111,6 +111,13 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const forgotI18n = {
+            sending: @json(statictranslations('Sending...')),
+            sendResetLink: @json(statictranslations('Send Reset Link')),
+            genericError: @json(statictranslations('Something went wrong. Please try again.')),
+            networkError: @json(statictranslations('Network error. Please check your connection.')),
+        };
+
         const modal = document.getElementById('forgotPasswordModal');
         const modalCard = modal ? modal.querySelector('.relative.bg-white') : null;
         const modalBackdrop = document.getElementById('modalBackdrop');
@@ -194,7 +201,7 @@
 
                 // Show loading state
                 submitBtn.disabled = true;
-                submitBtnText.textContent = 'Sending...';
+                submitBtnText.textContent = forgotI18n.sending;
                 submitBtnIcon.classList.add('hidden');
                 submitBtnSpinner.classList.remove('hidden');
 
@@ -213,7 +220,7 @@
                 .then(data => {
                     // Reset button state
                     submitBtn.disabled = false;
-                    submitBtnText.textContent = 'Send Reset Link';
+                    submitBtnText.textContent = forgotI18n.sendResetLink;
                     submitBtnIcon.classList.remove('hidden');
                     submitBtnSpinner.classList.add('hidden');
 
@@ -226,17 +233,17 @@
                             hideModal();
                         }, 3000);
                     } else {
-                        errorText.textContent = data.error || 'Something went wrong. Please try again.';
+                        errorText.textContent = data.error || forgotI18n.genericError;
                         errorMessage.classList.remove('hidden');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     submitBtn.disabled = false;
-                    submitBtnText.textContent = 'Send Reset Link';
+                    submitBtnText.textContent = forgotI18n.sendResetLink;
                     submitBtnIcon.classList.remove('hidden');
                     submitBtnSpinner.classList.add('hidden');
-                    errorText.textContent = 'Network error. Please check your connection.';
+                    errorText.textContent = forgotI18n.networkError;
                     errorMessage.classList.remove('hidden');
                 });
             });

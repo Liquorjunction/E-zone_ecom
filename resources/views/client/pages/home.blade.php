@@ -73,10 +73,10 @@
                 {{-- Section Header --}}
                 <div class="text-center mb-10 sm:mb-14">
                     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                        {{ gtrans('Featured Promotions') }}
+                        {{ statictranslations('Featured Promotions') }}
                     </h2>
                     <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-                        {{ gtrans('Handpicked deals just for you') }}
+                        {{ statictranslations('Handpicked deals just for you') }}
                     </p>
                     <div class="section-header-divider">
                         <span></span><span></span><span></span>
@@ -207,10 +207,10 @@
                 {{-- Section Header --}}
                 <div class="text-center mb-10 sm:mb-14">
                     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                        {{ gtrans('Deals & Discounts') }}
+                        {{ statictranslations('Deals & Discounts') }}
                     </h2>
                     <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-                        {{ gtrans('Grab the best offers on top products') }}
+                        {{ statictranslations('Grab the best offers on top products') }}
                     </p>
                     <div class="section-header-divider">
                         <span></span><span></span><span></span>
@@ -287,7 +287,7 @@
                 <div class="flex justify-center mt-8">
                     <a href="{{ route('products.deals') }}"
                        class="btn-primary inline-flex items-center">
-                        {{ gtrans('View All Deals') }}
+                        {{ statictranslations('View All Deals') }}
                         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
@@ -324,10 +324,10 @@
             {{-- Section Header --}}
             <div class="text-center mb-10 sm:mb-14">
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                    {{ gtrans('New Arrivals') }}
+                    {{ statictranslations('New Arrivals') }}
                 </h2>
                 <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-                    {{ gtrans('The latest tech just landed') }}
+                    {{ statictranslations('The latest tech just landed') }}
                 </p>
                 <div class="section-header-divider">
                     <span></span><span></span><span></span>
@@ -426,10 +426,10 @@
                 {{-- Section Header --}}
                 <div class="text-center mb-10 sm:mb-14">
                     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                        {{ gtrans('Best Sellers') }}
+                        {{ statictranslations('Best Sellers') }}
                     </h2>
                     <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-                        {{ gtrans('Most loved by our customers') }}
+                        {{ statictranslations('Most loved by our customers') }}
                     </p>
                     <div class="section-header-divider">
                         <span></span><span></span><span></span>
@@ -512,10 +512,10 @@
 
             <div class="text-center mb-10 sm:mb-14">
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                    {{ gtrans('Trusted Brands') }}
+                    {{ statictranslations('Trusted Brands') }}
                 </h2>
                 <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-                    {{ gtrans("We partner with the world's leading technology brands") }}
+                    {{ statictranslations("We partner with the world's leading technology brands") }}
                 </p>
                 <div class="section-header-divider">
                     <span></span><span></span><span></span>
@@ -555,10 +555,10 @@
 
             <div class="text-center mb-10 sm:mb-14">
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                    {{ gtrans('Why Shop With Us?') }}
+                    {{ statictranslations('Why Shop With Us?') }}
                 </h2>
                 <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-                    {{ gtrans('Experience excellence in every purchase') }}
+                    {{ statictranslations('Experience excellence in every purchase') }}
                 </p>
                 <div class="section-header-divider">
                     <span></span><span></span><span></span>
@@ -598,7 +598,7 @@
                 </div>
             @else
                 <div class="text-center text-gray-400 py-8">
-                    {{ gtrans('No features available at the moment.') }}
+                    {{ statictranslations('No features available at the moment.') }}
                 </div>
             @endif
         </div>

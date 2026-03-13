@@ -47,6 +47,20 @@ if (!function_exists('gtrans')) {
     }
 }
 
+if (!function_exists('statictranslations')) {
+    function statictranslations($text, $targetLocale = null)
+    {
+        if ($text === null || $text === '') {
+            return $text;
+        }
+
+        $locale = $targetLocale ?? App::getLocale();
+
+        // Local-only translation through Laravel lang files.
+        return __($text, [], $locale);
+    }
+}
+
 if (!function_exists('gtrans_html')) {
     function gtrans_html($html, $targetLocale = null)
     {
@@ -97,5 +111,46 @@ if (!function_exists('gtrans_html')) {
                 return $html;
             }
         });
+    }
+}
+
+if (!function_exists('ltrans_html')) {
+    function ltrans_html($html, $targetLocale = null)
+    {
+        if ($html === null || $html === '') {
+            return $html;
+        }
+
+        $locale = $targetLocale ?? App::getLocale();
+
+        try {
+            $dom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $dom->loadHTML('<div>' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+            $xpath = new DOMXPath($dom);
+            $textNodes = $xpath->query('//text()');
+
+            foreach ($textNodes as $node) {
+                $text = trim($node->nodeValue);
+                if ($text !== '') {
+                    $node->nodeValue = statictranslations($text, $locale);
+                }
+            }
+
+            $body = $dom->getElementsByTagName('div')->item(0);
+            if (!$body) {
+                return $html;
+            }
+
+            $innerHTML = '';
+            foreach ($body->childNodes as $child) {
+                $innerHTML .= $dom->saveHTML($child);
+            }
+
+            return $innerHTML;
+        } catch (\Throwable $e) {
+            return $html;
+        }
     }
 }

@@ -19,8 +19,8 @@
         <div class="bg-white border-b border-gray-200">
             <div class="container mx-auto px-4 py-8">
                 <x-breadcrumbs>
-                    <x-slot:title>All Brands</x-slot:title>
-                    <x-slot:content>Discover the best deals on our platform.</x-slot:content>
+                    <x-slot:title>{{ statictranslations('All Brands') }}</x-slot:title>
+                    <x-slot:content>{{ statictranslations('Discover the best deals on our platform.') }}</x-slot:content>
                 </x-breadcrumbs>
             </div>
         </div>
@@ -41,7 +41,7 @@
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
-                    <input x-model="search" type="text" placeholder="Search for a brand..."
+                    <input x-model="search" type="text" placeholder="{{ statictranslations('Search for a brand...') }}"
                         class="w-full pl-10 pr-9 py-2.5 bg-gray-50 border-gray-200 border rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm placeholder-gray-400">
                     {{-- Clear button --}}
                     <button x-show="search !== ''" @click="search = ''" type="button"
@@ -57,14 +57,14 @@
 
                     {{-- Counter Text --}}
                     <span class="text-sm text-gray-500 font-medium hidden sm:block">
-                        Showing <span class="text-gray-900 font-bold">{{ count($brands) }}</span> brands
+                        {{ statictranslations('Showing') }} <span class="text-gray-900 font-bold">{{ count($brands) }}</span> {{ statictranslations('brands') }}
                     </span>
 
                     {{-- View Toggles --}}
                     <div class="flex items-center bg-gray-100 p-1 rounded-lg">
                         <button @click="view = 'grid'"
                             :class="{ 'bg-white text-primary shadow-sm': view === 'grid', 'text-gray-400 hover:text-gray-600': view !== 'grid' }"
-                            class="p-2 rounded-md transition-all duration-200 focus:outline-none" title="Grid View">
+                            class="p-2 rounded-md transition-all duration-200 focus:outline-none" title="{{ statictranslations('Grid View') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
@@ -73,7 +73,7 @@
                         </button>
                         <button @click="view = 'list'"
                             :class="{ 'bg-white text-primary shadow-sm': view === 'list', 'text-gray-400 hover:text-gray-600': view !== 'list' }"
-                            class="p-2 rounded-md transition-all duration-200 focus:outline-none" title="List View">
+                            class="p-2 rounded-md transition-all duration-200 focus:outline-none" title="{{ statictranslations('List View') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 6h16M4 12h16M4 18h16"></path>
@@ -97,7 +97,7 @@
                         class="group bg-white rounded-2xl p-6 sm:p-6 text-center border border-gray-100 transition-all duration-300 overflow-hidden shadow-sm hover:border-primary hover:shadow-lg hover:-translate-y-1 focus-within:border-primary focus-within:shadow-lg cursor-pointer outline-none"
                         :class="view === 'list' ? 'flex items-center gap-5' : 'flex flex-col'"
                         tabindex="0"
-                        aria-label="Browse {{ $brand->name }} collection">
+                        aria-label="{{ statictranslations('Browse') }} {{ $brand->name }} {{ statictranslations('collection') }}">
 
                         {{-- Logo wrap --}}
                         <div class="rounded-2xl bg-gray-50 flex items-center justify-center shrink-0 transition-all duration-300"
@@ -118,7 +118,7 @@
                             </h2>
                             <div class="mt-3">
                                 <span class="inline-flex items-center text-sm font-semibold text-primary group-hover:text-primary-dark transition-colors">
-                                    <span>Browse Collection</span>
+                                    <span>{{ statictranslations('Browse Collection') }}</span>
                                     <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -137,8 +137,8 @@
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900">No brands found</h3>
-                        <p class="text-gray-500 mt-1">Try adjusting your search filters.</p>
+                        <h3 class="text-lg font-medium text-gray-900">{{ statictranslations('No brands found') }}</h3>
+                        <p class="text-gray-500 mt-1">{{ statictranslations('Try adjusting your search filters.') }}</p>
                     </div>
                 @endforelse
 
@@ -150,8 +150,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
-                    <p class="text-gray-500">No brands match "<span x-text="search" class="font-bold text-gray-900"></span>".</p>
-                    <button @click="search = ''" class="mt-2 text-primary text-sm font-semibold hover:underline">Clear Search</button>
+                    <p class="text-gray-500">{{ statictranslations('No brands match') }} "<span x-text="search" class="font-bold text-gray-900"></span>".</p>
+                    <button @click="search = ''" class="mt-2 text-primary text-sm font-semibold hover:underline">{{ statictranslations('Clear Search') }}</button>
                 </div>
             </div>
         </div>

@@ -198,8 +198,8 @@
         <div class="container mx-auto px-4">
 
             <x-breadcrumbs>
-                <x-slot:title>Compare Products</x-slot:title>
-                <x-slot:content>Compare products side by side.</x-slot:content>
+                <x-slot:title>{{ statictranslations('Compare Products') }}</x-slot:title>
+                <x-slot:content>{{ statictranslations('Compare products side by side.') }}</x-slot:content>
             </x-breadcrumbs>
 
             @if ($products->count() > 0)
@@ -210,13 +210,13 @@
                             <thead>
                                 <tr class="border-b-2 border-gray-100">
 
-                                    <th class="sticky left-0 bg-white p-6 min-w-[200px] z-10">
-                                        <h3 class="text-xl font-bold text-gray-900">Features</h3>
-                                        <p class="text-gray-500 text-sm">Products ({{ $products->count() }} of {{ $maxCompare }})</p>
+                                    <th class="sticky left-0 bg-white p-6 min-w-50 z-10">
+                                        <h3 class="text-xl font-bold text-gray-900">{{ statictranslations('Features') }}</h3>
+                                        <p class="text-gray-500 text-sm">{{ statictranslations('Products') }} ({{ $products->count() }} of {{ $maxCompare }})</p>
                                     </th>
 
                                     @foreach ($products as $product)
-                                        <th class="p-4 w-1/4 min-w-[300px] text-center border-l-2 border-gray-100">
+                                        <th class="p-4 w-1/4 min-w-75 text-center border-l-2 border-gray-100">
                                             <div class="flex justify-end mb-2">
                                                 <form action="{{ route('compare.remove') }}" method="POST">
                                                     @csrf
@@ -249,13 +249,13 @@
                                                 data-product-variant-id="{{ $product['id'] }}"
                                                 data-product-id="{{ $product['product_id'] }}"
                                                 onclick="addToCart('{{ $product['id'] }}', '{{ $product['product_id'] }}')">
-                                                Add to Cart
+                                                {{ statictranslations('Add to Cart') }}
                                             </button>
                                         </th>
                                     @endforeach
 
                                     @if ($products->count() < $maxCompare)
-                                        <th class="p-4 w-1/4 min-w-[300px] text-center border-l-2 border-gray-100">
+                                        <th class="p-4 w-1/4 min-w-75 text-center border-l-2 border-gray-100">
                                             <div class="flex items-center justify-center h-full">
                                                 <a href="{{ route('products.index') }}"
                                                     class="flex flex-col items-center justify-center w-full h-full aspect-square border-4 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-primary hover:text-primary transition-colors">
@@ -264,7 +264,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                                     </svg>
-                                                    <span class="font-semibold mt-2">Add Product</span>
+                                                    <span class="font-semibold mt-2">{{ statictranslations('Add Product') }}</span>
                                                 </a>
                                             </div>
                                         </th>
@@ -306,16 +306,16 @@
                                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                         </div>
-                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Nothing to Compare</h2>
-                        <p class="text-gray-600 mb-8">You haven't added any products to compare. Start browsing and add
-                            products to see a side-by-side comparison.</p>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ statictranslations('Nothing to Compare') }}</h2>
+                        <p class="text-gray-600 mb-8">{{ statictranslations("You haven't added any products to compare. Start browsing and add
+                            products to see a side-by-side comparison.") }}</p>
                         <a href="{{ route('products.index') }}"
                             class="inline-flex items-center px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
-                            Start Shopping
+                            {{ statictranslations('Start Shopping') }}
                         </a>
                     </div>
                 </div>

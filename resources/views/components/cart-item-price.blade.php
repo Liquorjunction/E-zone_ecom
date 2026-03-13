@@ -34,7 +34,7 @@
             </div>
             @endif
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-                <span class="fw-bold">Total:</span>
+                <span class="fw-bold">{{ statictranslations('Total') }}:</span>
                 <span class="fw-bold text-danger fs-5">
                     {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineFinal, 2) }}
                 </span>

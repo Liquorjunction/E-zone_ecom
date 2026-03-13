@@ -5,8 +5,8 @@
         <div class="container mx-auto px-4">
 
             <x-breadcrumbs>
-                <x-slot:title>Cart</x-slot:title>
-                <x-slot:content>Review your cart.</x-slot:content>
+                <x-slot:title>{{ statictranslations('Cart') }}</x-slot:title>
+                <x-slot:content>{{ statictranslations('Review your cart.') }}</x-slot:content>
             </x-breadcrumbs>
 
             @if (true)
@@ -21,7 +21,7 @@
                                 class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-lg">
                                 1
                             </div>
-                            <span class="mt-2 text-sm font-semibold text-primary">Shopping Cart</span>
+                            <span class="mt-2 text-sm font-semibold text-primary">{{ statictranslations('Shopping Cart') }}</span>
                         </div>
 
                         <!-- Connector Line -->
@@ -33,7 +33,7 @@
                                 class="w-12 h-12 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg">
                                 2
                             </div>
-                            <span class="mt-2 text-sm font-medium text-gray-500">Checkout</span>
+                            <span class="mt-2 text-sm font-medium text-gray-500">{{ statictranslations('Checkout') }}</span>
                         </div>
 
                         <!-- Step 3 -->
@@ -42,7 +42,7 @@
                                 class="w-12 h-12 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg">
                                 3
                             </div>
-                            <span class="mt-2 text-sm font-medium text-gray-500">Order Complete</span>
+                            <span class="mt-2 text-sm font-medium text-gray-500">{{ statictranslations('Order Complete') }}</span>
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <!-- Product Image -->
                                 <div class="shrink-0">
-                                    <img src="https://via.placeholder.com/150x150?text=Product" alt="Product"
+                                    <img src="https://via.placeholder.com/150x150?text=Product" alt="{{ statictranslations('Product') }}"
                                         class="w-full sm:w-32 h-32 object-cover rounded-xl">
                                 </div>
 
@@ -66,9 +66,9 @@
                                 <div class="flex-1">
                                     <div class="flex justify-between items-start mb-2">
                                         <div>
-                                            <h3 class="text-lg font-bold text-gray-900 mb-1">Sample Product</h3>
+                                            <h3 class="text-lg font-bold text-gray-900 mb-1">{{ statictranslations('Sample Product') }}</h3>
                                             <span
-                                                class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">Electronics</span>
+                                                class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">{{ statictranslations('Electronics') }}</span>
                                         </div>
                                         <button class="text-gray-400 hover:text-red-500 transition-colors p-2">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@
                                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            In Stock
+                                            {{ statictranslations('In Stock') }}
                                         </p>
                                         {{-- <p class="flex items-center">
                                             <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor"
@@ -101,7 +101,7 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                         <!-- Quantity Controller -->
                                         <div class="flex items-center">
-                                            <span class="text-sm font-medium text-gray-700 mr-4">Quantity:</span>
+                                            <span class="text-sm font-medium text-gray-700 mr-4">{{ statictranslations('Quantity:') }}</span>
                                             <div
                                                 class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                                                 <button
@@ -142,14 +142,14 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
-                                Have a Coupon Code?
+                                {{ statictranslations('Have a Coupon Code?') }}
                             </h3>
                             <div class="flex gap-3">
-                                <input type="text" placeholder="Enter coupon code"
+                                <input type="text" placeholder="{{ statictranslations('Enter coupon code') }}"
                                     class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
                                 <button
                                     class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
-                                    Apply
+                                    {{ statictranslations('Apply') }}
                                 </button>
                             </div>
                         </div>
@@ -161,12 +161,12 @@
                         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 sticky top-24">
                             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                                 <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
-                                Order Summary
+                                {{ statictranslations('Order Summary') }}
                             </h2>
 
                             <div class="space-y-4 mb-6">
                                 <div class="flex justify-between text-gray-600">
-                                    <span>Subtotal (1 item)</span>
+                                    <span>{{ statictranslations('Subtotal (1 item)') }}</span>
                                     <span class="font-semibold">$29.99</span>
                                 </div>
                                 {{-- <div class="flex justify-between text-gray-600">
@@ -174,29 +174,29 @@
                                     <span class="font-semibold text-green-600">FREE</span>
                                 </div> --}}
                                 <div class="flex justify-between text-gray-600">
-                                    <span>Tax (8%)</span>
+                                    <span>{{ statictranslations('Tax (8%)') }}</span>
                                     <span class="font-semibold">$2.40</span>
                                 </div>
 
                                 <div class="border-t-2 border-gray-100 pt-4">
                                     <div class="flex justify-between items-center">
-                                        <span class="text-xl font-bold text-gray-900">Total</span>
+                                        <span class="text-xl font-bold text-gray-900">{{ statictranslations('Total') }}</span>
                                         <span class="text-3xl font-bold text-primary">$32.39</span>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1 text-right">Including all taxes</p>
+                                    <p class="text-xs text-gray-500 mt-1 text-right">{{ statictranslations('Including all taxes') }}</p>
                                 </div>
                             </div>
 
                             <!-- Checkout Button -->
                             <a href="{{ route('checkout') }}"
                                 class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-3">
-                                Proceed to Checkout
+                                {{ statictranslations('Proceed to Checkout') }}
                             </a>
 
                             <!-- Continue Shopping Button -->
                             <a href="{{ route('products.index') }}"
                                 class="block w-full px-6 py-4 border-2 border-gray-200 text-gray-700 text-center font-semibold rounded-xl transition-all duration-300 hover:border-primary hover:text-primary">
-                                Continue Shopping
+                                {{ statictranslations('Continue Shopping') }}
                             </a>
 
                             <!-- Trust Badges -->
@@ -207,7 +207,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>
-                                    Secure Checkout
+                                    {{ statictranslations('Secure Checkout') }}
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600">
                                     <svg class="w-5 h-5 mr-3 text-blue-500" fill="none" stroke="currentColor"
@@ -215,7 +215,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                                     </svg>
-                                    Easy Returns
+                                    {{ statictranslations('Easy Returns') }}
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600">
                                     <svg class="w-5 h-5 mr-3 text-primary" fill="none" stroke="currentColor"
@@ -223,7 +223,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Best Price Guarantee
+                                    {{ statictranslations('Best Price Guarantee') }}
                                 </div>
                             </div>
                         </div>
@@ -241,16 +241,15 @@
                                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
                         </div>
-                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Your Cart is Empty</h2>
-                        <p class="text-gray-600 mb-8">Looks like you haven't added anything to your cart yet. Start
-                            shopping to fill it up!</p>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ statictranslations('Your Cart is Empty') }}</h2>
+                        <p class="text-gray-600 mb-8">{{ statictranslations("Looks like you haven't added anything to your cart yet. Start shopping to fill it up!") }}</p>
                         <a href="{{ route('products.index') }}"
                             class="inline-flex items-center px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
-                            Start Shopping
+                            {{ statictranslations('Start Shopping') }}
                         </a>
                     </div>
                 </div>

@@ -89,12 +89,12 @@
                 @endif
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit" class="w-full bg-primary/10 text-primary hover:bg-primary hover:text-white font-semibold py-2.5 rounded-lg transition-colors text-sm">
-                    {{ gtrans('Add to Cart') }}
+                    {{ statictranslations('Add to Cart') }}
                 </button>
             </form>
         @else
             <button type="button" onclick="event.preventDefault(); event.stopPropagation();" class="mt-3 w-full bg-primary/10 text-primary hover:bg-primary hover:text-white font-semibold py-2.5 rounded-lg transition-colors text-sm">
-                {{ gtrans('Add to Cart') }}
+                {{ statictranslations('Add to Cart') }}
             </button>
         @endif
     </div>

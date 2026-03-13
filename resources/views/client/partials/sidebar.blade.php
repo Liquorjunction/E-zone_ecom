@@ -44,13 +44,13 @@
                     </svg>
                 </span>
                 <div>
-                    <h2 class="text-sm font-bold text-gray-900 leading-tight tracking-wide">{{ gtrans('Categories') }}</h2>
-                    <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider leading-tight">{{ gtrans('Shop by') }}</p>
+                    <h2 class="text-sm font-bold text-gray-900 leading-tight tracking-wide">{{ statictranslations('Categories') }}</h2>
+                    <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider leading-tight">{{ statictranslations('Shop by') }}</p>
                 </div>
             </div>
 
-            <button @click.prevent="pinned = !pinned"
-                    :title="pinned ? 'Unpin sidebar' : 'Pin sidebar'"
+                <button @click.prevent="pinned = !pinned"
+                    :title="pinned ? '{{ statictranslations('Unpin sidebar') }}' : '{{ statictranslations('Pin sidebar') }}'"
                     :class="pinned
                         ? 'bg-primary text-white shadow-lg shadow-primary/30'
                         : 'bg-gray-100 text-gray-400 hover:bg-primary/10 hover:text-primary'"
@@ -178,7 +178,7 @@
         {{-- Collapsed: icon-only --}}
         <div x-show="sidebarCollapsed" class="flex justify-center">
             <a href="{{ route('products.index') }}"
-               title="{{ gtrans('View All Products') }}"
+               title="{{ statictranslations('View All Products') }}"
                class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-white
                       shadow-md shadow-primary/30 transition-all duration-200 hover:bg-primary-dark hover:scale-105 active:scale-95">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,7 +200,7 @@
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                 </svg>
-                {{ gtrans('View All Products') }}
+                {{ statictranslations('View All Products') }}
             </a>
         </div>
     </div>
@@ -262,8 +262,8 @@
                 </svg>
             </span>
             <div>
-                <h2 class="text-sm font-bold text-gray-900 tracking-wide leading-tight">{{ gtrans('Categories') }}</h2>
-                <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider leading-tight">{{ gtrans('Shop by') }}</p>
+                <h2 class="text-sm font-bold text-gray-900 tracking-wide leading-tight">{{ statictranslations('Categories') }}</h2>
+                <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider leading-tight">{{ statictranslations('Shop by') }}</p>
             </div>
         </div>
         <button @click="mobileSidebarOpen = false"
@@ -358,7 +358,7 @@
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
             </svg>
-            {{ gtrans('View All Products') }}
+            {{ statictranslations('View All Products') }}
         </a>
     </div>
 

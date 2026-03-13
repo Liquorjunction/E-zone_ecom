@@ -32,7 +32,7 @@
             @if ($errors->has('checkout'))
                 <div id="checkout-error-banner"
                     class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-center shadow-sm">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -40,7 +40,7 @@
                         </svg>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm font-bold text-red-800">Payment Failed</p>
+                        <p class="text-sm font-bold text-red-800">{{ statictranslations('Payment Failed') }}</p>
                         <p class="text-sm text-red-700">{{ $errors->first('checkout') }}</p>
                     </div>
                 </div>
@@ -51,39 +51,39 @@
                     <div class="mb-4 md:mb-0">
                         <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">
                             @if ($step == 1)
-                                Shopping Cart
+                                {{ statictranslations('Shopping Cart') }}
                             @elseif ($step == 2)
-                                Checkout
+                                {{ statictranslations('Checkout') }}
                             @else
-                                Order Placed
+                                {{ statictranslations('Order Placed') }}
                             @endif
                         </h1>
                         <p class="text-gray-600 text-lg">
                             @if ($step == 1)
-                                Review your items before proceeding
+                                {{ statictranslations('Review your items before proceeding') }}
                             @elseif ($step == 2)
-                                Complete your purchase securely
+                                {{ statictranslations('Complete your purchase securely') }}
                             @else
-                                Thank you for your order!
+                                {{ statictranslations('Thank you for your order!') }}
                             @endif
                         </p>
                     </div>
                     <div class="mt-4 md:mt-0">
                         <div
                             class="flex items-center space-x-2 text-sm text-gray-500 bg-white px-4 py-2 rounded-full shadow-sm">
-                            <a href="#" class="hover:text-primary transition-colors">Home</a>
+                            <a href="#" class="hover:text-primary transition-colors">{{ statictranslations('Home') }}</a>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                             @if ($step > 1)
-                                <a href="#" class="hover:text-primary transition-colors">Cart</a>
+                                <a href="#" class="hover:text-primary transition-colors">{{ statictranslations('Cart') }}</a>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7" />
                                 </svg>
                             @endif
                             @if ($step == 3)
-                                <a href="#" class="hover:text-primary transition-colors">Checkout</a>
+                                <a href="#" class="hover:text-primary transition-colors">{{ statictranslations('Checkout') }}</a>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7" />
@@ -91,11 +91,11 @@
                             @endif
                             <span class="text-primary font-semibold">
                                 @if ($step == 1)
-                                    Cart
+                                    {{ statictranslations('Cart') }}
                                 @elseif ($step == 2)
-                                    Checkout
+                                    {{ statictranslations('Checkout') }}
                                 @else
-                                    Placed
+                                    {{ statictranslations('Order Placed') }}
                                 @endif
                             </span>
                         </div>
@@ -175,7 +175,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                         </svg>
-                                        <p class="text-gray-500 text-lg">Your cart is empty.</p>
+                                        <p class="text-gray-500 text-lg">{{ statictranslations('Your cart is empty.') }}</p>
                                     </div>
                                 @endif
                             </div>
@@ -189,11 +189,12 @@
                                     <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                                         <span
                                             class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                        Order Summary
+                                        {{ statictranslations('Order Summary') }}
                                     </h2>
                                     <div
                                         class="flex items-center justify-between bg-linear-to-r from-primary/5 to-primary/10 px-4 py-3 rounded-lg">
-                                        <span class="text-sm font-semibold text-gray-700">Item Total:</span>
+                                        <span
+                                            class="text-sm font-semibold text-gray-700">{{ statictranslations('Item Total:') }}</span>
                                         <span id="item-total-count"
                                             class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                                             {{ $itemCount }} {{ $itemCount === 1 ? 'Item' : 'Items' }}
@@ -220,7 +221,7 @@
                                 {{-- Proceed button --}}
                                 <a href="{{ route('checkout', ['step' => 2]) }}"
                                     class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
-                                    Proceed to Checkout
+                                    {{ statictranslations('Proceed to Checkout') }}
                                     <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -246,20 +247,22 @@
                                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                                     <span
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                    Contact Information
+                                    {{ statictranslations('Contact Information') }}
                                 </h2>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div>
-                                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email
-                                            Address *</label>
+                                        <label for="email"
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email
+                                                                                        Address *') }}</label>
                                         <input type="email" id="email" name="email"
                                             value="{{ Auth::check() ? Auth::user()->email : '' }}" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
-                                        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone
-                                            Number *</label>
+                                        <label for="phone"
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone
+                                                                                        Number *') }}</label>
                                         <input type="tel" id="phone" name="phone"
                                             value="{{ Auth::check() ? Auth::user()->phone : '' }}" required
                                             pattern="[0-9\s\+\-\(\)]+"
@@ -276,9 +279,10 @@
                                         <h2 class="text-2xl font-bold text-gray-900 flex items-center">
                                             <span
                                                 class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                            Shipping Address
+                                            {{ statictranslations('Shipping Address') }}
                                         </h2>
-                                        <p class="text-gray-500 text-sm mt-1">Where should we deliver your order?</p>
+                                        <p class="text-gray-500 text-sm mt-1">
+                                            {{ statictranslations('Where should we deliver your order?') }}</p>
                                     </div>
                                     @if (Auth::check())
                                         <button type="button" id="addShippingAddressBtn"
@@ -288,7 +292,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 4v16m8-8H4" />
                                             </svg>
-                                            Add New
+                                            {{ statictranslations('Add New') }}
                                         </button>
                                     @endif
                                 </div>
@@ -298,10 +302,10 @@
                                         <div class="flex items-center justify-between mb-2">
                                             <label for="shippingAddressSelect"
                                                 class="block text-sm font-semibold text-gray-700">
-                                                Saved Addresses
+                                                {{ statictranslations('Saved Addresses') }}
                                                 <span
                                                     class="text-xs font-normal text-gray-500 ml-1">({{ $addresses->count() }}
-                                                    available)</span>
+                                                    {{ statictranslations('available') }})</span>
                                             </label>
                                             <!-- Removed '+ Use Different Address' button as per requirements -->
                                         </div>
@@ -309,7 +313,8 @@
                                             {{-- ID must be "shippingAddressSelect" — checkout-address-dropdown.js depends on this exact ID --}}
                                             <select id="shippingAddressSelect" name="saved_address_id"
                                                 class="block w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none bg-white pr-12 text-gray-900 font-medium">
-                                                <option value="">-- Select a saved address --</option>
+                                                <option value="">-- {{ statictranslations('Select a saved address') }} --
+                                                </option>
                                                 @foreach ($addresses as $addr)
                                                     <option value="{{ $addr->id }}"
                                                         data-addr='@json($addr)'
@@ -341,7 +346,8 @@
                                                     </svg>
                                                 </div>
                                                 <div class="flex-1">
-                                                    <p class="text-sm font-semibold text-green-800 mb-1">Shipping To:</p>
+                                                    <p class="text-sm font-semibold text-green-800 mb-1">
+                                                        {{ statictranslations('Shipping To:') }}</p>
                                                     <p id="displayShippingName" class="font-bold text-gray-900"></p>
                                                     <p id="displayShippingStreet" class="text-sm text-gray-700"></p>
                                                     <p id="displayShippingCity" class="text-sm text-gray-700"></p>
@@ -359,7 +365,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 4v16m8-8H4" />
                                             </svg>
-                                            Add Shipping Address
+                                            {{ statictranslations('Add Shipping Address') }}
                                         </button>
                                     </div>
                                 @endif
@@ -375,49 +381,56 @@
                                     id="manualAddressFields">
                                     <div>
                                         <label for="firstName"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('First Name') }}
+                                            *</label>
                                         <input type="text" id="firstName" name="firstName" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
-                                        <label for="lastName" class="block text-sm font-semibold text-gray-700 mb-2">Last
-                                            Name *</label>
+                                        <label for="lastName"
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Last Name') }}
+                                            *</label>
                                         <input type="text" id="lastName" name="lastName" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div class="md:col-span-2">
                                         <label for="address"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Street Address *</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Street Address') }}
+                                            *</label>
                                         <input type="text" id="address" name="address" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
-                                        <label for="city" class="block text-sm font-semibold text-gray-700 mb-2">City
+                                        <label for="city"
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }}
                                             *</label>
                                         <input type="text" id="city" name="city" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
-                                        <label for="state" class="block text-sm font-semibold text-gray-700 mb-2">State
-                                            / Region *</label>
+                                        <label for="state"
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('State / Region') }}
+                                            *</label>
                                         <input type="text" id="state" name="state" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
                                         <label for="zip"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Postal Code *</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}
+                                            *</label>
                                         <input type="text" id="zip" name="zip" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
                                         <label for="country"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Country *</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Country') }}
+                                            *</label>
                                         <input type="text" id="country" name="country" value="Morocco" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                     </div>
@@ -427,8 +440,8 @@
                                     <label class="inline-flex items-center mt-5">
                                         <input type="checkbox" name="save_address" value="1"
                                             class="form-checkbox h-4 w-4 text-primary rounded mr-3">
-                                        <span class="text-sm font-medium text-gray-700">Save this address for future
-                                            orders</span>
+                                        <span
+                                            class="text-sm font-medium text-gray-700">{{ statictranslations('Save this address for future orders') }}</span>
                                     </label>
                                 @endif
                             </div>
@@ -440,15 +453,17 @@
                                         <h2 class="text-2xl font-bold text-gray-900 flex items-center">
                                             <span
                                                 class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                            Billing Address
+                                            {{ statictranslations('Billing Address') }}
                                         </h2>
-                                        <p class="text-gray-500 text-sm mt-1">Payment and billing information</p>
+                                        <p class="text-gray-500 text-sm mt-1">
+                                            {{ statictranslations('Payment and billing information') }}</p>
                                     </div>
                                     <label
                                         class="inline-flex items-center px-4 py-2 bg-blue-50 rounded-xl border-2 border-blue-200 cursor-pointer hover:bg-blue-100 transition-all">
                                         <input type="checkbox" id="billingSameAsShipping" name="billing_same_as_shipping"
                                             value="1" class="form-checkbox h-4 w-4 text-primary rounded" checked>
-                                        <span class="ml-2 text-sm font-semibold text-gray-700">Same as shipping</span>
+                                        <span
+                                            class="ml-2 text-sm font-semibold text-gray-700">{{ statictranslations('Same as shipping') }}</span>
                                     </label>
                                 </div>
 
@@ -458,10 +473,10 @@
                                             <div class="flex items-center justify-between mb-4">
                                                 <label for="billingAddressSelect"
                                                     class="block text-sm font-semibold text-gray-700">
-                                                    Select Billing Address
+                                                    {{ statictranslations('Select Billing Address') }}
                                                     <span
                                                         class="text-xs font-normal text-gray-500 ml-1">({{ $billingAddresses->count() }}
-                                                        available)</span>
+                                                        {{ statictranslations('available') }})</span>
                                                 </label>
                                                 <button type="button" id="addBillingAddressBtn"
                                                     class="px-4 py-2.5 bg-linear-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
@@ -470,13 +485,14 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2" d="M12 4v16m8-8H4" />
                                                     </svg>
-                                                    Add New
+                                                    {{ statictranslations('Add New') }}
                                                 </button>
                                             </div>
                                             <div class="relative">
                                                 <select id="billingAddressSelect" name="saved_billing_address_id"
                                                     class="block w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none bg-white pr-12 text-gray-900 font-medium">
-                                                    <option value="">-- Select billing address --</option>
+                                                    <option value="">-- {{ statictranslations('Select billing address') }} --
+                                                    </option>
                                                     @foreach ($billingAddresses as $addr)
                                                         <option value="{{ $addr->id }}"
                                                             data-addr='@json($addr)'
@@ -508,7 +524,8 @@
                                                         </svg>
                                                     </div>
                                                     <div class="flex-1">
-                                                        <p class="text-sm font-semibold text-blue-800 mb-1">Billing To:</p>
+                                                        <p class="text-sm font-semibold text-blue-800 mb-1">
+                                                            {{ statictranslations('Billing To:') }}</p>
                                                         <p id="displayBillingName" class="font-bold text-gray-900"></p>
                                                         <p id="displayBillingStreet" class="text-sm text-gray-700"></p>
                                                         <p id="displayBillingCity" class="text-sm text-gray-700"></p>
@@ -526,44 +543,46 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 4v16m8-8H4" />
                                                 </svg>
-                                                Add Billing Address
+                                                {{ statictranslations('Add Billing Address') }}
                                             </button>
                                         </div>
                                     @else
                                         {{-- Guest billing manual fields --}}
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             <div>
-                                                <label class="block text-sm font-semibold text-gray-700 mb-2">First
-                                                    Name</label>
+                                                <label
+                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('First Name') }}</label>
                                                 <input type="text" id="billing_firstName" name="billing_firstName"
                                                     class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-semibold text-gray-700 mb-2">Last
-                                                    Name</label>
+                                                <label
+                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Last Name') }}</label>
                                                 <input type="text" id="billing_lastName" name="billing_lastName"
                                                     class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                             </div>
                                             <div class="md:col-span-2">
-                                                <label class="block text-sm font-semibold text-gray-700 mb-2">Street
-                                                    Address</label>
+                                                <label
+                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Street Address') }}</label>
                                                 <input type="text" id="billing_address_line"
                                                     name="billing_address_line"
                                                     class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
+                                                <label
+                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }}</label>
                                                 <input type="text" id="billing_city" name="billing_city"
                                                     class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-semibold text-gray-700 mb-2">State</label>
+                                                <label
+                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('State') }}</label>
                                                 <input type="text" id="billing_state" name="billing_state"
                                                     class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-semibold text-gray-700 mb-2">Postal
-                                                    Code</label>
+                                                <label
+                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}</label>
                                                 <input type="text" id="billing_zip" name="billing_zip"
                                                     class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                             </div>
@@ -637,7 +656,7 @@
                                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                                     <span
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                    Payment Method
+                                    {{ statictranslations('Payment Method') }}
                                 </h2>
                                 <div class="space-y-4 mb-6">
                                     <label
@@ -650,7 +669,8 @@
                                         class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                                         <input type="radio" name="payment_method" value="cod"
                                             class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
-                                        <span class="ml-4 font-semibold text-gray-900">Cash on Delivery</span>
+                                        <span
+                                            class="ml-4 font-semibold text-gray-900">{{ statictranslations('Cash on Delivery') }}</span>
                                     </label>
                                 </div>
 
@@ -658,7 +678,7 @@
                                 <div id="cardDetails" class="space-y-5">
                                     <div>
                                         <label for="cardNumber"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Card Number *</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Card Number *') }}</label>
                                         <input type="text" id="cardNumber" name="cardNumber"
                                             placeholder="1234 5678 9012 3456" required
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
@@ -667,8 +687,7 @@
                                     <div class="grid grid-cols-2 gap-5">
                                         <div>
                                             <label for="expiry"
-                                                class="block text-sm font-semibold text-gray-700 mb-2">Expiry Date
-                                                *</label>
+                                                class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Expiry Date *') }}</label>
                                             <input type="text" id="expiry" name="expiry" placeholder="MM/YY"
                                                 required pattern="\d{2}/\d{2}"
                                                 class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
@@ -677,7 +696,7 @@
                                         </div>
                                         <div>
                                             <label for="cvv"
-                                                class="block text-sm font-semibold text-gray-700 mb-2">CVV *</label>
+                                                class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('CVV *') }}</label>
                                             <input type="text" id="cvv" name="cvv" placeholder="123"
                                                 maxlength="3" required pattern="[0-9]{3}"
                                                 class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
@@ -704,7 +723,7 @@
                                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                                     <span
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                                    Order Summary
+                                    {{ statictranslations('Order Summary') }}
                                 </h2>
 
                                 {{-- Mini item list --}}
@@ -726,7 +745,7 @@
                                 {{-- Place order button --}}
                                 <button type="submit" name="step" value="3"
                                     class="w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
-                                    Place Secure Order
+                                    {{ statictranslations('Place Secure Order') }}
                                     <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -739,7 +758,7 @@
                                             d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                                             clip-rule="evenodd" />
                                     </svg>
-                                    Your payment information is secure
+                                    {{ statictranslations('Your payment information is secure') }}
                                 </p>
                             </div>
 
@@ -769,21 +788,27 @@
                                             d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <h2 class="text-xl font-extrabold text-gray-900 mb-4">Order Successfully Placed!</h2>
-                                <p class="text-xl text-gray-600 mb-2">Your order has been successfully placed and is now
-                                    being processed.</p>
+                                <h2 class="text-xl font-extrabold text-gray-900 mb-4">
+                                    {{ statictranslations('Order Successfully Placed!') }}</h2>
+                                <p class="text-xl text-gray-600 mb-2">
+                                    {{ statictranslations('Your order has been successfully placed and is now
+                                                                        being processed.') }}
+                                </p>
                                 <p class="text-lg text-gray-600">Order #<span class="font-bold text-primary">
                                         {{ isset($order) ? $order->order_number ?? '#' . $order->id : '#—' }}
                                     </span></p>
 
                                 <div class="bg-white rounded-2xl shadow-lg p-8 text-left mt-8 border border-gray-100">
-                                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Order Details</h3>
+                                    <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ statictranslations('Order Details') }}</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-base">
-                                        <div><span class="font-semibold text-gray-700 mr-2">Order Number:</span>
+                                        <div><span
+                                                class="font-semibold text-gray-700 mr-2">{{ statictranslations('Order Number') }}:</span>
                                             {{ $order->order_number ?? '—' }}</div>
-                                        <div><span class="font-semibold text-gray-700 mr-2">Order Date:</span>
+                                        <div><span
+                                                class="font-semibold text-gray-700 mr-2">{{ statictranslations('Order Date') }}:</span>
                                             {{ $order?->created_at?->format('M d, Y') ?? date('M d, Y') }}</div>
-                                        <div><span class="font-semibold text-gray-700 mr-2">Payment Method:</span>
+                                        <div><span
+                                                class="font-semibold text-gray-700 mr-2">{{ statictranslations('Payment Method') }}:</span>
                                             {{ $order->payment_method ?? '—' }}</div>
                                         {{-- <div><span class="font-semibold text-gray-700 mr-2">Shipping Method:</span>
                                             {{ $order->shipping_method ?? 'Standard Shipping' }}</div> --}}
@@ -798,9 +823,10 @@
                                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div>
-                                            <h4 class="font-bold text-blue-900 mb-1">What's Next?</h4>
-                                            <p class="text-sm text-blue-800">We've sent a confirmation email to your inbox.
-                                                You can track your order status in your account dashboard.</p>
+                                            <h4 class="font-bold text-blue-900 mb-1">{{ statictranslations("What's Next?") }}</h4>
+                                            <p class="text-sm text-blue-800">
+                                                {{ statictranslations("We've sent a confirmation email to your inbox. You can track your order status in your account dashboard.") }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -811,11 +837,11 @@
                                 <div class="flex flex-col sm:flex-row gap-4">
                                     <a href="{{ route('home') }}"
                                         class="flex-1 px-8 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                                        Continue Shopping
+                                        {{ statictranslations('Continue Shopping') }}
                                     </a>
                                     <a href="{{ isset($order) ? route('order-detail', ['order' => $order->id]) : '#' }}"
                                         class="flex-1 px-8 py-5 border-2 border-primary text-primary text-center font-bold rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105">
-                                        View Order Details
+                                        {{ statictranslations('View Order Details') }}
                                     </a>
                                 </div>
                             </div>
@@ -836,7 +862,7 @@
                                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                 <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
-                                            Shipping Address
+                                            {{ statictranslations('Shipping Address') }}
                                         </h3>
                                         <div class="bg-white rounded-xl p-4 space-y-1 text-sm text-gray-700">
                                             @if ($addr && isset($addr['name']))
@@ -850,7 +876,8 @@
                                                     <p>{{ $addr['country'] }}</p>
                                                 @endif
                                             @else
-                                                <p class="text-gray-600">No shipping address available</p>
+                                                <p class="text-gray-600">{{ statictranslations('No shipping address available') }}
+                                                </p>
                                             @endif
                                         </div>
                                     </div>
@@ -876,7 +903,7 @@
                                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                                     <span
                                         class="w-1.5 h-8 rounded-full bg-linear-to-b from-green-500 to-green-400 mr-3"></span>
-                                    Order Summary
+                                    {{ statictranslations('Order Summary') }}
                                 </h2>
 
                                 {{-- Order items (read-only, no qty controls) --}}
@@ -892,7 +919,7 @@
                                 {{-- Price breakdown from saved order --}}
                                 <div class="space-y-4 mb-6">
                                     <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
-                                        <span class="text-gray-600 font-medium">MRP</span>
+                                        <span class="text-gray-600 font-medium">{{ statictranslations('MRP') }}</span>
                                         <span
                                             class="font-bold text-gray-900">{{ $sym }}{{ number_format($order->subtotal ?? 0, 2) }}</span>
                                     </div>
@@ -907,7 +934,7 @@
                                                         d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                         clip-rule="evenodd" />
                                                 </svg>
-                                                Discount on MRP
+                                                {{ statictranslations('Discount on MRP') }}
                                             </span>
                                             <span
                                                 class="font-bold">-{{ $sym }}{{ number_format($order->discount_amount, 2) }}</span>
@@ -961,7 +988,7 @@
                                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            <span class="text-sm font-semibold">Payment Successful</span>
+                                            <span class="text-sm font-semibold">{{ statictranslations('Payment Successful') }}</span>
                                         </div>
                                     </div>
                                 @endif
@@ -993,7 +1020,7 @@
                                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900">Add Address</h3>
+                    <h3 class="text-2xl font-bold text-gray-900">{{ statictranslations('Add Address') }}</h3>
                 </div>
                 <button type="button" id="closeAddressModal"
                     class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors">
@@ -1012,13 +1039,14 @@
                 <div class="px-8 py-6 space-y-6">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Address Type</label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Address Type') }}</label>
                             <div class="relative">
                                 <select id="modal_address_type" name="type" required
                                     class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
-                                    <option value="">Select Address Type</option>
-                                    <option value="billing">Billing</option>
-                                    <option value="shipping">Shipping</option>
+                                    <option value="">{{ statictranslations('Select Address Type') }}</option>
+                                    <option value="billing">{{ statictranslations('Billing') }}</option>
+                                    <option value="shipping">{{ statictranslations('Shipping') }}</option>
                                 </select>
                                 <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1029,8 +1057,8 @@
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Address Label <span
-                                    class="text-gray-400 font-normal">(Optional)</span></label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Address Label') }}
+                                <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span></label>
                             <input id="modal_address_label" name="address_label" placeholder="e.g., Home, Office"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
@@ -1039,13 +1067,15 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('First Name') }}
+                                *</label>
                             <input id="modal_first_name" name="first_name" required placeholder="John"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Last Name') }}
+                                *</label>
                             <input id="modal_last_name" name="last_name" required placeholder="Doe"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
@@ -1053,7 +1083,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Street Address *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Street Address') }}
+                            *</label>
                         <input id="modal_street" name="street" required placeholder="123 Main Street"
                             class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
@@ -1061,19 +1092,21 @@
 
                     <div class="grid grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">City *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }} *</label>
                             <input id="modal_city" name="city" required placeholder="Casablanca"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">State / Region *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('State / Region') }}
+                                *</label>
                             <input id="modal_state" name="state" required placeholder="CA"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Postal Code *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}
+                                *</label>
                             <input id="modal_postal_code" name="postal_code" required placeholder="20000"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
@@ -1082,13 +1115,14 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Country *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Country') }}
+                                *</label>
                             <input id="modal_country" name="country" required value="Morocco"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone') }}</label>
                             <input id="modal_phone" name="phone" type="tel" placeholder="+1 (555) 123-4567"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
@@ -1099,7 +1133,7 @@
                         <label class="inline-flex items-center">
                             <input id="modal_is_default" name="is_default" type="checkbox" value="1"
                                 class="form-checkbox h-4 w-4 text-primary rounded mr-3">
-                            <span class="text-sm font-medium text-gray-700">Set as default address</span>
+                            <span class="text-sm font-medium text-gray-700">{{ statictranslations('Set as default address') }}</span>
                         </label>
                     </div>
                 </div>
@@ -1108,14 +1142,14 @@
                     class="flex items-center justify-end gap-3 px-8 py-6 bg-gray-50 border-t border-gray-200 rounded-b-3xl">
                     <button type="button" id="cancelAddressModal"
                         class="px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        Cancel
+                        {{ statictranslations('Cancel') }}
                     </button>
                     <button type="submit" id="submitAddressBtn"
                         class="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Save Address
+                        {{ statictranslations('Save Address') }}
                     </button>
                 </div>
             </form>

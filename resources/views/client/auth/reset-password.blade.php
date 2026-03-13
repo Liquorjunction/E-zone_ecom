@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ config('app.name', 'E-Zone Electronics') }} - Reset Password</title>
+    <title>{{ statictranslations(config('app.name', 'E-Zone Electronics')) }} - {{ statictranslations('Reset Password') }}</title>
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
@@ -28,7 +28,7 @@
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
                 <div class="relative z-10 flex justify-center">
@@ -38,8 +38,8 @@
                 <!-- Main Content -->
                 <div class="space-y-6">
                     <div>
-                        <h1 class="text-4xl font-bold mb-4">Secure Password Reset</h1>
-                        <p class="text-lg text-white/90">Create a strong new password to protect your account.</p>
+                        <h1 class="text-4xl font-bold mb-4">{{ statictranslations('Secure Password Reset') }}</h1>
+                        <p class="text-lg text-white/90">{{ statictranslations('Create a strong new password to protect your account.') }}</p>
                     </div>
 
                     <!-- Security Tips -->
@@ -53,8 +53,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Strong Password</h3>
-                                <p class="text-white/80">Use 8+ characters with mixed case & numbers</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Strong Password') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Use 8+ characters with mixed case & numbers') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -66,8 +66,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Account Security</h3>
-                                <p class="text-white/80">Your data is protected with encryption</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Account Security') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Your data is protected with encryption') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -79,8 +79,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Time Limited</h3>
-                                <p class="text-white/80">Link expires in 5 minutes for security</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Time Limited') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Link expires in 5 minutes for security') }}</p>
                             </div>
                         </div>
                     </div>
@@ -92,13 +92,13 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        Secure & Encrypted
+                        {{ statictranslations('Secure & Encrypted') }}
                     </div>
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        SSL Protected
+                        {{ statictranslations('SSL Protected') }}
                     </div>
                 </div>
             </div>
@@ -114,7 +114,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
 
@@ -125,8 +125,8 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Reset Password</h2>
-                    <p class="text-gray-600">Create a new password for your account</p>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ statictranslations('Reset Password') }}</h2>
+                    <p class="text-gray-600">{{ statictranslations('Create a new password for your account') }}</p>
                 </div>
 
                 {{-- Display Validation Errors --}}
@@ -175,7 +175,7 @@
 
                     <!-- Email Display (Read-only) -->
                     <div>
-                        <label for="email_display" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                        <label for="email_display" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address') }}</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@
 
                     <!-- New Password Field -->
                     <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('New Password') }}</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,23 +198,23 @@
                             </div>
                             <input id="password" name="password" type="password" required
                                 class="appearance-none block w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                                placeholder="Enter your new password">
+                                placeholder="{{ statictranslations('Enter your new password') }}">
                             <button type="button" id="togglePassword" tabindex="-1"
                                 class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                                aria-label="Toggle password visibility">
+                                aria-label="{{ statictranslations('Toggle password visibility') }}">
                                 <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
                         </div>
-                        <p class="mt-2 text-xs text-gray-500">Must be at least 8 characters with uppercase, lowercase, and numbers.</p>
+                        <p class="mt-2 text-xs text-gray-500">{{ statictranslations('Must be at least 8 characters with uppercase, lowercase, and numbers.') }}</p>
 
                         <!-- Password Strength Indicator -->
                         <div class="mt-2">
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-xs font-medium text-gray-600">Password Strength:</span>
-                                <span id="strengthText" class="text-xs font-medium text-gray-600">Weak</span>
+                                <span class="text-xs font-medium text-gray-600">{{ statictranslations('Password Strength:') }}</span>
+                                <span id="strengthText" class="text-xs font-medium text-gray-600">{{ statictranslations('Weak') }}</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                                 <div id="strengthBar" class="h-2 rounded-full transition-all duration-300 bg-red-500" style="width: 20%"></div>
@@ -224,7 +224,7 @@
 
                     <!-- Confirm Password Field -->
                     <div>
-                        <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
+                        <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Confirm New Password') }}</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,10 +233,10 @@
                             </div>
                             <input id="password_confirmation" name="password_confirmation" type="password" required
                                 class="appearance-none block w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                                placeholder="Re-enter your new password">
+                                placeholder="{{ statictranslations('Re-enter your new password') }}">
                             <button type="button" id="togglePasswordConfirm" tabindex="-1"
                                 class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                                aria-label="Toggle confirm password visibility">
+                                aria-label="{{ statictranslations('Toggle confirm password visibility') }}">
                                 <svg id="eyeIconConfirm" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -254,7 +254,7 @@
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm text-blue-700">This reset link will expire in 5 minutes. If it has expired, request a new one.</p>
+                                <p class="text-sm text-blue-700">{{ statictranslations('This reset link will expire in 5 minutes. If it has expired, request a new one.') }}</p>
                             </div>
                         </div>
                     </div>
@@ -263,7 +263,7 @@
                     <div class="pt-2">
                         <button type="submit"
                             class="w-full flex justify-center items-center px-6 py-3.5 text-base font-semibold text-white bg-primary rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-50">
-                            <span>Reset Password</span>
+                            <span>{{ statictranslations('Reset Password') }}</span>
                             <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -274,9 +274,9 @@
                 <!-- Footer Link -->
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <p class="text-center text-sm text-gray-600">
-                        Password reset link invalid or expired?
+                        {{ statictranslations('Password reset link invalid or expired?') }}
                         <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ml-1">
-                            Request a new one →
+                            {{ statictranslations('Request a new one') }} →
                         </a>
                     </p>
                 </div>
@@ -303,7 +303,13 @@
                 if (/[A-Z]/.test(password)) strength++;
                 if (/\d/.test(password)) strength++;
 
-                const strengthLevels = ['Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+                const strengthLevels = [
+                    @json(statictranslations('Weak')),
+                    @json(statictranslations('Fair')),
+                    @json(statictranslations('Good')),
+                    @json(statictranslations('Strong')),
+                    @json(statictranslations('Very Strong')),
+                ];
                 const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500'];
                 const widths = ['20%', '40%', '60%', '80%', '100%'];
 

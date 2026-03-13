@@ -7,8 +7,8 @@
         <div class="bg-white border-b border-gray-200">
             <div class="container mx-auto px-4 py-8">
                 <x-breadcrumbs>
-                    <x-slot:title>About Us</x-slot:title>
-                    <x-slot:content>Learn more about us.</x-slot:content>
+                    <x-slot:title>{{ statictranslations('About Us') }}</x-slot:title>
+                    <x-slot:content>{{ statictranslations('Learn more about us.') }}</x-slot:content>
                 </x-breadcrumbs>
             </div>
         </div>
@@ -21,7 +21,7 @@
                     <div class="sticky top-24">
                         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-                                Table of Contents
+                                {{ statictranslations('Table of Contents') }}
                             </h3>
                             <nav class="flex flex-col space-y-1" aria-label="About Us Navigation">
                                 @foreach ($aboutUs as $index => $content)
@@ -51,10 +51,10 @@
                             {{-- Introduction / Last Updated Placeholder (Optional) --}}
                             <div class="mb-10 pb-6 border-b border-gray-100">
                                 <p class="text-sm text-gray-500 font-medium">
-                                    Last Updated: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->format('F d, Y') : 'N/A' }}</span>
+                                    {{ statictranslations('Last Updated') }}: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->format('F d, Y') : 'N/A' }}</span>
                                 </p>
                                 <p>
-                                    Welcome to our About Us page. Here you can learn more about our company, our mission, and what we stand for.
+                                    {{ statictranslations('Welcome to our About Us page. Here you can learn more about our company, our mission, and what we stand for.') }}
                                 </p>
                             </div>
 
@@ -77,8 +77,8 @@
                         {{-- Footer of the document --}}
                         <div class="mt-16 pt-8 border-t border-gray-100 text-center">
                             <p class="text-gray-500">
-                                If you have any questions about us, please
-                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">contact us</a>.
+                                {{ statictranslations('If you have any questions about us, please') }}
+                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">{{ statictranslations('contact us') }}</a>.
                             </p>
                         </div>
 

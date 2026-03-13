@@ -10,8 +10,8 @@
         <div class="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
             <div class="container mx-auto px-4 py-6">
                 <x-breadcrumbs>
-                    <x-slot:title>Terms and Conditions</x-slot:title>
-                    <x-slot:content>Please read our terms and conditions carefully.</x-slot:content>
+                    <x-slot:title>{{ statictranslations('Terms and Conditions') }}</x-slot:title>
+                    <x-slot:content>{{ statictranslations('Please read our terms and conditions carefully.') }}</x-slot:content>
                 </x-breadcrumbs>
             </div>
         </div>

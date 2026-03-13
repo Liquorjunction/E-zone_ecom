@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ config('app.name', 'E-Zone Electronics') }}</title>
+    <title>{{ statictranslations(config('app.name', 'E-Zone Electronics')) }}</title>
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
@@ -28,7 +28,7 @@
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
                 <div class="relative z-10 flex justify-center">
@@ -38,8 +38,8 @@
                 <!-- Main Content -->
                 <div class="space-y-6">
                     <div>
-                        <h1 class="text-4xl font-bold mb-4">Welcome to E-Zone Electronics</h1>
-                        <p class="text-lg text-white/90">Your trusted destination for premium electronics and tech solutions.</p>
+                        <h1 class="text-4xl font-bold mb-4">{{ statictranslations('Welcome to E-Zone Electronics') }}</h1>
+                        <p class="text-lg text-white/90">{{ statictranslations('Your trusted destination for premium electronics and tech solutions.') }}</p>
                     </div>
 
                     <!-- Features -->
@@ -51,8 +51,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Track Your Orders</h3>
-                                <p class="text-white/80">Monitor your purchases in real-time</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Track Your Orders') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Monitor your purchases in real-time') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -62,8 +62,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Exclusive Deals</h3>
-                                <p class="text-white/80">Access members-only discounts</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Exclusive Deals') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Access members-only discounts') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -73,8 +73,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Quick Checkout</h3>
-                                <p class="text-white/80">Save time with stored preferences</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Quick Checkout') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Save time with stored preferences') }}</p>
                             </div>
                         </div>
                     </div>
@@ -86,13 +86,13 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        Secure & Encrypted
+                        {{ statictranslations('Secure & Encrypted') }}
                     </div>
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        SSL Protected
+                        {{ statictranslations('SSL Protected') }}
                     </div>
                 </div>
             </div>
@@ -108,7 +108,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
 
@@ -119,8 +119,8 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-                    <p class="text-gray-600">Sign in to your account to continue shopping</p>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ statictranslations('Welcome Back') }}</h2>
+                    <p class="text-gray-600">{{ statictranslations('Sign in to your account to continue shopping') }}</p>
                 </div>
 
                 {{-- Display Validation Errors --}}
@@ -181,7 +181,7 @@
 
                     <!-- Email Field -->
                     <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address') }}</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,13 +190,13 @@
                             </div>
                             <input id="email" name="email" type="email" value="{{ old('email') }}" required
                                 class="appearance-none block w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                                placeholder="you@example.com">
+                                placeholder="{{ statictranslations('you@example.com') }}">
                         </div>
                     </div>
 
                     <!-- Password Field -->
                     <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Password') }}</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +208,7 @@
                                 placeholder="••••••••">
                             <button type="button" id="togglePassword" tabindex="-1"
                                 class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                                aria-label="Toggle password visibility">
+                                aria-label="{{ statictranslations('Toggle password visibility') }}">
                                 <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -222,11 +222,11 @@
                         <div class="flex items-center">
                             <input id="remember-me" name="remember" type="checkbox"
                                 class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-                            <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                            <label for="remember-me" class="ml-2 block text-sm text-gray-700">{{ statictranslations('Remember me') }}</label>
                         </div>
                         <div class="text-sm">
                             <a href="#" id="forgotPasswordLink" class="font-medium text-primary hover:opacity-80 transition-opacity">
-                                Forgot password?
+                                {{ statictranslations('Forgot password?') }}
                             </a>
                         </div>
                     </div>
@@ -235,7 +235,7 @@
                     <div class="pt-2">
                         <button type="submit"
                             class="w-full flex justify-center items-center px-6 py-3.5 text-base font-semibold text-white bg-primary rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-50">
-                            <span>Sign in to your account</span>
+                            <span>{{ statictranslations('Sign in to your account') }}</span>
                             <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -246,9 +246,9 @@
                 <!-- Sign Up Link -->
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <p class="text-center text-sm text-gray-600">
-                        Don't have an account?
+                        {{ statictranslations("Don't have an account?") }}
                         <a href="{{ route('register') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ml-1">
-                            Create one now →
+                            {{ statictranslations('Create one now') }} →
                         </a>
                     </p>
                 </div>

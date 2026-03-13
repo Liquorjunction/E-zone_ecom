@@ -7,8 +7,8 @@
         <div class="bg-white border-b border-gray-200">
             <div class="container mx-auto px-4 py-8">
                 <x-breadcrumbs>
-                    <x-slot:title>Privacy Policy</x-slot:title>
-                    <x-slot:content>Your privacy and data security are important to us.</x-slot:content>
+                    <x-slot:title>{{ statictranslations('Privacy Policy') }}</x-slot:title>
+                    <x-slot:content>{{ statictranslations('Your privacy and data security are important to us.') }}</x-slot:content>
                 </x-breadcrumbs>
             </div>
         </div>

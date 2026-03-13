@@ -102,10 +102,10 @@
         {{-- Header --}}
         <div class="text-center mb-10 sm:mb-14">
             <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                {{ gtrans('Shop by Category') }}
+                {{ statictranslations('Shop by Category') }}
             </h2>
             <p class="mt-3 text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-                {{ gtrans('Browse our extensive collection') }}
+                {{ statictranslations('Browse our extensive collection') }}
             </p>
             <div class="mt-5 flex items-center justify-center gap-1.5">
                 <span class="block w-8 h-0.75 rounded-full bg-primary"></span>

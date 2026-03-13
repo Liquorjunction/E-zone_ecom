@@ -9,7 +9,7 @@
                     id="products-search"
                     form="filter-form"
                     value="{{ request('search') }}"
-                    placeholder="Search for products, brands, or categories..."
+                    placeholder="{{ statictranslations('Search for products, brands, or categories...') }}"
                     class="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
                 <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -35,9 +35,9 @@
                 id="products-sort"
                 form="filter-form"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
-                <option value="newest" @selected(request('sort') === 'newest' || !request('sort'))>Sort by: Newest</option>
-                <option value="price_asc" @selected(request('sort') === 'price_asc')>Price: Low to High</option>
-                <option value="price_desc" @selected(request('sort') === 'price_desc')>Price: High to Low</option>
+                <option value="newest" @selected(request('sort') === 'newest' || !request('sort'))>{{ statictranslations('Sort by: Newest') }}</option>
+                <option value="price_asc" @selected(request('sort') === 'price_asc')>{{ statictranslations('Price: Low to High') }}</option>
+                <option value="price_desc" @selected(request('sort') === 'price_desc')>{{ statictranslations('Price: High to Low') }}</option>
             </select>
         </div>
 

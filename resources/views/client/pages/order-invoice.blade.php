@@ -245,12 +245,12 @@
                                 <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="{{ config('app.name') }}"
                                     class="h-10 w-auto object-contain">
                             </div>
-                            <h2 class="text-3xl font-extrabold tracking-tight text-white mt-5">{{ gtrans('Invoice') }}</h2>
-                            <p class="text-xs font-semibold tracking-widest uppercase text-cyan-300 mt-1">{{ gtrans('Order') }}
+                            <h2 class="text-3xl font-extrabold tracking-tight text-white mt-5">{{ statictranslations('Invoice') }}</h2>
+                            <p class="text-xs font-semibold tracking-widest uppercase text-cyan-300 mt-1">{{ statictranslations('Order') }}
                                 #{{ $orderNum }}</p>
                         </div>
                         <div class="text-right text-xs text-slate-200 leading-relaxed">
-                            <div>{{ $siteContent->address ?? gtrans('Not available') }}</div>
+                            <div>{{ $siteContent->address ?? statictranslations('Not available') }}</div>
                             @if ($siteContent->phone ?? null)
                                 <div>{{ $siteContent->phone }}</div>
                             @endif
@@ -262,19 +262,19 @@
                     class="bg-slate-50 px-6 py-3 flex flex-wrap items-center justify-between gap-2 text-sm border-t border-white/30 invoice-header-meta">
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
-                        {{ gtrans('Placed') }}: <span
+                        {{ statictranslations('Placed') }}: <span
                             class="font-semibold text-slate-700">{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span>
                     </div>
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
-                        {{ gtrans('Order Status') }}: <span class="font-semibold text-slate-700">{{ $orderStatus }}</span></div>
+                        {{ statictranslations('Order Status') }}: <span class="font-semibold text-slate-700">{{ $orderStatus }}</span></div>
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
-                        {{ gtrans('Payment') }}: <span class="font-semibold text-slate-700">{{ $paymentMethod }}
+                        {{ statictranslations('Payment') }}: <span class="font-semibold text-slate-700">{{ $paymentMethod }}
                             ({{ $paymentStatus }})</span></div>
                     {{-- <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
-                        {{ gtrans('Shipping') }}: <span class="font-semibold text-slate-700">{{ $shippingMethod }}</span></div> --}}
+                        {{ statictranslations('Shipping') }}: <span class="font-semibold text-slate-700">{{ $shippingMethod }}</span></div> --}}
                 </div>
             </div>
 
@@ -283,7 +283,7 @@
 
                 <div
                     class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm print-avoid-break invoice-surface">
-                    <h4 class="font-semibold text-gray-700 mb-1 text-sm">{{ gtrans('Shipping Address') }}</h4>
+                    <h4 class="font-semibold text-gray-700 mb-1 text-sm">{{ statictranslations('Shipping Address') }}</h4>
                     @if (!empty($ship))
                         <p class="text-sm text-gray-800 font-medium print-text-xs">{{ $shipName }}</p>
                         @if ($shipStreet)
@@ -301,13 +301,13 @@
                             <p class="text-xs text-gray-400 mt-1">📞 {{ $shipPhone }}</p>
                         @endif
                     @else
-                        <p class="text-sm text-gray-400 italic">{{ gtrans('No shipping address on record.') }}</p>
+                        <p class="text-sm text-gray-400 italic">{{ statictranslations('No shipping address on record.') }}</p>
                     @endif
                 </div>
 
                 <div
                     class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm print-avoid-break invoice-surface">
-                    <h4 class="font-semibold text-gray-700 mb-1 text-sm">{{ gtrans('Billing Address') }}</h4>
+                    <h4 class="font-semibold text-gray-700 mb-1 text-sm">{{ statictranslations('Billing Address') }}</h4>
                     @if (!empty($bill))
                         <p class="text-sm text-gray-800 font-medium print-text-xs">{{ $billName }}</p>
                         @if ($billStreet)
@@ -326,35 +326,35 @@
                         @endif
                     @elseif (!empty($ship))
                         <p class="text-sm text-gray-800 font-medium print-text-xs">{{ $shipName }}</p>
-                        <p class="text-xs text-gray-400 italic">{{ gtrans('Same as shipping address') }}</p>
+                        <p class="text-xs text-gray-400 italic">{{ statictranslations('Same as shipping address') }}</p>
                     @else
-                        <p class="text-sm text-gray-400 italic">{{ gtrans('No billing address on record.') }}</p>
+                        <p class="text-sm text-gray-400 italic">{{ statictranslations('No billing address on record.') }}</p>
                     @endif
                 </div>
             </div>
 
             <!-- Order Items -->
             <div class="mb-10 print-mb-4 invoice-section">
-                <h3 class="font-semibold text-gray-800 mb-3 text-lg border-l-4 border-primary pl-2">{{ gtrans('Order Items') }}</h3>
+                <h3 class="font-semibold text-gray-800 mb-3 text-lg border-l-4 border-primary pl-2">{{ statictranslations('Order Items') }}</h3>
                 <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm invoice-items-wrap">
                     <table class="min-w-full bg-white invoice-items">
                         <thead class="bg-gray-50/80 invoice-items-head">
                             <tr>
                                 <th
                                     class="px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase text-gray-600">
-                                    {{ gtrans('Product') }}</th>
+                                    {{ statictranslations('Product') }}</th>
                                 <th
                                     class="px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase text-gray-600">
-                                    {{ gtrans('SKU') }}</th>
+                                    {{ statictranslations('SKU') }}</th>
                                 <th
                                     class="px-4 py-2.5 text-center text-[11px] font-semibold tracking-wide uppercase text-gray-600">
-                                    {{ gtrans('Qty') }}</th>
+                                    {{ statictranslations('Qty') }}</th>
                                 <th
                                     class="px-4 py-2.5 text-right text-[11px] font-semibold tracking-wide uppercase text-gray-600">
-                                    {{ gtrans('Unit Price') }}</th>
+                                    {{ statictranslations('Unit Price') }}</th>
                                 <th
                                     class="px-4 py-2.5 text-right text-[11px] font-semibold tracking-wide uppercase text-gray-600">
-                                    {{ gtrans('Total') }}</th>
+                                    {{ statictranslations('Total') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -406,9 +406,9 @@
             <div class="invoice-info-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 print-mb-4 invoice-section">
                 <div
                     class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm print-avoid-break invoice-surface">
-                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">{{ gtrans('Tax Summary') }}</h4>
+                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">{{ statictranslations('Tax Summary') }}</h4>
                     <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600">{{ gtrans('Taxable Amount') }} :</span>
+                        <span class="text-gray-600">{{ statictranslations('Taxable Amount') }} :</span>
                         <span class="font-medium">
                             @if ($taxableAmount !== null)
                                 {{ $sym }} {{ number_format((float) $taxableAmount, 2) }}
@@ -418,24 +418,24 @@
                         </span>
                     </div>
                     <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600">{{ gtrans('VAT') }} {{ number_format((float) $taxRate, 0) }}% :</span>
+                        <span class="text-gray-600">{{ statictranslations('VAT') }} {{ number_format((float) $taxRate, 0) }}% :</span>
                         <span class="font-medium">
                             <span class="font-semibold">{{ $tax > 0 ? $sym . ' ' . number_format($tax, 2) : '-' }}</span>
                         </span>
                     </div>
                     <div class="flex justify-between text-sm border-t pt-2 mt-2"></div>
                     <div class="flex justify-between text-sm mt-1">
-                        <span class="text-gray-600">{{ gtrans('Total Tax Inclusive Amount') }} :</span>
+                        <span class="text-gray-600">{{ statictranslations('Total Tax Inclusive Amount') }} :</span>
                         <span class="font-medium">{{ $sym }} {{ number_format($totalWithoutShipping, 2) }}</span>
                     </div>
                 </div>
 
                 <div
                     class="bg-white rounded-xl p-4 print-p-3 border border-gray-200 shadow-sm self-start print-avoid-break invoice-surface">
-                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">{{ gtrans('Order Summary') }}</h4>
+                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">{{ statictranslations('Order Summary') }}</h4>
 
                     <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600">{{ gtrans('Subtotal') }} ({{ $order->items->sum('quantity') }} {{ gtrans('items') }}) :</span>
+                        <span class="text-gray-600">{{ statictranslations('Subtotal') }} ({{ $order->items->sum('quantity') }} {{ statictranslations('items') }}) :</span>
                         @if ($couponCode)
                             <span class="font-medium">{{ $sym }} {{ number_format($subtotal, 2) }}</span>
                         @else
@@ -446,7 +446,7 @@
                     @if ($couponCode)
                         <div class="flex justify-between text-sm mb-1">
                             <span class="text-gray-600">
-                                {{ gtrans('Coupon Discount') }}:
+                                {{ statictranslations('Coupon Discount') }}:
                                 <span
                                     class="ml-1 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">{{ strtoupper($couponCode) }}</span>
                             </span>
@@ -455,18 +455,18 @@
                         </div>
                     @endif
 
-                    {{-- <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600">{{ gtrans('Shipping') }} ({{ $shippingMethod }}) :</span>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">{{ statictranslations('Shipping') }} ({{ $shippingMethod }}) :</span>
                         @if ($shippingCost > 0)
                             <span>{{ $sym }} {{ number_format($shippingCost, 2) }}</span>
                         @else
-                            <span class="text-green-600 font-medium">{{ gtrans('Free') }}</span>
+                            <span class="text-green-600 font-medium">{{ statictranslations('Free') }}</span>
                         @endif
-                    </div> --}}
+                    </div>
 
                     <div
                         class="flex justify-between text-base mt-3 border-t pt-2 font-bold bg-primary/5 rounded-lg px-2 py-1 invoice-total-highlight">
-                        <span class="text-gray-800">{{ gtrans('Total') }} :</span>
+                        <span class="text-gray-800">{{ statictranslations('Total') }} :</span>
                         <span class="text-primary text-lg">{{ $sym }} {{ number_format($total, 2) }}</span>
                     </div>
                 </div>
@@ -476,14 +476,14 @@
             <div class="flex items-center justify-between mt-8 no-print">
                 <button onclick="window.print()"
                     class="px-6 py-2 bg-primary hover:bg-primary-dark transition text-white rounded-lg font-semibold shadow">
-                    {{ gtrans('Print Invoice') }}
+                    {{ statictranslations('Print Invoice') }}
                 </button>
                 <a href="{{ route('dashboard.overview') }}"
-                    class="text-sm text-gray-500 hover:text-primary underline">&larr; {{ gtrans('Back to dashboard') }}</a>
+                    class="text-sm text-gray-500 hover:text-primary underline">&larr; {{ statictranslations('Back to dashboard') }}</a>
             </div>
 
             <div class="mt-6 text-center text-xs text-gray-400 print-footer-bottom">
-                {{ gtrans('Thank you for shopping with') }} {{ config('app.name') }}. {{ gtrans('If you have any questions about your order, contact us at') }}
+                {{ statictranslations('Thank you for shopping with') }} {{ config('app.name') }}. {{ statictranslations('If you have any questions about your order, contact us at') }}
                 <a href="mailto:{{ $siteContent->email ?? 'support@ezone.com' }}"
                     class="text-primary underline">{{ $siteContent->email ?? 'support@ezone.com' }}</a>.
             </div>

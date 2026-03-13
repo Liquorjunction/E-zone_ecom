@@ -32,7 +32,7 @@
                 </span>
             @else
                 <span class="discount-badge badge bg-danger ms-2">
-                    Save {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($discountAmount, 2) }}
+                    {{ statictranslations('Save') }} {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($discountAmount, 2) }}
                 </span>
             @endif
         </div>

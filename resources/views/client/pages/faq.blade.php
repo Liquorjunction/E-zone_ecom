@@ -7,8 +7,8 @@
         <div class="bg-white border-b border-gray-200">
             <div class="container mx-auto px-4 py-8">
                 <x-breadcrumbs>
-                    <x-slot:title>Frequently Asked Questions</x-slot:title>
-                    <x-slot:content>Find answers to common questions about our products and services.</x-slot:content>
+                    <x-slot:title>{{ statictranslations('Frequently Asked Questions') }}</x-slot:title>
+                    <x-slot:content>{{ statictranslations('Find answers to common questions about our products and services.') }}</x-slot:content>
                 </x-breadcrumbs>
             </div>
         </div>

@@ -5,8 +5,8 @@
         <div class="container mx-auto px-4">
             <!-- Page Header -->
             <x-breadcrumbs>
-                <x-slot:title>Our Products</x-slot:title>
-                <x-slot:content>Discover the latest in electronics and technology</x-slot:content>
+                <x-slot:title>{{ statictranslations('Our Products') }}</x-slot:title>
+                <x-slot:content>{{ statictranslations('Discover the latest in electronics and technology') }}</x-slot:content>
             </x-breadcrumbs>
 
             <!-- Search and Sort Bar -->
@@ -36,7 +36,7 @@
                         }
                     @endphp
                     <div id="active-filters-container" class="mb-6 flex flex-wrap items-center gap-2">
-                        <span class="text-sm font-medium text-gray-700">Active Filters:</span>
+                        <span class="text-sm font-medium text-gray-700">{{ statictranslations('Active Filters:') }}</span>
                         @if(request('brand'))
                             @php $brands = (array) request('brand'); @endphp
                             @foreach($brands as $brand)
@@ -63,7 +63,7 @@
                             @php $subs = (array) request('subcategory'); @endphp
                             @foreach($subs as $sub)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-subcategory="{{ $sub }}">
-                                    <span>Subcategory: {{ $subcategoryLookup[$sub] ?? str_replace('-', ' ', $sub) }}</span>
+                                    <span>{{ statictranslations('Subcategory:') }} {{ $subcategoryLookup[$sub] ?? str_replace('-', ' ', $sub) }}</span>
                                     <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="subcategory" data-filter-value="{{ $sub }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
@@ -85,7 +85,7 @@
                             @php $ratings = (array) request('rating'); @endphp
                             @foreach($ratings as $rating)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-rating="{{ $rating }}">
-                                    <span>{{ $rating }} Star{{ $rating != '1' ? 's' : '' }} and up</span>
+                                    <span>{{ $rating }} {{ statictranslations('Star') }}{{ $rating != '1' ? 's' : '' }} {{ statictranslations('and up') }}</span>
                                     <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="rating" data-filter-value="{{ $rating }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
@@ -96,7 +96,7 @@
                             @php $discounts = (array) request('discount'); @endphp
                             @foreach($discounts as $disc)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-discount="{{ $disc }}">
-                                    <span>{{ $disc }}% off or more</span>
+                                    <span>{{ $disc }}% {{ statictranslations('off or more') }}</span>
                                     <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="discount" data-filter-value="{{ $disc }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
@@ -115,8 +115,8 @@
 
                     <!-- Results Count -->
                     <div class="mb-6">
-                        <p class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-900">{{ $products->firstItem() }}-{{ $products->lastItem() }}</span> of
-                            <span class="font-semibold text-gray-900">{{ $products->total() }}</span> variants</p>
+                        <p class="text-sm text-gray-600">{{ statictranslations('Showing') }} <span class="font-semibold text-gray-900">{{ $products->firstItem() }}-{{ $products->lastItem() }}</span> {{ statictranslations('of') }}
+                            <span class="font-semibold text-gray-900">{{ $products->total() }}</span> {{ statictranslations('variants') }}</p>
                     </div>
 
                     <!-- Products Grid + Spinner -->
@@ -136,10 +136,10 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
                                     </div>
-                                    <h3 class="text-lg font-medium text-gray-900">No products found</h3>
-                                    <p class="text-gray-500 mt-1">Try adjusting your search or filters to find what you're looking for.</p>
+                                    <h3 class="text-lg font-medium text-gray-900">{{ statictranslations('No products found') }}</h3>
+                                    <p class="text-gray-500 mt-1">{{ statictranslations("Try adjusting your search or filters to find what you're looking for.") }}</p>
                                     <a href="{{ route('products.index') }}" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
-                                        Clear Filters
+                                        {{ statictranslations('Clear Filters') }}
                                     </a>
                                 </div>
                             @else
@@ -180,7 +180,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                <span class="font-semibold">Filters</span>
+                <span class="font-semibold">{{ statictranslations('Filters') }}</span>
             </button>
 
             <!-- Mobile Filter Modal -->
@@ -188,7 +188,7 @@
                 <div class="flex items-end justify-center min-h-screen">
                     <div class="bg-white w-full max-h-[90vh] rounded-t-3xl overflow-hidden transform transition-transform duration-300 translate-y-full" id="modal-content">
                         <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-bold text-gray-900">Filters</h2>
+                            <h2 class="text-xl font-bold text-gray-900">{{ statictranslations('Filters') }}</h2>
                             <button id="close-modal" type="button" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
                                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -201,8 +201,8 @@
                         </div>
 
                         <div class="sticky bottom-0 bg-white border-t p-4 flex gap-3">
-                            <button type="button" id="close-modal-btn" class="flex-1 inline-flex justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
-                            <button type="button" id="apply-mobile-filters" class="flex-1 inline-flex justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90">Apply Filters</button>
+                            <button type="button" id="close-modal-btn" class="flex-1 inline-flex justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">{{ statictranslations('Cancel') }}</button>
+                            <button type="button" id="apply-mobile-filters" class="flex-1 inline-flex justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90">{{ statictranslations('Apply Filters') }}</button>
                         </div>
 
                     </div>

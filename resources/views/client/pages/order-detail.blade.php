@@ -4,8 +4,8 @@
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
             <x-breadcrumbs>
-                <x-slot:title>Order Details</x-slot:title>
-                <x-slot:content>Track your order and view details</x-slot:content>
+                <x-slot:title>{{ statictranslations('Order Details') }}</x-slot:title>
+                <x-slot:content>{{ statictranslations('Track your order and view details') }}</x-slot:content>
             </x-breadcrumbs>
 
             {{-- Order Header --}}

@@ -47,11 +47,11 @@ $countActiveVariants = function ($products) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                Filters
+                {{ statictranslations('Filters') }}
             </h2>
             <a href="{{ route('products.index') }}"
                 class="text-sm font-medium text-primary hover:opacity-80 transition-opacity cursor-pointer hover:underline">
-                Clear All
+                {{ statictranslations('Clear All') }}
             </a>
         </div>
 
@@ -62,7 +62,7 @@ $countActiveVariants = function ($products) {
             <div class="border-b border-gray-100 pb-6">
                 <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
-                    Price Range
+                    {{ statictranslations('Price Range') }}
                 </h3>
                 <div class="space-y-3" data-price-range data-default-min="{{ $minPrice }}" data-default-max="{{ $maxPrice }}" data-price-dirty="false">
                     <div class="flex items-center justify-between text-sm text-gray-600">
@@ -98,7 +98,7 @@ $countActiveVariants = function ($products) {
             <div class="border-b border-gray-100 pb-6">
                 <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
-                    Brand
+                    {{ statictranslations('Brand') }}
                 </h3>
                 <div class="space-y-2 max-h-48 overflow-y-auto">
                     @foreach ($brands as $brand)
@@ -121,7 +121,7 @@ $countActiveVariants = function ($products) {
             <div class="border-b border-gray-100 pb-6">
                 <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
-                    Category
+                    {{ statictranslations('Category') }}
                 </h3>
                 <div class="space-y-2">
                     @foreach ($categories as $category)
@@ -178,7 +178,7 @@ $countActiveVariants = function ($products) {
             <div class="border-b border-gray-100 pb-6">
                 <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
-                    Customer Rating
+                    {{ statictranslations('Customer Rating') }}
                 </h3>
                 <div class="space-y-2">
                     <label class="flex items-center group cursor-pointer">
@@ -187,8 +187,7 @@ $countActiveVariants = function ($products) {
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
                         <span class="ml-3 flex items-center">
                             <span class="text-yellow-400">★★★★★</span>
-                            <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">(5
-                                stars)</span>
+                            <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">({{ statictranslations('5 stars') }})</span>
                         </span>
                     </label>
                     <label class="flex items-center group cursor-pointer">
@@ -197,8 +196,8 @@ $countActiveVariants = function ($products) {
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
                         <span class="ml-3 flex items-center">
                             <span class="text-yellow-400">★★★★</span><span class="text-gray-300">★</span>
-                            <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">(4
-                                stars and up)</span>
+                            <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">({{ statictranslations('4 stars and up') }})</span>
+                        </span>
                         </span>
                     </label>
                     <label class="flex items-center group cursor-pointer">
@@ -207,8 +206,7 @@ $countActiveVariants = function ($products) {
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
                         <span class="ml-3 flex items-center">
                             <span class="text-yellow-400">★★★</span><span class="text-gray-300">★★</span>
-                            <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">(3
-                                stars and up )</span>
+                            <span class="ml-2 text-sm text-gray-700 group-hover:text-primary transition-colors">({{ statictranslations('3 stars and up') }})</span>
                         </span>
                     </label>
                 </div>
@@ -218,15 +216,14 @@ $countActiveVariants = function ($products) {
             <div class="border-b border-gray-100 pb-6">
                 <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
-                    Availability
+                    {{ statictranslations('Availability') }}
                 </h3>
                 <div class="space-y-2">
                     <label class="flex items-center group cursor-pointer">
                         <input type="checkbox" name="availability[]" value="in_stock"
                             {{ in_array('in_stock', (array) request('availability', [])) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">In
-                            Stock</span>
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ statictranslations('In Stock') }}</span>
                         <span
                             class="ml-auto text-xs text-gray-400">({{ $availabilityCounts['in_stock'] ?? 0 }})</span>
                     </label>
@@ -234,8 +231,7 @@ $countActiveVariants = function ($products) {
                         <input type="checkbox" name="availability[]" value="out_of_stock"
                             {{ in_array('out_of_stock', (array) request('availability', [])) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">Out of
-                            Stock</span>
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ statictranslations('Out of Stock') }}</span>
                         <span
                             class="ml-auto text-xs text-gray-400">({{ $availabilityCounts['out_of_stock'] ?? 0 }})</span>
                     </label>
@@ -246,43 +242,38 @@ $countActiveVariants = function ($products) {
             <div class="pb-2">
                 <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
-                    Discount
+                    {{ statictranslations('Discount') }}
                 </h3>
                 <div class="space-y-2">
                     <label class="flex items-center group cursor-pointer">
                         <input type="checkbox" name="discount[]" value="50"
                             {{ in_array('50', (array) request('discount', [])) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">50% or
-                            more</span>
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ statictranslations('50% or more') }}</span>
                     </label>
                     <label class="flex items-center group cursor-pointer">
                         <input type="checkbox" name="discount[]" value="40"
                             {{ in_array('40', (array) request('discount', [])) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">40% or
-                            more</span>
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ statictranslations('40% or more') }}</span>
                     </label>
                     <label class="flex items-center group cursor-pointer">
                         <input type="checkbox" name="discount[]" value="30"
                             {{ in_array('30', (array) request('discount', [])) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">30% or
-                            more</span>
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ statictranslations('30% or more') }}</span>
                     </label>
                     <label class="flex items-center group cursor-pointer">
                         <input type="checkbox" name="discount[]" value="20"
                             {{ in_array('20', (array) request('discount', [])) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">20% or
-                            more</span>
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ statictranslations('20% or more') }}</span>
                     </label>
                     <label class="flex items-center group cursor-pointer">
                         <input type="checkbox" name="discount[]" value="10"
                             {{ in_array('10', (array) request('discount', [])) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">10% or
-                            more</span>
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ statictranslations('10% or more') }}</span>
                     </label>
                 </div>
             </div>
@@ -295,7 +286,7 @@ $countActiveVariants = function ($products) {
                 <div class="sticky bottom-4 z-40 bg-white pt-4 -mx-6 px-6">
                     <button type="submit"
                         class="w-full px-6 py-3 bg-primary text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
-                        Apply Filters
+                        {{ statictranslations('Apply Filters') }}
                     </button>
                 </div>
             </div>

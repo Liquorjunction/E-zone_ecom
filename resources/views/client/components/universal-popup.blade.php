@@ -29,7 +29,7 @@
             <button id="universal-popup-close"
                 type="button"
                 class="w-full max-w-30 mx-auto px-3 py-1 sm:px-4 sm:py-2 bg-primary text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95">
-                OK
+                {{ statictranslations('OK') }}
             </button>
 
             <!-- Confirmation buttons (conditional) -->
@@ -37,12 +37,12 @@
                 <button id="universal-popup-cancel"
                     type="button"
                     class="flex-1 px-3 py-1 sm:px-4 sm:py-2 bg-gray-200 text-gray-700 rounded-full font-semibold shadow-md hover:shadow-lg hover:scale-105 focus:ring-4 focus:ring-gray-300/30 focus:outline-none border border-gray-300 transition-all duration-200 active:scale-95 hover:bg-gray-300">
-                    Cancel
+                    {{ statictranslations('Cancel') }}
                 </button>
                 <button id="universal-popup-confirm"
                     type="button"
                     class="flex-1 px-3 py-1 sm:px-4 sm:py-2 bg-primary text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95">
-                    Confirm
+                    {{ statictranslations('Confirm') }}
                 </button>
             </div>
         </div>

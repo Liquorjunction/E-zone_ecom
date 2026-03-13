@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ config('app.name', 'E-Zone Electronics') }} - Register</title>
+    <title>{{ statictranslations(config('app.name', 'E-Zone Electronics')) }} - {{ statictranslations('Register') }}</title>
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
@@ -28,7 +28,7 @@
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
                 <div class="relative z-10 flex justify-center">
@@ -38,8 +38,8 @@
                 <!-- Main Content -->
                 <div class="space-y-6">
                     <div>
-                        <h1 class="text-4xl font-bold mb-4">Join E-Zone Electronics</h1>
-                        <p class="text-lg text-white/90">Create an account and unlock exclusive benefits.</p>
+                        <h1 class="text-4xl font-bold mb-4">{{ statictranslations('Join E-Zone Electronics') }}</h1>
+                        <p class="text-lg text-white/90">{{ statictranslations('Create an account and unlock exclusive benefits.') }}</p>
                     </div>
 
                     <!-- Benefits -->
@@ -52,8 +52,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Fast Checkout</h3>
-                                <p class="text-white/80">Save your info for quicker purchases</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Fast Checkout') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Save your info for quicker purchases') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -64,8 +64,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Order History</h3>
-                                <p class="text-white/80">Track all your orders in one place</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Order History') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Track all your orders in one place') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -76,8 +76,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-sm">Member Discounts</h3>
-                                <p class="text-white/80">Get special offers and early access</p>
+                                <h3 class="font-semibold text-sm">{{ statictranslations('Member Discounts') }}</h3>
+                                <p class="text-white/80">{{ statictranslations('Get special offers and early access') }}</p>
                             </div>
                         </div>
                     </div>
@@ -89,13 +89,13 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        Secure & Encrypted
+                        {{ statictranslations('Secure & Encrypted') }}
                     </div>
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        SSL Protected
+                        {{ statictranslations('SSL Protected') }}
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
 
@@ -122,8 +122,8 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Create Account</h2>
-                    <p class="text-gray-600">Join us to track orders and easier checkout</p>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ statictranslations('Create Account') }}</h2>
+                    <p class="text-gray-600">{{ statictranslations('Join us to track orders and easier checkout') }}</p>
                 </div>
 
                 {{-- Success Message --}}
@@ -134,11 +134,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <div>
-                                <h3 class="text-sm font-semibold text-green-800">Account Created Successfully!</h3>
+                                <h3 class="text-sm font-semibold text-green-800">{{ statictranslations('Account Created Successfully!') }}</h3>
                                 <p class="mt-2 text-sm text-green-700">{{ session('success') }}</p>
                                 <p class="mt-3 text-sm text-green-700">
-                                    <strong>Didn't receive the email?</strong> Check your spam folder or
-                                    <a href="{{ route('login') }}" class="text-green-900 font-semibold hover:underline">go back to login</a>
+                                    <strong>{{ statictranslations("Didn't receive the email?") }}</strong> {{ statictranslations('Check your spam folder or') }}
+                                    <a href="{{ route('login') }}" class="text-green-900 font-semibold hover:underline">{{ statictranslations('go back to login') }}</a>
                                 </p>
                             </div>
                         </div>
@@ -165,39 +165,39 @@
 
                     <!-- Name -->
                     <div>
-                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Full Name') }}</label>
                         <input type="text" name="name" id="name" value="{{ old('name', $prefilled['name'] ?? '') }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                            placeholder="John Doe">
+                            placeholder="{{ statictranslations('John Doe') }}">
                     </div>
 
                     <!-- Phone Number -->
                     <div>
-                        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone Number') }}</label>
                         <input type="tel" name="phone" id="phone" value="{{ old('phone', $prefilled['phone'] ?? '') }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                            placeholder="e.g. +212 612345678">
+                            placeholder="{{ statictranslations('e.g. +212 612345678') }}">
                         <input type="hidden" name="country_code" id="country_code" value="" style="height: 53px !important;">
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address') }}</label>
                         <input type="email" name="email" id="email" value="{{ old('email', $prefilled['email'] ?? '') }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                            placeholder="you@example.com">
+                            placeholder="{{ statictranslations('you@example.com') }}">
                     </div>
 
                     <!-- Password -->
                     <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Password') }}</label>
                         <div class="relative">
                             <input type="password" name="password" id="password" required
                                 class="appearance-none block w-full pr-12 pl-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                                 placeholder="••••••••">
                             <button type="button" id="togglePassword" tabindex="-1"
                                 class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                                aria-label="Toggle password visibility">
+                                aria-label="{{ statictranslations('Toggle password visibility') }}">
                                 <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -208,14 +208,14 @@
 
                     <!-- Confirm Password -->
                     <div>
-                        <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
+                        <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Confirm Password') }}</label>
                         <div class="relative">
                             <input type="password" name="password_confirmation" id="password_confirmation" required
                                 class="appearance-none block w-full pr-12 pl-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                                 placeholder="••••••••">
                             <button type="button" id="togglePasswordConfirm" tabindex="-1"
                                 class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                                aria-label="Toggle confirm password visibility">
+                                aria-label="{{ statictranslations('Toggle confirm password visibility') }}">
                                 <svg id="eyeIconConfirm" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -228,7 +228,7 @@
                     <div class="pt-2">
                         <button type="submit"
                             class="w-full flex justify-center items-center px-6 py-3.5 text-base font-semibold text-white bg-primary rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-50">
-                            Create Account
+                            {{ statictranslations('Create Account') }}
                         </button>
                     </div>
                 </form>
@@ -236,9 +236,9 @@
                 <!-- Sign In Link -->
                 <div class="mt-8 pt-6 border-t border-gray-200 @if (session('success')) hidden @endif">
                     <p class="text-center text-sm text-gray-600">
-                        Already have an account?
+                        {{ statictranslations('Already have an account?') }}
                         <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ml-1">
-                            Sign in here →
+                            {{ statictranslations('Sign in here') }} →
                         </a>
                     </p>
                 </div>

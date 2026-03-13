@@ -126,13 +126,13 @@
             @if ($master->created_at > now()->subDays(30))
                 <span class="inline-flex items-center bg-green-500 text-white
                              text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm leading-none">
-                    NEW
+                    {{ statictranslations('NEW') }}
                 </span>
             @endif
             @if ($isBestseller)
                 <span class="inline-flex items-center bg-amber-500 text-white
                              text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm leading-none">
-                    🔥 HOT
+                    🔥 {{ statictranslations('HOT') }}
                 </span>
             @endif
         </div>
@@ -143,20 +143,20 @@
                 <span class="flex items-center gap-1 bg-white/90 backdrop-blur-sm
                              text-green-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm leading-none">
                     <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0"></span>
-                    In Stock
+                    {{ statictranslations('In Stock') }}
                 </span>
             @else
                 <span class="flex items-center gap-1 bg-white/90 backdrop-blur-sm
                              text-red-500 text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm leading-none">
                     <span class="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0"></span>
-                    Out of Stock
+                    {{ statictranslations('Out of Stock') }}
                 </span>
             @endif
         </div>
 
         {{-- ── Wishlist button (bottom-right of image, always visible on mobile) ── --}}
         <button type="button"
-                aria-label="Add to wishlist"
+                aria-label="{{ statictranslations('Add to wishlist') }}"
                 data-product-variant-id="{{ $variantId }}"
                 data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}"
                 data-toast-ignore
@@ -181,7 +181,7 @@
 
         {{-- ── Compare button (bottom-left of image, always visible on mobile) ── --}}
         <button type="button"
-                aria-label="Compare product"
+                aria-label="{{ statictranslations('Compare product') }}"
                 data-product-variant-id="{{ $variantId }}"
                 data-init-compared="{{ $isCompared ? '1' : '0' }}"
                 class="compare-btn no-toast absolute bottom-2 left-2 z-10
@@ -228,7 +228,7 @@
                 <span class="text-[10px] text-gray-500 leading-none">{{ $averageRating }} ({{ $reviewCount }})</span>
             @else
                 <div class="flex items-center text-gray-200 text-[11px] leading-none">☆☆☆☆☆</div>
-                <span class="text-[10px] text-gray-400 leading-none">No reviews</span>
+                <span class="text-[10px] text-gray-400 leading-none">{{ statictranslations('No reviews') }}</span>
             @endif
         </div>
 
@@ -276,7 +276,7 @@
                 </button>
             @elseif ($stock <= 0)
                 <button class="shrink-0 w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center cursor-not-allowed opacity-50"
-                    disabled title="Out of Stock">
+                    disabled title="{{ statictranslations('Out of Stock') }}">
                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>

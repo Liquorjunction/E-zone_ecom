@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ config('app.name', 'E-Zone Electronics') }} - Verify Email</title>
+    <title>{{ statictranslations(config('app.name', 'E-Zone Electronics')) }} - {{ statictranslations('Verify Email') }}</title>
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
@@ -28,7 +28,7 @@
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
                 <div class="relative z-10 flex justify-center">
@@ -38,8 +38,8 @@
                 <!-- Main Content -->
                 <div class="space-y-6">
                     <div>
-                        <h1 class="text-4xl font-bold mb-4">Email Verification</h1>
-                        <p class="text-lg text-white/90">Secure your account by verifying your email address.</p>
+                        <h1 class="text-4xl font-bold mb-4">{{ statictranslations('Email Verification') }}</h1>
+                        <p class="text-lg text-white/90">{{ statictranslations('Secure your account by verifying your email address.') }}</p>
                     </div>
 
                     <!-- Features -->
@@ -51,8 +51,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-base">Account Security</h3>
-                                <p class="text-sm text-white/80 mt-1">Verify your email to protect your account</p>
+                                <h3 class="font-semibold text-base">{{ statictranslations('Account Security') }}</h3>
+                                <p class="text-sm text-white/80 mt-1">{{ statictranslations('Verify your email to protect your account') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -62,8 +62,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-base">Check Your Inbox</h3>
-                                <p class="text-sm text-white/80 mt-1">Verification email sent to your address</p>
+                                <h3 class="font-semibold text-base">{{ statictranslations('Check Your Inbox') }}</h3>
+                                <p class="text-sm text-white/80 mt-1">{{ statictranslations('Verification email sent to your address') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -73,8 +73,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-base">Quick Process</h3>
-                                <p class="text-sm text-white/80 mt-1">One click and you're ready to go</p>
+                                <h3 class="font-semibold text-base">{{ statictranslations('Quick Process') }}</h3>
+                                <p class="text-sm text-white/80 mt-1">{{ statictranslations("One click and you're ready to go") }}</p>
                             </div>
                         </div>
                     </div>
@@ -86,13 +86,13 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        Secure & Encrypted
+                        {{ statictranslations('Secure & Encrypted') }}
                     </div>
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        SSL Protected
+                        {{ statictranslations('SSL Protected') }}
                     </div>
                 </div>
             </div>
@@ -108,7 +108,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="font-semibold">Back to Home</span>
+                        <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
                     </a>
                 </div>
 
@@ -119,12 +119,12 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ statictranslations('Verify Your Email') }}</h2>
                     <p class="text-gray-600">
                         @if(session('email_sent'))
-                            A fresh verification link has been sent to your email
+                            {{ statictranslations('A fresh verification link has been sent to your email') }}
                         @else
-                            Please check your email for the verification link
+                            {{ statictranslations('Please check your email for the verification link') }}
                         @endif
                     </p>
                 </div>
@@ -139,7 +139,7 @@
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm text-green-700 font-medium">Verification email sent! Please check your inbox.</p>
+                                <p class="text-sm text-green-700 font-medium">{{ statictranslations('Verification email sent! Please check your inbox.') }}</p>
                             </div>
                         </div>
                     </div>
@@ -148,7 +148,7 @@
                 <!-- Email Display -->
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
                     <p class="text-sm text-blue-700">
-                        <span class="font-semibold">Verification Email Sent To:</span><br>
+                        <span class="font-semibold">{{ statictranslations('Verification Email Sent To:') }}</span><br>
                         <span class="text-blue-900 font-medium">{{ Auth::user()->email }}</span>
                     </p>
                 </div>
@@ -162,8 +162,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-sm font-medium text-gray-900">Check Your Email</h3>
-                            <p class="mt-1 text-sm text-gray-600">Look for our email with the subject "Verify Your Email Address"</p>
+                            <h3 class="text-sm font-medium text-gray-900">{{ statictranslations('Check Your Email') }}</h3>
+                            <p class="mt-1 text-sm text-gray-600">{{ statictranslations('Look for our email with the subject "Verify Your Email Address"') }}</p>
                         </div>
                     </div>
 
@@ -174,8 +174,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-sm font-medium text-gray-900">Click the Verification Link</h3>
-                            <p class="mt-1 text-sm text-gray-600">Open the link in the email to verify your account</p>
+                            <h3 class="text-sm font-medium text-gray-900">{{ statictranslations('Click the Verification Link') }}</h3>
+                            <p class="mt-1 text-sm text-gray-600">{{ statictranslations('Open the link in the email to verify your account') }}</p>
                         </div>
                     </div>
 
@@ -186,8 +186,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-sm font-medium text-gray-900">You're Ready!</h3>
-                            <p class="mt-1 text-sm text-gray-600">After verification, you can access your account</p>
+                            <h3 class="text-sm font-medium text-gray-900">{{ statictranslations("You're Ready!") }}</h3>
+                            <p class="mt-1 text-sm text-gray-600">{{ statictranslations('After verification, you can access your account') }}</p>
                         </div>
                     </div>
                 </div>
@@ -202,7 +202,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
-                                <strong>Verification links expire in <span id="timer">5:00</span>.</strong> If yours expired, request a new one below.
+                                <strong>{{ statictranslations('Verification links expire in') }} <span id="timer">5:00</span>.</strong> {{ statictranslations('If yours expired, request a new one below.') }}
                             </p>
                         </div>
                     </div>
@@ -217,7 +217,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Resend Verification Email
+                        {{ statictranslations('Resend Verification Email') }}
                     </button>
 
                     @if ($errors->has('email'))
@@ -236,26 +236,26 @@
                 <!-- Help Text -->
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <p class="text-sm text-gray-600 text-center font-semibold mb-3">
-                        Troubleshooting
+                        {{ statictranslations('Troubleshooting') }}
                     </p>
                     <div class="space-y-2 text-sm text-gray-600">
                         <div class="flex items-start">
                             <svg class="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                             </svg>
-                            <span>Check your spam/junk folder</span>
+                            <span>{{ statictranslations('Check your spam/junk folder') }}</span>
                         </div>
                         <div class="flex items-start">
                             <svg class="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                             </svg>
-                            <span>Make sure you entered the correct email</span>
+                            <span>{{ statictranslations('Make sure you entered the correct email') }}</span>
                         </div>
                         <div class="flex items-start">
                             <svg class="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                             </svg>
-                            <span>Use the resend button above</span>
+                            <span>{{ statictranslations('Use the resend button above') }}</span>
                         </div>
                     </div>
                 </div>
@@ -265,7 +265,7 @@
                     @csrf
                     <button type="submit"
                         class="w-full text-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-                        Sign Out
+                        {{ statictranslations('Sign Out') }}
                     </button>
                 </form>
             </div>

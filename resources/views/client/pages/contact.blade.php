@@ -5,8 +5,8 @@
         <div class="container mx-auto px-4">
 
             <x-breadcrumbs>
-                <x-slot:title>Contact</x-slot:title>
-                <x-slot:content>We're here to help. Get in touch with us!</x-slot:content>
+                <x-slot:title>{{ statictranslations('Contact') }}</x-slot:title>
+                <x-slot:content>{{ statictranslations("We're here to help. Get in touch with us!") }}</x-slot:content>
             </x-breadcrumbs>
 
             {{-- Success Banner (shown after submission) --}}
@@ -18,11 +18,10 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-bold text-green-800 text-lg">Message Received!</h3>
+                        <h3 class="font-bold text-green-800 text-lg">{{ statictranslations('Message Received!') }}</h3>
                         <p class="text-green-700 text-sm mt-1">
-                            Your ticket <strong>#{{ session('ticket_number', 'ENQ-XXXXXX') }}</strong> has been created.
-                            We've sent a confirmation to your email. Our team will respond within <strong>24–48
-                                hours</strong>.
+                            {{ statictranslations('Your ticket') }} <strong>#{{ session('ticket_number', 'ENQ-XXXXXX') }}</strong> {{ statictranslations('has been created.') }}
+                            {{ statictranslations("We've sent a confirmation to your email. Our team will respond within") }} <strong>{{ statictranslations('24–48 hours') }}</strong>.
                         </p>
                     </div>
                 </div>
@@ -38,7 +37,7 @@
 
                         <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                             <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
-                            Send Us a Message
+                            {{ statictranslations('Send Us a Message') }}
                         </h2>
 
                         <div class="space-y-5">
@@ -47,22 +46,22 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Full Name <span class="text-red-500">*</span>
+                                        {{ statictranslations('Full Name') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input type="text" id="name" name="name" required value="{{ old('name') }}"
                                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 @error('name') border-red-400 @enderror"
-                                        placeholder="John Doe">
+                                        placeholder="{{ statictranslations('John Doe') }}">
                                     @error('name')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 <div>
                                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Email Address <span class="text-red-500">*</span>
+                                        {{ statictranslations('Email Address') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input type="email" id="email" name="email" required value="{{ old('email') }}"
                                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 @error('email') border-red-400 @enderror"
-                                        placeholder="you@example.com">
+                                        placeholder="{{ statictranslations('you@example.com') }}">
                                     @error('email')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
@@ -73,51 +72,41 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="mobile" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Mobile Number <span class="text-red-500">*</span>
+                                        {{ statictranslations('Mobile Number') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input type="tel" id="mobile" name="mobile" required value="{{ old('mobile') }}"
                                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 @error('mobile') border-red-400 @enderror"
-                                        placeholder="+212 123 456 789">
+                                        placeholder="{{ statictranslations('+212 123 456 789') }}">
                                     @error('mobile')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 <div>
                                     <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Subject <span class="text-red-500">*</span>
+                                        {{ statictranslations('Subject') }} <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <select id="subject" name="subject" required
                                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 appearance-none bg-white cursor-pointer @error('subject') border-red-400 @enderror">
-                                            <option value="" disabled {{ old('subject') ? '' : 'selected' }}>— Select
-                                                a subject —</option>
+                                            <option value="" disabled {{ old('subject') ? '' : 'selected' }}>{{ statictranslations('— Select a subject —') }}</option>
                                             <option value="product_inquiry"
-                                                {{ old('subject') === 'product_inquiry' ? 'selected' : '' }}>Product
-                                                Inquiry</option>
+                                                {{ old('subject') === 'product_inquiry' ? 'selected' : '' }}>{{ statictranslations('Product Inquiry') }}</option>
                                             <option value="order_status"
-                                                {{ old('subject') === 'order_status' ? 'selected' : '' }}>Order
-                                                Status</option>
+                                                {{ old('subject') === 'order_status' ? 'selected' : '' }}>{{ statictranslations('Order Status') }}</option>
                                             <option value="return_replacement"
-                                                {{ old('subject') === 'return_replacement' ? 'selected' : '' }}>Return /
-                                                Replacement</option>
+                                                {{ old('subject') === 'return_replacement' ? 'selected' : '' }}>{{ statictranslations('Return / Replacement') }}</option>
                                             <option value="warranty_claim"
-                                                {{ old('subject') === 'warranty_claim' ? 'selected' : '' }}>Warranty
-                                                Claim</option>
+                                                {{ old('subject') === 'warranty_claim' ? 'selected' : '' }}>{{ statictranslations('Warranty Claim') }}</option>
                                             <option value="installation_support"
-                                                {{ old('subject') === 'installation_support' ? 'selected' : '' }}>
-                                                Installation Support</option>
+                                                {{ old('subject') === 'installation_support' ? 'selected' : '' }}>{{ statictranslations('Installation Support') }}</option>
                                             <option value="technical_issue"
-                                                {{ old('subject') === 'technical_issue' ? 'selected' : '' }}>
-                                                Technical Issue</option>
+                                                {{ old('subject') === 'technical_issue' ? 'selected' : '' }}>{{ statictranslations('Technical Issue') }}</option>
                                             <option value="bulk_purchase"
-                                                {{ old('subject') === 'bulk_purchase' ? 'selected' : '' }}>Bulk
-                                                Purchase Inquiry</option>
+                                                {{ old('subject') === 'bulk_purchase' ? 'selected' : '' }}>{{ statictranslations('Bulk Purchase Inquiry') }}</option>
                                             <option value="complaint"
-                                                {{ old('subject') === 'complaint' ? 'selected' : '' }}>
-                                                Complaint</option>
+                                                {{ old('subject') === 'complaint' ? 'selected' : '' }}>{{ statictranslations('Complaint') }}</option>
                                             <option value="other"
-                                                {{ old('subject') === 'other' ? 'selected' : '' }}>Other
-                                            </option>
+                                                {{ old('subject') === 'other' ? 'selected' : '' }}>{{ statictranslations('Other') }}</option>
                                         </select>
                                         <span
                                             class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -143,14 +132,13 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
-                                        Order Number <span class="text-red-500">*</span>
+                                        {{ statictranslations('Order Number') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input type="text" id="order_number" name="order_number"
                                         value="{{ old('order_number') }}"
                                         class="w-full px-4 py-3 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-amber-100 focus:border-amber-400 transition-all duration-300 bg-white"
-                                        placeholder="e.g. ORD-20240001">
-                                    <p class="text-amber-600 text-xs mt-2">You can find your order number in your
-                                        confirmation email or order history.</p>
+                                        placeholder="{{ statictranslations('e.g. ORD-20240001') }}">
+                                    <p class="text-amber-600 text-xs mt-2">{{ statictranslations('You can find your order number in your confirmation email or order history.') }}</p>
                                 </div>
                             </div>
 
@@ -164,25 +152,24 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M7 7h.01M7 3h5l4.586 4.586A2 2 0 0117 9v10a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2z" />
                                         </svg>
-                                        Product SKU / Model Number
+                                        {{ statictranslations('Product SKU / Model Number') }}
                                     </label>
                                     <input type="text" id="product_sku" name="product_sku"
                                         value="{{ old('product_sku') }}"
                                         class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-300 bg-white"
-                                        placeholder="e.g. SKU-ABC-12345">
-                                    <p class="text-blue-600 text-xs mt-2">Find the SKU on the product label, packaging, or
-                                        your invoice.</p>
+                                        placeholder="{{ statictranslations('e.g. SKU-ABC-12345') }}">
+                                    <p class="text-blue-600 text-xs mt-2">{{ statictranslations('Find the SKU on the product label, packaging, or your invoice.') }}</p>
                                 </div>
                             </div>
 
                             {{-- Message --}}
                             <div>
                                 <label for="message" class="block text-sm font-semibold text-gray-700 mb-2">
-                                    Message <span class="text-red-500">*</span>
+                                    {{ statictranslations('Message') }} <span class="text-red-500">*</span>
                                 </label>
                                 <textarea id="message" name="message" rows="6" required
                                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 resize-none @error('message') border-red-400 @enderror"
-                                    placeholder="Describe your issue or question in detail…">{{ old('message') }}</textarea>
+                                    placeholder="{{ statictranslations('Describe your issue or question in detail…') }}">{{ old('message') }}</textarea>
                                 @error('message')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -191,9 +178,8 @@
                             {{-- ── File Upload ──────────────────────────────────────────── --}}
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    Attachments
-                                    <span class="font-normal text-gray-400 ml-1">(Invoice, product images, screenshots —
-                                        max 5 files, 5 MB each)</span>
+                                    {{ statictranslations('Attachments') }}
+                                    <span class="font-normal text-gray-400 ml-1">{{ statictranslations('(Invoice, product images, screenshots — max 5 files, 5 MB each)') }}</span>
                                 </label>
 
                                 <div id="dropZone"
@@ -215,9 +201,9 @@
                                         </div>
                                         <p
                                             class="text-sm text-gray-500 group-hover:text-primary transition-colors duration-300">
-                                            <span class="font-semibold">Click to upload</span> or drag & drop
+                                            <span class="font-semibold">{{ statictranslations('Click to upload') }}</span> {{ statictranslations('or drag & drop') }}
                                         </p>
-                                        <p class="text-xs text-gray-400">PNG, JPG, PDF, DOC, XLS up to 5 MB each</p>
+                                        <p class="text-xs text-gray-400">{{ statictranslations('PNG, JPG, PDF, DOC, XLS up to 5 MB each') }}</p>
                                     </div>
                                 </div>
 
@@ -235,7 +221,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
-                                A confirmation email with your ticket number will be sent automatically.
+                                {{ statictranslations('A confirmation email with your ticket number will be sent automatically.') }}
                             </p>
                             <button type="submit"
                                 class="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl active:scale-95 flex items-center gap-2">
@@ -243,7 +229,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                 </svg>
-                                Send Message
+                                {{ statictranslations('Send Message') }}
                             </button>
                         </div>
                     </form>
@@ -256,7 +242,7 @@
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-5 flex items-center">
                             <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
-                            Contact Info
+                            {{ statictranslations('Contact Info') }}
                         </h2>
                         <div class="space-y-4">
                             @php
@@ -280,9 +266,9 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900 text-sm">Address</h3>
+                                    <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Address') }}</h3>
                                     <p class="text-gray-600 text-sm mt-0.5">
-                                        {{ $hasAddress ? $addressText : 'N/A' }}
+                                        {{ $hasAddress ? $addressText : statictranslations('N/A') }}
                                     </p>
                                 </div>
                             </div>
@@ -296,11 +282,11 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900 text-sm">Phone</h3>
+                                    <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Phone') }}</h3>
                                     @if($hasPhone)
                                         <a href="tel:{{ preg_replace('/\s+/', '', $phoneText) }}" class="text-primary text-sm hover:underline">{{ $phoneText }}</a>
                                     @else
-                                        <p class="text-gray-600 text-sm">N/A</p>
+                                        <p class="text-gray-600 text-sm">{{ statictranslations('N/A') }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -314,12 +300,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900 text-sm">Email</h3>
+                                    <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Email') }}</h3>
                                     @if($hasEmail)
                                         <a href="mailto:{{ $emailText }}"
                                             class="text-primary text-sm hover:underline">{{ $emailText }}</a>
                                     @else
-                                        <p class="text-gray-600 text-sm">N/A</p>
+                                        <p class="text-gray-600 text-sm">{{ statictranslations('N/A') }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -333,8 +319,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900 text-sm">Response Time</h3>
-                                    <p class="text-gray-600 text-sm mt-0.5">Within <strong>24–48 hours</strong></p>
+                                    <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Response Time') }}</h3>
+                                    <p class="text-gray-600 text-sm mt-0.5">{{ statictranslations('Within') }} <strong>{{ statictranslations('24–48 hours') }}</strong></p>
                                 </div>
                             </div>
                         </div>
@@ -344,18 +330,18 @@
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-5 flex items-center">
                             <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
-                            Visit Our Showroom
+                            {{ statictranslations('Visit Our Showroom') }}
                         </h2>
 
                         @php
                             $weekdayOrder = [
-                                'monday' => 'Monday',
-                                'tuesday' => 'Tuesday',
-                                'wednesday' => 'Wednesday',
-                                'thursday' => 'Thursday',
-                                'friday' => 'Friday',
-                                'saturday' => 'Saturday',
-                                'sunday' => 'Sunday',
+                                'monday' => statictranslations('Monday'),
+                                'tuesday' => statictranslations('Tuesday'),
+                                'wednesday' => statictranslations('Wednesday'),
+                                'thursday' => statictranslations('Thursday'),
+                                'friday' => statictranslations('Friday'),
+                                'saturday' => statictranslations('Saturday'),
+                                'sunday' => statictranslations('Sunday'),
                             ];
 
                             $openingHoursData = [];
@@ -391,7 +377,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Working Hours
+                                    {{ statictranslations('Working Hours') }}
                                 </h3>
                                 <div class="space-y-1.5 text-sm">
                                     @if(!empty($openingHoursData))
@@ -402,7 +388,7 @@
                                                 $openTime = $dayInfo['open'] ?? null;
                                                 $closeTime = $dayInfo['close'] ?? null;
 
-                                                $timeLabel = 'Closed';
+                                                $timeLabel = statictranslations('Closed');
                                                 if (!$isClosed && !empty($openTime) && !empty($closeTime)) {
                                                     $formattedOpen = date('g:i A', strtotime($openTime));
                                                     $formattedClose = date('g:i A', strtotime($closeTime));
@@ -411,14 +397,14 @@
                                             @endphp
                                             <div class="flex justify-between items-center">
                                                 <span class="text-gray-600">{{ $dayLabel }}</span>
-                                                <span class="font-medium {{ $timeLabel === 'Closed' ? 'text-red-500' : 'text-gray-900' }}">{{ $timeLabel }}</span>
+                                                <span class="font-medium {{ $timeLabel === statictranslations('Closed') ? 'text-red-500' : 'text-gray-900' }}">{{ $timeLabel }}</span>
                                             </div>
                                         @endforeach
                                     @else
                                         @foreach($weekdayOrder as $dayLabel)
                                             <div class="flex justify-between items-center">
                                                 <span class="text-gray-600">{{ $dayLabel }}</span>
-                                                <span class="font-medium text-gray-500">N/A</span>
+                                                <span class="font-medium text-gray-500">{{ statictranslations('N/A') }}</span>
                                             </div>
                                         @endforeach
                                     @endif
@@ -433,7 +419,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                                     </svg>
-                                    Find Us Here
+                                    {{ statictranslations('Find Us Here') }}
                                 </h3>
                                 <div
                                     class="aspect-video bg-gray-200 rounded-xl overflow-hidden relative group cursor-pointer">
@@ -441,7 +427,7 @@
                                         <iframe
                                             src="{{ $mapUrl }}"
                                             class="w-full h-full border-0" allowfullscreen="" loading="lazy"
-                                            referrerpolicy="no-referrer-when-downgrade" title="Showroom Location">
+                                            referrerpolicy="no-referrer-when-downgrade" title="{{ statictranslations('Showroom Location') }}">
                                         </iframe>
                                         <a href="{{ $openInMapsUrl }}" target="_blank"
                                             class="absolute bottom-3 right-3 bg-white text-xs font-semibold text-primary px-3 py-1.5 rounded-lg shadow hover:shadow-md transition-all duration-200 flex items-center gap-1">
@@ -449,11 +435,11 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
-                                            Open in Maps
+                                            {{ statictranslations('Open in Maps') }}
                                         </a>
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-sm text-gray-600 bg-gray-100">
-                                            Map not available (N/A)
+                                            {{ statictranslations('Map not available (N/A)') }}
                                         </div>
                                     @endif
                                 </div>
@@ -471,3 +457,4 @@
 @push('scripts')
     <script src="{{ asset('js/contact.js') }}"></script>
 @endpush
+

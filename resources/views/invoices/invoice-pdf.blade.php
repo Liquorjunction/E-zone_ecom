@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
@@ -703,7 +703,7 @@
                                         </td>
                                     </tr>
                                 @endif
-                                {{-- <tr>
+                                <tr>
                                     <td class="sum-label">Shipping ({{ $shippingMethod }}) :</td>
                                     <td class="sum-val">
                                         @if ($shippingCost > 0)
@@ -712,7 +712,7 @@
                                             <span class="text-green">Free</span>
                                         @endif
                                     </td>
-                                </tr> --}}
+                                </tr>
                             </table>
                             <table class="sum-table total-row-wrap">
                                 <tr>

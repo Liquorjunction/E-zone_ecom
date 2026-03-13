@@ -121,9 +121,9 @@
                             <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
                         </svg>
                         @if ($productDiscountInfo['discount_percentage'] > 0)
-                            {{ number_format($productDiscountInfo['discount_percentage'], 0) }}% OFF
+                            {{ number_format($productDiscountInfo['discount_percentage'], 0) }}% {{ statictranslations('OFF') }}
                         @else
-                            {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($productDiscountInfo['discount_amount'], 2) }} OFF
+                            {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($productDiscountInfo['discount_amount'], 2) }} {{ statictranslations('OFF') }}
                         @endif
                     </span>
                 @endif
@@ -132,7 +132,7 @@
                         <svg class="w-2.5 h-2.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        NEW
+                        {{ statictranslations('NEW') }}
                     </span>
                 @endif
                 @if ($isBestseller)
@@ -140,7 +140,7 @@
                         <svg class="w-2.5 h-2.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        BESTSELLER
+                        {{ statictranslations('BESTSELLER') }}
                     </span>
                 @endif
             </div>
@@ -148,7 +148,7 @@
 
         {{-- Wishlist button ── top right of image --}}
         <button type="button"
-                aria-label="Add to wishlist"
+                aria-label="{{ statictranslations('Add to wishlist') }}"
                 data-product-variant-id="{{ $variantId }}"
                 data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}"
                 data-toast-ignore
@@ -183,12 +183,12 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
-                    In Stock
+                    {{ statictranslations('In Stock') }}
                 </div>
             @else
                 <div class="flex items-center gap-1.5 text-xs font-medium text-red-600 shrink-0">
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    Out of Stock
+                    {{ statictranslations('Out of Stock') }}
                 </div>
             @endif
         </div>
@@ -217,7 +217,7 @@
                 </span>
             @else
                 <div class="flex items-center text-yellow-400 text-sm">☆☆☆☆☆</div>
-                <span class="text-xs text-gray-400">No reviews yet</span>
+                <span class="text-xs text-gray-400">{{ statictranslations('No reviews yet') }}</span>
             @endif
         </div>
 
@@ -260,7 +260,7 @@
 
                 {{-- Compare --}}
                 <button type="button"
-                        aria-label="Compare product"
+                        aria-label="{{ statictranslations('Compare product') }}"
                         data-product-variant-id="{{ $variantId }}"
                         data-init-compared="{{ $isCompared ? '1' : '0' }}"
                         class="compare-btn no-toast w-10 h-10 rounded-xl {{ $isCompared ? 'bg-blue-50 text-blue-700 is-compared' : 'bg-gray-100 text-blue-500' }}
@@ -286,7 +286,7 @@
                         </svg>
                     </button>
                 @elseif ($stock <= 0)
-                    <button class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center cursor-not-allowed" disabled title="Out of Stock">
+                    <button class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center cursor-not-allowed" disabled title="{{ statictranslations('Out of Stock') }}">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>

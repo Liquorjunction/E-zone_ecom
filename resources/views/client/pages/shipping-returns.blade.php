@@ -12,8 +12,8 @@
         <div class="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
             <div class="container mx-auto px-4 py-6">
                 <x-breadcrumbs>
-                    <x-slot:title>Shipping & Returns</x-slot:title>
-                    <x-slot:content>Learn about our shipping and return policies.</x-slot:content>
+                    <x-slot:title>{{ statictranslations('Shipping & Returns') }}</x-slot:title>
+                    <x-slot:content>{{ statictranslations('Learn about our shipping and return policies.') }}</x-slot:content>
                 </x-breadcrumbs>
             </div>
         </div>

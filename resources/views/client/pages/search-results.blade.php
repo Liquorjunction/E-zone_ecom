@@ -14,11 +14,11 @@
       <div class="max-w-4xl">
         <!-- Breadcrumb -->
         <div class="flex items-center space-x-2 text-sm text-white/80 mb-4">
-          <a href="{{ route('home') }}" class="hover:text-white transition-colors">Home</a>
+          <a href="{{ route('home') }}" class="hover:text-white transition-colors">{{ statictranslations('Home') }}</a>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
-          <span class="text-white font-medium">Search Results</span>
+          <span class="text-white font-medium">{{ statictranslations('Search Results') }}</span>
         </div>
 
         <!-- Search Title -->
@@ -30,9 +30,9 @@
           </div>
           <div>
             <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-2">
-              Search Results
+              {{ statictranslations('Search Results') }}
             </h1>
-            <p class="text-lg text-white/90">Showing results for "<span class="font-semibold">{{ request('q') ?: 'wireless headphones' }}</span>"</p>
+            <p class="text-lg text-white/90">{{ statictranslations('Showing results for') }} "<span class="font-semibold">{{ request('q') ?: statictranslations('wireless headphones') }}</span>"</p>
           </div>
         </div>
 
@@ -42,19 +42,19 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
-            <span class="font-semibold">156 Products Found</span>
+            <span class="font-semibold">{{ statictranslations('156 Products Found') }}</span>
           </div>
           <div class="flex items-center text-white/90">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="font-semibold">Instant Results</span>
+            <span class="font-semibold">{{ statictranslations('Instant Results') }}</span>
           </div>
           <div class="flex items-center text-white/90">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
-            <span class="font-semibold">Best Deals Available</span>
+            <span class="font-semibold">{{ statictranslations('Best Deals Available') }}</span>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@
         <!-- Search Bar -->
         <div class="flex-1">
           <form method="GET" action="{{ route('search') }}" class="relative">
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Search products..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ statictranslations('Search products...') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
             <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2">
               <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -81,12 +81,12 @@
         <!-- Sort Dropdown -->
         <div class="lg:w-64">
           <select class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
-            <option>Sort by: Featured</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-            <option>Newest First</option>
-            <option>Best Selling</option>
-            <option>Top Rated</option>
+            <option>{{ statictranslations('Sort by: Featured') }}</option>
+            <option>{{ statictranslations('Price: Low to High') }}</option>
+            <option>{{ statictranslations('Price: High to Low') }}</option>
+            <option>{{ statictranslations('Newest First') }}</option>
+            <option>{{ statictranslations('Best Selling') }}</option>
+            <option>{{ statictranslations('Top Rated') }}</option>
           </select>
         </div>
 
@@ -117,9 +117,9 @@
               <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              Filters
+              {{ statictranslations('Filters') }}
             </h2>
-            <button class="text-sm font-medium text-primary hover:opacity-80 transition-opacity">Clear All</button>
+            <button class="text-sm font-medium text-primary hover:opacity-80 transition-opacity">{{ statictranslations('Clear All') }}</button>
           </div>
 
           <div class="space-y-6 max-h-[calc(100vh-250px)] overflow-y-auto pr-2">

@@ -52,7 +52,7 @@
     }">
         <div class="px-4">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold text-gray-900">{{ gtrans('Shop by Category') }}</h2>
+                <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Shop by Category') }}</h2>
                 <div class="flex gap-1">
                     <button @click="prev()" :disabled="currentSlide === 0"
                         :class="currentSlide === 0 ? 'opacity-30' : ''"
@@ -124,7 +124,7 @@
         }
     }">
         <div class="px-4">
-            <h2 class="text-lg font-bold text-gray-900 mb-4">{{ gtrans('Featured Promotions') }}</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-4">{{ statictranslations('Featured Promotions') }}</h2>
 
             <div class="relative overflow-hidden rounded-xl">
                 <div class="flex transition-transform duration-500 ease-out"
@@ -178,11 +178,11 @@
         <div class="px-4">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h2 class="text-lg font-bold text-gray-900">{{ gtrans('New Arrivals') }}</h2>
-                    <p class="text-xs text-gray-600">{{ gtrans('Latest products') }}</p>
+                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('New Arrivals') }}</h2>
+                    <p class="text-xs text-gray-600">{{ statictranslations('Latest products') }}</p>
                 </div>
                 <a href="{{ route('products.index') }}" class="text-xs font-semibold text-primary">
-                    {{ gtrans('View All') }} →
+                    {{ statictranslations('View All') }} →
                 </a>
             </div>
 
@@ -226,11 +226,11 @@
             <div class="px-4">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h2 class="text-lg font-bold text-gray-900">{{ gtrans('Best Sellers') }}</h2>
-                        <p class="text-xs text-gray-600">{{ gtrans('Top rated') }}</p>
+                        <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Best Sellers') }}</h2>
+                        <p class="text-xs text-gray-600">{{ statictranslations('Top rated') }}</p>
                     </div>
                     <a href="{{ route('products.index') }}" class="text-xs font-semibold text-primary">
-                        {{ gtrans('View All') }} →
+                        {{ statictranslations('View All') }} →
                     </a>
                 </div>
 
@@ -265,7 +265,7 @@
     {{-- Mobile Brands --}}
     <section class="py-6 bg-gray-50">
         <div class="px-4">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ gtrans('Trusted Brands') }}</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ statictranslations('Trusted Brands') }}</h2>
 
             @php
                 $brandCount = ($brands ?? collect())->count();
@@ -304,7 +304,7 @@
     {{-- Mobile Why Choose --}}
     <section class="py-6 bg-white">
         <div class="px-4">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ gtrans('Why Shop With Us?') }}</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ statictranslations('Why Shop With Us?') }}</h2>
 
             @php
                 $whyShopWithUs = isset($whyShopWithUs) ? $whyShopWithUs : collect();

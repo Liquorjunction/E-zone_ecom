@@ -9,15 +9,15 @@
         <div class="container mx-auto px-4">
 
             <x-breadcrumbs>
-                <x-slot:title>Our Showrooms Around the World</x-slot:title>
-                <x-slot:content>Discover our showrooms across the globe.</x-slot:content>
+                <x-slot:title>{{ statictranslations('Our Showrooms Around the World') }}</x-slot:title>
+                <x-slot:content>{{ statictranslations('Discover our showrooms across the globe.') }}</x-slot:content>
             </x-breadcrumbs>
 
             <div class="mb-8 flex items-center justify-center">
                 <div class="bg-white rounded-2xl shadow-sm overflow-hidden w-full max-w-7xl p-0 flex items-center justify-center">
                     <img
                         src="{{ asset('icon/showroom.png') }}"
-                        alt="Worldwide Map"
+                        alt="{{ statictranslations('Worldwide Map') }}"
                         class="w-full h-150 object-fill transition-transform duration-300 hover:scale-105"
                         style="background: linear-gradient(135deg, #f3f4f6 0%, #fff 100%);"
                     >

@@ -46,8 +46,8 @@
                          fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text"
-                           placeholder="Search electronics, brands, deals..."
+                          <input type="text"
+                              placeholder="{{ statictranslations('Search electronics, brands, deals...') }}"
                            class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                                   focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                                   transition-all duration-200 placeholder:text-gray-400 text-gray-700">
@@ -70,7 +70,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
                         </svg>
-                        <span class="uppercase">{{ session('locale', 'en') }}</span>
+                        <span class="uppercase">{{ session('locale', app()->getLocale()) }}</span>
                         <svg class="w-2.5 h-2.5 text-gray-400 transition-transform duration-150" :class="{ 'rotate-180': languageOpen }"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
@@ -103,7 +103,7 @@
 
                 {{-- Compare --}}
                 <a href="{{ route('product-compare') }}"
-                   title="{{ gtrans('Compare') }}"
+                   title="{{ statictranslations('Compare') }}"
                    class="hidden md:flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-gray-100 hover:text-gray-800 transition-all duration-150 relative group/tip">
                     <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -114,12 +114,12 @@
                     <span class="compare-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
                                  bg-blue-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
                                  leading-none shadow-sm {{ ($compareCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $compareCount ?? 0 }}</span>
-                    <span class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ gtrans('Compare') }}</span>
+                    <span class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ statictranslations('Compare') }}</span>
                 </a>
 
                 {{-- Wishlist --}}
                 <a href="{{ route('dashboard.wishlist') }}"
-                   title="{{ gtrans('Wishlist') }}"
+                   title="{{ statictranslations('Wishlist') }}"
                    class="hidden md:flex relative items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-red-50 hover:text-red-500 transition-all duration-150 group/tip">
                     <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -129,12 +129,12 @@
                     <span class="wishlist-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
                                  bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
                                  leading-none shadow-sm {{ ($wishlistCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $wishlistCount ?? 0 }}</span>
-                    <span class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ gtrans('Wishlist') }}</span>
+                    <span class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ statictranslations('Wishlist') }}</span>
                 </a>
 
                 {{-- Cart --}}
                 <a href="{{ route('cart') }}"
-                   title="{{ gtrans('Cart') }}"
+                   title="{{ statictranslations('Cart') }}"
                    class="relative flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-primary/8 hover:text-primary transition-all duration-150 group/tip">
                     <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@
                     <span class="cart-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
                                  bg-primary text-white text-[9px] rounded-full flex items-center justify-center font-bold
                                  leading-none shadow-sm shadow-primary/30">{{ $cartItemCount ?? 0 }}</span>
-                    <span class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ gtrans('Cart') }}</span>
+                    <span class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ statictranslations('Cart') }}</span>
                 </a>
 
                 {{-- Thin separator --}}
@@ -172,7 +172,7 @@
                             @endif
                             <div class="hidden lg:block text-left leading-tight">
                                 <p class="text-xs font-semibold text-gray-800 max-w-18 truncate">{{ Auth::user()->name }}</p>
-                                <p class="text-[10px] text-gray-400">Account</p>
+                                <p class="text-[10px] text-gray-400">{{ statictranslations('Account') }}</p>
                             </div>
                             <svg class="w-3 h-3 text-gray-400 transition-transform duration-150 shrink-0"
                                  :class="{ 'rotate-180': accountOpen }"
@@ -223,7 +223,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
                                             </svg>
                                         </span>
-                                        {{ gtrans($item['label']) }}
+                                        {{ statictranslations($item['label']) }}
                                     </a>
                                     @endforeach
                                 </nav>
@@ -241,7 +241,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                                     </svg>
                                                 </span>
-                                                {{ gtrans('Logout') }}
+                                                {{ statictranslations('Logout') }}
                                             </button>
                                         </form>
                                     </div>
@@ -260,7 +260,7 @@
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
-                        {{ gtrans('Login') }}
+                        {{ statictranslations('Login') }}
                     </a>
                 @endauth
 
@@ -299,7 +299,7 @@
                  fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-            <input type="text" placeholder="Search products..."
+            <input type="text" placeholder="{{ statictranslations('Search products...') }}"
                    class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                           transition-all duration-200">
@@ -312,7 +312,7 @@
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
-                {{ gtrans('Wishlist') }}
+                {{ statictranslations('Wishlist') }}
             </a>
             <a href="{{ route('product-compare') }}"
                class="relative flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors">
@@ -321,7 +321,7 @@
                     <rect x="14" y="3" width="7" height="17" rx="2"/>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 15h4"/>
                 </svg>
-                {{ gtrans('Compare') }}
+                {{ statictranslations('Compare') }}
                 <span class="compare-counter ml-auto min-w-4.25 h-4.25 px-0.5
                              bg-blue-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
                              leading-none shadow-sm {{ ($compareCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $compareCount ?? 0 }}</span>
@@ -330,7 +330,7 @@
 
         {{-- Language --}}
         <div class="mb-3">
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 px-0.5">{{ gtrans('Language') }}</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 px-0.5">{{ statictranslations('Language') }}</p>
             <div class="grid grid-cols-3 gap-1.5">
                 @foreach(['en' => 'EN', 'fr' => 'FR', 'ar' => 'AR'] as $code => $label)
                 <a href="{{ route('lang.switch', $code) }}"
@@ -362,13 +362,13 @@
                 <div class="grid grid-cols-2 gap-1.5">
                     <a href="{{ route('dashboard.overview') }}"
                        class="flex items-center justify-center py-2.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-primary/8 hover:text-primary transition-colors">
-                        {{ gtrans('Dashboard') }}
+                        {{ statictranslations('Dashboard') }}
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
                                 class="w-full flex items-center justify-center py-2.5 rounded-xl text-xs font-semibold bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
-                            {{ gtrans('Logout') }}
+                            {{ statictranslations('Logout') }}
                         </button>
                     </form>
                 </div>
@@ -381,7 +381,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
-                    {{ gtrans('Login') }}
+                    {{ statictranslations('Login') }}
                 </a>
             </div>
         @endauth

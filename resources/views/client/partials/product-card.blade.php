@@ -120,7 +120,7 @@
                             <path
                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        NEW
+                        {{ statictranslations('NEW') }}
                     </span>
                 @endif
 
@@ -131,13 +131,13 @@
                             <path
                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        BESTSELLER
+                        {{  statictranslations('BESTSELLER') }}
                     </span>
                 @endif
             </div>
         @endif
 
-        <button type="button" aria-label="Add to wishlist" data-product-variant-id="{{ $variantId }}"
+        <button type="button" aria-label="{{ statictranslations('Add to wishlist') }}" data-product-variant-id="{{ $variantId }}"
             data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}" data-toast-ignore
             class="wishlist-btn no-toast absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none {{ $isWishlisted ? 'opacity-100 is-wishlisted' : 'opacity-0 group-hover:opacity-100' }}"
             @if (!$variantId) disabled @endif>
@@ -157,7 +157,7 @@
         </button>
 
         <!-- Compare Product Icon Button -->
-        <button type="button" aria-label="Compare product" data-product-variant-id="{{ $variantId }}"
+        <button type="button" aria-label="{{ statictranslations('Compare product') }}" data-product-variant-id="{{ $variantId }}"
             data-init-compared="{{ $isCompared ? '1' : '0' }}"
             class="compare-btn no-toast absolute top-16 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none {{ $isCompared ? 'opacity-100 is-compared' : 'opacity-0 group-hover:opacity-100' }}"
             @if (!$variantId) disabled @endif>
@@ -183,14 +183,14 @@
                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
-                    In Stock
+                    {{ statictranslations('In Stock') }}
                 </div>
             @else
                 <div class="flex items-center gap-1.5 text-xs font-medium text-red-600">
                     <span class="flex h-2 w-2 relative">
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                     </span>
-                    Out of Stock
+                    {{ statictranslations('Out of Stock') }}
                 </div>
             @endif
         </div>
@@ -221,7 +221,7 @@
                 <div class="flex items-center text-yellow-400 text-base">
                     ☆☆☆☆☆
                 </div>
-                <span class="text-sm text-gray-400 font-medium">No reviews yet</span>
+                <span class="text-sm text-gray-400 font-medium">{{ statictranslations('No reviews yet') }}</span>
             @endif
         </div>
 
@@ -290,7 +290,7 @@
             @elseif ($stock <= 0)
                 <button
                     class="shrink-0 w-12 h-12 rounded-xl bg-gray-300 flex items-center justify-center cursor-not-allowed"
-                    disabled title="Out of Stock">
+                    disabled title="{{ statictranslations('Out of Stock') }}">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round"

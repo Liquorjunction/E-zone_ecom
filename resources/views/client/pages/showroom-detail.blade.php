@@ -31,7 +31,7 @@
 
             <x-breadcrumbs>
                 <x-slot:title>{{ $name }}</x-slot:title>
-                <x-slot:content>Find directions, opening hours, and contact details.</x-slot:content>
+                <x-slot:content>{{ statictranslations('Find directions, opening hours, and contact details.') }}</x-slot:content>
             </x-breadcrumbs>
 
             <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
