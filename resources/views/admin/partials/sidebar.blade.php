@@ -230,6 +230,21 @@
                     </li>
                 @endcanany
 
+                @can('cities.read')
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.cities.*') ? 'active' : '' }}"
+                            href="{{ route('admin.cities.index') }}">
+                            <i class="icon">
+                                <i class="bi bi-geo-alt"></i>
+                            </i>
+                            <span class="item-name">Cities</span>
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="hr-horizontal">
+                    </li>
+                @endcan
+
                 <!-- Manage Customers -->
                 @can('manageCustomers.read')
                     <li class="nav-item">

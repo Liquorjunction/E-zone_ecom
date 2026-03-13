@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\ContactUsController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CouponUsageController;
@@ -462,6 +463,18 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [ActivityLogController::class, 'index'])->name('index');
             Route::get('/data', [ActivityLogController::class, 'datatable'])->name('data')->middleware('can:napsLogs.read,admin');
             Route::get('/show/{id}', [ActivityLogController::class, 'show'])->name('show')->middleware('can:napsLogs.read,admin');
+        });
+
+        // Cities Routes
+        Route::prefix('cities')->name('cities.')->middleware('can:cities.read,admin')->group(function () {
+            Route::get('/', [CityController::class, 'index'])->name('index'); // permission: cities.read
+            Route::get('/data', [CityController::class, 'data'])->name('data');
+            Route::get('/create', [CityController::class, 'create'])->name('create')->middleware('can:cities.create,admin');
+            Route::post('/', [CityController::class, 'store'])->name('store')->middleware('can:cities.create,admin');
+            Route::get('/edit', [CityController::class, 'edit'])->name('edit')->middleware('can:cities.update,admin');
+            Route::put('/update', [CityController::class, 'update'])->name('update')->middleware('can:cities.update,admin');
+            Route::delete('/destroy', [CityController::class, 'destroy'])->name('destroy')->middleware('can:cities.delete,admin');
+            Route::patch('/toggle-status', [CityController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:cities.update,admin');
         });
     });
 });
