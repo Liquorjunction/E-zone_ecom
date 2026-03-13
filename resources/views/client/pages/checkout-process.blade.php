@@ -810,8 +810,8 @@
                                         <div><span
                                                 class="font-semibold text-gray-700 mr-2">{{ statictranslations('Payment Method') }}:</span>
                                             {{ $order->payment_method ?? '—' }}</div>
-                                        {{-- <div><span class="font-semibold text-gray-700 mr-2">Shipping Method:</span>
-                                            {{ $order->shipping_method ?? 'Standard Shipping' }}</div> --}}
+                                        <div><span class="font-semibold text-gray-700 mr-2">Shipping Method:</span>
+                                            {{ $order->shipping_method ?? 'Standard Shipping' }}</div>
                                     </div>
                                 </div>
 
@@ -881,7 +881,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    {{-- <div class="bg-amber-50 rounded-2xl p-6 border border-amber-200">
+                                    <div class="bg-amber-50 rounded-2xl p-6 border border-amber-200">
                                         <h3 class="font-bold text-gray-900 text-lg mb-3">Shipping Method</h3>
                                         <p class="text-lg font-semibold text-gray-900 capitalize">
                                             {{ $order->shipping_method ?? 'Standard Shipping' }}
@@ -891,7 +891,7 @@
                                                 <span class="text-green-600 text-sm font-normal">(Free)</span>
                                             @endif
                                         </p>
-                                    </div> --}}
+                                    </div>
                                 </div>
                             @endif
 

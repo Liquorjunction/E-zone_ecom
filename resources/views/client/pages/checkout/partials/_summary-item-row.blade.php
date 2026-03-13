@@ -31,12 +31,12 @@
 
     <div class="flex gap-4 flex-1 min-w-0">
         <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}"
-            alt="{{ optional($item->product)->name ?? 'Product' }}"
+            alt="{{ optional($item->product)->name ?? statictranslations('Product') }}"
             class="w-20 h-20 rounded-lg object-cover shadow-sm shrink-0">
 
         <div class="flex-1 min-w-0">
             <h4 class="font-semibold text-gray-900 text-xs mb-1 truncate">
-                {{ optional($item->product)->name ?? 'Product' }}
+                {{ optional($item->product)->name ?? statictranslations('Product') }}
             </h4>
 
             @if (optional($item->variant)->variant_name)
@@ -45,7 +45,7 @@
 
             @if ($showQtyCtrl)
                 <div class="flex items-center gap-2 mb-2">
-                    <p class="text-xs text-gray-600">Qty:</p>
+                    <p class="text-xs text-gray-600">{{ statictranslations('Qty:') }}</p>
                     <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
                         <button type="button"
                             class="summary-qty-decrease px-2 py-1 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 text-xs font-bold transition-all duration-300"
@@ -59,7 +59,7 @@
                     </div>
                 </div>
             @else
-                <p class="text-xs text-gray-500 mb-1">Qty: {{ $item->quantity }}</p>
+                <p class="text-xs text-gray-500 mb-1">{{ statictranslations('Qty:') }} {{ $item->quantity }}</p>
             @endif
 
             @if ($hasDiscount)
@@ -78,7 +78,7 @@
     @if ($showQtyCtrl)
         <button type="button"
             class="summary-remove-item-btn flex items-center justify-center text-red-500 hover:text-red-700 transition-colors duration-200 shrink-0"
-            data-item-id="{{ $item->id }}" title="Remove item">
+            data-item-id="{{ $item->id }}" title="{{ statictranslations('Remove item') }}">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

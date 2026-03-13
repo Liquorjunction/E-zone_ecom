@@ -15,7 +15,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
         </svg>
-        Have a Coupon Code?
+        {{ statictranslations('Have a Coupon Code?') }}
     </h3>
 
     @if ($appliedCoupon)
@@ -30,12 +30,12 @@
                     </div>
                     <div>
                         <p class="font-bold text-gray-900 text-sm">{{ $appliedCoupon['code'] }}</p>
-                        <p class="text-xs text-gray-600">Coupon Applied</p>
+                        <p class="text-xs text-gray-600">{{ statictranslations('Coupon Applied') }}</p>
                     </div>
                 </div>
                 <button type="button" id="remove-coupon-btn{{ $suffix }}"
                     class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
-                    Remove
+                    {{ statictranslations('Remove') }}
                 </button>
             </div>
         </div>
@@ -43,11 +43,11 @@
         {{-- Coupon input form --}}
         <div class="flex gap-3" id="coupon-input-form{{ $suffix }}">
             <input type="text" id="coupon-code-input{{ $suffix }}"
-                placeholder="Enter coupon code"
+                placeholder="{{ statictranslations('Enter coupon code') }}"
                 class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
             <button type="button" id="apply-coupon-btn{{ $suffix }}"
                 class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                Apply
+                {{ statictranslations('Apply') }}
             </button>
         </div>
     @endif
