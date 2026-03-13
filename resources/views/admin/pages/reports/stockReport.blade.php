@@ -36,8 +36,12 @@
                                             <td>{{ optional($report->product)->name ?? 'N/A' }}</td>
                                             <td>{{ optional($report->variant)->variant_name ?? 'N/A' }}</td>
                                             <td>{{ optional(optional($report->product)->brand)->name ?? 'N/A' }}</td>
-                                            <td>{{ optional(optional($report->product)->category)->{'category-name'} ?? 'N/A' }}</td>
-                                            <td>{{ optional(optional($report->product)->subCategory)->{'sub-category-name'} ?? 'N/A' }}</td>
+                                            <td>
+                                                {{ optional(optional($report->product)->category)?->getTranslation('category-name', 'en') ?? 'N/A' }}
+                                            </td>
+                                            <td>
+                                                {{ optional(optional($report->product)->subCategory)?->getTranslation('sub-category-name', 'en') ?? 'N/A' }}
+                                            </td>
                                             <td>
                                                 @if($report->warehouse_id && $report->warehouse)
                                                     <span class="badge bg-primary">Warehouse</span> {{ $report->warehouse->warehouse_name }}
