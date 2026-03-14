@@ -11,7 +11,7 @@
         </svg>
       </div>
       <div>
-        <h4 class="font-bold text-gray-900">{{ $review->reviewer_name ?? 'Anonymous' }}</h4>
+        <h4 class="font-bold text-gray-900">{{ $review->reviewer_name ?? statictranslations('Anonymous') }}</h4>
         <div class="flex items-center gap-2 mt-1">
           <div class="flex gap-0.5">
             @for($i = 1; $i <= 5; $i++)
@@ -21,7 +21,7 @@
             @endfor
           </div>
           @if(isset($review->is_verified_purchase) && $review->is_verified_purchase)
-            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Verified Purchase</span>
+            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{{ statictranslations('Verified Purchase') }}</span>
           @endif
         </div>
       </div>
@@ -51,7 +51,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        Your review is pending approval
+        {{ statictranslations('Your review is pending approval') }}
       </p>
     </div>
   @endif

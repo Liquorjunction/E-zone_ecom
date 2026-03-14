@@ -1,6 +1,6 @@
 @extends('client.pages.dashboard-layout')
 
-@section('dashboard-title', 'My Profile')
+@section('dashboard-title', statictranslations('My Profile'))
 
 @section('dashboard-content')
     {{-- Profile Header Card --}}
@@ -33,7 +33,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span class="text-xs text-white font-medium">Change</span>
+                                <span class="text-xs text-white font-medium">{{ statictranslations('Change') }}</span>
                             </div>
                         </button>
                         {{-- Online Status Badge --}}
@@ -52,12 +52,12 @@
                         @if (auth()->user()->is_premium)
                             <span
                                 class="px-4 py-1.5 bg-linear-to-r from-primary to-primary/80 text-white text-xs font-semibold rounded-full shadow-sm">
-                                ✨ Premium Member
+                                ✨ {{ statictranslations('Premium Member') }}
                             </span>
                         @endif
                         <span
                             class="px-4 py-1.5 bg-white text-gray-700 text-xs font-semibold rounded-full border border-gray-200 shadow-sm">
-                            📅 Member since {{ auth()->user()->created_at->format('Y') }}
+                            📅 {{ statictranslations('Member since') }} {{ auth()->user()->created_at->format('Y') }}
                         </span>
                     </div>
                 </div>

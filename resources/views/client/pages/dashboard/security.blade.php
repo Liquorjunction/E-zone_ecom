@@ -10,16 +10,16 @@
         <div class="flex items-center justify-between mb-4 lg:mb-6">
             <h3 class="text-lg lg:text-xl font-bold text-gray-900 flex items-center">
                 <span class="w-1 h-6 lg:h-7 rounded-full bg-primary mr-3"></span>
-                Change Password
+                {{ statictranslations('Change Password') }}
             </h3>
-            <span class="text-xs text-gray-500">Last updated: {{ $lastPasswordUpdate ? \Carbon\Carbon::parse($lastPasswordUpdate)->diffForHumans() : 'Never' }}</span>
+            <span class="text-xs text-gray-500">{{ statictranslations('Last updated:') }} {{ $lastPasswordUpdate ? \Carbon\Carbon::parse($lastPasswordUpdate)->diffForHumans() : statictranslations('Never') }}</span>
         </div>
 
         <div class="max-w-2xl space-y-4 lg:space-y-5">
             {{-- Current Password --}}
             <div>
                 <label for="current_password" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Current Password *
+                    {{ statictranslations('Current Password') }} *
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -30,7 +30,7 @@
                     </div>
                     <input type="password" id="current_password" name="current_password" required
                         class="w-full pl-12 pr-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
-                        placeholder="Enter your current password">
+                        placeholder="{{ statictranslations('Enter your current password') }}">
                     <button type="button" class="absolute inset-y-0 right-0 pr-4 flex items-center js-toggle-password"
                         data-target="current_password">
                         <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor"
@@ -47,7 +47,7 @@
             {{-- New Password --}}
             <div>
                 <label for="new_password" class="block text-sm font-semibold text-gray-700 mb-2">
-                    New Password *
+                    {{ statictranslations('New Password') }} *
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -58,7 +58,7 @@
                     </div>
                     <input type="password" id="new_password" name="new_password" required
                         class="w-full pl-12 pr-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
-                        placeholder="Enter your new password">
+                        placeholder="{{ statictranslations('Enter your new password') }}">
                     <button type="button" class="absolute inset-y-0 right-0 pr-4 flex items-center js-toggle-password"
                         data-target="new_password">
                         <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor"

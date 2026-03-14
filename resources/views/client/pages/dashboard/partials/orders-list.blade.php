@@ -4,12 +4,12 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <div class="flex-1 lg:max-w-md">
                     <label for="search" class="block text-xs font-semibold text-gray-700 mb-2">
-                        Search Orders
+                        {{ statictranslations('Search Orders') }}
                     </label>
                     <div class="relative">
                         <input type="text" name="search" id="search"
                             class="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-                            placeholder="Order number, product name..." value="{{ request('search', '') }}"
+                            placeholder="{{ statictranslations('Order number, product name...') }}" value="{{ request('search', '') }}"
                             autocomplete="off">
                         <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,37 +32,35 @@
                 <div class="flex flex-col sm:flex-row gap-4 lg:gap-3">
                     <div class="flex-1 sm:w-44">
                         <label for="status" class="block text-xs font-semibold text-gray-700 mb-2">
-                            Status
+                            {{ statictranslations('Status') }}
                         </label>
                         <div class="relative">
                             <select name="status" id="status"
                                 class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white cursor-pointer">
-                                <option value="">All Statuses</option>
-                                <<<<<<< Updated upstream <option value="pending"
-                                    @if (request('status') == 'pending') selected @endif>Pending</option>
+                                <option value="">{{ statictranslations('All Statuses') }}</option>
+                                <option value="pending"
+                                    @if (request('status') == 'pending') selected @endif>{{ statictranslations('Pending') }}</option>
                                     <option value="order_confirmation"
-                                        @if (request('status') == 'order_confirmation') selected @endif>Order Confirmation</option>
-                                    <option value="shipped" @if (request('status') == 'shipped') selected @endif>Shipped
+                                        @if (request('status') == 'order_confirmation') selected @endif>{{ statictranslations('Order Confirmation') }}</option>
+                                    <option value="shipped" @if (request('status') == 'shipped') selected @endif>{{ statictranslations('Shipped') }}
                                     </option>
                                     <option value="out_for_delivery" @if (request('status') == 'out_for_delivery') selected @endif>
-                                        Out For Delivery</option>
+                                        {{ statictranslations('Out For Delivery') }}</option>
                                     <option value="delivered" @if (request('status') == 'delivered') selected @endif>
-                                        Delivered</option>
+                                        {{ statictranslations('Delivered') }}</option>
                                     <option value="cancelled" @if (request('status') == 'cancelled') selected @endif>
-                                        Cancelled</option>
-                                    =======
+                                        {{ statictranslations('Cancelled') }}</option>
                                     <option value="processing" @if (request('status') == 'processing') selected @endif>
-                                        Processing
+                                        {{ statictranslations('Processing') }}
                                     </option>
-                                    <option value="shipped" @if (request('status') == 'shipped') selected @endif>Shipped
+                                    <option value="shipped" @if (request('status') == 'shipped') selected @endif>{{ statictranslations('Shipped') }}
                                     </option>
                                     <option value="delivered" @if (request('status') == 'delivered') selected @endif>
-                                        Delivered
+                                        {{ statictranslations('Delivered') }}
                                     </option>
                                     <option value="cancelled" @if (request('status') == 'cancelled') selected @endif>
-                                        Cancelled
+                                        {{ statictranslations('Cancelled') }}
                                     </option>
-                                    >>>>>>> Stashed changes
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,19 +72,19 @@
                     </div>
                     <div class="flex-1 sm:w-44">
                         <label for="sort" class="block text-xs font-semibold text-gray-700 mb-2">
-                            Sort By
+                            {{ statictranslations('Sort By') }}
                         </label>
                         <div class="relative">
                             <select name="sort" id="sort"
                                 class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white cursor-pointer">
-                                <option value="latest" @if (request('sort', 'latest') == 'latest') selected @endif>Newest First
+                                <option value="latest" @if (request('sort', 'latest') == 'latest') selected @endif>{{ statictranslations('Newest First') }}
                                 </option>
-                                <option value="oldest" @if (request('sort') == 'oldest') selected @endif>Oldest First
+                                <option value="oldest" @if (request('sort') == 'oldest') selected @endif>{{ statictranslations('Oldest First') }}
                                 </option>
-                                <option value="amount_high" @if (request('sort') == 'amount_high') selected @endif>Highest
-                                    Amount</option>
-                                <option value="amount_low" @if (request('sort') == 'amount_low') selected @endif>Lowest
-                                    Amount</option>
+                                <option value="amount_high" @if (request('sort') == 'amount_high') selected @endif>{{ statictranslations('Highest Amount') }}
+                                </option>
+                                <option value="amount_low" @if (request('sort') == 'amount_low') selected @endif>{{ statictranslations('Lowest Amount') }}
+                                </option>
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,7 +108,7 @@
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     <span
-                        id="filter-toggle-text">{{ request('date_from') || request('date_to') ? 'Hide Advanced Filters' : 'Advanced Filters' }}</span>
+                        id="filter-toggle-text">{{ request('date_from') || request('date_to') ? statictranslations('Hide Advanced Filters') : statictranslations('Advanced Filters') }}</span>
                     @php
                         $hasDateFilters = request('date_from') || request('date_to');
                         $dateFilterCount = (request('date_from') ? 1 : 0) + (request('date_to') ? 1 : 0);
@@ -128,7 +126,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                         <label for="date_from" class="block text-xs font-semibold text-gray-700 mb-2">
-                            Date From
+                            {{ statictranslations('Date From') }}
                         </label>
                         <div class="relative">
                             <input type="date" name="date_from" id="date_from"
@@ -144,7 +142,7 @@
                     </div>
                     <div>
                         <label for="date_to" class="block text-xs font-semibold text-gray-700 mb-2">
-                            Date To
+                            {{ statictranslations('Date To') }}
                         </label>
                         <div class="relative">
                             <input type="date" name="date_to" id="date_to"
@@ -184,10 +182,10 @@
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
                     <span class="font-medium">
-                        {{ $totalFilterCount }} filter{{ $totalFilterCount !== 1 ? 's' : '' }} active
+                        {{ $totalFilterCount }} {{ statictranslations('filter') }}{{ $totalFilterCount !== 1 ? 's' : '' }} {{ statictranslations('active') }}
                     </span>
                 @else
-                    <span>No filters applied</span>
+                    <span>{{ statictranslations('No filters applied') }}</span>
                 @endif
             </div>
             <div class="flex items-center gap-2">
@@ -198,7 +196,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        Clear All
+                        {{ statictranslations('Clear All') }}
                     </a>
                 @endif
                 <button type="submit"
@@ -207,7 +205,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
-                    Apply Filters
+                    {{ statictranslations('Apply Filters') }}
                 </button>
             </div>
         </div>
@@ -291,7 +289,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            View Details
+                            {{ statictranslations('View Details') }}
                         </a>
                         @if (Auth::check() && $order->user_id === Auth::id() && in_array($status, ['pending', 'paid'], true))
                             <button type="button"
@@ -302,7 +300,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                                Cancel
+                                {{ statictranslations('Cancel') }}
                             </button>
                         @endif
                     </div>
@@ -317,19 +315,19 @@
                     </svg>
                 </div>
                 @if ($hasFilters)
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No orders found</h3>
-                    <p class="text-gray-600 mb-4">Try adjusting your filters to see more results.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ statictranslations('No orders found') }}</h3>
+                    <p class="text-gray-600 mb-4">{{ statictranslations('Try adjusting your filters to see more results.') }}</p>
                     <a href="{{ url()->current() }}"
                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        Clear All Filters
+                        {{ statictranslations('Clear All Filters') }}
                     </a>
                 @else
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
-                    <p class="text-gray-600">Your order history will appear here once you make a purchase.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ statictranslations('No orders yet') }}</h3>
+                    <p class="text-gray-600">{{ statictranslations('Your order history will appear here once you make a purchase.') }}</p>
                 @endif
             </div>
         @endforelse
@@ -407,7 +405,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        View
+                        {{ statictranslations('View') }}
                     </a>
                     @if (Auth::check() && $order->user_id === Auth::id() && in_array($status, ['pending'], true))
                         <button type="button"
@@ -418,7 +416,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            Cancel
+                            {{ statictranslations('Cancel') }}
                         </button>
                     @endif
                 </div>
@@ -432,19 +430,19 @@
                     </svg>
                 </div>
                 @if ($hasFilters)
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No orders found</h3>
-                    <p class="text-gray-600 mb-4">Try adjusting your filters to see more results.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ statictranslations('No orders found') }}</h3>
+                    <p class="text-gray-600 mb-4">{{ statictranslations('Try adjusting your filters to see more results.') }}</p>
                     <a href="{{ url()->current() }}"
                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        Clear All Filters
+                        {{ statictranslations('Clear All Filters') }}
                     </a>
                 @else
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
-                    <p class="text-gray-600">Your order history will appear here.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ statictranslations('No orders yet') }}</h3>
+                    <p class="text-gray-600">{{ statictranslations('Your order history will appear here.') }}</p>
                 @endif
             </div>
         @endforelse
@@ -453,9 +451,9 @@
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
             <nav class="flex flex-col sm:flex-row items-center justify-between gap-4" aria-label="Pagination">
                 <div class="text-sm text-gray-600 text-center sm:text-left">
-                    Showing <span class="font-semibold text-gray-900">{{ $orders->firstItem() ?? 0 }}</span> to
-                    <span class="font-semibold text-gray-900">{{ $orders->lastItem() ?? 0 }}</span> of
-                    <span class="font-semibold text-gray-900">{{ $orders->total() ?? 0 }}</span> results
+                    {{ statictranslations('Showing') }} <span class="font-semibold text-gray-900">{{ $orders->firstItem() ?? 0 }}</span> {{ statictranslations('to') }}
+                    <span class="font-semibold text-gray-900">{{ $orders->lastItem() ?? 0 }}</span> {{ statictranslations('of') }}
+                    <span class="font-semibold text-gray-900">{{ $orders->total() ?? 0 }}</span> {{ statictranslations('results') }}
                 </div>
                 <div class="w-full sm:w-auto">
                     {{ $orders->withQueryString()->links() }}
@@ -477,21 +475,20 @@
         <form id="cancel-order-form" method="POST" action="{{ route('client.orders.cancel') }}">
             @csrf
             <input type="hidden" name="id" id="cancel-order-id" value="">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Order <span id="cancel-order-number"
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ statictranslations('Cancel Order') }} <span id="cancel-order-number"
                     class="text-primary"></span></h3>
-            <p class="text-gray-700 mb-4">Please provide a reason for cancellation. This action cannot be undone.</p>
+            <p class="text-gray-700 mb-4">{{ statictranslations('Please provide a reason for cancellation. This action cannot be undone.') }}</p>
             <div class="mb-4">
-                <label for="cancel-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason <span
+                <label for="cancel-reason" class="block text-sm font-medium text-gray-700 mb-1">{{ statictranslations('Reason') }} <span
                         class="text-red-500">*</span></label>
                 <textarea name="reason" id="cancel-reason" rows="3" required
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"></textarea>
             </div>
             <div class="flex items-center justify-end gap-2">
                 <button type="button"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">Close</button>
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">{{ statictranslations('Close') }}</button>
                 <button type="submit"
-                    class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">Confirm
-                    Cancel</button>
+                    class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">{{ statictranslations('Confirm Cancel') }}</button>
             </div>
         </form>
     </div>

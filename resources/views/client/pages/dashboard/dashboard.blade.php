@@ -1,14 +1,15 @@
 @extends('client.pages.dashboard-layout')
 
-@section('dashboard-title', 'Dashboard')
+@section('dashboard-title', statictranslations('Dashboard'))
 
 @section('dashboard-content')
     @include('client.pages.dashboard._stats')
 
     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100">
         <div class="flex items-center justify-between p-6 border-b-2 border-gray-100">
-            <h2 class="text-2xl font-bold text-gray-900">Recent Orders</h2>
-            <a href="{{ route('dashboard.orders') }}" class="text-sm font-semibold text-primary">View All</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ statictranslations('Recent Orders') }}</h2>
+            <a href="{{ route('dashboard.orders') }}"
+                class="text-sm font-semibold text-primary">{{ statictranslations('View All') }}</a>
         </div>
         <div class="hidden lg:block">
             @if (!empty($orders) && $orders->count())
@@ -35,27 +36,35 @@
                                 <span>{{ optional($order->created_at)->format('M d, Y') }}</span>
                                 @if ($status === 'processing')
                                     <span
-                                        class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">Processing</span>
+                                        class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">{{ statictranslations('Processing') }}</span>
                                 @elseif($status === 'cancelled')
                                     <span
-                                        class="px-3 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">Cancelled</span>
+                                        class="px-3 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">{{ statictranslations('Cancelled') }}</span>
+                                @elseif($status === 'shipped')
+                                    <span
+                                        class="px-3 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full">{{ statictranslations('Shipped') }}</span>
+                                @elseif($status === 'delivered')
+                                    <span
+                                        class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations('Delivered') }}</span>
+                                @elseif($status === 'returned')
+                                    <span
+                                        class="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full">{{ statictranslations('Returned') }}</span>
                                 @else
                                     <span
-                                        class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ ucfirst($status) }}</span>
+                                        class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations(ucfirst($status)) }}</span>
                                 @endif
                             </div>
                         </div>
                         <span class="font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</span>
                         <div class="flex items-center gap-2 ml-4">
                             <a href="{{ route('order-detail', ['order' => $order->id]) }}"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors">View
-                                Details</a>
+                                class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors">{{ statictranslations('View Details') }}</a>
                             @if (Auth::check() && $order->user_id === Auth::id() && $canCancel)
                                 <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}"
                                     onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                     @csrf
                                     <button type="submit"
-                                        class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">Cancel</button>
+                                        class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">{{ statictranslations('Cancel') }}</button>
                                 </form>
                             @endif
                         </div>
@@ -68,7 +77,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
-                    <p class="text-gray-500 font-medium">You have no recent orders.</p>
+                    <p class="text-gray-500 font-medium">{{ statictranslations('You have no recent orders.') }}</p>
                 </div>
             @endif
         </div>
@@ -78,7 +87,8 @@
                     <div class="p-4 border-b-2 border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                         <div class="flex items-start justify-between mb-3">
                             <div>
-                                <p class="text-sm font-semibold text-primary">{{ $order->order_number ?? '#' . $order->id }}
+                                <p class="text-sm font-semibold text-primary">
+                                    {{ $order->order_number ?? '#' . $order->id }}
                                 </p>
                                 <p class="text-xs text-gray-600 mt-1">{{ optional($order->created_at)->format('M d, Y') }}
                                 </p>
@@ -89,10 +99,19 @@
                             @endphp
                             @if ($status === 'processing')
                                 <span
-                                    class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">Processing</span>
+                                    class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">{{ statictranslations('Processing') }}</span>
                             @elseif($status === 'cancelled')
                                 <span
-                                    class="px-3 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">Cancelled</span>
+                                    class="px-3 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">{{ statictranslations('Cancelled') }}</span>
+                            @elseif($status === 'shipped')
+                                <span
+                                    class="px-3 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full">{{ statictranslations('Shipped') }}</span>
+                            @elseif($status === 'delivered')
+                                <span
+                                    class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations('Delivered') }}</span>
+                            @elseif($status === 'returned')
+                                <span
+                                    class="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full">{{ statictranslations('Returned') }}</span>
                             @else
                                 <span
                                     class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ ucfirst($status) }}</span>
@@ -119,14 +138,13 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('order-detail', ['order' => $order->id]) }}"
-                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">View
-                                    Details</a>
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">{{ statictranslations('View Details') }}</a>
                                 @if (Auth::check() && $order->user_id === Auth::id() && $canCancel)
                                     <form method="POST" action="{{ route('client.orders.cancel', $order->id) }}"
                                         onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                         @csrf
                                         <button type="submit"
-                                            class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">Cancel</button>
+                                            class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">{{ statictranslations('Cancel') }}</button>
                                     </form>
                                 @endif
                             </div>
@@ -140,7 +158,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
-                    <p class="text-gray-500 font-medium">You have no recent orders.</p>
+                    <p class="text-gray-500 font-medium">{{ statictranslations('You have no recent orders.') }}</p>
                 </div>
             @endif
         </div>

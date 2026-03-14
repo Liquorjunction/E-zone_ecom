@@ -1,14 +1,14 @@
 @extends('client.pages.dashboard-layout')
 
-@section('dashboard-title', 'My Wishlist')
+@section('dashboard-title', statictranslations('My Wishlist'))
 
 @section('dashboard-content')
   @if(isset($wishlist) && $wishlist->count())
     {{-- Wishlist Header with Count --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 lg:mb-6 p-4 lg:p-6 bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100">
       <div>
-        <h2 class="text-xl lg:text-2xl font-bold text-gray-900">Your Wishlist</h2>
-        <p class="text-sm text-gray-600 mt-1"><span id="wishlist-count">{{ $wishlist->count() }}</span> {{ Str::plural('item', $wishlist->count()) }} saved</p>
+        <h2 class="text-xl lg:text-2xl font-bold text-gray-900">{{ statictranslations('Your Wishlist') }}</h2>
+        <p class="text-sm text-gray-600 mt-1"><span id="wishlist-count">{{ $wishlist->count() }}</span> {{ statictranslations('item') }}{{ $wishlist->count() > 1 ? 's' : '' }} {{ statictranslations('saved') }}</p>
       </div>
     </div>
 
@@ -47,7 +47,7 @@
               data-toast-ignore
               aria-pressed="true"
               class="wishlist-btn no-toast is-wishlisted opacity-100 absolute top-2 right-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
-              title="Remove from wishlist"
+              title="{{ statictranslations('Remove from wishlist') }}"
             >
               <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />

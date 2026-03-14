@@ -2,7 +2,7 @@
   <a href="{{ route('dashboard.orders') }}" class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow block focus:outline-none focus:ring-2 focus:ring-primary/50">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">Total Orders</p>
+        <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">{{ statictranslations('Total Orders') }}</p>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900">{{ $ordersCount ?? 0 }}</p>
       </div>
       <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
@@ -16,7 +16,7 @@
   <a href="{{ route('dashboard.wishlist') }}" class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow block focus:outline-none focus:ring-2 focus:ring-primary/50">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">Wishlist Items</p>
+        <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">{{ statictranslations('Wishlist Items') }}</p>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900">{{ $wishlistCount ?? 0 }}</p>
       </div>
       <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
@@ -30,7 +30,7 @@
   <a href="{{ route('dashboard.addresses') }}" class="group bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6 hover:shadow-md transition-shadow block focus:outline-none focus:ring-2 focus:ring-primary/50 sm:col-span-2 lg:col-span-1">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">Saved Addresses</p>
+        <p class="text-xs lg:text-sm font-medium text-gray-500 mb-1">{{ statictranslations('Saved Addresses') }}</p>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900">{{ $addressesCount ?? 0 }}</p>
       </div>
       <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
