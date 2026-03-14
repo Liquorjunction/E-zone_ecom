@@ -4,6 +4,7 @@ namespace App\Repositories\Client\Repositories;
 
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface;
 use App\Models\Address;
+use Illuminate\Support\Facades\Log;
 
 class AddressRepository implements AddressRepositoryInterface
 {
@@ -14,11 +15,13 @@ class AddressRepository implements AddressRepositoryInterface
 
     public function create(array $data)
     {
+        Log::debug('Creating new address', ['data' => $data]);
         return Address::create($data);
     }
 
     public function update(int $id, array $data)
     {
+        Log::debug('Updating address', ['id' => $id, 'data' => $data]);
         $address = Address::find($id);
         if ($address) {
             $address->update($data);

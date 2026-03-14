@@ -26,6 +26,12 @@
                     @method('PUT')
                     <input type="hidden" name="id" value="{{ old('id', optional($cityItem)->id ?? request('id')) }}">
 
+                    @if ($errors->any())
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Please fix the highlighted fields.</strong>
+                        </div>
+                    @endif
+
                     <div class="row g-3">
                         <div class="col-lg-8 col-md-12">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -52,7 +58,7 @@
                                 <div class="tab-pane fade show active" id="en" role="tabpanel">
                                     <div class="mb-3">
                                         <label for="city_name_en" class="form-label">City Name (EN) <span class="text-danger">*</span></label>
-                                        <input type="text" name="city_name[en]" id="city_name_en" class="form-control"
+                                        <input type="text" name="city_name[en]" id="city_name_en" class="form-control @error('city_name.en') is-invalid @enderror"
                                             value="{{ old('city_name.en', optional($cityItem)?->getTranslation('city_name', 'en')) }}"
                                             required>
                                         @error('city_name.en')
@@ -62,7 +68,7 @@
 
                                     <div class="mb-3">
                                         <label for="country_name_en" class="form-label">Country Name (EN) <span class="text-danger">*</span></label>
-                                        <input type="text" name="country_name[en]" id="country_name_en" class="form-control"
+                                        <input type="text" name="country_name[en]" id="country_name_en" class="form-control @error('country_name.en') is-invalid @enderror"
                                             value="{{ old('country_name.en', optional($cityItem)?->getTranslation('country_name', 'en')) }}"
                                             required>
                                         @error('country_name.en')
@@ -74,7 +80,7 @@
                                 <div class="tab-pane fade" id="fr" role="tabpanel">
                                     <div class="mb-3">
                                         <label for="city_name_fr" class="form-label">City Name (FR)</label>
-                                        <input type="text" name="city_name[fr]" id="city_name_fr" class="form-control"
+                                        <input type="text" name="city_name[fr]" id="city_name_fr" class="form-control @error('city_name.fr') is-invalid @enderror"
                                             value="{{ old('city_name.fr', optional($cityItem)?->getTranslation('city_name', 'fr')) }}">
                                         @error('city_name.fr')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -83,7 +89,7 @@
 
                                     <div class="mb-3">
                                         <label for="country_name_fr" class="form-label">Country Name (FR)</label>
-                                        <input type="text" name="country_name[fr]" id="country_name_fr" class="form-control"
+                                        <input type="text" name="country_name[fr]" id="country_name_fr" class="form-control @error('country_name.fr') is-invalid @enderror"
                                             value="{{ old('country_name.fr', optional($cityItem)?->getTranslation('country_name', 'fr')) }}">
                                         @error('country_name.fr')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -94,7 +100,7 @@
                                 <div class="tab-pane fade" id="ar" role="tabpanel">
                                     <div class="mb-3" dir="rtl">
                                         <label for="city_name_ar" class="form-label">City Name (AR)</label>
-                                        <input type="text" name="city_name[ar]" id="city_name_ar" class="form-control"
+                                        <input type="text" name="city_name[ar]" id="city_name_ar" class="form-control @error('city_name.ar') is-invalid @enderror"
                                             value="{{ old('city_name.ar', optional($cityItem)?->getTranslation('city_name', 'ar')) }}">
                                         @error('city_name.ar')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -103,7 +109,7 @@
 
                                     <div class="mb-3" dir="rtl">
                                         <label for="country_name_ar" class="form-label">Country Name (AR)</label>
-                                        <input type="text" name="country_name[ar]" id="country_name_ar" class="form-control"
+                                        <input type="text" name="country_name[ar]" id="country_name_ar" class="form-control @error('country_name.ar') is-invalid @enderror"
                                             value="{{ old('country_name.ar', optional($cityItem)?->getTranslation('country_name', 'ar')) }}">
                                         @error('country_name.ar')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -140,3 +146,25 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                let targetTab = null;
+
+                @if ($errors->has('city_name.fr') || $errors->has('country_name.fr'))
+                    targetTab = document.querySelector('#fr-tab');
+                @elseif ($errors->has('city_name.ar') || $errors->has('country_name.ar'))
+                    targetTab = document.querySelector('#ar-tab');
+                @elseif ($errors->has('city_name.en') || $errors->has('country_name.en') || $errors->has('status'))
+                    targetTab = document.querySelector('#en-tab');
+                @endif
+
+                if (targetTab && window.bootstrap && window.bootstrap.Tab) {
+                    window.bootstrap.Tab.getOrCreateInstance(targetTab).show();
+                }
+            });
+        </script>
+    @endif
+@endpush

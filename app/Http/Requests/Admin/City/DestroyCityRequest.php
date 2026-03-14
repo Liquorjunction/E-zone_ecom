@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Requests\Admin\City;
 
@@ -15,7 +15,7 @@ class DestroyCityRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'sometimes|integer',
+            'id' => 'required|integer|exists:cities,id',
         ];
     }
 }

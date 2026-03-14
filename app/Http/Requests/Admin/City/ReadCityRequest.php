@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\City;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
 class ReadCityRequest extends FormRequest
@@ -15,7 +16,12 @@ class ReadCityRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'sometimes|integer',
+            'id' => [
+                Rule::requiredIf($this->routeIs('admin.cities.edit')),
+                'nullable',
+                'integer',
+                'exists:cities,id',
+            ],
         ];
     }
 }

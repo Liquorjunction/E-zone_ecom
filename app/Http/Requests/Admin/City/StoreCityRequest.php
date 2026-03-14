@@ -2,14 +2,26 @@
 
 namespace App\Http\Requests\Admin\City;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class StoreCityRequest extends FormRequest
 {
     public function authorize()
     {
-        return Auth::guard('admin')->user()->can('cities.create');
+        $admin = Auth::guard('admin')->user();
+        $authorized = $admin?->can('cities.create') ?? false;
+
+        if (! $authorized) {
+            Log::warning('StoreCityRequest authorization failed', [
+                'admin_id' => $admin?->id,
+                'route' => optional($this->route())->getName(),
+            ]);
+        }
+
+        return $authorized;
     }
 
     public function rules()
@@ -59,5 +71,16 @@ class StoreCityRequest extends FormRequest
             'country_name.fr' => 'country name in French',
             'status' => 'status',
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        Log::warning('StoreCityRequest validation failed', [
+            'errors' => $validator->errors()->toArray(),
+            'route' => optional($this->route())->getName(),
+            'input' => $this->all(),
+        ]);
+
+        parent::failedValidation($validator);
     }
 }

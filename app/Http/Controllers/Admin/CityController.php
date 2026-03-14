@@ -37,6 +37,7 @@ class CityController extends Controller
     public function store(StoreCityRequest $request, CitiesRepo $cityRepo)
     {
         try {
+            Log::debug('City creation request received', ['request_data' => $request->all()]);
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
@@ -61,6 +62,7 @@ class CityController extends Controller
 
             return redirect()->route('admin.cities.index')->with('success', 'City created successfully.');
         } catch (\Exception $e) {
+            Log::debug('City creation failed', ['error' => $e->getMessage(), 'request_data' => $request->all()]);
             Log::error($e->getMessage());
             return redirect()->back()->with('error', 'Failed to create city.');
         }
@@ -69,7 +71,7 @@ class CityController extends Controller
     public function edit(ReadCityRequest $request, CitiesRepo $cityRepo)
     {
         try {
-            $city = $cityRepo->getAllCities($request);
+            $city = $cityRepo->getAllCities();
 
             return view('admin.pages.cities.edit', compact('city'));
         } catch (\Exception $e) {
@@ -81,6 +83,7 @@ class CityController extends Controller
     public function update(UpdateCityRequest $request, CitiesRepo $cityRepo)
     {
         try {
+            Log::debug('City update request received', ['request_data' => $request->all()]);
             $id = $request->input('id');
             $data = $request->validated();
 
@@ -102,10 +105,11 @@ class CityController extends Controller
             }
             // ----------------------------------
 
-            $cityRepo->updateCity($request, $id, $data);
+            $cityRepo->updateCity($id, $request, $data);
 
             return redirect()->route('admin.cities.index')->with('success', 'City updated successfully.');
         } catch (\Exception $e) {
+            Log::debug('City update failed', ['error' => $e->getMessage(), 'request_data' => $request->all()]);
             Log::error($e->getMessage());
             return redirect()->back()->with('error', 'Failed to update city.');
         }
@@ -154,7 +158,7 @@ class CityController extends Controller
     public function data(ReadCityRequest $request, CitiesRepo $cityRepo)
     {
         try {
-            $cities = $cityRepo->getDataforDataTable($request->all());
+            $cities = $cityRepo->getDataForDataTable();
 
             return DataTables::of($cities)
                 ->addIndexColumn()
@@ -193,6 +197,11 @@ class CityController extends Controller
                 ->make(true);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load cities data.',
+            ], 500);
         }
     }
 }

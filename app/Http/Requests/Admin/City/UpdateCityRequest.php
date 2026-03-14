@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\City;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class UpdateCityRequest extends FormRequest
 {
@@ -14,17 +15,34 @@ class UpdateCityRequest extends FormRequest
 
     public function rules()
     {
+        $cityId = $this->input('id');
+
         return [
-            'id' => 'sometimes|integer',
-            'city_name' => 'sometimes|array',
-            'city_name.en' => 'sometimes|required|string|max:255|unique:cities,city_name->en,' . $this->route('city'),
-            'city_name.ar' => 'nullable|string|max:255|unique:cities,city_name->ar,' . $this->route('city'),
-            'city_name.fr' => 'nullable|string|max:255|unique:cities,city_name->fr,' . $this->route('city'),
-            'country_name' => 'sometimes|array',
-            'country_name.en' => 'sometimes|required|string|max:255',
+            'id' => 'required|integer|exists:cities,id',
+            'city_name' => 'required|array',
+            'city_name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('cities', 'city_name->en')->ignore($cityId),
+            ],
+            'city_name.ar' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('cities', 'city_name->ar')->ignore($cityId),
+            ],
+            'city_name.fr' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('cities', 'city_name->fr')->ignore($cityId),
+            ],
+            'country_name' => 'required|array',
+            'country_name.en' => 'required|string|max:255',
             'country_name.ar' => 'nullable|string|max:255',
             'country_name.fr' => 'nullable|string|max:255',
-            'status' => 'sometimes|in:active,inactive',
+            'status' => 'required|in:active,inactive',
         ];
     }
 

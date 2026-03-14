@@ -36,6 +36,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Throwable $exception, Request $request) {
+            // Keep custom admin error pages only for production with debug disabled.
+            if (! app()->environment('production') || config('app.debug')) {
+                return null;
+            }
+
             if (! $request->is('admin') && ! $request->is('admin/*')) {
                 return null;
             }
