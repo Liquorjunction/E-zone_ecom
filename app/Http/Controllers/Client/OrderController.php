@@ -83,7 +83,10 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Checkout failed', ['error' => $e->getMessage()]);
-            return back()->withInput()->withErrors(['checkout' => $e->getMessage()]);
+            // Redirect to step 3 with error for full-page failure view
+            return redirect()
+                ->route('checkout', ['step' => 3])
+                ->withErrors(['checkout' => $e->getMessage()]);
         }
     }
 
