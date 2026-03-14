@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-const REQUIRED_FIELDS = ['type', 'name', 'street', 'city', 'country'];
+const REQUIRED_FIELDS = ['type', 'name', 'street', 'city_id', 'country'];
 
 // Helper to get CSRF token
 function getCsrfToken(){
@@ -383,8 +383,8 @@ function openEditModal(data, cardElem){
   setVal('field-name', data.name);
   setVal('field-phone', data.phone);
   setVal('field-street', data.street);
-  ensureCityOption(document.getElementById('field-city'), data.city);
-  setVal('field-city', data.city);
+  ensureCityOption(document.getElementById('field-city'), data.city_id);
+  setVal('field-city', data.city_id);
   setVal('field-postal_code', data.postal_code);
   setVal('field-country', data.country);
 
@@ -419,8 +419,8 @@ function openMobileEditForm(data){
   setVal('mobile-field-name', data.name);
   setVal('mobile-field-phone', data.phone);
   setVal('mobile-field-street', data.street);
-  ensureCityOption(document.getElementById('mobile-field-city'), data.city);
-  setVal('mobile-field-city', data.city);
+  ensureCityOption(document.getElementById('mobile-field-city'), data.city_id);
+  setVal('mobile-field-city', data.city_id);
   setVal('mobile-field-postal_code', data.postal_code);
   setVal('mobile-field-country', data.country);
 

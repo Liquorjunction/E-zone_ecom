@@ -105,11 +105,14 @@ class OrderController extends Controller
 
         $addresses = collect();
         $billingAddresses = collect();
+        $cities = collect();
 
         if (Auth::check()) {
             $addresses = $addressRepo->getAddressesByType(Auth::id(), 'shipping');
             $billingAddresses = $addressRepo->getAddressesByType(Auth::id(), 'billing');
         }
+
+        $cities = $addressRepo->getActiveCities() ?: collect();
 
         $order = null;
         $orders = collect();
@@ -143,6 +146,7 @@ class OrderController extends Controller
             'step',
             'addresses',
             'billingAddresses',
+            'cities',
             'order',
             'orders',
             'totals',

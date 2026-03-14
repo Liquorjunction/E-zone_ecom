@@ -112,11 +112,13 @@ class CartController extends Controller
         $cart   = $cartService->getCart($cartId);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
 
-        $totals        = $cart ? $priceService->calculate($cart) : $this->emptyTotals();
-        $addresses     = Auth::check() ? $addressRepo->getAddressesByUserId(Auth::id()) : collect();
-        $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
+        $totals           = $cart ? $priceService->calculate($cart) : $this->emptyTotals();
+        $addresses        = Auth::check() ? $addressRepo->getAddressesByUserId(Auth::id()) : collect();
+        $billingAddresses = collect();
+        $cities           = $addressRepo->getActiveCities() ?: collect();
+        $appliedCoupon    = $cart ? $sessionCoupon->getForCart($cart->id) : null;
 
-        return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'appliedCoupon'));
+        return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'billingAddresses', 'cities', 'appliedCoupon'));
     }
 
     // ─────────────────────────────────────────────────────────────

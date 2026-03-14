@@ -8,8 +8,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const shippingSelect = document.getElementById('shippingAddressSelect');
     const shippingDisplay = document.getElementById('selectedShippingDisplay');
 
+    function readAddressData(option) {
+        if (!option) return null;
+
+        return {
+            name: option.dataset.name || '',
+            street: option.dataset.street || '',
+            city: option.dataset.city || '',
+            postalCode: option.dataset.postalCode || '',
+            country: option.dataset.country || 'Morocco',
+            phone: option.dataset.phone || ''
+        };
+    }
+
+    function splitName(fullName) {
+        const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+        return {
+            firstName: parts[0] || '',
+            lastName: parts.slice(1).join(' ')
+        };
+    }
+
+    function formatLocation(city, postalCode) {
+        return [city, postalCode].filter(Boolean).join(', ');
+    }
+
     function syncShippingRequirementMode() {
-        const manualShippingIds = ['firstName', 'lastName', 'address', 'city', 'state', 'zip', 'country'];
+        const manualShippingIds = ['firstName', 'lastName', 'address', 'city', 'zip', 'country'];
         const usingSavedAddressDropdown = !!shippingSelect;
 
         manualShippingIds.forEach((id) => {
@@ -31,44 +56,36 @@ document.addEventListener('DOMContentLoaded', function() {
     if (shippingSelect) {
         shippingSelect.addEventListener('change', function() {
             const option = this.options[this.selectedIndex];
-            if (!option || !option.dataset.addr) {
+            const addr = readAddressData(option);
+            if (!addr || !addr.name) {
                 clearShippingFields();
                 if (shippingDisplay) shippingDisplay.classList.add('hidden');
                 return;
             }
-            try {
-                const addr = JSON.parse(option.dataset.addr);
-                const nameParts = addr.name ? addr.name.split(' ') : ['', ''];
-                const firstName = nameParts[0] || '';
-                const lastName = nameParts.slice(1).join(' ') || '';
-                setFieldValue('firstName', firstName);
-                setFieldValue('lastName', lastName);
-                setFieldValue('address', addr.street || '');
-                setFieldValue('city', addr.city || '');
-                setFieldValue('state', addr.state || '');
-                setFieldValue('zip', addr.postal_code || '');
-                setFieldValue('country', addr.country || 'Morocco');
-                if (shippingDisplay) {
-                    document.getElementById('displayShippingName').textContent = addr.name || '';
-                    document.getElementById('displayShippingStreet').textContent = addr.street || '';
-                    document.getElementById('displayShippingCity').textContent = `${addr.city || ''}, ${addr.state || ''} ${addr.postal_code || ''}`;
-                    shippingDisplay.classList.remove('hidden');
-                }
-                // If billing same as shipping is checked, copy the shipping data immediately
-                const billingSameCheckbox = document.getElementById('billingSameAsShipping');
-                if (billingSameCheckbox && billingSameCheckbox.checked) {
-                    setTimeout(() => {
-                        setFieldValue('billing_firstName', firstName);
-                        setFieldValue('billing_lastName', lastName);
-                        setFieldValue('billing_address_line', addr.street || '');
-                        setFieldValue('billing_city', addr.city || '');
-                        setFieldValue('billing_state', addr.state || '');
-                        setFieldValue('billing_zip', addr.postal_code || '');
-                        setFieldValue('billing_country', addr.country || 'Morocco');
-                    }, 50);
-                }
-            } catch (e) {
-                console.error('Error parsing shipping address:', e);
+            const nameParts = splitName(addr.name);
+            setFieldValue('firstName', nameParts.firstName);
+            setFieldValue('lastName', nameParts.lastName);
+            setFieldValue('address', addr.street);
+            setFieldValue('city', addr.city);
+            setFieldValue('zip', addr.postalCode);
+            setFieldValue('country', addr.country);
+            if (shippingDisplay) {
+                document.getElementById('displayShippingName').textContent = addr.name;
+                document.getElementById('displayShippingStreet').textContent = addr.street;
+                document.getElementById('displayShippingCity').textContent = formatLocation(addr.city, addr.postalCode);
+                shippingDisplay.classList.remove('hidden');
+            }
+            const billingSameCheckbox = document.getElementById('billingSameAsShipping');
+            if (billingSameCheckbox && billingSameCheckbox.checked) {
+                setTimeout(() => {
+                    setFieldValue('billing_firstName', nameParts.firstName);
+                    setFieldValue('billing_lastName', nameParts.lastName);
+                    setFieldValue('billing_address_line', addr.street);
+                    setFieldValue('billing_city', addr.city);
+                    setFieldValue('billing_zip', addr.postalCode);
+                    setFieldValue('billing_country', addr.country);
+                    setFieldValue('billing_phone', addr.phone);
+                }, 50);
             }
         });
         // Trigger change on load if default is selected
@@ -87,40 +104,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if (billingSelect) {
         billingSelect.addEventListener('change', function() {
             const option = this.options[this.selectedIndex];
-            if (!option || !option.dataset.addr) {
+            const addr = readAddressData(option);
+            if (!addr || !addr.name) {
                 // Clear fields if no valid selection
                 clearBillingFields();
                 if (billingDisplay) billingDisplay.classList.add('hidden');
                 return;
             }
 
-            try {
-                const addr = JSON.parse(option.dataset.addr);
+            const nameParts = splitName(addr.name);
 
-                // Parse name into first and last
-                const nameParts = addr.name ? addr.name.split(' ') : ['', ''];
-                const firstName = nameParts[0] || '';
-                const lastName = nameParts.slice(1).join(' ') || '';
+            setFieldValue('billing_firstName', nameParts.firstName);
+            setFieldValue('billing_lastName', nameParts.lastName);
+            setFieldValue('billing_address_line', addr.street);
+            setFieldValue('billing_city', addr.city);
+            setFieldValue('billing_zip', addr.postalCode);
+            setFieldValue('billing_country', addr.country);
+            setFieldValue('billing_phone', addr.phone);
 
-                // Populate hidden fields for form submission
-                setFieldValue('billing_firstName', firstName);
-                setFieldValue('billing_lastName', lastName);
-                setFieldValue('billing_address_line', addr.street || '');
-                setFieldValue('billing_city', addr.city || '');
-                setFieldValue('billing_state', addr.state || '');
-                setFieldValue('billing_zip', addr.postal_code || '');
-                setFieldValue('billing_country', addr.country || 'Morocco');
-                setFieldValue('billing_phone', addr.phone || '');
-
-                // Update selected address display
-                if (billingDisplay) {
-                    document.getElementById('displayBillingName').textContent = addr.name || '';
-                    document.getElementById('displayBillingStreet').textContent = addr.street || '';
-                    document.getElementById('displayBillingCity').textContent = `${addr.city || ''}, ${addr.state || ''} ${addr.postal_code || ''}`;
-                    billingDisplay.classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error('Error parsing billing address:', e);
+            if (billingDisplay) {
+                document.getElementById('displayBillingName').textContent = addr.name;
+                document.getElementById('displayBillingStreet').textContent = addr.street;
+                document.getElementById('displayBillingCity').textContent = formatLocation(addr.city, addr.postalCode);
+                billingDisplay.classList.remove('hidden');
             }
         });
 
@@ -142,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 lastName: document.getElementById('lastName')?.value || '',
                 address: document.getElementById('address')?.value || '',
                 city: document.getElementById('city')?.value || '',
-                state: document.getElementById('state')?.value || '',
                 zip: document.getElementById('zip')?.value || '',
                 country: document.getElementById('country')?.value || 'Morocco',
                 phone: document.getElementById('phone')?.value || ''
@@ -152,7 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
             setFieldValue('billing_lastName', shippingData.lastName);
             setFieldValue('billing_address_line', shippingData.address);
             setFieldValue('billing_city', shippingData.city);
-            setFieldValue('billing_state', shippingData.state);
             setFieldValue('billing_zip', shippingData.zip);
             setFieldValue('billing_country', shippingData.country);
             setFieldValue('billing_phone', shippingData.phone);
@@ -203,7 +207,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     lastName: document.getElementById('lastName')?.value || '',
                     address: document.getElementById('address')?.value || '',
                     city: document.getElementById('city')?.value || '',
-                    state: document.getElementById('state')?.value || '',
                     zip: document.getElementById('zip')?.value || '',
                     country: document.getElementById('country')?.value || 'Morocco',
                     phone: document.getElementById('phone')?.value || ''
@@ -215,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         setFieldValue('billing_lastName', shippingData.lastName);
                         setFieldValue('billing_address_line', shippingData.address);
                         setFieldValue('billing_city', shippingData.city);
-                        setFieldValue('billing_state', shippingData.state);
                         setFieldValue('billing_zip', shippingData.zip);
                         setFieldValue('billing_country', shippingData.country);
                         setFieldValue('billing_phone', shippingData.phone);
@@ -283,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setFieldValue('lastName', '');
         setFieldValue('address', '');
         setFieldValue('city', '');
-        setFieldValue('state', '');
         setFieldValue('zip', '');
     }
 
@@ -292,7 +293,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setFieldValue('billing_lastName', '');
         setFieldValue('billing_address_line', '');
         setFieldValue('billing_city', '');
-        setFieldValue('billing_state', '');
         setFieldValue('billing_zip', '');
         setFieldValue('billing_country', 'Morocco');
         setFieldValue('billing_phone', '');
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const errorDiv = document.createElement('p');
         errorDiv.className = 'validation-error mt-2 text-sm text-red-600 font-semibold flex items-center gap-1 animate-shake';
         errorDiv.innerHTML = `
-            <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
             ${message}

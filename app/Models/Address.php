@@ -14,11 +14,17 @@ class Address extends Model
         'is_default',
         'address_label',
         'name',
+        'phone',
         'street',
         'city',
+        'city_id',
         'state',
         'postal_code',
         'country',
-        'phone',
     ];
+
+    public function cityRelation()
+    {
+        return $this->belongsTo(\App\Models\city::class, 'city_id');
+    }
 }

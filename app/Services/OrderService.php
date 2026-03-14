@@ -67,63 +67,22 @@ class OrderService
         $data['shipping_method'] = $data['shipping_method'] ?? 'standard';
         $data['email'] = $data['email'] ?? $userEmail ?? null;
 
-        // Build shipping address
-        if (empty($data['shipping_address']) || !is_array($data['shipping_address'])) {
-            $data['shipping_address'] = [
-                'name' => trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) ?: null,
-                'street' => $data['address'] ?? null,
-                'city' => $data['city'] ?? null,
-                'state' => $data['state'] ?? null,
-                'postal_code' => $data['zip'] ?? $data['postal_code'] ?? null,
-                'country' => $data['country'] ?? null,
-                'phone' => $data['phone'] ?? $data['phone_no'] ?? null,
-            ];
-        }
+        $shippingAddress = $this->resolveShippingAddressData($data, $userId);
 
-        // Resolve billing address
         $billingSame = (bool) ($data['billing_same_as_shipping'] ?? false);
         if ($billingSame) {
-            $data['billing_address'] = $data['shipping_address'];
+            $billingAddress = $shippingAddress;
         } else {
-            if ($userId && !empty($data['saved_billing_address_id'])) {
-                $savedBilling = $this->addressRepo->findByIdAndUser($data['saved_billing_address_id'], $userId);
-                if ($savedBilling) {
-                    $data['billing_address'] = $savedBilling->toArray();
-                }
-            }
-
-            if (empty($data['billing_address']) || !is_array($data['billing_address'])) {
-                $data['billing_address'] = [
-                    'name' => trim(($data['billing_firstName'] ?? '') . ' ' . ($data['billing_lastName'] ?? '')) ?: ($data['shipping_address']['name'] ?? null),
-                    'street' => $data['billing_address_line'] ?? null,
-                    'city' => $data['billing_city'] ?? null,
-                    'state' => $data['billing_state'] ?? null,
-                    'postal_code' => $data['billing_zip'] ?? null,
-                    'country' => $data['billing_country'] ?? null,
-                    'phone' => $data['billing_phone'] ?? $data['shipping_address']['phone'] ?? null,
-                ];
-            }
+            $billingAddress = $this->resolveBillingAddressData($data, $shippingAddress, $userId);
         }
 
-        // Optionally save / load shipping address for authenticated users
-        if ($userId && !empty($data['saved_address_id'])) {
-            $saved = $this->addressRepo->findByIdAndUser($data['saved_address_id'], $userId);
-            if ($saved) {
-                $data['shipping_address'] = $saved->toArray();
-            }
-        } elseif ($userId && !empty($data['shipping_address']) && ($data['save_address'] ?? false)) {
-            $this->addressRepo->firstOrCreateAddress([
-                'user_id' => $userId,
-                'street' => $data['shipping_address']['street'] ?? '',
-                'city' => $data['shipping_address']['city'] ?? '',
-                'postal_code' => $data['shipping_address']['postal_code'] ?? '',
-                'country' => $data['shipping_address']['country'] ?? '',
-            ], $data['shipping_address']);
-        }
-
-        return DB::transaction(function () use ($cart, $data, $userId) {
+        return DB::transaction(function () use ($cart, $data, $userId, $shippingAddress, $billingAddress, $billingSame) {
             $shippingMethod = $data['shipping_method'] ?? 'standard';
             $pricing = $this->priceCalculator->calculate($cart, $shippingMethod);
+            $shippingAddressRecord = $this->resolveShippingAddressRecord($data, $shippingAddress, $userId);
+            $billingAddressRecord = $billingSame
+                ? $shippingAddressRecord
+                : $this->resolveBillingAddressRecord($data, $billingAddress, $userId);
 
             // Pull applied coupon from session BEFORE clearing cart/session.
             // We do this here so the coupon_id / coupon_code are saved on the order.
@@ -144,9 +103,9 @@ class OrderService
                 'taxable_amount' => $pricing['taxable_amount'] ?? ($pricing['final_total'] ?? 0),
                 'total' => $pricing['final_total'],
                 'status' => 'pending',
-                'shipping_address' => $data['shipping_address'] ?? null,
-                'billing_address' => $data['billing_address'] ?? null,
-                'phone_no' => $data['shipping_address']['phone'] ?? $data['phone_no'] ?? null,
+                'shipping_address_id' => $shippingAddressRecord?->id,
+                'billing_address_id' => $billingAddressRecord?->id,
+                'phone_no' => $shippingAddress['phone'] ?? $data['phone_no'] ?? null,
                 'email' => $data['email'] ?? null,
                 'payment_method' => $data['payment_method'] ?? null,
                 'order_number' => config('app.PREFIX') . '/ORD/' . uniqid(),
@@ -197,6 +156,98 @@ class OrderService
             $this->cartRepo->clearCart($cart);
             return $this->processPayment($order, $data, $appliedCoupon);
         });
+    }
+
+    protected function resolveShippingAddressData(array $data, ?int $userId): array
+    {
+        if ($userId && !empty($data['saved_address_id'])) {
+            $saved = $this->addressRepo->findByIdAndUser((int) $data['saved_address_id'], $userId);
+            if ($saved) {
+                return $saved->toArray();
+            }
+        }
+
+        if (!empty($data['shipping_address']) && is_array($data['shipping_address'])) {
+            return $data['shipping_address'];
+        }
+
+        return [
+            'name' => trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) ?: null,
+            'street' => $data['address'] ?? null,
+            'city' => $data['city'] ?? null,
+            'postal_code' => $data['zip'] ?? $data['postal_code'] ?? null,
+            'country' => $data['country'] ?? null,
+            'phone' => $data['phone'] ?? $data['phone_no'] ?? null,
+        ];
+    }
+
+    protected function resolveBillingAddressData(array $data, array $shippingAddress, ?int $userId): array
+    {
+        if ($userId && !empty($data['saved_billing_address_id'])) {
+            $savedBilling = $this->addressRepo->findByIdAndUser((int) $data['saved_billing_address_id'], $userId);
+            if ($savedBilling) {
+                return $savedBilling->toArray();
+            }
+        }
+
+        if (!empty($data['billing_address']) && is_array($data['billing_address'])) {
+            return $data['billing_address'];
+        }
+
+        return [
+            'name' => trim(($data['billing_firstName'] ?? '') . ' ' . ($data['billing_lastName'] ?? '')) ?: ($shippingAddress['name'] ?? null),
+            'street' => $data['billing_address_line'] ?? null,
+            'city' => $data['billing_city'] ?? null,
+            'postal_code' => $data['billing_zip'] ?? null,
+            'country' => $data['billing_country'] ?? null,
+            'phone' => $data['billing_phone'] ?? ($shippingAddress['phone'] ?? null),
+        ];
+    }
+
+    protected function resolveShippingAddressRecord(array $data, array $shippingAddress, ?int $userId)
+    {
+        if ($userId && !empty($data['saved_address_id'])) {
+            return $this->addressRepo->findByIdAndUser((int) $data['saved_address_id'], $userId);
+        }
+
+        return $this->persistCheckoutAddress($shippingAddress, 'shipping', $userId, (bool) ($data['save_address'] ?? false));
+    }
+
+    protected function resolveBillingAddressRecord(array $data, array $billingAddress, ?int $userId)
+    {
+        if ($userId && !empty($data['saved_billing_address_id'])) {
+            return $this->addressRepo->findByIdAndUser((int) $data['saved_billing_address_id'], $userId);
+        }
+
+        return $this->persistCheckoutAddress($billingAddress, 'billing', $userId, false);
+    }
+
+    protected function persistCheckoutAddress(array $address, string $type, ?int $userId, bool $attachToUser)
+    {
+        $payload = [
+            'type' => $type,
+            'user_id' => $attachToUser ? $userId : null,
+            'address_label' => ucfirst($type),
+            'name' => $address['name'] ?? '',
+            'phone' => $address['phone'] ?? null,
+            'street' => $address['street'] ?? '',
+            'city' => $address['city'] ?? '',
+            'postal_code' => $address['postal_code'] ?? null,
+            'country' => $address['country'] ?? '',
+        ];
+
+        if ($attachToUser && $userId) {
+            return $this->addressRepo->firstOrCreateAddress([
+                'user_id' => $userId,
+                'type' => $type,
+                'street' => $payload['street'],
+                'city' => $payload['city'],
+                'postal_code' => $payload['postal_code'],
+                'country' => $payload['country'],
+            ], $payload);
+        }
+
+        return $this->addressRepo->create($payload);
     }
 
     public function cancelClientOrder(int $orderId, ?string $reason, ?int $userId)

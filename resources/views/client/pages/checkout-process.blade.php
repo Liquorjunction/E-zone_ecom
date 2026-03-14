@@ -317,10 +317,15 @@
                                                 </option>
                                                 @foreach ($addresses as $addr)
                                                     <option value="{{ $addr->id }}"
-                                                        data-addr='@json($addr)'
+                                                        data-name="{{ $addr->name }}"
+                                                        data-street="{{ $addr->street }}"
+                                                        data-city="{{ $addr->city }}"
+                                                        data-postal-code="{{ $addr->postal_code }}"
+                                                        data-country="{{ $addr->country }}"
+                                                        data-phone="{{ $addr->phone }}"
                                                         {{ $addr->is_default ? 'selected' : '' }}>
                                                         {{ $addr->address_label ? '🏠 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }}
-                                                        ({{ $addr->city }}, {{ $addr->state }})
+                                                        ({{ collect([$addr->city, $addr->postal_code])->filter()->implode(', ') }})
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -412,18 +417,10 @@
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
                                     <div>
-                                        <label for="state"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('State / Region') }}
-                                            *</label>
-                                        <input type="text" id="state" name="state" required
-                                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                                        <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-                                    </div>
-                                    <div>
                                         <label for="zip"
                                             class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}
-                                            *</label>
-                                        <input type="text" id="zip" name="zip" required
+                                            <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span></label>
+                                        <input type="text" id="zip" name="zip"
                                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                                     </div>
@@ -495,10 +492,15 @@
                                                     </option>
                                                     @foreach ($billingAddresses as $addr)
                                                         <option value="{{ $addr->id }}"
-                                                            data-addr='@json($addr)'
+                                                            data-name="{{ $addr->name }}"
+                                                            data-street="{{ $addr->street }}"
+                                                            data-city="{{ $addr->city }}"
+                                                            data-postal-code="{{ $addr->postal_code }}"
+                                                            data-country="{{ $addr->country }}"
+                                                            data-phone="{{ $addr->phone }}"
                                                             {{ $addr->is_default ? 'selected' : '' }}>
                                                             {{ $addr->address_label ? '💳 ' . $addr->address_label . ' - ' : '' }}{{ $addr->name }}
-                                                            ({{ $addr->city }}, {{ $addr->state }})
+                                                            ({{ collect([$addr->city, $addr->postal_code])->filter()->implode(', ') }})
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -576,13 +578,7 @@
                                             </div>
                                             <div>
                                                 <label
-                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('State') }}</label>
-                                                <input type="text" id="billing_state" name="billing_state"
-                                                    class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                                            </div>
-                                            <div>
-                                                <label
-                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}</label>
+                                                    class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }} <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span></label>
                                                 <input type="text" id="billing_zip" name="billing_zip"
                                                     class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
                                             </div>
@@ -610,7 +606,6 @@
                                         <input type="hidden" id="billing_address_line" name="billing_address_line"
                                             value="">
                                         <input type="hidden" id="billing_city" name="billing_city" value="">
-                                        <input type="hidden" id="billing_state" name="billing_state" value="">
                                         <input type="hidden" id="billing_zip" name="billing_zip" value="">
                                         <input type="hidden" id="billing_country" name="billing_country"
                                             value="">
@@ -870,7 +865,7 @@
                                                 @if (isset($addr['street']))
                                                     <p>{{ $addr['street'] }}</p>
                                                 @endif
-                                                <p>{{ collect([$addr['city'] ?? null, $addr['state'] ?? null, $addr['postal_code'] ?? null])->filter()->implode(', ') }}
+                                                <p>{{ collect([$addr['city'] ?? null, $addr['postal_code'] ?? null])->filter()->implode(', ') }}
                                                 </p>
                                                 @if (isset($addr['country']))
                                                     <p>{{ $addr['country'] }}</p>
@@ -1067,16 +1062,15 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('First Name') }}
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Full Name') }}
                                 *</label>
-                            <input id="modal_first_name" name="first_name" required placeholder="John"
+                            <input id="modal_name" name="name" required placeholder="John Doe"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Last Name') }}
-                                *</label>
-                            <input id="modal_last_name" name="last_name" required placeholder="Doe"
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone') }}</label>
+                            <input id="modal_phone" name="phone" type="tel" placeholder="+1 (555) 123-4567"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
@@ -1091,42 +1085,37 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
-                        <div>
+                        <div class="col-span-2">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }} *</label>
-                            <input id="modal_city" name="city" required placeholder="Casablanca"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('State / Region') }}
-                                *</label>
-                            <input id="modal_state" name="state" required placeholder="CA"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <div class="relative">
+                                <select id="modal_city_id" name="city_id" required
+                                    class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+                                    <option value="">{{ statictranslations('Select city') }}</option>
+                                    @foreach(($cities ?? collect()) as $city)
+                                        <option value="{{ $city->id }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">{{ $city->getTranslation('city_name', app()->getLocale()) }}</option>
+                                    @endforeach
+                                </select>
+                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}
-                                *</label>
-                            <input id="modal_postal_code" name="postal_code" required placeholder="20000"
+                                <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span></label>
+                            <input id="modal_postal_code" name="postal_code" placeholder="20000"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Country') }}
-                                *</label>
-                            <input id="modal_country" name="country" required value="Morocco"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone') }}</label>
-                            <input id="modal_phone" name="phone" type="tel" placeholder="+1 (555) 123-4567"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-                        </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Country') }}
+                            *</label>
+                        <input id="modal_country" name="country" required value="Morocco"
+                            class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                        <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                     </div>
 
                     <div>

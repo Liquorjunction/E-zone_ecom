@@ -29,8 +29,8 @@ class Order extends Model
         'cancel_reason',
         'cancelled_by',
         'cancelled_at',
-        'shipping_address',
-        'billing_address',
+        'shipping_address_id',
+        'billing_address_id',
         'phone_no',
         'email',
         'payment_method',
@@ -40,8 +40,6 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'shipping_address' => 'array',
-        'billing_address' => 'array',
         'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'coupon_discount_amount' => 'decimal:2',
@@ -69,6 +67,42 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function shippingAddressRecord()
+    {
+        return $this->belongsTo(Address::class, 'shipping_address_id');
+    }
+
+    public function billingAddressRecord()
+    {
+        return $this->belongsTo(Address::class, 'billing_address_id');
+    }
+
+    public function getShippingAddressAttribute($value)
+    {
+        $related = $this->relationLoaded('shippingAddressRecord')
+            ? $this->getRelation('shippingAddressRecord')
+            : $this->shippingAddressRecord()->first();
+
+        if ($related) {
+            return $related->toArray();
+        }
+
+        return [];
+    }
+
+    public function getBillingAddressAttribute($value)
+    {
+        $related = $this->relationLoaded('billingAddressRecord')
+            ? $this->getRelation('billingAddressRecord')
+            : $this->billingAddressRecord()->first();
+
+        if ($related) {
+            return $related->toArray();
+        }
+
+        return [];
     }
 
     public function cancelledBy()

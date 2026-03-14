@@ -134,10 +134,10 @@
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
               <div class="relative">
-                <select id="field-city" name="city" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white" required>
+                <select id="field-city" name="city_id" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white" required>
                   <option value="">Select city</option>
                   @foreach(($cities ?? collect()) as $city)
-                    <option value="{{ $city->getTranslation('city_name', app()->getLocale()) }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">
+                    <option value="{{ $city->id }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">
                       {{ $city->getTranslation('city_name', app()->getLocale()) }}
                     </option>
                   @endforeach
@@ -232,10 +232,10 @@
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
           <div class="relative">
-            <select id="mobile-field-city" name="city" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base" required>
+            <select id="mobile-field-city" name="city_id" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base" required>
               <option value="">Select city</option>
               @foreach(($cities ?? collect()) as $city)
-                <option value="{{ $city->getTranslation('city_name', app()->getLocale()) }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">
+                <option value="{{ $city->id }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">
                   {{ $city->getTranslation('city_name', app()->getLocale()) }}
                 </option>
               @endforeach

@@ -759,17 +759,22 @@ document.addEventListener("DOMContentLoaded", function () {
     const cancelBtn = document.getElementById('cancelAddressModal');
     const form = document.getElementById('addAddressForm');
     const typeField = document.getElementById('modal_address_type');
+    const cityField = document.getElementById('modal_city_id');
+    const countryField = document.getElementById('modal_country');
     const submitBtn = document.getElementById('submitAddressBtn');
 
     if (!modal) return;
 
     // Function to open modal with type
     const openModalWithType = function(type) {
-        if (typeField) typeField.value = type;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
         if (form) form.reset();
+        if (typeField) typeField.value = type;
+        if (countryField && !countryField.value) {
+            countryField.value = 'Morocco';
+        }
 
         // Animate content in
         const content = document.getElementById('addAddressContent');
@@ -849,6 +854,33 @@ document.addEventListener("DOMContentLoaded", function () {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
+            const fieldsToValidate = form.querySelectorAll('[name="type"], [name="name"], [name="street"], [name="city_id"], [name="country"]');
+            let isValid = true;
+
+            fieldsToValidate.forEach(field => {
+                if (!validateField(field)) {
+                    isValid = false;
+                }
+            });
+
+            const postalField = form.querySelector('[name="postal_code"]');
+            if (postalField && postalField.value.trim() && !validateField(postalField)) {
+                isValid = false;
+            }
+
+            const phoneField = form.querySelector('[name="phone"]');
+            if (phoneField && phoneField.value.trim() && !validateField(phoneField)) {
+                isValid = false;
+            }
+
+            if (!isValid) {
+                const firstInvalid = form.querySelector('.error-state');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                }
+                return;
+            }
+
             // Disable submit button to prevent double submission
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -857,18 +889,15 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const formData = new FormData(form);
-            const name = (formData.get('first_name') + ' ' + formData.get(
-                'last_name')).trim();
 
             // Prepare data for submission
             const data = {
                 _token: formData.get('_token'),
                 type: formData.get('type'),
                 address_label: formData.get('address_label'),
-                name: name,
+                name: formData.get('name'),
                 street: formData.get('street'),
-                city: formData.get('city'),
-                state: formData.get('state'),
+                city_id: formData.get('city_id'),
                 postal_code: formData.get('postal_code'),
                 country: formData.get('country'),
                 phone: formData.get('phone'),
@@ -925,68 +954,54 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
         });
     }
+
+    if (cityField && countryField) {
+        cityField.addEventListener('change', function() {
+            const option = this.options[this.selectedIndex];
+            const country = option ? option.getAttribute('data-country') : '';
+            if (country) {
+                countryField.value = country;
+            }
+        });
+    }
 })();
 
-// Handle "Change" button clicks on address cards
+// Handle "Change" button clicks on address cards and payment method styling
 (function() {
     document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('changeAddressBtn')) {
-            e.preventDefault();
-            // Find the parent card and get type
-            const card = e.target.closest('div[id$="AddressPreview"]');
-            if (card) {
-                const isShipping = card.id === 'shippingAddressPreview';
-                const isBilling = card.id === 'billingAddressPreview';
+        const button = e.target.closest('.changeAddressBtn');
+        if (!button) return;
 
-                // Reset the corresponding cards and show the address list again
-                if (isShipping) {
-                    const cards = document.querySelectorAll('.shippingAddressCard');
-                    cards.forEach(c => {
-                        c.classList.remove('border-primary', 'bg-primary/5');
-                        c.querySelector('.shippingAddressRadio').classList.remove(
-                            'border-primary', 'bg-primary');
-                        c.querySelector('.shippingAddressRadio div').classList.remove(
-                            'bg-white');
-                    });
-                    card.classList.add('hidden');
-                } else if (isBilling) {
-                    const cards = document.querySelectorAll('.billingAddressCard');
-                    cards.forEach(c => {
-                        c.classList.remove('border-primary', 'bg-primary/5');
-                        c.querySelector('.billingAddressRadio').classList.remove(
-                            'border-primary', 'bg-primary');
-                        c.querySelector('.billingAddressRadio div').classList.remove(
-                            'bg-white');
-                    });
-                    card.classList.add('hidden');
-                }
-            }
+        e.preventDefault();
+        const card = button.closest('#shippingAddressPreview, #billingAddressPreview');
+        if (!card) return;
+
+        card.classList.add('hidden');
+
+        const listId = card.id === 'shippingAddressPreview' ? 'shippingAddressList' : 'billingAddressList';
+        const list = document.getElementById(listId);
+        if (list) {
+            list.classList.remove('hidden');
         }
     });
-})();
 
-// Payment Method Label Styling
-document.addEventListener('DOMContentLoaded', function() {
-    const paymentMethodLabels = document.querySelectorAll(
-        'div.space-y-4.mb-6 > label'
-    );
+    const paymentMethodLabels = document.querySelectorAll('div.space-y-4.mb-6 > label');
 
     function updatePaymentMethodStyles() {
         paymentMethodLabels.forEach(label => {
             const radio = label.querySelector('input[name="payment_method"]');
-            if (radio) {
-                if (radio.checked) {
-                    label.classList.add('border-primary', 'bg-primary/5');
-                    label.classList.remove('border-gray-200');
-                } else {
-                    label.classList.remove('border-primary', 'bg-primary/5');
-                    label.classList.add('border-gray-200');
-                }
+            if (!radio) return;
+
+            if (radio.checked) {
+                label.classList.add('border-primary', 'bg-primary/5');
+                label.classList.remove('border-gray-200');
+            } else {
+                label.classList.remove('border-primary', 'bg-primary/5');
+                label.classList.add('border-gray-200');
             }
         });
     }
 
-    // Add event listeners
     paymentMethodLabels.forEach(label => {
         const radio = label.querySelector('input[name="payment_method"]');
         if (radio) {
@@ -994,9 +1009,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Initial styling
     updatePaymentMethodStyles();
-});
+})();
 
 // Show Laravel validation errors on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -1093,18 +1107,11 @@ function showServerErrorBanner(title, errors) {
             }
         },
         // Address fields
-        first_name: {
-            required: 'First name is required',
+        name: {
+            required: 'Full name is required',
             pattern: {
                 value: /^[a-zA-Z\s]+$/,
-                message: 'First name should only contain letters'
-            }
-        },
-        last_name: {
-            required: 'Last name is required',
-            pattern: {
-                value: /^[a-zA-Z\s]+$/,
-                message: 'Last name should only contain letters'
+                message: 'Full name should only contain letters'
             }
         },
         street: {
@@ -1114,18 +1121,10 @@ function showServerErrorBanner(title, errors) {
                 message: 'Street address must be at least 5 characters'
             }
         },
-        city: {
-            required: 'City is required',
-            pattern: {
-                value: /^[a-zA-Z\s]+$/,
-                message: 'City should only contain letters'
-            }
-        },
-        state: {
-            required: 'State/Region is required'
+        city_id: {
+            required: 'Please select a city'
         },
         postal_code: {
-            required: 'Postal code is required',
             minLength: {
                 value: 3,
                 message: 'Postal code must be at least 3 characters'
@@ -1153,7 +1152,7 @@ function showServerErrorBanner(title, errors) {
         }
 
         // Check minLength
-        if (rules.minLength && field.value.trim().length < rules.minLength.value) {
+        if (rules.minLength && field.value.trim() && field.value.trim().length < rules.minLength.value) {
             showFieldError(field, rules.minLength.message);
             return false;
         }
@@ -1225,37 +1224,6 @@ function showServerErrorBanner(title, errors) {
                 value = value.slice(0, 2) + '/' + value.slice(2, 4);
             }
             e.target.value = value;
-        });
-    }
-
-    // Handle address form submission
-    const addressForm = document.getElementById('addAddressForm');
-    if (addressForm) {
-        addressForm.addEventListener('submit', function(e) {
-            const fieldsToValidate = addressForm.querySelectorAll('[name="type"], [name="first_name"], [name="last_name"], [name="street"], [name="city"], [name="state"], [name="postal_code"], [name="country"]');
-            let isValid = true;
-
-            fieldsToValidate.forEach(field => {
-                if (!validateField(field)) {
-                    isValid = false;
-                }
-            });
-
-            // Validate phone if provided
-            const phoneField = addressForm.querySelector('[name="phone"]');
-            if (phoneField && phoneField.value.trim()) {
-                if (!validateField(phoneField)) {
-                    isValid = false;
-                }
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                const firstInvalid = addressForm.querySelector('.error-state');
-                if (firstInvalid) {
-                    firstInvalid.focus();
-                }
-            }
         });
     }
 

@@ -7,6 +7,7 @@ use App\Http\Requests\Client\Address\StoreAddressRequest;
 use App\Http\Requests\Client\Address\UpdateAddressRequest;
 use App\Http\Requests\Client\Address\DestroyAddressRequest;
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo;
+use App\Models\city as CityModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -65,6 +66,11 @@ class AddressController extends Controller
         $data = $request->validated();
         $data['user_id'] = Auth::id();
 
+        if (!empty($data['city_id'])) {
+            $cityModel = CityModel::find($data['city_id']);
+            $data['city'] = $cityModel ? $cityModel->getTranslation('city_name', app()->getLocale()) : '';
+        }
+
         $address = $addressRepository->create($data);
 
         if (!empty($data['is_default'])) {
@@ -92,6 +98,12 @@ class AddressController extends Controller
         }
 
         $data = $request->validated();
+
+        if (!empty($data['city_id'])) {
+            $cityModel = CityModel::find($data['city_id']);
+            $data['city'] = $cityModel ? $cityModel->getTranslation('city_name', app()->getLocale()) : '';
+        }
+
         $address = $addressRepository->update((int) $id, $data);
 
         if (!empty($data['is_default'])) {
