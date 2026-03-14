@@ -18,13 +18,20 @@ class AddressController extends Controller
         $addresses = collect([]);
         $shipping = collect([]);
         $billing = collect([]);
+        $cities = collect([]);
 
         if (Auth::check()) {
-            $addresses = app(AddressRepo::class)->getAddressesByUserId(Auth::id()) ?: collect([]);
+            $addressRepo = app(AddressRepo::class);
+            $addresses = $addressRepo->getAddressesByUserId(Auth::id()) ?: collect([]);
+            $cities = $addressRepo->getActiveCities() ?: collect([]);
 
             // Normalize to collection
             if (! ($addresses instanceof \Illuminate\Support\Collection)) {
                 $addresses = collect($addresses);
+            }
+
+            if (! ($cities instanceof \Illuminate\Support\Collection)) {
+                $cities = collect($cities);
             }
 
             // Prepare sorted lists: default addresses first, then newest (id desc)
@@ -49,6 +56,7 @@ class AddressController extends Controller
             'addresses' => $addresses,
             'shipping' => $shipping,
             'billing' => $billing,
+            'cities' => $cities,
         ]);
     }
 

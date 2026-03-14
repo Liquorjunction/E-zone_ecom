@@ -4,6 +4,7 @@ namespace App\Repositories\Client\Repositories;
 
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface;
 use App\Models\Address;
+use App\Models\city;
 use Illuminate\Support\Facades\Log;
 
 class AddressRepository implements AddressRepositoryInterface
@@ -78,5 +79,10 @@ class AddressRepository implements AddressRepositoryInterface
     public function firstOrCreateAddress(array $matchAttributes, array $fillAttributes)
     {
         return Address::firstOrCreate($matchAttributes, $fillAttributes);
+    }
+
+    public function getActiveCities()
+    {
+        return city::active()->get();
     }
 }
