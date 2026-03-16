@@ -46,13 +46,13 @@
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
                         <div class="flex flex-wrap items-center gap-3 mb-2">
-                            <h1 class="text-xl lg:text-2xl font-bold text-gray-900">Order
+                            <h1 class="text-xl lg:text-2xl font-bold text-gray-900">{{ statictranslations('Order') }}
                                 #{{ $order->order_number ?? $order->id }}</h1>
                             <span class="px-3 py-1.5 text-xs lg:text-sm font-semibold rounded-full {{ $statusClass }}">
                                 {{ $statusLabel }}
                             </span>
                         </div>
-                        <p class="text-sm text-gray-600">Placed on
+                        <p class="text-sm text-gray-600">{{ statictranslations('Placed on') }}
                             {{ optional($order->created_at)->format('F j, Y \a\t g:i A') }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
@@ -61,14 +61,14 @@
                                 class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
                                 <span class="flex items-center gap-2">
                                     <i class="fa fa-download w-4 h-4"></i>
-                                    Download Invoice
+                                    {{ statictranslations('Download Invoice') }}
                                 </span>
                             </a>
                             <a href="{{ route('client.orders.invoice', ['id' => $order->id]) ?? '#' }}"
                                 class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
                                 <span class="flex items-center gap-2">
                                     <i class="fa fa-eye w-4 h-4"></i>
-                                    View Invoice
+                                    {{ statictranslations('View Invoice') }}
                                 </span>
                             </a>
                         @endif
@@ -82,7 +82,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M6 18L18 6M6 6l12 12" />
                                     </svg>
-                                    Cancel Order
+                                    {{ statictranslations('Cancel Order') }}
                                 </span>
                             </button>
                         @endif
@@ -100,24 +100,22 @@
                                 <form id="cancel-order-form" method="POST" action="{{ route('client.orders.cancel') }}">
                                     @csrf
                                     <input type="hidden" name="id" id="cancel-order-id" value="{{ $order->id }}">
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Order <span
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ statictranslations('Cancel Order') }} <span
                                             id="cancel-order-number"
                                             class="text-primary">{{ $order->order_number ?? '#' . $order->id }}</span></h3>
-                                    <p class="text-gray-700 mb-4">Please provide a reason for cancellation. This action
-                                        cannot be undone.</p>
+                                    <p class="text-gray-700 mb-4">{{ statictranslations('Please provide a reason for cancellation. This action cannot be undone.') }}</p>
                                     <div class="mb-4">
                                         <label for="cancel-reason"
-                                            class="block text-sm font-medium text-gray-700 mb-1">Reason <span
+                                            class="block text-sm font-medium text-gray-700 mb-1">{{ statictranslations('Reason') }} <span
                                                 class="text-red-500">*</span></label>
                                         <textarea name="reason" id="cancel-reason" rows="3" required
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"></textarea>
                                     </div>
                                     <div class="flex items-center justify-end gap-2">
                                         <button type="button"
-                                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">Close</button>
+                                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">{{ statictranslations('Close') }}</button>
                                         <button type="submit"
-                                            class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">Confirm
-                                            Cancel</button>
+                                            class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">{{ statictranslations('Confirm Cancel') }}</button>
                                     </div>
                                 </form>
                             </div>
@@ -134,7 +132,7 @@
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
                         <h2 class="text-lg lg:text-xl font-bold text-gray-900 mb-6 flex items-center">
                             <span class="w-1 h-6 lg:h-7 rounded-full bg-primary mr-3"></span>
-                            Order Tracking
+                            {{ statictranslations('Order Tracking') }}
                         </h2>
 
                         @if ($status === 'cancelled')
@@ -151,10 +149,10 @@
                                         </svg>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-base lg:text-lg font-bold text-red-900">Order Cancelled</p>
+                                        <p class="text-base lg:text-lg font-bold text-red-900">{{ statictranslations('Order Cancelled') }}</p>
                                         @if ($cancelledAt)
                                             <p class="text-sm text-red-700 mt-1">
-                                                Cancelled on {{ optional($cancelledAt)->format('M j, Y \a\t g:i A') }}
+                                                {{ statictranslations('Cancelled on') }} {{ optional($cancelledAt)->format('M j, Y \a\t g:i A') }}
                                             </p>
                                         @endif
                                     </div>
@@ -272,10 +270,9 @@
                                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                             clip-rule="evenodd" />
                                     </svg>
-                                    <div>
-                                        <p class="text-sm font-semibold text-green-900">Package Delivered Successfully!</p>
-                                        <p class="text-xs text-green-800 mt-1">Your order has been delivered to your
-                                            address. Delivered by: {{ $order->delivered_by ?? 'Unknown' }} </p>
+                                        <div>
+                                            <p class="text-sm font-semibold text-green-900">{{ statictranslations('Package Delivered Successfully!') }}</p>
+                                            <p class="text-xs text-green-800 mt-1">{{ statictranslations('Your order has been delivered to your address.') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -286,7 +283,7 @@
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
                         <h2 class="text-lg lg:text-xl font-bold text-gray-900 mb-4 lg:mb-6 flex items-center">
                             <span class="w-1 h-6 lg:h-7 rounded-full bg-primary mr-3"></span>
-                            Order Items ({{ $order->items->count() }})
+                      {{ statictranslations('Order Items') }} ({{ $order->items->count() }})
                         </h2>
 
                         <div class="space-y-4">
@@ -317,7 +314,7 @@
                                     <div class="flex-1 min-w-0">
                                         <h3 class="font-semibold text-gray-900 text-sm lg:text-base mb-1 line-clamp-2">
                                             {{ $variantName }}</h3>
-                                        <p class="text-xs text-gray-500 mb-2">Qty: {{ $item->quantity }}</p>
+                                        <p class="text-xs text-gray-500 mb-2">{{ statictranslations('Qty') }}: {{ $item->quantity }}</p>
                                         <div class="flex items-center justify-between flex-wrap gap-2">
                                             <div class="flex-1">
                                                 @php
@@ -390,7 +387,7 @@
                                                                 images: @json($reviewImages)
                                                             })'
                                                             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-500 hover:text-gray-700 bg-white hover:bg-white border hover:border-gray-300 border-green-600 rounded-lg transition-all duration-200">
-                                                            View Review
+                                                            {{ statictranslations('View Review') }}
                                                         </button>
                                                     @else
                                                         <button type="button"
@@ -413,7 +410,7 @@
                                                                 images: @json($reviewImages)
                                                             })'
                                                             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-all duration-200">
-                                                            Edit Review
+                                                            {{ statictranslations('Edit Review') }}
                                                         </button>
                                                     @endif
                                                 @else
@@ -430,7 +427,7 @@
                                                             reviewer_email: @json(Auth::user()?->email ?? '')
                                                         })'
                                                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:text-gray-700 bg-white hover:bg-white border hover:border-gray-300 border-primary rounded-lg transition-all duration-200">
-                                                        Write Review
+                                                        {{ statictranslations('Write Review') }}
                                                     </button>
                                                 @endif
                                             @endif
@@ -449,8 +446,8 @@
                     {{-- Order Summary --}}
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
                         <h3 class="text-lg font-bold flex items-center justify-between text-gray-900 mb-4">
-                            Order Summary
-                            <span class="text-sm font-semibold text-gray-600">Item Total:
+                            {{ statictranslations('Order Summary') }}
+                            <span class="text-sm font-semibold text-gray-600">{{ statictranslations('Item Total:') }}
                                 {{ $order->items->sum('quantity') }}</span>
                         </h3>
                         @php
@@ -464,7 +461,7 @@
                         @endphp
                         <div class="space-y-3 mb-4 pb-4 border-b-2 border-gray-100">
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Subtotal</span>
+                                <span class="text-gray-600">{{ statictranslations('Subtotal') }}</span>
                                 <span class="font-semibold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }}
                                     {{ number_format($subtotal, 2) }}</span>
                             </div>
@@ -478,7 +475,7 @@
                                                 d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                 clip-rule="evenodd" />
                                         </svg>
-                                        Item Discounts
+                                        {{ statictranslations('Item Discounts') }}
                                     </span>
                                     <span class="font-semibold text-green-600">-{{ config('app.CURRENCY_SYMBOL') }}
                                         {{ number_format($itemDiscount, 2) }}</span>
@@ -493,19 +490,19 @@
                                             <path
                                                 d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                         </svg>
-                                        Coupon Discount
+
                                     </span>
                                     <span class="font-semibold text-purple-600">-{{ config('app.CURRENCY_SYMBOL') }}
                                         {{ number_format($couponDiscount, 2) }}</span>
                                 </div>
                                 @if ($order->coupon_code)
-                                    <p class="text-xs text-purple-600 px-3">Code: <span
+                                    <p class="text-xs text-purple-600 px-3">{{ statictranslations('Code') }}: <span
                                             class="font-semibold">{{ $order->coupon_code }}</span></p>
                                 @endif
                             @endif
 {{--
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Shipping</span>
+                                <span class="text-gray-600">{{ statictranslations('Shipping') }}</span>
                                 <span class="font-semibold text-gray-900">
                                     @if ($shipping == 0)
                                         <span class="text-green-600">Free</span>
@@ -534,7 +531,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                     </svg>
-                                    <span class="text-xs font-semibold text-gray-700">Payment Method</span>
+                                    <span class="text-xs font-semibold text-gray-700">{{ statictranslations('Payment Method') }}</span>
                                 </div>
                                 <p class="text-sm text-gray-900 font-medium">
                                     {{ $order->payment_method ?? ($order->payment ?? '—') }}</p>
@@ -548,7 +545,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                         </svg>
-                                        <span class="text-xs font-semibold text-blue-700">Email</span>
+                                        <span class="text-xs font-semibold text-blue-700">{{ statictranslations('Email') }}</span>
                                     </div>
                                     <p class="text-sm text-blue-900 font-medium">{{ $order->email }}</p>
                                 </div>
@@ -566,7 +563,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            Shipping Address
+                            {{ statictranslations('Shipping Address') }}
                         </h3>
 
                         @php

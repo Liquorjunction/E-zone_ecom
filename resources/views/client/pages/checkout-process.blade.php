@@ -857,10 +857,9 @@
                                     <h2 class="text-xl font-extrabold text-gray-900 mb-4">
                                         {{ statictranslations('Order Successfully Placed!') }}</h2>
                                     <p class="text-xl text-gray-600 mb-2">
-                                        {{ statictranslations('Your order has been successfully placed and is now
-                                                                                                                being processed.') }}
+                                        {{ statictranslations('Your order has been successfully placed and is now being processed.') }}
                                     </p>
-                                    <p class="text-lg text-gray-600">Order #<span class="font-bold text-primary">
+                                    <p class="text-lg text-gray-600">{{ statictranslations('Order') }} #<span class="font-bold text-primary">
                                             {{ isset($order) ? $order->order_number ?? '#' . $order->id : '#—' }}
                                         </span></p>
 

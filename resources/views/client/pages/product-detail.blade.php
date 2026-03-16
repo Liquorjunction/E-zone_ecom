@@ -1,5 +1,6 @@
 @extends('client.layouts.app')
 
+
 @section('content')
     <script>
         window.CURRENCY_SYMBOL = @json(config('app.CURRENCY_SYMBOL'));
@@ -7,6 +8,8 @@
         window.PRODUCT_ID = @json($product->id);
         window.PRODUCT_VARIANT_ID = null;
         window.IS_AUTHENTICATED = @json(auth('web')->check());
+        window.APP_LOCALE = @json(app()->getLocale());
+        window.TRANSLATIONS = @json(json_decode(file_get_contents(base_path('lang/' . app()->getLocale() . '.json')), true));
     </script>
 
     {{-- ─── Page wrapper ────────────────────────────────────────────────── --}}
@@ -55,13 +58,13 @@
                                 @if ($product->created_at > now()->subDays(30))
                                     <span
                                         class="bg-emerald-500 text-white text-[11px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-lg shadow-lg">
-                                        New
+                                        {{ statictranslations('New') }}
                                     </span>
                                 @endif
                                 @if ($currentVariant && $currentVariant->is_bestseller)
                                     <span
                                         class="bg-amber-500 text-white text-[11px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-lg shadow-lg">
-                                        Bestseller
+                                        {{ statictranslations('Bestseller') }}
                                     </span>
                                 @endif
                             </div>
@@ -136,7 +139,7 @@
                         <div class="flex items-center gap-2 flex-wrap">
                             <span
                                 class="inline-flex items-center gap-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1">
-                                Electronics
+                                {{ statictranslations('Electronics') }}
                             </span>
                             <span id="product-sku"
                                 class="inline-flex items-center gap-1 rounded-lg bg-gray-100 text-gray-500 text-xs font-medium px-2.5 py-1">
@@ -164,7 +167,7 @@
                                     ☆☆☆☆☆
                                 </div>
                                 <span id="productHeaderReviewCount" class="text-gray-600 text-xs font-medium">(0
-                                    reviews)</span>
+                                    {{ statictranslations('reviews') }})</span>
                             </div>
 
                             @php
@@ -186,13 +189,13 @@
                                 <span
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    In Stock
+                                    {{ statictranslations('In Stock') }}
                                 </span>
                             @else
                                 <span
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold border border-red-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                    Out of Stock
+                                    {{ statictranslations('Out of Stock') }}
                                 </span>
                             @endif
                         </div>
@@ -227,7 +230,7 @@
                                                 {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($originalPrice, 2) }}
                                             </div>
                                             <div class="flex items-baseline gap-2">
-                                                <span class="text-xs text-gray-500 font-medium">From</span>
+                                                <span class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
                                                 <span id="product-price"
                                                     class="text-4xl font-extrabold text-red-600 tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
                                                     {{ number_format($finalPrice, 2) }}</span>
@@ -235,13 +238,13 @@
                                             @if ($discountPercentage > 0)
                                                 <span
                                                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold self-start">
-                                                    Save {{ number_format($discountPercentage, 0) }}%
+                                                    {{ statictranslations('Save') }} {{ number_format($discountPercentage, 0) }}%
                                                 </span>
                                             @endif
                                         @else
                                             @php $minPrice = $product->productVariants->min('price'); @endphp
                                             <div class="flex items-baseline gap-2">
-                                                <span class="text-xs text-gray-500 font-medium">From</span>
+                                                <span class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
                                                 <span id="product-price"
                                                     class="text-4xl font-extrabold text-primary tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
                                                     {{ number_format($minPrice, 2) }}</span>
@@ -258,7 +261,7 @@
                                             @if ($discountPercentage > 0)
                                                 <span
                                                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold self-start">
-                                                    Save {{ number_format($discountPercentage, 0) }}%
+                                                    {{ statictranslations('Save') }} {{ number_format($discountPercentage, 0) }}%
                                                 </span>
                                             @endif
                                         @else
@@ -267,7 +270,7 @@
                                                 {{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
                                         @endif
                                     @endif
-                                    <span class="text-xs text-gray-400 font-medium">incl. taxes</span>
+                                    <span class="text-xs text-gray-400 font-medium">{{ statictranslations('incl. taxes') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -279,7 +282,7 @@
                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                         clip-rule="evenodd" />
                                 </svg>
-                                <span class="text-sm font-semibold text-emerald-800">{{ $discountName }} applied!</span>
+                                <span class="text-sm font-semibold text-emerald-800">{{ $discountName }} {{ statictranslations('applied') }}!</span>
                             </div>
                         @endif
                     </div>
@@ -293,7 +296,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                 </svg>
-                                <span class="text-gray-500">Category:</span>
+                                <span class="text-gray-500">{{ statictranslations('Category') }}:</span>
                                 <a href="{{ route('products.index', ['category' => $product->category->slug]) }}"
                                     class="text-primary hover:text-primary-dark font-semibold transition-colors hover:underline">
                                     {{ method_exists($product->category ?? null, 'getTranslation') ? $product->category->getTranslation('category-name', app()->getLocale()) : (is_array(optional($product->category)->{'category-name'}) ? optional($product->category)->{'category-name'}[app()->getLocale()] ?? (optional($product->category)->{'category-name'}['en'] ?? '') : optional($product->category)->{'category-name'}) }}
@@ -307,7 +310,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
-                                <span class="text-gray-500">Brand:</span>
+                                <span class="text-gray-500">{{ statictranslations('Brand') }}:</span>
                                 <a href="{{ route('brand.products', $product->brand->slug) }}"
                                     class="text-primary hover:text-primary-dark font-semibold transition-colors hover:underline">
                                     {{ method_exists($product->brand ?? null, 'getTranslation') ? $product->brand->getTranslation('name', app()->getLocale()) : (is_array(optional($product->brand)->name) ? optional($product->brand)->name[app()->getLocale()] ?? (optional($product->brand)->name['en'] ?? '') : optional($product->brand)->name) }}
@@ -380,8 +383,7 @@
                     @if ($product->productVariants && $product->productVariants->count() > 0)
                         <div class="space-y-3">
                             <div class="flex items-center justify-between">
-                                <label class="text-sm font-bold text-gray-800 uppercase tracking-wide">Select
-                                    Variant</label>
+                                <label class="text-sm font-bold text-gray-800 uppercase tracking-wide">{{ statictranslations('Select Variant') }}</label>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach ($product->productVariants as $variant)
@@ -490,12 +492,10 @@
                                                 @endif
                                                 @if ($qty > 0)
                                                     <span
-                                                        class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg stock-badge border border-emerald-200 whitespace-nowrap shrink-0">In
-                                                        Stock</span>
+                                                        class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg stock-badge border border-emerald-200 whitespace-nowrap shrink-0">{{ statictranslations('In Stock') }}</span>
                                                 @else
                                                     <span
-                                                        class="text-[10px] font-semibold text-red-700 bg-red-50 px-2 py-1 rounded-lg stock-badge border border-red-200 whitespace-nowrap shrink-0">Out
-                                                        of Stock</span>
+                                                        class="text-[10px] font-semibold text-red-700 bg-red-50 px-2 py-1 rounded-lg stock-badge border border-red-200 whitespace-nowrap shrink-0">{{ statictranslations('Out of Stock') }}</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -560,7 +560,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
-                                        Add to Cart
+                                        {{ statictranslations('Add to Cart') }}
                                     </button>
                                     <button type="submit" name="buy_now" value="1" id="buy-now-btn"
                                         class="flex-1 bg-gray-900 text-white text-sm font-bold py-3 px-5 rounded-xl shadow-md hover:bg-black hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2 active:translate-y-0">
@@ -568,7 +568,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
-                                        Buy Now
+                                        {{ statictranslations('Buy Now') }}
                                     </button>
                                 </div>
                             </div>
@@ -630,7 +630,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 6h16M4 12h16M4 18h7" />
                             </svg>
-                            Description
+                            {{ statictranslations('Description') }}
                         </button>
                         <button
                             class="tab-button px-5 py-3 text-gray-500 hover:text-gray-900 font-semibold transition-all whitespace-nowrap text-sm flex items-center gap-2 rounded-t-xl hover:bg-white/70"
@@ -639,7 +639,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
-                            Specifications
+                            {{ statictranslations('Specifications') }}
                         </button>
                         <button
                             class="tab-button px-5 py-3 text-gray-500 hover:text-gray-900 font-semibold transition-all whitespace-nowrap text-sm flex items-center gap-2 rounded-t-xl hover:bg-white/70"
@@ -648,7 +648,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                             </svg>
-                            Reviews (<span id="reviewsTabCount">0</span>)
+                            {{ statictranslations('Reviews') }} (<span id="reviewsTabCount">0</span>)
                         </button>
                         {{-- <button
                             class="tab-button px-5 py-3 text-gray-500 hover:text-gray-900 font-semibold transition-all whitespace-nowrap text-sm flex items-center gap-2 rounded-t-xl hover:bg-white/70"
@@ -659,7 +659,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                             </svg>
-                            Shipping & Returns
+                            {{ statictranslations('Shipping & Returns') }}
                         </button> --}}
                     </nav>
                 </div>
@@ -669,7 +669,7 @@
                     {{-- ── Description tab ── --}}
                     <div id="description-tab" class="tab-content active prose-content">
                         <div class="prose prose-lg max-w-none">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">About This Product</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ statictranslations('About This Product') }}</h3>
                             <div class="text-gray-700 leading-relaxed">
                                 {!! is_array($product->description)
                                     ? $product->description[app()->getLocale()] ?? ($product->description['en'] ?? '')
@@ -690,7 +690,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                                 </svg>
-                                                Warranty Information
+                                                {{ statictranslations('Warranty Information') }}
                                             </h4>
                                             <div class="text-gray-700 text-sm">
                                                 {!! is_array($product->warranty)
@@ -707,7 +707,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                                 </svg>
-                                                Product Dimensions
+                                                {{ statictranslations('Product Dimensions') }}
                                             </h4>
                                             <div class="text-gray-700 text-sm">
                                                 {!! is_array($product->dimensions)
@@ -739,7 +739,7 @@
                                                                 stroke-width="2"
                                                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                                         </svg>
-                                                        Technical Specifications
+                                                        {{ statictranslations('Technical Specifications') }}
                                                     </h4>
                                                     <div class="divide-y divide-gray-100">
                                                         @foreach ($specifications as $spec)
@@ -766,7 +766,7 @@
                                                                 stroke-width="2"
                                                                 d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                                         </svg>
-                                                        Dimensions & Weight
+                                                        {{ statictranslations('Dimensions & Weight') }}
                                                     </h4>
                                                     <div class="divide-y divide-gray-100">
                                                         @foreach ($dimensions as $dim)
@@ -790,7 +790,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
-                                            <p class="text-gray-400 font-medium">No specifications available.</p>
+                                            <p class="text-gray-400 font-medium">{{ statictranslations('No specifications available.') }}</p>
                                         </div>
                                     @endif
                                 </div>
@@ -805,7 +805,7 @@
                         <div class="space-y-8">
                             <div class="bg-gray-50/60 border border-gray-200 rounded-2xl p-6 shadow-sm">
                                 <div class="flex items-center justify-between mb-6">
-                                    <h4 class="text-xl font-bold text-gray-900">Customer Reviews</h4>
+                                    <h4 class="text-xl font-bold text-gray-900">{{ statictranslations('Customer Reviews') }}</h4>
                                     @auth('web')
                                         {{-- Write review button can go here --}}
                                     @else
@@ -826,7 +826,7 @@
                                         <div id="avgRatingStars"
                                             class="flex items-center justify-center text-amber-400 text-2xl mb-2">☆☆☆☆☆
                                         </div>
-                                        <div id="reviewCount" class="text-sm text-gray-500 font-medium">Loading reviews...
+                                        <div id="reviewCount" class="text-sm text-gray-500 font-medium">{{ statictranslations('Loading reviews...') }}
                                         </div>
                                     </div>
                                     <div id="ratingBreakdown" class="space-y-2.5"></div>
@@ -838,14 +838,14 @@
                                     <div
                                         class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-3">
                                     </div>
-                                    <p class="text-gray-400 text-sm">Loading reviews...</p>
+                                    <p class="text-gray-400 text-sm">{{ statictranslations('Loading reviews...') }}</p>
                                 </div>
                             </div>
 
                             <div id="loadMoreContainer" class="text-center hidden">
                                 <button id="loadMoreReviews"
                                     class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-xl text-sm font-semibold transition-colors">
-                                    Load More Reviews
+                                    {{ statictranslations('Load More Reviews') }}
                                 </button>
                             </div>
                         </div>
@@ -864,7 +864,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                                     </svg>
-                                    Shipping Options
+                                    {{ statictranslations('Shipping Options') }}
                                 </h4>
                                 <div class="space-y-3">
                                     @foreach ([['icon' => 'M5 13l4 4L19 7', 'color' => 'green', 'title' => 'Free Standard Shipping', 'desc' => 'Orders over $50 · 5–7 business days'], ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'blue', 'title' => 'Express Delivery', 'desc' => '$9.99 · 1–2 business days'], ['icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'color' => 'purple', 'title' => 'Same Day Delivery', 'desc' => '$14.99 · Select areas only']] as $opt)
@@ -895,7 +895,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m-3 3V9a4 4 0 014-4h4m0 0l-3 3m3-3l-3-3" />
                                     </svg>
-                                    Returns & Exchanges
+                                    {{ statictranslations('Returns & Exchanges') }}
                                 </h4>
                                 <div class="space-y-3">
                                     @foreach ([['color' => 'orange', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => '30-Day Returns', 'desc' => 'Full refund on eligible items'], ['color' => 'indigo', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => 'Free Exchanges', 'desc' => 'Different size or color at no cost'], ['color' => 'green', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => 'Easy Process', 'desc' => 'Print label or drop off anywhere']] as $opt)
@@ -930,7 +930,7 @@
             @if ($relatedProducts && $relatedProducts->count() > 0)
                 <div class="mb-12">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">You Might Also Like</h2>
+                        <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">{{ statictranslations('You Might Also Like') }}</h2>
                         <div class="h-px flex-1 mx-6 bg-gray-200 hidden sm:block"></div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
