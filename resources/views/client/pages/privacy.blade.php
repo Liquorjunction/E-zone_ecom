@@ -21,7 +21,7 @@
                     <div class="sticky top-24">
                         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-                                Table of Contents
+                                {{ statictranslations('Table of Contents') }}
                             </h3>
                             <nav class="flex flex-col space-y-1" aria-label="Privacy Policy Navigation">
                                 @foreach ($privacyPolicy as $index => $content)
@@ -50,10 +50,10 @@
                             {{-- Introduction / Last Updated Placeholder (Optional) --}}
                             <div class="mb-10 pb-6 border-b border-gray-100">
                                 <p class="text-sm text-gray-500 font-medium">
-                                    Last Updated: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->format('F d, Y') : 'N/A' }}</span>
+                                    {{ statictranslations('Last Updated') }}: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->format('F d, Y') : 'N/A' }}</span>
                                 </p>
                                 <p>
-                                    Please read our privacy policy carefully to get a clear understanding of how we collect, use, protect or otherwise handle your Personally Identifiable Information in accordance with our website.
+                                    {{ statictranslations('Please read our privacy policy carefully to get a clear understanding of how we collect, use, protect or otherwise handle your Personally Identifiable Information in accordance with our website.') }}
                                 </p>
                             </div>
 
