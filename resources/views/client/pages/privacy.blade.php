@@ -76,8 +76,8 @@
                         {{-- Footer of the document --}}
                         <div class="mt-16 pt-8 border-t border-gray-100 text-center">
                             <p class="text-gray-500">
-                                If you have any questions about this policy, please
-                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">contact us</a>.
+                                {{ statictranslations('If you have any questions about this policy, please') }}
+                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">{{ statictranslations('contact us') }}</a>.
                             </p>
                         </div>
 
