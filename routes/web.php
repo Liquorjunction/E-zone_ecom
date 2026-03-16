@@ -17,9 +17,11 @@ use App\Http\Controllers\Client\PrivacyPolicyController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\ReviewController;
+use App\Http\Controllers\Client\SearchController;
 use App\Http\Controllers\Client\SecurityController;
 use App\Http\Controllers\Client\ShowroomController;
 use App\Http\Controllers\Client\ShippingAndReturnsController;
+use App\Http\Controllers\Client\SubCategoryController;
 use App\Http\Controllers\Client\TermsController;
 use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Redirect;
@@ -66,6 +68,10 @@ Route::get('/brand/{slug}', [BrandController::class, 'productsByBrand'])->name('
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
 Route::get('/category/{slug}', [CategoryController::class, 'productsByCategory'])->name('category.products');
 
+// Subcategories
+Route::get('/subcategories', [SubCategoryController::class, 'index'])->name('subcategories');
+Route::get('/subcategory/{slug}', [SubCategoryController::class, 'productsBySubCategory'])->name('subcategory.products');
+
 // Products
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
@@ -75,7 +81,7 @@ Route::prefix('products')->name('products.')->group(function () {
 });
 
 // Product Discovery
-Route::view('/search', 'client.pages.search-results')->name('search');
+Route::get('/ajax/search', [SearchController::class, 'ajaxSearch']);
 Route::view('/new-arrivals', 'client.pages.new-arrivals')->name('new-arrivals');
 Route::view('/best-sellers', 'client.pages.best-sellers')->name('best-sellers');
 Route::get('/product-compare', [CompareController::class, 'index'])->name('product-compare');

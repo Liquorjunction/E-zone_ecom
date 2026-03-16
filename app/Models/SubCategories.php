@@ -48,4 +48,16 @@ class SubCategories extends Model
     {
         return $this->hasMany(Product::class, 'sub_category_id');
     }
+
+    public function variants()
+    {
+        return $this->hasManyThrough(
+            ProductVariant::class,
+            Product::class,
+            'sub_category_id', // Foreign key on Product table
+            'product_id',      // Foreign key on ProductVariant table
+            'id',              // Local key on SubCategories table
+            'id'               // Local key on Product table
+        );
+    }
 }

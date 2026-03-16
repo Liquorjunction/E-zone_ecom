@@ -44,4 +44,16 @@ class Brand extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function variants()
+    {
+        return $this->hasManyThrough(
+            ProductVariant::class,
+            Product::class,
+            'brand_id',
+            'product_id',
+            'id',
+            'id'
+        );
+    }
 }

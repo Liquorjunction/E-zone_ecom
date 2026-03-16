@@ -10,6 +10,17 @@ use App\Models\DiscountTarget;
 
 class BrandRepository implements BrandRepositoryInterface
 {
+    public function getVariantsByBrandSlug(string $slug, int $perPage = 12)
+    {
+        $brand = $this->getBrandBySlug($slug);
+        if ($brand) {
+            return $brand->variants()
+                ->where('product_variants.status', 'active')
+                ->paginate($perPage);
+        }
+        return null;
+    }
+
     public function getActiveBrandsData()
     {
         return Brand::where('status', 'active')->get();
@@ -37,7 +48,7 @@ class BrandRepository implements BrandRepositoryInterface
         $discounts = Discount::where('status', 'active')
             ->whereHas('targets', function ($query) use ($brandId) {
                 $query->where('target_type', DiscountTarget::targetType('brand'))
-                      ->where('target_id', $brandId);
+                    ->where('target_id', $brandId);
             })
             ->get();
 

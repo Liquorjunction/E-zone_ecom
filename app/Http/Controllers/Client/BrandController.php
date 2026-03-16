@@ -22,7 +22,7 @@ class BrandController extends Controller
 
     public function productsByBrand(ReadBrandRequest $request, string $slug, BrandRepo $brandRepo)
     {
-        $products = $brandRepo->getProductsByBrandSlug($slug, 12);
+        $products = $brandRepo->getVariantsByBrandSlug($slug, 12);
         return view('client.pages.brand-products', [
             'brand' => $brandRepo->getBrandBySlug($slug),
             'products' => $products,

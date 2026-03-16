@@ -61,12 +61,7 @@ class Product extends Model
     // Relationships
     public function productVariants()
     {
-        return $this->hasMany(ProductVariant::class);
-    }
-
-    public function productVariantsByProductId()
-    {
-        return $this->hasMany(ProductVariant::class, 'product_id', 'id');
+        return $this->hasMany(ProductVariant::class, 'product_id');
     }
 
     public function brand()

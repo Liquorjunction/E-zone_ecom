@@ -211,6 +211,12 @@ Breadcrumbs::for('category.products', function (BreadcrumbTrail $trail, $slug) {
     $trail->push(Str::title($slug), route('category.products', $slug));
 });
 
+// Home > Products > Category > [SubCategory Name]
+Breadcrumbs::for('subcategory.products', function (BreadcrumbTrail $trail, $slug) {
+    $trail->parent('products.index');
+    $trail->push(Str::title($slug), route('subcategory.products', $slug));
+});
+
 // Home > Order Tracking
 Breadcrumbs::for('order-tracking', function (BreadcrumbTrail $trail) {
     $trail->parent('home');

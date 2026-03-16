@@ -10,6 +10,17 @@ use App\Models\DiscountTarget;
 
 class CategoryRepository implements CategoryRepositoryInterface
 {
+    public function getVariantsByCategorySlug(string $slug, int $perPage = 12)
+    {
+        $category = Categories::where('slug', $slug)->where('status', 'active')->first();
+        if (!$category) {
+            return null;
+        }
+        return $category->variants()
+            ->where('product_variants.status', 'active')
+            ->paginate($perPage);
+    }
+
     public function getCategoriesData()
     {
         return Categories::where('status', 'active')->get();

@@ -28,10 +28,10 @@ class Categories extends Model
         'status'
     ];
 
-    public function getSlugOptions() : SlugOptions
+    public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom(function($model) {
+            ->generateSlugsFrom(function ($model) {
                 return $model->getTranslation('category-name', 'en');
             })
             ->saveSlugsTo('slug');
@@ -45,5 +45,17 @@ class Categories extends Model
     public function products()
     {
         return $this->hasMany(Product::class, 'category_id');
+    }
+
+    public function variants()
+    {
+        return $this->hasManyThrough(
+            ProductVariant::class,
+            Product::class,
+            'category_id',
+            'product_id',
+            'id',
+            'id'
+        );
     }
 }

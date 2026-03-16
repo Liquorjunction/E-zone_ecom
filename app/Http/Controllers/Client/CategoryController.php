@@ -22,7 +22,7 @@ class CategoryController extends Controller
 
 	public function productsByCategory(ReadCategoryRequest $request, string $slug, CategoryRepo $categoryRepo)
 	{
-		$products = $categoryRepo->getProductsByCategorySlug($slug, 12);
+		$products = $categoryRepo->getVariantsByCategorySlug($slug, 12);
 		return view('client.pages.category-products', [
 			'category' => $categoryRepo->getCategoryBySlug($slug),
 			'products' => $products,
