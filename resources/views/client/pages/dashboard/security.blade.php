@@ -73,7 +73,7 @@
 
                 {{-- Password Requirements --}}
                 <div class="mt-3 space-y-2">
-                    <p class="text-xs font-semibold text-gray-700">Password must contain:</p>
+                    <p class="text-xs font-semibold text-gray-700">{{ statictranslations('Password must contain:') }}</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div class="flex items-center gap-2 text-xs text-gray-600 js-pwd-rule" data-rule="length">
                             <svg class="w-4 h-4 js-pwd-icon text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -81,7 +81,7 @@
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                     clip-rule="evenodd" />
                             </svg>
-                            <span class="js-pwd-text">At least 8 characters</span>
+                            <span class="js-pwd-text">{{ statictranslations('At least 8 characters') }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-600 js-pwd-rule" data-rule="uppercase">
                             <svg class="w-4 h-4 js-pwd-icon text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -89,7 +89,7 @@
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                     clip-rule="evenodd" />
                             </svg>
-                            <span class="js-pwd-text">One uppercase letter</span>
+                            <span class="js-pwd-text">{{ statictranslations('One uppercase letter') }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-600 js-pwd-rule" data-rule="number">
                             <svg class="w-4 h-4 js-pwd-icon text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -97,7 +97,7 @@
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                     clip-rule="evenodd" />
                             </svg>
-                            <span class="js-pwd-text">One number</span>
+                            <span class="js-pwd-text">{{ statictranslations('One number') }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-600 js-pwd-rule" data-rule="special">
                             <svg class="w-4 h-4 js-pwd-icon text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -105,25 +105,25 @@
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                     clip-rule="evenodd" />
                             </svg>
-                            <span class="js-pwd-text">One special character</span>
+                            <span class="js-pwd-text">{{ statictranslations('One special character') }}</span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Strength Indicator --}}
                 <div id="pwd-strength" class="mt-3 hidden">
-                    <p class="text-xs font-semibold text-gray-700 mb-2">Strength</p>
+                    <p class="text-xs font-semibold text-gray-700 mb-2">{{ statictranslations('Strength') }}</p>
                     <div class="w-full bg-gray-200 rounded-full h-2">
                         <div id="pwd-strength-bar" class="h-2 rounded-full bg-red-500" style="width:10%"></div>
                     </div>
-                    <div class="mt-1 text-xs text-gray-600" id="pwd-strength-text">Very weak</div>
+                    <div class="mt-1 text-xs text-gray-600" id="pwd-strength-text">{{ statictranslations('Very weak') }}</div>
                 </div>
             </div>
 
             {{-- Confirm Password --}}
             <div>
                 <label for="confirm_password" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Confirm New Password *
+                    {{ statictranslations('Confirm New Password') }} *
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -134,7 +134,7 @@
                     </div>
                     <input type="password" id="confirm_password" name="new_password_confirmation" required
                         class="w-full pl-12 pr-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
-                        placeholder="Confirm your new password">
+                        placeholder="{{ statictranslations('Confirm your new password') }}">
                     <p class="js-confirm-msg text-xs mt-1"></p>
                     <button type="button" class="absolute inset-y-0 right-0 pr-4 flex items-center js-toggle-password"
                         data-target="confirm_password">
@@ -156,7 +156,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
-                Update Password
+                {{ statictranslations('Update Password') }}
             </button>
         </div>
     </form>

@@ -29,7 +29,7 @@ class StoreFaqCategoryRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('faq_categories', 'name->en'),
+                Rule::unique('faq_categories', "name->en")->whereNull('deleted_at'),
             ],
             'name.ar' => 'nullable|string|max:255',
             'name.fr' => 'nullable|string|max:255',

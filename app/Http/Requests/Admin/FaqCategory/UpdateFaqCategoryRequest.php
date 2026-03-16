@@ -26,11 +26,15 @@ class UpdateFaqCategoryRequest extends FormRequest
     {
         return [
             'id' => 'required|exists:faq_categories,id',
-
-            'name' => 'required|array|unique:faq_categories,name,' . $this->id,
-            'name.en' => ['required', 'string', 'max:255', Rule::unique('faq_categories', 'name.en')->ignore($this->id)],
-            'name.fr' => 'nullable|string',
-            'name.ar' => 'nullable|string',
+            'name' => 'required|array',
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('faq_categories', "name->en")->ignore($this->id)->whereNull('deleted_at'),
+            ],
+            'name.fr' => 'nullable|string|max:255',
+            'name.ar' => 'nullable|string|max:255',
             'status' => 'required|in:active,inactive',
         ];
     }

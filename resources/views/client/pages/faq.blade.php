@@ -22,7 +22,7 @@
                     <div class="sticky top-24">
                         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-                                FAQ Categories
+                                {{ statictranslations('FAQ Categories') }}
                             </h3>
                             <nav class="flex flex-col space-y-1" aria-label="FAQ Navigation">
                                 @foreach ($faqcategories ?? [] as $category)
@@ -39,10 +39,10 @@
 
                         {{-- Quick Contact Box --}}
                         <div class="mt-6 bg-blue-50 rounded-xl p-6 border border-blue-100">
-                            <h4 class="text-blue-900 font-semibold mb-2">Still need help?</h4>
-                            <p class="text-sm text-blue-700 mb-4">Can't find the answer you're looking for?</p>
+                            <h4 class="text-blue-900 font-semibold mb-2">{{ statictranslations('Still need help?') }}</h4>
+                            <p class="text-sm text-blue-700 mb-4">{{ statictranslations("Can't find the answer you're looking for?") }}</p>
                             <a href="{{ route('contact') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
-                                Contact Support &rarr;
+                                {{ statictranslations('Contact Support') }} &rarr;
                             </a>
                         </div>
                     </div>
@@ -59,8 +59,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-medium text-gray-900">No FAQs Found</h3>
-                                <p class="text-gray-500 mt-2">Check back later for updates.</p>
+                                <h3 class="text-lg font-medium text-gray-900">{{ statictranslations('No FAQs Found') }}</h3>
+                                <p class="text-gray-500 mt-2">{{ statictranslations('Check back later for updates.') }}</p>
                             </div>
                         @else
                             <div class="space-y-12">
@@ -109,8 +109,8 @@
                         {{-- Footer of the document --}}
                         <div class="mt-16 pt-8 border-t border-gray-100 text-center">
                             <p class="text-gray-500">
-                                Still can't find what you're looking for?
-                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">Contact our support team</a>.
+                                {{ statictranslations("Still can't find what you're looking for?") }}
+                                <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">{{ statictranslations('Contact our support team') }}</a>.
                             </p>
                         </div>
 

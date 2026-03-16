@@ -66,11 +66,11 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-white/80 backdrop-blur-sm rounded-xl p-4 text-center border border-gray-100 shadow-sm">
                         <p class="text-3xl font-bold text-primary mb-1">{{ $orderCount ?? '0' }}</p>
-                        <p class="text-xs text-gray-600 font-medium">Total Orders</p>
+                        <p class="text-xs text-gray-600 font-medium">{{ statictranslations('Total Orders') }}</p>
                     </div>
                     <div class="bg-white/80 backdrop-blur-sm rounded-xl p-4 text-center border border-gray-100 shadow-sm">
                         <p class="text-3xl font-bold text-primary mb-1">{{ $rewardPoints ?? '0' }}</p>
-                        <p class="text-xs text-gray-600 font-medium">Reward Points</p>
+                        <p class="text-xs text-gray-600 font-medium">{{ statictranslations('Reward Points') }}</p>
                     </div>
                 </div>
             </div>
@@ -114,12 +114,12 @@
                     <div
                         class="text-center bg-white/80 backdrop-blur-sm rounded-xl p-5 min-w-25 border border-gray-100 shadow-sm">
                         <p class="text-3xl font-bold text-primary mb-1">{{ $orderCount ?? '0' }}</p>
-                        <p class="text-sm text-gray-600 font-medium">Orders</p>
+                        <p class="text-sm text-gray-600 font-medium">{{ statictranslations('Orders') }}</p>
                     </div>
                     <div
                         class="text-center bg-white/80 backdrop-blur-sm rounded-xl p-5 min-w-25 border border-gray-100 shadow-sm hidden">
                         <p class="text-3xl font-bold text-primary mb-1">{{ $rewardPoints ?? '0' }}</p>
-                        <p class="text-sm text-gray-600 font-medium">Points</p>
+                        <p class="text-sm text-gray-600 font-medium">{{ statictranslations('Points') }}</p>
                     </div>
                 </div>
             </div>
@@ -134,7 +134,7 @@
             <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                 <h3 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center">
                     <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
-                    Personal Information
+                    {{ statictranslations('Personal Information') }}
                 </h3>
                 <button type="button" id="editBtn"
                     class="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5 rounded-lg transition-all duration-200">
@@ -142,7 +142,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
-                    Edit
+                    {{ statictranslations('Edit') }}
                 </button>
             </div>
 
@@ -150,7 +150,7 @@
                 {{-- Name Field --}}
                 <div class="group">
                     <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Full Name <span class="text-red-500">*</span>
+                        {{ statictranslations('Full Name') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -171,7 +171,7 @@
                 {{-- Email Field --}}
                 <div class="group">
                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Email Address <span class="text-red-500">*</span>
+                        {{ statictranslations('Email Address') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -184,7 +184,7 @@
                         <input type="email" id="email" name="email" disabled required
                             value="{{ old('email', auth()->user()->email) }}"
                             class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 bg-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
-                            placeholder="your.email@example.com">
+                            placeholder="{{ statictranslations('your.email@example.com') }}">
                         <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                             <svg fill="#6B7280" width="24px" height="24px" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24">
@@ -199,7 +199,7 @@
                 {{-- Phone Field --}}
                 <div class="group">
                     <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Phone Number <span class="text-red-500">*</span>
+                        {{ statictranslations('Phone Number') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -212,7 +212,7 @@
                         <input type="tel" id="phone" name="phone" required readonly
                             value="{{ old('phone', auth()->user()->phone) }}"
                             class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
-                            placeholder="+1 (555) 000-0000">
+                            placeholder="{{ statictranslations('+1 (555) 000-0000') }}">
                     </div>
                     <div class="error-message text-xs text-red-600 mt-1.5 hidden" data-error-for="phone"></div>
                 </div>
@@ -220,7 +220,7 @@
                 {{-- Avatar Upload Field --}}
                 <div class="group">
                     <label for="avatar" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Profile Picture
+                        {{ statictranslations('Profile Picture') }}
                     </label>
                     <div class="relative">
                         <input type="file" id="avatar" name="avatar" class="hidden" accept="image/*" disabled
@@ -234,11 +234,11 @@
                                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors"
-                                    id="file-name">Choose image file</span>
+                                    id="file-name">{{ statictranslations('Choose image file') }}</span>
                             </div>
                         </label>
                     </div>
-                    <p class="mt-1.5 text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                    <p class="mt-1.5 text-xs text-gray-500">{{ statictranslations('PNG, JPG, GIF up to 5MB') }}</p>
                     <div class="error-message text-xs text-red-600 mt-1.5 hidden" data-error-for="avatar"></div>
                 </div>
             </div>
@@ -249,14 +249,14 @@
             <button type="button"
                 class="px-6 py-3.5 md:py-4 border-2 border-gray-200 bg-white text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-md transition-all duration-200 text-sm md:text-base"
                 onclick="window.location.reload();">
-                Cancel
+                {{ statictranslations('Cancel') }}
             </button>
             <button type="submit"
                 class="px-6 py-3.5 md:py-4 bg-linear-to-r from-primary to-primary/90 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm md:text-base flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
-                Save Changes
+                {{ statictranslations('Save Changes') }}
             </button>
         </div>
     </form>
