@@ -307,8 +307,7 @@
                             </svg>
                         </div>
                         <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ statictranslations('Nothing to Compare') }}</h2>
-                        <p class="text-gray-600 mb-8">{{ statictranslations("You haven't added any products to compare. Start browsing and add
-                            products to see a side-by-side comparison.") }}</p>
+                        <p class="text-gray-600 mb-8">{{ statictranslations("You haven't added any products to compare. Start browsing and add products to see a side-by-side comparison.") }}</p>
                         <a href="{{ route('products.index') }}"
                             class="inline-flex items-center px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
