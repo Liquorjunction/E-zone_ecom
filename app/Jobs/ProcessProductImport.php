@@ -46,7 +46,7 @@ class ProcessProductImport implements ShouldQueue
 
     public function handle(ProductRepositoryInterface $productRepo, AutoTranslationService $translationService)
     {
-        $cacheKey = 'import_progress_'.$this->batchId;
+        $cacheKey = 'import_progress_' . $this->batchId;
 
         Log::info("========== ProcessProductImport Job START (Batch: {$this->batchId}) ==========");
 
@@ -78,10 +78,9 @@ class ProcessProductImport implements ShouldQueue
             $this->persistReport($result['successful'], $result['failed_records'], $this->batchId);
             $this->finalizeProgress($cacheKey, $result);
             $this->cleanupFile();
-
         } catch (\Exception $e) {
-            Log::error('Import Job Fatal: '.$e->getMessage());
-            $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal Error: '.$e->getMessage()]);
+            Log::error('Import Job Fatal: ' . $e->getMessage());
+            $this->updateProgress($cacheKey, 'failed', 0, 0, 0, 0, ['Fatal Error: ' . $e->getMessage()]);
         } finally {
             Log::info('========== ProcessProductImport Job END ==========');
         }
@@ -101,7 +100,7 @@ class ProcessProductImport implements ShouldQueue
         }
 
         if ($dto->hasErrors()) {
-            return ['status' => 'error', 'message' => "Row $rowNum: ".$dto->getErrorsAsString()];
+            return ['status' => 'error', 'message' => "Row $rowNum: " . $dto->getErrorsAsString()];
         }
 
         $brandId = $this->brandsMap[strtolower(trim($row['brand']))] ?? null;
@@ -132,12 +131,13 @@ class ProcessProductImport implements ShouldQueue
             }
 
             $data = [
-                'brand_id' => $brandId,
-                'category_id' => $catId,
+                'brand_id'        => $brandId,
+                'category_id'     => $catId,
                 'sub_category_id' => $subId,
-                'price' => 0,
-                'name' => ['en' => trim($row['name_en'])],
-                'specifications' => ['en' => $dto->specs],
+                'price'           => 0,
+                'status'          => 'active',
+                'name'            => ['en' => trim($row['name_en'])],
+                'specifications'  => ['en' => $dto->specs],
             ];
 
             if (! empty($row['description_en'])) {
@@ -160,11 +160,12 @@ class ProcessProductImport implements ShouldQueue
                     $entry = [
                         'variant_name' => ['en' => $v['name_en']],
                         'price' => $v['price'],
+                        'status' => 'active',
                         'is_bestseller' => (bool)($v['is_bestseller'] ?? false),
                     ];
                     if (! empty($v['attributes']) && is_array($v['attributes'])) {
-                        if (isset($v['attributes']['en'])) {
-                            $entry['attributes'] = ['en' => $v['attributes']['en']];
+                        if (!empty($v['attributes']) && is_array($v['attributes'])) {
+                            $entry['attributes'] = $v['attributes'];
                         } else {
                             $entry['attributes'] = ['en' => $v['attributes']];
                         }
@@ -176,6 +177,7 @@ class ProcessProductImport implements ShouldQueue
                     'variant_name' => ['en' => trim($row['name_en'])],
                     'price' => $row['price'],
                     'attributes' => ['en' => []],
+                    'status' => 'active',
                     'is_bestseller' => false,
                 ];
             }
@@ -200,7 +202,6 @@ class ProcessProductImport implements ShouldQueue
             }
 
             return ['status' => 'success', 'product' => $product];
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Row $rowNum: Import FAILED", ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);

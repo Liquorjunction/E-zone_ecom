@@ -190,7 +190,6 @@ trait ProductGrouper
             }
         }
 
-        $attributesFound = false;
         $clean = [];
         foreach ($attributes['en'] as $it) {
             $k = is_string($it['key']) ? trim($it['key']) : '';
