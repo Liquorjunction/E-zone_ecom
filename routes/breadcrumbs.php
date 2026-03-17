@@ -25,11 +25,11 @@ Breadcrumbs::for('products.detail', function (BreadcrumbTrail $trail, $product) 
         $trail->push(statictranslations('Home'), route('home'));
         if ($product->category) {
             $categorySlug = $product->category->slug ?? statictranslations('category');
-            $trail->push($categorySlug, url('/category/' . $categorySlug));
+            $trail->push($categorySlug, url('/' . $categorySlug));
         }
         if ($product->subcategory) {
             $subcategorySlug = $product->subcategory->slug ?? statictranslations('subcategory');
-            $trail->push($subcategorySlug, url('/subcategory/' . $subcategorySlug));
+            $trail->push($subcategorySlug, url('/' . ($product->category?->slug ?? '') . '/' . $subcategorySlug));
         }
         $productSlug = $product->slug ?? statictranslations('product');
         $trail->push($productSlug, route('products.detail.with-category', [
