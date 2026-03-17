@@ -41,6 +41,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            // Skip custom error page for validation exceptions
+            if ($exception instanceof \Illuminate\Validation\ValidationException) {
+                return null;
+            }
+
             if (! $request->is('admin') && ! $request->is('admin/*')) {
                 return null;
             }
