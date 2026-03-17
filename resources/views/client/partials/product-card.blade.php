@@ -87,7 +87,7 @@
 <div
     class="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border-2 border-gray-100 hover:border-primary/20">
     <div class="relative aspect-square bg-gray-100 overflow-hidden">
-        <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}"
+        <a href="{{ route('products.detail.with-category', ['category' => $master->category?->slug, 'subcategory' => $master->subcategory?->slug, 'slug' => $master->slug]) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}"
             class="block w-full h-full">
             <img src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}" alt="{{ $name }}"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
@@ -196,7 +196,7 @@
         </div>
 
         <a
-            href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
+            href="{{ route('products.detail.with-category', ['category' => $master->category?->slug, 'subcategory' => $master->subcategory?->slug, 'slug' => $master->slug]) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
             <h3
                 class="text-sm font-bold text-gray-900 line-clamp-2 mb-3 group-hover:text-primary transition-colors leading-snug">
                 {{ $name }}

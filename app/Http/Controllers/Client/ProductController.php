@@ -52,9 +52,22 @@ class ProductController extends Controller
         return view('client.pages.deals', compact('products', 'bestsellers', 'bestsellersIds', 'availabilityCounts', 'brands', 'categories', 'subCategories', 'minPrice', 'maxPrice'));
     }
 
-    public function show($slug, ProductRepo $productRepository)
+    public function show($category = null, $subcategory = null, $slug = null, ProductRepo $productRepository)
     {
+        if ($slug === null && $category !== null) {
+            $slug = $category;
+            $category = null;
+            $subcategory = null;
+        }
+
         $product = $productRepository->findActiveBySlug($slug);
+
+        if ($category && $product && $product->category && $product->category->slug !== $category) {
+            abort(404);
+        }
+        if ($subcategory && $product && $product->subcategory && $product->subcategory->slug !== $subcategory) {
+            abort(404);
+        }
         $relatedProducts = $productRepository->getRelatedProducts($product);
         $bestsellers = $productRepository->getBestsellerVariants(8);
         $bestsellersIds = $bestsellers->pluck('id')->toArray();

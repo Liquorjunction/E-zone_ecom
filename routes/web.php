@@ -78,7 +78,11 @@ Route::prefix('products')->name('products.')->group(function () {
     Route::get('/deals', [ProductController::class, 'deals'])->name('deals');
     Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
     Route::post('/variant-discount', [ProductController::class, 'getVariantDiscount'])->name('variant-discount');
+    Route::get('/{category}/{subcategory}/products', [ProductController::class, 'index'])->name('index.with-category');
 });
+
+// SEO-friendly product detail route (should be after all more specific routes)
+Route::get('/{category}/{subcategory}/{slug}', [ProductController::class, 'show'])->name('products.detail.with-category');
 
 // Product Discovery
 Route::get('/ajax/search', [SearchController::class, 'ajaxSearch']);
