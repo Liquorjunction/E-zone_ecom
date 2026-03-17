@@ -14,11 +14,11 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
+        web: __DIR__ . '/../routes/web.php',
         then: function (): void {
             require base_path('routes/admin.php');
         },
-        commands: __DIR__.'/../routes/console.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -36,17 +36,32 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Throwable $exception, Request $request) {
-            // Keep custom admin error pages only for production with debug disabled.
+            // Only apply in production with debug disabled
             if (! app()->environment('production') || config('app.debug')) {
                 return null;
             }
 
-            // Skip custom error page for validation exceptions
-            if ($exception instanceof \Illuminate\Validation\ValidationException) {
+            // Skip for non-admin routes
+            if (! $request->is('admin') && ! $request->is('admin/*')) {
                 return null;
             }
 
-            if (! $request->is('admin') && ! $request->is('admin/*')) {
+            // Skip exceptions that should redirect, not render an error page
+            $redirectExceptions = [
+                \Illuminate\Validation\ValidationException::class,
+                \Illuminate\Auth\AuthenticationException::class,
+                \Illuminate\Session\TokenMismatchException::class, // 419 CSRF
+            ];
+
+            foreach ($redirectExceptions as $class) {
+                if ($exception instanceof $class) {
+                    return null; // Let Laravel handle redirects normally
+                }
+            }
+
+            // Only render custom error pages for non-JSON requests
+            // (AJAX/API calls should get JSON error responses)
+            if ($request->expectsJson()) {
                 return null;
             }
 
@@ -54,7 +69,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 ? $exception->getStatusCode()
                 : 500;
 
-            $supportedErrorPages = [401, 403, 404, 419, 429, 500, 503];
+            $supportedErrorPages = [401, 403, 404, 429, 500, 503];
+            // Note: 419 removed — handled via redirect above
 
             if (! in_array($statusCode, $supportedErrorPages, true)) {
                 $statusCode = 500;
