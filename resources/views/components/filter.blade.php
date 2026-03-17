@@ -153,18 +153,20 @@ $countActiveVariants = function ($products) {
                                     <div class="subcategories-container ml-7 mt-2 space-y-1 hidden"
                                         data-category-slug="{{ $category->slug }}">
                                         @foreach ($category->subcategories as $subcategory)
-                                            <label class="flex items-center group cursor-pointer">
-                                                <input type="checkbox" name="subcategory[]"
-                                                    value="{{ $subcategory->slug }}"
-                                                    {{ in_array($subcategory->slug, (array) request('subcategory', [])) ? 'checked' : '' }}
-                                                    class="w-3 h-3 text-primary border-gray-300 rounded focus:ring-primary subcategory-checkbox"
-                                                    data-category-slug="{{ $category->slug }}"
-                                                    data-subcategory-id="{{ $subcategory->id }}">
-                                                <span
-                                                    class="ml-3 text-xs text-gray-600 group-hover:text-primary transition-colors">{{ $subcategory->{'sub-category-name'} }}</span>
-                                                <span
-                                                    class="ml-auto text-xs text-gray-400">({{ $countActiveVariants($subcategory->products) }})</span>
-                                            </label>
+                                            @if ($countActiveVariants($subcategory->products) > 0)
+                                                <label class="flex items-center group cursor-pointer">
+                                                    <input type="checkbox" name="subcategory[]"
+                                                        value="{{ $subcategory->slug }}"
+                                                        {{ in_array($subcategory->slug, (array) request('subcategory', [])) ? 'checked' : '' }}
+                                                        class="w-3 h-3 text-primary border-gray-300 rounded focus:ring-primary subcategory-checkbox"
+                                                        data-category-slug="{{ $category->slug }}"
+                                                        data-subcategory-id="{{ $subcategory->id }}">
+                                                    <span
+                                                        class="ml-3 text-xs text-gray-600 group-hover:text-primary transition-colors">{{ $subcategory->{'sub-category-name'} }}</span>
+                                                    <span
+                                                        class="ml-auto text-xs text-gray-400">({{ $countActiveVariants($subcategory->products) }})</span>
+                                                </label>
+                                            @endif
                                         @endforeach
                                     </div>
                                 @endif

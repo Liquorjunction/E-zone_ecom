@@ -36,6 +36,9 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
         }
         return $subCategory->variants()
             ->where('product_variants.status', 'active')
+            ->whereHas('product', function($query) {
+                $query->where('status', 'active');
+            })
             ->paginate($perPage);
     }
 

@@ -199,21 +199,21 @@ Breadcrumbs::for('products.deals', function (BreadcrumbTrail $trail) {
     $trail->push(statictranslations('Deals'), route('products.deals'));
 });
 
-// Home > Products > [Brand Name]
+// Home > All Brands > [Brand Name]
 Breadcrumbs::for('brand.products', function (BreadcrumbTrail $trail, $slug) {
-    $trail->parent('products.index');
+    $trail->parent('brands');
     $trail->push(Str::title($slug), route('brand.products', $slug));
 });
 
-// Home > Products > [Category Name]
+// Home > All Categories > [Category Name]
 Breadcrumbs::for('category.products', function (BreadcrumbTrail $trail, $slug) {
-    $trail->parent('products.index');
+    $trail->parent('categories');
     $trail->push(Str::title($slug), route('category.products', $slug));
 });
 
-// Home > Products > Category > [SubCategory Name]
+// Home > All Categories > Category > [SubCategory Name]
 Breadcrumbs::for('subcategory.products', function (BreadcrumbTrail $trail, $slug) {
-    $trail->parent('products.index');
+    $trail->parent('subcategories');
     $trail->push(Str::title($slug), route('subcategory.products', $slug));
 });
 
@@ -242,6 +242,11 @@ Breadcrumbs::for('categories', function (BreadcrumbTrail $trail) {
     $trail->push(statictranslations('All Categories'), route('categories'));
 });
 
+// Home > All SubCategories
+Breadcrumbs::for('subcategories', function (BreadcrumbTrail $trail) {
+    $trail->parent('home');
+    $trail->push(statictranslations('All SubCategories'), route('subcategories'));
+});
 
 // ============================================
 // ADMIN DASHBOARD ROUTES

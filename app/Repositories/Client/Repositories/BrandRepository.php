@@ -16,6 +16,9 @@ class BrandRepository implements BrandRepositoryInterface
         if ($brand) {
             return $brand->variants()
                 ->where('product_variants.status', 'active')
+                ->whereHas('product', function($query) {
+                    $query->where('status', 'active');
+                })
                 ->paginate($perPage);
         }
         return null;

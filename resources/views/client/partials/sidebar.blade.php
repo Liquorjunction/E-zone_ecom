@@ -153,15 +153,17 @@
                              x-collapse.duration.200ms
                              class="mt-1 ml-13 space-y-0.5 pb-1 pl-3 border-l-2 border-primary/20">
                             @foreach ($category->subcategories as $subcategory)
-                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
-                                   data-subcategory-slug="{{ $subcategory->slug }}"
-                                   data-category-slug="{{ $category->slug }}"
-                                   class="subcategory-sidebar-link group/sub flex items-center gap-2.5 px-3 py-2
-                                          text-xs text-gray-500 rounded-xl transition-all duration-150
-                                          hover:bg-primary/5 hover:text-primary hover:pl-4 hover:font-medium">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/sub:bg-primary shrink-0 transition-colors duration-150"></span>
-                                    <span class="truncate">{{ $subcategory->{'sub-category-name'} }}</span>
-                                </a>
+                                @if (function_exists('countActiveVariants') ? countActiveVariants($subcategory->products) > 0 : (isset($countActiveVariants) ? $countActiveVariants($subcategory->products) > 0 : ($subcategory->products && $subcategory->products->where('status', 'active')->count() > 0)))
+                                    <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                       data-subcategory-slug="{{ $subcategory->slug }}"
+                                       data-category-slug="{{ $category->slug }}"
+                                       class="subcategory-sidebar-link group/sub flex items-center gap-2.5 px-3 py-2
+                                              text-xs text-gray-500 rounded-xl transition-all duration-150
+                                              hover:bg-primary/5 hover:text-primary hover:pl-4 hover:font-medium">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/sub:bg-primary shrink-0 transition-colors duration-150"></span>
+                                        <span class="truncate">{{ $subcategory->{'sub-category-name'} }}</span>
+                                    </a>
+                                @endif
                             @endforeach
                         </div>
                     @endif
@@ -330,15 +332,17 @@
                              x-collapse.duration.200ms
                              class="mt-1 ml-[3.25rem] space-y-0.5 pb-1 pl-3 border-l-2 border-primary/20">
                             @foreach ($category->subcategories as $subcategory)
-                                <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
-                                   data-subcategory-slug="{{ $subcategory->slug }}"
-                                   data-category-slug="{{ $category->slug }}"
-                                   class="subcategory-sidebar-link group/sub flex items-center gap-2.5 px-3 py-2
-                                          text-xs text-gray-500 rounded-xl transition-all duration-150
-                                          hover:bg-primary/5 hover:text-primary hover:pl-4 hover:font-medium">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/sub:bg-primary shrink-0 transition-colors duration-150"></span>
-                                    <span class="truncate">{{ $subcategory->{'sub-category-name'} }}</span>
-                                </a>
+                                @if (function_exists('countActiveVariants') ? countActiveVariants($subcategory->products) > 0 : (isset($countActiveVariants) ? $countActiveVariants($subcategory->products) > 0 : ($subcategory->products && $subcategory->products->where('status', 'active')->count() > 0)))
+                                    <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
+                                       data-subcategory-slug="{{ $subcategory->slug }}"
+                                       data-category-slug="{{ $category->slug }}"
+                                       class="subcategory-sidebar-link group/sub flex items-center gap-2.5 px-3 py-2
+                                              text-xs text-gray-500 rounded-xl transition-all duration-150
+                                              hover:bg-primary/5 hover:text-primary hover:pl-4 hover:font-medium">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/sub:bg-primary shrink-0 transition-colors duration-150"></span>
+                                        <span class="truncate">{{ $subcategory->{'sub-category-name'} }}</span>
+                                    </a>
+                                @endif
                             @endforeach
                         </div>
                     @endif

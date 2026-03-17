@@ -70,7 +70,7 @@ class ProductRepository implements ProductRepositoryInterface
             }
         ])
             ->withCount([
-                'productVariantsByProductId as productVariants_count' => function ($q) {
+                'productVariants as productVariants_count' => function ($q) {
                     $q->where('status', 'active');
                 }
             ])

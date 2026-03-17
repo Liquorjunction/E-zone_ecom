@@ -18,6 +18,9 @@ class CategoryRepository implements CategoryRepositoryInterface
         }
         return $category->variants()
             ->where('product_variants.status', 'active')
+            ->whereHas('product', function($query) {
+                $query->where('status', 'active');
+            })
             ->paginate($perPage);
     }
 
