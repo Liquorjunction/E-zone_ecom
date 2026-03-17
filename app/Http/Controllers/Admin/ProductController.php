@@ -328,7 +328,7 @@ class ProductController extends Controller
         }
 
         if ($progress['status'] === 'completed') {
-            Cache::forget('import_progress_' . $batchId);
+            // Cache::forget('import_progress_' . $batchId);
 
             session()->flash('import_status', [
                 'type' => 'import_summary',
