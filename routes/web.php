@@ -70,7 +70,7 @@ Route::get('/category/{slug}', [CategoryController::class, 'productsByCategory']
 
 // Subcategories
 Route::get('/subcategories', [SubCategoryController::class, 'index'])->name('subcategories');
-Route::get('/subcategory/{slug}', [SubCategoryController::class, 'productsBySubCategory'])->name('subcategory.products');
+Route::get('/subcategory/{slug}', [SubCategoryController::class, 'productsBySubCategory'])->name('subcategorgit revert 6d9edac7c68ba5da963c33771b21ad1837b5f4bf da6aafcb681e9d6452fd5cf52af72c2c8b29c72cy.products');
 
 // Products
 Route::prefix('products')->name('products.')->group(function () {
@@ -78,11 +78,7 @@ Route::prefix('products')->name('products.')->group(function () {
     Route::get('/deals', [ProductController::class, 'deals'])->name('deals');
     Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
     Route::post('/variant-discount', [ProductController::class, 'getVariantDiscount'])->name('variant-discount');
-    Route::get('/{category}/{subcategory}/products', [ProductController::class, 'index'])->name('index.with-category');
 });
-
-// SEO-friendly product detail route (should be after all more specific routes)
-Route::get('/{category}/{subcategory}/{slug}', [ProductController::class, 'show'])->name('products.detail.with-category');
 
 // Product Discovery
 Route::get('/ajax/search', [SearchController::class, 'ajaxSearch']);

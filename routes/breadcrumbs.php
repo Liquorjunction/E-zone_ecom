@@ -22,22 +22,9 @@ Breadcrumbs::for('products.index', function (BreadcrumbTrail $trail) {
 
 // Home > Products > Product Detail
 Breadcrumbs::for('products.detail', function (BreadcrumbTrail $trail, $product) {
-        $trail->push(statictranslations('Home'), route('home'));
-        if ($product->category) {
-            $categorySlug = $product->category->slug ?? statictranslations('category');
-            $trail->push($categorySlug, url('/' . $categorySlug));
-        }
-        if ($product->subcategory) {
-            $subcategorySlug = $product->subcategory->slug ?? statictranslations('subcategory');
-            $trail->push($subcategorySlug, url('/' . ($product->category?->slug ?? '') . '/' . $subcategorySlug));
-        }
-        $productSlug = $product->slug ?? statictranslations('product');
-        $trail->push($productSlug, route('products.detail.with-category', [
-            'category' => $product->category?->slug,
-            'subcategory' => $product->subcategory?->slug,
-            'slug' => $product->slug
-        ]));
-    });
+    $trail->parent('products.index');
+    $trail->push($product->name, route('products.detail', $product->slug));
+});
 
 // Home > Cart
 Breadcrumbs::for('cart', function (BreadcrumbTrail $trail) {
