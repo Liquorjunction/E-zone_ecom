@@ -22,6 +22,10 @@ class SiteSettingsRepository implements SiteSettingsRepositoryInterface
     {
         $siteSetting = SiteSetting::find($id);
         if ($siteSetting) {
+            // Ensure infotext is always an array
+            if (isset($data['infotext']) && !is_array($data['infotext'])) {
+                $data['infotext'] = [$data['infotext']];
+            }
             $siteSetting->update($data);
 
             Cache::forget('site_status');
@@ -34,6 +38,10 @@ class SiteSettingsRepository implements SiteSettingsRepositoryInterface
 
     public function createSiteSetting(array $data)
     {
+        // Ensure infotext is always an array
+        if (isset($data['infotext']) && !is_array($data['infotext'])) {
+            $data['infotext'] = [$data['infotext']];
+        }
         $setting = SiteSetting::create($data);
 
         Cache::forget('site_status');

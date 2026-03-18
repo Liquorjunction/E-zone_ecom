@@ -22,11 +22,12 @@ class SiteSettingController extends Controller
     {
         try {
             $data = $request->validated();
-
             $data['site_status'] = $data['site_status'] ?? 'active';
-
+            // Ensure infotext is always an array
+            if (isset($data['infotext']) && !is_array($data['infotext'])) {
+                $data['infotext'] = [$data['infotext']];
+            }
             $siteSetting = $siteSettingsRepository->createSiteSetting($data);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Site settings created successfully',
@@ -52,6 +53,10 @@ class SiteSettingController extends Controller
             }
 
             $data = $request->validated();
+            // Ensure infotext is always an array
+            if (isset($data['infotext']) && !is_array($data['infotext'])) {
+                $data['infotext'] = [$data['infotext']];
+            }
             $siteSetting = $siteSettingsRepository->updateSiteSetting($id, $data);
 
             if (!$siteSetting) {

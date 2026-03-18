@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SiteSetting extends Model
 {
+
     protected $fillable = [
         'name',
         'phone',
@@ -22,6 +23,7 @@ class SiteSetting extends Model
 
     protected $casts = [
         'site_status' => 'string',
+        'infotext' => 'array',
     ];
 
     public function scopeActive($query)

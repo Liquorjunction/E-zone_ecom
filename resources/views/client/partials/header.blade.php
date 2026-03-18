@@ -1,27 +1,7 @@
 <header class="bg-white z-50 sticky top-0" style="box-shadow: 0 1px 0 #e5e7eb, 0 4px 24px rgba(0,0,0,0.06);">
 
     {{-- ══ Announcement bar — only renders when there is actual non-empty text ══ --}}
-    @php $infotext = trim($siteContent->infotext ?? ''); @endphp
-    @if ($infotext)
-        <div class="bg-linear-to-r from-primary to-primary-dark text-white overflow-hidden">
-            <div class="py-2 flex items-center justify-center">
-                <div class="flex items-center gap-12 animate-scroll whitespace-nowrap select-none">
-                    @for ($i = 0; $i < 3; $i++)
-                        <div class="flex items-center gap-2 shrink-0">
-                            <svg class="w-3 h-3 text-yellow-300 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            <span class="text-xs font-medium tracking-wide">{{ $infotext }}</span>
-                        </div>
-                    @endfor
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <style>
-        /* Remove custom CSS, use Tailwind only */
-    </style>
+    @include('client.components.announcementbar')
 
     {{-- ══ Main bar ══ --}}
     <div class="px-4 sm:px-6 lg:px-8 py-2.5">
@@ -125,7 +105,8 @@
                 <a href="{{ route('dashboard.wishlist') }}" title="{{ statictranslations('Wishlist') }}"
                     class="hidden md:flex relative items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-red-50 hover:text-red-500 transition-all duration-150 group/tip">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
@@ -316,12 +297,14 @@
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input id="universal-search-input-mobile" type="text" placeholder="{{ statictranslations('Search products...') }}"
+            <input id="universal-search-input-mobile" type="text"
+                placeholder="{{ statictranslations('Search products...') }}"
                 class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                           transition-all duration-200">
             <div id="universal-search-results-mobile"
-                class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden"></div>
+                class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
+            </div>
         </div>
 
         {{-- Quick links --}}

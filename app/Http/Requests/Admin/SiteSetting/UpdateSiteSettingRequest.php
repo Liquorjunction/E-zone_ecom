@@ -32,7 +32,8 @@ class UpdateSiteSettingRequest extends FormRequest
             'facebook' => 'nullable|url|max:255',
             'twitter' => 'nullable|url|max:255',
             'instagram' => 'nullable|url|max:255',
-            'infotext' => 'nullable|string|max:1000',
+            'infotext' => 'nullable|array',
+            'infotext.*' => 'nullable|string|max:1000',
             'site_status' => 'nullable|in:active,inactive',
         ];
     }

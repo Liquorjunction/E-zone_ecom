@@ -141,14 +141,21 @@
                                         </div>
                                     </div>
 
+
                                     <div class="row">
                                         <div class="col-12">
-                                            <div class="form-group">
-                                                <label for="infotext">Info Text</label>
-                                                <textarea class="form-control" id="infotext" name="infotext" rows="3"
-                                                    placeholder="Welcome message or important information">{{ $siteSetting->infotext }}</textarea>
-                                            </div>
+                                            <label>Info Texts (max 3)</label>
                                         </div>
+                                        @php
+                                            $infoTexts = is_array($siteSetting->infotext) ? $siteSetting->infotext : (empty($siteSetting->infotext) ? [] : [$siteSetting->infotext]);
+                                            $maxInfoTexts = 3;
+                                        @endphp
+                                        @for ($i = 0; $i < $maxInfoTexts; $i++)
+                                            <div class="col-12 mb-2">
+                                                <input type="text" class="form-control infotext-input" name="infotext[]" maxlength="1000"
+                                                    value="{{ $infoTexts[$i] ?? '' }}" placeholder="Info Text #{{ $i + 1 }}">
+                                            </div>
+                                        @endfor
                                     </div>
 
                                     <div class="row">
