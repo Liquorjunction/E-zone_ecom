@@ -106,9 +106,9 @@
                                 clip-rule="evenodd" />
                         </svg>
                         @if ($productDiscountInfo['discount_percentage'] > 0)
-                            {{ number_format($productDiscountInfo['discount_percentage'], 0) }}% OFF
+                            {{ number_format($productDiscountInfo['discount_percentage'], 0) }}% {{ statictranslations('OFF') }}
                         @else
-                            ${{ number_format($productDiscountInfo['discount_amount'], 2) }} OFF
+                            {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($productDiscountInfo['discount_amount'], 2) }} {{ statictranslations('OFF') }}
                         @endif
                     </span>
                 @endif

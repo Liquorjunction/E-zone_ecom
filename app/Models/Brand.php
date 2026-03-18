@@ -56,4 +56,10 @@ class Brand extends Model
             'id'
         );
     }
+
+    public function discountTargets()
+    {
+        return $this->hasMany(\App\Models\DiscountTarget::class, 'target_id')
+            ->where('target_type', 'brand');
+    }
 }

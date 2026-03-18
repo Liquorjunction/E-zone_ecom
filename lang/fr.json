@@ -302,7 +302,6 @@
     "No worries! Enter your email and we'll send you reset instructions.": "Pas de soucis! Entrez votre e-mail et nous vous enverrons des instructions de réinitialisation.",
     "Not available": "Pas disponible",
     "Nothing to Compare": "Rien à comparer",
-    "OFF": "OFF",
     "OK": "OK",
     "One click and you're ready to go": "Un clic et vous êtes prêt à partir",
     "Open in Maps": "Ouvrir dans Maps",
@@ -780,5 +779,10 @@
     "No products found for this subcategory.": "Aucun produit trouvé pour cette sous-catégorie.",
     "Subcategory Not Found": "Sous-catégorie non trouvée",
     "The subcategory": "La sous-catégorie",
-    "Back to All Subcategories": "Retour à toutes les sous-catégories"
+    "Back to All Subcategories": "Retour à toutes les sous-catégories",
+    "OFF": "Désactivé",
+    "No deals found.": "Aucune offre trouvée.",
+    "Login to Review": "Connectez-vous pour commenter",
+    "No ratings yet.": "Pas encore de notes.",
+    "Be the first to review this product!": "Soyez le premier à commenter ce produit !"
 }

@@ -33,7 +33,7 @@ class SubCategories extends Model
     {
         return SlugOptions::create()
             // FIX: Generate slug ONLY from the English translation
-            ->generateSlugsFrom(function($model) {
+            ->generateSlugsFrom(function ($model) {
                 return $model->getTranslation('sub-category-name', 'en');
             })
             ->saveSlugsTo('slug');
@@ -47,6 +47,12 @@ class SubCategories extends Model
     public function products()
     {
         return $this->hasMany(Product::class, 'sub_category_id');
+    }
+
+    public function discountTargets()
+    {
+        return $this->hasMany(DiscountTarget::class, 'target_id')
+            ->where('target_type', 'subcategory');
     }
 
     public function variants()

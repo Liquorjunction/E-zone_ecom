@@ -58,4 +58,10 @@ class Categories extends Model
             'id'
         );
     }
+
+    public function discountTargets()
+    {
+        return $this->hasMany(\App\Models\DiscountTarget::class, 'target_id')
+            ->where('target_type', 'category');
+    }
 }

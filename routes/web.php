@@ -8,6 +8,7 @@ use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\CategoryController;
 use App\Http\Controllers\Client\ContactUsController;
 use App\Http\Controllers\Client\CompareController;
+use App\Http\Controllers\Client\DealController;
 use App\Http\Controllers\Client\FaqController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\InventoryController;
@@ -75,7 +76,7 @@ Route::get('/subcategory/{slug}', [SubCategoryController::class, 'productsBySubC
 // Products
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
-    Route::get('/deals', [ProductController::class, 'deals'])->name('deals');
+    Route::get('/deals', [DealController::class, 'index'])->name('deals');
     Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
     Route::post('/variant-discount', [ProductController::class, 'getVariantDiscount'])->name('variant-discount');
 });
