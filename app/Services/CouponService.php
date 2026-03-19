@@ -33,7 +33,7 @@ class CouponService
             $this->sessionCoupon->remove();
             return [
                 'success' => false,
-                'message' => 'Cannot apply a coupon to an empty cart.',
+                'message' => statictranslations('Cannot apply a coupon to an empty cart.'),
                 'discount' => null,
             ];
         }
@@ -50,7 +50,7 @@ class CouponService
         if (!$coupon) {
             return [
                 'success' => false,
-                'message' => 'Invalid coupon code.',
+                'message' => statictranslations('Invalid coupon code.'),
                 'discount' => null,
             ];
         }
@@ -59,7 +59,7 @@ class CouponService
         if ($coupon->starts_at && $now->lt($coupon->starts_at)) {
             return [
                 'success' => false,
-                'message' => 'This coupon is not yet active.',
+                'message' => statictranslations('This coupon is not yet active.'),
                 'discount' => null,
             ];
         }
@@ -67,7 +67,7 @@ class CouponService
         if ($coupon->ends_at && $now->gt($coupon->ends_at)) {
             return [
                 'success' => false,
-                'message' => 'This coupon has expired.',
+                'message' => statictranslations('This coupon has expired.'),
                 'discount' => null,
             ];
         }
@@ -75,7 +75,7 @@ class CouponService
         if ($coupon->usage_limit && $coupon->usages()->count() >= $coupon->usage_limit) {
             return [
                 'success' => false,
-                'message' => 'This coupon has reached its usage limit.',
+                'message' => statictranslations('This coupon has reached its usage limit.'),
                 'discount' => null,
             ];
         }
@@ -88,7 +88,7 @@ class CouponService
             if ($userUsageCount >= $coupon->usage_limit_per_user) {
                 return [
                     'success' => false,
-                    'message' => 'You have already used this coupon the maximum number of times.',
+                    'message' => statictranslations('You have already used this coupon the maximum number of times.'),
                     'discount' => null,
                 ];
             }
@@ -99,7 +99,7 @@ class CouponService
         if ($hasDiscountedItems) {
             return [
                 'success' => false,
-                'message' => 'Coupon cannot be applied to cart with discounted items. Please remove discounted products to use this coupon.',
+                'message' => statictranslations('Coupon cannot be applied to cart with discounted items. Please remove discounted products to use this coupon.'),
                 'discount' => null,
             ];
         }
@@ -111,7 +111,7 @@ class CouponService
             return [
                 'success' => false,
                 'message' => sprintf(
-                    'Minimum order amount of %s%s required to use this coupon.',
+                    statictranslations('Minimum order amount of %s%s required to use this coupon.'),
                     config('app.CURRENCY_SYMBOL'),
                     number_format($coupon->min_order_amount, 2)
                 ),
@@ -136,7 +136,7 @@ class CouponService
 
         return [
             'success' => true,
-            'message' => sprintf('Coupon applied! You saved %s%s', config('app.CURRENCY_SYMBOL'), number_format($discountAmount, 2)),
+            'message' => sprintf(statictranslations('Coupon applied! You saved %s%s'), config('app.CURRENCY_SYMBOL'), number_format($discountAmount, 2)),
             'discount' => $discountAmount,
             'coupon' => [
                 'id' => $coupon->id,

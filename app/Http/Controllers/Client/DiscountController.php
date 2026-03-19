@@ -19,11 +19,11 @@ class DiscountController extends Controller
     {
         $id = $request->input('id');
         if (is_null($id)) {
-            return response()->json(['message' => 'id is required'], 422);
+            return response()->json(['message' => statictranslations('id is required')], 422);
         }
         $discount = $discountRepo->getDiscountDetails($id);
         if (!$discount) {
-            return response()->json(['message' => 'Discount not found'], 404);
+            return response()->json(['message' => statictranslations('Discount not found')], 404);
         }
         return response()->json(['data' => $discount]);
     }
@@ -33,7 +33,7 @@ class DiscountController extends Controller
         $variantId = $request->input('variant_id');
 
         if (is_null($variantId)) {
-            return response()->json(['message' => 'variant_id is required'], 422);
+            return response()->json(['message' => statictranslations('variant_id is required')], 422);
         }
 
         $context = $request->all();
@@ -46,7 +46,7 @@ class DiscountController extends Controller
     {
         $categoryId = $request->input('category_id');
         if (is_null($categoryId)) {
-            return response()->json(['message' => 'category_id is required'], 422);
+            return response()->json(['message' => statictranslations('category_id is required')], 422);
         }
         $context = $request->all();
         $discounts = $discountRepo->getApplicableDiscountsForCategory($categoryId, $context);
@@ -57,7 +57,7 @@ class DiscountController extends Controller
     {
         $subcategoryId = $request->input('subcategory_id');
         if (is_null($subcategoryId)) {
-            return response()->json(['message' => 'subcategory_id is required'], 422);
+            return response()->json(['message' => statictranslations('subcategory_id is required')], 422);
         }
         $context = $request->all();
         $discounts = $discountRepo->getApplicableDiscountsForSubcategory($subcategoryId, $context);
@@ -68,7 +68,7 @@ class DiscountController extends Controller
     {
         $brandId = $request->input('brand_id');
         if (is_null($brandId)) {
-            return response()->json(['message' => 'brand_id is required'], 422);
+            return response()->json(['message' => statictranslations('brand_id is required')], 422);
         }
         $context = $request->all();
         $discounts = $discountRepo->getApplicableDiscountsForBrand($brandId, $context);
@@ -79,11 +79,11 @@ class DiscountController extends Controller
     {
         $id = $request->input('id');
         if (is_null($id)) {
-            return response()->json(['message' => 'id is required'], 422);
+            return response()->json(['message' => statictranslations('id is required')], 422);
         }
         $originalPrice = $request->input('original_price');
         if (is_null($originalPrice)) {
-            return response()->json(['message' => 'original_price is required'], 422);
+            return response()->json(['message' => statictranslations('original_price is required')], 422);
         }
         $context = $request->all();
         $result = $discountRepo->calculateDiscount($id, (float) $originalPrice, $context);

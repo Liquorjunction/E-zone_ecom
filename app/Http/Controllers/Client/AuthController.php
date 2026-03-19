@@ -56,7 +56,7 @@ class AuthController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             return back()->withErrors([
-                'email' => 'Unable to complete registration. Please try again.',
+                'email' => statictranslations('Unable to complete registration. Please try again.'),
             ])->withInput($request->except('password'));
         }
     }
@@ -66,13 +66,13 @@ class AuthController extends Controller
         $token = $request->query('token');
 
         if (!$token) {
-            return redirect()->route('register')->with('error', 'Invalid session. Please register again.');
+            return redirect()->route('register')->with('error', statictranslations('Invalid session. Please register again.'));
         }
 
         $pending = $this->getPendingRegistration($token);
 
         if (!$pending) {
-            return redirect()->route('register')->with('error', 'Session expired. Please register again.');
+            return redirect()->route('register')->with('error', statictranslations('Session expired. Please register again.'));
         }
 
         return view('client.auth.register', [
@@ -93,7 +93,7 @@ class AuthController extends Controller
 
         if ($user && !$user->is_active) {
             return back()->withErrors([
-                'email' => 'Your account is inactive. Please contact support.',
+                'email' => statictranslations('Your account is inactive. Please contact support.'),
             ])->onlyInput('email');
         }
 
@@ -104,7 +104,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Your email or password is invalid.',
+            'email' => statictranslations('Your email or password is invalid.'),
         ])->onlyInput('email');
     }
 
@@ -120,7 +120,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'If your email is registered, a reset link has been sent.',
+                'message' => statictranslations('If your email is registered, a reset link has been sent.'),
             ]);
         } catch (\Throwable $e) {
             Log::error('Password reset error: ' . $e->getMessage(), [
@@ -129,7 +129,7 @@ class AuthController extends Controller
             ]);
             return response()->json([
                 'status' => 'error',
-                'error' => 'Unable to send reset link. Please try again later.',
+                'error' => statictranslations('Unable to send reset link. Please try again later.'),
             ], 500);
         }
     }
@@ -146,19 +146,19 @@ class AuthController extends Controller
                 $email = $decoded['email'] ?? null;
                 $token = $decoded['token'] ?? null;
             } catch (\Throwable $e) {
-                return redirect()->route('login')->with('error', 'Invalid password reset link.');
+                return redirect()->route('login')->with('error', statictranslations('Invalid password reset link.'));
             }
         }
 
         // Validate token and email exist
         if (!$token || !$email) {
-            return redirect()->route('login')->with('error', 'Invalid password reset link.');
+            return redirect()->route('login')->with('error', statictranslations('Invalid password reset link.'));
         }
 
         $validation = $resetService->validateResetToken($token, $email, 'user');
 
         if (!$validation['valid']) {
-            return redirect()->route('login')->with('error', $validation['message'] ?? 'Invalid password reset link.');
+            return redirect()->route('login')->with('error', $validation['message'] ?? statictranslations('Invalid password reset link.'));
         }
 
         return view('client.auth.reset-password', [
@@ -173,7 +173,7 @@ class AuthController extends Controller
 
         if (!$validation['valid']) {
             return back()->withErrors([
-                'email' => $validation['message'] ?? 'The reset link is invalid or has expired. Please request a new one.',
+                'email' => $validation['message'] ?? statictranslations('The reset link is invalid or has expired. Please request a new one.'),
             ])->withInput($request->only('email'));
         }
 
@@ -185,7 +185,7 @@ class AuthController extends Controller
             ])->withInput($request->only('email'));
         }
 
-        return redirect()->route('login')->with('success', 'Your password has been reset successfully. Please log in with your new password.');
+        return redirect()->route('login')->with('success', statictranslations('Your password has been reset successfully. Please log in with your new password.'));
     }
 
     public function verifyEmail(VerifyEmailRequest $request, VerifyEmailService $verifyEmailService, AuthRepo $authRepository)
@@ -201,24 +201,24 @@ class AuthController extends Controller
                 $email = $decoded['email'] ?? null;
                 $token = $decoded['token'] ?? null;
             } catch (\Throwable $e) {
-                return redirect()->route('login')->with('error', 'Invalid verification link.');
+                return redirect()->route('login')->with('error', statictranslations('Invalid verification link.'));
             }
         }
 
         // Validate token and email exist
         if (!$token || !$email) {
-            return redirect()->route('login')->with('error', 'Invalid verification link.');
+            return redirect()->route('login')->with('error', statictranslations('Invalid verification link.'));
         }
 
         $pending = $this->getPendingRegistration($token);
         if ($pending) {
             if (!hash_equals($pending['email'], $email)) {
-                return redirect()->route('login')->with('error', 'Invalid verification link.');
+                return redirect()->route('login')->with('error', statictranslations('Invalid verification link.'));
             }
 
             if (User::where('email', $email)->exists()) {
                 $this->clearPendingRegistration($token);
-                return redirect()->route('login')->with('info', 'Account already exists. Please log in.');
+                return redirect()->route('login')->with('info', statictranslations('Account already exists. Please log in.'));
             }
 
             try {
@@ -236,27 +236,27 @@ class AuthController extends Controller
                     'email' => $email,
                     'trace' => $e->getTraceAsString()
                 ]);
-                return redirect()->route('login')->with('error', 'Unable to create account. Please try again.');
+                return redirect()->route('login')->with('error', statictranslations('Unable to create account. Please try again.'));
             }
 
-            return redirect()->route('login')->with('success', 'Email verified successfully! You can now log in.');
+            return redirect()->route('login')->with('success', statictranslations('Email verified successfully! You can now log in.'));
         }
 
         // Validate the token
         $validation = $verifyEmailService->validateVerificationToken($token, $email, 'user');
 
         if (!$validation['valid']) {
-            return redirect()->route('login')->with('error', $validation['message'] ?? 'Invalid or expired verification link.');
+            return redirect()->route('login')->with('error', $validation['message'] ?? statictranslations('Invalid or expired verification link.'));
         }
 
         // Verify the email
         $isVerified = $verifyEmailService->verifyEmail($token, $email, 'user');
 
         if (!$isVerified) {
-            return redirect()->route('login')->with('error', 'Unable to verify email. Please try again.');
+            return redirect()->route('login')->with('error', statictranslations('Unable to verify email. Please try again.'));
         }
 
-        return redirect()->route('login')->with('success', 'Email verified successfully! You can now log in.');
+        return redirect()->route('login')->with('success', statictranslations('Email verified successfully! You can now log in.'));
     }
 
     private function storePendingRegistration(string $token, array $data): void
@@ -290,13 +290,13 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->email_verified_at) {
-            return back()->with('info', 'Your email is already verified.');
+            return back()->with('info', statictranslations('Your email is already verified.'));
         }
 
         try {
             $token = $verifyEmailService->generateVerificationToken('user', $user->email);
             $verifyEmailService->resendVerificationEmail($user, $token, 'user');
-            return back()->with('success', 'Verification email resent successfully! Please check your inbox.');
+            return back()->with('success', statictranslations('Verification email resent successfully! Please check your inbox.'));
         } catch (\Throwable $e) {
             Log::error('Resend verification email error: ' . $e->getMessage(), [
                 'user_id' => $user->id,
@@ -304,7 +304,7 @@ class AuthController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             return back()->withErrors([
-                'email' => 'Unable to resend verification email. Please try again later.',
+                'email' => statictranslations('Unable to resend verification email. Please try again later.'),
             ]);
         }
     }

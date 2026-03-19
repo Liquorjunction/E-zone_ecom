@@ -1352,7 +1352,7 @@
                 e.preventDefault();
                 if (typeof showUniversalPopup === 'function') {
                     showUniversalPopup(
-                        'You have a coupon applied. Leave without completing your purchase?',
+                        trans('You have a coupon applied. Leave without completing your purchase?'),
                         'error', 0, {
                             confirmation: true,
                             confirmText: 'Yes, Leave',

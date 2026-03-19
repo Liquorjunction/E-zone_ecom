@@ -153,11 +153,11 @@ class OrderController extends Controller
             'order',
             'orders',
             'totals',
-            'itemsForView'
+            'itemsForView',
         ));
     }
 
-    public function detail(OrderDetailRequest $request, OrderRepo $orderRepo, ReviewRepositoryInterface $reviewRepo)
+    public function detail(OrderDetailRequest $request, OrderRepo $orderRepo, ReviewRepositoryInterface $reviewRepo, \App\Services\OrderStatusService $orderStatusService)
     {
         if (!Auth::check()) {
             return redirect()->route('login');
@@ -176,7 +176,7 @@ class OrderController extends Controller
             }
         }
 
-        return view('client.pages.order-detail', compact('order', 'userReviews'));
+        return view('client.pages.order-detail', compact('order', 'userReviews', 'orderStatusService'));
     }
 
     public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo, PriceCalculatorService $priceCalculator)

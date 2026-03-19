@@ -83,17 +83,17 @@ class CartController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Item added to cart.',
+                'message' => statictranslations('Item added to cart.'),
                 'item_id' => $item->id ?? null,
                 'summary' => ['itemCount' => $itemCount],
             ]);
         }
 
         if ($request->filled('buy_now')) {
-            return redirect()->route('checkout', ['step' => 2])->with('success', 'Item added. Proceed to checkout.');
+            return redirect()->route('checkout', ['step' => 2])->with('success', statictranslations('Item added. Proceed to checkout.'));
         }
 
-        return redirect()->back()->with('success', 'Item added to cart.');
+        return redirect()->back()->with('success', statictranslations('Item added to cart.'));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ class CartController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Summary refreshed.',
+                'message' => statictranslations('Summary refreshed.'),
                 'item'    => null,
                 'summary' => $summary,
             ]);
@@ -229,7 +229,7 @@ class CartController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cart updated.',
+                'message' => statictranslations('Cart updated.'),
                 'item'    => [
                     'id'        => $item->id ?? null,
                     'quantity'  => $item->quantity ?? null,
@@ -242,7 +242,7 @@ class CartController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Cart updated.');
+        return redirect()->back()->with('success', statictranslations('Cart updated.'));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -258,7 +258,7 @@ class CartController extends Controller
         $itemId = (int) ($request->input('id') ?? $request->input('item_id'));
 
         if (! $itemId) {
-            return response()->json(['success' => false, 'message' => 'Item ID is missing.']);
+            return response()->json(['success' => false, 'message' => statictranslations('Item ID is missing.')]);
         }
 
         $cartId         = CartIdentifier::fromRequest($request);
@@ -289,12 +289,12 @@ class CartController extends Controller
 
             return response()->json([
                 'success' => (bool) $ok,
-                'message' => $ok ? 'Item removed from cart.' : 'Failed to remove item.',
+                'message' => $ok ? statictranslations('Item removed from cart.') : statictranslations('Failed to remove item.'),
                 'summary' => $summary,
             ]);
         }
 
-        return redirect()->route('cart')->with('success', 'Item removed from cart.');
+        return redirect()->route('cart')->with('success', statictranslations('Item removed from cart.'));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -312,7 +312,7 @@ class CartController extends Controller
         $cart   = $cartService->getCart($cartId);
 
         if (! $cart || $cart->items->isEmpty()) {
-            return response()->json(['success' => false, 'message' => 'Your cart is empty.']);
+            return response()->json(['success' => false, 'message' => statictranslations('Your cart is empty.')]);
         }
 
         $code   = strtoupper($request->input('code'));
@@ -354,7 +354,7 @@ class CartController extends Controller
         $cart   = $cartService->getCart($cartId);
 
         if (! $cart) {
-            return response()->json(['success' => false, 'message' => 'Cart not found.']);
+            return response()->json(['success' => false, 'message' => statictranslations('Cart not found.')]);
         }
 
         $removed = $couponService->removeCoupon($cart);
@@ -365,7 +365,7 @@ class CartController extends Controller
 
         return response()->json([
             'success' => $removed,
-            'message' => $removed ? 'Coupon removed.' : 'Failed to remove coupon.',
+            'message' => $removed ? statictranslations('Coupon removed.') : statictranslations('Failed to remove coupon.'),
             'summary' => $this->buildSummary($totals, $cart),
         ]);
     }

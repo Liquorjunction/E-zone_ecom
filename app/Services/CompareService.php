@@ -40,15 +40,15 @@ class CompareService
         $variant = $this->compareRepo->getActiveVariantById($variantId);
 
         if (! $variant) {
-            return $this->response(false, 'This product is not available for comparison.', $ids, 422);
+            return $this->response(false, statictranslations('This product is not available for comparison.'), $ids, 422);
         }
 
         if (in_array($variantId, $ids, true)) {
-            return $this->response(true, 'Product already in compare list.', $ids, 200);
+            return $this->response(true, statictranslations('Product already in compare list.'), $ids, 200);
         }
 
         if (count($ids) >= self::MAX_ITEMS) {
-            return $this->response(false, 'You can compare up to 4 products only.', $ids, 422);
+            return $this->response(false, statictranslations('You can compare up to 4 products only.'), $ids, 422);
         }
 
         $existingVariants = $this->compareRepo->getActiveVariantsByIds($ids);
@@ -58,7 +58,7 @@ class CompareService
             $incomingCategoryId = (int) ($variant->product?->category_id ?? 0);
 
             if ($existingCategoryId > 0 && $incomingCategoryId > 0 && $existingCategoryId !== $incomingCategoryId) {
-                return $this->response(false, 'Only products from the same category can be compared.', $ids, 422);
+                return $this->response(false, statictranslations('Only products from the same category can be compared.'), $ids, 422);
             }
 
             $existingProductIds = $existingVariants
@@ -67,14 +67,14 @@ class CompareService
                 ->all();
 
             if (in_array((int) $variant->product_id, $existingProductIds, true)) {
-                return $this->response(false, 'A product is already in compare list. Remove it to compare another variant.', $ids, 422);
+                return $this->response(false, statictranslations('A product is already in compare list. Remove it to compare another variant.'), $ids, 422);
             }
         }
 
         $ids[] = $variantId;
         $this->storeSessionVariantIds($ids);
 
-        return $this->response(true, 'Product added to compare list.', $ids, 201);
+        return $this->response(true, statictranslations('Product added to compare list.'), $ids, 201);
     }
 
     public function removeVariant(int $variantId): array
@@ -86,7 +86,7 @@ class CompareService
 
         $this->storeSessionVariantIds($ids);
 
-        return $this->response(true, 'Product removed from compare list.', $ids, 200);
+        return $this->response(true, statictranslations('Product removed from compare list.'), $ids, 200);
     }
 
     public function getState(): array
@@ -116,7 +116,7 @@ class CompareService
 
         return [
             'success' => true,
-            'message' => 'Compare list cleared.',
+            'message' => statictranslations('Compare list cleared.'),
             'count' => 0,
             'ids' => [],
         ];

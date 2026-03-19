@@ -5,15 +5,15 @@
         {{-- ── Results summary ── --}}
         <p class="text-sm text-gray-500 shrink-0">
             @if ($paginator->firstItem())
-                Showing
+                {{ statictranslations('Showing') }}
                 <span class="font-semibold text-gray-800">{{ $paginator->firstItem() }}</span>
                 –
                 <span class="font-semibold text-gray-800">{{ $paginator->lastItem() }}</span>
-                of
+                {{ statictranslations('of') }}
                 <span class="font-semibold text-gray-800">{{ $paginator->total() }}</span>
-                results
+                {{ statictranslations('results') }}
             @else
-                {{ $paginator->count() }} results
+                {{ statictranslations('Showing') }} {{ $paginator->count() }} {{ statictranslations('results') }}
             @endif
         </p>
 

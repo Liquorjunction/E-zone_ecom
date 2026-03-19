@@ -35,18 +35,18 @@ class SecurityController extends Controller
         if (! $securityRepo->validateCurrentPassword($user, $request->current_password)) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
-                    'errors' => ['current_password' => ['The current password is incorrect.']]
+                    'errors' => ['current_password' => [statictranslations('The current password is incorrect.')]]
                 ], 422);
             }
-            return back()->withErrors(['current_password' => 'The current password is incorrect.'])->withInput();
+            return back()->withErrors(['current_password' => statictranslations('The current password is incorrect.')])->withInput();
         }
 
         $securityRepo->updatePassword($user, $request->new_password);
         $request->session()->regenerate();
         if ($request->expectsJson() || $request->ajax()) {
-            return response()->json(['message' => 'Password updated successfully.']);
+            return response()->json(['message' => statictranslations('Password updated successfully.')]);
         }
-        return back()->with('success', 'Password updated successfully.');
+        return back()->with('success', statictranslations('Password updated successfully.'));
     }
 
     public function logoutAllSessions(Request $request, SecurityRepo $securityRepo)
@@ -65,6 +65,6 @@ class SecurityController extends Controller
         $user = $request->user();
         $securityRepo->revokeSession($request->session_id, $user->id);
 
-        return back()->with('status', 'Session revoked.');
+        return back()->with('status', statictranslations('Session revoked.'));
     }
 }

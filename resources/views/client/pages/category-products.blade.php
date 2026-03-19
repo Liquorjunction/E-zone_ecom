@@ -4,9 +4,9 @@
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-10">
         <div class="container mx-auto px-4 max-w-7xl">
 
-            <x-breadcrumbs>
-                <x-slot:title>{{ statictranslations('Shop:') }} {{ $category ? $category->getTranslation('category-name', app()->getLocale()) : Str::title($category_slug) }}</x-slot:title>
-                <x-slot:content>{{ statictranslations('All products from') }} {{ $category ? $category->getTranslation('category-name', app()->getLocale()) : Str::title($category_slug) }}.</x-slot:content>
+            <x-breadcrumbs :category="$category">
+                <x-slot:title>{{ statictranslations('Shop:') }} {{$category->category_name}}</x-slot:title>
+                <x-slot:content>{{ statictranslations('All products from') }} {{$category->category_name}}.</x-slot:content>
             </x-breadcrumbs>
 
             @if($category)

@@ -102,7 +102,7 @@ class ProductController extends Controller
             if (!$variantId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Variant ID is required'
+                    'message' => statictranslations('Variant ID is required')
                 ], 400);
             }
 
@@ -111,7 +111,7 @@ class ProductController extends Controller
             if (!$variant) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Product variant not found'
+                    'message' => statictranslations('Product variant not found')
                 ], 404);
             }
 
@@ -124,7 +124,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred: ' . $e->getMessage()
+                'message' => statictranslations('An error occurred: ') . $e->getMessage()
             ], 500);
         }
     }

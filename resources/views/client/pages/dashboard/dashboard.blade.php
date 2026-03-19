@@ -64,7 +64,7 @@
                                     onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                     @csrf
                                     <button type="submit"
-                                        class="px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors">{{ statictranslations('Cancel') }}</button>
+                                        class="px-3 py-2 text-sm font-medium cursor-pointer text-red-700 bg-white border-2 border-red-200 rounded-lg hover:bg-gray-50 hover:border-red-300 hover:text-red-600 transition-colors">{{ statictranslations('Cancel') }}</button>
                                 </form>
                             @endif
                         </div>

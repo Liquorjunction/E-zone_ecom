@@ -16,7 +16,7 @@ class ShippingAndReturnsController extends Controller
                 'policy' => $policy,
             ]);
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Unable to fetch Shipping and Returns.']);
+            return back()->withErrors(['error' => statictranslations('Unable to fetch Shipping and Returns.')]);
         }
     }
 }

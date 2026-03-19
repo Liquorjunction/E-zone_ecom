@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Categories;
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 use Illuminate\Support\Str;
@@ -48,12 +49,6 @@ Breadcrumbs::for('login', function (BreadcrumbTrail $trail) {
 Breadcrumbs::for('register', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
     $trail->push(statictranslations('Register'), route('register'));
-});
-
-// Home > Checkout Success
-Breadcrumbs::for('checkout-success', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push(statictranslations('Checkout Success'), route('checkout-success'));
 });
 
 // Home > Support
@@ -136,7 +131,7 @@ Breadcrumbs::for('dashboard.overview', function (BreadcrumbTrail $trail) {
 // Home > Dashboard > Orders
 Breadcrumbs::for('dashboard.orders', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard.overview');
-    $trail->push(statictranslations('Orders'), route('dashboard.orders'));
+    $trail->push(statictranslations('My Orders'), route('dashboard.orders'));
 });
 
 // Home > Dashboard > Profile
@@ -175,12 +170,6 @@ Breadcrumbs::for('dashboard.rewards', function (BreadcrumbTrail $trail) {
     $trail->push(statictranslations('Rewards'), route('dashboard.rewards'));
 });
 
-// Home > Search
-Breadcrumbs::for('search', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push(statictranslations('Search'), route('search'));
-});
-
 // Home > New Arrivals
 Breadcrumbs::for('new-arrivals', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
@@ -206,15 +195,25 @@ Breadcrumbs::for('brand.products', function (BreadcrumbTrail $trail, $slug) {
 });
 
 // Home > All Categories > [Category Name]
-Breadcrumbs::for('category.products', function (BreadcrumbTrail $trail, $slug) {
+Breadcrumbs::for('category.products', function (BreadcrumbTrail $trail, $category) {
+    if (is_string($category)) {
+        $category = \App\Models\Categories::where('slug', $category)->first();
+    }
+    $name = $category?->getTranslation('category-name', app()->getLocale()) ?? $category?->category_name ?? $category?->slug ?? 'Category';
     $trail->parent('categories');
-    $trail->push(Str::title($slug), route('category.products', $slug));
+    $trail->push($name, route('category.products', $category?->slug ?? $category));
 });
 
 // Home > All Categories > Category > [SubCategory Name]
 Breadcrumbs::for('subcategory.products', function (BreadcrumbTrail $trail, $slug) {
+    if (is_string($slug)) {
+        $subcategory = \App\Models\SubCategories::where('slug', $slug)->first();
+    } else {
+        $subcategory = $slug;
+    }
+    $name = $subcategory?->getTranslation('sub-category-name', app()->getLocale()) ?? $subcategory?->subcategory_name ?? $subcategory?->slug ?? 'SubCategory';
     $trail->parent('subcategories');
-    $trail->push(Str::title($slug), route('subcategory.products', $slug));
+    $trail->push($name, route('subcategory.products', $subcategory?->slug ?? $subcategory));
 });
 
 // Home > Order Tracking

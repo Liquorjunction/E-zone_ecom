@@ -48,7 +48,7 @@
                             prose-ul:text-gray-600 prose-li:marker:text-gray-300">
 
                             {{-- Introduction / Last Updated Placeholder (Optional) --}}
-                            <div class="mb-10 pb-6 border-b border-gray-100">
+                            <div class="mb-5 pb-6 border-b border-gray-100">
                                 <p class="text-sm text-gray-500 font-medium">
                                     {{ statictranslations('Last Updated') }}: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->format('F d, Y') : 'N/A' }}</span>
                                 </p>
@@ -59,7 +59,7 @@
 
                             {{-- Dynamic Content Loop --}}
                             @foreach ($privacyPolicy as $index => $content)
-                                <div id="section-{{ $index }}" class="scroll-mt-24 mb-12 prose-content">
+                                <div id="section-{{ $index }}" class="scroll-mt-24 mb-6 prose-content">
                                     <h2>{{ $content->title }}</h2>
 
                                     <div class="text-justify">

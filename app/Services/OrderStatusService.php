@@ -35,11 +35,36 @@ class OrderStatusService
         'delivered' => ['completed', 'returned'],
     ];
 
+    // Handel Status Translation
+    protected $statusTranslations = [];
+
     protected $mailTriggerService;
+
+    public function getTranslatedStatus(string $status): string
+    {
+        return $this->statusTranslations[$status] ?? ucfirst(str_replace('_', ' ', $status));
+    }
 
     public function __construct(MailTriggerService $mailTriggerService)
     {
         $this->mailTriggerService = $mailTriggerService;
+
+        $this->statusTranslations = [
+            'pending' => statictranslations('Pending'),
+            'paid' => statictranslations('Paid'),
+            'order_confirmation' => statictranslations('Order Confirmation'),
+            'partially_dispatched' => statictranslations('Partially Dispatched'),
+            'dispatched' => statictranslations('Dispatched'),
+            'ready_to_ship' => statictranslations('Ready to Ship'),
+            'shipped' => statictranslations('Shipped'),
+            'out_for_delivery' => statictranslations('Out for Delivery'),
+            'delivered' => statictranslations('Delivered'),
+            'completed' => statictranslations('Completed'),
+            'cancelled' => statictranslations('Cancelled'),
+            'refunded' => statictranslations('Refunded'),
+            'returned' => statictranslations('Returned'),
+            'failed_delivery' => statictranslations('Failed Delivery')
+        ];
     }
 
     public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null)

@@ -12,3 +12,4 @@ window.translations = {
 function trans(key) {
     return window.translations[key] ?? key;
 }
+window.trans = trans;

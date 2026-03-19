@@ -38,7 +38,7 @@ class ReviewController extends Controller
 
         if (!$review) {
             return response()->json([
-                'message' => 'Review not found.',
+                'message' => statictranslations('Review not found.'),
             ], 404);
         }
 
@@ -78,13 +78,13 @@ class ReviewController extends Controller
             $review = $reviewRepo->createReview($data);
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Unable to submit review.',
+                'message' => statictranslations('Unable to submit review.'),
                 'errors' => $e->errors(),
             ], 422);
         }
 
         return response()->json([
-            'message' => 'Review submitted successfully.',
+            'message' => statictranslations('Review submitted successfully.'),
             'review' => $review,
         ], 201);
     }
@@ -109,13 +109,13 @@ class ReviewController extends Controller
             $review = $reviewRepo->updateReview($id, $userId, $data);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Unable to update review.',
+                'message' => statictranslations('Unable to update review.'),
                 'error' => $e->getMessage(),
             ], 422);
         }
 
         return response()->json([
-            'message' => 'Review updated successfully.',
+            'message' => statictranslations('Review updated successfully.'),
             'review' => $review,
         ], 200);
     }
@@ -129,7 +129,7 @@ class ReviewController extends Controller
             $reviewRepo->deleteReview($id, $userId);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Unable to delete review.',
+                'message' => statictranslations('Unable to delete review.'),
                 'error' => $e->getMessage(),
             ], 422);
         }

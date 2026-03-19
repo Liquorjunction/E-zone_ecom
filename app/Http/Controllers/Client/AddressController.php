@@ -84,7 +84,7 @@ class AddressController extends Controller
             return response()->json(['data' => $address, 'html' => $html], 201);
         }
 
-        return redirect()->back()->with('success', 'Address added successfully.');
+        return redirect()->back()->with('success', statictranslations('Address added successfully.'));
     }
 
     public function update(UpdateAddressRequest $request, AddressRepo $addressRepository)
@@ -92,9 +92,9 @@ class AddressController extends Controller
         $id = $request->input('id') ?? $request->address_id ?? null;
         if (!$id) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Address id missing'], 422);
+                return response()->json(['message' => statictranslations('Address id missing')], 422);
             }
-            return redirect()->route('dashboard.addresses')->with('error', 'Address id missing');
+            return redirect()->route('dashboard.addresses')->with('error', statictranslations('Address id missing'));
         }
 
         $data = $request->validated();
@@ -116,14 +116,14 @@ class AddressController extends Controller
             return response()->json(['data' => $address, 'html' => $html]);
         }
 
-        return redirect()->route('dashboard.addresses')->with('success', 'Address updated successfully.');
+        return redirect()->route('dashboard.addresses')->with('success', statictranslations('Address updated successfully.'));
     }
 
     public function destroy(DestroyAddressRequest $request, AddressRepo $addressRepository, $id = null)
     {
         $id = $id ?? $request->input('id') ?? $request->route('id');
         if (!$id) {
-            return response()->json(['message' => 'Address id missing'], 422);
+            return response()->json(['message' => statictranslations('Address id missing')], 422);
         }
 
         $deleted = $addressRepository->delete((int) $id);
@@ -132,10 +132,10 @@ class AddressController extends Controller
         }
 
         if ($deleted) {
-            return redirect()->route('dashboard.addresses')->with('success', 'Address deleted');
+            return redirect()->route('dashboard.addresses')->with('success', statictranslations('Address deleted successfully.'));
         }
 
-        return redirect()->route('dashboard.addresses')->with('error', 'Failed to delete address');
+        return redirect()->route('dashboard.addresses')->with('error', statictranslations('Failed to delete address'));
     }
 
     public function setDefault(Request $request, AddressRepo $addressRepository, $id = null)
@@ -143,12 +143,12 @@ class AddressController extends Controller
         $id = $id ?? $request->input('id') ?? $request->route('id');
         $userId = Auth::id();
         if (!$id) {
-            return response()->json(['message' => 'Address id missing'], 422);
+            return response()->json(['message' => statictranslations('Address id missing')], 422);
         }
 
         $address = $addressRepository->findById((int) $id);
         if (!$address || ($address->user_id ?? null) != $userId) {
-            return response()->json(['message' => 'Address not found or unauthorized'], 404);
+            return response()->json(['message' => statictranslations('Address not found or unauthorized')], 404);
         }
 
         $addressRepository->setDefaultAddress($userId, (int) $id);
@@ -159,7 +159,7 @@ class AddressController extends Controller
             return response()->json(['data' => $address]);
         }
 
-        return redirect()->route('dashboard.addresses')->with('success', 'Default address updated.');
+        return redirect()->route('dashboard.addresses')->with('success', statictranslations('Default address updated.'));
     }
 
     /**
@@ -170,7 +170,7 @@ class AddressController extends Controller
         $id = $id ?? $request->input('id') ?? $request->route('id');
         $address = $addressRepository->findById((int) $id);
         if (!$address) {
-            return response()->json(['message' => 'Address not found'], 404);
+            return response()->json(['message' => statictranslations('Address not found')], 404);
         }
 
         return response()->json(['data' => $address]);

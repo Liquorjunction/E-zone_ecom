@@ -17,7 +17,7 @@ class FaqController extends Controller
 
             return view('client.pages.faq', compact('faqcategories'));
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Unable to fetch FAQs.']);
+            return back()->withErrors(['error' => statictranslations('Unable to fetch FAQs.')]);
         }
     }
 }

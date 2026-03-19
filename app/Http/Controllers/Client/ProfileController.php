@@ -40,7 +40,7 @@ class ProfileController extends Controller
         $updatedProfile = $clientProfileRepo->updateProfile($request->user(), $data);
 
         if (!$updatedProfile) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => statictranslations('User not found')], 404);
         }
 
         return response()->json(['profile' => $updatedProfile], 200);

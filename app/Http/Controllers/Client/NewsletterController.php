@@ -18,17 +18,17 @@ class NewsletterController extends Controller
             $newsletter = $newsletterRepo->subscribe($data);
 
             return response()->json([
-                'message' => 'Subscribed to newsletter successfully.',
+                'message' => statictranslations('Subscribed to newsletter successfully.'),
                 'success' => true
             ], 200);
         } catch (QueryException $e) {
             return response()->json([
-                'message' => 'Database error. Please try again.',
+                'message' => statictranslations('Database error. Please try again.'),
                 'error' => config('app.debug') ? $e->getMessage() : 'Database error'
             ], 500);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'An error occurred while subscribing.',
+                'message' => statictranslations('An error occurred while subscribing.'),
                 'error' => config('app.debug') ? $e->getMessage() : 'Server error'
             ], 500);
         }
@@ -38,8 +38,8 @@ class NewsletterController extends Controller
     {
         $data = $request->validated();
         if ($newsletterRepo->unsubscribe($data)) {
-            return response()->json(['message' => 'Unsubscribed from newsletter successfully.']);
+            return response()->json(['message' => statictranslations('Unsubscribed from newsletter successfully.')]);
         }
-        return response()->json(['message' => 'Email not found in newsletter subscriptions.'], 404);
+        return response()->json(['message' => statictranslations('Email not found in newsletter subscriptions.')], 404);
     }
 }

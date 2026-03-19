@@ -13,7 +13,7 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
-import './translations';
+// import './translations';
 import './toast';
 import './wishlist';
 import './compare';
