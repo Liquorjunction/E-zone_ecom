@@ -13,11 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!max) return;
         const message =
             max === 1
-                ? "Only 1 item available in stock."
-                : `Only ${max} items available in stock.`;
+                ? trans('Only 1 item available in stock.')
+                : `(${trans('Only')}) ${max} ${trans('items available in stock.')}`;
 
         if (window.Toast && typeof window.Toast.info === "function") {
-            window.Toast.info({ title: "Stock limit", message });
+            window.Toast.info({ title: trans('Stock limit'), message });
             return;
         }
 
@@ -73,16 +73,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     discountPercentage > 0
                         ? `
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold self-start">
-                    Save ${discountPercentage.toFixed(0)}%
+                    ${trans('Save')} ${discountPercentage.toFixed(0)}%
                 </span>`
                         : ""
                 }
-                <span class="text-xs text-gray-400 font-medium">incl. taxes</span>
+                <span class="text-xs text-gray-400 font-medium">${trans('incl. taxes')}</span>
             `;
         } else {
             priceWrapper.innerHTML = `
                 <span id="product-price" class="text-4xl font-extrabold text-primary tracking-tight">${window.CURRENCY_SYMBOL} ${formatPrice(finalPrice || originalPrice)}</span>
-                <span class="text-xs text-gray-400 font-medium">incl. taxes</span>
+                <span class="text-xs text-gray-400 font-medium">${trans('incl. taxes')}</span>
             `;
         }
 
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
-                <span class="text-sm font-semibold text-emerald-800">${discountInfo.discount_name} applied!</span>
+                <span class="text-sm font-semibold text-emerald-800">${discountInfo.discount_name} ${trans('applied!')}</span>
             `;
             priceContainer.appendChild(badge);
         }
@@ -616,7 +616,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (rows) {
                         variantHtml = `
                             <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
-                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Variant Specifications</h4>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">${trans('Variant Specifications')}</h4>
                                 <table class="w-full text-sm"><tbody class="divide-y divide-gray-100">${rows}</tbody></table>
                             </div>`;
                     }
@@ -625,7 +625,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (items) {
                         variantHtml = `
                             <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
-                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Variant Specifications</h4>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">${trans('Variant Specifications')}</h4>
                                 <table class="w-full text-sm"><tbody class="divide-y divide-gray-100">${items}</tbody></table>
                             </div>`;
                     }
@@ -710,7 +710,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             );
                         }
 
-                        const msg = data.message || "Item added to cart.";
+                        const msg = data.message || trans('Item added to cart.');
                         if (window.showUniversalPopup)
                             showUniversalPopup(msg, "success", 2000);
                         else if (window.Toast?.success)
@@ -728,7 +728,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     } else {
                         const msg =
-                            data.message || "Could not add item to cart.";
+                            data.message || trans('Could not add item to cart.');
                         if (window.showUniversalPopup)
                             showUniversalPopup(msg, "error", 3000);
                         else if (window.Toast?.error)
@@ -740,7 +740,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 })
                 .catch(() => {
-                    const msg = "An error occurred. Please try again.";
+                    const msg = trans('An error occurred. Please try again.');
                     if (window.showUniversalPopup)
                         showUniversalPopup(msg, "error", 3000);
                     else if (window.Toast?.error)

@@ -310,6 +310,8 @@ class OrderService
                 $updateFields['naps_refund_id'] = $refundId;
             }
 
+            $updateFields['status'] = $finalStatus;
+
             $order->update($updateFields);
 
             // Record status history

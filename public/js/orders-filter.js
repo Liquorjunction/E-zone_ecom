@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     advancedFilters.style.display = "";
                     toggleBtn.setAttribute("aria-expanded", "true");
                     if (filterToggleText)
-                        filterToggleText.textContent = "Hide Advanced Filters";
+                        filterToggleText.textContent = trans('Hide Advanced Filters');
                     if (filterIcon)
                         filterIcon.style.transform = "rotate(45deg)";
                 } else {
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     advancedFilters.style.display = "none";
                     toggleBtn.setAttribute("aria-expanded", "false");
                     if (filterToggleText)
-                        filterToggleText.textContent = "Advanced Filters";
+                        filterToggleText.textContent = trans('Advanced Filters');
                     if (filterIcon) filterIcon.style.transform = "rotate(0deg)";
                 }
             });
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             filterCountElements.forEach((el) => {
                 el.textContent = activeFilters.length;
-                el.style.display = activeFilters.length > 0 ? "" : "none";
+                el.style.display = activeFilters.length > 0 ? "" : trans('none');
             });
         }
 
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Loading...
+                    ${trans('Loading...')}
                 `;
                 applyButton.disabled = true;
                 setTimeout(() => {
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
             headers: { "X-Requested-With": "XMLHttpRequest" },
         })
             .then((res) => {
-                if (!res.ok) throw new Error("Network response was not ok");
+                if (!res.ok) throw new Error(trans('Network response was not okay.'));
                 return res.json();
             })
             .then((data) => {
@@ -229,8 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     container.style.pointerEvents = "auto";
                     window.history.pushState({}, "", url);
                     attachPaginationHandler();
-                    initOrdersFilter(); // Re-initialize listeners after AJAX
-                    // Attach clear search handler after AJAX content update
+                    initOrdersFilter();
                     const form = document.getElementById("orders-filter-form");
                     if (form) {
                         const clearSearchBtn = document.getElementById("clear-search-btn");

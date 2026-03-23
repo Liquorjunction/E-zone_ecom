@@ -25,7 +25,7 @@ function renderSearchResults(data, q) {
     let html = '';
 
     if (data.categories && data.categories.length) {
-        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-blue-700 uppercase">Categories</div>';
+        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-blue-700 uppercase">' + trans('Categories') + '</div>';
         html += '<div class="px-4 pb-2 flex flex-wrap gap-2">';
         data.categories.forEach(c => {
             html += `<a href="${c.url}" class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200 transition">${highlightMatch(c.display_name || c['category-name'] || '', q)}</a>`;
@@ -34,7 +34,7 @@ function renderSearchResults(data, q) {
     }
 
     if (data.sub_categories && data.sub_categories.length) {
-        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-green-700 uppercase">Subcategories</div>';
+        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-green-700 uppercase">' + trans('Subcategories') + '</div>';
         html += '<div class="px-4 pb-2 flex flex-wrap gap-2">';
         data.sub_categories.forEach(s => {
             html += `<a href="${s.url}" class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold hover:bg-green-200 transition">${highlightMatch(s.display_name || s['sub-category-name'] || '', q)}</a>`;
@@ -43,7 +43,7 @@ function renderSearchResults(data, q) {
     }
 
     if (data.brands && data.brands.length) {
-        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-yellow-700 uppercase">Brands</div>';
+        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-yellow-700 uppercase">' + trans('Brands') + '</div>';
         html += '<div class="px-4 pb-2 flex flex-wrap gap-2">';
         data.brands.forEach(b => {
             html += `<a href="${b.url}" class="inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold hover:bg-yellow-200 transition">${highlightMatch(b.display_name || b.name, q)}</a>`;
@@ -52,7 +52,7 @@ function renderSearchResults(data, q) {
     }
 
     if (data.products && data.products.length) {
-        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-primary uppercase">Products</div>';
+        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-primary uppercase">' + trans('Products') + '</div>';
         html += '<div class="max-h-96 overflow-y-auto px-4">';
         data.products.forEach(product => {
             html += `<a href="${product.url}" class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 rounded-xl transition">
@@ -67,7 +67,7 @@ function renderSearchResults(data, q) {
     }
 
     if (data.orders && data.orders.length) {
-        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-gray-700 uppercase">Orders</div>';
+        html += '<div class="px-4 pt-3 pb-1 text-xs font-bold text-gray-700 uppercase">' + trans('Orders') + '</div>';
         html += '<div class="px-4 pt-2">';
         data.orders.forEach(o => {
             html += `<a href="${o.url}" class="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition">Order #${highlightMatch(o.order_number, q)}</a>`;
@@ -75,7 +75,7 @@ function renderSearchResults(data, q) {
         html += '</div>';
     }
 
-    return html || '<div class="p-4 text-sm text-gray-500">No results found</div>';
+    return html || '<div class="p-4 text-sm text-gray-500">' + trans('No results found') + '</div>';
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ function initSearch(inputEl, resultsEl) {
                 hasMore = data.result.has_more || false;
             } else {
                 if (!append) {
-                    resultsEl.innerHTML = '<div class="p-4 text-sm text-gray-500">No results found</div>';
+                    resultsEl.innerHTML = '<div class="p-4 text-sm text-gray-500">' + trans('No results found') + '</div>';
                     resultsEl.classList.remove('hidden');
                 }
                 hasMore = false;

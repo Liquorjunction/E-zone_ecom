@@ -33,10 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
             : `Only ${max} items available in stock.`;
 
         if (window.Toast && typeof window.Toast.info === 'function') {
-            window.Toast.info({
-                title: 'Stock limit',
-                message: message,
-            });
+            window.Toast.info({ title: 'Stock limit', message: message });
             return;
         }
 
@@ -60,28 +57,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getMaxStockForItem(id) {
-        const input = root.querySelector(
-            `.cart-quantity-input[data-item-id="${id}"]`
-        );
+        const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
         let max = null;
 
         if (input) {
             const raw = input.getAttribute('max') || input.dataset.maxStock || input.dataset.max;
             const parsed = parseInt(raw || '', 10);
-            if (!Number.isNaN(parsed) && parsed > 0) {
-                max = parsed;
-            }
+            if (!Number.isNaN(parsed) && parsed > 0) max = parsed;
         }
 
         if (!max) {
-            const summaryRow = document.querySelector(
-                `.summary-item-row[data-summary-item-id="${id}"]`
-            );
+            const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
             const raw = summaryRow?.dataset?.maxStock;
             const parsed = parseInt(raw || '', 10);
-            if (!Number.isNaN(parsed) && parsed > 0) {
-                max = parsed;
-            }
+            if (!Number.isNaN(parsed) && parsed > 0) max = parsed;
         }
 
         return max;
@@ -108,9 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (increaseBtn) {
             e.preventDefault();
             const id = increaseBtn.dataset.itemId;
-            const input = root.querySelector(
-                `.cart-quantity-input[data-item-id="${id}"]`
-            );
+            const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
             if (input) {
                 const max = getMaxStockForItem(id);
                 let newVal = Number(input.value || 0) + 1;
@@ -126,9 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (decreaseBtn) {
             e.preventDefault();
             const id = decreaseBtn.dataset.itemId;
-            const input = root.querySelector(
-                `.cart-quantity-input[data-item-id="${id}"]`
-            );
+            const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
             if (input) {
                 let newVal = Math.max(1, Number(input.value || 1) - 1);
                 input.value = newVal;
@@ -140,17 +125,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const summaryIncreaseBtn = target.closest(".summary-qty-increase");
         if (summaryIncreaseBtn) {
             e.preventDefault();
-
-            // Disable qty changes on step 3 (order confirmed) using a data attribute on the root
             if (root.dataset.step === '3') return;
 
             const id = summaryIncreaseBtn.dataset.itemId;
-            const quantityDisplay = document.querySelector(
-                `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
-            );
-            const mainInput = root.querySelector(
-                `.cart-quantity-input[data-item-id="${id}"]`
-            );
+            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
+            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
 
             if (mainInput) {
                 const max = getMaxStockForItem(id);
@@ -162,8 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 debounceUpdate(id, newVal);
             } else if (quantityDisplay) {
                 const max = getMaxStockForItem(id);
-                let currentQty = Number(quantityDisplay.textContent || 0);
-                let newVal = currentQty + 1;
+                let newVal = Number(quantityDisplay.textContent || 0) + 1;
                 if (max) newVal = Math.min(newVal, max);
                 quantityDisplay.textContent = newVal;
                 if (max && newVal === max) showStockLimitMessage(max);
@@ -175,17 +153,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const summaryDecreaseBtn = target.closest(".summary-qty-decrease");
         if (summaryDecreaseBtn) {
             e.preventDefault();
-
-            // Disable qty changes on step 3 (order confirmed) using a data attribute on the root
             if (root.dataset.step === '3') return;
 
             const id = summaryDecreaseBtn.dataset.itemId;
-            const quantityDisplay = document.querySelector(
-                `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
-            );
-            const mainInput = root.querySelector(
-                `.cart-quantity-input[data-item-id="${id}"]`
-            );
+            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
+            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
 
             if (mainInput) {
                 let newVal = Math.max(1, Number(mainInput.value || 1) - 1);
@@ -193,8 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (quantityDisplay) quantityDisplay.textContent = newVal;
                 debounceUpdate(id, newVal);
             } else if (quantityDisplay) {
-                let currentQty = Number(quantityDisplay.textContent || 1);
-                let newVal = Math.max(1, currentQty - 1);
+                let newVal = Math.max(1, Number(quantityDisplay.textContent || 1) - 1);
                 quantityDisplay.textContent = newVal;
                 debounceUpdate(id, newVal);
             }
@@ -225,17 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (addressSelect) {
         addressSelect.addEventListener("change", function () {
             const opt = this.options[this.selectedIndex];
-
-            const fieldIds = [
-                "firstName",
-                "lastName",
-                "address",
-                "city",
-                "state",
-                "zip",
-                "phone",
-                "email",
-            ];
+            const fieldIds = ["firstName", "lastName", "address", "city", "state", "zip", "phone", "email"];
 
             if (!opt || !opt.dataset || !opt.dataset.addr) {
                 fieldIds.forEach((id) => {
@@ -274,17 +235,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateCardDetailsVisibility() {
-        const selected = document.querySelector(
-            'input[name="payment_method"]:checked'
-        );
-        const cardWrapper =
-            document.getElementById("card-details-wrapper") ||
-            document.getElementById("cardDetails");
+        const selected = document.querySelector('input[name="payment_method"]:checked');
+        const cardWrapper = document.getElementById("card-details-wrapper") || document.getElementById("cardDetails");
 
         if (cardWrapper) {
-            cardWrapper.style.display =
-                selected && selected.value === "card" ? "block" : "none";
-
+            cardWrapper.style.display = selected && selected.value === "card" ? "block" : "none";
             const inputs = cardWrapper.querySelectorAll("input, select");
             inputs.forEach((input) => {
                 if (selected && selected.value === "card") {
@@ -296,19 +251,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    document
-        .querySelectorAll('input[name="payment_method"]')
-        .forEach((radio) => {
-            radio.addEventListener("change", updateCardDetailsVisibility);
-        });
+    document.querySelectorAll('input[name="payment_method"]').forEach((radio) => {
+        radio.addEventListener("change", updateCardDetailsVisibility);
+    });
     updateCardDetailsVisibility();
 
     function debounceUpdate(id, quantity) {
         if (debounceTimers[id]) clearTimeout(debounceTimers[id]);
-
-        debounceTimers[id] = setTimeout(() => {
-            updateItem(id, quantity);
-        }, 500);
+        debounceTimers[id] = setTimeout(() => { updateItem(id, quantity); }, 500);
     }
 
     function getCurrentShippingMethod() {
@@ -322,90 +272,52 @@ document.addEventListener("DOMContentLoaded", function () {
             await requestSummaryRefresh();
             return;
         }
-
         const itemId = firstCartInput.dataset.itemId;
         const quantity = Number(firstCartInput.value || 1);
         if (!itemId) return;
-
         await updateItem(itemId, quantity);
     }
 
     async function requestSummaryRefresh() {
         if (!updateUrl) return;
-
         try {
             const resp = await fetch(updateUrl, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrf,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({
-                    shipping_method: getCurrentShippingMethod(),
-                }),
+                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
+                body: JSON.stringify({ shipping_method: getCurrentShippingMethod() }),
             });
-
             const data = await resp.json();
-            if (resp.ok && data?.success && data?.summary) {
-                updateSummary(data.summary);
-            }
+            if (resp.ok && data?.success && data?.summary) updateSummary(data.summary);
         } catch (e) {
             console.error("Failed to refresh summary for shipping", e);
         }
     }
 
-    document
-        .querySelectorAll('input[name="shipping_method"]')
-        .forEach((radio) => {
-            radio.addEventListener("change", refreshTotalsForShipping);
-        });
+    document.querySelectorAll('input[name="shipping_method"]').forEach((radio) => {
+        radio.addEventListener("change", refreshTotalsForShipping);
+    });
 
     async function updateItem(id, quantity) {
         if (!updateUrl) return;
-
-        // Read the currently selected shipping method so the server recalculates shipping correctly
         const shippingMethod = getCurrentShippingMethod();
 
         try {
             const resp = await fetch(updateUrl, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrf,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({
-                    id: id,
-                    item_id: id,
-                    quantity: quantity,
-                    shipping_method: shippingMethod,
-                }),
+                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
+                body: JSON.stringify({ id, item_id: id, quantity, shipping_method: shippingMethod }),
             });
 
             let data = null;
-            try {
-                data = await resp.json();
-            } catch (e) {
-                data = null;
-            }
+            try { data = await resp.json(); } catch (e) { data = null; }
 
             if (!resp.ok) {
                 const maxStock = data?.item?.max_stock || data?.max_stock;
                 if (maxStock) {
-                    const input = root.querySelector(
-                        `.cart-quantity-input[data-item-id="${id}"]`
-                    );
-                    if (input) {
-                        input.value = Math.min(Number(input.value || 1), maxStock);
-                    }
-                    const summaryQtyDisplay = document.querySelector(
-                        `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
-                    );
-                    if (summaryQtyDisplay) {
-                        const currentVal = Number(summaryQtyDisplay.textContent || 1);
-                        summaryQtyDisplay.textContent = Math.min(currentVal, maxStock);
-                    }
+                    const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+                    if (input) input.value = Math.min(Number(input.value || 1), maxStock);
+                    const summaryQtyDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
+                    if (summaryQtyDisplay) summaryQtyDisplay.textContent = Math.min(Number(summaryQtyDisplay.textContent || 1), maxStock);
                     showStockLimitMessage(maxStock);
                 }
                 throw new Error(data?.message || ("Server returned " + resp.status));
@@ -413,39 +325,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (data.success) {
                 if (data.item?.max_stock) {
-                    const input = root.querySelector(
-                        `.cart-quantity-input[data-item-id="${id}"]`
-                    );
-                    if (input) {
-                        input.setAttribute('max', data.item.max_stock);
-                        input.dataset.maxStock = data.item.max_stock;
-                    }
-                    const summaryRow = document.querySelector(
-                        `.summary-item-row[data-summary-item-id="${id}"]`
-                    );
-                    if (summaryRow) {
-                        summaryRow.dataset.maxStock = data.item.max_stock;
-                    }
+                    const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+                    if (input) { input.setAttribute('max', data.item.max_stock); input.dataset.maxStock = data.item.max_stock; }
+                    const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
+                    if (summaryRow) summaryRow.dataset.maxStock = data.item.max_stock;
                 }
 
                 const cartRow = document.querySelector(`.cart-item-row[data-item-id="${id}"]`);
-
-                const lineTotalEl = document.querySelector(
-                    `#item-line-total-${id}`
-                );
+                const lineTotalEl = document.querySelector(`#item-line-total-${id}`);
                 if (lineTotalEl && data.item?.discount) {
                     if (data.item.discount.has_discount) {
-                        const discountedLineTotal =
-                            data.item.discount.line_total_after_discount
-                            ?? data.item.line_total
-                            ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
-                        lineTotalEl.textContent = formatMoney(
-                            discountedLineTotal
-                        );
+                        const discountedLineTotal = data.item.discount.line_total_after_discount ?? data.item.line_total ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
+                        lineTotalEl.textContent = formatMoney(discountedLineTotal);
                     } else {
-                        lineTotalEl.textContent = formatMoney(
-                            data.item.line_total
-                        );
+                        lineTotalEl.textContent = formatMoney(data.item.line_total);
                     }
                 } else if (lineTotalEl && data.item?.line_total) {
                     lineTotalEl.textContent = formatMoney(data.item.line_total);
@@ -456,9 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (data.item.discount.has_discount && data.item.discount.discount_amount > 0) {
                         if (discountBadge) {
                             const discountText = discountBadge.querySelector('svg').nextSibling;
-                            if (discountText) {
-                                discountText.textContent = ` Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
-                            }
+                            if (discountText) discountText.textContent = ` Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
                         } else {
                             const priceContainer = cartRow.querySelector('.text-right');
                             if (priceContainer) {
@@ -473,44 +364,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
 
-                const summaryQtyDisplay = document.querySelector(
-                    `.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`
-                );
-                const cartInput = root.querySelector(
-                    `.cart-quantity-input[data-item-id="${id}"]`
-                );
-                if (summaryQtyDisplay && cartInput) {
-                    summaryQtyDisplay.textContent = cartInput.value;
-                }
+                const summaryQtyDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
+                const cartInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
+                if (summaryQtyDisplay && cartInput) summaryQtyDisplay.textContent = cartInput.value;
 
-                const summaryItemPrice = document.querySelector(
-                    `.summary-item-row[data-summary-item-id="${id}"] .summary-item-price`
-                );
+                const summaryItemPrice = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-item-price`);
                 if (summaryItemPrice && data.item?.discount) {
                     if (data.item.discount.has_discount) {
-                        const discountedLineTotal =
-                            data.item.discount.line_total_after_discount
-                            ?? data.item.line_total
-                            ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
-                        summaryItemPrice.textContent = formatMoney(
-                            discountedLineTotal
-                        );
+                        const discountedLineTotal = data.item.discount.line_total_after_discount ?? data.item.line_total ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
+                        summaryItemPrice.textContent = formatMoney(discountedLineTotal);
                     } else {
-                        summaryItemPrice.textContent = formatMoney(
-                            data.item.line_total
-                        );
+                        summaryItemPrice.textContent = formatMoney(data.item.line_total);
                     }
                 }
 
                 updateSummary(data.summary);
 
-                // Dispatch event to update header cart counter
                 if (data.summary && typeof data.summary.itemCount !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('cart:changed', {
-                        detail: {
-                            summary: data.summary
-                        }
-                    }));
+                    window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
                 }
             } else {
                 console.error("Update failed:", data.message);
@@ -538,36 +409,19 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const resp = await fetch(removeUrl, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrf,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({
-                    id: id,
-                    item_id: id,
-                    shipping_method: getCurrentShippingMethod(),
-                }),
+                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
+                body: JSON.stringify({ id, item_id: id, shipping_method: getCurrentShippingMethod() }),
             });
 
             if (!resp.ok) throw new Error("Server returned " + resp.status);
-
             const data = await resp.json();
 
             if (data.success) {
-                const row = document.querySelector(
-                    `.cart-item-row[data-item-id="${id}"]`
-                );
-                if (row) {
-                    row.remove();
-                }
+                const row = document.querySelector(`.cart-item-row[data-item-id="${id}"]`);
+                if (row) row.remove();
 
-                const summaryRow = document.querySelector(
-                    `.summary-item-row[data-summary-item-id="${id}"]`
-                );
-                if (summaryRow) {
-                    summaryRow.remove();
-                }
+                const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
+                if (summaryRow) summaryRow.remove();
 
                 if (document.querySelectorAll(".cart-item-row").length === 0) {
                     location.reload();
@@ -576,20 +430,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 updateSummary(data.summary);
 
-                // Dispatch event to update header cart counter
                 if (data.summary && typeof data.summary.itemCount !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('cart:changed', {
-                        detail: {
-                            summary: data.summary
-                        }
-                    }));
+                    window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
                 }
 
-                if (window.Toast)
-                    window.Toast.success({
-                        title: "Removed",
-                        message: "Item removed from cart",
-                    });
+                if (window.Toast) window.Toast.success({ title: "Removed", message: "Item removed from cart" });
             } else {
                 submitFallback(id);
             }
@@ -606,15 +451,11 @@ document.addEventListener("DOMContentLoaded", function () {
         form.style.display = "none";
 
         const token = document.createElement("input");
-        token.type = "hidden";
-        token.name = "_token";
-        token.value = csrf;
+        token.type = "hidden"; token.name = "_token"; token.value = csrf;
         form.appendChild(token);
 
         const idInput = document.createElement("input");
-        idInput.type = "hidden";
-        idInput.name = "id";
-        idInput.value = id;
+        idInput.type = "hidden"; idInput.name = "id"; idInput.value = id;
         form.appendChild(idInput);
 
         document.body.appendChild(form);
@@ -639,27 +480,19 @@ document.addEventListener("DOMContentLoaded", function () {
             if (summary[key] === undefined) continue;
 
             selectors.forEach((sel) => {
-                const els = sel.startsWith(".")
-                    ? document.querySelectorAll(sel)
-                    : [document.getElementById(sel)];
-
+                const els = sel.startsWith(".") ? document.querySelectorAll(sel) : [document.getElementById(sel)];
                 els.forEach((el) => {
                     if (!el) return;
                     if (key === "shipping") {
-                        el.textContent =
-                            summary[key] > 0
-                                ? formatMoney(summary[key])
-                                : "FREE";
+                        el.textContent = summary[key] > 0 ? formatMoney(summary[key]) : "FREE";
                     } else if (key === "itemCount") {
                         el.textContent = summary[key];
                     } else if (key === "item_discount" || key === "coupon_discount") {
                         if (summary[key] > 0) {
                             el.textContent = "-" + formatMoney(summary[key]);
-                            // Show parent row if it was hidden
                             const row = el.closest('[id$="-discount-row"], .discount-row');
                             if (row) row.style.display = '';
                         } else {
-                            // Hide the row when discount becomes 0
                             const row = el.closest('[id$="-discount-row"], .discount-row');
                             if (row) row.style.display = 'none';
                         }
@@ -681,57 +514,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateOrderSummaryItems(summary) {
-        if (!summary || !summary.items) {
-            console.warn(
-                "updateOrderSummaryItems: No summary or items data received",
-                summary
-            );
-            return;
-        }
-
-        console.log("Updating order summary items:", summary.items);
+        if (!summary || !summary.items) return;
 
         Object.entries(summary.items).forEach(([itemId, itemData]) => {
-            const summaryRow = document.querySelector(
-                `.summary-item-row[data-summary-item-id="${itemId}"]`
-            );
-            if (!summaryRow) {
-                console.warn(`Summary row not found for item ${itemId}`);
-                return;
-            }
+            const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${itemId}"]`);
+            if (!summaryRow) return;
 
             const qtyDisplay = summaryRow.querySelector(".summary-quantity");
-            if (qtyDisplay) {
-                qtyDisplay.textContent = itemData.quantity;
-                console.log(
-                    `Updated quantity for item ${itemId}: ${itemData.quantity}`
-                );
-            }
+            if (qtyDisplay) qtyDisplay.textContent = itemData.quantity;
 
-            const priceElement = summaryRow.querySelector(
-                ".summary-item-price"
-            );
-            if (
-                priceElement &&
-                (itemData.final_price !== undefined ||
-                    itemData.unit_price !== undefined)
-            ) {
-                const unitPrice =
-                    itemData.final_price ?? itemData.unit_price ?? 0;
+            const priceElement = summaryRow.querySelector(".summary-item-price");
+            if (priceElement && (itemData.final_price !== undefined || itemData.unit_price !== undefined)) {
+                const unitPrice = itemData.final_price ?? itemData.unit_price ?? 0;
                 const lineTotal = unitPrice * itemData.quantity;
                 priceElement.textContent = formatMoney(lineTotal);
-                console.log(
-                    `Updated price for item ${itemId}: ${formatMoney(
-                        lineTotal
-                    )} (unit: ${formatMoney(unitPrice)}, qty: ${
-                        itemData.quantity
-                    })`
-                );
-            } else {
-                console.warn(
-                    `Price element or price data not found for item ${itemId}`,
-                    itemData
-                );
             }
 
             const lineThroughEl = summaryRow.querySelector(".text-xs.text-gray-400.line-through");
@@ -748,7 +544,288 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Modal and Address Handling (from inline script)
+// ═══════════════════════════════════════════════════════════════
+//  AJAX CHECKOUT SUBMISSION  (Step 2 → Place Secure Order)
+// ═══════════════════════════════════════════════════════════════
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkoutForm = document.querySelector('form[action*="checkout"]');
+        if (!checkoutForm) return;
+
+        checkoutForm.addEventListener('submit', async function (e) {
+            const submitter = e.submitter;
+            // Only intercept the "Place Secure Order" button (value="3")
+            if (!submitter || submitter.value !== '3') return;
+
+            e.preventDefault();
+
+            // Clear previous errors
+            clearAllFieldErrors();
+
+            // Client-side validation first
+            const isValid = runCheckoutValidation(checkoutForm);
+            if (!isValid) return;
+
+            // Show loading spinner on button
+            const originalBtnHTML = submitter.innerHTML;
+            submitter.disabled = true;
+            submitter.innerHTML = `
+                <span class="inline-flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Placing Order...
+                </span>`;
+
+            const formData = new FormData(checkoutForm);
+            formData.set('step', '3');
+
+            try {
+                const response = await fetch(checkoutForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData,
+                });
+
+                const contentType = response.headers.get('content-type') || '';
+
+                // Non-JSON = server did a full redirect (shouldn't happen with expectsJson, but just in case)
+                if (!contentType.includes('application/json')) {
+                    if (typeof window.goToStep === 'function') {
+                        window.goToStep(3, { success: true });
+                    } else {
+                        window.location.href = response.url;
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+
+                // Success — go to step 3 without page reload
+                if (response.ok && (data.success || data.redirect)) {
+                    if (typeof window.goToStep === 'function') {
+                        window.goToStep(3, {
+                            success: true,
+                            order_id: data.order_id,
+                            order_number: data.order_number,
+                            order_detail_url: data.order_detail_url,
+                        });
+                    } else {
+                        // Fallback: follow redirect if goToStep not loaded
+                        window.location.href = data.redirect || data.url || (window.location.pathname + '?step=3');
+                    }
+                    return;
+                }
+
+                // Laravel 422 validation errors — show inline, stay on step 2
+                if (response.status === 422 && data.errors) {
+                    handleServerValidationErrors(data.errors);
+                    submitter.disabled = false;
+                    submitter.innerHTML = originalBtnHTML;
+                    return;
+                }
+
+                // Other server error — go to step 3 error state without reload
+                if (typeof window.goToStep === 'function') {
+                    window.goToStep(3, { success: false, message: data.message || 'Something went wrong. Please try again.' });
+                } else {
+                    showCheckoutErrorBanner(data.message || 'Something went wrong. Please try again.');
+                }
+                submitter.disabled = false;
+                submitter.innerHTML = originalBtnHTML;
+
+            } catch (err) {
+                console.error('Checkout AJAX error:', err);
+                if (typeof window.goToStep === 'function') {
+                    window.goToStep(3, { success: false, message: 'A network error occurred. Please check your connection and try again.' });
+                } else {
+                    showCheckoutErrorBanner('A network error occurred. Please check your connection and try again.');
+                }
+                submitter.disabled = false;
+                submitter.innerHTML = originalBtnHTML;
+            }
+        });
+    });
+
+    // ── Helpers ────────────────────────────────────────────────
+
+    function showCheckoutErrorBanner(message) {
+        let banner = document.getElementById('checkout-error-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'checkout-error-banner';
+            banner.className = 'mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-center shadow-sm';
+            const checkoutRoot = document.getElementById('checkout-root');
+            if (checkoutRoot) checkoutRoot.insertBefore(banner, checkoutRoot.firstChild);
+            else document.body.prepend(banner);
+        }
+        banner.innerHTML = `
+            <div class="shrink-0">
+                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-bold text-red-800">Order Failed</p>
+                <p class="text-sm text-red-700">${message}</p>
+            </div>`;
+        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Maps Laravel field names → DOM element IDs
+    const serverFieldMap = {
+        saved_address_id:         'shippingAddressSelect',
+        saved_billing_address_id: 'billingAddressSelect',
+        billing_address_id:       'billingAddressSelect',
+        email:          'email',
+        phone:          'phone',
+        firstName:      'firstName',
+        lastName:       'lastName',
+        address:        'address',
+        city:           'city',
+        zip:            'zip',
+        country:        'country',
+        payment_method: 'payment_method',
+        cardNumber:     'cardNumber',
+        expiry:         'expiry',
+        cvv:            'cvv',
+    };
+
+    function handleServerValidationErrors(errors) {
+        let firstField = null;
+
+        Object.entries(errors).forEach(([key, messages]) => {
+            const message = Array.isArray(messages) ? messages[0] : messages;
+            const mappedId = serverFieldMap[key] || key;
+
+            const field = document.getElementById(mappedId)
+                || document.querySelector(`[name="${mappedId}"]`)
+                || document.querySelector(`[name="${key}"]`);
+
+            if (!field) return;
+            setFieldError(field, message);
+            if (!firstField) firstField = field;
+        });
+
+        if (firstField) {
+            firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstField.focus({ preventScroll: true });
+        }
+    }
+
+    function setFieldError(field, message) {
+        field.classList.add('border-red-500', 'bg-red-50');
+        field.classList.remove('border-gray-200', 'border-green-400');
+
+        const wrapper = field.closest('div');
+        let msgEl = wrapper ? wrapper.querySelector('.error-message') : null;
+        if (!msgEl && wrapper) {
+            msgEl = document.createElement('span');
+            msgEl.className = 'error-message text-red-500 text-sm mt-1 font-medium block';
+            wrapper.appendChild(msgEl);
+        }
+        if (msgEl) {
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden');
+            msgEl.style.display = 'block';
+        }
+    }
+
+    function clearAllFieldErrors() {
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.textContent = '';
+            el.classList.add('hidden');
+            el.style.display = '';
+        });
+        document.querySelectorAll('.border-red-500').forEach(el => {
+            el.classList.remove('border-red-500', 'bg-red-50');
+        });
+        const banner = document.getElementById('checkout-error-banner');
+        if (banner) banner.remove();
+    }
+
+    /**
+     * Client-side validation before AJAX submit.
+     * Checks all visible required fields and returns true if all pass.
+     */
+    function runCheckoutValidation(form) {
+        let isValid = true;
+        let firstInvalid = null;
+
+        function fail(field, msg) {
+            setFieldError(field, msg);
+            if (!firstInvalid) firstInvalid = field;
+            isValid = false;
+        }
+
+        // Email
+        const email = form.querySelector('[name="email"]');
+        if (email && email.offsetParent !== null) {
+            if (!email.value.trim()) fail(email, 'Email is required');
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) fail(email, 'Please enter a valid email address');
+        }
+
+        // Phone
+        const phone = form.querySelector('[name="phone"]');
+        if (phone && phone.offsetParent !== null) {
+            if (!phone.value.trim()) fail(phone, 'Phone number is required');
+            else if (!/^[\d\s\+\-\(\)]{7,}$/.test(phone.value.trim())) fail(phone, 'Please enter a valid phone number');
+        }
+
+        // Shipping address
+        const shippingSelect = form.querySelector('[name="saved_address_id"]');
+        const manualFields = document.getElementById('manualAddressFields');
+        const isManualVisible = manualFields && !manualFields.classList.contains('hidden');
+
+        if (shippingSelect && shippingSelect.offsetParent !== null && !shippingSelect.value && !isManualVisible) {
+            fail(shippingSelect, 'Please select a shipping address');
+        }
+
+        if (isManualVisible) {
+            [
+                { name: 'firstName', label: 'First name is required' },
+                { name: 'lastName',  label: 'Last name is required' },
+                { name: 'address',   label: 'Street address is required' },
+                { name: 'city',      label: 'City is required' },
+                { name: 'country',   label: 'Country is required' },
+            ].forEach(({ name, label }) => {
+                const f = form.querySelector(`[name="${name}"]`);
+                if (f && !f.value.trim()) fail(f, label);
+            });
+        }
+
+        // Card details (only when card payment is selected and section is visible)
+        const paymentMethod = form.querySelector('input[name="payment_method"]:checked');
+        if (paymentMethod && paymentMethod.value === 'card') {
+            const cardDetails = document.getElementById('cardDetails');
+            if (cardDetails && cardDetails.style.display !== 'none') {
+                const cardNumber = form.querySelector('[name="cardNumber"]');
+                const expiry    = form.querySelector('[name="expiry"]');
+                const cvv       = form.querySelector('[name="cvv"]');
+
+                if (cardNumber && !cardNumber.value.replace(/\s/g, '').match(/^\d{13,19}$/)) fail(cardNumber, 'Please enter a valid card number');
+                if (expiry && !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry.value.trim())) fail(expiry, 'Format should be MM/YY');
+                if (cvv && !/^\d{3,4}$/.test(cvv.value.trim())) fail(cvv, 'CVV must be 3 or 4 digits');
+            }
+        }
+
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus({ preventScroll: true });
+        }
+
+        return isValid;
+    }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  Modal and Address Handling
+// ═══════════════════════════════════════════════════════════════
 (function() {
     const modal = document.getElementById('addAddressModal');
     const openBillingBtn = document.getElementById('addBillingAddressBtn');
@@ -765,18 +842,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!modal) return;
 
-    // Function to open modal with type
     const openModalWithType = function(type) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
         if (form) form.reset();
         if (typeField) typeField.value = type;
-        if (countryField && !countryField.value) {
-            countryField.value = 'Morocco';
-        }
+        if (countryField && !countryField.value) countryField.value = 'Morocco';
 
-        // Animate content in
         const content = document.getElementById('addAddressContent');
         if (content) {
             setTimeout(() => {
@@ -786,46 +859,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    // Open modal for billing address
-    if (openBillingBtn) {
-        openBillingBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModalWithType('billing');
-        });
-    }
+    if (openBillingBtn)      openBillingBtn.addEventListener('click',      function(e) { e.preventDefault(); openModalWithType('billing'); });
+    if (openShippingBtn)     openShippingBtn.addEventListener('click',     function(e) { e.preventDefault(); openModalWithType('shipping'); });
+    if (openBillingBtnEmpty) openBillingBtnEmpty.addEventListener('click', function(e) { e.preventDefault(); openModalWithType('billing'); });
+    if (openShippingBtnEmpty) openShippingBtnEmpty.addEventListener('click', function(e) { e.preventDefault(); openModalWithType('shipping'); });
 
-    // Open modal for shipping address
-    if (openShippingBtn) {
-        openShippingBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModalWithType('shipping');
-        });
-    }
-
-    // Open modal for billing address (empty state button)
-    if (openBillingBtnEmpty) {
-        openBillingBtnEmpty.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModalWithType('billing');
-        });
-    }
-
-    // Open modal for shipping address (empty state button)
-    if (openShippingBtnEmpty) {
-        openShippingBtnEmpty.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModalWithType('shipping');
-        });
-    }
-
-    // Close modal
     const closeModal = function() {
         const content = document.getElementById('addAddressContent');
         if (content) {
             content.classList.add('scale-95', 'opacity-0');
             content.classList.remove('scale-100', 'opacity-100');
         }
-
         setTimeout(() => {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
@@ -837,19 +881,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
-    // Close on outside click
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) closeModal();
-    });
-
-    // Close on escape key
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            closeModal();
-        }
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
     });
 
-    // Handle form submission
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -858,39 +894,27 @@ document.addEventListener("DOMContentLoaded", function () {
             let isValid = true;
 
             fieldsToValidate.forEach(field => {
-                if (!validateField(field)) {
-                    isValid = false;
-                }
+                if (!validateField(field)) isValid = false;
             });
 
             const postalField = form.querySelector('[name="postal_code"]');
-            if (postalField && postalField.value.trim() && !validateField(postalField)) {
-                isValid = false;
-            }
+            if (postalField && postalField.value.trim() && !validateField(postalField)) isValid = false;
 
             const phoneField = form.querySelector('[name="phone"]');
-            if (phoneField && phoneField.value.trim() && !validateField(phoneField)) {
-                isValid = false;
-            }
+            if (phoneField && phoneField.value.trim() && !validateField(phoneField)) isValid = false;
 
             if (!isValid) {
                 const firstInvalid = form.querySelector('.error-state');
-                if (firstInvalid) {
-                    firstInvalid.focus();
-                }
+                if (firstInvalid) firstInvalid.focus();
                 return;
             }
 
-            // Disable submit button to prevent double submission
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML =
-                    '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Saving...</span>';
+                submitBtn.innerHTML = '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Saving...</span>';
             }
 
             const formData = new FormData(form);
-
-            // Prepare data for submission
             const data = {
                 _token: formData.get('_token'),
                 type: formData.get('type'),
@@ -904,54 +928,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 is_default: formData.get('is_default') ? 1 : 0
             };
 
-            // Submit via AJAX
             fetch('/client/addresses', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': data._token,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success || result.data) {
-                        // Close modal
-                        closeModal();
-
-                        // Show success message
-                        alert(
-                            'Address saved successfully! The page will reload to show your new address.'
-                        );
-
-                        // Reload page to refresh address list
-                        window.location.reload();
-                    } else {
-                        alert('Error saving address: ' + (result.message ||
-                            'Unknown error'));
-                        // Re-enable submit button
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML =
-                                '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    if (typeof showUniversalPopup === 'function') {
-                        showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
-                    } else {
-                        alert('Error saving address. Please try again.');
-                    }
-                    // Re-enable submit button
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': data._token, 'Accept': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success || result.data) {
+                    closeModal();
+                    alert('Address saved successfully! The page will reload to show your new address.');
+                    window.location.reload();
+                } else {
+                    alert('Error saving address: ' + (result.message || 'Unknown error'));
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.innerHTML =
-                            '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
+                        submitBtn.innerHTML = '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
                     }
-                });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (typeof showUniversalPopup === 'function') {
+                    showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
+                } else {
+                    alert('Error saving address. Please try again.');
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
+                }
+            });
         });
     }
 
@@ -959,14 +966,14 @@ document.addEventListener("DOMContentLoaded", function () {
         cityField.addEventListener('change', function() {
             const option = this.options[this.selectedIndex];
             const country = option ? option.getAttribute('data-country') : '';
-            if (country) {
-                countryField.value = country;
-            }
+            if (country) countryField.value = country;
         });
     }
 })();
 
-// Handle "Change" button clicks on address cards and payment method styling
+// ═══════════════════════════════════════════════════════════════
+//  Change Address Button + Payment Method Styling
+// ═══════════════════════════════════════════════════════════════
 (function() {
     document.addEventListener('click', function(e) {
         const button = e.target.closest('.changeAddressBtn');
@@ -977,12 +984,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!card) return;
 
         card.classList.add('hidden');
-
         const listId = card.id === 'shippingAddressPreview' ? 'shippingAddressList' : 'billingAddressList';
         const list = document.getElementById(listId);
-        if (list) {
-            list.classList.remove('hidden');
-        }
+        if (list) list.classList.remove('hidden');
     });
 
     const paymentMethodLabels = document.querySelectorAll('div.space-y-4.mb-6 > label');
@@ -991,7 +995,6 @@ document.addEventListener("DOMContentLoaded", function () {
         paymentMethodLabels.forEach(label => {
             const radio = label.querySelector('input[name="payment_method"]');
             if (!radio) return;
-
             if (radio.checked) {
                 label.classList.add('border-primary', 'bg-primary/5');
                 label.classList.remove('border-gray-200');
@@ -1004,31 +1007,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     paymentMethodLabels.forEach(label => {
         const radio = label.querySelector('input[name="payment_method"]');
-        if (radio) {
-            radio.addEventListener('change', updatePaymentMethodStyles);
-        }
+        if (radio) radio.addEventListener('change', updatePaymentMethodStyles);
     });
 
     updatePaymentMethodStyles();
 })();
 
-// Show Laravel validation errors on page load
+// ═══════════════════════════════════════════════════════════════
+//  Server Error Banner
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
-    // This will be populated by blade template if errors exist
     checkAndShowValidationErrors();
 });
 
 function checkAndShowValidationErrors() {
-    // Function to show server error banner
-    // Note: Errors data should be passed from the blade template
-    // Update this if you have actual error data
+    // Populated by Blade template if needed
 }
 
 function showServerErrorBanner(title, errors) {
     const banner = document.createElement('div');
     banner.id = 'serverErrorBanner';
-    banner.className =
-        'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down';
+    banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down';
 
     let errorList = '';
     if (errors && errors.length > 1) {
@@ -1053,12 +1052,10 @@ function showServerErrorBanner(title, errors) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-        </div>
-    `;
+        </div>`;
 
     document.body.appendChild(banner);
 
-    // Auto-remove after 10 seconds for server errors
     setTimeout(() => {
         if (banner.parentElement) {
             banner.style.opacity = '0';
@@ -1068,192 +1065,100 @@ function showServerErrorBanner(title, errors) {
     }, 10000);
 }
 
-// Client-side Form Validation
+// ═══════════════════════════════════════════════════════════════
+//  GLOBAL Validation Rules + Functions
+//  Must be global so the address modal IIFE above can call validateField()
+// ═══════════════════════════════════════════════════════════════
+const validationRules = {
+    email:    { required: 'Email is required',               pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please enter a valid email address' } },
+    phone:    { required: 'Phone number is required',        pattern: { value: /^[\d\s\+\-\(\)]{7,}$/, message: 'Please enter a valid phone number' } },
+    cardNumber: { required: 'Card number is required',       pattern: { value: /^\d{13,19}$/, message: 'Card number must be between 13 and 19 digits' } },
+    expiry:   { required: 'Expiry date is required',         pattern: { value: /^(0[1-9]|1[0-2])\/\d{2}$/, message: 'Format should be MM/YY' } },
+    cvv:      { required: 'CVV is required',                 pattern: { value: /^\d{3,4}$/, message: 'CVV must be 3 or 4 digits' } },
+    name:     { required: 'Full name is required',           pattern: { value: /^[a-zA-Z\s]+$/, message: 'Full name should only contain letters' } },
+    street:   { required: 'Street address is required',      minLength: { value: 5, message: 'Street address must be at least 5 characters' } },
+    city_id:     { required: 'Please select a city' },
+    postal_code: { minLength: { value: 3, message: 'Postal code must be at least 3 characters' } },
+    country:     { required: 'Country is required' },
+    type:        { required: 'Please select an address type' },
+};
+
+function validateField(field) {
+    const fieldName = field.name || field.id;
+    const rules = validationRules[fieldName];
+    if (!rules) return true;
+
+    if (rules.required && !field.value.trim()) {
+        showFieldError(field, rules.required);
+        return false;
+    }
+    if (rules.minLength && field.value.trim() && field.value.trim().length < rules.minLength.value) {
+        showFieldError(field, rules.minLength.message);
+        return false;
+    }
+    if (rules.pattern && field.value.trim()) {
+        if (!rules.pattern.value.test(field.value.replace(/\s/g, ''))) {
+            showFieldError(field, rules.pattern.message);
+            return false;
+        }
+    }
+
+    clearFieldError(field);
+    return true;
+}
+
+function showFieldError(field, message) {
+    const errorMsg = field.parentElement ? field.parentElement.querySelector('.error-message') : null;
+    if (errorMsg) {
+        errorMsg.textContent = message;
+        errorMsg.classList.remove('hidden');
+        errorMsg.style.display = 'block';
+    }
+    field.classList.add('error-state', 'border-red-500', 'bg-red-50');
+    field.classList.remove('success-state', 'border-gray-200');
+}
+
+function clearFieldError(field) {
+    const errorMsg = field.parentElement ? field.parentElement.querySelector('.error-message') : null;
+    if (errorMsg) {
+        errorMsg.textContent = '';
+        errorMsg.classList.add('hidden');
+        errorMsg.style.display = '';
+    }
+    field.classList.remove('error-state', 'border-red-500', 'bg-red-50');
+    field.classList.add('success-state');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Real-time Validation + Card Input Formatting
+// ═══════════════════════════════════════════════════════════════
 (function() {
-    const validationRules = {
-        email: {
-            required: 'Email is required',
-            pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Please enter a valid email address'
-            }
-        },
-        phone: {
-            required: 'Phone number is required',
-            pattern: {
-                value: /^[\d\s\+\-\(\)]{7,}$/,
-                message: 'Please enter a valid phone number'
-            }
-        },
-        cardNumber: {
-            required: 'Card number is required',
-            pattern: {
-                value: /^\d{13,19}$/,
-                message: 'Card number must be between 13 and 19 digits'
-            }
-        },
-        expiry: {
-            required: 'Expiry date is required',
-            pattern: {
-                value: /^(0[1-9]|1[0-2])\/\d{2}$/,
-                message: 'Format should be MM/YY'
-            }
-        },
-        cvv: {
-            required: 'CVV is required',
-            pattern: {
-                value: /^\d{3,4}$/,
-                message: 'CVV must be 3 or 4 digits'
-            }
-        },
-        // Address fields
-        name: {
-            required: 'Full name is required',
-            pattern: {
-                value: /^[a-zA-Z\s]+$/,
-                message: 'Full name should only contain letters'
-            }
-        },
-        street: {
-            required: 'Street address is required',
-            minLength: {
-                value: 5,
-                message: 'Street address must be at least 5 characters'
-            }
-        },
-        city_id: {
-            required: 'Please select a city'
-        },
-        postal_code: {
-            minLength: {
-                value: 3,
-                message: 'Postal code must be at least 3 characters'
-            }
-        },
-        country: {
-            required: 'Country is required'
-        },
-        type: {
-            required: 'Please select an address type'
-        }
-    };
-
-    function validateField(field) {
-        const fieldName = field.name || field.id;
-        const rules = validationRules[fieldName];
-        const errorMsg = field.parentElement.querySelector('.error-message');
-
-        if (!rules) return true;
-
-        // Check required
-        if (rules.required && !field.value.trim()) {
-            showFieldError(field, rules.required);
-            return false;
-        }
-
-        // Check minLength
-        if (rules.minLength && field.value.trim() && field.value.trim().length < rules.minLength.value) {
-            showFieldError(field, rules.minLength.message);
-            return false;
-        }
-
-        // Check pattern
-        if (rules.pattern && field.value.trim()) {
-            if (!rules.pattern.value.test(field.value.replace(/\s/g, ''))) {
-                showFieldError(field, rules.pattern.message);
-                return false;
-            }
-        }
-
-        clearFieldError(field);
-        return true;
-    }
-
-    function showFieldError(field, message) {
-        const errorMsg = field.parentElement.querySelector('.error-message');
-        if (errorMsg) {
-            errorMsg.textContent = message;
-            errorMsg.classList.add('show');
-        }
-        field.classList.add('error-state');
-        field.classList.remove('success-state');
-    }
-
-    function clearFieldError(field) {
-        const errorMsg = field.parentElement.querySelector('.error-message');
-        if (errorMsg) {
-            errorMsg.textContent = '';
-            errorMsg.classList.remove('show');
-        }
-        field.classList.remove('error-state');
-        field.classList.add('success-state');
-    }
-
-    // Real-time validation on input
     document.addEventListener('input', function(e) {
         const field = e.target;
-        if (validationRules[field.name || field.id]) {
-            validateField(field);
-        }
+        if (validationRules[field.name || field.id]) validateField(field);
     });
 
-    // Real-time validation on blur
     document.addEventListener('blur', function(e) {
         const field = e.target;
-        if (validationRules[field.name || field.id]) {
-            validateField(field);
-        }
+        if (validationRules[field.name || field.id]) validateField(field);
     }, true);
 
-    // Format card number with spaces
+    // Format card number with spaces every 4 digits
     const cardNumberField = document.getElementById('cardNumber');
     if (cardNumberField) {
         cardNumberField.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\s/g, '');
-            let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
-            e.target.value = formatted;
+            e.target.value = value.match(/.{1,4}/g)?.join(' ') || value;
         });
     }
 
-    // Format expiry date MM/YY
+    // Format expiry MM/YY automatically
     const expiryField = document.getElementById('expiry');
     if (expiryField) {
         expiryField.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 2) {
-                value = value.slice(0, 2) + '/' + value.slice(2, 4);
-            }
+            if (value.length >= 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
             e.target.value = value;
-        });
-    }
-
-    // Validate form before main checkout submission
-    const form = document.querySelector('form[action*="checkout"]');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const fieldsToValidate = form.querySelectorAll('[name="email"], [name="phone"], [name="cardNumber"], [name="expiry"], [name="cvv"]');
-            let isValid = true;
-
-            fieldsToValidate.forEach(field => {
-                // Only validate visible fields
-                const cardDetails = document.getElementById('cardDetails');
-                if (field.name === 'cardNumber' || field.name === 'expiry' || field.name === 'cvv') {
-                    if (cardDetails && cardDetails.style.display === 'none') {
-                        return;
-                    }
-                }
-                if (!validateField(field)) {
-                    isValid = false;
-                }
-            });
-
-            if (!isValid) {
-                e.preventDefault();
-                const firstInvalid = form.querySelector('.error-state');
-                if (firstInvalid) {
-                    firstInvalid.focus();
-                }
-            }
         });
     }
 })();

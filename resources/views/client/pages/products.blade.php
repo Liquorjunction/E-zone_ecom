@@ -1,6 +1,9 @@
 @extends('client.layouts.app')
 
 @section('content')
+    <script>
+            window.CURRENCY_SYMBOL = @json(config('app.CURRENCY_SYMBOL'));
+    </script>
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
             <!-- Page Header -->

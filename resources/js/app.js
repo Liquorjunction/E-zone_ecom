@@ -13,7 +13,7 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
-// import './translations';
+import './translations';
 import './toast';
 import './wishlist';
 import './compare';
@@ -62,3 +62,5 @@ document.addEventListener('click', function (ev) {
         window.Toast && window.Toast.show({ type, title, message, actionText });
     } catch (e) {}
 });
+
+

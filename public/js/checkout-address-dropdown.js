@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         setFieldValue('billing_country', shippingData.country);
                         setFieldValue('billing_phone', shippingData.phone);
                     } else {
-                        showValidationError(shippingSelect, 'Please select a shipping address first');
+                        showValidationError(shippingSelect, trans('Please select a shipping address first'));
                         hasErrors = true;
                     }
                 }
@@ -230,14 +230,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Validate shipping address
             if (shippingSelect && !shippingSelect.value) {
-                showValidationError(shippingSelect, 'Please select a shipping address');
+                showValidationError(shippingSelect, trans('Please select a shipping address'));
                 hasErrors = true;
             }
 
             // Validate billing address (if not same as shipping)
             if (billingSameCheckbox && !billingSameCheckbox.checked) {
                 if (billingSelect && !billingSelect.value) {
-                    showValidationError(billingSelect, 'Please select a billing address');
+                    showValidationError(billingSelect, trans('Please select a billing address'));
                     hasErrors = true;
                 }
             }

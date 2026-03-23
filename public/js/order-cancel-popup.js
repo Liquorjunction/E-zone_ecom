@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const submitBtn = cancelForm.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Cancelling...';
+                submitBtn.textContent = trans('Cancelling...');
             }
             fetch(cancelForm.action, {
                 method: 'POST',
@@ -64,14 +64,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Hide the cancel modal first
                     cancelModal.classList.add("hidden");
                     cancelModal.classList.remove("flex");
-                    cancelModal.style.display = 'none';
                     cancelForm.reset();
 
                     // Wait a moment for the modal to fully hide, then show universal popup
                     setTimeout(() => {
                         if (data && (data.success || data.status === 'success')) {
                             if (typeof window.showUniversalPopup === 'function') {
-                                window.showUniversalPopup(data.message || 'Order cancelled successfully', 'success');
+                                window.showUniversalPopup(data.message || trans('Order cancelled successfully.'), 'success');
                             }
                             if (typeof ajaxLoad === 'function') {
                                 setTimeout(() => ajaxLoad(window.location.href), 1200);
@@ -80,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                         } else {
                             if (typeof window.showUniversalPopup === 'function') {
-                                window.showUniversalPopup((data && data.message) || 'Failed to cancel order', 'failure');
+                                window.showUniversalPopup((data && data.message) || trans('Failed to cancel order'), 'failure');
                             }
                         }
                     }, 100);
@@ -89,19 +88,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Hide the modal before showing failure popup
                     cancelModal.classList.add("hidden");
                     cancelModal.classList.remove("flex");
-                    cancelModal.style.display = 'none';
                     cancelForm.reset();
 
                     setTimeout(() => {
                         if (typeof window.showUniversalPopup === 'function') {
-                            window.showUniversalPopup('Failed to cancel order', 'failure');
+                            window.showUniversalPopup(trans('Failed to cancel order'), 'failure');
                         }
                     }, 100);
                 })
                 .finally(() => {
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.textContent = 'Confirm Cancel';
+                        submitBtn.textContent = trans('Confirm Cancel');
                     }
                 });
         });

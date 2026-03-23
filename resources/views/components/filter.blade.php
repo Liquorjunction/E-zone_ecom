@@ -66,8 +66,8 @@ $countActiveVariants = function ($products) {
                 </h3>
                 <div class="space-y-3" data-price-range data-default-min="{{ $minPrice }}" data-default-max="{{ $maxPrice }}" data-price-dirty="false">
                     <div class="flex items-center justify-between text-sm text-gray-600">
-                        <span>${{ $minPrice }}</span>
-                        <span>${{ $maxPrice }}+</span>
+                        <span>{{ config('app.CURRENCY_SYMBOL') }} {{ $minPrice }}</span>
+                        <span>{{ config('app.CURRENCY_SYMBOL') }} {{ $maxPrice }}+</span>
                     </div>
                     <div class="relative pt-6 pb-3 touch-none" data-range-root>
                         <div class="absolute w-full h-2 bg-gray-200 rounded-lg top-2"></div>

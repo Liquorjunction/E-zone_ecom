@@ -118,9 +118,9 @@
                                     </div>
                                     <div class="flex items-center justify-end gap-2">
                                         <button type="button"
-                                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn">{{ statictranslations('Close') }}</button>
+                                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg close-cancel-modal-btn transition-all duration-200 hover:bg-gray-200 cursor-pointer">{{ statictranslations('Close') }}</button>
                                         <button type="submit"
-                                            class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200">{{ statictranslations('Confirm Cancel') }}</button>
+                                            class="px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200 cursor-pointer">{{ statictranslations('Confirm Cancel') }}</button>
                                     </div>
                                 </form>
                             </div>

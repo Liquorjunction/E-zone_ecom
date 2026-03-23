@@ -66,7 +66,7 @@ window.handleFileSelect = function(input) {
 
     // Trim to 5 files
     if (input.files.length > MAX_FILES) {
-        alert(`You can upload up to ${MAX_FILES} files.`);
+        alert(trans(`${trans('You can upload up to')} ${MAX_FILES} ${trans('files')}.`));
         const dt = new DataTransfer();
         [...input.files].slice(0, MAX_FILES).forEach(f => dt.items.add(f));
         input.files = dt.files;
@@ -75,7 +75,7 @@ window.handleFileSelect = function(input) {
     // Check sizes
     const oversized = [...input.files].filter(f => f.size > MAX_SIZE);
     if (oversized.length) {
-        alert(`These files exceed 5 MB:\n${oversized.map(f => f.name).join('\n')}`);
+        alert(`${trans('The following files exceed 5 MB')}:\n${oversized.map(f => f.name).join('\n')}`);
         const dt = new DataTransfer();
         [...input.files].filter(f => f.size <= MAX_SIZE).forEach(f => dt.items.add(f));
         input.files = dt.files;
@@ -155,9 +155,9 @@ if (contactForm) {
                 renderFileList([]);
             } else {
                 if (window.showUniversalPopup) {
-                    showUniversalPopup(data.message || 'Submission failed.', 'error');
+                    showUniversalPopup(data.message || trans('Submission failed.'), 'error');
                 } else {
-                    alert(data.message || 'Submission failed.');
+                    alert(data.message || trans('Submission failed.'));
                 }
             }
         })
@@ -165,9 +165,9 @@ if (contactForm) {
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50');
             if (window.showUniversalPopup) {
-                showUniversalPopup('An error occurred. Please try again.', 'error');
+                showUniversalPopup(trans('An error occurred. Please try again.'), 'error');
             } else {
-                alert('An error occurred. Please try again.');
+                alert(trans('An error occurred. Please try again.'));
             }
         });
     });

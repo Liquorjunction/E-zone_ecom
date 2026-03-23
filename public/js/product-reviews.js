@@ -145,7 +145,7 @@
     }
 
     function updateRatingText(rating) {
-        const texts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+        const texts = ['', trans('Poor'), trans('Fair'), trans('Good'), trans('Very Good'), trans('Excellent')];
         ratingText.textContent = texts[rating] || '';
     }
 
@@ -178,12 +178,12 @@
             const data = await response.json();
 
             if (response.ok) {
-                showNotification('success', 'Review submitted successfully! It will appear after approval.');
+                showNotification('success', trans('Review submitted successfully! It will appear after approval.'));
                 closeReviewModal();
                 // Optionally reload reviews
                 setTimeout(() => loadReviews(), 500);
             } else {
-                const errorMessage = data.message || 'Failed to submit review. Please try again.';
+                const errorMessage = data.message || trans('Failed to submit review. Please try again.');
                 showNotification('error', errorMessage);
 
                 // Display validation errors
@@ -195,7 +195,7 @@
             }
         } catch (error) {
             console.error('Error submitting review:', error);
-            showNotification('error', 'An error occurred. Please try again later.');
+            showNotification('error', trans('An error occurred. Please try again later.'));
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
@@ -229,11 +229,11 @@
                 displayReviews();
                 updateReviewStats();
             } else {
-                console.error('Failed to load reviews:', data);
+                console.error(trans('Failed to load reviews:'), data);
                 showNoReviews();
             }
         } catch (error) {
-            console.error('Error loading reviews:', error);
+            console.error(trans('Error loading reviews:'), error);
             showNoReviews();
         }
     }
@@ -263,11 +263,11 @@
         const div = document.createElement('div');
         div.className = 'bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow';
 
-        const userName = review.reviewer_name || review.user?.name || 'Anonymous';
+        const userName = review.reviewer_name || review.user?.name || trans('Anonymous');
         const userInitial = userName.charAt(0).toUpperCase();
         const reviewDate = formatDate(review.created_at);
         const stars = generateStars(review.rating);
-        const isVerified = review.is_verified_purchase ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-2">Verified Purchase</span>' : '';
+        const isVerified = review.is_verified_purchase ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-2">' + trans('Verified Purchase') + '</span>' : '';
 
         div.innerHTML = `
             <div class="flex items-start justify-between mb-4">
@@ -325,8 +325,8 @@
         if (!allReviews || allReviews.length === 0) {
             document.getElementById('avgRating').textContent = '-';
             document.getElementById('avgRatingStars').innerHTML = '☆☆☆☆☆';
-            document.getElementById('reviewCount').textContent = 'No reviews yet';
-            document.getElementById('ratingBreakdown').innerHTML = '<p class="text-gray-500 text-center py-4">No ratings yet</p>';
+            document.getElementById('reviewCount').textContent = trans('No reviews yet.');
+            document.getElementById('ratingBreakdown').innerHTML = '<p class="text-gray-500 text-center py-4">' + trans('No ratings yet.') + '</p>';
             updateHeaderReviewSummary(0, 0);
             updateReviewsTabCount(0);
             return;
@@ -374,8 +374,8 @@
                 <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                 </svg>
-                <p class="text-gray-500 text-lg font-medium mb-2">No reviews yet</p>
-                <p class="text-gray-400">Be the first to review this product!</p>
+                <p class="text-gray-500 text-lg font-medium mb-2">` + trans('No reviews yet.') + `</p>
+                <p class="text-gray-400">` + trans('Be the first to review this product!') + `</p>
             </div>
         `;
         loadMoreContainer.classList.add('hidden');
@@ -392,7 +392,7 @@
         }
 
         if (headerCount) {
-            headerCount.textContent = `(${reviewCount} review${reviewCount !== 1 ? 's' : ''})`;
+            headerCount.textContent = `(${reviewCount} ${trans('reviews')})`;
         }
     }
 

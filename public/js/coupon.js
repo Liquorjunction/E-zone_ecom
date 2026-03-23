@@ -90,12 +90,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const code = input?.value.trim().toUpperCase();
 
         if (!code) {
-            showMessage("Please enter a coupon code.", "error", messageEl);
+            showMessage(trans('Please enter a coupon code.'), "error", messageEl);
             return;
         }
 
         btn.disabled = true;
-        btn.textContent = "Applying...";
+        btn.textContent = trans('Applying...');
 
         axios
             .post(
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                     </div>
                                     <div>
                                         <p class="font-bold text-gray-900 text-sm">${coupon.code}</p>
-                                        <p class="text-xs text-gray-600">Coupon Applied</p>
+                                        <p class="text-xs text-gray-600">${trans('Coupon Applied')}</p>
                                     </div>
                                 </div>
                                 <button type="button" id="remove-coupon-btn${suffix}"
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(function () {
                 showMessage(
-                    "Failed to remove coupon. Please try again.",
+                    trans('Failed to remove coupon. Please try again.'),
                     "error",
                     messageEl,
                 );
@@ -327,7 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const shippingText =
                     shippingValue > 0
                         ? formatMoney(shippingValue)
-                        : "FREE";
+                        : trans('FREE');
                 setText("order-shipping" + s, shippingText);
             }
 

@@ -182,20 +182,35 @@
         rangeRoot.addEventListener('pointerup', endDrag);
         rangeRoot.addEventListener('pointercancel', endDrag);
 
-        let minVal = parseInt(minPriceRange.value) || minLimit;
-        let maxVal = parseInt(maxPriceRange.value) || maxLimit;
+        // Strip name attributes before init to prevent change events during
+        // setup from accidentally submitting price values
+        minPriceInput.removeAttribute('name');
+        maxPriceInput.removeAttribute('name');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlMin = urlParams.has('min_price') ? parseFloat(urlParams.get('min_price')) : null;
+        const urlMax = urlParams.has('max_price') ? parseFloat(urlParams.get('max_price')) : null;
+        const hasPriceFilter = urlMin !== null || urlMax !== null;
+
+        let minVal = hasPriceFilter && urlMin !== null ? urlMin : (parseInt(minPriceRange.value) || minLimit);
+        let maxVal = hasPriceFilter && urlMax !== null ? urlMax : (parseInt(maxPriceRange.value) || maxLimit);
+
         if (maxVal - minVal < priceGap) {
             minVal = Math.max(minLimit, maxVal - priceGap);
         }
-        if (minPriceInput.value === '') minPriceInput.value = minVal;
-        if (maxPriceInput.value === '') maxPriceInput.value = maxVal;
-        setValues(minVal, maxVal, { silent: true });
 
-        const initialMin = parseFloat(minPriceInput.value);
-        const initialMax = parseFloat(maxPriceInput.value);
-        if ((Number.isFinite(initialMin) && initialMin !== defaultMin) ||
-            (Number.isFinite(initialMax) && initialMax !== defaultMax)) {
-            updateDirtyState(initialMin, initialMax);
+        minPriceRange.value = minVal;
+        maxPriceRange.value = maxVal;
+        minPriceInput.value = minVal;
+        maxPriceInput.value = maxVal;
+        updateVisuals();
+
+        if (hasPriceFilter) {
+            // User had an explicit price filter — mark dirty and restore names
+            updateDirtyState(minVal, maxVal);
+        } else {
+            // No price filter — keep names stripped, dirty = false
+            container.dataset.priceDirty = 'false';
         }
     }
 
@@ -219,9 +234,8 @@
             maxInput.name = '';
         }
     }
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('form').forEach(function(form) {
-            form.addEventListener('submit', handlePriceRangeFormSubmit, true);
-        });
+    // Register submit guard immediately (DOMContentLoaded already fired when scripts load)
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', handlePriceRangeFormSubmit, true);
     });
 })();
