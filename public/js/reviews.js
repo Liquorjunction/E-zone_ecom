@@ -28,10 +28,10 @@ function openDesktopReviewForm(data){
   const images = Array.isArray(data.images) ? data.images : [];
   const hasImages = images.length > 0;
 
-  document.getElementById('review-modal-title').textContent = isView ? 'View Review' : (isEdit ? 'Edit Review' : 'Write a Review');
+  document.getElementById('review-modal-title').textContent = isView ? trans('View Review') : (isEdit ? trans('Edit Review') : trans('Write a Review'));
   const cancelBtn = document.getElementById('review-cancel-btn');
   if(cancelBtn){
-    cancelBtn.textContent = isView ? 'Close' : 'Cancel';
+    cancelBtn.textContent = isView ? trans('Close') : trans('Cancel');
   }
   document.getElementById('review-form').action = '/reviews';
   document.getElementById('review-form-method').value = isEdit ? 'PUT' : 'POST';
@@ -321,7 +321,7 @@ function setRating(rating){
     }
   });
 
-  const labels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+  const labels = [trans('Poor'), trans('Fair'), trans('Good'), trans('Very Good'), trans('Excellent')];
   ratingText.textContent = labels[rating - 1] || '';
 }
 
@@ -473,7 +473,7 @@ async function handleReviewFormSubmit(e) {
     if(ratingError){
       ratingError.classList.remove('hidden');
     }
-    showUniversalPopup('Please select a rating before submitting your review', 'error', 3000);
+    showUniversalPopup(trans('Please select a rating before submitting your review'), 'error', 3000);
     return;
   }
 
@@ -508,7 +508,7 @@ async function handleReviewFormSubmit(e) {
     }
 
     // Success
-    showUniversalPopup(json.message || 'Review submitted successfully!', 'success', 3000);
+    showUniversalPopup(json.message || trans('Review submitted successfully!'), 'success', 3000);
 
     if(isMobile){
       closeMobileReviewForm();
@@ -525,7 +525,7 @@ async function handleReviewFormSubmit(e) {
 
   }catch(e){
     console.error(e);
-    showUniversalPopup('Failed to submit review. Please try again.', 'error', 3000);
+    showUniversalPopup(trans('Failed to submit review. Please try again.'), 'error', 3000);
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalBtnHtml;
   }
@@ -533,7 +533,7 @@ async function handleReviewFormSubmit(e) {
 
 // Delete Review
 async function deleteReview(id){
-  if(!confirm('Are you sure you want to delete this review?')) return;
+  if(!confirm(trans('Are you sure you want to delete this review?'))) return;
 
   const token = getCsrfToken();
 
@@ -551,11 +551,11 @@ async function deleteReview(id){
     const json = await res.json();
 
     if(!res.ok){
-      showUniversalPopup(json.message || 'Failed to delete review', 'error', 3000);
+      showUniversalPopup(json.message || trans('Failed to delete review'), 'error', 3000);
       return;
     }
 
-    showUniversalPopup(json.message || 'Review deleted successfully', 'success', 3000);
+    showUniversalPopup(json.message || trans('Review deleted successfully'), 'success', 3000);
 
     // Remove review card from UI
     const reviewCard = document.getElementById('review-card-' + id);
@@ -572,7 +572,7 @@ async function deleteReview(id){
 
   }catch(e){
     console.error(e);
-    showUniversalPopup('Failed to delete review. Please try again.', 'error', 3000);
+    showUniversalPopup(trans('Failed to delete review. Please try again.'), 'error', 3000);
   }
 }
 
@@ -589,7 +589,7 @@ function openEditReviewFromElem(elem){
   }
 
   if(!data.id){
-    showUniversalPopup('Review data is missing', 'error', 3000);
+    showUniversalPopup(trans('Review data is missing'), 'error', 3000);
     return;
   }
 

@@ -67,7 +67,7 @@ window.addToCart = function(variantId, productId) {
         }
     }
     if (stock === 0) {
-        try { window.Toast && window.Toast.error({ title: 'Error', message: 'This item is out of stock.' }); } catch (e) { alert('This item is out of stock.'); }
+        try { window.Toast && window.Toast.error({ title: 'Error', message: trans('This item is out of stock.') }); } catch (e) { alert('This item is out of stock.'); }
         return;
     }
 

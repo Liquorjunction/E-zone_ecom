@@ -7,18 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
     newsletterForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         if (!newsletterCheckbox.checked) {
-            showUniversalPopup('Please accept the Terms & Conditions to subscribe.', 'error');
+            showUniversalPopup(trans('Please accept the Terms & Conditions to subscribe.'), 'error');
             return;
         }
 
         const email = emailInput.value.trim();
         if (!email) {
-            showUniversalPopup('Please enter your email address.', 'error');
+            showUniversalPopup(trans('Please enter your email address.'), 'error');
             return;
         }
 
         submitButton.disabled = true;
-        submitButton.textContent = 'Subscribing...';
+        submitButton.textContent = trans('Subscribing...');
 
         try {
             const formData = new FormData(newsletterForm);
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = isJson ? await response.json() : null;
 
             if (response.ok) {
-                showUniversalPopup((data && data.message) || 'Subscribed successfully!', 'success');
+                showUniversalPopup((data && data.message) || trans('Subscribed successfully!'), 'success');
                 emailInput.value = '';
                 newsletterCheckbox.checked = false;
             } else if (data && data.errors) {
@@ -47,13 +47,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 showUniversalPopup(data.message, 'error');
             } else {
                 const fallbackText = isJson ? '' : await response.text();
-                showUniversalPopup('An error occurred. Please try again.', 'error');
+                showUniversalPopup(trans('An error occurred. Please try again.'), 'error');
             }
         } catch (error) {
-            showUniversalPopup('An error occurred. Please try again later.', 'error');
+            showUniversalPopup(trans('An error occurred. Please try again later.'), 'error');
         } finally {
             submitButton.disabled = false;
-            submitButton.textContent = 'Subscribe';
+            submitButton.textContent = trans('Subscribe');
         }
     });
 });

@@ -22,7 +22,7 @@ document.addEventListener('submit', function (ev) {
         headers: Object.assign({ 'Content-Type': 'multipart/form-data', 'X-SKIP-TOAST': '1' }, csrf ? { 'X-CSRF-TOKEN': csrf } : {})
     }).then(function (resp) {
         const data = resp && resp.data;
-        const msg = (data && (data.message || (data.success ? data.success : null))) || 'Item added to cart';
+        const msg = (data && (data.message || (data.success ? data.success : null))) || trans('Item added to cart');
         try { window.Toast && window.Toast.success({ title: 'Added', message: msg }); } catch (e) {
             try { showUniversalPopup(msg, 'success', 2000); } catch(e2) { alert(msg); }
         }
@@ -37,7 +37,7 @@ document.addEventListener('submit', function (ev) {
         try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: data })); } catch (e) {}
     }).catch(function (error) {
         const resp = error && error.response;
-        let msg = 'Failed to add to cart';
+        let msg = trans('Failed to add to cart');
         if (resp && resp.data && (resp.data.message || resp.data.error)) msg = resp.data.message || resp.data.error;
         try { window.Toast && window.Toast.error({ title: 'Error', message: msg }); } catch (e) {
             try { showUniversalPopup(msg, 'error', 3000); } catch(e2) { alert(msg); }

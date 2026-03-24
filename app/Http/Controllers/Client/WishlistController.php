@@ -38,13 +38,13 @@ class WishlistController extends Controller
         $productVariantId = $request->input('product_variant_id');
 
         if ($wishlistRepo->checkWishlist($userId, $productVariantId)) {
-            return response()->json(['message' => statictranslations('Product already in wishlist')], 200);
+            return response()->json(['message' => statictranslations('Product already in wishlist.')], 200);
         }
 
         $wishlistRepo->addToWishlist($userId, $productVariantId);
 
         $count = $wishlistRepo->countWishlist($userId);
-        return response()->json(['message' => statictranslations('Product added to wishlist'), 'count' => $count], 201);
+        return response()->json(['message' => statictranslations('Product added to wishlist.'), 'count' => $count], 201);
     }
 
     public function removeFromWishlist(RemoveWishlistRequest $request, WishlistRepo $wishlistRepo)
@@ -53,13 +53,13 @@ class WishlistController extends Controller
         $productVariantId = $request->input('product_variant_id');
 
         if (! $wishlistRepo->checkWishlist($userId, $productVariantId)) {
-            return response()->json(['message' => statictranslations('Product not found in wishlist')], 404);
+            return response()->json(['message' => statictranslations('Product not found in wishlist.')], 404);
         }
 
         $wishlistRepo->removeFromWishlist($userId, $productVariantId);
         $count = $wishlistRepo->countWishlist($userId);
 
-        return response()->json(['message' => statictranslations('Product removed from wishlist'), 'count' => $count], 200);
+        return response()->json(['message' => statictranslations('Product removed from wishlist.'), 'count' => $count], 200);
     }
 
     public function getWishlist(GetWishlistRequest $request, WishlistRepo $wishlistRepo)

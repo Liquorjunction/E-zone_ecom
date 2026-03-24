@@ -45,7 +45,7 @@
               data-product-variant-id="{{ $variant?->id }}"
               data-init-wishlisted="1"
               data-toast-ignore
-              aria-pressed="true"
+              aria-pressed="t   rue"
               class="wishlist-btn no-toast is-wishlisted opacity-100 absolute top-2 right-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
               title="{{ statictranslations('Remove from wishlist') }}"
             >
@@ -70,7 +70,7 @@
                 href="{{ $productSlug ? route('products.detail', $productSlug) . ($variantSlug ? '?variant=' . $variantSlug : '') : '#' }}"
                 class="px-4 py-2 bg-white text-gray-900 font-semibold rounded-lg text-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300"
               >
-                Quick View
+                {{ statictranslations('Quick View') }}
               </a>
             </div>
           </div>
@@ -114,7 +114,7 @@
                 <svg class="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                Add to Cart
+                {{ statictranslations('Add to Cart') }}
               </button>
             </form>
           </div>
@@ -143,10 +143,10 @@
           </div>
 
           <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 lg:mb-4">
-            Your Wishlist is Empty
+            {{ statictranslations('Your Wishlist is Empty') }}
           </h2>
           <p class="text-sm lg:text-base text-gray-600 mb-6 lg:mb-8 leading-relaxed">
-            Save your favorite items here so you can easily find them later. Start exploring and add products you love!
+            {{ statictranslations('Save your favorite items here so you can easily find them later. Start exploring and add products you love!') }}
           </p>
 
           <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -157,7 +157,7 @@
               <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              Discover Products
+              {{ statictranslations('Discover Products') }}
             </a>
           </div>
         </div>
@@ -179,10 +179,10 @@
         </div>
 
         <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 lg:mb-4">
-          Your Wishlist is Empty
+          {{ statictranslations('Your Wishlist is Empty') }}
         </h2>
         <p class="text-sm lg:text-base text-gray-600 mb-6 lg:mb-8 leading-relaxed">
-          Save your favorite items here so you can easily find them later. Start exploring and add products you love!
+          {{ statictranslations('Save your favorite items here so you can easily find them later. Start exploring and add products you love!') }}
         </p>
 
         {{-- CTA Buttons --}}
@@ -194,7 +194,7 @@
             <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            Discover Products
+            {{ statictranslations('Discover Products') }}
           </a>
         </div>
       </div>

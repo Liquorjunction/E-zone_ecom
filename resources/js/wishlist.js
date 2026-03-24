@@ -94,7 +94,6 @@ document.addEventListener('click', async (ev) => {
             }
             window._wishlistCount = count;
             if (res.ok) {
-                console.debug('Wishlist: removed', id, json);
                 updateButtonState(btn, false);
                 try {
                     const wrapperSelectors = [
@@ -135,10 +134,10 @@ document.addEventListener('click', async (ev) => {
                         } catch (e) { window.location.reload(); }
                     }
                 } catch (e) {}
-                const msg = json.message || 'Removed from wishlist';
+                const msg = json.message || trans('Removed from wishlist');
                 try { window.Toast && window.Toast.success({ title: 'Wishlist', message: msg }); } catch (e) {}
             } else {
-                const msg = json.message || 'Failed to remove';
+                const msg = json.message || trans('Failed to remove');
                 try { window.Toast && window.Toast.error({ title: 'Wishlist', message: msg }); } catch (e) {}
             }
         } else {
@@ -157,18 +156,17 @@ document.addEventListener('click', async (ev) => {
             }
             window._wishlistCount = count;
             if (res.ok) {
-                console.debug('Wishlist: added', id, json);
                 updateButtonState(btn, true);
-                const msg = json.message || 'Added to wishlist';
+                const msg = json.message || trans('Added to wishlist');
                 try { window.Toast && window.Toast.success({ title: 'Wishlist', message: msg }); } catch (e) {}
             } else {
-                const msg = json.message || 'Failed to add to wishlist';
+                const msg = json.message || trans('Failed to add to wishlist');
                 try { window.Toast && window.Toast.error({ title: 'Wishlist', message: msg }); } catch (e) {}
             }
         }
     } catch (err) {
         console.error('Wishlist error', err);
-        try { window.Toast && window.Toast.error({ title: 'Wishlist', message: 'Request failed' }); } catch (e) {}
+        try { window.Toast && window.Toast.error({ title: 'Wishlist', message: trans('Request failed') }); } catch (e) {}
     }
 });
 

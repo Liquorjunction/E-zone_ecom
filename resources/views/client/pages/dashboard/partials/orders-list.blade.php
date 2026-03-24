@@ -449,12 +449,7 @@
     </div>
     @if ($orders->hasPages())
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <nav class="flex flex-col sm:flex-row items-center justify-between gap-4" aria-label="Pagination">
-                <div class="text-sm text-gray-600 text-center sm:text-left">
-                    {{ statictranslations('Showing') }} <span class="font-semibold text-gray-900">{{ $orders->firstItem() ?? 0 }}</span> {{ statictranslations('to') }}
-                    <span class="font-semibold text-gray-900">{{ $orders->lastItem() ?? 0 }}</span> {{ statictranslations('of') }}
-                    <span class="font-semibold text-gray-900">{{ $orders->total() ?? 0 }}</span> {{ statictranslations('results') }}
-                </div>
+            <nav class="gap-4" aria-label="Pagination">
                 <div class="w-full sm:w-auto">
                     {{ $orders->withQueryString()->links() }}
                 </div>

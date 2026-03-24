@@ -124,9 +124,9 @@ class AjaxPagination {
 
     showError() {
         if (typeof showUniversalPopup === 'function') {
-            showUniversalPopup('Failed to load page. Please try again.', 'error', 3000);
+            showUniversalPopup(trans('Failed to load page. Please try again.'), 'error', 3000);
         } else if (window.Toast && typeof window.Toast.error === 'function') {
-            window.Toast.error({ title: 'Error', message: 'Failed to load page. Please try again.', duration: 4000 });
+            window.Toast.error({ title: 'Error', message: trans('Failed to load page. Please try again.'), duration: 4000 });
         } else {
             alert('Failed to load page. Please try again.');
         }

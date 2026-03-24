@@ -116,12 +116,12 @@ document.addEventListener('click', async (ev) => {
         if (window.Toast) {
             window.Toast.error({
                 title: 'Compare',
-                message: json.message || 'Failed to update compare list.',
+                message: json.message || trans('Failed to update compare list.'),
             });
         }
     } catch (_) {
         if (window.Toast) {
-            window.Toast.error({ title: 'Compare', message: 'Request failed.' });
+            window.Toast.error({ title: 'Compare', message: trans('Request failed.') });
         }
     } finally {
         inFlightVariantIds.delete(variantId);

@@ -64,16 +64,16 @@ function validateForm() {
   const nameValue = nameInput.value.trim();
 
   if (!nameValue) {
-    showFieldError('name', 'Name is required.');
+    showFieldError('name', trans('Name is required.'));
     isValid = false;
   } else if (nameValue.length < 2) {
-    showFieldError('name', 'Name must be at least 2 characters long.');
+    showFieldError('name', trans('Name must be at least 2 characters long.'));
     isValid = false;
   } else if (nameValue.length > 255) {
-    showFieldError('name', 'Name must not exceed 255 characters.');
+    showFieldError('name', trans('Name must not exceed 255 characters.'));
     isValid = false;
   } else if (!/^[a-zA-Z\s'-]+$/.test(nameValue)) {
-    showFieldError('name', 'Name can only contain letters, spaces, hyphens, and apostrophes.');
+    showFieldError('name', trans('Name can only contain letters, spaces, hyphens, and apostrophes.'));
     isValid = false;
   }
 
@@ -82,13 +82,13 @@ function validateForm() {
   const phoneValue = phoneInput.value.trim();
 
   if (!phoneValue) {
-    showFieldError('phone', 'Phone number is required.');
+    showFieldError('phone', trans('Phone number is required.'));
     isValid = false;
   } else if (!/^[\d\s\-\+\(\)]+$/.test(phoneValue)) {
-    showFieldError('phone', 'Please enter a valid phone number.');
+    showFieldError('phone', trans('Please enter a valid phone number.'));
     isValid = false;
   } else if (phoneValue.replace(/\D/g, '').length < 10) {
-    showFieldError('phone', 'Phone number must be at least 10 digits.');
+    showFieldError('phone', trans('Phone number must be at least 10 digits.'));
     isValid = false;
   }
 
@@ -100,10 +100,10 @@ function validateForm() {
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
-      showFieldError('avatar', 'Avatar must be a JPG, PNG, or GIF image.');
+      showFieldError('avatar', trans('Avatar must be a JPG, PNG, or GIF image.'));
       isValid = false;
     } else if (file.size > maxSize) {
-      showFieldError('avatar', 'Avatar file size must not exceed 5MB.');
+      showFieldError('avatar', trans('Avatar file size must not exceed 5MB.'));
       isValid = false;
     }
   }
@@ -175,13 +175,13 @@ document.addEventListener('DOMContentLoaded', function() {
       clearFieldError('name');
 
       if (!value) {
-        showFieldError('name', 'Name is required.');
+        showFieldError('name', trans('Name is required.'));
       } else if (value.length < 2) {
-        showFieldError('name', 'Name must be at least 2 characters long.');
+        showFieldError('name', trans('Name must be at least 2 characters long.'));
       } else if (value.length > 255) {
-        showFieldError('name', 'Name must not exceed 255 characters.');
+        showFieldError('name', trans('Name must not exceed 255 characters.'));
       } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
-        showFieldError('name', 'Name can only contain letters, spaces, hyphens, and apostrophes.');
+        showFieldError('name', trans('Name can only contain letters, spaces, hyphens, and apostrophes.'));
       }
     });
 
@@ -198,11 +198,11 @@ document.addEventListener('DOMContentLoaded', function() {
       clearFieldError('phone');
 
       if (!value) {
-        showFieldError('phone', 'Phone number is required.');
+        showFieldError('phone', trans('Phone number is required.'));
       } else if (!/^[\d\s\-\+\(\)]+$/.test(value)) {
-        showFieldError('phone', 'Please enter a valid phone number.');
+        showFieldError('phone', trans('Please enter a valid phone number.'));
       } else if (value.replace(/\D/g, '').length < 10) {
-        showFieldError('phone', 'Phone number must be at least 10 digits.');
+        showFieldError('phone', trans('Phone number must be at least 10 digits.'));
       }
     });
 
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const data = await response.json();
           // Show success message using universal popup
           if (typeof showUniversalPopup === 'function') {
-            showUniversalPopup('Profile updated successfully!', 'success', 2000);
+            showUniversalPopup(trans('Profile updated successfully!'), 'success', 2000);
           }
 
           setTimeout(() => {
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Show error message using universal popup
         if (typeof showUniversalPopup === 'function') {
-          showUniversalPopup('An error occurred. Please try again.', 'error', 5000);
+          showUniversalPopup(trans('An error occurred. Please try again.'), 'error', 5000);
         }
       });
     });
