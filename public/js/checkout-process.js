@@ -28,12 +28,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function showStockLimitMessage(max) {
         if (!max) return;
-        const message = max === 1
-            ? 'Only 1 item available in stock.'
-            : `Only ${max} items available in stock.`;
+        let message = '';
+        if (max === 1) {
+            message = trans('Only 1 item available in stock.');
+        } else {
+            message = trans('Only') + ' ' + max + ' ' + trans('items available in stock.');
+        }
 
         if (window.Toast && typeof window.Toast.info === 'function') {
-            window.Toast.info({ title: 'Stock limit', message: message });
+            window.Toast.info({ title: trans('Stock limit'), message: message });
             return;
         }
 
@@ -434,7 +437,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
                 }
 
-                if (window.Toast) window.Toast.success({ title: "Removed", message: "Item removed from cart" });
+                if (window.Toast) window.Toast.success({ title: trans('Removed'), message: trans('Item removed from cart') });
             } else {
                 submitFallback(id);
             }
@@ -632,9 +635,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Other server error — go to step 3 error state without reload
                 if (typeof window.goToStep === 'function') {
-                    window.goToStep(3, { success: false, message: data.message || 'Something went wrong. Please try again.' });
+                    window.goToStep(3, { success: false, message: data.message || trans('Something went wrong. Please try again.') });
                 } else {
-                    showCheckoutErrorBanner(data.message || 'Something went wrong. Please try again.');
+                    showCheckoutErrorBanner(data.message || trans('Something went wrong. Please try again.'));
                 }
                 submitter.disabled = false;
                 submitter.innerHTML = originalBtnHTML;
@@ -642,9 +645,9 @@ document.addEventListener("DOMContentLoaded", function () {
             } catch (err) {
                 console.error('Checkout AJAX error:', err);
                 if (typeof window.goToStep === 'function') {
-                    window.goToStep(3, { success: false, message: 'A network error occurred. Please check your connection and try again.' });
+                    window.goToStep(3, { success: false, message: trans('A network error occurred. Please check your connection and try again.') });
                 } else {
-                    showCheckoutErrorBanner('A network error occurred. Please check your connection and try again.');
+                    showCheckoutErrorBanner(trans('A network error occurred. Please check your connection and try again.'));
                 }
                 submitter.disabled = false;
                 submitter.innerHTML = originalBtnHTML;
@@ -1069,19 +1072,30 @@ function showServerErrorBanner(title, errors) {
 //  GLOBAL Validation Rules + Functions
 //  Must be global so the address modal IIFE above can call validateField()
 // ═══════════════════════════════════════════════════════════════
-const validationRules = {
-    email:    { required: 'Email is required',               pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please enter a valid email address' } },
-    phone:    { required: 'Phone number is required',        pattern: { value: /^[\d\s\+\-\(\)]{7,}$/, message: 'Please enter a valid phone number' } },
-    cardNumber: { required: 'Card number is required',       pattern: { value: /^\d{13,19}$/, message: 'Card number must be between 13 and 19 digits' } },
-    expiry:   { required: 'Expiry date is required',         pattern: { value: /^(0[1-9]|1[0-2])\/\d{2}$/, message: 'Format should be MM/YY' } },
-    cvv:      { required: 'CVV is required',                 pattern: { value: /^\d{3,4}$/, message: 'CVV must be 3 or 4 digits' } },
-    name:     { required: 'Full name is required',           pattern: { value: /^[a-zA-Z\s]+$/, message: 'Full name should only contain letters' } },
-    street:   { required: 'Street address is required',      minLength: { value: 5, message: 'Street address must be at least 5 characters' } },
-    city_id:     { required: 'Please select a city' },
-    postal_code: { minLength: { value: 3, message: 'Postal code must be at least 3 characters' } },
-    country:     { required: 'Country is required' },
-    type:        { required: 'Please select an address type' },
-};
+(function() {
+    // Ensure trans is available before defining validationRules
+    if (typeof window.trans !== 'function') {
+        window.trans = function(key) {
+            if (window.translations && window.translations[key]) {
+                return window.translations[key];
+            }
+            return key;
+        };
+    }
+    window.validationRules = {
+        email:    { required: trans('Email is required'),               pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: trans('Please enter a valid email address') } },
+        phone:    { required: trans('Phone number is required'),        pattern: { value: /^[\d\s\+\-\(\)]{7,}$/, message: trans('Please enter a valid phone number') } },
+        cardNumber: { required: trans('Card number is required'),       pattern: { value: /^\d{13,19}$/, message: trans('Card number must be between 13 and 19 digits') } },
+        expiry:   { required: trans('Expiry date is required'),         pattern: { value: /^(0[1-9]|1[0-2])\/\d{2}$/, message: trans('Format should be MM/YY') } },
+        cvv:      { required: trans('CVV is required'),                 pattern: { value: /^\d{3,4}$/, message: trans('CVV must be 3 or 4 digits') } },
+        name:     { required: trans('Full name is required'),           pattern: { value: /^[a-zA-Z\s]+$/, message: trans('Full name should only contain letters') } },
+        street:   { required: trans('Street address is required'),      minLength: { value: 5, message: trans('Street address must be at least 5 characters') } },
+        city_id:     { required: trans('Please select a city') },
+        postal_code: { minLength: { value: 3, message: trans('Postal code must be at least 3 characters') } },
+        country:     { required: trans('Country is required') },
+        type:        { required: trans('Please select an address type') },
+    };
+})();
 
 function validateField(field) {
     const fieldName = field.name || field.id;

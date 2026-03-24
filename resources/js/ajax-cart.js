@@ -23,7 +23,7 @@ document.addEventListener('submit', function (ev) {
     }).then(function (resp) {
         const data = resp && resp.data;
         const msg = (data && (data.message || (data.success ? data.success : null))) || trans('Item added to cart');
-        try { window.Toast && window.Toast.success({ title: 'Added', message: msg }); } catch (e) {
+        try { window.Toast && window.Toast.success({ title: trans('Added'), message: msg }); } catch (e) {
             try { showUniversalPopup(msg, 'success', 2000); } catch(e2) { alert(msg); }
         }
 
@@ -39,7 +39,7 @@ document.addEventListener('submit', function (ev) {
         const resp = error && error.response;
         let msg = trans('Failed to add to cart');
         if (resp && resp.data && (resp.data.message || resp.data.error)) msg = resp.data.message || resp.data.error;
-        try { window.Toast && window.Toast.error({ title: 'Error', message: msg }); } catch (e) {
+        try { window.Toast && window.Toast.error({ title: trans('Error'), message: msg }); } catch (e) {
             try { showUniversalPopup(msg, 'error', 3000); } catch(e2) { alert(msg); }
         }
     });

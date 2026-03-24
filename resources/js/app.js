@@ -45,7 +45,7 @@ axios.interceptors.response.use(function (response) {
     try {
         const resp = error && error.response;
         const msg = resp && resp.data && (resp.data.message || resp.data.error) ? (resp.data.message || resp.data.error) : (error.message || 'Request failed');
-        window.Toast && window.Toast.error({ title: 'Error', message: msg, duration: 6000 });
+        window.Toast && window.Toast.error({ title: trans('Error'), message: msg, duration: 6000 });
     } catch (e) {}
     return Promise.reject(error);
 });

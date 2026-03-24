@@ -250,9 +250,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (row && row.parentNode) row.parentNode.removeChild(row);
                 updateSummary(data.summary);
                 if (typeof showUniversalPopup === 'function') {
-                    showUniversalPopup((data && data.message) ? data.message : 'Item removed from cart.', 'success', 2000);
+                    showUniversalPopup((data && data.message) ? data.message : trans('Item removed from cart.'), 'success', 2000);
                 } else if (window.Toast && typeof window.Toast.success === 'function') {
-                    window.Toast.success({ title: 'Success', message: (data && data.message) ? data.message : 'Item removed from cart.' });
+                    window.Toast.success({ title: trans('Success'), message: (data && data.message) ? data.message : trans('Item removed from cart.') });
                 }
             } else {
                 submitFallback(itemId);
@@ -261,9 +261,9 @@ document.addEventListener("DOMContentLoaded", function () {
             // fallback to form submit
             submitFallback(itemId);
             if (typeof showUniversalPopup === 'function') {
-                showUniversalPopup('Failed to remove item.', 'error', 3000);
+                showUniversalPopup(trans('Failed to remove item.')  , 'error', 3000);
             } else if (window.Toast && typeof window.Toast.error === 'function') {
-                window.Toast.error({ title: 'Error', message: 'Failed to remove item.' });
+                window.Toast.error({ title: trans('Error'), message: trans('Failed to remove item.') });
             }
         }
     }

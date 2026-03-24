@@ -67,7 +67,7 @@ window.addToCart = function(variantId, productId) {
         }
     }
     if (stock === 0) {
-        try { window.Toast && window.Toast.error({ title: 'Error', message: trans('This item is out of stock.') }); } catch (e) { alert('This item is out of stock.'); }
+        try { window.Toast && window.Toast.error({ title: trans('Error'), message: trans('This item is out of stock.') }); } catch (e) { alert(trans('This item is out of stock.')); }
         return;
     }
 
@@ -85,19 +85,19 @@ window.addToCart = function(variantId, productId) {
         headers: Object.assign({ 'Content-Type': 'multipart/form-data', 'X-SKIP-TOAST': '1' }, csrf ? { 'X-CSRF-TOKEN': csrf } : {})
     }).then(function (resp) {
         const data = resp && resp.data;
-        const msg = (data && (data.message || (data.success ? data.success : null))) || 'Item added to cart';
-        try { window.Toast && window.Toast.success({ title: 'Added', message: msg }); } catch (e) { alert(msg); }
+        const msg = (data && (data.message || (data.success ? data.success : null))) || trans('Item added to cart');
+        try { window.Toast && window.Toast.success({ title: trans('Added'), message: msg }); } catch (e) { alert(msg); }
         try { markButtonsInCart(variantId, productId); } catch (e) {}
         try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: data })); } catch (e) {}
     }).catch(function (error) {
         const resp = error && error.response;
-        let msg = 'Failed to add to cart';
+        let msg = trans('Failed to add to cart');
         // If unauthenticated, redirect to login page
         if (resp && resp.status === 401) {
             window.location.href = '/login';
             return;
         }
         if (resp && resp.data && (resp.data.message || resp.data.error)) msg = resp.data.message || resp.data.error;
-        try { window.Toast && window.Toast.error({ title: 'Error', message: msg }); } catch (e) { alert(msg); }
+        try { window.Toast && window.Toast.error({ title: trans('Error'), message: msg }); } catch (e) { alert(msg); }
     });
 };
