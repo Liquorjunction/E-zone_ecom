@@ -109,6 +109,7 @@
         'Subscribed successfully!' => statictranslations('Subscribed successfully!'),
         'Subscribe' => statictranslations('Subscribe'),
         'Failed to load page. Please try again.' => statictranslations('Failed to load page. Please try again.'),
+        'Wishlist' => statictranslations('Wishlist'),
         'Removed from wishlist' => statictranslations('Removed from wishlist'),
         'Failed to remove' => statictranslations('Failed to remove'),
         'Added to wishlist' => statictranslations('Added to wishlist'),

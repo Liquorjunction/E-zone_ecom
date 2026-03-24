@@ -36,9 +36,9 @@ class AddressController extends Controller
             }
 
             // Prepare sorted lists: default addresses first, then newest (id desc)
-            $prepare = function($col, $type) {
+            $prepare = function ($col, $type) {
                 $arr = $col->where('type', $type)->values()->all();
-                usort($arr, function($a, $b){
+                usort($arr, function ($a, $b) {
                     $da = !empty($a->is_default) ? 1 : 0;
                     $db = !empty($b->is_default) ? 1 : 0;
                     if ($da === $db) {
@@ -79,9 +79,12 @@ class AddressController extends Controller
         }
 
         // return server-rendered HTML for AJAX
-        if ($request->expectsJson()) {
-            $html = view('client.pages.dashboard._address_card', ['address' => $address])->render();
-            return response()->json(['data' => $address, 'html' => $html], 201);
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => statictranslations('Address saved successfully.'),
+                'address' => $address,
+            ]);
         }
 
         return redirect()->back()->with('success', statictranslations('Address added successfully.'));

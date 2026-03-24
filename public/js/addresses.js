@@ -447,6 +447,7 @@ function closeModal(){
 // Unified AJAX Submit Handler
 async function handleFormSubmit(e) {
   e.preventDefault();
+  showAddressLoader();
   const form = e.target;
   const isMobile = form.id === 'mobile-address-form-element';
   const url = form.action;
@@ -464,7 +465,6 @@ async function handleFormSubmit(e) {
   submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5 inline mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> ' + trans('Saving...');
 
   try{
-    // Always POST form submissions to match AJAX endpoints; `_method` stays in FormData for server-side
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -482,6 +482,7 @@ async function handleFormSubmit(e) {
       showUniversalPopup(json.message || trans('Failed to save address'), 'error', 3000);
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
+      hideAddressLoader();
       return;
     }
 
@@ -500,12 +501,16 @@ async function handleFormSubmit(e) {
         existing.replaceWith(newCard);
       } else {
         const grid = document.getElementById('addresses-grid');
-        const emptyMsg = grid.querySelector('.col-span-full');
-        if(emptyMsg) emptyMsg.remove();
-
-        const addBtn = grid.querySelector('button[onclick="openAddModal()"]');
-        if (addBtn && addBtn.parentNode === grid) {
-          grid.insertBefore(newCard, addBtn);
+        let section = null;
+        if (data.type === 'shipping') {
+          section = grid.querySelector('section:nth-of-type(1) .grid');
+        } else if (data.type === 'billing') {
+          section = grid.querySelector('section:nth-of-type(2) .grid');
+        }
+        if (section) {
+          const emptyMsg = section.querySelector('.col-span-full');
+          if(emptyMsg) emptyMsg.remove();
+          section.appendChild(newCard);
         } else {
           grid.appendChild(newCard);
         }
@@ -528,6 +533,7 @@ async function handleFormSubmit(e) {
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalBtnHtml;
+    hideAddressLoader();
   }
 }
 

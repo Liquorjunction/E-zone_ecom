@@ -135,10 +135,10 @@ document.addEventListener('click', async (ev) => {
                     }
                 } catch (e) {}
                 const msg = json.message || trans('Removed from wishlist');
-                try { window.Toast && window.Toast.success({ title: 'Wishlist', message: msg }); } catch (e) {}
+                try { window.Toast && window.Toast.success({ title: trans('Wishlist'), message: msg }); } catch (e) {}
             } else {
                 const msg = json.message || trans('Failed to remove');
-                try { window.Toast && window.Toast.error({ title: 'Wishlist', message: msg }); } catch (e) {}
+                try { window.Toast && window.Toast.error({ title: trans('Wishlist'), message: msg }); } catch (e) {}
             }
         } else {
             const res = await postJson('/client/wishlist/add', { product_variant_id: id });
@@ -158,15 +158,15 @@ document.addEventListener('click', async (ev) => {
             if (res.ok) {
                 updateButtonState(btn, true);
                 const msg = json.message || trans('Added to wishlist');
-                try { window.Toast && window.Toast.success({ title: 'Wishlist', message: msg }); } catch (e) {}
+                try { window.Toast && window.Toast.success({ title: trans('Wishlist'), message: msg }); } catch (e) {}
             } else {
                 const msg = json.message || trans('Failed to add to wishlist');
-                try { window.Toast && window.Toast.error({ title: 'Wishlist', message: msg }); } catch (e) {}
+                try { window.Toast && window.Toast.error({ title: trans('Wishlist'), message: msg }); } catch (e) {}
             }
         }
     } catch (err) {
         console.error('Wishlist error', err);
-        try { window.Toast && window.Toast.error({ title: 'Wishlist', message: trans('Request failed') }); } catch (e) {}
+        try { window.Toast && window.Toast.error({ title: trans('Wishlist'), message: trans('Request failed') }); } catch (e) {}
     }
 });
 
