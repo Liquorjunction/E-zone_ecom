@@ -176,4 +176,19 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
         return $query->orderBy('created_at', 'asc')->lockForUpdate()->get();
     }
+
+    public function getInventoryForOrderItem(OrderItem $orderItem)
+    {
+        $query = Inventory::with(['store', 'warehouse'])
+            ->where('quantity', '>', 0);
+
+        if ($orderItem->variant_id) {
+            $query->where('product_variant_id', $orderItem->variant_id);
+        } else {
+            $query->where('product_id', $orderItem->product_id)
+                ->whereNull('product_variant_id');
+        }
+
+        return $query->orderByDesc('quantity')->get();
+    }
 }

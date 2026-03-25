@@ -328,6 +328,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/create', [DispatchController::class, 'create'])->name('create')->middleware('can:dispatch.create,admin');
             Route::post('/store', [DispatchController::class, 'store'])->name('store')->middleware('can:dispatch.create,admin');
             Route::put('/{id}/status', [DispatchController::class, 'updateStatus'])->name('update-status')->middleware('can:dispatch.update,admin');
+            Route::get('/item-inventory', [DispatchController::class, 'getItemInventory'])->name('item-inventory')->middleware('can:dispatch.read,admin');
         });
 
         // Review Routes

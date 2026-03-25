@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Admin\Interfaces;
 
+use App\Models\OrderItem;
+
 interface InventoryRepositoryInterface
 {
     public function all(array $filters = []);
@@ -20,4 +22,5 @@ interface InventoryRepositoryInterface
     public function getBatchesForDataTable(array $filters = []);
     public function getLowStock(array $filters = []);
     public function getLockedForCheckout(int $productId, ?int $variantId);
+    public function getInventoryForOrderItem(OrderItem $orderItem);
 }

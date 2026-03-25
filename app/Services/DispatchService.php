@@ -36,20 +36,25 @@ class DispatchService
         DB::beginTransaction();
 
         try {
-            $orderId = $data['order_id'];
+            $orderId         = $data['order_id'];
+            $dispatchMethod  = $data['dispatch_method'] ?? 'courier';
+            $remarks         = $data['remarks'] ?? null;
             $itemsDispatched = 0;
 
-            foreach ($data['order_item_id'] as $index => $orderItemId) {
-                $inventoryId = $data['inventory_id'][$index] ?? null;
-                $quantity = $data['quantity'][$index] ?? 0;
+            // New structure: $data['dispatches'] is an array of rows, each with:
+            //   order_item_id, inventory_id, quantity
+            // A single order item may appear in multiple rows (multi-location split).
+            foreach ($data['dispatches'] as $row) {
+                $orderItemId = $row['order_item_id'];
+                $inventoryId = $row['inventory_id'];
+                $quantity    = (int) $row['quantity'];
 
-                if (empty($inventoryId) || empty($quantity) || $quantity <= 0) {
-                    continue;
-                }
+                if ($quantity <= 0) continue;
 
                 $orderItem = $this->orderRepository->getOrderItemById($orderItemId);
                 $inventory = $this->inventoryRepo->findWithLock($inventoryId);
 
+                // Guard: how much of this item has already been dispatched/delivered?
                 $alreadyDispatched = $this->dispatchRepository
                     ->getDispatchesByOrderId($orderId)
                     ->where('order_item_id', $orderItemId)
@@ -59,48 +64,54 @@ class DispatchService
                 $remainingToDispatch = $orderItem->quantity - $alreadyDispatched;
 
                 if ($quantity > $remainingToDispatch) {
-                    throw new Exception("Quantity exceeds remaining dispatchable quantity for Product ID {$orderItem->product_id}. Remaining: {$remainingToDispatch}");
+                    throw new Exception(
+                        "Quantity exceeds remaining dispatchable qty for product ID {$orderItem->product_id}. " .
+                        "Remaining: {$remainingToDispatch}, requested: {$quantity}."
+                    );
                 }
 
                 if ($inventory->quantity < $quantity) {
-                    throw new Exception("Insufficient inventory for Product ID {$orderItem->product_id}. Available: {$inventory->quantity}");
+                    throw new Exception(
+                        "Insufficient inventory for product ID {$orderItem->product_id}. " .
+                        "Available: {$inventory->quantity}, requested: {$quantity}."
+                    );
                 }
 
-                $beforeQty = $inventory->quantity;
-                $beforeReserved = $inventory->reserved_quantity ?? 0;
+                $beforeQty       = $inventory->quantity;
+                $beforeReserved  = $inventory->reserved_quantity ?? 0;
 
                 $this->inventoryRepo->update($inventory->id, [
-                    'quantity' => $beforeQty - $quantity,
-                    'reserved_quantity' => max(0, $beforeReserved - $quantity)
+                    'quantity'          => $beforeQty - $quantity,
+                    'reserved_quantity' => max(0, $beforeReserved - $quantity),
                 ]);
 
                 $this->transactionRepo->create([
-                    'batch_no' => $inventory->batch_no,
-                    'inventory_id' => $inventory->id,
-                    'type' => 'dispatch',
-                    'quantity' => $quantity,
-                    'rate' => $inventory->cost_price ?? 0,
-                    'created_by' => $adminId,
-                    'reference_type' => 'order',
-                    'reference_id' => $orderId,
-                    'before_quantity' => $beforeQty,
-                    'after_quantity' => $beforeQty - $quantity,
-                    'quantity_change' => -$quantity,
-                    'description' => "Item dispatched for Order #{$orderId}",
+                    'batch_no'         => $inventory->batch_no,
+                    'inventory_id'     => $inventory->id,
+                    'type'             => 'dispatch',
+                    'quantity'         => $quantity,
+                    'rate'             => $inventory->cost_price ?? 0,
+                    'created_by'       => $adminId,
+                    'reference_type'   => 'order',
+                    'reference_id'     => $orderId,
+                    'before_quantity'  => $beforeQty,
+                    'after_quantity'   => $beforeQty - $quantity,
+                    'quantity_change'  => -$quantity,
+                    'description'      => "Item dispatched for Order #{$orderId}",
                 ]);
 
                 $this->dispatchRepository->createDispatch([
-                    'order_id' => $orderId,
-                    'order_item_id' => $orderItemId,
-                    'inventory_id' => $inventoryId,
-                    'quantity' => $quantity,
-                    'status' => 'dispatched',
-                    'dispatch_method' => $data['dispatch_method'] ?? 'courier',
-                    'dispatch_from_store_id' => $inventory->store_id,
-                    'dispatch_from_warehouse_id' => $inventory->warehouse_id,
-                    'dispatched_at' => now(),
-                    'dispatched_by' => $adminId,
-                    'remarks' => $data['remarks'] ?? null,
+                    'order_id'                    => $orderId,
+                    'order_item_id'               => $orderItemId,
+                    'inventory_id'                => $inventoryId,
+                    'quantity'                    => $quantity,
+                    'status'                      => 'dispatched',
+                    'dispatch_method'             => $dispatchMethod,
+                    'dispatch_from_store_id'      => $inventory->store_id,
+                    'dispatch_from_warehouse_id'  => $inventory->warehouse_id,
+                    'dispatched_at'               => now(),
+                    'dispatched_by'               => $adminId,
+                    'remarks'                     => $remarks,
                 ]);
 
                 $itemsDispatched++;

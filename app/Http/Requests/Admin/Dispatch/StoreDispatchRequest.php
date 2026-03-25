@@ -16,26 +16,26 @@ class StoreDispatchRequest extends FormRequest
     {
         return [
             'order_id' => 'required|exists:orders,id',
-            
-            'order_item_id' => 'required|array',
-            'order_item_id.*' => 'required|exists:order_items,id',
-            
-            'inventory_id' => 'required|array',
-            'inventory_id.*' => 'nullable|exists:inventories,id', 
-            
-            'quantity' => 'required|array',
-            'quantity.*' => 'nullable|numeric|min:0',
-            
+
+            // New structure: flat array of split rows, each with item + location + qty
+            'dispatches'                  => 'required|array|min:1',
+            'dispatches.*.order_item_id'  => 'required|exists:order_items,id',
+            'dispatches.*.inventory_id'   => 'required|exists:inventories,id',
+            'dispatches.*.quantity'       => 'required|integer|min:1',
+
             'dispatch_method' => 'nullable|in:courier,pickup',
-            'remarks' => 'nullable|string|max:500',
+            'remarks'         => 'nullable|string|max:500',
         ];
     }
 
     public function messages()
     {
         return [
-            'inventory_id.*.exists' => 'The selected inventory location is invalid.',
-            'quantity.*.min' => 'Dispatch quantity must be at least 1 for selected items.',
+            'dispatches.required'                 => 'Please allocate at least one item before submitting.',
+            'dispatches.*.order_item_id.required' => 'Each dispatch row must reference a valid order item.',
+            'dispatches.*.inventory_id.required'  => 'Please select a location for every dispatch row.',
+            'dispatches.*.inventory_id.exists'    => 'The selected inventory location is invalid.',
+            'dispatches.*.quantity.min'           => 'Dispatch quantity must be at least 1.',
         ];
     }
 }

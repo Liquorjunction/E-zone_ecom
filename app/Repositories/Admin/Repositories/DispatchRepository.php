@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Admin\Repositories;
 
+use App\Models\Admin;
 use App\Models\Dispatch;
 use App\Repositories\Admin\Interfaces\DispatchRepositoryInterface;
 
@@ -45,6 +46,13 @@ class DispatchRepository implements DispatchRepositoryInterface
     public function getDispatchesByOrderId(int $orderId)
     {
         return Dispatch::with(['orderItem', 'inventory'])->where('order_id', $orderId)->get();
+    }
+
+    public function getDispatchesByNamefromAdminTable(string $name)
+    {
+        $dispatchById = Dispatch::where('dispatched_by', $name)->value('dispatched_by');
+        $admin = Admin::find($dispatchById);
+        return $admin->name;
     }
 
     public function getDataforDatatable()

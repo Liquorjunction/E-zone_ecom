@@ -5,8 +5,6 @@
     <div class="container-fluid py-4">
         @php
             $orderItems = $order->orderItems ?? [];
-            
-            // BULLETPROOF: Get all true, valid dispatches for this order directly from the database
             $orderDispatches = \App\Models\Dispatch::where('order_id', isset($order) ? $order->id : 0)
                 ->whereIn('status', ['dispatched', 'delivered'])
                 ->get();
@@ -16,11 +14,11 @@
         <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
             <div>
                 <h4 class="fw-semibold mb-1">Create Dispatch</h4>
-                <p class="text-secondary small mb-0">Dispatch order items — full order or item-by-item</p>
+                <p class="text-secondary small mb-0">Dispatch order items — split across one or multiple locations</p>
                 @if (isset($order) && $order->status)
                     <div class="mt-2">
                         <span
-                            class="badge 
+                            class="badge
                             @if ($order->status === 'partially_dispatched') bg-warning text-dark
                             @elseif($order->status === 'dispatched') bg-primary
                             @elseif($order->status === 'delivered') bg-success
@@ -36,14 +34,20 @@
             </a>
         </div>
 
+        {{-- Main form — JS injects hidden inputs before submit --}}
         <form id="dispatchForm" method="POST" action="{{ route('admin.dispatch.store') }}">
             @csrf
             <input type="hidden" name="order_id" value="{{ isset($order) ? $order->id : '' }}">
+            <input type="hidden" name="dispatch_method" id="form_dispatch_method" value="courier">
+            <input type="hidden" name="remarks" id="form_remarks" value="">
+            {{-- Per-item splits injected as dispatches[i][order_item_id|inventory_id|quantity] --}}
+            <div id="dispatch-hidden-inputs"></div>
 
-            {{-- Section 1: Order Display --}}
+            {{-- Section 1: Order Details --}}
             <div class="card border rounded-3 mb-4">
                 <div class="card-body p-4">
-                    <p class="text-uppercase text-muted small fw-semibold letter-spacing-1 border-bottom pb-2 mb-3">Order Details</p>
+                    <p class="text-uppercase text-muted small fw-semibold letter-spacing-1 border-bottom pb-2 mb-3">Order
+                        Details</p>
                     <div class="row g-3">
                         <div class="col-md-5">
                             <label class="form-label small fw-medium">Order Number</label>
@@ -55,35 +59,31 @@
                 </div>
             </div>
 
-            {{-- Section 2: Dispatch Items Table --}}
+            {{-- Section 2: Order Items --}}
             <div class="card border rounded-3 mb-4">
                 <div class="card-body p-4">
                     <p class="text-uppercase text-muted small fw-semibold border-bottom pb-2 mb-3">Order Items</p>
                     <div class="table-responsive border rounded-2">
-                        <table class="table table-hover align-middle mb-0" id="dispatch-items-table">
+                        <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th class="text-uppercase text-muted small fw-semibold">Product</th>
                                     <th class="text-uppercase text-muted small fw-semibold">Variant</th>
-                                    <th class="text-uppercase text-muted small fw-semibold">Order Status</th>
-                                    <th class="text-uppercase text-muted small fw-semibold">Available Qty</th>
-                                    <th class="text-uppercase text-muted small fw-semibold">Dispatch Qty</th>
-                                    <th class="text-uppercase text-muted small fw-semibold">Location<br><span class="fw-normal text-muted small">(Store / Warehouse)</span></th>
+                                    <th class="text-uppercase text-muted small fw-semibold">Qty Status</th>
+                                    <th class="text-uppercase text-muted small fw-semibold">Allocation</th>
+                                    <th class="text-uppercase text-muted small fw-semibold text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @php
-                                    $stores = isset($order) && property_exists($order, 'stores') ? $order->stores : $stores ?? [];
-                                    $warehouses = isset($order) && property_exists($order, 'warehouses') ? $order->warehouses : $warehouses ?? [];
-                                @endphp
                                 @if (count($orderItems))
                                     @foreach ($orderItems as $item)
                                         @php
-                                            // CALCULATION: Real dispatched vs Ordered
-                                            $alreadyDispatched = $orderDispatches->where('order_item_id', $item->id)->sum('quantity');
+                                            $alreadyDispatched = $orderDispatches
+                                                ->where('order_item_id', $item->id)
+                                                ->sum('quantity');
                                             $remainingQty = max(0, $item->quantity - $alreadyDispatched);
                                         @endphp
-                                        <tr>
+                                        <tr data-item-id="{{ $item->id }}">
                                             <td class="fw-medium">
                                                 {{ $item->product ? $item->product->getTranslation('name', 'en') ?? ($item->product->name ?? '—') : '—' }}
                                             </td>
@@ -96,171 +96,64 @@
                                                     <span class="text-muted">—</span>
                                                 @endif
                                             </td>
-                                            
-                                            {{-- Dynamic Status Column --}}
+
                                             <td>
                                                 <div class="mb-1">
-                                                    <span class="text-muted small">Ordered:</span> 
+                                                    <span class="text-muted small">Ordered:</span>
                                                     <span class="fw-bold font-monospace">{{ $item->quantity }}</span>
                                                 </div>
                                                 @if ($alreadyDispatched > 0)
                                                     <div class="small text-success mb-1">
-                                                        <i class="bi bi-check-circle"></i> Dispatched: <span class="fw-bold font-monospace">{{ $alreadyDispatched }}</span>
+                                                        <i class="bi bi-check-circle"></i> Dispatched:
+                                                        <span class="fw-bold font-monospace">{{ $alreadyDispatched }}</span>
                                                     </div>
                                                 @endif
                                                 @if ($remainingQty > 0)
                                                     <div class="small text-warning">
-                                                        <i class="bi bi-hourglass-split"></i> Remaining: <span class="fw-bold font-monospace">{{ $remainingQty }}</span>
+                                                        <i class="bi bi-hourglass-split"></i> Remaining:
+                                                        <span class="fw-bold font-monospace">{{ $remainingQty }}</span>
                                                     </div>
                                                 @endif
                                             </td>
-                                            
+
+                                            {{-- Allocation summary (written by JS after modal) --}}
                                             <td>
-                                                <span class="font-monospace fw-medium text-success">
-                                                    {{ $item->variant ? $item->variant->total_stock ?? ($item->variant->getTotalStockAttribute() ?? '—') : '—' }}
-                                                </span>
+                                                @if ($remainingQty > 0)
+                                                    <div id="allocation-summary-{{ $item->id }}"
+                                                        class="small text-muted fst-italic">
+                                                        Not yet allocated
+                                                    </div>
+                                                @else
+                                                    <div
+                                                        class="d-inline-flex align-items-center gap-2 text-success small fw-semibold">
+                                                        <i class="bi bi-check2-all fs-6"></i> Fully Dispatched
+                                                    </div>
+                                                @endif
                                             </td>
 
-                                            @if($remainingQty > 0)
-                                                <td>
-                                                    <input type="hidden" name="order_item_id[]" value="{{ $item->id }}">
-                                                    <input type="number" name="quantity[]"
-                                                        min="0" max="{{ $remainingQty }}" value="0"
-                                                        class="form-control text-center font-monospace fw-medium dispatch-qty-input border-warning"
-                                                        data-item-id="{{ $item->id }}" style="width: 80px;" step="1">
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex flex-column gap-2 align-items-start mb-1">
-                                                        @php
-                                                            $variantInventories = $item->variant && $item->variant->relationLoaded('inventory') ? $item->variant->inventory : $item->variant->inventory ?? [];
-                                                            $storeQtys = [];
-                                                            $warehouseQtys = [];
-                                                            foreach ($variantInventories as $inv) {
-                                                                if ($inv->store_id) {
-                                                                    $storeQtys[$inv->store_id] = ($storeQtys[$inv->store_id] ?? 0) + $inv->quantity;
-                                                                }
-                                                                if ($inv->warehouse_id) {
-                                                                    $warehouseQtys[$inv->warehouse_id] = ($warehouseQtys[$inv->warehouse_id] ?? 0) + $inv->quantity;
-                                                                }
-                                                            }
-                                                            $storeCount = 0;
-                                                            $lastStoreId = null;
-                                                            foreach ($stores as $store) {
-                                                                if (isset($storeQtys[$store->id]) && $storeQtys[$store->id] > 0) {
-                                                                    $storeCount++;
-                                                                    $lastStoreId = $store->id;
-                                                                }
-                                                            }
-                                                            $warehouseCount = 0;
-                                                            $lastWarehouseId = null;
-                                                            foreach ($warehouses as $wh) {
-                                                                if (isset($warehouseQtys[$wh->id]) && $warehouseQtys[$wh->id] > 0) {
-                                                                    $warehouseCount++;
-                                                                    $lastWarehouseId = $wh->id;
-                                                                }
-                                                            }
-                                                        @endphp
-
-                                                        @if ($storeCount + $warehouseCount === 1)
-                                                            @if ($storeCount === 1)
-                                                                <select name="inventory_id[]" class="form-select form-select-sm border-warning" data-item-id="{{ $item->id }}" style="min-width: 150px;">
-                                                                    @foreach ($variantInventories as $inv)
-                                                                        @if ($inv->store_id && isset($storeQtys[$inv->store_id]) && $storeQtys[$inv->store_id] > 0)
-                                                                            <option value="{{ $inv->id }}" selected>
-                                                                                {{ method_exists($inv->store, 'getTranslation') ? $inv->store->getTranslation('store_name', 'en') : $inv->store->store_name ?? ($inv->store->name ?? 'N/A') }}
-                                                                                (Qty: {{ $storeQtys[$inv->store_id] }})
-                                                                            </option>
-                                                                        @endif
-                                                                    @endforeach
-                                                                </select>
-                                                            @elseif($warehouseCount === 1)
-                                                                <select name="inventory_id[]" class="form-select form-select-sm border-warning" data-item-id="{{ $item->id }}" style="min-width: 150px;">
-                                                                    @foreach ($variantInventories as $inv)
-                                                                        @if ($inv->warehouse_id && isset($warehouseQtys[$inv->warehouse_id]) && $warehouseQtys[$inv->warehouse_id] > 0)
-                                                                            <option value="{{ $inv->id }}" selected>
-                                                                                {{ method_exists($inv->warehouse, 'getTranslation') ? $inv->warehouse->getTranslation('warehouse_name', 'en') : $inv->warehouse->warehouse_name ?? ($inv->warehouse->name ?? 'N/A') }}
-                                                                                (Qty: {{ $warehouseQtys[$inv->warehouse_id] }})
-                                                                            </option>
-                                                                        @endif
-                                                                    @endforeach
-                                                                </select>
-                                                            @endif
-                                                        @elseif($storeCount + $warehouseCount > 1)
-                                                            <select class="form-select form-select-sm location-type-select border-warning" onchange="toggleLocationInputs(this)" data-item-id="{{ $item->id }}" style="min-width: 140px;">
-                                                                <option value="">Select Location Type</option>
-                                                                @if ($storeCount > 0) <option value="store">Store</option> @endif
-                                                                @if ($warehouseCount > 0) <option value="warehouse">Warehouse</option> @endif
-                                                            </select>
-                                                            <select name="inventory_id[]" class="form-select form-select-sm store-dropdown border-warning d-none" disabled data-item-id="{{ $item->id }}" style="min-width: 150px;">
-                                                                <option value="">Select Store</option>
-                                                                @foreach ($variantInventories as $inv)
-                                                                    @if ($inv->store_id && isset($storeQtys[$inv->store_id]) && $storeQtys[$inv->store_id] > 0)
-                                                                        <option value="{{ $inv->id }}">
-                                                                            {{ method_exists($inv->store, 'getTranslation') ? $inv->store->getTranslation('store_name', 'en') : $inv->store->store_name ?? ($inv->store->name ?? 'N/A') }} — Qty: {{ $storeQtys[$inv->store_id] }}
-                                                                        </option>
-                                                                    @endif
-                                                                @endforeach
-                                                            </select>
-                                                            <select name="inventory_id[]" class="form-select form-select-sm warehouse-dropdown border-warning d-none" disabled data-item-id="{{ $item->id }}" style="min-width: 150px;">
-                                                                <option value="">Select Warehouse</option>
-                                                                @foreach ($variantInventories as $inv)
-                                                                    @if ($inv->warehouse_id && isset($warehouseQtys[$inv->warehouse_id]) && $warehouseQtys[$inv->warehouse_id] > 0)
-                                                                        <option value="{{ $inv->id }}">
-                                                                            {{ method_exists($inv->warehouse, 'getTranslation') ? $inv->warehouse->getTranslation('warehouse_name', 'en') : $inv->warehouse->warehouse_name ?? ($inv->warehouse->name ?? 'N/A') }} — Qty: {{ $warehouseQtys[$inv->warehouse_id] }}
-                                                                        </option>
-                                                                    @endif
-                                                                @endforeach
-                                                            </select>
-                                                        @else
-                                                            <select name="inventory_id[]" class="d-none" disabled></select>
-                                                            <span class="badge bg-danger-subtle text-danger">Out of stock at all locations</span>
-                                                        @endif
-                                                    </div>
-                                                    
-                                                    {{-- The breakdown of Store/Warehouse stock that was missing! --}}
-                                                    <div class="small text-muted mt-2">
-                                                        @if (count($storeQtys))
-                                                            <div><span class="fw-semibold">Store Qty:</span>
-                                                                @foreach ($stores as $store)
-                                                                    @if (isset($storeQtys[$store->id]))
-                                                                        <span class="me-2">{{ method_exists($store, 'getTranslation') ? $store->getTranslation('store_name', 'en') : $store->store_name ?? ($store->name ?? 'N/A') }}:
-                                                                            <span class="text-success">{{ $storeQtys[$store->id] }}</span>
-                                                                        </span>
-                                                                    @endif
-                                                                @endforeach
-                                                            </div>
-                                                        @endif
-                                                        @if (count($warehouseQtys))
-                                                            <div><span class="fw-semibold">Warehouse Qty:</span>
-                                                                @foreach ($warehouses as $wh)
-                                                                    @if (isset($warehouseQtys[$wh->id]))
-                                                                        <span class="me-2">{{ method_exists($wh, 'getTranslation') ? $wh->getTranslation('warehouse_name', 'en') : $wh->warehouse_name ?? ($wh->name ?? 'N/A') }}:
-                                                                            <span class="text-primary">{{ $warehouseQtys[$wh->id] }}</span>
-                                                                        </span>
-                                                                    @endif
-                                                                @endforeach
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            @else
-                                                <td colspan="2" class="text-center align-middle">
-                                                    {{-- Send blanks so array lengths don't break --}}
-                                                    <input type="hidden" name="order_item_id[]" value="{{ $item->id }}">
-                                                    <input type="hidden" name="quantity[]" value="0">
-                                                    <input type="hidden" name="inventory_id[]" value="">
-                                                    
-                                                    <div class="d-inline-flex align-items-center justify-content-center p-2 rounded bg-success-subtle text-success w-100 border border-success border-opacity-25">
-                                                        <i class="bi bi-check2-all me-2 fs-5"></i>
-                                                        <span class="fw-semibold">100% Fully Dispatched</span>
-                                                    </div>
-                                                </td>
-                                            @endif
+                                            <td class="text-center">
+                                                @if ($remainingQty > 0)
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-primary fw-semibold d-inline-flex align-items-center gap-1 open-dispatch-modal"
+                                                        data-item-id="{{ $item->id }}"
+                                                        data-order-id="{{ $order->id }}"
+                                                        data-remaining="{{ $remainingQty }}"
+                                                        data-product="{{ $item->product ? $item->product->getTranslation('name', 'en') ?? ($item->product->name ?? 'Product') : 'Product' }}"
+                                                        data-variant="{{ $item->variant ? $item->variant->getTranslation('variant_name', 'en') ?? ($item->variant->variant_name ?? '') : '' }}">
+                                                        <i class="bi bi-truck"></i> Dispatch
+                                                    </button>
+                                                @else
+                                                    <span
+                                                        class="badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-2">
+                                                        <i class="bi bi-check2-all me-1"></i> Done
+                                                    </span>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-5">
+                                        <td colspan="5" class="text-center text-muted py-5">
                                             <div class="fs-3 opacity-50 mb-2">📦</div>
                                             <div>No items found for the selected order.</div>
                                         </td>
@@ -277,42 +170,137 @@
                 <div class="card-body p-4">
                     <p class="text-uppercase text-muted small fw-semibold border-bottom pb-2 mb-3">Additional Info</p>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="remarks" class="form-label small fw-medium">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-medium">Dispatch Method</label>
+                            <select class="form-select" id="dispatch_method_select">
+                                <option value="courier" selected>Courier</option>
+                                <option value="pickup">Pickup</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-medium">
                                 Remarks <span class="text-muted">(optional)</span>
                             </label>
-                            <textarea class="form-control" id="remarks" name="remarks" rows="3"
-                                placeholder="Add any notes about this dispatch..."></textarea>
+                            <textarea class="form-control" id="remarks_textarea" rows="2" placeholder="Add any notes about this dispatch..."></textarea>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end mt-4">
-                        <button type="submit"
-                            class="btn btn-primary d-inline-flex align-items-center gap-2 fw-semibold px-4">
+                    <div class="d-flex align-items-center justify-content-between mt-4">
+                        <div id="allocation-status-msg" class="small text-muted">
+                            Allocate at least one item to create a dispatch.
+                        </div>
+                        <button type="submit" id="submitDispatchBtn"
+                            class="btn btn-primary d-inline-flex align-items-center gap-2 fw-semibold px-4" disabled>
                             <i class="bi bi-truck"></i> Create Dispatch
                         </button>
                     </div>
                 </div>
             </div>
-
         </form>
     </div>
 
-    <script>
-        function toggleLocationInputs(selectElement) {
-            const container = selectElement.parentElement;
-            const storeDropdown = container.querySelector('.store-dropdown');
-            const warehouseDropdown = container.querySelector('.warehouse-dropdown');
+    {{-- ═══════════════════════════════════════════════════════════
+         DISPATCH MODAL
+    ════════════════════════════════════════════════════════════ --}}
+    <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
 
-            if (selectElement.value === 'store') {
-                if(storeDropdown) { storeDropdown.classList.remove('d-none'); storeDropdown.disabled = false; storeDropdown.required = true; }
-                if(warehouseDropdown) { warehouseDropdown.classList.add('d-none'); warehouseDropdown.disabled = true; warehouseDropdown.required = false; }
-            } else if (selectElement.value === 'warehouse') {
-                if(warehouseDropdown) { warehouseDropdown.classList.remove('d-none'); warehouseDropdown.disabled = false; warehouseDropdown.required = true; }
-                if(storeDropdown) { storeDropdown.classList.add('d-none'); storeDropdown.disabled = true; storeDropdown.required = false; }
-            } else {
-                if(storeDropdown) { storeDropdown.classList.add('d-none'); storeDropdown.disabled = true; storeDropdown.required = false; }
-                if(warehouseDropdown) { warehouseDropdown.classList.add('d-none'); warehouseDropdown.disabled = true; warehouseDropdown.required = false; }
-            }
-        }
+                <div class="modal-header border-bottom bg-light px-4 py-3">
+                    <div>
+                        <h5 class="modal-title fw-semibold mb-0" id="dispatchModalLabel">
+                            <i class="bi bi-truck me-2 text-primary"></i> Dispatch Item
+                        </h5>
+                        <div class="small text-muted mt-1" id="modal-item-subtitle"></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body px-4 py-3">
+
+                    {{-- Item qty summary bar --}}
+                    <div class="row g-0 rounded-2 bg-light border mb-4 overflow-hidden">
+                        <div class="col-4 p-3 border-end text-center">
+                            <div class="small text-muted mb-1">To dispatch</div>
+                            <div class="fw-bold fs-5 font-monospace text-warning" id="modal-remaining-display">0</div>
+                        </div>
+                        <div class="col-4 p-3 border-end text-center">
+                            <div class="small text-muted mb-1">Allocated</div>
+                            <div class="fw-bold fs-5 font-monospace text-primary" id="modal-allocated-display">0</div>
+                        </div>
+                        <div class="col-4 p-3 text-center">
+                            <div class="small text-muted mb-1">Still needed</div>
+                            <div class="fw-bold fs-5 font-monospace text-danger" id="modal-still-needed-display">0</div>
+                        </div>
+                    </div>
+
+                    {{-- Loading --}}
+                    <div id="modal-loading" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="small text-muted mt-2">Loading inventory...</div>
+                    </div>
+
+                    {{-- Error --}}
+                    <div id="modal-error" class="alert alert-danger d-none py-2"></div>
+
+                    {{-- Split rows --}}
+                    <div id="split-rows-container"></div>
+
+                    {{-- Add another location --}}
+                    <button type="button" id="add-split-btn"
+                        class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 mt-2 d-none">
+                        <i class="bi bi-plus-circle"></i> Add Another Location
+                    </button>
+
+                    {{-- Inline validation --}}
+                    <div id="modal-validation-msg" class="alert mt-3 d-none small py-2"></div>
+
+                </div>
+
+                <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                    <div class="small text-muted" id="modal-footer-hint"></div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirm-dispatch-btn"
+                            class="btn btn-primary fw-semibold d-inline-flex align-items-center gap-2" disabled>
+                            <i class="bi bi-check-lg"></i> Confirm Allocation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Split-row template (cloned by JS) --}}
+    <template id="split-row-template">
+        <div class="split-row border rounded-2 p-3 mb-2 bg-white">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label small fw-medium mb-1">Location</label>
+                    <select class="form-select form-select-sm split-location-select">
+                        <option value="">— Select location —</option>
+                    </select>
+                    <div class="small mt-1 location-stock-hint text-muted"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium mb-1">Qty to dispatch</label>
+                    <input type="number" class="form-control form-control-sm split-qty-input font-monospace"
+                        min="1" value="" placeholder="0">
+                </div>
+                <div class="col-md-2 d-flex align-items-end justify-content-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-split-btn" title="Remove row">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // Expose route to JS file
+        window.ITEM_INVENTORY_URL = @json(route('admin.dispatch.item-inventory'));
     </script>
+
+    @push('scripts')
+        <script src="{{ asset('admin_assets/js/admin-dispatch-modal.js') }}"></script>
+    @endpush
 @endsection

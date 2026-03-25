@@ -8,10 +8,12 @@ use App\Http\Requests\Admin\Dispatch\EditDispatchRequest;
 use App\Http\Requests\Admin\Dispatch\StoreDispatchRequest;
 use App\Http\Requests\Admin\Dispatch\UpdateDispatchStatusRequest;
 use App\Repositories\Admin\Interfaces\DispatchRepositoryInterface as DispatchRepo;
+use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface as InventoryRepo;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
 use App\Repositories\Admin\Interfaces\StoreRepositoryInterface as StoreRepo;
 use App\Repositories\Admin\Interfaces\WarehouseRepositoryInterface as WarehouseRepo;
 use App\Services\DispatchService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -54,6 +56,45 @@ class DispatchController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function getItemInventory(Request $request, OrderRepo $orderRepository, InventoryRepo $inventoryRepo)
+    {
+        $request->validate(['order_item_id' => 'required|exists:order_items,id']);
+
+        $orderItem = $orderRepository->getOrderItemById($request->order_item_id);
+
+        // Fetch every active inventory record that holds stock for this variant/product
+        $inventories = $inventoryRepo->getInventoryForOrderItem($orderItem);
+
+        $result = $inventories->map(function ($inv) {
+            $locationType = $inv->store_id ? 'store' : 'warehouse';
+
+            if ($inv->store_id && $inv->store) {
+                $label = method_exists($inv->store, 'getTranslation')
+                    ? $inv->store->getTranslation('store_name', 'en')
+                    : ($inv->store->store_name ?? $inv->store->name ?? 'Store #' . $inv->store_id);
+            } elseif ($inv->warehouse_id && $inv->warehouse) {
+                $label = method_exists($inv->warehouse, 'getTranslation')
+                    ? $inv->warehouse->getTranslation('warehouse_name', 'en')
+                    : ($inv->warehouse->warehouse_name ?? $inv->warehouse->name ?? 'Warehouse #' . $inv->warehouse_id);
+            } else {
+                $label = 'Unknown location';
+            }
+
+            return [
+                'id'                 => $inv->id,
+                'location_type'      => $locationType,
+                'location_label'     => $label,
+                'available_quantity' => max(0, $inv->quantity ?? 0),
+                'batch_no'           => $inv->batch_no,
+            ];
+        })
+        // Only surface locations that actually have stock
+        ->filter(fn($inv) => $inv['available_quantity'] > 0)
+        ->values();
+
+        return response()->json(['inventory' => $result]);
     }
 
     public function datatable(ReadDispatchRequest $request, DispatchRepo $dispatchRepository)
@@ -107,9 +148,9 @@ class DispatchController extends Controller
                     };
                     return '<span class="badge ' . $statusClass . '">' . ucfirst($dispatch->status) . '</span>';
                 })
-                ->addColumn('date', function ($dispatch) {
+                ->addColumn('date', function ($dispatch) use ($dispatchRepository) {
                     $date = $dispatch->dispatched_at ? \Carbon\Carbon::parse($dispatch->dispatched_at)->format('d M Y, h:i A') : '—';
-                    $by = optional($dispatch->dispatchedBy)->name ?? 'System';
+                    $by = $dispatchRepository->getDispatchesByNamefromAdminTable($dispatch->dispatched_by);
                     return '<div class="small fw-medium">' . $date . '</div><div class="small text-muted mt-1">By: ' . $by . '</div>';
                 })
                 ->rawColumns(['dispatch_id', 'order_number', 'product', 'location', 'status_badge', 'date'])
