@@ -284,6 +284,7 @@
 @push('scripts')
     <script src="{{ asset('js/coupon.js') }}"></script>
     <script src="{{ asset('js/checkout-process.js') }}"></script>
+    <script src="{{ asset('js/checkout-address-dropdown.js') }}"></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {

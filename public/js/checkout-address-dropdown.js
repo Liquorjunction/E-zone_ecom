@@ -236,8 +236,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Validate billing address (if not same as shipping)
             if (billingSameCheckbox && !billingSameCheckbox.checked) {
-                if (billingSelect && !billingSelect.value) {
-                    showValidationError(billingSelect, trans('Please select a billing address'));
+                if (billingSelect) {
+                    // Auth user with saved billing addresses - one must be selected.
+                    if (!billingSelect.value) {
+                        showValidationError(billingSelect, trans('Please select a billing address'));
+                        hasErrors = true;
+                    }
+                } else {
+                    // No billingAddressSelect means zero saved billing addresses.
+                    // Unchecking "same as shipping" with no address to select is
+                    // always invalid — block unconditionally regardless of hidden
+                    // field values (they may hold stale shipping data).
+                    var billingSection = document.getElementById('billingAddressSection');
+                    var anchorEl = billingSection || document.getElementById('billingFields');
+                    if (anchorEl) {
+                        showValidationError(anchorEl, trans('Please add a billing address, or use the same as shipping'));
+                    }
+                    var addBillingBtn = document.getElementById('addBillingAddressBtnEmpty');
+                    if (addBillingBtn) {
+                        addBillingBtn.classList.add('ring-4', 'ring-red-400', 'scale-105');
+                        setTimeout(function() {
+                            addBillingBtn.classList.remove('ring-4', 'ring-red-400', 'scale-105');
+                        }, 2500);
+                    }
                     hasErrors = true;
                 }
             }

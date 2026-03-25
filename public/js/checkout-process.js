@@ -288,12 +288,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (billingVisible && billingFields && !billingFields.classList.contains("hidden")) {
             if (billingSelect) {
-                if (!billingSelect.value) { showValidationError(billingSelect, "Please select a billing address"); hasErrors = true; }
+                // Auth user with saved billing addresses - one must be selected.
+                if (!billingSelect.value) {
+                    showValidationError(billingSelect, "Please select a billing address");
+                    hasErrors = true;
+                }
             } else {
-                ["billing_firstName", "billing_address_line", "billing_city"].forEach(function (id) {
-                    var f = document.getElementById(id);
-                    if (f && !f.value.trim()) { showValidationError(f, "This field is required"); hasErrors = true; }
-                });
+                // No billingAddressSelect in the DOM means the user has zero saved
+                // billing addresses. If they unchecked "same as shipping" there is
+                // nothing valid to use — block unconditionally and tell them to add
+                // one via the modal. Never rely on hidden-field values here because
+                // they may still hold stale shipping data from the initial copy.
+                var billingSection = document.getElementById("billingAddressSection");
+                var anchorEl = billingSection || billingFields;
+                if (anchorEl) {
+                    showValidationError(anchorEl, "Please add a billing address, or use the same as shipping");
+                }
+                var addBillingBtn = document.getElementById("addBillingAddressBtnEmpty");
+                if (addBillingBtn) {
+                    addBillingBtn.classList.add("ring-4", "ring-red-400", "scale-105");
+                    setTimeout(function() {
+                        addBillingBtn.classList.remove("ring-4", "ring-red-400", "scale-105");
+                    }, 2500);
+                }
+                hasErrors = true;
             }
         }
 
@@ -694,12 +712,18 @@ document.addEventListener("DOMContentLoaded", function () {
             fields.classList.toggle("hidden", same);
 
             if (same) {
+                // Checkbox checked: copy shipping data into billing hidden fields
+                // and remove any stale "billing_same_as_shipping=0" flag.
                 copyShippingToBillingHidden();
                 var form = document.getElementById("checkout-form");
                 if (form) {
                     var hiddenFlag = form.querySelector('input[type="hidden"][name="billing_same_as_shipping"]');
                     if (hiddenFlag) hiddenFlag.remove();
                 }
+            } else {
+                // Checkbox unchecked: wipe billing hidden fields so stale shipping
+                // data cannot silently pass validation or be submitted as billing.
+                clearBillingHiddenFields();
             }
         }
         checkbox.addEventListener("change", applyToggle);
@@ -865,15 +889,17 @@ document.addEventListener("DOMContentLoaded", function () {
 // ═══════════════════════════════════════════════════════════════
 //  ADD ADDRESS MODAL & AJAX LOGIC
 // ═══════════════════════════════════════════════════════════════
+// The modal lives permanently in the DOM (outside #checkout-root),
+// so close/submit/keydown listeners are bound once at load time.
+// The open-buttons (#addShippingAddressBtn etc.) live INSIDE
+// #checkout-step-content which is replaced by goToStep() — we use
+// event delegation on document so clicks always reach the handler
+// regardless of when the buttons appear.
 (function() {
-    const modal = document.getElementById('addAddressModal');
-    const openBillingBtn = document.getElementById('addBillingAddressBtn');
-    const openShippingBtn = document.getElementById('addShippingAddressBtn');
-    const openBillingBtnEmpty = document.getElementById('addBillingAddressBtnEmpty');
-    const openShippingBtnEmpty = document.getElementById('addShippingAddressBtnEmpty');
-    const closeBtn = document.getElementById('closeAddressModal');
+    const modal     = document.getElementById('addAddressModal');
+    const closeBtn  = document.getElementById('closeAddressModal');
     const cancelBtn = document.getElementById('cancelAddressModal');
-    const form = document.getElementById('addAddressForm');
+    const form      = document.getElementById('addAddressForm');
     const typeField = document.getElementById('modal_address_type');
     const cityField = document.getElementById('modal_city_id');
     const countryField = document.getElementById('modal_country');
@@ -881,35 +907,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!modal) return;
 
+    // ── Open ──────────────────────────────────────────────────────
     const openModalWithType = function(type) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-        if (form) form.reset();
+        if (form)      form.reset();
         if (typeField) typeField.value = type;
         if (countryField && !countryField.value) countryField.value = 'Morocco';
 
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+
         const content = document.getElementById('addAddressContent');
         if (content) {
-            setTimeout(() => {
+            // next tick so the transition fires after display:flex is applied
+            setTimeout(function() {
                 content.classList.remove('scale-95', 'opacity-0');
                 content.classList.add('scale-100', 'opacity-100');
             }, 10);
         }
     };
 
-    if (openBillingBtn)      openBillingBtn.addEventListener('click',      function(e) { e.preventDefault(); openModalWithType('billing'); });
-    if (openShippingBtn)     openShippingBtn.addEventListener('click',     function(e) { e.preventDefault(); openModalWithType('shipping'); });
-    if (openBillingBtnEmpty) openBillingBtnEmpty.addEventListener('click', function(e) { e.preventDefault(); openModalWithType('billing'); });
-    if (openShippingBtnEmpty) openShippingBtnEmpty.addEventListener('click', function(e) { e.preventDefault(); openModalWithType('shipping'); });
+    // Delegated click handler — works even after goToStep() replaces the DOM
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest(
+            '#addShippingAddressBtn, #addShippingAddressBtnEmpty, ' +
+            '#addBillingAddressBtn,  #addBillingAddressBtnEmpty'
+        );
+        if (!btn) return;
+        e.preventDefault();
+        var type = (btn.id === 'addBillingAddressBtn' || btn.id === 'addBillingAddressBtnEmpty')
+            ? 'billing'
+            : 'shipping';
+        openModalWithType(type);
+    });
 
+    // ── Close ─────────────────────────────────────────────────────
     const closeModal = function() {
         const content = document.getElementById('addAddressContent');
         if (content) {
             content.classList.add('scale-95', 'opacity-0');
             content.classList.remove('scale-100', 'opacity-100');
         }
-        setTimeout(() => {
+        setTimeout(function() {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             document.body.style.overflow = 'auto';
@@ -917,90 +956,112 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 200);
     };
 
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (closeBtn)  closeBtn.addEventListener('click',  closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
-    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
     });
 
+    // ── City → Country auto-fill ──────────────────────────────────
+    if (cityField && countryField) {
+        cityField.addEventListener('change', function() {
+            var option  = this.options[this.selectedIndex];
+            var country = option ? option.getAttribute('data-country') : '';
+            if (country) countryField.value = country;
+        });
+    }
+
+    // ── Form submit (AJAX save) ───────────────────────────────────
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Perform simple validation since we dropped global validatior for the new form script logic
-            let isValid = true;
-            const fieldsToValidate = form.querySelectorAll('[name="type"], [name="name"], [name="street"], [name="city_id"], [name="country"]');
-
-            fieldsToValidate.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('border-red-500', 'bg-red-50');
-                    isValid = false;
-                } else {
-                    field.classList.remove('border-red-500', 'bg-red-50');
-                }
-            });
-
+            // Validate required fields
+            var isValid = true;
+            form.querySelectorAll('[name="type"], [name="name"], [name="street"], [name="city_id"], [name="country"]')
+                .forEach(function(field) {
+                    if (!field.value.trim()) {
+                        field.classList.add('border-red-500', 'bg-red-50');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('border-red-500', 'bg-red-50');
+                    }
+                });
             if (!isValid) return;
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Saving...</span>';
+                submitBtn.innerHTML =
+                    '<span class="inline-flex items-center">' +
+                    '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">' +
+                    '<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>' +
+                    '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>' +
+                    '</svg>Saving...</span>';
             }
 
-            const formData = new FormData(form);
-            const data = {
-                _token: formData.get('_token'),
-                type: formData.get('type'),
+            var formData = new FormData(form);
+            var data = {
+                _token:        formData.get('_token'),
+                type:          formData.get('type'),
                 address_label: formData.get('address_label'),
-                name: formData.get('name'),
-                street: formData.get('street'),
-                city_id: formData.get('city_id'),
-                postal_code: formData.get('postal_code'),
-                country: formData.get('country'),
-                phone: formData.get('phone'),
-                is_default: formData.get('is_default') ? 1 : 0
+                name:          formData.get('name'),
+                street:        formData.get('street'),
+                city_id:       formData.get('city_id'),
+                postal_code:   formData.get('postal_code'),
+                country:       formData.get('country'),
+                phone:         formData.get('phone'),
+                is_default:    formData.get('is_default') ? 1 : 0
+            };
+
+            var resetSubmitBtn = function() {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML =
+                        '<span class="inline-flex items-center">' +
+                        '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>' +
+                        '</svg>Save Address</span>';
+                }
             };
 
             fetch('/client/addresses', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': data._token, 'Accept': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': data._token,
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
-            .then(result => {
+            .then(function(response) { return response.json(); })
+            .then(function(result) {
                 if (result.success || result.data) {
                     closeModal();
-                    if (window.Toast) window.Toast.success({ message: 'Address saved successfully!' });
-                    else alert('Address saved successfully! The page will reload.');
+                    if (window.Toast) {
+                        window.Toast.success({ message: 'Address saved successfully!' });
+                    } else {
+                        alert('Address saved successfully! The page will reload.');
+                    }
                     window.location.reload();
                 } else {
                     alert('Error saving address: ' + (result.message || 'Unknown error'));
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
-                    }
+                    resetSubmitBtn();
                 }
             })
-            .catch(error => {
+            .catch(function(error) {
                 console.error('Error:', error);
-                if (typeof showUniversalPopup === 'function') showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
-                else alert('Error saving address. Please try again.');
-
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
+                if (typeof showUniversalPopup === 'function') {
+                    showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
+                } else {
+                    alert('Error saving address. Please try again.');
                 }
+                resetSubmitBtn();
             });
-        });
-    }
-
-    if (cityField && countryField) {
-        cityField.addEventListener('change', function() {
-            const option = this.options[this.selectedIndex];
-            const country = option ? option.getAttribute('data-country') : '';
-            if (country) countryField.value = country;
         });
     }
 })();

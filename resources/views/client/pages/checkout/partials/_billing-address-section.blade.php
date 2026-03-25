@@ -89,52 +89,30 @@
                 </button>
             </div>
         @else
-            {{-- Guest billing manual fields --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('First Name') }}</label>
-                    <input type="text" id="billing_firstName" name="billing_firstName"
-                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Last Name') }}</label>
-                    <input type="text" id="billing_lastName" name="billing_lastName"
-                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Street Address') }}</label>
-                    <input type="text" id="billing_address_line" name="billing_address_line"
-                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }}</label>
-                    <input type="text" id="billing_city" name="billing_city"
-                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        {{ statictranslations('Postal Code') }}
-                        <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span>
-                    </label>
-                    <input type="text" id="billing_zip" name="billing_zip"
-                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-                    <input type="text" id="billing_country" name="billing_country" value="Morocco"
-                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-                </div>
+            {{--
+                Guests must log in to add addresses via the address model.
+                Billing will be copied from the shipping address (same-as-shipping is
+                checked by default). If they uncheck it and have no saved billing
+                address, validation will block submission.
+            --}}
+            <div class="text-center py-8 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border-2 border-dashed border-gray-300">
+                <svg class="w-10 h-10 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <p class="text-sm font-semibold text-gray-700 mb-1">{{ statictranslations('Billing address will match shipping') }}</p>
+                <p class="text-xs text-gray-500">{{ statictranslations('Log in to manage saved addresses') }}</p>
             </div>
         @endif
 
-        @if (Auth::check())
-            <input type="hidden" id="billing_firstName"    name="billing_firstName"    value="">
-            <input type="hidden" id="billing_lastName"     name="billing_lastName"     value="">
-            <input type="hidden" id="billing_address_line" name="billing_address_line" value="">
-            <input type="hidden" id="billing_city"         name="billing_city"         value="">
-            <input type="hidden" id="billing_zip"          name="billing_zip"          value="">
-            <input type="hidden" id="billing_country"      name="billing_country"      value="">
-            <input type="hidden" id="billing_phone"        name="billing_phone"        value="">
-        @endif
+        {{-- Hidden fields populated by JS (used for all auth states) --}}
+        <input type="hidden" id="billing_firstName"    name="billing_firstName"    value="">
+        <input type="hidden" id="billing_lastName"     name="billing_lastName"     value="">
+        <input type="hidden" id="billing_address_line" name="billing_address_line" value="">
+        <input type="hidden" id="billing_city"         name="billing_city"         value="">
+        <input type="hidden" id="billing_zip"          name="billing_zip"          value="">
+        <input type="hidden" id="billing_country"      name="billing_country"      value="">
+        <input type="hidden" id="billing_phone"        name="billing_phone"        value="">
     </div>
 </div>

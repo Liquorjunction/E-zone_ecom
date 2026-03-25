@@ -84,51 +84,28 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 {{ Auth::check() && $addresses->count() > 0 ? 'hidden' : '' }}"
-        id="manualAddressFields">
-        <div>
-            <label for="firstName" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('First Name') }} *</label>
-            <input type="text" id="firstName" name="firstName" required
-                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
+    {{--
+        Hidden fields always present: populated by JS when a saved address is selected.
+        Guests cannot add addresses inline — they must use the address model (modal).
+    --}}
+    @if (!Auth::check())
+        <div class="text-center py-10 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border-2 border-dashed border-gray-300">
+            <svg class="w-10 h-10 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <p class="text-sm font-semibold text-gray-700 mb-1">{{ statictranslations('Please log in to add a shipping address') }}</p>
+            <p class="text-xs text-gray-500">{{ statictranslations('Addresses are managed through your account') }}</p>
         </div>
-        <div>
-            <label for="lastName" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Last Name') }} *</label>
-            <input type="text" id="lastName" name="lastName" required
-                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-        </div>
-        <div class="md:col-span-2">
-            <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Street Address') }} *</label>
-            <input type="text" id="address" name="address" required
-                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-        </div>
-        <div>
-            <label for="city" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }} *</label>
-            <input type="text" id="city" name="city" required
-                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-        </div>
-        <div>
-            <label for="zip" class="block text-sm font-semibold text-gray-700 mb-2">
-                {{ statictranslations('Postal Code') }}
-                <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span>
-            </label>
-            <input type="text" id="zip" name="zip"
-                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-        </div>
-        <div>
-            <label for="country" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Country') }} *</label>
-            <input type="text" id="country" name="country" value="Morocco" required
-                class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all">
-        </div>
-    </div>
-
-    @if (Auth::check())
-        <label class="inline-flex items-center mt-5">
-            <input type="checkbox" name="save_address" value="1" class="form-checkbox h-4 w-4 text-primary rounded mr-3">
-            <span class="text-sm font-medium text-gray-700">{{ statictranslations('Save this address for future orders') }}</span>
-        </label>
     @endif
+
+    {{-- Hidden fields populated by JS when a saved address is selected --}}
+    <input type="hidden" id="firstName" name="firstName" value="">
+    <input type="hidden" id="lastName"  name="lastName"  value="">
+    <input type="hidden" id="address"   name="address"   value="">
+    <input type="hidden" id="city"      name="city"      value="">
+    <input type="hidden" id="zip"       name="zip"       value="">
+    <input type="hidden" id="country"   name="country"   value="">
+    <input type="hidden" id="phone"     name="phone"     value="">
 </div>
