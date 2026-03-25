@@ -1,39 +1,64 @@
+// ═══════════════════════════════════════════════════════════════
+//  GLOBAL UTILS & VALIDATION
+// ═══════════════════════════════════════════════════════════════
+if (typeof window.trans !== 'function') {
+    window.trans = function(key) {
+        if (window.translations && window.translations[key]) return window.translations[key];
+        return key;
+    };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('addAddressModal');
     if(modal) document.body.appendChild(modal);
 });
 
+// ═══════════════════════════════════════════════════════════════
+//  MAIN CHECKOUT PROCESSOR
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", function () {
     const root = document.getElementById("checkout-root");
     if (!root) return;
 
     const updateUrl = root.dataset.updateUrl;
     const removeUrl = root.dataset.removeUrl;
-    const csrf =
-        document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute("content") || "";
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "";
 
     let debounceTimers = {};
+    let goToStepTimer = null;
+    let stepLoader = null;
 
     function formatMoney(n) {
-        const symbol = window.env?.CURRENCY_SYMBOL || "$";
+        const sym = window.env?.CURRENCY_SYMBOL || "$";
         const num = typeof n === 'string' ? parseFloat(n.replace(/[,\s]/g, '')) : Number(n);
         const formatted = num.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        return symbol + ' ' + formatted;
+        return sym + ' ' + formatted;
     }
 
+    function getCurrentShippingMethod() {
+        const el = document.querySelector('input[name="shipping_method"]:checked');
+        return el ? el.value : "standard";
+    }
+
+    function showToast(message, type = "success") {
+        if (typeof showUniversalPopup === "function") {
+            showUniversalPopup(message, type, type === "error" ? 3000 : 2000);
+        } else if (window.Toast && typeof window.Toast[type] === "function") {
+            window.Toast[type]({ message: message });
+        } else {
+            console.log("[" + type + "]", message);
+        }
+    }
+
+    // --- Injected Stock & Quantity Handlers ---
     function showStockLimitMessage(max) {
         if (!max) return;
-        let message = '';
-        if (max === 1) {
-            message = trans('Only 1 item available in stock.');
-        } else {
-            message = trans('Only') + ' ' + max + ' ' + trans('items available in stock.');
-        }
+        let message = max === 1
+            ? trans('Only 1 item available in stock.')
+            : trans('Only') + ' ' + max + ' ' + trans('items available in stock.');
 
         if (window.Toast && typeof window.Toast.info === 'function') {
             window.Toast.info({ title: trans('Stock limit'), message: message });
@@ -44,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!banner) {
             banner = document.createElement('div');
             banner.id = 'stockLimitBanner';
-            banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-amber-500 text-white px-4 py-3 rounded-xl shadow-xl';
+            banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-amber-500 text-white px-4 py-3 rounded-xl shadow-xl transition-all duration-300';
             document.body.appendChild(banner);
         }
         banner.textContent = message;
@@ -75,7 +100,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const parsed = parseInt(raw || '', 10);
             if (!Number.isNaN(parsed) && parsed > 0) max = parsed;
         }
-
         return max;
     }
 
@@ -85,105 +109,702 @@ document.addEventListener("DOMContentLoaded", function () {
         return v;
     }
 
+    function debounceUpdate(id, quantity) {
+        if (debounceTimers[id]) clearTimeout(debounceTimers[id]);
+        debounceTimers[id] = setTimeout(() => { updateItem(id, quantity); }, 500);
+    }
+    // ------------------------------------------
+
+    function setFieldValue(nameOrId, value) {
+        var strVal = String(value || "");
+        var byId = document.getElementById(nameOrId);
+        if (byId) {
+            byId.value = strVal;
+            byId.setAttribute("value", strVal);
+        }
+        var form = document.getElementById("checkout-form");
+        if (form) {
+            var hidden = form.querySelector('input[type="hidden"][name="' + nameOrId + '"]');
+            if (hidden && hidden !== byId) {
+                hidden.value = strVal;
+                hidden.setAttribute("value", strVal);
+            }
+        }
+    }
+
+    function flashFields(ids) {
+        ids.forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.value) {
+                el.style.transition = "background-color 0.3s ease";
+                el.style.backgroundColor = "rgba(34, 197, 94, 0.1)";
+                setTimeout(function () { el.style.backgroundColor = ""; }, 800);
+            }
+        });
+    }
+
+    function splitName(fullName) {
+        var parts = String(fullName || "").trim().split(/\s+/).filter(Boolean);
+        return { firstName: parts[0] || "", lastName: parts.slice(1).join(" ") };
+    }
+
+    function readAddressDataFromOption(opt) {
+        if (!opt || !opt.value) return null;
+        return {
+            name:       opt.dataset.name       || "",
+            street:     opt.dataset.street     || "",
+            city:       opt.dataset.city       || "",
+            postalCode: opt.dataset.postalCode || "",
+            country:    opt.dataset.country    || "Morocco",
+            phone:      opt.dataset.phone      || "",
+        };
+    }
+
+    function showValidationError(element, message) {
+        clearValidationErrorFor(element);
+        var errorDiv = document.createElement("p");
+        errorDiv.className = "validation-error mt-2 text-sm text-red-600 font-semibold flex items-center gap-1";
+        errorDiv.innerHTML =
+            '<svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">' +
+            '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>' +
+            "</svg>" + message;
+        element.classList.add("border-red-500", "border-2", "bg-red-50");
+        element.classList.remove("border-gray-200");
+        if (element.parentElement) element.parentElement.appendChild(errorDiv);
+    }
+
+    function clearValidationErrorFor(element) {
+        if (!element || !element.parentElement) return;
+        var existing = element.parentElement.querySelector(".validation-error");
+        if (existing) existing.remove();
+        element.classList.remove("border-red-500", "border-2", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
+        element.classList.add("border-gray-200");
+    }
+
+    function clearAllValidationErrors() {
+        document.querySelectorAll(".validation-error").forEach(function (e) { e.remove(); });
+        document.querySelectorAll(".border-red-500").forEach(function (f) {
+            f.classList.remove("border-red-500", "border-2", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
+            f.classList.add("border-gray-200");
+        });
+    }
+
+    function updateProgressBar(step) {
+        var fill = document.getElementById("progress-bar-fill");
+        if (fill) {
+            fill.className = fill.className.replace(/bg-linear[^\s]*/g, "").replace(/from-[^\s]*/g, "").replace(/to-[^\s]*/g, "").trim();
+            if (step === 2) {
+                fill.classList.add("bg-linear-to-r", "from-primary", "to-primary/80");
+                fill.style.width = "calc(50% - 8%)";
+                fill.style.marginLeft = "8%";
+            } else if (step === 3) {
+                fill.classList.add("bg-linear-to-r", "from-green-500", "to-green-400");
+                fill.style.width = "calc(100% - 16%)";
+                fill.style.marginLeft = "8%";
+            } else {
+                fill.style.width = "0";
+            }
+        }
+        document.querySelectorAll("[data-step-circle]").forEach(function (circle) {
+            var num = parseInt(circle.dataset.stepCircle);
+            circle.className = circle.className.replace(/bg-linear[^\s]*/g, "").replace(/from-[^\s]*/g, "").replace(/to-[^\s]*/g, "").replace(/ring-[^\s]*/g, "").replace(/text-(?:white|gray-600)/g, "").replace(/bg-gray-200/g, "").trim();
+            if (num === step) {
+                circle.classList.add("bg-linear-to-br", "from-primary", "to-primary/80", "text-white", "ring-4", "ring-primary/20");
+            } else if (num < step) {
+                circle.classList.add("bg-linear-to-br", "from-green-500", "to-green-400", "text-white");
+            } else {
+                circle.classList.add("bg-gray-200", "text-gray-600");
+            }
+        });
+        root.dataset.step = step;
+    }
+
+    async function goToStep(step) {
+    // Debounce: prevent rapid multiple calls
+    if (goToStepTimer) {
+        clearTimeout(goToStepTimer);
+    }
+    goToStepTimer = setTimeout(async () => {
+        var routes  = window.__checkoutRoutes || {};
+        var showUrl = routes.show || window.location.pathname;
+        var content = document.getElementById("checkout-step-content");
+        // Show loader animation
+        if (content) {
+            if (!stepLoader) {
+                stepLoader = document.createElement("div");
+                stepLoader.className = "flex items-center justify-center py-12";
+                stepLoader.innerHTML = `<svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            }
+            content.innerHTML = "";
+            content.appendChild(stepLoader);
+        }
+        try {
+            var resp = await fetch(showUrl + "?step=" + step, {
+                credentials: "same-origin",
+                headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json", "X-CSRF-TOKEN": csrf },
+            });
+            var data = await resp.json();
+            if (data.redirect) { window.location.href = data.redirect; return; }
+            if (data.html) {
+                if (content) content.innerHTML = data.html;
+                updateProgressBar(step);
+                runStepInits();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        } catch (e) {
+            console.error("goToStep failed", e);
+            showToast("Navigation failed. Please refresh the page.", "error");
+        }
+    }, 250); // 250ms debounce
+}
+
+    function validateStep2() {
+        clearAllValidationErrors();
+        var hasErrors = false;
+
+        var email = document.getElementById("email");
+        var phone = document.getElementById("phone");
+
+        if (email && !email.value.trim()) { showValidationError(email, "Email address is required"); hasErrors = true; }
+        if (phone && !phone.value.trim()) { showValidationError(phone, "Phone number is required"); hasErrors = true; }
+
+        var shippingSelect = document.getElementById("shippingAddressSelect");
+        var manualFirst    = document.getElementById("firstName");
+
+        if (shippingSelect) {
+            if (!shippingSelect.value) { showValidationError(shippingSelect, "Please select a shipping address"); hasErrors = true; }
+        } else if (manualFirst) {
+            ["firstName", "lastName", "address", "city", "country"].forEach(function (id) {
+                var f = document.getElementById(id);
+                if (f && !f.value.trim()) { showValidationError(f, "This field is required"); hasErrors = true; }
+            });
+        }
+
+        var billingSame    = document.getElementById("billingSameAsShipping");
+        var billingFields  = document.getElementById("billingFields");
+        var billingSelect  = document.getElementById("billingAddressSelect");
+
+        var billingVisible = billingSame ? !billingSame.checked : true;
+
+        if (billingVisible && billingFields && !billingFields.classList.contains("hidden")) {
+            if (billingSelect) {
+                if (!billingSelect.value) { showValidationError(billingSelect, "Please select a billing address"); hasErrors = true; }
+            } else {
+                ["billing_firstName", "billing_address_line", "billing_city"].forEach(function (id) {
+                    var f = document.getElementById(id);
+                    if (f && !f.value.trim()) { showValidationError(f, "This field is required"); hasErrors = true; }
+                });
+            }
+        }
+
+        var paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        if (!paymentMethod) { showToast("Please select a payment method.", "error"); hasErrors = true; }
+
+        if (hasErrors) {
+            var firstError = document.querySelector(".validation-error");
+            if (firstError) firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return !hasErrors;
+    }
+
+    function copyShippingToBillingHidden() {
+        var form = document.getElementById("checkout-form");
+        if (!form) return;
+        var map = {
+            billing_firstName:    document.getElementById("firstName")?.value    || "",
+            billing_lastName:     document.getElementById("lastName")?.value     || "",
+            billing_address_line: document.getElementById("address")?.value      || "",
+            billing_city:         document.getElementById("city")?.value         || "",
+            billing_zip:          document.getElementById("zip")?.value          || "",
+            billing_country:      document.getElementById("country")?.value      || "Morocco",
+            billing_phone:        document.getElementById("phone")?.value        || "",
+        };
+
+        Object.entries(map).forEach(function ([name, val]) {
+            var h = form.querySelector('input[type="hidden"][name="' + name + '"]');
+            if (h) { h.value = val; h.setAttribute("value", val); }
+        });
+    }
+
+    function syncBillingSameFlag() {
+        var checkbox = document.getElementById("billingSameAsShipping");
+        var form     = document.getElementById("checkout-form");
+        if (!form || !checkbox) return;
+        var hiddenFlag = form.querySelector('input[type="hidden"][name="billing_same_as_shipping"]');
+
+        if (checkbox.checked) {
+            if (hiddenFlag) hiddenFlag.remove();
+            copyShippingToBillingHidden();
+        } else {
+            if (!hiddenFlag) {
+                hiddenFlag = document.createElement("input");
+                hiddenFlag.type  = "hidden";
+                hiddenFlag.name  = "billing_same_as_shipping";
+                hiddenFlag.value = "0";
+                form.appendChild(hiddenFlag);
+            }
+        }
+    }
+
+    async function submitCheckout() {
+        if (!validateStep2()) return;
+        syncBillingSameFlag();
+
+        var form = document.getElementById("checkout-form");
+        if (!form) return;
+
+        var btn = document.getElementById("placeOrderBtn");
+        if (btn) { btn.disabled = true; btn.textContent = "Processing…"; }
+
+        var routes     = window.__checkoutRoutes || {};
+        var processUrl = routes.process || form.action;
+
+        try {
+            var resp = await fetch(processUrl, {
+                method: "POST", credentials: "same-origin",
+                headers: { "X-CSRF-TOKEN": csrf, "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
+                body: new FormData(form),
+            });
+            var data = await resp.json();
+
+            if (data.success && data.html) {
+                var content = document.getElementById("checkout-step-content");
+                if (content) content.innerHTML = data.html;
+                updateProgressBar(3);
+                window.__checkoutSubmitting = false;
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+                if (data.errors) {
+                    Object.entries(data.errors).forEach(function ([field, messages]) {
+                        var el = document.getElementById(field) || document.querySelector('[name="' + field + '"]');
+                        if (el) showValidationError(el, messages[0]);
+                    });
+                    var first = document.querySelector(".validation-error");
+                    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+                if (data.html) {
+                    var content = document.getElementById("checkout-step-content");
+                    if (content) content.innerHTML = data.html;
+                    updateProgressBar(3);
+                }
+                showToast(data.message || "Order could not be placed. Please check the form.", "error");
+            }
+        } catch (e) {
+            showToast("A network error occurred. Please try again.", "error");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML =
+                    "Place Secure Order " +
+                    '<svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" ' +
+                    'd="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>';
+            }
+        }
+    }
+
+    function updateSummary(summary) {
+        if (!summary) return;
+
+        const finalTot   = summary.final_total ?? summary.total ?? 0;
+        const subTot     = summary.subtotal ?? 0;
+        const itemDisc   = summary.total_item_discount ?? summary.item_discount ?? 0;
+        const couponDisc = summary.coupon_discount ?? 0;
+        const shipCost   = summary.shipping_cost ?? summary.shipping ?? 0;
+
+        // The Blade uses IDs with "" (Step 1) and "-step2" (Step 2)
+        ["", "-step2"].forEach(suffix => {
+            const elSub = document.getElementById("order-subtotal" + suffix);
+            if (elSub) elSub.textContent = formatMoney(subTot);
+
+            const elDisc  = document.getElementById("order-discount" + suffix);
+            const rowDisc = document.getElementById("item-discount-row" + suffix);
+            if (elDisc && rowDisc) {
+                if (itemDisc > 0) {
+                    elDisc.textContent = "-" + formatMoney(itemDisc);
+                    rowDisc.style.display = ""; // flex
+                } else {
+                    rowDisc.style.display = "none";
+                }
+            }
+
+            const elCoup  = document.getElementById("order-coupon-discount" + suffix);
+            const rowCoup = document.getElementById("coupon-discount-row" + suffix);
+            if (elCoup && rowCoup) {
+                if (couponDisc > 0) {
+                    elCoup.textContent = "-" + formatMoney(couponDisc);
+                    rowCoup.style.display = ""; // flex
+                } else {
+                    rowCoup.style.display = "none";
+                }
+            }
+
+            const elShip = document.getElementById("order-shipping" + suffix);
+            if (elShip) elShip.textContent = shipCost > 0 ? formatMoney(shipCost) : trans("FREE");
+
+            const elTot = document.getElementById("order-total" + suffix);
+            if (elTot) elTot.textContent = formatMoney(finalTot);
+        });
+
+        // Update main Item Count Span
+        const countEl = document.getElementById("item-total-count");
+        if (countEl && summary.itemCount !== undefined) {
+            countEl.textContent = summary.itemCount + (summary.itemCount === 1 ? " Item" : " Items");
+        }
+    }
+
+    async function updateItem(itemId, quantity) {
+        if (!updateUrl) return;
+        try {
+            var resp = await fetch(updateUrl, {
+                method: "POST", credentials: "same-origin",
+                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
+                body: JSON.stringify({ item_id: itemId, quantity: Number(quantity), shipping_method: getCurrentShippingMethod() }),
+            });
+            var data = await resp.json();
+            if (!data || !data.success) return;
+
+            var lineEl = document.getElementById("item-line-total-" + itemId);
+            if (lineEl && data.item && data.item.line_total !== undefined) {
+                lineEl.textContent = formatMoney(data.item.line_total);
+            }
+            document.querySelectorAll('[data-summary-item-id="' + itemId + '"] .summary-item-price')
+                .forEach(function (el) {
+                    if (data.item && data.item.line_total !== undefined) el.textContent = formatMoney(data.item.line_total);
+                });
+            document.querySelectorAll('[data-summary-item-id="' + itemId + '"] .summary-quantity')
+                .forEach(function (el) { el.textContent = quantity; });
+
+            var cartRow = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
+            if (cartRow && data.item && data.item.discount) {
+                var sym   = window.env?.CURRENCY_SYMBOL || "$";
+                var badge = cartRow.querySelector(".inline-flex.items-center.text-xs.font-semibold.text-green-700");
+                if (data.item.discount.has_discount && data.item.discount.discount_amount > 0) {
+                    var saveAmt = (data.item.discount.discount_amount * quantity).toFixed(2);
+                    if (badge) {
+                        var txt = badge.querySelector("svg")?.nextSibling;
+                        if (txt) txt.textContent = " Save " + sym + " " + saveAmt;
+                    } else {
+                        var pc = cartRow.querySelector(".text-right");
+                        if (pc) {
+                            var nb = document.createElement("div");
+                            nb.className = "inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1";
+                            nb.innerHTML = '<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Save ' + sym + ' ' + saveAmt;
+                            pc.insertBefore(nb, pc.firstChild);
+                        }
+                    }
+                } else if (badge) { badge.remove(); }
+            }
+            updateSummary(data.summary);
+
+            if (data.summary && typeof data.summary.itemCount !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
+            }
+        } catch (e) { console.error("updateItem failed", e); }
+    }
+
+    async function refreshTotalsForShipping() {
+        if (!updateUrl) return;
+        var firstInput = document.querySelector(".cart-quantity-input[data-item-id]");
+        if (firstInput) {
+            await updateItem(firstInput.dataset.itemId, Math.max(1, Number(firstInput.value || 1)));
+            return;
+        }
+        try {
+            var resp = await fetch(updateUrl, {
+                method: "POST", credentials: "same-origin",
+                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
+                body: JSON.stringify({ shipping_method: getCurrentShippingMethod() }),
+            });
+            var data = await resp.json();
+            if (resp.ok && data && data.success) updateSummary(data.summary);
+        } catch (e) { console.error("refreshTotalsForShipping failed", e); }
+    }
+
+    async function removeItem(itemId) {
+        if (!removeUrl) return submitFallback(itemId);
+        try {
+            var resp = await fetch(removeUrl, {
+                method: "POST", credentials: "same-origin",
+                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
+                body: JSON.stringify({ item_id: itemId, shipping_method: getCurrentShippingMethod() }),
+            });
+            var data = await resp.json();
+            if (data && data.success) {
+                var mainRow    = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
+                var summaryRow = document.querySelector('[data-summary-item-id="' + itemId + '"]');
+                if (mainRow)    mainRow.remove();
+                if (summaryRow) summaryRow.remove();
+                updateSummary(data.summary);
+
+                if (data.summary && typeof data.summary.itemCount !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
+                }
+                showToast(data.message || "Item removed from cart.", "success");
+            } else { submitFallback(itemId); }
+        } catch (e) {
+            submitFallback(itemId);
+            showToast("Failed to remove item.", "error");
+        }
+    }
+
+    function submitFallback(itemId) {
+        var existing = document.getElementById("remove-item-" + itemId);
+        if (existing) { try { existing.submit(); } catch (e) { console.error(e); } return; }
+        try {
+            var form  = document.createElement("form");
+            form.method = "POST";
+            form.action = removeUrl || window.location.href;
+            form.style.display = "none";
+            form.id = "remove-item-" + itemId;
+
+            var token = document.createElement("input");
+            token.type = "hidden"; token.name = "_token"; token.value = csrf;
+            form.appendChild(token);
+
+            var iid = document.createElement("input");
+            iid.type = "hidden"; iid.name = "item_id"; iid.value = itemId;
+            form.appendChild(iid);
+
+            document.body.appendChild(form);
+            form.submit();
+        } catch (e) { console.error("submitFallback failed", e); }
+    }
+
+    function initShippingAddressSelect() {
+        var sel = document.getElementById("shippingAddressSelect");
+        if (!sel || sel.dataset.bound) return;
+        sel.dataset.bound = "1";
+
+        sel.addEventListener("change", function () {
+            var addr    = readAddressDataFromOption(this.options[this.selectedIndex]);
+            var display = document.getElementById("selectedShippingDisplay");
+
+            if (!addr || !addr.name) {
+                ["firstName","lastName","address","city","zip","country"].forEach(function (id) {
+                    setFieldValue(id, "");
+                });
+                if (display) display.classList.add("hidden");
+                return;
+            }
+
+            var n = splitName(addr.name);
+            setFieldValue("firstName", n.firstName);
+            setFieldValue("lastName",  n.lastName);
+            setFieldValue("address",   addr.street);
+            setFieldValue("city",      addr.city);
+            setFieldValue("zip",       addr.postalCode);
+            setFieldValue("country",   addr.country);
+            setFieldValue("phone",     addr.phone);
+
+            if (display) {
+                var nameEl   = document.getElementById("displayShippingName");
+                var streetEl = document.getElementById("displayShippingStreet");
+                var cityEl   = document.getElementById("displayShippingCity");
+                if (nameEl)   nameEl.textContent   = addr.name;
+                if (streetEl) streetEl.textContent = addr.street;
+                if (cityEl)   cityEl.textContent   = [addr.city, addr.postalCode].filter(Boolean).join(", ");
+                display.classList.remove("hidden");
+            }
+
+            flashFields(["firstName", "lastName", "address", "city", "zip", "country"]);
+
+            var sameChk = document.getElementById("billingSameAsShipping");
+            if (sameChk && sameChk.checked) {
+                setTimeout(copyShippingToBillingHidden, 50);
+            }
+        });
+
+        var manualIds = ["firstName", "lastName", "address", "city", "zip", "country"];
+        manualIds.forEach(function (id) {
+            var input = document.getElementById(id);
+            if (input) input.required = false;
+        });
+        sel.required = true;
+        if (sel.value) sel.dispatchEvent(new Event("change"));
+    }
+
+    function initBillingAddressSelect() {
+        var sel = document.getElementById("billingAddressSelect");
+        if (!sel || sel.dataset.bound) return;
+        sel.dataset.bound = "1";
+
+        sel.addEventListener("change", function () {
+            var addr    = readAddressDataFromOption(this.options[this.selectedIndex]);
+            var display = document.getElementById("selectedBillingDisplay");
+            var form    = document.getElementById("checkout-form");
+
+            if (!addr || !addr.name) {
+                if (display) display.classList.add("hidden");
+                clearBillingHiddenFields();
+                return;
+            }
+
+            var n = splitName(addr.name);
+            var billingMap = {
+                billing_firstName:    n.firstName,
+                billing_lastName:     n.lastName,
+                billing_address_line: addr.street,
+                billing_city:         addr.city,
+                billing_zip:          addr.postalCode,
+                billing_country:      addr.country,
+                billing_phone:        addr.phone,
+            };
+
+            Object.entries(billingMap).forEach(function ([name, val]) {
+                if (form) {
+                    var h = form.querySelector('input[type="hidden"][name="' + name + '"]');
+                    if (h) { h.value = val; h.setAttribute("value", val); }
+                }
+                var vis = document.getElementById(name);
+                if (vis && vis.type !== "hidden") { vis.value = val; }
+            });
+
+            if (display) {
+                var nameEl   = document.getElementById("displayBillingName");
+                var streetEl = document.getElementById("displayBillingStreet");
+                var cityEl   = document.getElementById("displayBillingCity");
+                if (nameEl)   nameEl.textContent   = addr.name;
+                if (streetEl) streetEl.textContent = addr.street;
+                if (cityEl)   cityEl.textContent   = [addr.city, addr.postalCode].filter(Boolean).join(", ");
+                display.classList.remove("hidden");
+            }
+        });
+
+        if (sel.value) sel.dispatchEvent(new Event("change"));
+    }
+
+    function clearBillingHiddenFields() {
+        var form = document.getElementById("checkout-form");
+        if (!form) return;
+        ["billing_firstName","billing_lastName","billing_address_line", "billing_city","billing_zip","billing_country","billing_phone"].forEach(function (name) {
+            var h = form.querySelector('input[type="hidden"][name="' + name + '"]');
+            if (h) { h.value = ""; h.setAttribute("value", ""); }
+        });
+    }
+
+    function initBillingToggle() {
+        var checkbox = document.getElementById("billingSameAsShipping");
+        var fields   = document.getElementById("billingFields");
+        if (!checkbox || !fields || checkbox.dataset.bound) return;
+        checkbox.dataset.bound = "1";
+
+        function applyToggle() {
+            var same = checkbox.checked;
+            fields.classList.toggle("hidden", same);
+
+            if (same) {
+                copyShippingToBillingHidden();
+                var form = document.getElementById("checkout-form");
+                if (form) {
+                    var hiddenFlag = form.querySelector('input[type="hidden"][name="billing_same_as_shipping"]');
+                    if (hiddenFlag) hiddenFlag.remove();
+                }
+            }
+        }
+        checkbox.addEventListener("change", applyToggle);
+        setTimeout(applyToggle, 150);
+    }
+
+    function initPaymentMethodToggle() {
+        document.querySelectorAll('input[name="payment_method"]').forEach(function (r) {
+            if (!r.dataset.bound) {
+                r.dataset.bound = "1";
+                r.addEventListener("change", syncCardDetailsVisibility);
+            }
+        });
+    }
+
+    function syncCardDetailsVisibility() {
+        var sel     = document.querySelector('input[name="payment_method"]:checked')?.value;
+        var details = document.getElementById("cardDetails");
+        if (!details) return;
+        details.style.display = sel === "card" ? "" : "none";
+        const inputs = details.querySelectorAll("input, select");
+        inputs.forEach((input) => {
+            if (sel === "card") input.setAttribute("required", "required");
+            else input.removeAttribute("required");
+        });
+    }
+
+    function runStepInits() {
+        initShippingAddressSelect();
+        initBillingAddressSelect();
+        initBillingToggle();
+        initPaymentMethodToggle();
+        syncCardDetailsVisibility();
+    }
+
+    // --- Click Listeners (Injected Max Stock) ---
     root.addEventListener("click", function (e) {
-        const target = e.target;
+        var spaBtn = e.target.closest("[data-spa-step]");
+        if (spaBtn) { e.preventDefault(); goToStep(parseInt(spaBtn.dataset.spaStep, 10)); return; }
 
-        const removeBtn = target.closest(".remove-item-btn, .remove-item-ajax");
-        if (removeBtn) {
-            e.preventDefault();
-            const id = removeBtn.dataset.itemId;
-            if (id) removeItem(id);
+        if (e.target.closest("#placeOrderBtn")) { e.preventDefault(); submitCheckout(); return; }
+
+        var qtyInc = e.target.closest(".qty-increase");
+        if (qtyInc) {
+            var id    = qtyInc.dataset.itemId;
+            var input = root.querySelector('.cart-quantity-input[data-item-id="' + id + '"]');
+            if (!input) return;
+            var max    = getMaxStockForItem(id);
+            var newVal = Number(input.value || 0) + 1;
+            if (max) newVal = Math.min(newVal, max);
+            input.value = newVal;
+            if (max && newVal === max) showStockLimitMessage(max);
+            debounceUpdate(id, newVal);
             return;
         }
 
-        const increaseBtn = target.closest(".qty-increase");
-        if (increaseBtn) {
-            e.preventDefault();
-            const id = increaseBtn.dataset.itemId;
-            const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
-            if (input) {
-                const max = getMaxStockForItem(id);
-                let newVal = Number(input.value || 0) + 1;
-                if (max) newVal = Math.min(newVal, max);
-                input.value = newVal;
-                if (max && newVal === max) showStockLimitMessage(max);
-                debounceUpdate(id, newVal);
-            }
+        var qtyDec = e.target.closest(".qty-decrease");
+        if (qtyDec) {
+            var id    = qtyDec.dataset.itemId;
+            var input = root.querySelector('.cart-quantity-input[data-item-id="' + id + '"]');
+            if (!input) return;
+            var newVal = Math.max(1, Number(input.value || 1) - 1);
+            input.value = newVal;
+            debounceUpdate(id, newVal);
             return;
         }
 
-        const decreaseBtn = target.closest(".qty-decrease");
-        if (decreaseBtn) {
-            e.preventDefault();
-            const id = decreaseBtn.dataset.itemId;
-            const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
-            if (input) {
-                let newVal = Math.max(1, Number(input.value || 1) - 1);
-                input.value = newVal;
-                debounceUpdate(id, newVal);
-            }
-            return;
-        }
-
-        const summaryIncreaseBtn = target.closest(".summary-qty-increase");
-        if (summaryIncreaseBtn) {
-            e.preventDefault();
+        var sumInc = e.target.closest(".summary-qty-increase");
+        if (sumInc) {
             if (root.dataset.step === '3') return;
-
-            const id = summaryIncreaseBtn.dataset.itemId;
-            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
-            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
-
-            if (mainInput) {
-                const max = getMaxStockForItem(id);
-                let newVal = Number(mainInput.value || 0) + 1;
-                if (max) newVal = Math.min(newVal, max);
-                mainInput.value = newVal;
-                if (quantityDisplay) quantityDisplay.textContent = newVal;
-                if (max && newVal === max) showStockLimitMessage(max);
-                debounceUpdate(id, newVal);
-            } else if (quantityDisplay) {
-                const max = getMaxStockForItem(id);
-                let newVal = Number(quantityDisplay.textContent || 0) + 1;
-                if (max) newVal = Math.min(newVal, max);
-                quantityDisplay.textContent = newVal;
-                if (max && newVal === max) showStockLimitMessage(max);
-                debounceUpdate(id, newVal);
-            }
+            var id   = sumInc.dataset.itemId;
+            var row  = root.querySelector('[data-summary-item-id="' + id + '"]');
+            var span = row ? row.querySelector(".summary-quantity") : null;
+            if (!span) return;
+            var max    = getMaxStockForItem(id);
+            var newVal = Number(span.textContent || 1) + 1;
+            if (max) newVal = Math.min(newVal, max);
+            span.textContent = newVal;
+            var mi = root.querySelector('.cart-quantity-input[data-item-id="' + id + '"]');
+            if (mi) mi.value = newVal;
+            if (max && newVal === max) showStockLimitMessage(max);
+            debounceUpdate(id, newVal);
             return;
         }
 
-        const summaryDecreaseBtn = target.closest(".summary-qty-decrease");
-        if (summaryDecreaseBtn) {
-            e.preventDefault();
+        var sumDec = e.target.closest(".summary-qty-decrease");
+        if (sumDec) {
             if (root.dataset.step === '3') return;
-
-            const id = summaryDecreaseBtn.dataset.itemId;
-            const quantityDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
-            const mainInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
-
-            if (mainInput) {
-                let newVal = Math.max(1, Number(mainInput.value || 1) - 1);
-                mainInput.value = newVal;
-                if (quantityDisplay) quantityDisplay.textContent = newVal;
-                debounceUpdate(id, newVal);
-            } else if (quantityDisplay) {
-                let newVal = Math.max(1, Number(quantityDisplay.textContent || 1) - 1);
-                quantityDisplay.textContent = newVal;
-                debounceUpdate(id, newVal);
-            }
+            var id   = sumDec.dataset.itemId;
+            var row  = root.querySelector('[data-summary-item-id="' + id + '"]');
+            var span = row ? row.querySelector(".summary-quantity") : null;
+            if (!span) return;
+            var newVal = Math.max(1, Number(span.textContent || 1) - 1);
+            span.textContent = newVal;
+            var mi = root.querySelector('.cart-quantity-input[data-item-id="' + id + '"]');
+            if (mi) mi.value = newVal;
+            debounceUpdate(id, newVal);
             return;
         }
 
-        const summaryRemoveBtn = target.closest(".summary-remove-item-btn");
-        if (summaryRemoveBtn) {
-            e.preventDefault();
-            const id = summaryRemoveBtn.dataset.itemId;
-            if (id) removeItem(id);
-            return;
-        }
+        var removeBtn = e.target.closest(".remove-item-btn, .remove-item-ajax, .summary-remove-item-btn");
+        if (removeBtn && removeBtn.dataset.itemId) { removeItem(removeBtn.dataset.itemId); return; }
     });
 
+    // --- Input Listener for Real-Time Quantity Debouncing ---
     root.addEventListener("input", function (e) {
         if (e.target.classList.contains("cart-quantity-input")) {
             const id = e.target.dataset.itemId;
@@ -195,639 +816,54 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    const addressSelect = document.getElementById("savedAddressSelect");
-    if (addressSelect) {
-        addressSelect.addEventListener("change", function () {
-            const opt = this.options[this.selectedIndex];
-            const fieldIds = ["firstName", "lastName", "address", "city", "state", "zip", "phone", "email"];
-
-            if (!opt || !opt.dataset || !opt.dataset.addr) {
-                fieldIds.forEach((id) => {
-                    const el = document.getElementById(id);
-                    if (el) el.value = "";
-                });
-                return;
-            }
-
-            try {
-                const addr = JSON.parse(opt.dataset.addr);
-                const mapping = {
-                    firstName: addr.first_name,
-                    lastName: addr.last_name,
-                    address: addr.street || addr.address,
-                    city: addr.city,
-                    state: addr.state || addr.region,
-                    zip: addr.postal_code || addr.zip,
-                    phone: addr.phone,
-                    email: addr.email,
-                };
-
-                for (const [id, val] of Object.entries(mapping)) {
-                    const el = document.getElementById(id);
-                    if (el && val) {
-                        el.value = val;
-                        el.style.transition = "background-color 0.3s ease";
-                        el.style.backgroundColor = "rgba(34, 197, 94, 0.1)";
-                        setTimeout(() => (el.style.backgroundColor = ""), 500);
-                    }
-                }
-            } catch (e) {
-                console.error("Error parsing address data", e);
-            }
-        });
-    }
-
-    function updateCardDetailsVisibility() {
-        const selected = document.querySelector('input[name="payment_method"]:checked');
-        const cardWrapper = document.getElementById("card-details-wrapper") || document.getElementById("cardDetails");
-
-        if (cardWrapper) {
-            cardWrapper.style.display = selected && selected.value === "card" ? "block" : "none";
-            const inputs = cardWrapper.querySelectorAll("input, select");
-            inputs.forEach((input) => {
-                if (selected && selected.value === "card") {
-                    input.setAttribute("required", "required");
-                } else {
-                    input.removeAttribute("required");
-                }
-            });
-        }
-    }
-
-    document.querySelectorAll('input[name="payment_method"]').forEach((radio) => {
-        radio.addEventListener("change", updateCardDetailsVisibility);
-    });
-    updateCardDetailsVisibility();
-
-    function debounceUpdate(id, quantity) {
-        if (debounceTimers[id]) clearTimeout(debounceTimers[id]);
-        debounceTimers[id] = setTimeout(() => { updateItem(id, quantity); }, 500);
-    }
-
-    function getCurrentShippingMethod() {
-        const shippingMethodEl = document.querySelector('input[name="shipping_method"]:checked');
-        return shippingMethodEl ? shippingMethodEl.value : 'standard';
-    }
-
-    async function refreshTotalsForShipping() {
-        const firstCartInput = root.querySelector('.cart-quantity-input[data-item-id]');
-        if (!firstCartInput) {
-            await requestSummaryRefresh();
-            return;
-        }
-        const itemId = firstCartInput.dataset.itemId;
-        const quantity = Number(firstCartInput.value || 1);
-        if (!itemId) return;
-        await updateItem(itemId, quantity);
-    }
-
-    async function requestSummaryRefresh() {
-        if (!updateUrl) return;
-        try {
-            const resp = await fetch(updateUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
-                body: JSON.stringify({ shipping_method: getCurrentShippingMethod() }),
-            });
-            const data = await resp.json();
-            if (resp.ok && data?.success && data?.summary) updateSummary(data.summary);
-        } catch (e) {
-            console.error("Failed to refresh summary for shipping", e);
-        }
-    }
-
-    document.querySelectorAll('input[name="shipping_method"]').forEach((radio) => {
-        radio.addEventListener("change", refreshTotalsForShipping);
+    // --- Change Listeners ---
+    root.addEventListener("change", function (e) {
+        if (e.target.name === "shipping_method") { refreshTotalsForShipping(); return; }
+        if (e.target.name === "payment_method")  { syncCardDetailsVisibility(); return; }
     });
 
-    async function updateItem(id, quantity) {
-        if (!updateUrl) return;
-        const shippingMethod = getCurrentShippingMethod();
+    var allowNavigation = false;
 
-        try {
-            const resp = await fetch(updateUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
-                body: JSON.stringify({ id, item_id: id, quantity, shipping_method: shippingMethod }),
-            });
+    function isCouponApplied() {
+        return !!document.querySelector('[id^="applied-coupon-display"], [id^="remove-coupon-btn"]');
+    }
 
-            let data = null;
-            try { data = await resp.json(); } catch (e) { data = null; }
-
-            if (!resp.ok) {
-                const maxStock = data?.item?.max_stock || data?.max_stock;
-                if (maxStock) {
-                    const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
-                    if (input) input.value = Math.min(Number(input.value || 1), maxStock);
-                    const summaryQtyDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
-                    if (summaryQtyDisplay) summaryQtyDisplay.textContent = Math.min(Number(summaryQtyDisplay.textContent || 1), maxStock);
-                    showStockLimitMessage(maxStock);
-                }
-                throw new Error(data?.message || ("Server returned " + resp.status));
-            }
-
-            if (data.success) {
-                if (data.item?.max_stock) {
-                    const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
-                    if (input) { input.setAttribute('max', data.item.max_stock); input.dataset.maxStock = data.item.max_stock; }
-                    const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
-                    if (summaryRow) summaryRow.dataset.maxStock = data.item.max_stock;
-                }
-
-                const cartRow = document.querySelector(`.cart-item-row[data-item-id="${id}"]`);
-                const lineTotalEl = document.querySelector(`#item-line-total-${id}`);
-                if (lineTotalEl && data.item?.discount) {
-                    if (data.item.discount.has_discount) {
-                        const discountedLineTotal = data.item.discount.line_total_after_discount ?? data.item.line_total ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
-                        lineTotalEl.textContent = formatMoney(discountedLineTotal);
-                    } else {
-                        lineTotalEl.textContent = formatMoney(data.item.line_total);
-                    }
-                } else if (lineTotalEl && data.item?.line_total) {
-                    lineTotalEl.textContent = formatMoney(data.item.line_total);
-                }
-
-                if (cartRow && data.item?.discount) {
-                    const discountBadge = cartRow.querySelector('.inline-flex.items-center.text-xs.font-semibold.text-green-700');
-                    if (data.item.discount.has_discount && data.item.discount.discount_amount > 0) {
-                        if (discountBadge) {
-                            const discountText = discountBadge.querySelector('svg').nextSibling;
-                            if (discountText) discountText.textContent = ` Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
-                        } else {
-                            const priceContainer = cartRow.querySelector('.text-right');
-                            if (priceContainer) {
-                                const newBadge = document.createElement('div');
-                                newBadge.className = 'inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1';
-                                newBadge.innerHTML = `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
-                                priceContainer.insertBefore(newBadge, priceContainer.firstChild);
-                            }
-                        }
-                    } else if (discountBadge) {
-                        discountBadge.remove();
-                    }
-                }
-
-                const summaryQtyDisplay = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-quantity`);
-                const cartInput = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
-                if (summaryQtyDisplay && cartInput) summaryQtyDisplay.textContent = cartInput.value;
-
-                const summaryItemPrice = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"] .summary-item-price`);
-                if (summaryItemPrice && data.item?.discount) {
-                    if (data.item.discount.has_discount) {
-                        const discountedLineTotal = data.item.discount.line_total_after_discount ?? data.item.line_total ?? ((Number(data.item.final_price ?? data.item.unit_price ?? 0)) * Number(data.item.quantity ?? quantity));
-                        summaryItemPrice.textContent = formatMoney(discountedLineTotal);
-                    } else {
-                        summaryItemPrice.textContent = formatMoney(data.item.line_total);
-                    }
-                }
-
-                updateSummary(data.summary);
-
-                if (data.summary && typeof data.summary.itemCount !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
-                }
-            } else {
-                console.error("Update failed:", data.message);
-                if (typeof showUniversalPopup === 'function') {
-                    showUniversalPopup(data.message || "Could not update item.", 'error', 3000);
-                } else {
-                    alert(data.message || "Could not update item.");
-                }
-            }
-        } catch (e) {
-            console.error("AJAX Error:", e);
-            if (e?.message) {
-                if (typeof showUniversalPopup === 'function') {
-                    showUniversalPopup(e.message, 'error', 3000);
-                } else {
-                    alert(e.message);
-                }
-            }
+    window.addEventListener("beforeunload", function (e) {
+        if (isCouponApplied() && !allowNavigation && !window.__checkoutSubmitting) {
+            e.preventDefault(); e.returnValue = "";
         }
-    }
+    });
 
-    async function removeItem(id) {
-        if (!removeUrl) return submitFallback(id);
-
-        try {
-            const resp = await fetch(removeUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
-                body: JSON.stringify({ id, item_id: id, shipping_method: getCurrentShippingMethod() }),
-            });
-
-            if (!resp.ok) throw new Error("Server returned " + resp.status);
-            const data = await resp.json();
-
-            if (data.success) {
-                const row = document.querySelector(`.cart-item-row[data-item-id="${id}"]`);
-                if (row) row.remove();
-
-                const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
-                if (summaryRow) summaryRow.remove();
-
-                if (document.querySelectorAll(".cart-item-row").length === 0) {
-                    location.reload();
-                    return;
-                }
-
-                updateSummary(data.summary);
-
-                if (data.summary && typeof data.summary.itemCount !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
-                }
-
-                if (window.Toast) window.Toast.success({ title: trans('Removed'), message: trans('Item removed from cart') });
-            } else {
-                submitFallback(id);
-            }
-        } catch (e) {
-            console.error("Remove failed, trying fallback", e);
-            submitFallback(id);
+    document.addEventListener("submit", function (e) {
+        if (e.target instanceof HTMLFormElement && window.__checkoutRoutes && e.target.action === window.__checkoutRoutes.process) {
+            allowNavigation = true;
+            window.__checkoutSubmitting = true;
         }
-    }
+    }, true);
 
-    function submitFallback(id) {
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = removeUrl;
-        form.style.display = "none";
-
-        const token = document.createElement("input");
-        token.type = "hidden"; token.name = "_token"; token.value = csrf;
-        form.appendChild(token);
-
-        const idInput = document.createElement("input");
-        idInput.type = "hidden"; idInput.name = "id"; idInput.value = id;
-        form.appendChild(idInput);
-
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-    function updateSummary(summary) {
-        if (!summary) return;
-
-        const map = {
-            subtotal:                     [".order-subtotal",                  "order-subtotal", "order-subtotal-step2"],
-            item_discount:                [".order-discount",                  "order-discount", "order-discount-step2"],
-            subtotal_after_item_discount: [".order-subtotal-after-discount",   "order-subtotal-after-discount", "order-subtotal-after-discount-step2"],
-            coupon_discount:              [".order-coupon-discount",            "order-coupon-discount", "order-coupon-discount-step2"],
-            tax:                          [".order-tax",                        "order-tax", "order-tax-step2"],
-            total:                        [".order-total",                      "order-total", "order-total-step2", "summary-total"],
-            itemCount:                    [".order-item-count",                 "order-item-count", "order-item-count-step2"],
-            shipping:                     [".order-shipping",                   "order-shipping", "order-shipping-step2"],
-        };
-
-        for (const [key, selectors] of Object.entries(map)) {
-            if (summary[key] === undefined) continue;
-
-            selectors.forEach((sel) => {
-                const els = sel.startsWith(".") ? document.querySelectorAll(sel) : [document.getElementById(sel)];
-                els.forEach((el) => {
-                    if (!el) return;
-                    if (key === "shipping") {
-                        el.textContent = summary[key] > 0 ? formatMoney(summary[key]) : "FREE";
-                    } else if (key === "itemCount") {
-                        el.textContent = summary[key];
-                    } else if (key === "item_discount" || key === "coupon_discount") {
-                        if (summary[key] > 0) {
-                            el.textContent = "-" + formatMoney(summary[key]);
-                            const row = el.closest('[id$="-discount-row"], .discount-row');
-                            if (row) row.style.display = '';
-                        } else {
-                            const row = el.closest('[id$="-discount-row"], .discount-row');
-                            if (row) row.style.display = 'none';
-                        }
-                    } else {
-                        el.textContent = formatMoney(summary[key]);
-                    }
-                });
-            });
-        }
-
-        if (typeof summary.itemCount !== 'undefined') {
-            const itemTotalCount = document.getElementById('item-total-count');
-            if (itemTotalCount) {
-                itemTotalCount.textContent = summary.itemCount + ' ' + (summary.itemCount === 1 ? 'Quantity' : 'Quantity');
-            }
-        }
-
-        updateOrderSummaryItems(summary);
-    }
-
-    function updateOrderSummaryItems(summary) {
-        if (!summary || !summary.items) return;
-
-        Object.entries(summary.items).forEach(([itemId, itemData]) => {
-            const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${itemId}"]`);
-            if (!summaryRow) return;
-
-            const qtyDisplay = summaryRow.querySelector(".summary-quantity");
-            if (qtyDisplay) qtyDisplay.textContent = itemData.quantity;
-
-            const priceElement = summaryRow.querySelector(".summary-item-price");
-            if (priceElement && (itemData.final_price !== undefined || itemData.unit_price !== undefined)) {
-                const unitPrice = itemData.final_price ?? itemData.unit_price ?? 0;
-                const lineTotal = unitPrice * itemData.quantity;
-                priceElement.textContent = formatMoney(lineTotal);
-            }
-
-            const lineThroughEl = summaryRow.querySelector(".text-xs.text-gray-400.line-through");
-            if (lineThroughEl) {
-                if (itemData.unit_price && itemData.final_price && itemData.unit_price > itemData.final_price) {
-                    const originalLineTotal = itemData.unit_price * itemData.quantity;
-                    lineThroughEl.innerHTML = `${window.env?.CURRENCY_SYMBOL || '$'} ${Number(originalLineTotal).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}<br />`;
-                    lineThroughEl.style.display = '';
-                } else {
-                    lineThroughEl.style.display = 'none';
+    document.addEventListener("click", function (e) {
+        var link = e.target.closest("a[href]");
+        if (!link || !isCouponApplied() || allowNavigation) return;
+        var href = link.getAttribute("href");
+        if (!href || href === "#" || href.startsWith("#") || href === window.location.pathname) return;
+        e.preventDefault();
+        if (typeof showUniversalPopup === "function") {
+            showUniversalPopup(
+                "You have a coupon applied. Leave without completing your purchase?",
+                "error", 0,
+                {
+                    confirmation: true, confirmText: "Yes, Leave", cancelText: "No, Stay",
+                    onConfirm: function () { allowNavigation = true; window.location.href = href; },
                 }
-            }
-        });
-    }
+            );
+        }
+    }, true);
+
+    runStepInits();
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  AJAX CHECKOUT SUBMISSION  (Step 2 → Place Secure Order)
-// ═══════════════════════════════════════════════════════════════
-(function () {
-    document.addEventListener('DOMContentLoaded', function () {
-        const checkoutForm = document.querySelector('form[action*="checkout"]');
-        if (!checkoutForm) return;
-
-        checkoutForm.addEventListener('submit', async function (e) {
-            const submitter = e.submitter;
-            // Only intercept the "Place Secure Order" button (value="3")
-            if (!submitter || submitter.value !== '3') return;
-
-            e.preventDefault();
-
-            // Clear previous errors
-            clearAllFieldErrors();
-
-            // Client-side validation first
-            const isValid = runCheckoutValidation(checkoutForm);
-            if (!isValid) return;
-
-            // Show loading spinner on button
-            const originalBtnHTML = submitter.innerHTML;
-            submitter.disabled = true;
-            submitter.innerHTML = `
-                <span class="inline-flex items-center justify-center gap-2">
-                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Placing Order...
-                </span>`;
-
-            const formData = new FormData(checkoutForm);
-            formData.set('step', '3');
-
-            try {
-                const response = await fetch(checkoutForm.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: formData,
-                });
-
-                const contentType = response.headers.get('content-type') || '';
-
-                // Non-JSON = server did a full redirect (shouldn't happen with expectsJson, but just in case)
-                if (!contentType.includes('application/json')) {
-                    if (typeof window.goToStep === 'function') {
-                        window.goToStep(3, { success: true });
-                    } else {
-                        window.location.href = response.url;
-                    }
-                    return;
-                }
-
-                const data = await response.json();
-
-                // Success — go to step 3 without page reload
-                if (response.ok && (data.success || data.redirect)) {
-                    if (typeof window.goToStep === 'function') {
-                        window.goToStep(3, {
-                            success: true,
-                            order_id: data.order_id,
-                            order_number: data.order_number,
-                            order_detail_url: data.order_detail_url,
-                        });
-                    } else {
-                        // Fallback: follow redirect if goToStep not loaded
-                        window.location.href = data.redirect || data.url || (window.location.pathname + '?step=3');
-                    }
-                    return;
-                }
-
-                // Laravel 422 validation errors — show inline, stay on step 2
-                if (response.status === 422 && data.errors) {
-                    handleServerValidationErrors(data.errors);
-                    submitter.disabled = false;
-                    submitter.innerHTML = originalBtnHTML;
-                    return;
-                }
-
-                // Other server error — go to step 3 error state without reload
-                if (typeof window.goToStep === 'function') {
-                    window.goToStep(3, { success: false, message: data.message || trans('Something went wrong. Please try again.') });
-                } else {
-                    showCheckoutErrorBanner(data.message || trans('Something went wrong. Please try again.'));
-                }
-                submitter.disabled = false;
-                submitter.innerHTML = originalBtnHTML;
-
-            } catch (err) {
-                console.error('Checkout AJAX error:', err);
-                if (typeof window.goToStep === 'function') {
-                    window.goToStep(3, { success: false, message: trans('A network error occurred. Please check your connection and try again.') });
-                } else {
-                    showCheckoutErrorBanner(trans('A network error occurred. Please check your connection and try again.'));
-                }
-                submitter.disabled = false;
-                submitter.innerHTML = originalBtnHTML;
-            }
-        });
-    });
-
-    // ── Helpers ────────────────────────────────────────────────
-
-    function showCheckoutErrorBanner(message) {
-        let banner = document.getElementById('checkout-error-banner');
-        if (!banner) {
-            banner = document.createElement('div');
-            banner.id = 'checkout-error-banner';
-            banner.className = 'mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-center shadow-sm';
-            const checkoutRoot = document.getElementById('checkout-root');
-            if (checkoutRoot) checkoutRoot.insertBefore(banner, checkoutRoot.firstChild);
-            else document.body.prepend(banner);
-        }
-        banner.innerHTML = `
-            <div class="shrink-0">
-                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm font-bold text-red-800">Order Failed</p>
-                <p class="text-sm text-red-700">${message}</p>
-            </div>`;
-        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    // Maps Laravel field names → DOM element IDs
-    const serverFieldMap = {
-        saved_address_id:         'shippingAddressSelect',
-        saved_billing_address_id: 'billingAddressSelect',
-        billing_address_id:       'billingAddressSelect',
-        email:          'email',
-        phone:          'phone',
-        firstName:      'firstName',
-        lastName:       'lastName',
-        address:        'address',
-        city:           'city',
-        zip:            'zip',
-        country:        'country',
-        payment_method: 'payment_method',
-        cardNumber:     'cardNumber',
-        expiry:         'expiry',
-        cvv:            'cvv',
-    };
-
-    function handleServerValidationErrors(errors) {
-        let firstField = null;
-
-        Object.entries(errors).forEach(([key, messages]) => {
-            const message = Array.isArray(messages) ? messages[0] : messages;
-            const mappedId = serverFieldMap[key] || key;
-
-            const field = document.getElementById(mappedId)
-                || document.querySelector(`[name="${mappedId}"]`)
-                || document.querySelector(`[name="${key}"]`);
-
-            if (!field) return;
-            setFieldError(field, message);
-            if (!firstField) firstField = field;
-        });
-
-        if (firstField) {
-            firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            firstField.focus({ preventScroll: true });
-        }
-    }
-
-    function setFieldError(field, message) {
-        field.classList.add('border-red-500', 'bg-red-50');
-        field.classList.remove('border-gray-200', 'border-green-400');
-
-        const wrapper = field.closest('div');
-        let msgEl = wrapper ? wrapper.querySelector('.error-message') : null;
-        if (!msgEl && wrapper) {
-            msgEl = document.createElement('span');
-            msgEl.className = 'error-message text-red-500 text-sm mt-1 font-medium block';
-            wrapper.appendChild(msgEl);
-        }
-        if (msgEl) {
-            msgEl.textContent = message;
-            msgEl.classList.remove('hidden');
-            msgEl.style.display = 'block';
-        }
-    }
-
-    function clearAllFieldErrors() {
-        document.querySelectorAll('.error-message').forEach(el => {
-            el.textContent = '';
-            el.classList.add('hidden');
-            el.style.display = '';
-        });
-        document.querySelectorAll('.border-red-500').forEach(el => {
-            el.classList.remove('border-red-500', 'bg-red-50');
-        });
-        const banner = document.getElementById('checkout-error-banner');
-        if (banner) banner.remove();
-    }
-
-    /**
-     * Client-side validation before AJAX submit.
-     * Checks all visible required fields and returns true if all pass.
-     */
-    function runCheckoutValidation(form) {
-        let isValid = true;
-        let firstInvalid = null;
-
-        function fail(field, msg) {
-            setFieldError(field, msg);
-            if (!firstInvalid) firstInvalid = field;
-            isValid = false;
-        }
-
-        // Email
-        const email = form.querySelector('[name="email"]');
-        if (email && email.offsetParent !== null) {
-            if (!email.value.trim()) fail(email, 'Email is required');
-            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) fail(email, 'Please enter a valid email address');
-        }
-
-        // Phone
-        const phone = form.querySelector('[name="phone"]');
-        if (phone && phone.offsetParent !== null) {
-            if (!phone.value.trim()) fail(phone, 'Phone number is required');
-            else if (!/^[\d\s\+\-\(\)]{7,}$/.test(phone.value.trim())) fail(phone, 'Please enter a valid phone number');
-        }
-
-        // Shipping address
-        const shippingSelect = form.querySelector('[name="saved_address_id"]');
-        const manualFields = document.getElementById('manualAddressFields');
-        const isManualVisible = manualFields && !manualFields.classList.contains('hidden');
-
-        if (shippingSelect && shippingSelect.offsetParent !== null && !shippingSelect.value && !isManualVisible) {
-            fail(shippingSelect, 'Please select a shipping address');
-        }
-
-        if (isManualVisible) {
-            [
-                { name: 'firstName', label: 'First name is required' },
-                { name: 'lastName',  label: 'Last name is required' },
-                { name: 'address',   label: 'Street address is required' },
-                { name: 'city',      label: 'City is required' },
-                { name: 'country',   label: 'Country is required' },
-            ].forEach(({ name, label }) => {
-                const f = form.querySelector(`[name="${name}"]`);
-                if (f && !f.value.trim()) fail(f, label);
-            });
-        }
-
-        // Card details (only when card payment is selected and section is visible)
-        const paymentMethod = form.querySelector('input[name="payment_method"]:checked');
-        if (paymentMethod && paymentMethod.value === 'card') {
-            const cardDetails = document.getElementById('cardDetails');
-            if (cardDetails && cardDetails.style.display !== 'none') {
-                const cardNumber = form.querySelector('[name="cardNumber"]');
-                const expiry    = form.querySelector('[name="expiry"]');
-                const cvv       = form.querySelector('[name="cvv"]');
-
-                if (cardNumber && !cardNumber.value.replace(/\s/g, '').match(/^\d{13,19}$/)) fail(cardNumber, 'Please enter a valid card number');
-                if (expiry && !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry.value.trim())) fail(expiry, 'Format should be MM/YY');
-                if (cvv && !/^\d{3,4}$/.test(cvv.value.trim())) fail(cvv, 'CVV must be 3 or 4 digits');
-            }
-        }
-
-        if (firstInvalid) {
-            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            firstInvalid.focus({ preventScroll: true });
-        }
-
-        return isValid;
-    }
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  Modal and Address Handling
+//  ADD ADDRESS MODAL & AJAX LOGIC
 // ═══════════════════════════════════════════════════════════════
 (function() {
     const modal = document.getElementById('addAddressModal');
@@ -893,24 +929,20 @@ document.addEventListener("DOMContentLoaded", function () {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const fieldsToValidate = form.querySelectorAll('[name="type"], [name="name"], [name="street"], [name="city_id"], [name="country"]');
+            // Perform simple validation since we dropped global validatior for the new form script logic
             let isValid = true;
+            const fieldsToValidate = form.querySelectorAll('[name="type"], [name="name"], [name="street"], [name="city_id"], [name="country"]');
 
             fieldsToValidate.forEach(field => {
-                if (!validateField(field)) isValid = false;
+                if (!field.value.trim()) {
+                    field.classList.add('border-red-500', 'bg-red-50');
+                    isValid = false;
+                } else {
+                    field.classList.remove('border-red-500', 'bg-red-50');
+                }
             });
 
-            const postalField = form.querySelector('[name="postal_code"]');
-            if (postalField && postalField.value.trim() && !validateField(postalField)) isValid = false;
-
-            const phoneField = form.querySelector('[name="phone"]');
-            if (phoneField && phoneField.value.trim() && !validateField(phoneField)) isValid = false;
-
-            if (!isValid) {
-                const firstInvalid = form.querySelector('.error-state');
-                if (firstInvalid) firstInvalid.focus();
-                return;
-            }
+            if (!isValid) return;
 
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -940,7 +972,8 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(result => {
                 if (result.success || result.data) {
                     closeModal();
-                    alert('Address saved successfully! The page will reload to show your new address.');
+                    if (window.Toast) window.Toast.success({ message: 'Address saved successfully!' });
+                    else alert('Address saved successfully! The page will reload.');
                     window.location.reload();
                 } else {
                     alert('Error saving address: ' + (result.message || 'Unknown error'));
@@ -952,11 +985,9 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => {
                 console.error('Error:', error);
-                if (typeof showUniversalPopup === 'function') {
-                    showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
-                } else {
-                    alert('Error saving address. Please try again.');
-                }
+                if (typeof showUniversalPopup === 'function') showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
+                else alert('Error saving address. Please try again.');
+
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<span class="inline-flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Address</span>';
@@ -975,204 +1006,21 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  Change Address Button + Payment Method Styling
+//  REAL-TIME INPUT FORMATTING (Card Data)
 // ═══════════════════════════════════════════════════════════════
 (function() {
-    document.addEventListener('click', function(e) {
-        const button = e.target.closest('.changeAddressBtn');
-        if (!button) return;
-
-        e.preventDefault();
-        const card = button.closest('#shippingAddressPreview, #billingAddressPreview');
-        if (!card) return;
-
-        card.classList.add('hidden');
-        const listId = card.id === 'shippingAddressPreview' ? 'shippingAddressList' : 'billingAddressList';
-        const list = document.getElementById(listId);
-        if (list) list.classList.remove('hidden');
-    });
-
-    const paymentMethodLabels = document.querySelectorAll('div.space-y-4.mb-6 > label');
-
-    function updatePaymentMethodStyles() {
-        paymentMethodLabels.forEach(label => {
-            const radio = label.querySelector('input[name="payment_method"]');
-            if (!radio) return;
-            if (radio.checked) {
-                label.classList.add('border-primary', 'bg-primary/5');
-                label.classList.remove('border-gray-200');
-            } else {
-                label.classList.remove('border-primary', 'bg-primary/5');
-                label.classList.add('border-gray-200');
-            }
-        });
-    }
-
-    paymentMethodLabels.forEach(label => {
-        const radio = label.querySelector('input[name="payment_method"]');
-        if (radio) radio.addEventListener('change', updatePaymentMethodStyles);
-    });
-
-    updatePaymentMethodStyles();
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  Server Error Banner
-// ═══════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', function() {
-    checkAndShowValidationErrors();
-});
-
-function checkAndShowValidationErrors() {
-    // Populated by Blade template if needed
-}
-
-function showServerErrorBanner(title, errors) {
-    const banner = document.createElement('div');
-    banner.id = 'serverErrorBanner';
-    banner.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full mx-4 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl animate-slide-down';
-
-    let errorList = '';
-    if (errors && errors.length > 1) {
-        errorList = '<ul class="mt-2 space-y-1 text-sm">';
-        errors.forEach(error => {
-            errorList += `<li class="flex items-start gap-2"><span>•</span><span>${error}</span></li>`;
-        });
-        errorList += '</ul>';
-    }
-
-    banner.innerHTML = `
-        <div class="flex items-start gap-3">
-            <svg class="w-6 h-6 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-            <div class="flex-1">
-                <p class="font-semibold">${title}</p>
-                ${errorList}
-            </div>
-            <button onclick="this.closest('#serverErrorBanner').remove()" class="text-white hover:text-red-100">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>`;
-
-    document.body.appendChild(banner);
-
-    setTimeout(() => {
-        if (banner.parentElement) {
-            banner.style.opacity = '0';
-            banner.style.transform = 'translate(-50%, -100%)';
-            setTimeout(() => banner.remove(), 300);
-        }
-    }, 10000);
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  GLOBAL Validation Rules + Functions
-//  Must be global so the address modal IIFE above can call validateField()
-// ═══════════════════════════════════════════════════════════════
-(function() {
-    // Ensure trans is available before defining validationRules
-    if (typeof window.trans !== 'function') {
-        window.trans = function(key) {
-            if (window.translations && window.translations[key]) {
-                return window.translations[key];
-            }
-            return key;
-        };
-    }
-    window.validationRules = {
-        email:    { required: trans('Email is required'),               pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: trans('Please enter a valid email address') } },
-        phone:    { required: trans('Phone number is required'),        pattern: { value: /^[\d\s\+\-\(\)]{7,}$/, message: trans('Please enter a valid phone number') } },
-        cardNumber: { required: trans('Card number is required'),       pattern: { value: /^\d{13,19}$/, message: trans('Card number must be between 13 and 19 digits') } },
-        expiry:   { required: trans('Expiry date is required'),         pattern: { value: /^(0[1-9]|1[0-2])\/\d{2}$/, message: trans('Format should be MM/YY') } },
-        cvv:      { required: trans('CVV is required'),                 pattern: { value: /^\d{3,4}$/, message: trans('CVV must be 3 or 4 digits') } },
-        name:     { required: trans('Full name is required'),           pattern: { value: /^[a-zA-Z\s]+$/, message: trans('Full name should only contain letters') } },
-        street:   { required: trans('Street address is required'),      minLength: { value: 5, message: trans('Street address must be at least 5 characters') } },
-        city_id:     { required: trans('Please select a city') },
-        postal_code: { minLength: { value: 3, message: trans('Postal code must be at least 3 characters') } },
-        country:     { required: trans('Country is required') },
-        type:        { required: trans('Please select an address type') },
-    };
-})();
-
-function validateField(field) {
-    const fieldName = field.name || field.id;
-    const rules = validationRules[fieldName];
-    if (!rules) return true;
-
-    if (rules.required && !field.value.trim()) {
-        showFieldError(field, rules.required);
-        return false;
-    }
-    if (rules.minLength && field.value.trim() && field.value.trim().length < rules.minLength.value) {
-        showFieldError(field, rules.minLength.message);
-        return false;
-    }
-    if (rules.pattern && field.value.trim()) {
-        if (!rules.pattern.value.test(field.value.replace(/\s/g, ''))) {
-            showFieldError(field, rules.pattern.message);
-            return false;
-        }
-    }
-
-    clearFieldError(field);
-    return true;
-}
-
-function showFieldError(field, message) {
-    const errorMsg = field.parentElement ? field.parentElement.querySelector('.error-message') : null;
-    if (errorMsg) {
-        errorMsg.textContent = message;
-        errorMsg.classList.remove('hidden');
-        errorMsg.style.display = 'block';
-    }
-    field.classList.add('error-state', 'border-red-500', 'bg-red-50');
-    field.classList.remove('success-state', 'border-gray-200');
-}
-
-function clearFieldError(field) {
-    const errorMsg = field.parentElement ? field.parentElement.querySelector('.error-message') : null;
-    if (errorMsg) {
-        errorMsg.textContent = '';
-        errorMsg.classList.add('hidden');
-        errorMsg.style.display = '';
-    }
-    field.classList.remove('error-state', 'border-red-500', 'bg-red-50');
-    field.classList.add('success-state');
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  Real-time Validation + Card Input Formatting
-// ═══════════════════════════════════════════════════════════════
-(function() {
-    document.addEventListener('input', function(e) {
-        const field = e.target;
-        if (validationRules[field.name || field.id]) validateField(field);
-    });
-
-    document.addEventListener('blur', function(e) {
-        const field = e.target;
-        if (validationRules[field.name || field.id]) validateField(field);
-    }, true);
-
     // Format card number with spaces every 4 digits
-    const cardNumberField = document.getElementById('cardNumber');
-    if (cardNumberField) {
-        cardNumberField.addEventListener('input', function(e) {
+    document.addEventListener('input', function(e) {
+        if (e.target.id === 'cardNumber' || e.target.name === 'cardNumber') {
             let value = e.target.value.replace(/\s/g, '');
             e.target.value = value.match(/.{1,4}/g)?.join(' ') || value;
-        });
-    }
+        }
 
-    // Format expiry MM/YY automatically
-    const expiryField = document.getElementById('expiry');
-    if (expiryField) {
-        expiryField.addEventListener('input', function(e) {
+        // Format expiry MM/YY automatically
+        if (e.target.id === 'expiry' || e.target.name === 'expiry') {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length >= 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
             e.target.value = value;
-        });
-    }
+        }
+    });
 })();

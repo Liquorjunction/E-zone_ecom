@@ -1017,5 +1017,16 @@
     "Phone number must be at least 10 digits.": "Phone number must be at least 10 digits.",
     "Name can only contain letters, spaces, hyphens, and apostrophes.": "Name can only contain letters, spaces, hyphens, and apostrophes.",
     "item available in stock.": "item available in stock.",
-    "If an account exists with that email, you will receive an email with password reset Link.": "If an account exists with that email, you will receive an email with password reset Link."
+    "If an account exists with that email, you will receive an email with password reset Link.": "If an account exists with that email, you will receive an email with password reset Link.",
+    "Order Failed": "Order Failed",
+    "Your order could not be processed.": "Your order could not be processed.",
+    "Check your payment details and try again.": "Check your payment details and try again.",
+    "Try a different payment method.": "Try a different payment method.",
+    "If the problem persists, contact support.": "If the problem persists, contact support.",
+    "What can you do?": "What can you do?",
+    "Your payment could not be processed. Please try again.": "Your payment could not be processed. Please try again.",
+    "Order Failed!": "Order Failed!",
+    "Try Again": "Try Again",
+    "Return to Cart": "Return to Cart",
+    "No order was placed.": "No order was placed."
 }

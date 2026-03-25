@@ -1,3 +1,38 @@
+// Loader overlay helpers (must be at top so available before use)
+function showAddressLoader() {
+  let loader = document.getElementById('address-loader-overlay');
+  if (!loader) {
+    loader = document.createElement('div');
+    loader.id = 'address-loader-overlay';
+    loader.style.position = 'fixed';
+    loader.style.top = 0;
+    loader.style.left = 0;
+    loader.style.width = '100vw';
+    loader.style.height = '100vh';
+    loader.style.background = 'rgba(255,255,255,0.6)';
+    loader.style.zIndex = 100000;
+    loader.style.display = 'flex';
+    loader.style.alignItems = 'center';
+    loader.style.justifyContent = 'center';
+    loader.innerHTML = '<div class="animate-spin rounded-full h-16 w-16 border-t-4 border-primary border-solid"></div>';
+    document.body.appendChild(loader);
+  }
+  loader.style.display = 'flex';
+}
+function hideAddressLoader() {
+  const loader = document.getElementById('address-loader-overlay');
+  if (loader) loader.style.display = 'none';
+}
+
+// Debounce helper
+function debounce(fn, delay) {
+  let timer = null;
+  return function(...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 function ensureCityOption(selectEl, cityValue){
   if(!selectEl || !cityValue) return;
 

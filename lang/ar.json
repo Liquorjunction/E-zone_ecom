@@ -1017,5 +1017,16 @@
     "Phone number must be at least 10 digits.": "يجب أن يكون رقم الهاتف مكونًا من 10 أرقام على الأقل.",
     "Name can only contain letters, spaces, hyphens, and apostrophes.": "يمكن أن يحتوي الاسم فقط على أحرف ومسافات وشرطات وأبستروف.",
     "item available in stock.": "عنصر متوفر في المخزون.",
-    "If an account exists with that email, you will receive an email with password reset Link.": "إذا كان هناك حساب مرتبط بهذا البريد الإلكتروني، فستتلقى رسالة بريد إلكتروني تحتوي على رابط لإعادة تعيين كلمة المرور."
+    "If an account exists with that email, you will receive an email with password reset Link.": "إذا كان هناك حساب مرتبط بهذا البريد الإلكتروني، فستتلقى رسالة بريد إلكتروني تحتوي على رابط لإعادة تعيين كلمة المرور.",
+    "Order Failed": "فشل الطلب",
+    "Your order could not be processed.": "تعذر معالجة طلبك.",
+    "Check your payment details and try again.": "تحقق من تفاصيل الدفع وحاول مرة أخرى.",
+    "Try a different payment method.": "جرّب طريقة دفع مختلفة.",
+    "If the problem persists, contact support.": "إذا استمرت المشكلة، اتصل بالدعم.",
+    "What can you do?": "ماذا يمكنك أن تفعل؟",
+    "Your payment could not be processed. Please try again.": "تعذر معالجة الدفع. يرجى المحاولة مرة أخرى.",
+    "Order Failed!": "فشل الطلب!",
+    "Try Again": "حاول مرة أخرى",
+    "Return to Cart": "العودة إلى السلة",
+    "No order was placed.": "لم يتم وضع أي طلب."
 }

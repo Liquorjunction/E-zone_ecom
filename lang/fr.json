@@ -1017,5 +1017,16 @@
     "Email\n                                                                                        Address *": "Courriel Adresse *",
     "You haven't added any products to compare. Start browsing and add\n                            products to see a side-by-side comparison.": "Vous n'avez ajouté aucun produit à comparer. Commencez à naviguer et ajoutez produits pour voir une comparaison côte à côte.",
     "Your order has been successfully placed and is now\n                                                                        being processed.": "Votre commande a été passée avec succès et est maintenant en cours de traitement.",
-    "If an account exists with that email, you will receive an email with password reset Link.": "Si un compte existe avec cette adresse email, vous recevrez un lien de restauration de mot de passe par email."
+    "If an account exists with that email, you will receive an email with password reset Link.": "Si un compte existe avec cette adresse email, vous recevrez un lien de restauration de mot de passe par email.",
+    "Order Failed": "Échec de la commande",
+    "Your order could not be processed.": "Votre commande n'a pas pu être traitée.",
+    "Check your payment details and try again.": "Vérifiez vos détails de paiement et essayez à nouveau.",
+    "Try a different payment method.": "Essayez une méthode de paiement différente.",
+    "If the problem persists, contact support.": "Si le problème persiste, contactez le support.",
+    "What can you do?": "Que pouvez-vous faire ?",
+    "Your payment could not be processed. Please try again.": "Votre paiement n'a pas pu être traité. Veuillez réessayer.",
+    "Order Failed!": "Échec de la commande!",
+    "Try Again": "Essayez encore",
+    "Return to Cart": "Retour au panier",
+    "No order was placed.": "Aucune commande n'a été passée."
 }

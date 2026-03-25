@@ -118,7 +118,8 @@ class CartController extends Controller
         $cities           = $addressRepo->getActiveCities() ?: collect();
         $appliedCoupon    = $cart ? $sessionCoupon->getForCart($cart->id) : null;
 
-        return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'billingAddresses', 'cities', 'appliedCoupon'));
+        $itemsForView = $cart ? $cart->items : collect();
+        return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'billingAddresses', 'cities', 'appliedCoupon', 'itemsForView'));
     }
 
     // ─────────────────────────────────────────────────────────────
