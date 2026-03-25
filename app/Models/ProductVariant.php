@@ -119,4 +119,24 @@ class ProductVariant extends Model
     {
         return $this->morphMany(DiscountTarget::class, 'target');
     }
+
+    public function getSellableStock()
+    {
+        $total = $this->inventory()->sum('quantity');
+
+        $dispatched = $this->orderItems()
+            ->whereHas('order', function($q) {
+                $q->whereIn('status', ['dispatched', 'completed']);
+            })
+            ->sum('quantity');
+
+        $pending = $this->orderItems()
+            ->whereHas('order', function($q) {
+                $q->whereIn('status', ['pending', 'processing', 'paid']);
+            })
+            ->sum('quantity');
+
+        $sellable = $total - $dispatched - $pending;
+        return max(0, $sellable);
+    }
 }

@@ -14,14 +14,10 @@
     $hasDiscount  = ($item->discount_amount ?? 0) > 0;
 
     $availableStock = 0;
-    if ($showQtyCtrl && $item->variant) {
-        $availableStock = (int) ($item->variant->total_stock
-            ?? optional($item->variant)->inventory()?->sum('quantity')
-            ?? 0);
-    } elseif ($showQtyCtrl && $item->product) {
-        $availableStock = method_exists($item->product, 'getTotalStockAttribute')
-            ? (int) $item->product->getTotalStockAttribute()
-            : 0;
+    if ($showQtyCtrl && $item->variant && method_exists($item->variant, 'getSellableStock')) {
+        $availableStock = (int) $item->variant->getSellableStock();
+    } elseif ($showQtyCtrl && $item->product && method_exists($item->product, 'getSellableStock')) {
+        $availableStock = (int) $item->product->getSellableStock();
     }
 @endphp
 
