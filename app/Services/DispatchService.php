@@ -77,12 +77,72 @@ class DispatchService
                     );
                 }
 
-                $beforeQty       = $inventory->quantity;
-                $beforeReserved  = $inventory->reserved_quantity ?? 0;
 
+                // --- Reservation/Release Logic Start ---
+                // Release reservation from other locations if dispatching from a different location
+                $remainingToRelease = $quantity;
+                $allInventories = $this->inventoryRepo->getForReservation(
+                    $orderItem->product_id,
+                    $orderItem->product_variant_id ?? null,
+                    'asc'
+                );
+                // Release from all other inventories except the dispatch location
+                foreach ($allInventories as $invRow) {
+                    if ($invRow->id == $inventory->id) continue;
+                    $reserved = $invRow->reserved_quantity ?? 0;
+                    if ($reserved > 0 && $remainingToRelease > 0) {
+                        $releaseQty = min($reserved, $remainingToRelease);
+                        $this->inventoryRepo->update($invRow->id, [
+                            'reserved_quantity' => max(0, $reserved - $releaseQty),
+                        ]);
+                        if (method_exists($this->transactionRepo, 'create')) {
+                            $this->transactionRepo->create([
+                                'batch_no' => $invRow->batch_no,
+                                'inventory_id' => $invRow->id,
+                                'type' => 'release',
+                                'quantity' => $releaseQty,
+                                'rate' => $invRow->cost_price ?? 0,
+                                'created_by' => $adminId,
+                                'reference_type' => 'order',
+                                'reference_id' => $orderId,
+                                'before_quantity' => $reserved,
+                                'after_quantity' => max(0, $reserved - $releaseQty),
+                                'quantity_change' => -1 * $releaseQty,
+                                'description' => "Reservation released due to dispatch from another location for Order #{$orderId}",
+                            ]);
+                        }
+                        $remainingToRelease -= $releaseQty;
+                    }
+                }
+
+                // 2. Reduce reserved_quantity at dispatch location if any reservation exists there
+                $reservedHere = $inventory->reserved_quantity ?? 0;
+                $reservedToReduce = min($reservedHere, $quantity);
+                if ($reservedToReduce > 0) {
+                    $this->inventoryRepo->update($inventory->id, [
+                        'reserved_quantity' => max(0, $reservedHere - $reservedToReduce),
+                    ]);
+                    if (method_exists($this->transactionRepo, 'create')) {
+                        $this->transactionRepo->create([
+                            'batch_no' => $inventory->batch_no,
+                            'inventory_id' => $inventory->id,
+                            'type' => 'reserve_consume',
+                            'quantity' => $reservedToReduce,
+                            'rate' => $inventory->cost_price ?? 0,
+                            'created_by' => $adminId,
+                            'reference_type' => 'order',
+                            'reference_id' => $orderId,
+                            'before_quantity' => $reservedHere,
+                            'after_quantity' => max(0, $reservedHere - $reservedToReduce),
+                            'quantity_change' => -1 * $reservedToReduce,
+                            'description' => "Reservation consumed by dispatch for Order #{$orderId}",
+                        ]);
+                    }
+                }
+
+                $beforeQty = $inventory->quantity;
                 $this->inventoryRepo->update($inventory->id, [
-                    'quantity'          => $beforeQty - $quantity,
-                    'reserved_quantity' => max(0, $beforeReserved - $quantity),
+                    'quantity' => $beforeQty - $quantity,
                 ]);
 
                 $this->transactionRepo->create([

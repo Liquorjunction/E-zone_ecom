@@ -116,8 +116,14 @@
             opt.value        = inv.id;
             opt.dataset.stock = inv.available_quantity;
             opt.dataset.label = inv.location_label;
+            opt.dataset.batch = inv.batch_no || '';
             const icon       = inv.location_type === 'store' ? '🏪' : '🏭';
-            opt.textContent  = icon + ' ' + inv.location_label + '  —  Available: ' + inv.available_quantity;
+            let labelText = icon + ' ' + inv.location_label;
+            if (inv.batch_no) {
+                labelText += ' (' + inv.batch_no + ')';
+            }
+            labelText += ' — Available: ' + inv.available_quantity;
+            opt.textContent = labelText;
             if (inv.available_quantity <= 0) opt.disabled = true;
             select.appendChild(opt);
         });
