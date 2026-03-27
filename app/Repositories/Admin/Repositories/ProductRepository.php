@@ -74,7 +74,7 @@ class ProductRepository implements ProductRepositoryInterface
                     $q->where('status', 'active');
                 }
             ])
-            ->addSelect([
+            ->select([
                 'products.id',
                 'products.name',
                 'products.status',
@@ -93,10 +93,46 @@ class ProductRepository implements ProductRepositoryInterface
         ), 0) as min_price')
             ->latest();
 
-        $results = $query->get();
-        return $results;
-    }
+        if (isset($request['best_seller']) && $request['best_seller'] == '1') {
+            $query->where('is_bestseller', true);
+        }
 
+        if (isset($request['status']) && $request['status'] == 'active') {
+            $query->where('status', 'active');
+        } elseif (isset($request['status']) && $request['status'] == 'inactive') {
+            $query->where('status', 'inactive');
+        }
+
+        if (isset($request['in_stock']) && $request['in_stock'] == '1') {
+            $query->whereHas('productVariants.inventories', function ($q) {
+                $q->where('quantity', '>', 0);
+            });
+        }
+
+        if (isset($request['out_of_stock']) && $request['out_of_stock'] == '1') {
+            $query->whereHas('productVariants.inventories', function ($q) {
+                $q->where('quantity', 0);
+            });
+        }
+
+        if (isset($request['price_min']) && is_numeric($request['price_min'])) {
+            $query->havingRaw('min_price >= ?', [$request['price_min']]);
+        }
+
+        if (isset($request['price_max']) && is_numeric($request['price_max'])) {
+            $query->havingRaw('min_price <= ?', [$request['price_max']]);
+        }
+
+        if (isset($request['date_from']) && isset($request['date_to'])) {
+            $query->whereBetween('created_at', [$request['date_from'], $request['date_to']]);
+        } elseif (isset($request['date_from'])) {
+            $query->where('created_at', '>=', $request['date_from']);
+        } elseif (isset($request['date_to'])) {
+            $query->where('created_at', '<=', $request['date_to']);
+        }
+
+        return $query;
+    }
 
     public function createProduct($request, $data = null)
     {

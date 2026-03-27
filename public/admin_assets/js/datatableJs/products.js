@@ -120,21 +120,28 @@ $(document).ready(function () {
     // =========================================================
     // 2. DATATABLE INITIALIZATION
     // =========================================================
-    var table = $("#product-table").DataTable({
+    var table = (window.productsTable = $("#product-table").DataTable({
         processing: true,
         serverSide: true,
         ajax: {
             url: $("#product-table").data("source"),
+            type: "GET",
             data: function (d) {
-                // Append Filter Data to the AJAX request
-                d.brand_id = $("#filter-brand").val();
-                d.category_id = $("#filter-category").val();
-                d.status = $("#filter-status").val();
+                d.columns[3].search.value = $("#search").val();
+
+                d.best_seller = $("#bestseller").is(":checked") ? "1" : "";
+                d.in_stock = $("input[name='in_stock']").is(":checked")? "1" : "";
+                d.out_of_stock = $("input[name='out_of_stock']").is(":checked") ? "1" : "";
+                d.price_min = $("input[name='price_min']").val();
+                d.price_max = $("input[name='price_max']").val();
+                d.date_from = $("input[name='date_from']").val();
+                d.date_to = $("input[name='date_to']").val();
             },
             error: function (xhr, error, thrown) {
                 console.error("DataTables Error:", error, thrown);
             },
         },
+        searching: true,
         columns: [
             {
                 className: "dt-control",
@@ -159,7 +166,7 @@ $(document).ready(function () {
             },
             { data: "name", name: "name", width: "20%" },
             { data: "brand", name: "brand.name", width: "10%" },
-            { data: "category", name: "category.name", width: "10%" },
+            { data: "category", name: "category.category_name", width: "10%", searchable: false },
             { data: "is_bestseller", name: "is_bestseller", width: "10%" },
             { data: "status", name: "status", width: "10%" },
             {
@@ -182,9 +189,6 @@ $(document).ready(function () {
                 '<i class="fa fa-spinner fa-spin fa-2x fa-fw"></i><span class="sr-only">Loading...</span>',
         },
         drawCallback: function () {
-            // Re-initialize any tooltips or plugins after table draw
-            // $('[data-toggle="tooltip"]').tooltip();
-            // Update indeterminate state for parent toggles based on server-provided flags
             $("input.status-toggle").each(function () {
                 const el = $(this);
                 const allActive =
@@ -194,7 +198,6 @@ $(document).ready(function () {
                     parseInt(el.attr("data-variants-all-inactive") || 0, 10) ===
                     1;
                 if (!allActive && !allInactive) {
-                    // Mixed state
                     this.indeterminate = true;
                 } else {
                     this.indeterminate = false;
@@ -220,7 +223,7 @@ $(document).ready(function () {
                 }
             });
         },
-    });
+    }));
 
     // =========================================================
     // 3. CHILD ROW EXPANSION
@@ -239,20 +242,20 @@ $(document).ready(function () {
     });
 
     // =========================================================
-    // 4. FILTERING HANDLERS
+    // 4. FILTER BAR HANDLERS
     // =========================================================
-    $("#filter-brand, #filter-category, #filter-status").on(
-        "change",
-        function () {
-            table.draw();
-        },
-    );
 
-    $("#reset-filters").on("click", function () {
-        $("#filter-brand").val("").trigger("change");
-        $("#filter-category").val("").trigger("change");
-        $("#filter-status").val("").trigger("change");
-        table.draw();
+    // Submit: prevent page reload, reload DataTable with new filter values
+    $("#product-filter-bar").on("submit", function (e) {
+        e.preventDefault();
+        table.ajax.reload();
+    });
+
+    // Reset: clear all filter inputs, reload DataTable
+    $("#product-filter-bar").on("click", "a", function (e) {
+        e.preventDefault();
+        document.getElementById("product-filter-bar").reset();
+        table.ajax.reload();
     });
 
     // =========================================================
@@ -262,8 +265,7 @@ $(document).ready(function () {
     // NOTE: Status toggle is handled globally by
     // public/admin_assets/js/datatable-status-toggle.js
 
-    // Toggle Product Bestseller
-    // Parent product bestseller toggle (checkbox in datatable)
+    // Parent product bestseller toggle
     $(document).on("change", ".bestseller-toggle", function (e) {
         e.preventDefault();
         const checkbox = $(this);
@@ -332,10 +334,9 @@ $(document).ready(function () {
                 if (response.success) {
                     if (window.showToast)
                         window.showToast(response.message, "success");
-                    // SYNC FIX: Reload to update parent status if needed
                     table.ajax.reload(null, false);
                 } else {
-                    checkbox.prop("checked", !isChecked); // Revert
+                    checkbox.prop("checked", !isChecked);
                     if (window.showToast)
                         window.showToast(
                             response.message || "Error updating variant",
@@ -344,7 +345,7 @@ $(document).ready(function () {
                 }
             },
             error: function () {
-                checkbox.prop("checked", !isChecked); // Revert
+                checkbox.prop("checked", !isChecked);
                 if (window.showToast)
                     window.showToast("Failed to update status", "error");
             },
@@ -378,16 +379,15 @@ $(document).ready(function () {
                 if (response.success) {
                     if (window.showToast)
                         window.showToast(response.message, "success");
-                    // SYNC FIX: Reload to update parent bestseller status if needed
                     table.ajax.reload(null, false);
                 } else {
-                    checkbox.prop("checked", !isChecked); // Revert
+                    checkbox.prop("checked", !isChecked);
                     if (window.showToast)
                         window.showToast(response.message || "Failed", "error");
                 }
             },
             error: function () {
-                checkbox.prop("checked", !isChecked); // Revert
+                checkbox.prop("checked", !isChecked);
                 if (window.showToast)
                     window.showToast("Failed to update status", "error");
             },
@@ -474,90 +474,8 @@ $(document).ready(function () {
     });
 
     // =========================================================
-    // 8. BULK ACTIONS (Select All & Bulk Delete)
+    // 8. IMPORT FORM HANDLER
     // =========================================================
-
-    // Select All Checkbox
-    $("#select-all").on("click", function () {
-        var rows = table.rows({ search: "applied" }).nodes();
-        $('input[type="checkbox"].product-checkbox', rows).prop(
-            "checked",
-            this.checked,
-        );
-    });
-
-    // Handle individual checkbox click
-    $("#product-table tbody").on(
-        "change",
-        'input[type="checkbox"].product-checkbox',
-        function () {
-            if (!this.checked) {
-                var el = $("#select-all").get(0);
-                if (el && el.checked && "indeterminate" in el) {
-                    el.indeterminate = true;
-                }
-            }
-        },
-    );
-
-    // Bulk Delete Button Click
-    $("#bulk-delete-btn").on("click", function () {
-        var selectedIds = [];
-        $(".product-checkbox:checked").each(function () {
-            selectedIds.push($(this).val());
-        });
-
-        if (selectedIds.length === 0) {
-            Swal.fire(
-                "No items selected",
-                "Please select at least one product to delete.",
-                "info",
-            );
-            return;
-        }
-
-        Swal.fire({
-            title: "Are you sure?",
-            text: `You are about to delete ${selectedIds.length} products. This cannot be undone!`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, delete them!",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: $(this).data("url"), // Ensure your button has data-url attribute
-                    type: "POST",
-                    data: {
-                        ids: selectedIds,
-                        _token: $('meta[name="csrf-token"]').attr("content"),
-                        _method: "DELETE", // Method spoofing if route is DELETE
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            if (window.showToast)
-                                window.showToast(response.message, "success");
-                            table.ajax.reload(null, false);
-                            $("#select-all").prop("checked", false);
-                        } else {
-                            if (window.showToast)
-                                window.showToast(
-                                    response.message || "Error occurred",
-                                    "error",
-                                );
-                        }
-                    },
-                    error: function () {
-                        if (window.showToast)
-                            window.showToast("Server Error", "error");
-                    },
-                });
-            }
-        });
-    });
-
-    // Handle Import Form
     const importForm = document.getElementById("importForm");
 
     if (importForm) {
@@ -580,7 +498,6 @@ $(document).ready(function () {
             const fileName = importFile.files[0].name;
             const formData = new FormData(importForm);
 
-            // Disable button and close modal
             btnStartImport.disabled = true;
             const modal = bootstrap.Modal.getInstance(
                 document.getElementById("importModal"),
@@ -589,12 +506,10 @@ $(document).ready(function () {
                 modal.hide();
             }
 
-            // Upload file and start import job
             axios
                 .post(importForm.action, formData)
                 .then((response) => {
                     if (response.data.success && response.data.batch_id) {
-                        // Create floating notification
                         if (window.createImportNotification) {
                             window.createImportNotification(
                                 response.data.batch_id,
@@ -602,7 +517,6 @@ $(document).ready(function () {
                                 "/admin/products/import/progress/",
                             );
                         }
-                        // Reset form
                         importForm.reset();
                     } else {
                         if (window.showToast) {

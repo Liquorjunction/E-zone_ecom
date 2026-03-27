@@ -380,13 +380,53 @@ class ProductController extends Controller
     public function dataTable(ReadProductRequest $request, ProductRepo $productRepo)
     {
         try {
-            $products = $productRepo->getDataforDataTable($request);
-
-            if ($products instanceof \Illuminate\Pagination\Paginator || $products instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-                $products->load('productVariants');
-            }
+            $products = $productRepo->getDataforDataTable($request->all());
 
             return DataTables::of($products)
+                ->filterColumn('name', function ($query, $keyword) {
+                    $like = "%{$keyword}%";
+                    $langs = ['en', 'fr', 'ar'];
+
+                    $query->where(function ($q) use ($like, $langs) {
+
+                        // Product name JSON + SKU
+                        foreach ($langs as $lang) {
+                            $q->orWhere("products.name->$lang", 'LIKE', $like)
+                                ->orWhere("products.sku", 'LIKE', $like);
+                        }
+
+                        // Variant name JSON + SKU
+                        $q->orWhereHas('productVariants', function ($vq) use ($like, $langs) {
+                            $vq->where(function ($vq2) use ($like, $langs) {
+                                foreach ($langs as $lang) {
+                                    $vq2->orWhere("variant_name->$lang", 'LIKE', $like)
+                                        ->orWhere("sku", 'LIKE', $like);
+                                }
+                            });
+                        });
+
+                        // Brand name JSON
+                        $q->orWhereHas('brand', function ($bq) use ($like, $langs) {
+                            $bq->where(function ($bq2) use ($like, $langs) {
+                                foreach ($langs as $lang) {
+                                    $bq2->orWhere("name->$lang", 'LIKE', $like);
+                                }
+                            });
+                        });
+
+                        // Category — column is `category-name` (hyphen), must use raw JSON_EXTRACT
+                        $q->orWhereHas('category', function ($cq) use ($like, $langs) {
+                            $cq->where(function ($cq2) use ($like, $langs) {
+                                foreach ($langs as $lang) {
+                                    $cq2->orWhereRaw(
+                                        "JSON_UNQUOTE(JSON_EXTRACT(`categories`.`category-name`, '$.\"$lang\"')) LIKE ?",
+                                        [$like]
+                                    );
+                                }
+                            });
+                        });
+                    });
+                })
                 ->addIndexColumn()
                 ->addColumn('image', function ($product) use ($productRepo) {
                     if ($product->cover_image && Storage::disk('public')->exists($product->cover_image)) {
