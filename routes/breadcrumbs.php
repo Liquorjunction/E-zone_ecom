@@ -471,4 +471,23 @@ Breadcrumbs::for('admin.quick-stats.edit', function (BreadcrumbTrail $trail) {
 });
 
 
+// --- Products ---
+Breadcrumbs::for('admin.products.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Products'), route('admin.products.index'));
+});
+Breadcrumbs::for('admin.products.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.products.index');
+    $trail->push(statictranslations('Create Product'), route('admin.products.create'));
+});
+Breadcrumbs::for('admin.products.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.products.index');
+    $trail->push(statictranslations('Edit Product'), route('admin.products.edit'));
+});
+Breadcrumbs::for('admin.products.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.products.index');
+    $trail->push(statictranslations('View Product'), route('admin.products.show', $id));
+});
+
+
 
