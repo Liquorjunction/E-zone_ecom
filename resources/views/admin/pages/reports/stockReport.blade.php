@@ -77,7 +77,7 @@
                                                             class="btn btn-sm btn-outline-primary expand-btn px-2 py-0"
                                                             data-sku-id="{{ $index }}"
                                                             title="Show locations">
-                                                        <i class="fa fa-plus"></i>
+                                                        <i class="bi bi-chevron-double-down"></i>
                                                     </button>
                                                 @endif
                                             </td>
