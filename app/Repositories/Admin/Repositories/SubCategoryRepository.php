@@ -114,10 +114,16 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
         return $subCategory;
     }
 
-    public function getDataForDataTable()
+    public function getDataForDataTable($request = null)
     {
-        return SubCategories::with('category')
+        $query = SubCategories::with('category')
             ->withCount('products')
             ->latest();
+
+        if (isset($request['status']) && $request['status'] !== '') {
+            $query->where('status', $request['status'] == '1' ? 'active' : 'inactive');
+        }
+
+        return $query;
     }
 }

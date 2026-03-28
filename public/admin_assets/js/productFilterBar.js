@@ -31,6 +31,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (qs("input[name='out_of_stock']")?.checked)
             active.push({ key: "out_of_stock", label: "Out of Stock" });
 
+        // Status: Active/Inactive (checkboxes)
+        const statusActive = qs("input[name='status'][value='active']")?.checked;
+        const statusInactive = qs("input[name='status'][value='inactive']")?.checked;
+        if (statusActive)
+            active.push({ key: "status_active", label: "Active" });
+        if (statusInactive)
+            active.push({ key: "status_inactive", label: "Inactive" });
+
         const priceMin = qs("input[name='price_min']")?.value;
         const priceMax = qs("input[name='price_max']")?.value;
         if (priceMin)
@@ -63,6 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
             case "out_of_stock":
                 qs("input[name='out_of_stock']").checked = false;
                 break;
+            case "status_active":
+                qs("input[name='status'][value='active']").checked = false;
+                break;
+            case "status_inactive":
+                qs("input[name='status'][value='inactive']").checked = false;
+                break;
             case "price_min":
                 qs("input[name='price_min']").value = "";
                 break;
@@ -78,75 +92,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ── Update badge count + chips row ───────────────────────────
-    function updateFilterUI() {
-        const active  = getActiveFilters();
-        const badge   = el("filter-active-badge");
-        const chips   = el("active-filter-chips");
-        const counter = el("filter-result-count");
-
-        // Badge on toggle button
-        if (active.length > 0) {
-            badge.textContent = active.length;
-            badge.classList.remove("d-none");
-        } else {
-            badge.classList.add("d-none");
-        }
-
-        // Chips row
-        chips.innerHTML = "";
-        if (active.length > 0) {
-            chips.classList.remove("d-none");
-            counter.classList.remove("d-none");
-
-            active.forEach((f) => {
-                const chip = document.createElement("span");
-                chip.className =
-                    "badge bg-primary-subtle text-primary border border-primary-subtle d-inline-flex align-items-center gap-1 px-2 py-1";
-                chip.style.fontSize = "0.75rem";
-                chip.innerHTML = `${f.label} <i class="fas fa-times ms-1" style="cursor:pointer" data-key="${f.key}"></i>`;
-                chips.appendChild(chip);
-            });
-
-            // Dismiss individual chip
-            chips.querySelectorAll("[data-key]").forEach((icon) => {
-                icon.addEventListener("click", function () {
-                    clearFilter(this.dataset.key);
-                    updateFilterUI();
-                    if (window.productsTable)
-                        window.productsTable.ajax.reload();
-                });
-            });
-        } else {
-            chips.classList.add("d-none");
-            counter.classList.add("d-none");
-        }
-    }
+    // (updateFilterUI and filter chip UI removed)
 
     // ── Auto-open panel if filters present on page load ──────────
     if (getActiveFilters().length > 0) {
         const panel = el("filter-panel");
         if (panel) new bootstrap.Collapse(panel, { toggle: false }).show();
-        updateFilterUI();
+        // (removed: updateFilterUI)
     }
 
     // ── Live update badge/chips on any input change ───────────────
-    document.querySelectorAll(".filter-input").forEach((input) => {
-        input.addEventListener("change", updateFilterUI);
-        input.addEventListener("input",  updateFilterUI);
-    });
+    // (removed: updateFilterUI on filter-input change/input)
 
     // ── Form submit → prevent reload, reload DataTable ───────────
     el("product-filter-bar")?.addEventListener("submit", function (e) {
         e.preventDefault();
-        updateFilterUI();
         if (window.productsTable) window.productsTable.ajax.reload();
     });
 
     // ── Reset button ─────────────────────────────────────────────
     el("reset-filter-btn")?.addEventListener("click", function () {
         el("product-filter-bar").reset();
-        updateFilterUI();
         if (window.productsTable) window.productsTable.ajax.reload();
     });
 });

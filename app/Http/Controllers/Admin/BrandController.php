@@ -140,10 +140,20 @@ class BrandController extends Controller
     public function data(ReadBrandRequest $request, BrandRepo $brandRepo)
     {
         try {
-            $brands = $brandRepo->getDataForDatatable();
+            $brands = $brandRepo->getDataForDatatable($request->all());
 
             return DataTables::of($brands)
                 ->addIndexColumn()
+                ->filterColumn('name', function ($query, $keyword) {
+                    $like = "%{$keyword}%";
+                    $langs = ['en', 'fr', 'ar'];
+
+                    $query->where(function ($q) use ($like, $langs) {
+                        foreach ($langs as $lang) {
+                            $q->orWhere("name->$lang", 'LIKE', $like);
+                        }
+                    });
+                })
                 ->addColumn('image', function ($brand) {
                     if ($brand->image && Storage::disk('public')->exists($brand->image)) {
                         return '<img src="' . asset('storage/' . $brand->image) . '" width="50" class="rounded">';

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Repositories\Admin\Repositories;
+
 use App\Repositories\Admin\Interfaces\BrandRepositoryInterface;
 
 use App\Models\Brand;
@@ -20,15 +21,15 @@ class BrandRepository implements BrandRepositoryInterface
 
     public function createBrand($request, $data = null)
     {
-       $data = $data ?? $request->validated();
+        $data = $data ?? $request->validated();
 
-       // Handle Image Upload
-       if ($request->hasFile('image')) {
-           $imagePath = $request->file('image')->store('brands', 'public');
-           $data['image'] = $imagePath;
-       }
+        // Handle Image Upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('brands', 'public');
+            $data['image'] = $imagePath;
+        }
 
-       return Brand::create($data);
+        return Brand::create($data);
     }
 
     public function updateBrand($request, $id, $data = null)
@@ -81,8 +82,14 @@ class BrandRepository implements BrandRepositoryInterface
         return $brand;
     }
 
-    public function getDataForDatatable()
+    public function getDataForDatatable($request = null)
     {
-        return Brand::withCount('products')->get();
+        $query = Brand::withCount('products');
+
+        if (isset($request['status']) && $request['status'] !== '') {
+            $query->where('status', $request['status'] == '1' ? 'active' : 'inactive');
+        }
+
+        return $query;
     }
 }

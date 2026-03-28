@@ -92,47 +92,66 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         return $hasBeenDispatched;
     }
+
     public function getBatchesForDataTable(array $filters = [])
     {
         $query = Inventory::query()
-            ->select(
-                'batch_no',
-                DB::raw('MAX(location_type) as location_type'),
-                DB::raw('MAX(store_id) as store_id'),
-                DB::raw('MAX(warehouse_id) as warehouse_id'),
-                DB::raw('MAX(created_at) as created_at'),
-                DB::raw('MAX(status) as status'),
-                DB::raw('MAX(id) as id'),
-                DB::raw('COUNT(id) as items_count'),
-                DB::raw('SUM(quantity) as total_quantity'),
-                DB::raw('SUM(quantity * cost_price) as subtotal_cost')
-            )
+            ->select('batch_no')
+            ->selectRaw('MAX(location_type) as location_type')
+            ->selectRaw('MAX(store_id) as store_id')
+            ->selectRaw('MAX(warehouse_id) as warehouse_id')
+            ->selectRaw('MAX(created_at) as created_at')
+            ->selectRaw('MAX(status) as status')
+            ->selectRaw('MAX(id) as id')
+            ->selectRaw('COUNT(id) as items_count')
+            ->selectRaw('SUM(quantity) as total_quantity')
+            ->selectRaw('SUM(quantity * cost_price) as subtotal_cost')
             ->with(['store', 'warehouse'])
             ->groupBy('batch_no');
 
-        if (isset($filters['status']) && $filters['status'] !== '') {
-            $query->having('status', $filters['status']);
+        // Location type: warehouse or store
+        if (!empty($filters['location_type'])) {
+            $query->where('location_type', $filters['location_type']);
         }
 
-        if (isset($filters['search']['value']) && !empty($filters['search']['value'])) {
-            $search = $filters['search']['value'];
-            $query->where('batch_no', 'like', "%{$search}%");
+        // Specific location ID (store_id or warehouse_id)
+        if (!empty($filters['location_id']) && !empty($filters['location_type'])) {
+            if ($filters['location_type'] === 'store') {
+                $query->where('store_id', $filters['location_id']);
+            } elseif ($filters['location_type'] === 'warehouse') {
+                $query->where('warehouse_id', $filters['location_id']);
+            }
+        }
+
+        // Date range
+        if (!empty($filters['date_from']) && !empty($filters['date_to'])) {
+            $query->whereBetween('created_at', [
+                $filters['date_from'] . ' 00:00:00',
+                $filters['date_to']   . ' 23:59:59',
+            ]);
+        } elseif (!empty($filters['date_from'])) {
+            $query->where('created_at', '>=', $filters['date_from'] . ' 00:00:00');
+        } elseif (!empty($filters['date_to'])) {
+            $query->where('created_at', '<=', $filters['date_to'] . ' 23:59:59');
         }
 
         $batches = $query->get();
+
         foreach ($batches as $batch) {
             $batch->is_sold = $this->isBatchSold($batch->batch_no);
         }
-        return $batches;
-    }
 
-    public function getDataforDataTable(array $filters = [])
-    {
-        $query = Inventory::query()->with(['variant.product', 'store', 'warehouse'])->withCount('orderItems');
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+        // Exclude sold batches if filter is set
+        if (!empty($filters['exclude_sold'])) {
+            $batches = $batches->filter(fn($batch) => !$batch->is_sold)->values();
         }
-        return $query;
+
+        // Completely Sold batches (quantity = 0) can be optionally excluded
+        if (!empty($filters['exclude_completely_sold'])) {
+            $batches = $batches->filter(fn($batch) => $batch->total_quantity > 0)->values();
+        }
+
+        return $batches;
     }
 
     public function findByProduct(int $productId, ?int $variantId = null, ?int $warehouseId = null, ?int $storeId = null)

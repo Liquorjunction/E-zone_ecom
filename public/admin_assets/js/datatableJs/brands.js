@@ -4,16 +4,22 @@ $(document).ready(function () {
     var columns = [
         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
         { data: 'image', name: 'image', orderable: false, searchable: false },
-        { data: 'name', name: 'name' },
+        { data: 'name', name: 'name', searchable: true },
         { data: 'status', name: 'status' }
     ];
     if (hasAction) {
         columns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
     }
-    $('#brand-table').DataTable({
+
+    window.brandTable = $('#brand-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: $('#brand-table').data('route'),
+        ajax: {
+            url: $('#brand-table').data('route'),
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val();
+            }
+        },
         columns: columns
     });
 });

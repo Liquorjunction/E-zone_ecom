@@ -132,6 +132,9 @@ $(document).ready(function () {
                 d.best_seller = $("#bestseller").is(":checked") ? "1" : "";
                 d.in_stock = $("input[name='in_stock']").is(":checked")? "1" : "";
                 d.out_of_stock = $("input[name='out_of_stock']").is(":checked") ? "1" : "";
+                d.status = [];
+                if ($("input[name='status'][value='active']").is(":checked")) d.status.push("active");
+                if ($("input[name='status'][value='inactive']").is(":checked")) d.status.push("inactive");
                 d.price_min = $("input[name='price_min']").val();
                 d.price_max = $("input[name='price_max']").val();
                 d.date_from = $("input[name='date_from']").val();

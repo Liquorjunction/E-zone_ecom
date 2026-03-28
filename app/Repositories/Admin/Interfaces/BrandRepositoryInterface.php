@@ -11,5 +11,5 @@ interface BrandRepositoryInterface
     public function deleteBrand($id);
     public function getBrand($id);
     public function updateBrandStatus($id);
-    public function getDataforDatatable();
+    public function getDataforDatatable($request = null);
 }

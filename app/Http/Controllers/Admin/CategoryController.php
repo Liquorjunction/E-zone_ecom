@@ -111,9 +111,19 @@ class CategoryController extends Controller
 
         return DataTables::of($categories)
             ->addIndexColumn()
+            ->filterColumn('category-name', function ($query, $keyword) {
+                $like = "%{$keyword}%";
+                $langs = ['en', 'fr', 'ar'];
+
+                $query->where(function ($q) use ($like, $langs) {
+                    foreach ($langs as $lang) {
+                        $q->orWhere("category-name->$lang", 'LIKE', $like);
+                    }
+                });
+            })
             ->addColumn('image', function ($category) {
                 if ($category->{'category-icon'} && Storage::disk('public')->exists($category->{'category-icon'})) {
-                    return '<img src="'.asset('storage/'.$category->{'category-icon'}).'" alt="Category Image" class="img-thumbnail" width="50">';
+                    return '<img src="' . asset('storage/' . $category->{'category-icon'}) . '" alt="Category Image" class="img-thumbnail" width="50">';
                 }
 
                 return 'N/A';

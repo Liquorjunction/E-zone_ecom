@@ -123,6 +123,16 @@ class SubCategoryController extends Controller
 
         return DataTables::of($subCategories)
             ->addIndexColumn()
+            ->filterColumn('name', function ($query, $keyword) {
+                $like = "%{$keyword}%";
+                $langs = ['en', 'fr', 'ar'];
+
+                $query->where(function ($q) use ($like, $langs) {
+                    foreach ($langs as $lang) {
+                        $q->orWhere("sub-category-name->$lang", 'LIKE', $like);
+                    }
+                });
+            })
             ->addColumn('name', function ($subCategory) {
                 // Show English Name
                 return $subCategory->getTranslation('sub-category-name', 'en');

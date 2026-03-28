@@ -11,5 +11,5 @@ interface CategoryRepositoryInterface
     public function updateCategory($request, $id);
     public function deleteCategory($id);
     public function updateStatus($id);
-    public function getDataForDataTable();
+    public function getDataForDataTable($request = null);
 }

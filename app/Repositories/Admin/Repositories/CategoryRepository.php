@@ -105,8 +105,14 @@ class CategoryRepository implements CategoryRepositoryInterface
         return $category;
     }
 
-    public function getDataForDataTable()
+    public function getDataForDataTable($request = null)
     {
-        return Categories::withCount('subcategories')->get();
+        $query = Categories::withCount('subcategories');
+
+        if (isset($request['status']) && $request['status'] !== '') {
+            $query->where('status', $request['status'] == '1' ? 'active' : 'inactive');
+        }
+
+        return $query;
     }
 }

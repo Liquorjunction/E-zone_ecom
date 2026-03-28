@@ -97,10 +97,16 @@ class ProductRepository implements ProductRepositoryInterface
             $query->where('is_bestseller', true);
         }
 
-        if (isset($request['status']) && $request['status'] == 'active') {
-            $query->where('status', 'active');
-        } elseif (isset($request['status']) && $request['status'] == 'inactive') {
-            $query->where('status', 'inactive');
+        if (isset($request['status'])) {
+            $statuses = is_array($request['status']) ? $request['status'] : [$request['status']];
+            $statuses = array_filter($statuses, function ($s) {
+                return in_array($s, ['active', 'inactive']);
+            });
+            if (count($statuses) === 1) {
+                $query->where('status', $statuses[0]);
+            } elseif (count($statuses) > 1) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
         if (isset($request['in_stock']) && $request['in_stock'] == '1') {

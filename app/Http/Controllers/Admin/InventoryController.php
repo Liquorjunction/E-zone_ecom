@@ -20,9 +20,12 @@ use Yajra\DataTables\Facades\DataTables;
 
 class InventoryController extends Controller
 {
-    public function index()
+    public function index(WarehouseRepo $warehouseRepo, StoreRepo $storeRepo)
     {
-        return view('admin.pages.inventory.index');
+        $warehouses = $warehouseRepo->getActiveWarehouses();
+        $stores     = $storeRepo->getAllActiveStores();
+
+        return view('admin.pages.inventory.index', compact('warehouses', 'stores'));
     }
 
     public function create(ProductRepo $productRepo, WarehouseRepo $warehouseRepo, StoreRepo $storeRepo)
@@ -30,9 +33,9 @@ class InventoryController extends Controller
         abort_if(!Auth::guard('admin')->user()->can('inventories.create'), 403, 'Unauthorized action.');
 
         try {
-            $products = $productRepo->getAllActiveProducts();
+            $products   = $productRepo->getAllActiveProducts();
             $warehouses = $warehouseRepo->getActiveWarehouses();
-            $stores = $storeRepo->getAllActiveStores();
+            $stores     = $storeRepo->getAllActiveStores();
 
             return view('admin.pages.inventory.create', compact('products', 'warehouses', 'stores'));
         } catch (\Exception $e) {
@@ -45,7 +48,7 @@ class InventoryController extends Controller
     public function store(StoreBatchInventoryRequest $request, InventoryService $inventoryService)
     {
         try {
-            $data = $request->validated();
+            $data    = $request->validated();
             $adminId = Auth::guard('admin')->id();
             $inventoryService->createBatch($data, $adminId);
 
@@ -59,66 +62,72 @@ class InventoryController extends Controller
         }
     }
 
-    public function edit(EditInventoryRequest $request, InventoryRepo $inventoryRepo, ProductRepo $productRepo, WarehouseRepo $warehouseRepo, StoreRepo $storeRepo)
-    {
+    public function edit(
+        EditInventoryRequest $request,
+        InventoryRepo $inventoryRepo,
+        ProductRepo $productRepo,
+        WarehouseRepo $warehouseRepo,
+        StoreRepo $storeRepo
+    ) {
         try {
-            $id = $request->input('id');
-
+            $id            = $request->input('id');
             $referenceItem = $inventoryRepo->find($id);
 
             if (!$referenceItem) {
-                return redirect()->route('admin.inventory.index')->with('error', 'Inventory record not found.');
+                return redirect()->route('admin.inventory.index')
+                    ->with('error', 'Inventory record not found.');
             }
 
             $batchItems = $inventoryRepo->getByBatchNo($referenceItem->batch_no);
             $batchItems->load(['product', 'variant']);
 
-            $products = $productRepo->getAllActiveProducts();
+            $products   = $productRepo->getAllActiveProducts();
             $warehouses = $warehouseRepo->getActiveWarehouses();
-            $stores = $storeRepo->getAllActiveStores();
+            $stores     = $storeRepo->getAllActiveStores();
 
-            return view('admin.pages.inventory.create', compact('referenceItem', 'batchItems', 'products', 'warehouses', 'stores'));
+            return view('admin.pages.inventory.create', compact(
+                'referenceItem', 'batchItems', 'products', 'warehouses', 'stores'
+            ));
         } catch (\Exception $e) {
             Log::error('Error loading inventory edit form: ' . $e->getMessage());
-            return redirect()->route('admin.inventory.index')->with('error', 'An error occurred while loading the edit form.');
+            return redirect()->route('admin.inventory.index')
+                ->with('error', 'An error occurred while loading the edit form.');
         }
     }
-
 
     public function update(StoreBatchInventoryRequest $request, InventoryService $inventoryService)
     {
         try {
-            $data = $request->validated();
-            $id = $request->input('id');
+            $data    = $request->validated();
+            $id      = $request->input('id');
             $adminId = Auth::guard('admin')->id();
             $inventoryService->updateBatch($id, $data, $adminId);
-            return redirect()->route('admin.inventory.index')->with('success', 'Batch updated successfully.');
+
+            return redirect()->route('admin.inventory.index')
+                ->with('success', 'Batch updated successfully.');
         } catch (\Exception $e) {
             Log::error('Error updating inventory batch: ' . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'An error occurred while updating the batch.');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'An error occurred while updating the batch.');
         }
     }
 
     public function destroy(DestroyInventoryRequest $request, InventoryRepo $inventoryRepo)
     {
         try {
-            $id = $request->input('id');
+            $id      = $request->input('id');
             $adminId = Auth::guard('admin')->id();
-            $item = $inventoryRepo->find($id);
+            $item    = $inventoryRepo->find($id);
 
-            if ($item) {
-                $batchNo = $item->batch_no;
-                $inventoryRepo->deleteByBatchNo($batchNo, $adminId);
-            } else {
+            if (!$item) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Inventory record not found.',
                 ], 404);
             }
 
-            if ($request->ajax()) {
-                return response()->json(['success' => 'Batch deleted successfully.']);
-            }
+            $inventoryRepo->deleteByBatchNo($item->batch_no, $adminId);
 
             return response()->json([
                 'success' => true,
@@ -126,9 +135,6 @@ class InventoryController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error deleting inventory batch: ' . $e->getMessage());
-            if ($request->ajax()) {
-                return response()->json(['error' => 'An error occurred while deleting.'], 500);
-            }
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while deleting.',
@@ -136,39 +142,49 @@ class InventoryController extends Controller
         }
     }
 
-    public function show(ReadInventoryRequest $request, InventoryRepo $inventoryRepo, InventoryTransactionsRepo $inventoryTransactionRepo)
-    {
+    public function show(
+        ReadInventoryRequest $request,
+        InventoryRepo $inventoryRepo,
+        InventoryTransactionsRepo $inventoryTransactionRepo
+    ) {
         try {
-            $id = $request->input('id');
+            $id        = $request->input('id');
             $inventory = $inventoryRepo->find($id);
 
             if (!$inventory) {
-                return redirect()->route('admin.inventory.index')->with('error', 'Inventory not found.');
+                return redirect()->route('admin.inventory.index')
+                    ->with('error', 'Inventory not found.');
             }
 
             $batchItems = $inventoryRepo->getByBatchNo($inventory->batch_no);
             $batchItems->load(['product', 'variant']);
-            $allTransactions = $inventoryTransactionRepo->getByBatchNo($inventory->batch_no);
+
+            $allTransactions    = $inventoryTransactionRepo->getByBatchNo($inventory->batch_no);
             $productBatchHistory = $allTransactions->groupBy('inventory_id');
 
-            return view('admin.pages.inventory.show', compact('inventory', 'batchItems', 'productBatchHistory'));
+            return view('admin.pages.inventory.show', compact(
+                'inventory', 'batchItems', 'productBatchHistory'
+            ));
         } catch (\Exception $e) {
             Log::error('Error loading inventory details: ' . $e->getMessage());
-            return redirect()->route('admin.inventory.index')->with('error', 'An error occurred while loading details.');
+            return redirect()->route('admin.inventory.index')
+                ->with('error', 'An error occurred while loading details.');
         }
     }
 
     public function dataTable(ReadInventoryRequest $request, InventoryRepo $inventoryRepo)
     {
         try {
-            $query = $inventoryRepo->getBatchesForDataTable($request->all());
+            $batches = $inventoryRepo->getBatchesForDataTable($request->all());
 
-            return DataTables::of($query)
+            return DataTables::of($batches)
                 ->addIndexColumn()
-                ->editColumn('created_at', fn($row) => $row->created_at->format('d M Y, h:i A'))
+                ->editColumn('created_at', fn($row) => \Carbon\Carbon::parse($row->created_at)->format('d M Y, h:i A'))
                 ->addColumn('batch_no', fn($row) => '<span class="badge bg-primary">' . ($row->batch_no ?? 'N/A') . '</span>')
                 ->addColumn('location', function ($row) {
-                    if ($row->location_type === 'store') return $row->store->store_name ?? 'Store';
+                    if ($row->location_type === 'store') {
+                        return $row->store->store_name ?? 'Store';
+                    }
                     return $row->warehouse->warehouse_name ?? 'Warehouse';
                 })
                 ->addColumn('items_summary', fn($row) => '<span class="badge bg-info">' . $row->items_count . ' Items</span>')
@@ -178,17 +194,16 @@ class InventoryController extends Controller
                     return '<span class="badge bg-success">' . $symbol . number_format($row->subtotal_cost, 2) . '</span>';
                 })
                 ->addColumn('action', function ($row) use ($request, $inventoryRepo) {
-                    $canRead = $request->user()->can('inventories.read');
+                    $canRead   = $request->user()->can('inventories.read');
                     $canUpdate = $request->user()->can('inventories.update');
                     $canDelete = $request->user()->can('inventories.delete');
-                    $isSold = $inventoryRepo->isBatchSold($row->batch_no);
-                    $editUrl = ($canUpdate && !$isSold) ? route('admin.inventory.edit', ['id' => $row->id]) : null;
-                    $deleteUrl = ($canDelete && !$isSold) ? route('admin.inventory.destroy', ['id' => $row->id]) : null;
+                    $isSold    = $inventoryRepo->isBatchSold($row->batch_no);
+
                     return view('admin.partials.datatable-actions', [
-                        'id' => $row->id,
-                        'view_url' => $canRead ? route('admin.inventory.show', ['id' => $row->id]) : null,
-                        'edit_url' => $editUrl,
-                        'delete_url' => $deleteUrl,
+                        'id'         => $row->id,
+                        'view_url'   => $canRead   ? route('admin.inventory.show',    ['id' => $row->id]) : null,
+                        'edit_url'   => ($canUpdate && !$isSold) ? route('admin.inventory.edit',    ['id' => $row->id]) : null,
+                        'delete_url' => ($canDelete && !$isSold) ? route('admin.inventory.destroy', ['id' => $row->id]) : null,
                     ])->render();
                 })
                 ->rawColumns(['batch_no', 'items_summary', 'subtotal_cost', 'action'])

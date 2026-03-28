@@ -18,7 +18,6 @@ interface InventoryRepositoryInterface
     public function isBatchSold(string $batchNo);
     public function findByProduct(int $productId, ?int $variantId = null, ?int $warehouseId = null, ?int $storeId = null);
     public function findWithLock(int $id);
-    public function getDataforDataTable(array $filters = []);
     public function getBatchesForDataTable(array $filters = []);
     public function getLowStock(array $filters = []);
     public function getLockedForCheckout(int $productId, ?int $variantId);

@@ -3,6 +3,7 @@
  * Handles DataTables for Categories and SubCategories index page.
  */
 
+
 $(document).ready(function() {
     // --------------------------------------------------------------
     // 1. Initialize Category DataTable
@@ -27,12 +28,22 @@ $(document).ready(function() {
             catColumns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
         }
 
+        // Helper to get filter data for AJAX
+        function getCategoryFilterData(d) {
+            d.status = $("input[name='status']:checked").val() || '';
+        }
+
         var catTable = $(catTableSelector).DataTable({
             processing: true,
             serverSide: true,
-            ajax: $(catTableSelector).data('route'),
+            ajax: {
+                url: $(catTableSelector).data('route'),
+                data: getCategoryFilterData
+            },
             columns: catColumns
         });
+        // Expose for filter bar JS
+        window.categoryTable = catTable;
     }
 
     // --------------------------------------------------------------
@@ -61,12 +72,22 @@ $(document).ready(function() {
             subCatColumns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
         }
 
+        // Helper to get filter data for AJAX
+        function getSubCategoryFilterData(d) {
+            d.status = $("input[name='status']:checked").val() || '';
+        }
+
         var subCatTable = $(subCatTableSelector).DataTable({
             processing: true,
             serverSide: true,
-            ajax: $(subCatTableSelector).data('route'),
+            ajax: {
+                url: $(subCatTableSelector).data('route'),
+                data: getSubCategoryFilterData
+            },
             columns: subCatColumns
         });
+        // Expose for filter bar JS
+        window.subcategoryTable = subCatTable;
     }
 
     // --------------------------------------------------------------

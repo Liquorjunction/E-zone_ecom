@@ -12,5 +12,5 @@ interface SubCategoryRepositoryInterface
     public function updateSubCategory($request, $id);
     public function deleteSubCategory($id);
     public function updateStatus($id);
-    public function getDataForDataTable();
+    public function getDataForDataTable($request = null);
 }
