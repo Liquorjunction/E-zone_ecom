@@ -5,21 +5,27 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Stock Report</h4>
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center justify-content-between py-3">
+                        <h4 class="card-title mb-0">
+                            <i class="bi bi-box-seam me-2 text-primary"></i>Stock Report
+                        </h4>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
+
+                        {{-- Hidden data source for child rows --}}
                         <table id="skuChildRowsData" style="display:none;">
                             <tbody>
                                 @foreach($stocks as $index => $group)
                                     @foreach($group['rows'] as $row)
                                         @php $inv = $row['inventory']; @endphp
-                                        <tr class="sku-child-row bg-light" data-sku-parent="{{ $index }}">
+                                        <tr class="sku-child-row" data-sku-parent="{{ $index }}">
                                             <td></td>
                                             <td></td>
-                                            <td class="text-muted ps-3">
-                                                <small>↳ {{ $inv->batch_no }}</small>
+                                            <td>
+                                                <span class="child-batch-badge">
+                                                    <i class="bi bi-arrow-return-right me-1"></i>{{ $inv->batch_no }}
+                                                </span>
                                             </td>
                                             <td>{{ optional($inv->product)->name ?? 'N/A' }}</td>
                                             <td>{{ optional($inv->variant)->variant_name ?? 'N/A' }}</td>
@@ -27,15 +33,15 @@
                                             <td>
                                                 @if($inv->warehouse_id && $inv->warehouse)
                                                     <span class="badge bg-primary">Warehouse</span>
-                                                    {{ $inv->warehouse->warehouse_name }}
+                                                    <span class="text-muted small">{{ $inv->warehouse->warehouse_name }}</span>
                                                 @elseif($inv->store_id && $inv->store)
                                                     <span class="badge bg-success">Store</span>
-                                                    {{ $inv->store->store_name }}
+                                                    <span class="text-muted small">{{ $inv->store->store_name }}</span>
                                                 @else
-                                                    <span class="text-muted">N/A</span>
+                                                    <span class="text-muted">—</span>
                                                 @endif
                                             </td>
-                                            <td></td>
+                                            <td>—</td>
                                             <td>{{ $row['total_qty'] }}</td>
                                             <td>{{ $row['sold_qty'] }}</td>
                                             <td>{{ $row['reserved_qty'] }}</td>
@@ -47,8 +53,9 @@
                             </tbody>
                         </table>
 
-                        <div id="stockReportTableWrapper">
-                            <table id="stockReportTable" class="table table-bordered table-striped">
+                        {{-- Main DataTable --}}
+                        <div id="stockReportTableWrapper" class="p-3">
+                            <table id="stockReportTable" class="table table-bordered dataTable">
                                 <thead>
                                     <tr>
                                         <th style="width:40px;"></th>
@@ -68,40 +75,74 @@
                                 </thead>
                                 <tbody>
                                     @foreach($stocks as $index => $group)
-                                        <tr class="sku-parent-row fw-semibold"
+                                        @php
+                                            $hasChildren = count($group['rows']) > 1;
+                                            $firstRow    = $group['rows'][0] ?? null;
+                                            $batchNo     = $firstRow && isset($firstRow['inventory'])
+                                                            ? $firstRow['inventory']->batch_no ?? null
+                                                            : null;
+                                        @endphp
+                                        <tr class="sku-parent-row {{ $hasChildren ? 'has-children' : '' }}"
                                             data-sku-id="{{ $index }}"
-                                            data-has-children="{{ count($group['rows']) > 1 ? '1' : '0' }}">
-                                            <td class="text-center p-1">
-                                                @if(count($group['rows']) > 1)
+                                            data-has-children="{{ $hasChildren ? '1' : '0' }}">
+
+                                            {{-- Expand button --}}
+                                            <td class="text-center align-middle expand-cell">
+                                                @if($hasChildren)
                                                     <button type="button"
-                                                            class="btn btn-sm btn-outline-primary expand-btn px-2 py-0"
+                                                            class="btn btn-sm expand-btn"
                                                             data-sku-id="{{ $index }}"
-                                                            title="Show locations">
+                                                            title="Show batch locations">
                                                         <i class="bi bi-chevron-double-down"></i>
                                                     </button>
                                                 @endif
                                             </td>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>
-                                                <span class="badge bg-secondary">{{ $group['sku'] }}</span>
-                                                @php
-                                                    $firstRow = $group['rows'][0] ?? null;
-                                                    $batchNo = $firstRow && isset($firstRow['inventory']) ? $firstRow['inventory']->batch_no ?? null : null;
-                                                @endphp
-                                                @if(count($group['rows']) === 1 && $batchNo)
+
+                                            <td class="align-middle">{{ $index + 1 }}</td>
+
+                                            <td class="align-middle">
+                                                <span class="badge bg-secondary sku-badge">{{ $group['sku'] }}</span>
+                                                @if(!$hasChildren && $batchNo)
                                                     <br><small class="text-muted">{{ $batchNo }}</small>
                                                 @endif
+                                                @if($hasChildren)
+                                                    <br><small class="text-primary fw-semibold">
+                                                        <i class="bi bi-layers me-1"></i>{{ count($group['rows']) }} batches
+                                                    </small>
+                                                @endif
                                             </td>
-                                            <td>{{ optional($group['product'])->name ?? 'N/A' }}</td>
-                                            <td>{{ optional($group['variant'])->variant_name ?? 'N/A' }}</td>
-                                            <td>{{ optional($group['brand'])->name ?? 'N/A' }}</td>
-                                            <td>{{ optional($group['category'])?->getTranslation('category-name', 'en') ?? 'N/A' }}</td>
-                                            <td>{{ optional($group['subCategory'])?->getTranslation('sub-category-name', 'en') ?? 'N/A' }}</td>
-                                            <td><span class="badge bg-dark" title="Total across all locations">{{ $group['totals']['total_qty'] }}</span></td>
-                                            <td><span class="badge bg-danger" title="Sold (dispatched)">{{ $group['totals']['sold_qty'] }}</span></td>
-                                            <td><span class="badge bg-warning text-dark" title="Reserved (pending/processing)">{{ $group['totals']['reserved_qty'] }}</span></td>
-                                            <td><span class="badge bg-success" title="Available (not reserved)">{{ $group['totals']['available_qty'] }}</span></td>
-                                            <td><span class="badge bg-info text-dark" title="Returned / RTO restocked">{{ $group['totals']['returned_qty'] }}</span></td>
+
+                                            <td class="align-middle fw-semibold">{{ optional($group['product'])->name ?? 'N/A' }}</td>
+                                            <td class="align-middle">{{ optional($group['variant'])->variant_name ?? 'N/A' }}</td>
+                                            <td class="align-middle">{{ optional($group['brand'])->name ?? 'N/A' }}</td>
+                                            <td class="align-middle">{{ optional($group['category'])?->getTranslation('category-name', 'en') ?? 'N/A' }}</td>
+                                            <td class="align-middle">{{ optional($group['subCategory'])?->getTranslation('sub-category-name', 'en') ?? 'N/A' }}</td>
+
+                                            <td class="align-middle text-center">
+                                                <span class="badge bg-dark qty-badge" title="Total across all locations">
+                                                    {{ $group['totals']['total_qty'] }}
+                                                </span>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <span class="badge bg-danger qty-badge" title="Sold (dispatched)">
+                                                    {{ $group['totals']['sold_qty'] }}
+                                                </span>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <span class="badge bg-warning text-dark qty-badge" title="Reserved (pending/processing)">
+                                                    {{ $group['totals']['reserved_qty'] }}
+                                                </span>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <span class="badge bg-success qty-badge" title="Available">
+                                                    {{ $group['totals']['available_qty'] }}
+                                                </span>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <span class="badge bg-info text-dark qty-badge" title="Returned / RTO restocked">
+                                                    {{ $group['totals']['returned_qty'] }}
+                                                </span>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -116,21 +157,7 @@
 @endsection
 
 @push('styles')
-<style>
-    #stockReportTableWrapper .dataTables_wrapper > .row {
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    #stockReportTableWrapper .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    #stockReportTableWrapper {
-        width: 100%;
-    }
-</style>
+    <link rel="stylesheet" href="{{ asset('admin_assets/css/stockReportTable.css') }}">
 @endpush
 
 @push('scripts')

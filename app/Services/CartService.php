@@ -69,7 +69,7 @@ class CartService
             $variant = $item->variant ?? null;
             $product = $item->product ?? null;
             $quantity = $data['quantity'] ?? $item->quantity;
-            $stock = $variant ? $variant->getTotalStockAttribute() : ($product ? $product->productVariants()->sum('inventory.quantity') : 0);
+            $stock = $variant ? $variant->getSellableStock() : ($product ? $product->productVariants()->sum('inventory.quantity') : 0);
             if ($stock < $quantity) {
                 throw new \Exception(statictranslations('Insufficient stock for this item.'));
             }

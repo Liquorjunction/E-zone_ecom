@@ -71,7 +71,7 @@ class InventoryTransactionsController extends Controller
                     return $transaction->batch_no ?? 'N/A';
                 })
                 ->addColumn('reference_type', function ($transaction) {
-                    return $transaction->reference_type ?? 'N/A';
+                    return $transaction->description ?? 'N/A';
                 })
                 ->addColumn('before_quantity', function ($transaction) {
                     return $transaction->before_quantity ?? 'N/A';

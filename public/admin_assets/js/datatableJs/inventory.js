@@ -5,8 +5,8 @@ $(function () {
 
     window.inventoryTable = $('#inventory-table').DataTable({
         processing: true,
-        serverSide: false, // repo uses ->get() with groupBy aggregates
-        searching:  false, // custom filter bar handles all filtering
+        serverSide: true,
+        searching: true,
         ajax: {
             url:  $('#inventory-table').data('route'),
             type: 'GET',

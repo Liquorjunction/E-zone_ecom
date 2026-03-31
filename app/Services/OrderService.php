@@ -130,7 +130,7 @@ class OrderService
                     $item->product_id,
                     $item->variant_id,
                     $item->quantity,
-                    'OrderId: ' . '#' . $order->id,
+                    'order',
                     $order->id,
                     $userId ?? 1
                 );

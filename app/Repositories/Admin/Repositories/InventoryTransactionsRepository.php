@@ -45,6 +45,7 @@ class InventoryTransactionsRepository implements InventoryTransactionsRepository
                 'inventory_transactions.before_quantity',
                 'inventory_transactions.after_quantity',
                 'inventory_transactions.quantity_change',
+                'inventory_transactions.description',
                 'products.name as product_name',
                 'product_variants.variant_name as variant_name',
                 'inventories.batch_no as inventory_batch_no',

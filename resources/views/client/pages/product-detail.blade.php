@@ -538,10 +538,9 @@
                                                 d="M20 12H4" />
                                         </svg>
                                     </button>
-                                    <input type="text" name="quantity" id="cart-quantity" value="1"
+                                    <input type="number" name="quantity" id="cart-quantity" value="1"
                                         class="w-12 text-center text-base font-bold text-gray-900 border-x-2 border-gray-200 focus:outline-none bg-transparent"
-                                        readonly aria-label="Quantity"
-                                        @if ($totalStock > 0) max="{{ $totalStock }}" @endif>
+                                        min="1" @if ($totalStock > 0) max="{{ $totalStock }}" @endif aria-label="Quantity">
                                     <button type="button" id="qty-increase"
                                         class="w-11 h-11 text-gray-500 hover:text-primary hover:bg-gray-50 transition-colors rounded-r-xl flex items-center justify-center"
                                         aria-label="Increase quantity">

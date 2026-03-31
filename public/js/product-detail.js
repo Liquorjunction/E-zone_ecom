@@ -219,6 +219,28 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!Number.isNaN(initialMax) && initialMax > 0) {
             setMaxStock(initialMax);
         }
+            // Manual input validation (like checkout)
+            qtyInput.addEventListener('input', function () {
+                let max = getMaxStock();
+                let val = parseInt(qtyInput.value, 10);
+                if (isNaN(val) || val < 1) val = 1;
+                if (max && val > max) {
+                    val = max;
+                    showStockLimitMessage(max);
+                    qtyInput.classList.add('border-red-500', 'bg-red-50');
+                } else {
+                    qtyInput.classList.remove('border-red-500', 'bg-red-50');
+                }
+                qtyInput.value = val;
+            });
+            qtyInput.addEventListener('blur', function () {
+                let max = getMaxStock();
+                let val = parseInt(qtyInput.value, 10);
+                if (isNaN(val) || val < 1) val = 1;
+                if (max && val > max) val = max;
+                qtyInput.value = val;
+                qtyInput.classList.remove('border-red-500', 'bg-red-50');
+            });
     }
 
     if (qtyDecrease && qtyIncrease && qtyInput) {
