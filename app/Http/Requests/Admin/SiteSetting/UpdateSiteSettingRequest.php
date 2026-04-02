@@ -38,6 +38,25 @@ class UpdateSiteSettingRequest extends FormRequest
         ];
     }
 
+    protected function prepareForValidation()
+    {
+        $infotext = $this->input('infotext', $this->input('infotext[]'));
+
+        if (is_string($infotext)) {
+            $infotext = [$infotext];
+        }
+
+        if (is_array($infotext)) {
+            $infotext = array_values(array_filter($infotext, static function ($value) {
+                return $value !== null && $value !== '';
+            }));
+        }
+
+        $this->merge([
+            'infotext' => $infotext,
+        ]);
+    }
+
     /**
      * Get custom messages for validator errors.
      *

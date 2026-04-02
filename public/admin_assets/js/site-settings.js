@@ -123,7 +123,23 @@
 
             const siteId = this.dataset.siteId;
             const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+            const data = {};
+
+            for (const [key, value] of formData.entries()) {
+                if (key.endsWith('[]')) {
+                    const normalizedKey = key.slice(0, -2);
+                    if (!Array.isArray(data[normalizedKey])) {
+                        data[normalizedKey] = [];
+                    }
+
+                    if (value !== '') {
+                        data[normalizedKey].push(value);
+                    }
+                    continue;
+                }
+
+                data[key] = value;
+            }
 
             delete data._method;
             delete data._token;
