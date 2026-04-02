@@ -12,6 +12,13 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Keep admin panel language fixed to English only.
+        if ($request->is('admin') || $request->is('admin/*')) {
+            App::setLocale('en');
+
+            return $next($request);
+        }
+
         $supportedLocales = ['en', 'fr', 'ar'];
         $defaultLocale = config('app.locale', 'fr');
 
