@@ -176,6 +176,43 @@ document.addEventListener("DOMContentLoaded", function () {
         syncCheckoutSubmitState();
     }
 
+    function hasBlockingStockIssue() {
+        return Array.from(root.querySelectorAll('.cart-item-row, .summary-item-row')).some(function (row) {
+            if (row.dataset.stockStatus === 'out') {
+                return true;
+            }
+
+            const max = parseStockValue(row.dataset.maxStock);
+            if (max === null) {
+                return false;
+            }
+
+            if (max <= 0) {
+                return true;
+            }
+
+            const quantityField = row.querySelector('.cart-quantity-input, .summary-quantity');
+            const quantity = parseInt(quantityField?.value || quantityField?.textContent || '0', 10);
+            return !Number.isNaN(quantity) && quantity > max;
+        });
+    }
+
+    function updateForwardNavigationState() {
+        const proceedButton = root.querySelector('[data-spa-step="2"]');
+        if (!proceedButton) return;
+
+        const blocked = hasBlockingStockIssue();
+        proceedButton.disabled = blocked;
+        proceedButton.classList.toggle('opacity-60', blocked);
+        proceedButton.classList.toggle('cursor-not-allowed', blocked);
+        proceedButton.classList.toggle('pointer-events-none', blocked);
+        if (blocked) {
+            proceedButton.title = trans('Please remove out-of-stock items before continuing to checkout.');
+        } else {
+            proceedButton.removeAttribute('title');
+        }
+    }
+
     function debounceUpdate(id, quantity) {
         if (debounceTimers[id]) clearTimeout(debounceTimers[id]);
         debounceTimers[id] = setTimeout(() => { updateItem(id, quantity); }, 500);
@@ -384,6 +421,14 @@ document.addEventListener("DOMContentLoaded", function () {
         clearTimeout(goToStepTimer);
     }
     goToStepTimer = setTimeout(async () => {
+        const currentStep = parseInt(root.dataset.step || '1', 10) || 1;
+        if (step > currentStep && hasBlockingStockIssue()) {
+            showToast(trans('Please remove out-of-stock items before continuing to checkout.'), 'error');
+            syncCheckoutSubmitState();
+            updateForwardNavigationState();
+            return;
+        }
+
         var routes  = window.__checkoutRoutes || {};
         var showUrl = routes.show || window.location.pathname;
         var content = document.getElementById("checkout-step-content");
@@ -408,6 +453,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (content) content.innerHTML = data.html;
                 updateProgressBar(step);
                 runStepInits();
+                updateForwardNavigationState();
                 window.scrollTo({ top: 0, behavior: "smooth" });
             }
         } catch (e) {
@@ -572,6 +618,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
             syncCheckoutSubmitState();
+            updateForwardNavigationState();
         }
     }
 
@@ -1059,6 +1106,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     runStepInits();
     syncCheckoutSubmitState();
+    updateForwardNavigationState();
 });
 
 // ═══════════════════════════════════════════════════════════════

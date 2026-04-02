@@ -724,7 +724,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then((r) => r.json())
                 .then((data) => {
                     if (data.success) {
-                        if (data.summary?.itemCount !== undefined) {
+                        if (!isBuyNow && data.summary?.itemCount !== undefined) {
                             window.dispatchEvent(
                                 new CustomEvent("cart:changed", {
                                     detail: {

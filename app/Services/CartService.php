@@ -82,7 +82,7 @@ class CartService
     {
         $cart = Cart::create([
             'user_id' => $cartId->userId,
-            'session_id' => $cartId->sessionId,
+            'session_id' => $this->buildBuyNowSessionId($cartId->sessionId),
         ]);
 
         session()->put(self::SESSION_KEY_ACTIVE_BUY_NOW_CART_ID, $cart->id);
@@ -215,6 +215,11 @@ class CartService
     {
         session()->forget(self::SESSION_KEY_ACTIVE_BUY_NOW_CART_ID);
         session()->forget(self::SESSION_KEY_BUY_NOW_CONTEXT);
+    }
+
+    private function buildBuyNowSessionId(string $sessionId): string
+    {
+        return $sessionId . ':buy-now';
     }
 
     public function updateItem(CartIdentifier $cartId, int $itemId, array $data)

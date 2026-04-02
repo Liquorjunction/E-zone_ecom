@@ -6,6 +6,20 @@
     $appliedCoupon = $appliedCoupon ?? null;
 @endphp
 
+@php
+    $hasBlockingStockIssue = collect($itemsCollection ?? ($cart?->items ?? []))->contains(function ($item) {
+        $availableStock = 0;
+
+        if ($item->variant && method_exists($item->variant, 'getSellableStock')) {
+            $availableStock = (int) $item->variant->getSellableStock();
+        } elseif ($item->product && method_exists($item->product, 'getSellableStock')) {
+            $availableStock = (int) $item->product->getSellableStock();
+        }
+
+        return $availableStock <= 0;
+    });
+@endphp
+
 {{-- ══════════════════════════════════════════ --}}
 {{--  STEP 1 – SHOPPING CART                   --}}
 {{-- ══════════════════════════════════════════ --}}
@@ -60,12 +74,16 @@
 
                 {{-- SPA: use data-spa-step instead of href to avoid page reload --}}
                 <button type="button" data-spa-step="2"
-                    class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
+                    @disabled($hasBlockingStockIssue)
+                    class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 {{ $hasBlockingStockIssue ? 'opacity-60 cursor-not-allowed pointer-events-none' : '' }}">
                     {{ statictranslations('Proceed to Checkout') }}
                     <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                     </svg>
                 </button>
+                @if ($hasBlockingStockIssue)
+                    <p class="mt-3 text-sm font-medium text-red-600">{{ statictranslations('Please remove out-of-stock items before continuing to checkout.') }}</p>
+                @endif
             </div>
         </div>
     </div>
