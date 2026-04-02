@@ -81,9 +81,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                     </svg>
                 </button>
-                @if ($hasBlockingStockIssue)
-                    <p class="mt-3 text-sm font-medium text-red-600">{{ statictranslations('Please remove out-of-stock items before continuing to checkout.') }}</p>
-                @endif
+                <p id="checkout-stock-block-message"
+                    class="mt-3 text-sm font-medium text-red-600 {{ $hasBlockingStockIssue ? '' : 'hidden' }}">
+                    {{ statictranslations('Please remove out-of-stock items before continuing to checkout.') }}
+                </p>
             </div>
         </div>
     </div>

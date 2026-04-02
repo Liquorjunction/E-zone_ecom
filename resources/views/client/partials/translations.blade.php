@@ -48,6 +48,10 @@
         'Failed to delete address' => statictranslations('Failed to delete address'),
         'Address deleted successfully' => statictranslations('Address deleted successfully'),
         'Address saved successfully!' => statictranslations('Address saved successfully!'),
+        'The page will reload.' => statictranslations('The page will reload.'),
+        'Error saving address. Please try again.' => statictranslations('Error saving address. Please try again.'),
+        'Error saving address.' => statictranslations('Error saving address.'),
+        'Unknown error' => statictranslations('Unknown error'),
         'Are you sure you want to delete this address?' => statictranslations('Are you sure you want to delete this address?'),
         'Please select a shipping address first' => statictranslations('Please select a shipping address first'),
         'Please select a billing address' => statictranslations('Please select a billing address'),
@@ -100,6 +104,9 @@
         'Failed to delete review. Please try again.' => statictranslations('Failed to delete review. Please try again.'),
         'Review data is missing' => statictranslations('Review data is missing'),
         'This item is out of stock.' => statictranslations('This item is out of stock.'),
+        'Please remove out-of-stock items before placing your order.' => statictranslations('Please remove out-of-stock items before placing your order.'),
+        'Please remove out-of-stock items before continuing to checkout.' => statictranslations('Please remove out-of-stock items before continuing to checkout.'),
+        'Please fix the highlighted fields before continuing.' => statictranslations('Please fix the highlighted fields before continuing.'),
         'Failed to add to cart' => statictranslations('Failed to add to cart'),
         'Failed to update compare list.' => statictranslations('Failed to update compare list.'),
         'Request failed.' => statictranslations('Request failed.'),
@@ -123,6 +130,16 @@
         'Stock limit' => statictranslations('Stock limit'),
         'A network error occurred. Please check your connection and try again.' => statictranslations('A network error occurred. Please check your connection and try again.'),
         'Something went wrong. Please try again.' => statictranslations('Something went wrong. Please try again.'),
+        'Email address is required' => statictranslations('Email address is required'),
+        'Please select a payment method.' => statictranslations('Please select a payment method.'),
+        'Please add a billing address, or use the same as shipping' => statictranslations('Please add a billing address, or use the same as shipping'),
+        'Processing...' => statictranslations('Processing...'),
+        'Navigation failed. Please refresh the page.' => statictranslations('Navigation failed. Please refresh the page.'),
+        'Order could not be placed. Please check the form.' => statictranslations('Order could not be placed. Please check the form.'),
+        'A network error occurred. Please try again.' => statictranslations('A network error occurred. Please try again.'),
+        'You have a coupon applied. Leave without completing your purchase?' => statictranslations('You have a coupon applied. Leave without completing your purchase?'),
+        'Yes, Leave' => statictranslations('Yes, Leave'),
+        'No, Stay' => statictranslations('No, Stay'),
         // --- Added for JS translations (French keys) ---
         'Email is required' => statictranslations('Email is required'),
         'Please enter a valid email address.' => statictranslations('Please enter a valid email address.'),
@@ -141,8 +158,16 @@
         'Postal code must be at least 3 characters' => statictranslations('Postal code must be at least 3 characters'),
         'Country is required' => statictranslations('Country is required'),
         'Please select an address type' => statictranslations('Please select an address type'),
+        'This item is currently unavailable. Remove it to continue checkout.' => statictranslations('This item is currently unavailable. Remove it to continue checkout.'),
+        'Remove this item to complete checkout.' => statictranslations('Remove this item to complete checkout.'),
+        'Out of stock' => statictranslations('Out of stock'),
     ];
 @endphp
 <script>
     window.translations = @json($translations);
+    window.trans = window.trans || function (key) {
+        return window.translations && window.translations[key] !== undefined
+            ? window.translations[key]
+            : key;
+    };
 </script>

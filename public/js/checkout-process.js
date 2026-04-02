@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 if (typeof window.trans !== 'function') {
     window.trans = function(key) {
-        if (window.translations && window.translations[key]) return window.translations[key];
+        if (window.translations && window.translations[key] !== undefined) return window.translations[key];
         return key;
     };
 }
@@ -199,18 +199,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateForwardNavigationState() {
         const proceedButton = root.querySelector('[data-spa-step="2"]');
-        if (!proceedButton) return;
-
         const blocked = hasBlockingStockIssue();
-        proceedButton.disabled = blocked;
-        proceedButton.classList.toggle('opacity-60', blocked);
-        proceedButton.classList.toggle('cursor-not-allowed', blocked);
-        proceedButton.classList.toggle('pointer-events-none', blocked);
-        if (blocked) {
-            proceedButton.title = trans('Please remove out-of-stock items before continuing to checkout.');
-        } else {
-            proceedButton.removeAttribute('title');
+
+        if (proceedButton) {
+            proceedButton.disabled = blocked;
+            proceedButton.classList.toggle('opacity-60', blocked);
+            proceedButton.classList.toggle('cursor-not-allowed', blocked);
+            proceedButton.classList.toggle('pointer-events-none', blocked);
+            if (blocked) {
+                proceedButton.title = trans('Please remove out-of-stock items before continuing to checkout.');
+            } else {
+                proceedButton.removeAttribute('title');
+            }
         }
+
+        const blockMessage = document.getElementById('checkout-stock-block-message');
+        if (blockMessage) {
+            blockMessage.classList.toggle('hidden', !blocked);
+        }
+    }
+
+    function syncCheckoutActionStates() {
+        syncCheckoutSubmitState();
+        updateForwardNavigationState();
     }
 
     function debounceUpdate(id, quantity) {
@@ -424,8 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const currentStep = parseInt(root.dataset.step || '1', 10) || 1;
         if (step > currentStep && hasBlockingStockIssue()) {
             showToast(trans('Please remove out-of-stock items before continuing to checkout.'), 'error');
-            syncCheckoutSubmitState();
-            updateForwardNavigationState();
+            syncCheckoutActionStates();
             return;
         }
 
@@ -453,12 +463,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (content) content.innerHTML = data.html;
                 updateProgressBar(step);
                 runStepInits();
-                updateForwardNavigationState();
+                syncCheckoutActionStates();
                 window.scrollTo({ top: 0, behavior: "smooth" });
             }
         } catch (e) {
             console.error("goToStep failed", e);
-            showToast("Navigation failed. Please refresh the page.", "error");
+            showToast(trans('Navigation failed. Please refresh the page.'), "error");
         }
     }, 250); // 250ms debounce
 }
@@ -470,18 +480,18 @@ document.addEventListener("DOMContentLoaded", function () {
         var email = document.getElementById("email");
         var phone = document.getElementById("phone");
 
-        if (email && !email.value.trim()) { showValidationError(email, "Email address is required"); hasErrors = true; }
-        if (phone && !phone.value.trim()) { showValidationError(phone, "Phone number is required"); hasErrors = true; }
+        if (email && !email.value.trim()) { showValidationError(email, trans('Email address is required')); hasErrors = true; }
+        if (phone && !phone.value.trim()) { showValidationError(phone, trans('Phone number is required')); hasErrors = true; }
 
         var shippingSelect = document.getElementById("shippingAddressSelect");
         var manualFirst    = document.getElementById("firstName");
 
         if (shippingSelect) {
-            if (!shippingSelect.value) { showValidationError(shippingSelect, "Please select a shipping address"); hasErrors = true; }
+            if (!shippingSelect.value) { showValidationError(shippingSelect, trans('Please select a shipping address')); hasErrors = true; }
         } else if (manualFirst) {
             ["firstName", "lastName", "address", "city", "country"].forEach(function (id) {
                 var f = document.getElementById(id);
-                if (f && !f.value.trim()) { showValidationError(f, "This field is required"); hasErrors = true; }
+                if (f && !f.value.trim()) { showValidationError(f, trans('This field is required.')); hasErrors = true; }
             });
         }
 
@@ -495,7 +505,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (billingSelect) {
                 // Auth user with saved billing addresses - one must be selected.
                 if (!billingSelect.value) {
-                    showValidationError(billingSelect, "Please select a billing address");
+                    showValidationError(billingSelect, trans('Please select a billing address'));
                     hasErrors = true;
                 }
             } else {
@@ -507,7 +517,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 var billingSection = document.getElementById("billingAddressSection");
                 var anchorEl = billingFields || billingSection;
                 if (anchorEl) {
-                    showValidationError(anchorEl, "Please add a billing address, or use the same as shipping");
+                    showValidationError(anchorEl, trans('Please add a billing address, or use the same as shipping'));
                 }
                 var addBillingBtn = document.getElementById("addBillingAddressBtnEmpty");
                 if (addBillingBtn) {
@@ -521,7 +531,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        if (!paymentMethod) { showToast("Please select a payment method.", "error"); hasErrors = true; }
+        if (!paymentMethod) { showToast(trans('Please select a payment method.'), "error"); hasErrors = true; }
 
         if (hasErrors) {
             var firstError = document.querySelector(".validation-error");
@@ -578,7 +588,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var btn = document.getElementById("placeOrderBtn");
         var originalBtnHtml = btn ? btn.innerHTML : null;
-        if (btn) { btn.disabled = true; btn.textContent = "Processing…"; }
+        if (btn) { btn.disabled = true; btn.textContent = trans('Processing...'); }
 
         var routes     = window.__checkoutRoutes || {};
         var processUrl = routes.process || form.action;
@@ -606,10 +616,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (content) content.innerHTML = data.html;
                     updateProgressBar(3);
                 }
-                showToast(data.message || "Order could not be placed. Please check the form.", "error");
+                showToast(data.message || trans('Order could not be placed. Please check the form.'), "error");
             }
         } catch (e) {
-            showToast("A network error occurred. Please try again.", "error");
+            showToast(trans('A network error occurred. Please try again.'), "error");
         } finally {
             if (btn) {
                 btn.disabled = false;
@@ -617,8 +627,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     btn.innerHTML = originalBtnHtml;
                 }
             }
-            syncCheckoutSubmitState();
-            updateForwardNavigationState();
+            syncCheckoutActionStates();
         }
     }
 
@@ -688,7 +697,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data && data.message) {
                     showToast(data.message, "error");
                 }
-                syncCheckoutSubmitState();
+                syncCheckoutActionStates();
                 return;
             }
 
@@ -721,20 +730,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     var saveAmt = (data.item.discount.discount_amount * quantity).toFixed(2);
                     if (badge) {
                         var txt = badge.querySelector("svg")?.nextSibling;
-                        if (txt) txt.textContent = " Save " + sym + " " + saveAmt;
+                        if (txt) txt.textContent = " " + trans('Save') + " " + sym + " " + saveAmt;
                     } else {
                         var pc = cartRow.querySelector(".text-right");
                         if (pc) {
                             var nb = document.createElement("div");
                             nb.className = "inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1";
-                            nb.innerHTML = '<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Save ' + sym + ' ' + saveAmt;
+                            nb.innerHTML = '<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' + trans('Save') + ' ' + sym + ' ' + saveAmt;
                             pc.insertBefore(nb, pc.firstChild);
                         }
                     }
                 } else if (badge) { badge.remove(); }
             }
             updateSummary(data.summary);
-            syncCheckoutSubmitState();
+            syncCheckoutActionStates();
 
             if (data.summary && typeof data.summary.itemCount !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
@@ -756,7 +765,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({ shipping_method: getCurrentShippingMethod() }),
             });
             var data = await resp.json();
-            if (resp.ok && data && data.success) updateSummary(data.summary);
+            if (resp.ok && data && data.success) {
+                updateSummary(data.summary);
+                syncCheckoutActionStates();
+            }
         } catch (e) { console.error("refreshTotalsForShipping failed", e); }
     }
 
@@ -779,9 +791,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.summary && typeof data.summary.itemCount !== 'undefined') {
                     window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
                 }
+                syncCheckoutActionStates();
                 showToast(data.message || "Item removed from cart.", "success");
-            } else { submitFallback(itemId); }
+            } else {
+                syncCheckoutActionStates();
+                submitFallback(itemId);
+            }
         } catch (e) {
+            syncCheckoutActionStates();
             submitFallback(itemId);
             showToast("Failed to remove item.", "error");
         }
@@ -1093,11 +1110,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!href || href === "#" || href.startsWith("#") || href === window.location.pathname) return;
         e.preventDefault();
         if (typeof showUniversalPopup === "function") {
-            showUniversalPopup(
-                "You have a coupon applied. Leave without completing your purchase?",
+                showUniversalPopup(
+                trans('You have a coupon applied. Leave without completing your purchase?'),
                 "error", 0,
                 {
-                    confirmation: true, confirmText: "Yes, Leave", cancelText: "No, Stay",
+                    confirmation: true, confirmText: trans('Yes, Leave'), cancelText: trans('No, Stay'),
                     onConfirm: function () { allowNavigation = true; window.location.href = href; },
                 }
             );
@@ -1105,8 +1122,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, true);
 
     runStepInits();
-    syncCheckoutSubmitState();
-    updateForwardNavigationState();
+    syncCheckoutActionStates();
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -1266,22 +1282,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (result.success || result.data) {
                     closeModal();
                     if (window.Toast) {
-                        window.Toast.success({ message: 'Address saved successfully!' });
+                        window.Toast.success({ message: trans('Address saved successfully!') });
                     } else {
-                        alert('Address saved successfully! The page will reload.');
+                        alert(trans('Address saved successfully!') + ' ' + trans('The page will reload.'));
                     }
                     window.location.reload();
                 } else {
-                    alert('Error saving address: ' + (result.message || 'Unknown error'));
+                    alert(trans('Error saving address.') + ': ' + (result.message || trans('Unknown error')));
                     resetSubmitBtn();
                 }
             })
             .catch(function(error) {
                 console.error('Error:', error);
                 if (typeof showUniversalPopup === 'function') {
-                    showUniversalPopup('Error saving address. Please try again.', 'error', 3000);
+                    showUniversalPopup(trans('Error saving address. Please try again.'), 'error', 3000);
                 } else {
-                    alert('Error saving address. Please try again.');
+                    alert(trans('Error saving address. Please try again.'));
                 }
                 resetSubmitBtn();
             });
