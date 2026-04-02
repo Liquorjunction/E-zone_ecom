@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
+use App\Services\DispatchService;
 use Psr\Log\LoggerInterface;
 use Illuminate\Support\Facades\DB;
 use App\Services\PaymentService;
@@ -30,6 +31,7 @@ class OrderService
     protected CouponService $couponService;
     protected SessionCouponService $sessionCoupon;
     protected OrderStatusService $orderStatusService;
+    protected DispatchService $dispatchService;
 
     protected MXPlusService $mXPlusService;
 
@@ -38,6 +40,7 @@ class OrderService
         CartRepositoryInterface $cartRepo,
         AddressRepositoryInterface $addressRepo,
         InventoryService $inventoryService,
+        DispatchService $dispatchService,
         PaymentService $paymentService,
         PriceCalculatorService $priceCalculator,
         CouponService $couponService,
@@ -50,6 +53,7 @@ class OrderService
         $this->cartRepo = $cartRepo;
         $this->addressRepo = $addressRepo;
         $this->inventoryService = $inventoryService;
+        $this->dispatchService = $dispatchService;
         $this->priceCalculator = $priceCalculator;
         $this->paymentService = $paymentService;
         $this->couponService = $couponService;
@@ -296,7 +300,7 @@ class OrderService
                     $item->product_id,
                     $item->variant_id,
                     $item->quantity,
-                    'Order Cancellation.' . ' Order ID: #' . $order->id,
+                    'order cancellation',
                     $order->id,
                     $userId ?? 1
                 );
@@ -319,6 +323,98 @@ class OrderService
 
             //$this->orderStatusService->changeStatus($order, 'cancelled', $reason, false, null);
         });
+
+        return true;
+    }
+
+    public function cancelAdminOrder(int $orderId, ?string $reason, ?int $adminId)
+    {
+        $allowedStatuses = ['pending', 'paid', 'order_confirmation', 'partially_dispatched', 'dispatched'];
+        $order = $this->orders->findOrderWithRelations($orderId, ['items']);
+
+        if (!$order) {
+            throw new \Exception('Order not found.');
+        }
+
+        $currentStatus = strtolower((string) $order->status);
+        if (in_array($currentStatus, ['cancelled', 'refunded'], true)) {
+            throw new \Exception('Order is already cancelled or refunded.');
+        }
+
+        if (!in_array($currentStatus, $allowedStatuses, true)) {
+            throw new \Exception("Order status '{$order->status}' cannot be cancelled from admin.");
+        }
+
+        $effectiveAdminId = $adminId ?? Auth::guard('admin')->id();
+        $refundId = null;
+        $finalStatus = ($currentStatus === 'paid') ? 'refunded' : 'cancelled';
+        $dispatches = $this->dispatchService->getDispatchesByOrderId($order->id);
+
+        foreach ($dispatches as $dispatch) {
+            $dispatchStatus = strtolower((string) $dispatch->status);
+
+            if (in_array($dispatchStatus, ['delivered', 'returned'], true)) {
+                throw new \Exception("Dispatch #{$dispatch->id} is already {$dispatch->status} and cannot be cancelled safely.");
+            }
+
+            if (! $dispatch->inventory_id) {
+                throw new \Exception("Dispatch #{$dispatch->id} is missing the inventory reference needed for stock reversal.");
+            }
+        }
+
+        if ($currentStatus === 'paid') {
+            $refundData = [
+                'orderid' => $order->order_number,
+                'amount' => $order->total,
+                'authnumber' => $order->naps_auth_number,
+                'paymentid' => $order->transaction_id,
+                'firstName' => $order->shipping_address['name'] ?? 'Customer',
+                'email' => $order->email,
+            ];
+
+            $apiResult = $this->mXPlusService->refund($refundData);
+            $refundPayload = is_array($apiResult) ? $apiResult : (array) $apiResult;
+
+            if (!isset($refundPayload['statuscode']) || !in_array($refundPayload['statuscode'], ['00', '07'], true)) {
+                throw new \Exception('Refund failed: ' . ($refundPayload['status'] ?? 'API Error'));
+            }
+
+            $refundId = $refundPayload['refundid'] ?? $refundPayload['operation_id'] ?? null;
+        }
+
+        DB::transaction(function () use ($order, $reason, $effectiveAdminId, $refundId, $currentStatus, $finalStatus, $dispatches) {
+            foreach ($dispatches as $dispatch) {
+                if (strtolower((string) $dispatch->status) === 'cancelled') {
+                    continue;
+                }
+
+                $this->inventoryService->restoreDispatchedInventory(
+                    (int) $dispatch->inventory_id,
+                    (float) $dispatch->quantity,
+                    'order cancellation',
+                    $order->id,
+                    $effectiveAdminId ?? 1
+                );
+
+                $this->dispatchService->cancelDispatch($dispatch->id, $effectiveAdminId ?? 1);
+            }
+
+            if ($refundId) {
+                $order->naps_refund_id = $refundId;
+                $order->save();
+            }
+
+            $this->orderStatusService->changeStatus($order, $finalStatus, $reason, true, $effectiveAdminId, false);
+        });
+
+        $this->orderStatusService->changeStatus(
+            $order->fresh(),
+            $finalStatus,
+            $reason,
+            true,
+            $effectiveAdminId,
+            true
+        );
 
         return true;
     }

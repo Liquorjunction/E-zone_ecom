@@ -46,7 +46,7 @@
                                             <td>{{ $row['sold_qty'] }}</td>
                                             <td>{{ $row['reserved_qty'] }}</td>
                                             <td>{{ $row['available_qty'] }}</td>
-                                            <td>{{ $row['returned_qty'] }}</td>
+                                            {{-- <td>{{ $row['returned_qty'] }}</td> --}}
                                         </tr>
                                     @endforeach
                                 @endforeach
@@ -70,7 +70,7 @@
                                         <th>Sold Qty</th>
                                         <th>Reserved Qty</th>
                                         <th>Available Qty</th>
-                                        <th>Returned Qty</th>
+                                        {{-- <th>Returned Qty</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -138,11 +138,11 @@
                                                     {{ $group['totals']['available_qty'] }}
                                                 </span>
                                             </td>
-                                            <td class="align-middle text-center">
+                                            {{-- <td class="align-middle text-center">
                                                 <span class="badge bg-info text-dark qty-badge" title="Returned / RTO restocked">
                                                     {{ $group['totals']['returned_qty'] }}
                                                 </span>
-                                            </td>
+                                            </td> --}}
                                         </tr>
                                     @endforeach
                                 </tbody>

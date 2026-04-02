@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\Orders\OrderInvoiceRequest;
 use App\Repositories\Admin\Interfaces\OrderRepositoryInterface as OrderRepo;
 use App\Services\InvoiceExportService;
 use App\Services\MXPlusService;
+use App\Services\OrderService;
 use App\Services\OrderStatusService as OrderStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -62,19 +63,13 @@ class OrderController extends Controller
         }
     }
 
-    public function cancelOrder(CancelOrderRequest $request, OrderRepo $orderRepo, OrderStatus $orderStatusService)
+    public function cancelOrder(CancelOrderRequest $request, OrderService $orderService)
     {
         try {
             $id = $request->input('id');
             $cancelReason = $request->input('cancel_reason');
-            $order = $orderRepo->getOrderById($id);
-
-            if (!$order) {
-                return redirect()->back()->with(['success' => false, 'message' => 'Order not found.'], 404);
-            }
-
             $adminId = Auth::guard('admin')->id();
-            $orderStatusService->changeStatus($order, 'cancelled', $cancelReason, false, $adminId);
+            $orderService->cancelAdminOrder((int) $id, $cancelReason, $adminId);
 
             $message = 'Order cancelled successfully.';
             if ($request->ajax() || $request->wantsJson()) {

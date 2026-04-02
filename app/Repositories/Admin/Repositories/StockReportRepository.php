@@ -38,16 +38,17 @@ class StockReportRepository implements StockReportRepositoryInterface
             $rows = [];
             foreach ($items as $inventory) {
                 $reservedQty = (float) ($inventory->reserved_quantity ?? 0);
-                $soldQty = (float) abs(
+                $dispatchedQty = (float) abs(
                     $inventory->transactions
                         ->where('type', 'dispatch')
                         ->sum('quantity_change')
                 );
                 $returnedQty = (float) $inventory->transactions
-                    ->whereIn('type', ['return', 'rto_restock'])
+                    ->whereIn('type', ['return', 'rto_restock', 'restock'])
                     ->sum('quantity_change');
+                $soldQty = max(0, $dispatchedQty - $returnedQty);
                 $availableQty = max(0, (float) $inventory->quantity - $reservedQty);
-                $totalQty = $availableQty + $reservedQty + $soldQty;
+                $totalQty = (float) $inventory->quantity;
 
                 $skuTotals['total_qty'] += $totalQty;
                 $skuTotals['sold_qty'] += $soldQty;

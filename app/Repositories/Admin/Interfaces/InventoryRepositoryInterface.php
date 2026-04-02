@@ -14,6 +14,7 @@ interface InventoryRepositoryInterface
     public function deleteByBatchNo(string $batchNo);
     public function getByBatchNo(string $batchNo);
     public function getForReservation(int $productId, ?int $variantId, string $orderDirection = 'asc');
+    public function getForDispatchRelease(int $productId, ?int $variantId, string $orderDirection = 'asc');
     public function getLatestInward(int $productId, ?int $variantId);
     public function isBatchSold(string $batchNo);
     public function findByProduct(int $productId, ?int $variantId = null, ?int $warehouseId = null, ?int $storeId = null);

@@ -81,7 +81,8 @@ class InventoryService
                         'after_quantity' => $inventory->quantity,
                         'quantity_change' => $inventory->quantity,
                     ]);
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
             }
 
             return $createdItems;
@@ -242,7 +243,8 @@ class InventoryService
                         'after_quantity' => 0,
                         'quantity_change' => -1 * $inventory->quantity,
                     ]);
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
             }
             return $this->inventoryRepo->delete($id);
         }
@@ -274,14 +276,15 @@ class InventoryService
                     'rate' => $inv->cost_price ?? 0,
                     'batch_no' => $inv->batch_no,
                     'created_by' => $adminId,
-                    'description' => 'Reserved for '.$referenceType . 'Id: ' . '#' . $referenceId,
+                    'description' => 'Reserved for ' . $referenceType . 'Id: ' . '#' . $referenceId,
                     'reference_type' => $referenceType,
                     'reference_id' => $referenceId,
                     'before_quantity' => $before,
                     'after_quantity' => $before + $take,
                     'quantity_change' => $take,
                 ]);
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
 
             $remaining -= $take;
         }
@@ -315,19 +318,94 @@ class InventoryService
                     'rate' => $inv->cost_price ?? 0,
                     'batch_no' => $inv->batch_no,
                     'created_by' => $adminId,
-                    'description' => 'Reservation released for '.$referenceType . 'Id: ' . '#' . $referenceId,
+                    'description' => 'Reservation released for ' . $referenceType . 'Id: ' . '#' . $referenceId,
                     'reference_type' => $referenceType,
                     'reference_id' => $referenceId,
                     'before_quantity' => $before,
                     'after_quantity' => max(0, $before - $take),
                     'quantity_change' => -1 * $take,
                 ]);
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
 
             $remaining -= $take;
         }
 
         return $quantity - $remaining;
+    }
+
+    public function releaseDispatched(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId)
+    {
+        $remaining = $quantity;
+        $adminId = $adminId ?? Auth::guard('admin')->id();
+        $rows = $this->inventoryRepo->getForDispatchRelease($productId, $variantId);
+
+        foreach ($rows as $inv) {
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $reserved = max(0, $inv->reserved_quantity);
+            if ($reserved <= 0) {
+                continue;
+            }
+
+            $take = min($reserved, $remaining);
+            $before = $inv->reserved_quantity;
+            $after = max(0, $before - $take);
+
+            $this->inventoryRepo->update($inv->id, ['reserved_quantity' => $after]);
+
+            $this->inventoryTransactionRepo->create([
+                'inventory_id' => $inv->id,
+                'type' => 'release',
+                'quantity' => $take,
+                'rate' => $inv->cost_price ?? 0,
+                'batch_no' => $inv->batch_no,
+                'created_by' => $adminId,
+                'description' => 'Order cancelled, released dispatch reservation for ' . $referenceType . ' #' . $referenceId,
+                'reference_type' => $referenceType,
+                'reference_id' => $referenceId,
+                'before_quantity' => $before,
+                'after_quantity' => $after,
+                'quantity_change' => -1 * $take,
+            ]);
+
+            $remaining -= $take;
+        }
+
+        return $quantity - $remaining;
+    }
+
+    public function restoreDispatchedInventory(int $inventoryId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId = 1)
+    {
+        $inventory = $this->inventoryRepo->findWithLock($inventoryId);
+
+        if (! $inventory) {
+            throw new \Exception('Inventory record not found for dispatched stock reversal.');
+        }
+
+        $before = (float) $inventory->quantity;
+        $after = $before + $quantity;
+
+        $this->inventoryRepo->update($inventory->id, ['quantity' => $after]);
+
+        $this->inventoryTransactionRepo->create([
+            'inventory_id' => $inventory->id,
+            'type' => 'restock',
+            'quantity' => $quantity,
+            'rate' => $inventory->cost_price ?? 0,
+            'batch_no' => $inventory->batch_no,
+            'created_by' => $adminId,
+            'description' => 'Order cancelled, restocked dispatched quantity for ' . $referenceType . ' #' . $referenceId,
+            'reference_type' => $referenceType,
+            'reference_id' => $referenceId,
+            'before_quantity' => $before,
+            'after_quantity' => $after,
+            'quantity_change' => $quantity,
+        ]);
+
+        return $inventory->refresh();
     }
 
     public function processReturn(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId = 1)
@@ -343,7 +421,7 @@ class InventoryService
                 'store_id' => null,
                 'quantity' => 0,
                 'cost_price' => 0,
-                'batch_no' => 'RET-'.date('Ymd').'-'.strtoupper(Str::random(4)),
+                'batch_no' => 'RET-' . date('Ymd') . '-' . strtoupper(Str::random(4)),
                 'status' => 'active',
             ]);
         }
@@ -366,7 +444,8 @@ class InventoryService
                 'after_quantity' => $before + $quantity,
                 'quantity_change' => $quantity,
             ]);
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         return $inv;
     }

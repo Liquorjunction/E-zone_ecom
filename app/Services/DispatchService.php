@@ -196,19 +196,31 @@ class DispatchService
         DB::beginTransaction();
         try {
             $dispatch = $this->dispatchRepository->getDispatchById($id);
-            $oldStatus = $dispatch->status;
+
+            if (strtolower((string) $dispatch->status) === strtolower($status)) {
+                DB::commit();
+                return $dispatch;
+            }
+
+            if (in_array(strtolower((string) $dispatch->status), ['delivered', 'returned'], true) && strtolower($status) === 'cancelled') {
+                throw new Exception('Delivered or returned dispatches cannot be cancelled.');
+            }
 
             $dispatch->status = $status;
-            $dispatch->status_updated_by = $adminId;
-            $dispatch->status_updated_at = now();
+
+            if ($status === 'delivered' && empty($dispatch->delivered_at)) {
+                $dispatch->delivered_at = now();
+            }
+
             $dispatch->save();
 
-            if ($status === 'returned' && $oldStatus !== 'returned') {
+            if ($status === 'returned') {
                 $inventory = $this->inventoryRepo->findWithLock($dispatch->inventory_id);
 
                 if ($inventory) {
                     $beforeQty = $inventory->quantity;
-                    $this->inventoryRepo->update($inventory->id, ['quantity' => $beforeQty + $dispatch->quantity]);
+                    $afterQty = $beforeQty + $dispatch->quantity;
+                    $this->inventoryRepo->update($inventory->id, ['quantity' => $afterQty]);
 
                     $this->transactionRepo->create([
                         'batch_no' => $inventory->batch_no,
@@ -220,7 +232,7 @@ class DispatchService
                         'reference_type' => 'dispatch',
                         'reference_id' => $dispatch->id,
                         'before_quantity' => $beforeQty,
-                        'after_quantity' => $beforeQty + $dispatch->quantity,
+                        'after_quantity' => $afterQty,
                         'quantity_change' => $dispatch->quantity,
                         'description' => "RTO Restock for Dispatch #{$dispatch->id}",
                     ]);
@@ -228,6 +240,38 @@ class DispatchService
             }
 
             $this->syncOrderStatus($dispatch->order_id, $adminId);
+
+            DB::commit();
+            return $dispatch;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function getDispatchesByOrderId(int $orderId)
+    {
+        return $this->dispatchRepository->getDispatchesByOrderId($orderId);
+    }
+
+    public function cancelDispatch(int $id, int $adminId)
+    {
+        DB::beginTransaction();
+
+        try {
+            $dispatch = $this->dispatchRepository->getDispatchById($id);
+
+            if (strtolower((string) $dispatch->status) === 'cancelled') {
+                DB::commit();
+                return $dispatch;
+            }
+
+            if (in_array(strtolower((string) $dispatch->status), ['delivered', 'returned'], true)) {
+                throw new Exception('Delivered or returned dispatches cannot be cancelled.');
+            }
+
+            $dispatch->status = 'cancelled';
+            $dispatch->save();
 
             DB::commit();
             return $dispatch;

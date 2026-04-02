@@ -61,6 +61,17 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->orderBy('created_at', $orderDirection)->get();
     }
 
+    public function getForDispatchRelease(int $productId, ?int $variantId, string $orderDirection = 'asc')
+    {
+        $query = Inventory::query();
+        if ($variantId) {
+            $query->where('product_variant_id', $variantId);
+        } else {
+            $query->where('product_id', $productId);
+        }
+        return $query->orderBy('created_at', $orderDirection)->get();
+    }
+
     public function getLatestInward(int $productId, ?int $variantId)
     {
         $query = Inventory::query();

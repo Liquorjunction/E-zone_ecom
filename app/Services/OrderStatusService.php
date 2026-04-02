@@ -67,7 +67,7 @@ class OrderStatusService
         ];
     }
 
-    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null)
+    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null, bool $sendNotification = true)
     {
         if (!$force && !$this->canTransition($order->status, $toStatus)) {
             throw new Exception("Invalid order transition from '{$order->status}' to '{$toStatus}'.");
@@ -79,14 +79,17 @@ class OrderStatusService
         $order->status_changed_by = $statusActorId;
         $order->status_changed_at = Carbon::now();
 
-        if ($toStatus === 'cancelled') {
+        if (in_array($toStatus, ['cancelled', 'refunded'], true)) {
             $order->cancel_reason = $reason;
             $order->cancelled_by = $statusActorId;
             $order->cancelled_at = Carbon::now();
         }
 
         $order->save();
-        $this->mailTriggerService->sendOrderStatusUpdate($order, $toStatus);
+
+        if ($sendNotification) {
+            $this->mailTriggerService->sendOrderStatusUpdate($order, $toStatus);
+        }
 
         return $order;
     }
