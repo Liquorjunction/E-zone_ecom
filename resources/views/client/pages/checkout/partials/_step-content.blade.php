@@ -74,6 +74,19 @@
 {{--  STEP 2 – CHECKOUT FORM                   --}}
 {{-- ══════════════════════════════════════════ --}}
 @elseif ($step == 2)
+    @if ($errors->any())
+        <div id="checkout-validation-summary" class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm">
+            <p class="font-semibold">{{ statictranslations('Please fix the highlighted fields before continuing.') }}</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @else
+        <div id="checkout-validation-summary" class="hidden mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm"></div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {{-- Left – Forms --}}

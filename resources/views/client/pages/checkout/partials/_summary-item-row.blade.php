@@ -19,11 +19,14 @@
     } elseif ($showQtyCtrl && $item->product && method_exists($item->product, 'getSellableStock')) {
         $availableStock = (int) $item->product->getSellableStock();
     }
+
+    $isOutOfStock = $availableStock <= 0;
 @endphp
 
 <div class="flex gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 summary-item-row items-center justify-between"
     data-summary-item-id="{{ $item->id }}"
-    @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @endif>
+    data-stock-status="{{ $isOutOfStock ? 'out' : 'available' }}"
+    @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @else data-max-stock="0" @endif>
 
     <div class="flex gap-4 flex-1 min-w-0">
         <img src="{{ optional($item->product)->cover_image ? asset('storage/' . optional($item->product)->cover_image) : 'https://via.placeholder.com/80x80' }}"
@@ -39,7 +42,7 @@
                 <div class="text-gray-600 text-xs font-normal mb-1">{{ $item->variant->variant_name }}</div>
             @endif
 
-            @if ($showQtyCtrl)
+            @if ($showQtyCtrl && ! $isOutOfStock)
                 <div class="flex items-center gap-2 mb-2">
                     <p class="text-xs text-gray-600">{{ statictranslations('Qty:') }}</p>
                     <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
@@ -54,6 +57,11 @@
                             data-item-id="{{ $item->id }}">+</button>
                     </div>
                 </div>
+            @elseif ($showQtyCtrl)
+                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700">
+                    {{ statictranslations('Out of stock') }}
+                </div>
+                <p class="text-xs text-red-600 mb-2">{{ statictranslations('Remove this item to complete checkout.') }}</p>
             @else
                 <p class="text-xs text-gray-500 mb-1">{{ statictranslations('Qty:') }} {{ $item->quantity }}</p>
             @endif

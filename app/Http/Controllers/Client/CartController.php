@@ -159,6 +159,7 @@ class CartController extends Controller
         $appliedCoupon    = $cart ? $sessionCoupon->getForCart($cart->id) : null;
 
         $itemsForView = $cart ? $cart->items : collect();
+
         return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'billingAddresses', 'cities', 'appliedCoupon', 'itemsForView'));
     }
 
@@ -272,12 +273,15 @@ class CartController extends Controller
                 'success' => true,
                 'message' => statictranslations('Cart updated.'),
                 'item'    => [
-                    'id'        => $item->id ?? null,
-                    'quantity'  => $item->quantity ?? null,
-                    'unit_price' => $item->unit_price ?? null,
-                    'line_total' => isset($item->quantity, $item->unit_price) ? ($item->quantity * $item->unit_price) : null,
-                    'discount'  => $itemDiscount,
-                    'max_stock' => $getStock($item),
+                    'id'                         => $item->id ?? null,
+                    'quantity'                   => $item->quantity ?? null,
+                    'unit_price'                => $item->unit_price ?? null,
+                    'line_total'                => isset($item->quantity, $item->final_price)
+                        ? ($item->quantity * $item->final_price)
+                        : (isset($item->quantity, $item->unit_price) ? ($item->quantity * $item->unit_price) : null),
+                    'line_total_before_discount' => isset($item->quantity, $item->unit_price) ? ($item->quantity * $item->unit_price) : null,
+                    'discount'                  => $itemDiscount,
+                    'max_stock'                 => $getStock($item),
                 ],
                 'summary' => $summary,
             ]);

@@ -59,7 +59,7 @@ class OrderCheckoutRequest extends FormRequest
             'zip' => ['nullable', 'string', 'max:20'],
             'postal_code' => ['nullable', 'string', 'max:20'],
             'country' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'max:20'],
 
             'shipping_address' => ['nullable', 'array'],
             'shipping_address.name' => ['required_with:shipping_address', 'string', 'max:255'],
@@ -123,6 +123,17 @@ class OrderCheckoutRequest extends FormRequest
             'billing_address_line.required_without_all' => 'Billing address is required.',
             'billing_city.required_without_all' => 'Billing city is required.',
             'billing_country.required_without_all' => 'Billing country is required.',
+
+            'phone.required' => 'Phone number is required.',
+            'email.required' => 'Email address is required.',
+            'email.email' => 'Please enter a valid email address.',
+
+            'payment_method.required_without' => 'Please select a payment method.',
+            'cardNumber.required_if' => 'Card number is required when paying by card.',
+            'cardNumber.digits_between' => 'Card number must be between 12 and 19 digits.',
+            'expiry.required_if' => 'Expiry date is required when paying by card.',
+            'cvv.required_if' => 'CVV is required when paying by card.',
+            'cvv.digits_between' => 'CVV must be 3 or 4 digits.',
         ];
     }
 }

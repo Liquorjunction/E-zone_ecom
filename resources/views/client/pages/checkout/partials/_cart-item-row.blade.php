@@ -19,10 +19,14 @@
     } elseif ($item->product && method_exists($item->product, 'getSellableStock')) {
         $availableStock = (int) $item->product->getSellableStock();
     }
+
+    $isOutOfStock = $availableStock <= 0;
 @endphp
 
 <div class="cart-item-row flex flex-col sm:flex-row gap-6 p-6 bg-linear-to-r from-gray-50 to-white rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-md"
-    data-item-id="{{ $item->id }}">
+    data-item-id="{{ $item->id }}"
+    data-stock-status="{{ $isOutOfStock ? 'out' : 'available' }}"
+    @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @else data-max-stock="0" @endif>
 
     {{-- Product image --}}
     <div class="shrink-0">
@@ -59,29 +63,42 @@
             </button>
         </div>
 
-        <p class="flex items-center text-sm text-gray-600 mb-5">
-            <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            <span class="font-medium">{{ statictranslations('In Stock') }}</span>
-        </p>
+        @if ($isOutOfStock)
+            <div class="mb-5 inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                {{ statictranslations('Out of stock') }}
+            </div>
+            <p class="mb-5 text-sm text-red-600 font-medium">{{ statictranslations('This item is currently unavailable. Remove it to continue checkout.') }}</p>
+        @else
+            <p class="flex items-center text-sm text-gray-600 mb-5">
+                <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span class="font-medium">{{ statictranslations('In Stock') }}</span>
+            </p>
+        @endif
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {{-- Quantity controls --}}
             <div class="flex items-center">
                 <span class="text-sm font-semibold text-gray-700 mr-4">{{ statictranslations('Quantity:') }}</span>
-                <div class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <div class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm {{ $isOutOfStock ? 'opacity-50 pointer-events-none' : '' }}">
                     <button type="button"
                         class="qty-decrease px-5 py-3 bg-gray-50 hover:bg-primary hover:text-white text-gray-700 font-bold transition-all duration-300"
                         data-item-id="{{ $item->id }}"
+                        @disabled($isOutOfStock)
                         @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @endif>−</button>
                     <input type="number" value="{{ $item->quantity }}" min="1"
                         class="cart-quantity-input w-16 text-center border-0 focus:outline-none font-bold text-gray-900 bg-white"
                         data-item-id="{{ $item->id }}"
+                        @disabled($isOutOfStock)
                         @if ($availableStock > 0) max="{{ $availableStock }}" data-max-stock="{{ $availableStock }}" @endif>
                     <button type="button"
                         class="qty-increase px-5 py-3 bg-gray-50 hover:bg-primary hover:text-white text-gray-700 font-bold transition-all duration-300"
                         data-item-id="{{ $item->id }}"
+                        @disabled($isOutOfStock)
                         @if ($availableStock > 0) data-max-stock="{{ $availableStock }}" @endif>+</button>
                 </div>
             </div>

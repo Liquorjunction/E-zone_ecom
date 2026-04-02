@@ -55,8 +55,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- Injected Stock & Quantity Handlers ---
     function showStockLimitMessage(max) {
-        if (!max) return;
-        let message = max === 1
+        if (max === null || max === undefined) return;
+        let message = Number(max) <= 0
+            ? trans('This item is out of stock.')
+            : max === 1
             ? trans('Only 1 item available in stock.')
             : trans('Only') + ' ' + max + ' ' + trans('items available in stock.');
 
@@ -84,29 +86,94 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 2500);
     }
 
+    function parseStockValue(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const parsed = parseInt(value, 10);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
     function getMaxStockForItem(id) {
         const input = root.querySelector(`.cart-quantity-input[data-item-id="${id}"]`);
         let max = null;
 
         if (input) {
             const raw = input.getAttribute('max') || input.dataset.maxStock || input.dataset.max;
-            const parsed = parseInt(raw || '', 10);
-            if (!Number.isNaN(parsed) && parsed > 0) max = parsed;
+            const parsed = parseStockValue(raw);
+            if (parsed !== null) max = parsed;
         }
 
-        if (!max) {
+        if (max === null) {
             const summaryRow = document.querySelector(`.summary-item-row[data-summary-item-id="${id}"]`);
             const raw = summaryRow?.dataset?.maxStock;
-            const parsed = parseInt(raw || '', 10);
-            if (!Number.isNaN(parsed) && parsed > 0) max = parsed;
+            const parsed = parseStockValue(raw);
+            if (parsed !== null) max = parsed;
         }
         return max;
     }
 
     function clampQuantity(val, max) {
         let v = Math.max(1, Number(val || 1));
-        if (max && v > max) v = max;
+        if (max === 0) return 0;
+        if (max !== null && max !== undefined && v > max) v = max;
         return v;
+    }
+
+    function syncCheckoutSubmitState() {
+        const btn = document.getElementById("placeOrderBtn");
+        if (!btn) return;
+
+        const hasStockIssue = Array.from(root.querySelectorAll(".cart-item-row, .summary-item-row")).some(function (row) {
+            const stockState = row.dataset.stockStatus;
+            if (stockState === 'out') return true;
+
+            const max = parseStockValue(row.dataset.maxStock);
+            if (max === null || max <= 0) return false;
+
+            const quantityField = row.querySelector('.cart-quantity-input, .summary-quantity');
+            const quantity = parseInt(quantityField?.value || quantityField?.textContent || '0', 10);
+            return !Number.isNaN(quantity) && quantity > max;
+        });
+
+        btn.disabled = hasStockIssue || !!window.__checkoutSubmitting;
+        btn.classList.toggle('opacity-60', btn.disabled);
+        btn.classList.toggle('cursor-not-allowed', btn.disabled);
+        if (hasStockIssue) {
+            btn.title = trans('Please remove out-of-stock items before placing your order.');
+        } else {
+            btn.removeAttribute('title');
+        }
+    }
+
+    function applyStockStateToItem(itemId, maxStock) {
+        const max = parseStockValue(maxStock);
+        const isOutOfStock = max !== null && max <= 0;
+
+        root.querySelectorAll('.cart-item-row[data-item-id="' + itemId + '"], .summary-item-row[data-summary-item-id="' + itemId + '"]').forEach(function (row) {
+            row.dataset.maxStock = max === null ? '' : String(max);
+            row.dataset.stockStatus = isOutOfStock ? 'out' : 'available';
+
+            const input = row.querySelector('.cart-quantity-input');
+            if (input) {
+                if (max !== null && max > 0) {
+                    input.max = String(max);
+                    input.dataset.maxStock = String(max);
+                    input.disabled = false;
+                } else if (isOutOfStock) {
+                    input.removeAttribute('max');
+                    input.dataset.maxStock = '0';
+                    input.disabled = true;
+                    input.value = input.value || '1';
+                }
+            }
+
+            row.querySelectorAll('.qty-decrease, .qty-increase, .summary-qty-decrease, .summary-qty-increase').forEach(function (btn) {
+                btn.disabled = isOutOfStock;
+                btn.classList.toggle('pointer-events-none', isOutOfStock);
+                btn.classList.toggle('opacity-50', isOutOfStock);
+            });
+        });
+
+        syncCheckoutSubmitState();
     }
 
     function debounceUpdate(id, quantity) {
@@ -173,6 +240,94 @@ document.addEventListener("DOMContentLoaded", function () {
         if (element.parentElement) element.parentElement.appendChild(errorDiv);
     }
 
+    function getValidationSummaryBox() {
+        var box = document.getElementById("checkout-validation-summary");
+        if (!box) {
+            box = document.createElement("div");
+            box.id = "checkout-validation-summary";
+            box.className = "hidden mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm";
+            var anchor = document.getElementById("checkout-step-content") || document.getElementById("checkout-form");
+            if (anchor) {
+                anchor.parentNode.insertBefore(box, anchor);
+            }
+        }
+        return box;
+    }
+
+    function showValidationSummary(messages) {
+        var box = getValidationSummaryBox();
+        if (!box) return;
+
+        if (!messages || !messages.length) {
+            box.innerHTML = "";
+            box.classList.add("hidden");
+            return;
+        }
+
+        box.innerHTML =
+            '<p class="font-semibold">' + trans('Please fix the highlighted fields before continuing.') + '</p>' +
+            '<ul class="mt-2 list-disc space-y-1 pl-5 text-sm">' +
+            messages.map(function (message) { return '<li>' + message + '</li>'; }).join('') +
+            '</ul>';
+        box.classList.remove("hidden");
+        box.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function resolveValidationTarget(field) {
+        var candidates = [field, field.replace(/\./g, '_')];
+        for (var i = 0; i < candidates.length; i++) {
+            var candidate = candidates[i];
+            var byId = document.getElementById(candidate);
+            if (byId) return byId;
+            var byName = document.querySelector('[name="' + candidate + '"]');
+            if (byName) return byName;
+        }
+
+        if (field.indexOf('payment_method') === 0) {
+            var paymentInput = document.querySelector('input[name="payment_method"]');
+            return paymentInput ? paymentInput.closest('.space-y-4') || paymentInput : null;
+        }
+
+        if (field.indexOf('shipping_address.') === 0) {
+            return document.getElementById('shippingAddressSection');
+        }
+
+        if (field.indexOf('billing_address.') === 0 || field.indexOf('billing_') === 0) {
+            return document.getElementById('billingFields') || document.getElementById('billingAddressSection');
+        }
+
+        return null;
+    }
+
+    function renderValidationErrors(errors) {
+        clearAllValidationErrors();
+
+        var messages = [];
+        if (!errors) {
+            showValidationSummary(messages);
+            return;
+        }
+
+        Object.entries(errors).forEach(function ([field, fieldMessages]) {
+            var message = Array.isArray(fieldMessages) ? fieldMessages[0] : fieldMessages;
+            if (!message) return;
+
+            messages.push(message);
+            var target = resolveValidationTarget(field);
+            if (target) {
+                showValidationError(target, message);
+                target.setAttribute('aria-invalid', 'true');
+            }
+        });
+
+        showValidationSummary(messages);
+
+        var firstError = document.querySelector(".validation-error");
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    }
+
     function clearValidationErrorFor(element) {
         if (!element || !element.parentElement) return;
         var existing = element.parentElement.querySelector(".validation-error");
@@ -187,6 +342,10 @@ document.addEventListener("DOMContentLoaded", function () {
             f.classList.remove("border-red-500", "border-2", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
             f.classList.add("border-gray-200");
         });
+        document.querySelectorAll("[aria-invalid='true']").forEach(function (el) {
+            el.removeAttribute('aria-invalid');
+        });
+        showValidationSummary([]);
     }
 
     function updateProgressBar(step) {
@@ -372,6 +531,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!form) return;
 
         var btn = document.getElementById("placeOrderBtn");
+        var originalBtnHtml = btn ? btn.innerHTML : null;
         if (btn) { btn.disabled = true; btn.textContent = "Processing…"; }
 
         var routes     = window.__checkoutRoutes || {};
@@ -393,12 +553,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.scrollTo({ top: 0, behavior: "smooth" });
             } else {
                 if (data.errors) {
-                    Object.entries(data.errors).forEach(function ([field, messages]) {
-                        var el = document.getElementById(field) || document.querySelector('[name="' + field + '"]');
-                        if (el) showValidationError(el, messages[0]);
-                    });
-                    var first = document.querySelector(".validation-error");
-                    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+                    renderValidationErrors(data.errors);
                 }
                 if (data.html) {
                     var content = document.getElementById("checkout-step-content");
@@ -412,12 +567,11 @@ document.addEventListener("DOMContentLoaded", function () {
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML =
-                    "Place Secure Order " +
-                    '<svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" ' +
-                    'd="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>';
+                if (originalBtnHtml) {
+                    btn.innerHTML = originalBtnHtml;
+                }
             }
+            syncCheckoutSubmitState();
         }
     }
 
@@ -480,18 +634,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({ item_id: itemId, quantity: Number(quantity), shipping_method: getCurrentShippingMethod() }),
             });
             var data = await resp.json();
-            if (!data || !data.success) return;
+            if (!data || !data.success) {
+                if (data && data.item && data.item.max_stock !== undefined) {
+                    applyStockStateToItem(itemId, data.item.max_stock);
+                }
+                if (data && data.message) {
+                    showToast(data.message, "error");
+                }
+                syncCheckoutSubmitState();
+                return;
+            }
 
             var lineEl = document.getElementById("item-line-total-" + itemId);
-            if (lineEl && data.item && data.item.line_total !== undefined) {
-                lineEl.textContent = formatMoney(data.item.line_total);
+            var calculatedLineTotal = data?.item?.discount?.line_total_after_discount
+                ?? data?.item?.line_total
+                ?? data?.item?.line_total_before_discount;
+
+            if (lineEl && calculatedLineTotal !== undefined && calculatedLineTotal !== null) {
+                lineEl.textContent = formatMoney(calculatedLineTotal);
             }
             document.querySelectorAll('[data-summary-item-id="' + itemId + '"] .summary-item-price')
                 .forEach(function (el) {
-                    if (data.item && data.item.line_total !== undefined) el.textContent = formatMoney(data.item.line_total);
+                    if (calculatedLineTotal !== undefined && calculatedLineTotal !== null) {
+                        el.textContent = formatMoney(calculatedLineTotal);
+                    }
                 });
             document.querySelectorAll('[data-summary-item-id="' + itemId + '"] .summary-quantity')
                 .forEach(function (el) { el.textContent = quantity; });
+
+            if (data.item && data.item.max_stock !== undefined && data.item.max_stock !== null) {
+                applyStockStateToItem(itemId, data.item.max_stock);
+            }
 
             var cartRow = document.querySelector('.cart-item-row[data-item-id="' + itemId + '"]');
             if (cartRow && data.item && data.item.discount) {
@@ -514,6 +687,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (badge) { badge.remove(); }
             }
             updateSummary(data.summary);
+            syncCheckoutSubmitState();
 
             if (data.summary && typeof data.summary.itemCount !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
@@ -884,6 +1058,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, true);
 
     runStepInits();
+    syncCheckoutSubmitState();
 });
 
 // ═══════════════════════════════════════════════════════════════
