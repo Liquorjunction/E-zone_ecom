@@ -65,13 +65,20 @@
                     <p class="text-uppercase text-muted small fw-semibold border-bottom pb-2 mb-3">Order Items</p>
                     <div class="table-responsive border rounded-2">
                         <table class="table table-hover align-middle mb-0">
+                            <colgroup>
+                                <col style="width: 26%;">
+                                <col style="width: 18%;">
+                                <col style="width: 18%;">
+                                <col style="width: 28%;">
+                                <col style="width: 10%;">
+                            </colgroup>
                             <thead class="table-light">
                                 <tr>
-                                    <th class="text-uppercase text-muted small fw-semibold">Product</th>
-                                    <th class="text-uppercase text-muted small fw-semibold">Variant</th>
-                                    <th class="text-uppercase text-muted small fw-semibold">Qty Status</th>
-                                    <th class="text-uppercase text-muted small fw-semibold">Allocation</th>
-                                    <th class="text-uppercase text-muted small fw-semibold text-center">Action</th>
+                                    <th class="text-uppercase text-muted small fw-semibold text-nowrap">Product</th>
+                                    <th class="text-uppercase text-muted small fw-semibold text-nowrap">Variant</th>
+                                    <th class="text-uppercase text-muted small fw-semibold text-nowrap">Qty Status</th>
+                                    <th class="text-uppercase text-muted small fw-semibold text-nowrap">Allocation</th>
+                                    <th class="text-uppercase text-muted small fw-semibold text-center text-nowrap">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -84,10 +91,10 @@
                                             $remainingQty = max(0, $item->quantity - $alreadyDispatched);
                                         @endphp
                                         <tr data-item-id="{{ $item->id }}">
-                                            <td class="fw-medium">
+                                            <td class="fw-medium text-break">
                                                 {{ $item->product ? $item->product->getTranslation('name', 'en') ?? ($item->product->name ?? '—') : '—' }}
                                             </td>
-                                            <td>
+                                            <td class="text-break">
                                                 @if ($item->variant && ($item->variant->getTranslation('variant_name', 'en') ?? $item->variant->variant_name))
                                                     <span class="badge bg-light text-secondary border font-monospace">
                                                         {{ $item->variant->getTranslation('variant_name', 'en') ?? $item->variant->variant_name }}
@@ -97,7 +104,7 @@
                                                 @endif
                                             </td>
 
-                                            <td>
+                                            <td class="text-break">
                                                 <div class="mb-1">
                                                     <span class="text-muted small">Ordered:</span>
                                                     <span class="fw-bold font-monospace">{{ $item->quantity }}</span>
@@ -117,10 +124,10 @@
                                             </td>
 
                                             {{-- Allocation summary (written by JS after modal) --}}
-                                            <td>
+                                            <td class="text-break">
                                                 @if ($remainingQty > 0)
                                                     <div id="allocation-summary-{{ $item->id }}"
-                                                        class="small text-muted fst-italic">
+                                                        class="small text-muted fst-italic text-break">
                                                         Not yet allocated
                                                     </div>
                                                 @else
@@ -202,64 +209,81 @@
          DISPATCH MODAL
     ════════════════════════════════════════════════════════════ --}}
     <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg overflow-hidden">
 
-                <div class="modal-header border-bottom bg-light px-4 py-3">
+                <div class="modal-header border-0 bg-primary-subtle px-4 py-3">
                     <div>
-                        <h5 class="modal-title fw-semibold mb-0" id="dispatchModalLabel">
-                            <i class="bi bi-truck me-2 text-primary"></i> Dispatch Item
-                        </h5>
+                        <div class="small text-uppercase text-primary fw-semibold letter-spacing-1">Dispatch allocation</div>
+                        <h5 class="modal-title fw-semibold mb-0" id="dispatchModalLabel">Dispatch Item</h5>
                         <div class="small text-muted mt-1" id="modal-item-subtitle"></div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body px-4 py-3">
-
-                    {{-- Item qty summary bar --}}
-                    <div class="row g-0 rounded-2 bg-light border mb-4 overflow-hidden">
-                        <div class="col-4 p-3 border-end text-center">
-                            <div class="small text-muted mb-1">To dispatch</div>
-                            <div class="fw-bold fs-5 font-monospace text-warning" id="modal-remaining-display">0</div>
+                <div class="modal-body p-4">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="border rounded-3 bg-light h-100 p-3 text-center">
+                                <div class="small text-muted text-uppercase fw-semibold mb-1">To dispatch</div>
+                                <div class="fw-bold fs-3 font-monospace text-warning" id="modal-remaining-display">0</div>
+                            </div>
                         </div>
-                        <div class="col-4 p-3 border-end text-center">
-                            <div class="small text-muted mb-1">Allocated</div>
-                            <div class="fw-bold fs-5 font-monospace text-primary" id="modal-allocated-display">0</div>
+                        <div class="col-md-4">
+                            <div class="border rounded-3 bg-light h-100 p-3 text-center">
+                                <div class="small text-muted text-uppercase fw-semibold mb-1">Allocated</div>
+                                <div class="fw-bold fs-3 font-monospace text-primary" id="modal-allocated-display">0</div>
+                            </div>
                         </div>
-                        <div class="col-4 p-3 text-center">
-                            <div class="small text-muted mb-1">Still needed</div>
-                            <div class="fw-bold fs-5 font-monospace text-danger" id="modal-still-needed-display">0</div>
+                        <div class="col-md-4">
+                            <div class="border rounded-3 bg-light h-100 p-3 text-center">
+                                <div class="small text-muted text-uppercase fw-semibold mb-1">Still needed</div>
+                                <div class="fw-bold fs-3 font-monospace text-danger" id="modal-still-needed-display">0</div>
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Loading --}}
                     <div id="modal-loading" class="text-center py-5 d-none">
                         <div class="spinner-border text-primary" role="status"></div>
                         <div class="small text-muted mt-2">Loading inventory...</div>
                     </div>
 
-                    {{-- Error --}}
-                    <div id="modal-error" class="alert alert-danger d-none py-2"></div>
+                    <div id="modal-error" class="alert alert-danger d-none mb-4"></div>
 
-                    {{-- Split rows --}}
-                    <div id="split-rows-container"></div>
+                    <div class="card border shadow-sm mb-3">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+                                <div>
+                                    <h6 class="fw-semibold mb-1">Allocation rows</h6>
+                                    <div class="small text-muted">Split this item across one or more locations. A location can only be used once.</div>
+                                </div>
+                                <button type="button" id="add-split-btn"
+                                    class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 d-none">
+                                    <i class="bi bi-plus-circle"></i> Add location
+                                </button>
+                            </div>
 
-                    {{-- Add another location --}}
-                    <button type="button" id="add-split-btn"
-                        class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 mt-2 d-none">
-                        <i class="bi bi-plus-circle"></i> Add Another Location
-                    </button>
+                            <div id="split-rows-empty" class="border rounded-3 bg-light text-center py-5 px-3 d-none">
+                                <div class="fs-3 opacity-50 mb-2">📍</div>
+                                <div class="fw-semibold mb-1">No allocation rows yet</div>
+                                <div class="small text-muted">Choose a location to start splitting this dispatch.</div>
+                            </div>
 
-                    {{-- Inline validation --}}
-                    <div id="modal-validation-msg" class="alert mt-3 d-none small py-2"></div>
+                            <div id="split-rows-container" class="d-grid gap-3"></div>
 
+                            <div id="modal-validation-msg" class="alert mt-3 d-none small mb-0"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="small text-muted" id="modal-footer-hint"></div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                    <div class="d-flex gap-2 ms-auto">
+                        <button type="button"
+                            class="btn btn-outline-secondary fw-semibold d-inline-flex align-items-center gap-2 px-4"
+                            data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
                         <button type="button" id="confirm-dispatch-btn"
                             class="btn btn-primary fw-semibold d-inline-flex align-items-center gap-2" disabled>
                             <i class="bi bi-check-lg"></i> Confirm Allocation
@@ -272,24 +296,34 @@
 
     {{-- Split-row template (cloned by JS) --}}
     <template id="split-row-template">
-        <div class="split-row border rounded-2 p-3 mb-2 bg-white">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label small fw-medium mb-1">Location</label>
-                    <select class="form-select form-select-sm split-location-select">
-                        <option value="">— Select location —</option>
-                    </select>
+        <div class="split-row card border shadow-sm">
+            <div class="card-body p-3 p-md-4">
+                <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                    <div>
+                        <div class="small text-uppercase text-muted fw-semibold">Location allocation</div>
+                        <div class="small text-muted row-status-text">Select a location and quantity.</div>
+                    </div>
+                    <div class="small text-muted text-end">Each location can be used once.</div>
+                </div>
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-7">
+                        <label class="form-label small fw-medium mb-1">Location</label>
+                        <select class="form-select split-location-select">
+                            <option value="">— Select location —</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-8">
+                        <label class="form-label small fw-medium mb-1">Qty to dispatch</label>
+                        <input type="number" class="form-control split-qty-input font-monospace" min="1" value="" placeholder="0">
+                    </div>
+                    <div class="col-lg-2 col-md-4 d-grid">
+                        <button type="button" class="btn btn-outline-danger remove-split-btn d-inline-flex align-items-center justify-content-center gap-1" title="Remove row">
+                            <i class="bi bi-x-lg"></i>
+                            <span class="d-lg">Remove</span>
+                        </button>
+                    </div>
                     <div class="small mt-1 location-stock-hint text-muted"></div>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small fw-medium mb-1">Qty to dispatch</label>
-                    <input type="number" class="form-control form-control-sm split-qty-input font-monospace"
-                        min="1" value="" placeholder="0">
-                </div>
-                <div class="col-md-2 d-flex align-items-end justify-content-end">
-                    <button type="button" class="btn btn-outline-danger btn-sm remove-split-btn" title="Remove row">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
                 </div>
             </div>
         </div>

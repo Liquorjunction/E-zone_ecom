@@ -25,6 +25,7 @@
     const loadingEl          = document.getElementById('modal-loading');
     const errorEl            = document.getElementById('modal-error');
     const splitContainer     = document.getElementById('split-rows-container');
+    const splitEmptyEl       = document.getElementById('split-rows-empty');
     const addSplitBtn        = document.getElementById('add-split-btn');
     const validationMsg      = document.getElementById('modal-validation-msg');
     const footerHint         = document.getElementById('modal-footer-hint');
@@ -54,7 +55,6 @@
             setValidation('');
             footerHint.textContent = '';
             confirmBtn.disabled    = true;
-            addSplitBtn.classList.add('d-none');
 
             setLoading(true);
             bsModal.show();
@@ -81,6 +81,8 @@
 
             if (!inventoryData.length) {
                 setError('No stock available at any location for this item.');
+                splitContainer.classList.add('d-none');
+                if (splitEmptyEl) splitEmptyEl.classList.add('d-none');
                 return;
             }
 
@@ -92,7 +94,7 @@
                 addSplitRow();
             }
 
-            addSplitBtn.classList.remove('d-none');
+            updateVisibility();
         })
         .catch(function (err) {
             setLoading(false);
@@ -108,6 +110,7 @@
         const select    = row.querySelector('.split-location-select');
         const qtyInput  = row.querySelector('.split-qty-input');
         const hint      = row.querySelector('.location-stock-hint');
+        const rowStatus  = row.querySelector('.row-status-text');
         const removeBtn = row.querySelector('.remove-split-btn');
 
         // Populate options
@@ -131,16 +134,16 @@
         if (preselectedInvId) {
             select.value   = preselectedInvId;
             qtyInput.value = preselectedQty || 1;
-            refreshHint(select, hint, qtyInput);
+            refreshHint(select, hint, qtyInput, rowStatus);
         }
 
         select.addEventListener('change', function () {
-            refreshHint(this, hint, qtyInput);
+            refreshHint(this, hint, qtyInput, rowStatus);
             // Auto-suggest remaining needed, capped at stock
             if (!qtyInput.value || qtyInput.value == '0') {
                 const stock  = parseInt((this.options[this.selectedIndex] || {}).dataset.stock || 0, 10);
                 const needed = getRemainingNeeded();
-                qtyInput.value = Math.min(needed > 0 ? needed : 1, stock);
+                qtyInput.value = Math.min(Math.max(needed > 0 ? needed : 1, 1), stock);
             }
             revalidate();
         });
@@ -150,20 +153,33 @@
         removeBtn.addEventListener('click', function () {
             if (splitContainer.querySelectorAll('.split-row').length <= 1) return;
             row.remove();
+            updateVisibility();
             revalidate();
         });
 
         splitContainer.appendChild(row);
+        updateVisibility();
         revalidate();
     }
 
-    function refreshHint(select, hint, qtyInput) {
+    function refreshHint(select, hint, qtyInput, rowStatus) {
         const opt   = select.options[select.selectedIndex];
         const stock = parseInt((opt || {}).dataset.stock || 0, 10);
-        if (!opt || !opt.value) { hint.textContent = ''; return; }
+        if (!opt || !opt.value) {
+            hint.textContent = '';
+            if (rowStatus) {
+                rowStatus.textContent = 'Select a location and quantity.';
+                rowStatus.className = 'small text-muted row-status-text';
+            }
+            return;
+        }
         hint.textContent = 'Available: ' + stock + ' units';
         hint.className   = 'small mt-1 location-stock-hint ' + (stock > 0 ? 'text-success' : 'text-danger');
         qtyInput.max     = stock;
+        if (rowStatus) {
+            rowStatus.textContent = 'Selected: ' + ((opt.dataset.label || opt.textContent || 'Location'));
+            rowStatus.className = 'small text-muted row-status-text';
+        }
     }
 
     addSplitBtn.addEventListener('click', function () { addSplitRow(); });
@@ -284,12 +300,12 @@
         if (!el) return;
 
         const total = splits.reduce(function (s, x) { return s + x.quantity; }, 0);
-        let html = '<div class="d-flex flex-column gap-1">';
+        let html = '<div class="d-flex flex-column gap-2">';
         splits.forEach(function (s) {
-            html += '<div class="d-flex align-items-center gap-2">'
+            html += '<div class="d-flex align-items-start gap-2 flex-wrap">'
                 + '<span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 font-monospace">'
                 + s.quantity + '×</span>'
-                + '<span class="small text-dark">' + escHtml(s.locationLabel) + '</span></div>';
+                + '<span class="small text-dark text-break">' + escHtml(s.locationLabel) + '</span></div>';
         });
         html += '<div class="small text-muted mt-1">Total: <strong class="text-dark">' + total + '</strong></div></div>';
         el.innerHTML = html;
@@ -343,7 +359,20 @@
     function setLoading(on) {
         loadingEl.classList.toggle('d-none', !on);
         splitContainer.classList.toggle('d-none', on);
+        if (splitEmptyEl) splitEmptyEl.classList.add('d-none');
         addSplitBtn.classList.toggle('d-none', true); // always hide until loaded
+        if (!on) updateVisibility();
+    }
+
+    function updateVisibility() {
+        const hasRows = splitContainer.querySelectorAll('.split-row').length > 0;
+        const loading = !loadingEl.classList.contains('d-none');
+
+        splitContainer.classList.toggle('d-none', loading || !hasRows);
+        if (splitEmptyEl) {
+            splitEmptyEl.classList.toggle('d-none', loading || hasRows);
+        }
+        addSplitBtn.classList.toggle('d-none', loading || !inventoryData.length);
     }
 
     function setError(msg) {
