@@ -59,7 +59,7 @@ class OrderCheckoutRequest extends FormRequest
             'zip' => ['nullable', 'string', 'max:20'],
             'postal_code' => ['nullable', 'string', 'max:20'],
             'country' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:20'],
 
             'shipping_address' => ['nullable', 'array'],
             'shipping_address.name' => ['required_with:shipping_address', 'string', 'max:255'],
