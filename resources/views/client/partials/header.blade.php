@@ -24,10 +24,18 @@
                     </svg>
                     <input id="universal-search-input" type="text"
                         placeholder="{{ statictranslations('Search electronics, brands, deals...') }}"
-                        class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
+                        class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                                transition-all duration-200 placeholder:text-gray-400 text-gray-700"
                         autocomplete="off">
+                    <button type="button" data-search-clear="universal-search-input"
+                        class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                        aria-label="Clear search">
+                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                     <div id="universal-search-results"
                         class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
                     </div>
@@ -299,9 +307,17 @@
             </svg>
             <input id="universal-search-input-mobile" type="text"
                 placeholder="{{ statictranslations('Search products...') }}"
-                class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
+                class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                           transition-all duration-200">
+            <button type="button" data-search-clear="universal-search-input-mobile"
+                class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                aria-label="Clear search">
+                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
             <div id="universal-search-results-mobile"
                 class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
             </div>
