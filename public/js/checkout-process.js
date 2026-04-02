@@ -505,7 +505,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // one via the modal. Never rely on hidden-field values here because
                 // they may still hold stale shipping data from the initial copy.
                 var billingSection = document.getElementById("billingAddressSection");
-                var anchorEl = billingSection || billingFields;
+                var anchorEl = billingFields || billingSection;
                 if (anchorEl) {
                     showValidationError(anchorEl, "Please add a billing address, or use the same as shipping");
                 }
