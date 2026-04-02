@@ -26,6 +26,11 @@ class CartRepository implements CartRepositoryInterface
             ->firstOrCreate(['session_id' => $identifier->sessionId]);
     }
 
+    public function getCartById(int $cartId)
+    {
+        return Cart::with('items.product', 'items.variant')->find($cartId);
+    }
+
     public function addItem($cart, array $data)
     {
         $existing = $cart->items()->where('product_id', $data['product_id'])->where('variant_id', $data['variant_id'] ?? null)->first();
@@ -103,6 +108,12 @@ class CartRepository implements CartRepositoryInterface
         return true;
     }
 
+    public function clearCartItems($cart)
+    {
+        if (!$cart) return;
+        $cart->items()->delete();
+    }
+
     public function calculateCartTotals($cart): array
     {
         $items = $cart->items()->with(['product', 'variant'])->get();
@@ -155,6 +166,53 @@ class CartRepository implements CartRepositoryInterface
         ];
     }
 
+    public function snapshotCartItems($cart): array
+    {
+        if (!$cart) {
+            return [];
+        }
+
+        return $cart->items()->get([
+            'product_id',
+            'variant_id',
+            'quantity',
+            'unit_price',
+            'discount_id',
+            'discount_amount',
+            'final_price',
+        ])->map(function ($item) {
+            return [
+                'product_id' => $item->product_id,
+                'variant_id' => $item->variant_id,
+                'quantity' => (int) $item->quantity,
+                'unit_price' => $item->unit_price,
+                'discount_id' => $item->discount_id,
+                'discount_amount' => $item->discount_amount ?? 0,
+                'final_price' => $item->final_price ?? $item->unit_price,
+            ];
+        })->values()->all();
+    }
+
+    public function restoreCartItems($cart, array $items): void
+    {
+        if (!$cart || empty($items)) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'product_id' => $item['product_id'] ?? null,
+                'variant_id' => $item['variant_id'] ?? null,
+                'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                'unit_price' => $item['unit_price'] ?? null,
+                'discount_id' => $item['discount_id'] ?? null,
+                'discount_amount' => $item['discount_amount'] ?? 0,
+                'final_price' => $item['final_price'] ?? ($item['unit_price'] ?? 0),
+            ]);
+        }
+    }
+
     public function getOrderDataByOrderId(int $orderId)
     {
         $order = Order::with([
@@ -196,12 +254,5 @@ class CartRepository implements CartRepositoryInterface
             ->where('user_id', $userId)
             ->orderByDesc('created_at')
             ->get();
-
-        $orders = Order::with(['items.product', 'items.variant'])
-            ->where('user_id', $userId)
-            ->orderByDesc('created_at')
-            ->get();
-
-        return $orders;
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Inventory\DestroyInventoryRequest;
 use App\Http\Requests\Admin\Inventory\EditInventoryRequest;
 use App\Http\Requests\Admin\Inventory\ReadInventoryRequest;
+use App\Http\Requests\Admin\Inventory\SeedAllInventoryRequest;
 use App\Http\Requests\Admin\Inventory\StoreBatchInventoryRequest;
 use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface as InventoryRepo;
 use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface as InventoryTransactionsRepo;
@@ -59,6 +60,27 @@ class InventoryController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'An error occurred while adding stock: ' . $e->getMessage());
+        }
+    }
+
+    public function seedAll(SeedAllInventoryRequest $request, InventoryService $inventoryService)
+    {
+        try {
+            $data = $request->validated();
+            $adminId = Auth::guard('admin')->id();
+            $result = $inventoryService->seedAllProductsWithInventory($data, $adminId);
+
+            $message = sprintf(
+                'Inventory seeded as a new batch for all products and variants. Created: %d.',
+                $result['created'] ?? 0
+            );
+
+            return redirect()->route('admin.inventory.index')->with('success', $message);
+        } catch (\Exception $e) {
+            Log::error('Error seeding inventory for all products: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'An error occurred while seeding inventory: ' . $e->getMessage());
         }
     }
 

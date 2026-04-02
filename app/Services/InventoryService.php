@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Product;
 use App\Models\InventoryTransaction;
 use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface;
 use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface;
@@ -249,6 +250,94 @@ class InventoryService
             return $this->inventoryRepo->delete($id);
         }
         return false;
+    }
+
+    public function seedAllProductsWithInventory(array $data, int $adminId = 1): array
+    {
+        return DB::transaction(function () use ($data, $adminId) {
+            $batchNo = $data['batch_no'] ?? 'SEED-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+            $locationType = $data['location_type'];
+            $warehouseId = ($locationType === 'warehouse') ? ($data['warehouse_id'] ?? null) : null;
+            $storeId = ($locationType === 'store') ? ($data['store_id'] ?? null) : null;
+            $quantity = (float) ($data['quantity'] ?? 100);
+            $notes = $data['notes'] ?? null;
+
+            $products = Product::with(['productVariants' => function ($query) {
+                $query->orderBy('id');
+            }])->get();
+
+            $created = 0;
+            $items = [];
+
+            foreach ($products as $product) {
+                $variantList = $product->productVariants && $product->productVariants->count() > 0
+                    ? $product->productVariants
+                    : collect([null]);
+
+                foreach ($variantList as $variant) {
+                    $variantId = $variant?->id;
+                    $targetCostPrice = $this->resolveLowerInventoryCostPrice(
+                        $product->price,
+                        $variant?->price
+                    );
+
+                    $payload = [
+                        'product_id' => $product->id,
+                        'product_variant_id' => $variantId,
+                        'location_type' => $locationType,
+                        'warehouse_id' => $warehouseId,
+                        'store_id' => $storeId,
+                        'cost_price' => $targetCostPrice,
+                        'quantity' => $quantity,
+                        'batch_no' => $batchNo,
+                        'status' => 'active',
+                        'notes' => $notes,
+                    ];
+
+                    $inventory = $this->inventoryRepo->create($payload);
+                    $created++;
+                    $items[] = $inventory;
+
+                    try {
+                        $this->inventoryTransactionRepo->create([
+                            'inventory_id' => $inventory->id,
+                            'type' => 'inward',
+                            'quantity' => $quantity,
+                            'rate' => $targetCostPrice,
+                            'batch_no' => $batchNo,
+                            'created_by' => $adminId,
+                            'description' => 'Bulk inventory seed: ' . $batchNo,
+                            'before_quantity' => 0,
+                            'after_quantity' => $quantity,
+                            'quantity_change' => $quantity,
+                        ]);
+                    } catch (\Throwable $e) {
+                    }
+                }
+            }
+
+            return [
+                'batch_no' => $batchNo,
+                'created' => $created,
+                'items' => $items,
+            ];
+        });
+    }
+
+    private function resolveLowerInventoryCostPrice($productPrice, $variantPrice = null): float
+    {
+        $productPrice = (float) ($productPrice ?? 0);
+        $variantPrice = $variantPrice === null ? null : (float) $variantPrice;
+
+        if ($variantPrice === null || $variantPrice <= 0) {
+            return max(0, $productPrice);
+        }
+
+        if ($productPrice <= 0) {
+            return max(0, $variantPrice);
+        }
+
+        return max(0, min($productPrice, $variantPrice));
     }
 
     // FIFO Style Reservation

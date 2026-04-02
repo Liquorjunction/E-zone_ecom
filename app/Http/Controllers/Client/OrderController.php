@@ -71,7 +71,17 @@ class OrderController extends Controller
     ) {
         $step   = (int) $request->get('step', 1);
         $cartId = CartIdentifier::fromRequest($request);
-        $cart   = $cartService->getCart($cartId);
+        $isBuyNowFlow = $request->boolean('buy_now');
+        $request->session()->put('checkout_mode', $isBuyNowFlow ? 'buy_now' : 'normal');
+
+        if ($isBuyNowFlow) {
+            $cart = $cartService->getActiveBuyNowCart();
+        } else {
+            if ($step <= 2) {
+                $cartService->recoverIncompleteBuyNowToPreviousCart($cartId);
+            }
+            $cart = $cartService->getCart($cartId);
+        }
 
         if (in_array($step, [1, 2]) && (!$cart || $cart->items->isEmpty())) {
             if ($request->ajax()) {
@@ -151,7 +161,10 @@ class OrderController extends Controller
         PriceCalculatorService $priceCalculator
     ) {
         $cartId = CartIdentifier::fromRequest($request);
-        $cart   = $cartService->getCart($cartId);
+        $checkoutMode = (string) $request->session()->get('checkout_mode', 'normal');
+        $cart = $checkoutMode === 'buy_now'
+            ? $cartService->getActiveBuyNowCart()
+            : $cartService->getCart($cartId);
 
         if (!$cart || $cart->items->isEmpty()) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -169,6 +182,11 @@ class OrderController extends Controller
             );
 
             Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id()]);
+            $request->session()->forget('checkout_mode');
+
+            if ($checkoutMode === 'buy_now') {
+                $cartService->clearBuyNowFlowState();
+            }
 
             // ── AJAX ─────────────────────────────────────────────────────
             if ($request->ajax() || $request->wantsJson()) {
@@ -208,6 +226,11 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Checkout failed', ['error' => $e->getMessage()]);
+
+            if ($checkoutMode === 'buy_now') {
+                $cartService->recoverIncompleteBuyNowToPreviousCart($cartId);
+                $request->session()->forget('checkout_mode');
+            }
 
             if ($request->ajax() || $request->wantsJson()) {
                 // Return step-3 failure HTML

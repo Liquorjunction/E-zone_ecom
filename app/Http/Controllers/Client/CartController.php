@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\DTOs\CartIdentifier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\Cart\CartAddRequest;
+use App\Http\Requests\Client\Cart\BuyNowRequest;
 use App\Http\Requests\Client\Coupon\ApplyCouponRequest;
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
@@ -66,6 +67,9 @@ class CartController extends Controller
         $data   = $request->validated();
         $cartId = CartIdentifier::fromRequest($request);
 
+        // If a previous buy-now flow was abandoned, move that item back first.
+        $cartService->recoverIncompleteBuyNowToPreviousCart($cartId);
+
         try {
             $item = $cartService->addItem($cartId, $data);
         } catch (\Exception $e) {
@@ -89,11 +93,46 @@ class CartController extends Controller
             ]);
         }
 
-        if ($request->filled('buy_now')) {
-            return redirect()->route('checkout', ['step' => 2])->with('success', statictranslations('Item added. Proceed to checkout.'));
+        return redirect()->back()->with('success', statictranslations('Item added to cart.'));
+    }
+
+    public function buyNow(BuyNowRequest $request, CartService $cartService, LoggerInterface $logger)
+    {
+        $data   = $request->validated();
+        $cartId = CartIdentifier::fromRequest($request);
+
+        try {
+            $buyNow = $cartService->startBuyNowFlow($cartId, $data);
+            $buyNowCart = $buyNow['cart'] ?? null;
+            $item = $buyNow['item'] ?? null;
+        } catch (\Exception $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
+            }
+
+            return redirect()->back()->with('error', $e->getMessage());
         }
 
-        return redirect()->back()->with('success', statictranslations('Item added to cart.'));
+        $logger->info('Started buy-now flow', [
+            'cart_id' => $buyNowCart->id ?? null,
+            'item_id' => $item->id ?? null,
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            $itemCount = $buyNowCart ? (int) $buyNowCart->items->sum('quantity') : 0;
+
+            return response()->json([
+                'success' => true,
+                'message' => statictranslations('Item added. Proceed to checkout.'),
+                'item_id' => $item->id ?? null,
+                'buy_now' => true,
+                'redirect_to' => route('checkout', ['step' => 2, 'buy_now' => 1]),
+                'summary' => ['itemCount' => $itemCount],
+            ]);
+        }
+
+        return redirect()->route('checkout', ['step' => 2, 'buy_now' => 1])
+            ->with('success', statictranslations('Item added. Proceed to checkout.'));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -109,6 +148,7 @@ class CartController extends Controller
         AddressRepo $addressRepo
     ) {
         $cartId = CartIdentifier::fromRequest($request);
+        $cartService->recoverIncompleteBuyNowToPreviousCart($cartId);
         $cart   = $cartService->getCart($cartId);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
 

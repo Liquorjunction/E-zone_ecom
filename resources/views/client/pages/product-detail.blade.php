@@ -521,7 +521,10 @@
                         }
                     @endphp
                     @if ($totalStock > 0)
-                        <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" class="space-y-3">
+                        <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}"
+                            data-add-url="{{ route('cart.add') }}"
+                            data-buy-now-url="{{ route('cart.buyNow') }}"
+                            class="space-y-3">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="variant_id" id="cart-variant-id" value="">
@@ -562,6 +565,7 @@
                                         {{ statictranslations('Add to Cart') }}
                                     </button>
                                     <button type="submit" name="buy_now" value="1" id="buy-now-btn"
+                                        formaction="{{ route('cart.buyNow') }}"
                                         class="flex-1 bg-gray-900 text-white text-sm font-bold py-3 px-5 rounded-xl shadow-md hover:bg-black hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2 active:translate-y-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

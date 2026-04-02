@@ -296,6 +296,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/get-variants', [InventoryController::class, 'getVariants'])->name('get-variants');
             Route::get('/create', [InventoryController::class, 'create'])->name('create')->middleware('can:inventories.create,admin');
             Route::post('/store', [InventoryController::class, 'store'])->name('store')->middleware('can:inventories.create,admin');
+            Route::post('/seed-all', [InventoryController::class, 'seedAll'])->name('seed-all')->middleware('can:inventories.create,admin');
             Route::get('/edit', [InventoryController::class, 'edit'])->name('edit')->middleware('can:inventories.update,admin');
             Route::put('/update', [InventoryController::class, 'update'])->name('update')->middleware('can:inventories.update,admin');
             Route::get('/show', [InventoryController::class, 'show'])->name('show')->middleware('can:inventories.read,admin');

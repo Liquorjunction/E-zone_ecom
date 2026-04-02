@@ -712,8 +712,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const formData = new FormData(this);
             const isBuyNow = clickedButton === "buy_now";
+            const actionUrl = isBuyNow
+                ? this.dataset.buyNowUrl || "/cart/buy-now"
+                : this.dataset.addUrl || this.action;
 
-            fetch(this.action, {
+            fetch(actionUrl, {
                 method: "POST",
                 body: formData,
                 headers: { Accept: "application/json" },
@@ -745,7 +748,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (isBuyNow) {
                             setTimeout(() => {
                                 window.location.href =
-                                    window.CHECKOUT_URL || "/checkout?step=2";
+                                    data.redirect_to || window.CHECKOUT_URL || "/checkout?step=2";
                             }, 500);
                         }
                     } else {
