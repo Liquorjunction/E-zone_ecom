@@ -41,6 +41,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 2500);
     }
 
+    function selectQuantityInputText(input) {
+        if (!input) return;
+        try {
+            if (typeof input.select === "function") {
+                input.select();
+            }
+        } catch (e) {}
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Price display
     // ─────────────────────────────────────────────────────────────────────────
@@ -219,10 +228,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!Number.isNaN(initialMax) && initialMax > 0) {
             setMaxStock(initialMax);
         }
+        qtyInput.addEventListener("focus", function () {
+            selectQuantityInputText(qtyInput);
+        });
             // Manual input validation (like checkout)
             qtyInput.addEventListener('input', function () {
                 let max = getMaxStock();
-                let val = parseInt(qtyInput.value, 10);
+                const raw = String(qtyInput.value || "");
+                if (raw === "") {
+                    return;
+                }
+
+                let val = parseInt(raw, 10);
                 if (isNaN(val) || val < 1) val = 1;
                 if (max && val > max) {
                     val = max;
@@ -231,14 +248,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     qtyInput.classList.remove('border-red-500', 'bg-red-50');
                 }
-                qtyInput.value = val;
+                qtyInput.value = String(val);
             });
             qtyInput.addEventListener('blur', function () {
                 let max = getMaxStock();
                 let val = parseInt(qtyInput.value, 10);
                 if (isNaN(val) || val < 1) val = 1;
                 if (max && val > max) val = max;
-                qtyInput.value = val;
+                qtyInput.value = String(val);
                 qtyInput.classList.remove('border-red-500', 'bg-red-50');
             });
     }

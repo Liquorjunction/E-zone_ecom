@@ -118,6 +118,15 @@ document.addEventListener("DOMContentLoaded", function () {
         return v;
     }
 
+    function selectQuantityInputText(input) {
+        if (!input) return;
+        try {
+            if (typeof input.select === 'function') {
+                input.select();
+            }
+        } catch (e) {}
+    }
+
     function syncCheckoutSubmitState() {
         const btn = document.getElementById("placeOrderBtn");
         if (!btn) return;
@@ -1071,12 +1080,34 @@ document.addEventListener("DOMContentLoaded", function () {
         if (e.target.classList.contains("cart-quantity-input")) {
             const id = e.target.dataset.itemId;
             const max = getMaxStockForItem(id);
-            const val = clampQuantity(e.target.value, max);
-            e.target.value = val;
+            const raw = String(e.target.value || "");
+            if (raw === "") {
+                return;
+            }
+
+            const val = clampQuantity(raw, max);
+            e.target.value = String(val);
             if (max && val === max) showStockLimitMessage(max);
             debounceUpdate(id, val);
         }
     });
+
+    root.addEventListener("focusin", function (e) {
+        if (e.target.classList && e.target.classList.contains("cart-quantity-input")) {
+            selectQuantityInputText(e.target);
+        }
+    });
+
+    root.addEventListener("blur", function (e) {
+        if (e.target.classList && e.target.classList.contains("cart-quantity-input")) {
+            const id = e.target.dataset.itemId;
+            const max = getMaxStockForItem(id);
+            const val = clampQuantity(e.target.value, max);
+            e.target.value = String(val);
+            if (max && val === max) showStockLimitMessage(max);
+            debounceUpdate(id, val);
+        }
+    }, true);
 
     // --- Change Listeners ---
     root.addEventListener("change", function (e) {
