@@ -66,15 +66,7 @@
                                         @enderror
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label for="country_name_en" class="form-label">Country Name (EN) <span class="text-danger">*</span></label>
-                                        <input type="text" name="country_name[en]" id="country_name_en" class="form-control @error('country_name.en') is-invalid @enderror"
-                                            value="{{ old('country_name.en', optional($cityItem)?->getTranslation('country_name', 'en')) }}"
-                                            required>
-                                        @error('country_name.en')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                    <input type="hidden" name="country_name[en]" id="country_name_en" value="{{ config('app.COUNTRY') }}">
                                 </div>
 
                                 <div class="tab-pane fade" id="fr" role="tabpanel">
