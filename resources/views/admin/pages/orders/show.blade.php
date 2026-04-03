@@ -72,7 +72,7 @@
                                     </tr>
                                     <tr>
                                         <th>Total</th>
-                                        <td>{{ isset($order->total) ? number_format($order->total, 2) : 'N/A' }}</td>
+                                        <td>{{ config('app.CURRENCY_SYMBOL') }} {{ isset($order->total) ? number_format($order->total, 2) : 'N/A' }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -299,7 +299,7 @@
                                             </tr>
                                             <tr>
                                                 <th>Tax Rate</th>
-                                                <td>{{ config('app.CURRENCY_SYMBOL') }}
+                                                <td>
                                                     {{ isset($order->tax_percentage) ? number_format($order->tax_percentage, 2) . '%' : '-' }}
                                                 </td>
                                             </tr>
@@ -346,8 +346,10 @@
                                                 @endif
                                             </tr>
                                             <tr>
-                                                <th>Transaction ID</th>
-                                                <td>{{ $order->transaction_id ?? 'N/A' }}</td>
+                                                @if (@isset($order->transaction_id) && !empty($order->transaction_id))
+                                                    <th>Transaction ID</th>
+                                                    <td>{{ $order->transaction_id ?? 'N/A' }}</td>
+                                                @endif
                                             </tr>
                                         </table>
                                     </div>

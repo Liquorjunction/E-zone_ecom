@@ -54,7 +54,6 @@
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
-
                                     <input type="hidden" name="country_name[en]" id="country_name_en" value="{{ config('app.COUNTRY') }}">
                                 </div>
 
@@ -67,15 +66,7 @@
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label for="country_name_fr" class="form-label">Country Name (FR)</label>
-                                        <input type="text" name="country_name[fr]" id="country_name_fr" class="form-control @error('country_name.fr') is-invalid @enderror"
-                                            value="{{ old('country_name.fr') }}" placeholder="Enter country name in French">
-                                        @error('country_name.fr')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                    <input type="hidden" name="country_name[fr]" id="country_name_fr" value="{{ config('app.COUNTRY') }}">
                                 </div>
 
                                 <div class="tab-pane fade" id="ar" role="tabpanel">
@@ -87,15 +78,7 @@
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
-
-                                    <div class="mb-3" dir="rtl">
-                                        <label for="country_name_ar" class="form-label">Country Name (AR)</label>
-                                        <input type="text" name="country_name[ar]" id="country_name_ar" class="form-control @error('country_name.ar') is-invalid @enderror"
-                                            value="{{ old('country_name.ar') }}" placeholder="Enter country name in Arabic">
-                                        @error('country_name.ar')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                    <input type="hidden" name="country_name[ar]" id="country_name_ar" value="{{ config('app.COUNTRY') }}">
                                 </div>
                             </div>
 

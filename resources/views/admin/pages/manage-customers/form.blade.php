@@ -36,7 +36,7 @@
         @enderror
     </div>
 
-    <div class="col-md-6 mb-4">
+    <div class="col-md-6 mb-4" style="display: none;">
         <label class="form-label fw-semibold">Status</label>
         <div class="form-check form-switch">
             <input type="hidden" name="status" value="0">
