@@ -245,7 +245,7 @@
                                 <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span>
                             </label>
                             <input id="modal_postal_code" name="postal_code" placeholder="20000"
-                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"/>
+                                class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" maxlength="10" inputmode="numeric" pattern="\d*"/>
                         </div>
                     </div>
                     <div>

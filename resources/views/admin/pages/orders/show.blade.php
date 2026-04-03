@@ -11,15 +11,16 @@
                             <small class="text-muted">View detailed information about the order</small>
                         </div>
                         <div class="d-flex gap-2">
-                            @if($order->payment_method === 'card')
+                            @if ($order->payment_method === 'card')
                                 @can('napsStatus.read', 'admin')
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="naps-status-btn"
-                                    data-naps-url="{{ route('admin.orders.naps-order-detail', ['order' => $order->id]) }}">
-                                    <i class="bi bi-credit-card"></i> NAPS Payment Status
-                                </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="naps-status-btn"
+                                        data-naps-url="{{ route('admin.orders.naps-order-detail', ['order' => $order->id]) }}">
+                                        <i class="bi bi-credit-card"></i> NAPS Payment Status
+                                    </button>
                                 @endcan
                             @endif
-                            <a href="{{ route('admin.orders.downloadInvoice', ['id' => $order->id]) }}" class="btn btn-sm btn-outline-secondary">
+                            <a href="{{ route('admin.orders.downloadInvoice', ['id' => $order->id]) }}"
+                                class="btn btn-sm btn-outline-secondary">
                                 <i class="bi bi-download"></i> Download Invoice
                             </a>
                             <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-primary">
@@ -213,14 +214,18 @@
                                                     <td>{{ $qty }}</td>
                                                     <td>
                                                         @if (isset($discount) && $discount > 0)
-                                                            <del>{{ number_format($unitPriceOriginal, 2) }}</del>
+                                                            <del>{{ config('app.CURRENCY_SYMBOL') }}
+                                                                {{ number_format($unitPriceOriginal, 2) }}</del>
                                                             <br>
+                                                            {{ config('app.CURRENCY_SYMBOL') }}
                                                             {{ number_format($unitPrice, 2) }}
                                                         @else
+                                                            {{ config('app.CURRENCY_SYMBOL') }}
                                                             {{ number_format($unitPrice, 2) }}
                                                         @endif
                                                     </td>
-                                                    <td>{{ number_format($lineTotal, 2) }}</td>
+                                                    <td>{{ config('app.CURRENCY_SYMBOL') }}
+                                                        {{ number_format($lineTotal, 2) }}</td>
                                                 </tr>
                                             @empty
                                                 <tr>
@@ -245,30 +250,35 @@
                                                 <th class="w-50">Subtotal</th>
                                                 @if (isset($order->coupon_id))
                                                     <td>
+                                                        {{ config('app.CURRENCY_SYMBOL') }}
                                                         {{ isset($order->subtotal) ? number_format($order->subtotal, 2) : '-' }}
                                                     </td>
                                                 @else
                                                     <td>
                                                         @php
-                                                            $totalWithoutShipping = $order->total - $order->shipping_cost;
+                                                            $totalWithoutShipping =
+                                                                $order->total - $order->shipping_cost;
                                                         @endphp
+                                                        {{ config('app.CURRENCY_SYMBOL') }}
                                                         {{ isset($totalWithoutShipping) ? number_format($totalWithoutShipping, 2) : '-' }}
                                                     </td>
                                                 @endif
                                             </tr>
                                             <tr>
                                                 <th>Coupon Discount</th>
-                                                    <td>-{{ isset($order->coupon_discount_amount) ? number_format($order->coupon_discount_amount, 2) : '-' }}
+                                                <td>-{{ config('app.CURRENCY_SYMBOL') }}
+                                                    {{ isset($order->coupon_discount_amount) ? number_format($order->coupon_discount_amount, 2) : '-' }}
                                                 </td>
                                             </tr>
                                             {{-- <tr>
                                                 <th>Shipping</th>
-                                                    <td>{{ isset($order->shipping_amount) ? number_format($order->shipping_amount, 2) : (isset($order->shipping_cost) ? number_format($order->shipping_cost, 2) : '-') }}
+                                                    <td>{{ config('app.CURRENCY_SYMBOL') }} {{ isset($order->shipping_amount) ? number_format($order->shipping_amount, 2) : (isset($order->shipping_cost) ? number_format($order->shipping_cost, 2) : '-') }}
                                                 </td>
                                             </tr> --}}
                                             <tr class="table-active font-weight-bold">
                                                 <th>Total</th>
                                                 <td class="font-weight-bold">
+                                                    {{ config('app.CURRENCY_SYMBOL') }}
                                                     {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
                                                 </td>
                                             </tr>
@@ -283,22 +293,26 @@
                                         <table class="table table-sm mb-0">
                                             <tr>
                                                 <th>Taxable Amount</th>
-                                                <td>{{ isset($order->taxable_amount) ? number_format($order->taxable_amount, 2) : '-' }}
+                                                <td>{{ config('app.CURRENCY_SYMBOL') }}
+                                                    {{ isset($order->taxable_amount) ? number_format($order->taxable_amount, 2) : '-' }}
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <th>Tax Rate</th>
-                                                <td>{{ isset($order->tax_percentage) ? number_format($order->tax_percentage, 2) . '%' : '-' }}
+                                                <td>{{ config('app.CURRENCY_SYMBOL') }}
+                                                    {{ isset($order->tax_percentage) ? number_format($order->tax_percentage, 2) . '%' : '-' }}
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <th>Tax Amount</th>
-                                                <td>{{ isset($order->tax_amount) ? number_format($order->tax_amount, 2) : (isset($order->tax) ? number_format($order->tax, 2) : '-') }}
+                                                <td>{{ config('app.CURRENCY_SYMBOL') }}
+                                                    {{ isset($order->tax_amount) ? number_format($order->tax_amount, 2) : (isset($order->tax) ? number_format($order->tax, 2) : '-') }}
                                                 </td>
                                             </tr>
                                             <tr class="table-active font-weight-bold">
                                                 <th>Total Tax Inclusive Amount</th>
                                                 <td class="font-weight-bold">
+                                                    {{ config('app.CURRENCY_SYMBOL') }}
                                                     {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
                                                 </td>
                                             </tr>
@@ -319,7 +333,17 @@
                                             </tr>
                                             <tr>
                                                 <th>Payment Status</th>
-                                                <td>{{ $order->payment_status ?? 'N/A' }}</td>
+                                                @if (($order->payment_method ?? null) === 'cod')
+                                                    @if (($order->status ?? null) !== 'delivered')
+                                                        <td>Pending</td>
+                                                    @elseif (($order->status ?? null) === 'delivered')
+                                                        <td>Paid</td>
+                                                    @endif
+                                                @elseif ($order->payment_method === 'card' || $order->transaction_id !== null)
+                                                    <td>Paid</td>
+                                                @else
+                                                    <td>N/A</td>
+                                                @endif
                                             </tr>
                                             <tr>
                                                 <th>Transaction ID</th>
@@ -342,7 +366,7 @@
                                                 <label class="form-label fw-semibold">Order Status</label>
                                                 <div class="d-flex flex-wrap gap-2">
                                                     @foreach ($availableStatuses as $value)
-                                                        @if(isset($statusLabels[$value]))
+                                                        @if (isset($statusLabels[$value]))
                                                         <div class="form-check form-check-inline">
                                                             <input class="form-check-input" type="radio" name="status"
                                                                 id="status_{{ $value }}"
@@ -378,43 +402,48 @@
     </div>
     </div>
 
-{{-- NAPS Payment Status Modal Container --}}
-<div id="naps-modal-container"></div>
+    {{-- NAPS Payment Status Modal Container --}}
+    <div id="naps-modal-container"></div>
 
 @endsection
 
 @push('scripts')
-<script>
-    document.getElementById('naps-status-btn') && document.getElementById('naps-status-btn').addEventListener('click', function () {
-        var url = this.dataset.napsUrl;
-        var btn = this;
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Loading...';
+    <script>
+        document.getElementById('naps-status-btn') && document.getElementById('naps-status-btn').addEventListener('click',
+            function() {
+                var url = this.dataset.napsUrl;
+                var btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Loading...';
 
-        fetch(url, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(function (res) { return res.json(); })
-        .then(function (response) {
-            if (response.success === false) {
-                alert(response.message || 'Could not retrieve NAPS status.');
-                return;
-            }
-            document.getElementById('naps-modal-container').innerHTML = response.modal_html;
-            var el = document.getElementById('napsModal');
-            if (el && el.parentElement !== document.body) {
-                document.body.appendChild(el);
-            }
-            var modal = new bootstrap.Modal(el);
-            modal.show();
-        })
-        .catch(function () {
-            alert('Failed to fetch NAPS status.');
-        })
-        .finally(function () {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-credit-card"></i> NAPS Payment Status';
-        });
-    });
-</script>
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(res) {
+                        return res.json();
+                    })
+                    .then(function(response) {
+                        if (response.success === false) {
+                            alert(response.message || 'Could not retrieve NAPS status.');
+                            return;
+                        }
+                        document.getElementById('naps-modal-container').innerHTML = response.modal_html;
+                        var el = document.getElementById('napsModal');
+                        if (el && el.parentElement !== document.body) {
+                            document.body.appendChild(el);
+                        }
+                        var modal = new bootstrap.Modal(el);
+                        modal.show();
+                    })
+                    .catch(function() {
+                        alert('Failed to fetch NAPS status.');
+                    })
+                    .finally(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-credit-card"></i> NAPS Payment Status';
+                    });
+            });
+    </script>
 @endpush

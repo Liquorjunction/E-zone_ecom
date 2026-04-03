@@ -56,8 +56,8 @@ class OrderCheckoutRequest extends FormRequest
             'address' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
             'city' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
-            'zip' => ['nullable', 'string', 'max:20'],
-            'postal_code' => ['nullable', 'string', 'max:20'],
+            'zip' => ['nullable', 'regex:/^\d{1,10}$/'],
+            'postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'country' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
 
@@ -66,7 +66,7 @@ class OrderCheckoutRequest extends FormRequest
             'shipping_address.street' => ['required_with:shipping_address', 'string', 'max:255'],
             'shipping_address.city' => ['required_with:shipping_address', 'string', 'max:255'],
             'shipping_address.state' => ['nullable', 'string', 'max:255'],
-            'shipping_address.postal_code' => ['nullable', 'string', 'max:20'],
+            'shipping_address.postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'shipping_address.country' => ['required_with:shipping_address', 'string', 'max:255'],
             'shipping_address.phone' => ['nullable', 'string', 'max:20'],
 
@@ -75,7 +75,7 @@ class OrderCheckoutRequest extends FormRequest
             'billing_address.street' => ['required_with:billing_address', 'string', 'max:255'],
             'billing_address.city' => ['required_with:billing_address', 'string', 'max:255'],
             'billing_address.state' => ['nullable', 'string', 'max:255'],
-            'billing_address.postal_code' => ['nullable', 'string', 'max:20'],
+            'billing_address.postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'billing_address.country' => ['required_with:billing_address', 'string', 'max:255'],
             'billing_address.phone' => ['nullable', 'string', 'max:20'],
 
@@ -84,8 +84,8 @@ class OrderCheckoutRequest extends FormRequest
             'billing_address_line' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
             'billing_city' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
             'billing_state' => ['nullable', 'string', 'max:255'],
-            'billing_zip' => ['nullable', 'string', 'max:20'],
-            'billing_postal_code' => ['nullable', 'string', 'max:20'],
+            'billing_zip' => ['nullable', 'regex:/^\d{1,10}$/'],
+            'billing_postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'billing_country' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
             'billing_phone' => ['nullable', 'string', 'max:20'],
 
@@ -123,6 +123,7 @@ class OrderCheckoutRequest extends FormRequest
             'billing_address_line.required_without_all' => 'Billing address is required.',
             'billing_city.required_without_all' => 'Billing city is required.',
             'billing_country.required_without_all' => 'Billing country is required.',
+            '*.regex' => 'The postal code must be up to 10 digits.',
 
             'phone.required' => 'Phone number is required.',
             'email.required' => 'Email address is required.',

@@ -105,7 +105,7 @@ $(document).ready(function () {
                 <tr>
                     <td>${variant.name || "N/A"}</td>
                     <td>${variant.sku || "N/A"}</td>
-                    <td class="text-success fw-bold">$${variant.price}</td>
+                    <td class="text-success fw-bold">${window.CURRENCY_SYMBOL} ${variant.price}</td>
                     <td>${bestsellerToggle}</td>
                     <td>${statusToggle}</td>
                     ${showVariantActions ? actions : ""}

@@ -245,6 +245,14 @@ class DiscountController extends Controller
             ->addColumn('name', function ($discount) {
                 return $discount->getTranslation('name', 'en');
             })
+            ->addColumn('value', function ($discount) {
+                if (isset($discount->type) && $discount->type === 'flat' && isset($discount->value)) {
+                    return config('app.CURRENCY_SYMBOL') . ' ' . $discount->value;
+                } elseif (isset($discount->type) && $discount->type === 'percentage' && isset($discount->value)) {
+                    return $discount->value . ' %';
+                }
+                return 'N/A';
+            })
             ->addColumn('starts_at', function ($discount) {
                 return $discount->starts_at ? $discount->starts_at->format('Y-m-d H:i:s') : '';
             })

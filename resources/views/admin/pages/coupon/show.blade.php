@@ -61,7 +61,7 @@
                                 <div class="ms-4">
                                     <span class="text-dark">
                                         @if(isset($coupon->value))
-                                            {{ $coupon->value }}
+                                            {{ config('app.CURRENCY_SYMBOL') }} {{ $coupon->value }}
                                         @else
                                             N/A
                                         @endif

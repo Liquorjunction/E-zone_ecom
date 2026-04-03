@@ -12,6 +12,10 @@
     @endforeach
 @endsection
 
+<script>
+    window.CURRENCY_SYMBOL = "{{ config('app.CURRENCY_SYMBOL') }}";
+</script>
+
 @section('content')
     <div class="container-fluid py-4">
 

@@ -22,7 +22,7 @@ class UpdateAddressRequest extends FormRequest
             'street' => ['nullable','string','max:255'],
             'city_id' => ['nullable','exists:cities,id'],
             'state' => ['nullable','string','max:255'],
-            'postal_code' => ['nullable','string','max:20'],
+            'postal_code' => ['nullable','regex:/^\d{1,10}$/'],
             'country' => ['nullable','string','max:255'],
         ];
     }
@@ -48,7 +48,7 @@ class UpdateAddressRequest extends FormRequest
             'street.max' => 'The street must not be greater than 255 characters.',
             'city_id.exists' => 'The selected city is invalid.',
             'state.max' => 'The state must not be greater than 255 characters.',
-            'postal_code.max' => 'The postal code must not be greater than 20 characters.',
+            'postal_code.regex' => 'The postal code must be up to 10 digits.',
             'country.max' => 'The country must not be greater than 255 characters.',
         ];
     }

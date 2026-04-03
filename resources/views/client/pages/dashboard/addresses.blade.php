@@ -150,7 +150,7 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}</label>
-                            <input id="field-postal_code" name="postal_code" placeholder="{{ statictranslations('10001') }}" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                            <input id="field-postal_code" name="postal_code" placeholder="{{ statictranslations('10001') }}" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" maxlength="10" inputmode="numeric" pattern="\d*" />
                         </div>
 
                         <div class="md:col-span-3">
@@ -248,7 +248,7 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Postal Code') }}</label>
-                    <input id="mobile-field-postal_code" name="postal_code" placeholder="{{ statictranslations('10001') }}" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" />
+                    <input id="mobile-field-postal_code" name="postal_code" placeholder="{{ statictranslations('10001') }}" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-base" maxlength="10" inputmode="numeric" pattern="\d*" />
                 </div>
 
                 <div>

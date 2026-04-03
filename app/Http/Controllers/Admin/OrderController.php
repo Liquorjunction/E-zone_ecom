@@ -131,7 +131,7 @@ class OrderController extends Controller
                     return $orderRepo->getCustomerNameByOrderId($order->id) ?? 'N/A';
                 })
                 ->addColumn('email', fn($order) => $order->email ?? optional($order->user)->email ?? 'N/A')
-                ->addColumn('total', fn($order) => $order->total ?? 'N/A')
+                ->addColumn('total', fn($order) => config('app.CURRENCY_SYMBOL') .' '. ($order->total ?? 'N/A'))
                 ->addColumn('created_at', fn($order) => $order->created_at->format('d M Y, h:i A'))
                 ->addColumn('status', function ($order) use ($orderStatusService, $statusLabels, $request) {
                     // Only show dropdown for users with permission and for allowed transitions
