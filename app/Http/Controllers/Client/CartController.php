@@ -210,8 +210,12 @@ class CartController extends Controller
             if (! $cartItem) return 0;
             $variant = $cartItem->variant ?? null;
             $product = $cartItem->product ?? null;
-            if ($variant) return (int) ($variant->getTotalStockAttribute() ?? 0);
-            if ($product) return (int) ($product->productVariants()->sum('inventory.quantity') ?? 0);
+            if ($variant) return (int) ($variant->getSellableStock() ?? 0);
+            if ($product) {
+                return (int) $product->productVariants->sum(function ($pv) {
+                    return method_exists($pv, 'getSellableStock') ? $pv->getSellableStock() : 0;
+                });
+            }
             return 0;
         };
 

@@ -49,14 +49,14 @@
     }
 
     if ($isVariant) {
-        $stock = $product->getTotalStockAttribute() ?? 0;
+        $stock = method_exists($product, 'getSellableStock') ? $product->getSellableStock() : 0;
     } else {
         if ($master->productVariants && $master->productVariants->count() > 0) {
             $stock = $master->productVariants->sum(function ($v) {
-                return method_exists($v, 'getTotalStockAttribute') ? $v->getTotalStockAttribute() : 0;
+                return method_exists($v, 'getSellableStock') ? $v->getSellableStock() : 0;
             });
         } else {
-            $stock = method_exists($master, 'getTotalStockAttribute') ? $master->getTotalStockAttribute() : 0;
+            $stock = 0;
         }
     }
 

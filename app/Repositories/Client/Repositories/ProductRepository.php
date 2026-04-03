@@ -172,12 +172,12 @@ class ProductRepository implements ProductRepositoryInterface
             $availability = is_array($request->availability) ? $request->availability : [$request->availability];
             if (in_array('in_stock', $availability) && !in_array('out_of_stock', $availability)) {
                 $query->whereHas('inventory', function (Builder $q) {
-                    $q->where('quantity', '>', 0);
+                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
                 });
             }
             if (in_array('out_of_stock', $availability) && !in_array('in_stock', $availability)) {
                 $query->whereDoesntHave('inventory', function (Builder $q) {
-                    $q->where('quantity', '>', 0);
+                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
                 });
             }
         }
@@ -319,12 +319,12 @@ class ProductRepository implements ProductRepositoryInterface
             $availability = is_array($request->availability) ? $request->availability : [$request->availability];
             if (in_array('in_stock', $availability) && !in_array('out_of_stock', $availability)) {
                 $query->whereHas('inventory', function (Builder $q) {
-                    $q->where('quantity', '>', 0);
+                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
                 });
             }
             if (in_array('out_of_stock', $availability) && !in_array('in_stock', $availability)) {
                 $query->whereDoesntHave('inventory', function (Builder $q) {
-                    $q->where('quantity', '>', 0);
+                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
                 });
             }
         }
@@ -545,7 +545,7 @@ class ProductRepository implements ProductRepositoryInterface
                     ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
                     ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
             })
-            ->whereHas('inventory', fn($q) => $q->where('quantity', '>', 0))
+            ->whereHas('inventory', fn($q) => $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0'))
             ->count();
 
         // Count out-of-stock variants
@@ -557,7 +557,7 @@ class ProductRepository implements ProductRepositoryInterface
                     ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
                     ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
             })
-            ->whereDoesntHave('inventory', fn($q) => $q->where('quantity', '>', 0))
+            ->whereDoesntHave('inventory', fn($q) => $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0'))
             ->count();
 
         return [

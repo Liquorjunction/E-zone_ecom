@@ -174,14 +174,12 @@
                                 $totalStock = 0;
                                 if ($product->productVariants && $product->productVariants->count() > 0) {
                                     $totalStock = $product->productVariants->sum(function ($v) {
-                                        return method_exists($v, 'getTotalStockAttribute')
-                                            ? $v->getTotalStockAttribute()
-                                            : $v->inventory->sum('quantity') ?? 0;
+                                        return method_exists($v, 'getSellableStock')
+                                            ? $v->getSellableStock()
+                                            : 0;
                                     });
                                 } else {
-                                    $totalStock = method_exists($product, 'getTotalStockAttribute')
-                                        ? $product->getTotalStockAttribute()
-                                        : $product->inventory->sum('quantity') ?? 0;
+                                    $totalStock = 0;
                                 }
                                 $isInStock = $totalStock > 0;
                             @endphp
@@ -388,9 +386,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach ($product->productVariants as $variant)
                                     @php
-                                        $qty =
-                                            (int) ($variant->total_stock ??
-                                                ($variant->inventory->sum('quantity') ?? 0));
+                                        $qty = (int) (method_exists($variant, 'getSellableStock') ? $variant->getSellableStock() : 0);
                                         $variantImagePaths = [];
                                         if ($variant->relationLoaded('images')) {
                                             $variantImagePaths = $variant->images
@@ -510,14 +506,12 @@
                         $totalStock = 0;
                         if ($product->productVariants && $product->productVariants->count() > 0) {
                             $totalStock = $product->productVariants->sum(function ($v) {
-                                return method_exists($v, 'getTotalStockAttribute')
-                                    ? $v->getTotalStockAttribute()
-                                    : $v->inventory->sum('quantity') ?? 0;
+                                return method_exists($v, 'getSellableStock')
+                                    ? $v->getSellableStock()
+                                    : 0;
                             });
                         } else {
-                            $totalStock = method_exists($product, 'getTotalStockAttribute')
-                                ? $product->getTotalStockAttribute()
-                                : $product->inventory->sum('quantity') ?? 0;
+                            $totalStock = 0;
                         }
                     @endphp
                     @if ($totalStock > 0)

@@ -32,7 +32,7 @@ class CartService
 
     public function addItemToCart(Cart $cart, array $payload)
     {
-        $payloadData = $this->preparePayloadAndValidateStock($payload);
+        $payloadData = $this->preparePayloadAndValidateStock($cart, $payload);
 
         $item = $this->repo->addItem($cart, $payloadData);
         $this->logger->info('Cart item added', [
@@ -45,7 +45,7 @@ class CartService
         return $item;
     }
 
-    private function preparePayloadAndValidateStock(array $payload): array
+    private function preparePayloadAndValidateStock(Cart $cart, array $payload): array
     {
 
         $productId = $payload['product_id'] ?? null;
@@ -69,9 +69,21 @@ class CartService
 
         $payload['unit_price'] = $unitPrice;
 
-        $quantity = $payload['quantity'] ?? 1;
-        $stock = $variant ? $variant->getTotalStockAttribute() : ($product ? $product->productVariants()->sum('inventory.quantity') : 0);
-        if ($stock < $quantity) {
+        $quantity = (int) ($payload['quantity'] ?? 1);
+        $existingQty = 0;
+        if (!empty($payload['product_id'])) {
+            $existingItem = $cart->items->first(function ($item) use ($payload) {
+                return (int) $item->product_id === (int) ($payload['product_id'] ?? 0)
+                    && (int) ($item->variant_id ?? 0) === (int) ($payload['variant_id'] ?? 0);
+            });
+            $existingQty = (int) ($existingItem->quantity ?? 0);
+        }
+
+        $requiredQty = $quantity + $existingQty;
+        $stock = $variant
+            ? $variant->getSellableStock()
+            : ($product ? $product->productVariants->sum(fn($pv) => method_exists($pv, 'getSellableStock') ? $pv->getSellableStock() : 0) : 0);
+        if ($stock < $requiredQty) {
             throw new \Exception(statictranslations('Insufficient stock for this item.'));
         }
 
@@ -230,7 +242,9 @@ class CartService
             $variant = $item->variant ?? null;
             $product = $item->product ?? null;
             $quantity = $data['quantity'] ?? $item->quantity;
-            $stock = $variant ? $variant->getSellableStock() : ($product ? $product->productVariants()->sum('inventory.quantity') : 0);
+            $stock = $variant
+                ? $variant->getSellableStock()
+                : ($product ? $product->productVariants->sum(fn($pv) => method_exists($pv, 'getSellableStock') ? $pv->getSellableStock() : 0) : 0);
             if ($stock < $quantity) {
                 throw new \Exception(statictranslations('Insufficient stock for this item.'));
             }

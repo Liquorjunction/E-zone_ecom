@@ -111,13 +111,13 @@ class ProductRepository implements ProductRepositoryInterface
 
         if (isset($request['in_stock']) && $request['in_stock'] == '1') {
             $query->whereHas('productVariants.inventories', function ($q) {
-                $q->where('quantity', '>', 0);
+                $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
             });
         }
 
         if (isset($request['out_of_stock']) && $request['out_of_stock'] == '1') {
             $query->whereHas('productVariants.inventories', function ($q) {
-                $q->where('quantity', 0);
+                $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) <= 0');
             });
         }
 
