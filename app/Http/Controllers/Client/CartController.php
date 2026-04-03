@@ -96,6 +96,43 @@ class CartController extends Controller
         return redirect()->back()->with('success', statictranslations('Item added to cart.'));
     }
 
+    public function itemStatus(Request $request, CartService $cartService)
+    {
+        $productId = (int) $request->input('product_id');
+        $variantId = $request->filled('variant_id') ? (int) $request->input('variant_id') : null;
+
+        if ($productId <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => statictranslations('Invalid product.'),
+                'in_cart' => false,
+            ], 422);
+        }
+
+        $cartId = CartIdentifier::fromRequest($request);
+        $cart = $cartService->getCart($cartId);
+
+        $inCart = false;
+        if ($cart && $cart->items) {
+            $inCart = $cart->items->contains(function ($item) use ($productId, $variantId) {
+                if ((int) $item->product_id !== $productId) {
+                    return false;
+                }
+
+                if ($variantId === null) {
+                    return true;
+                }
+
+                return (int) ($item->variant_id ?? 0) === $variantId;
+            });
+        }
+
+        return response()->json([
+            'success' => true,
+            'in_cart' => $inCart,
+        ]);
+    }
+
     public function buyNow(BuyNowRequest $request, CartService $cartService, LoggerInterface $logger)
     {
         $data   = $request->validated();

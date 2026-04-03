@@ -275,7 +275,17 @@
                         ->exists();
                 }
             @endphp
-            @if (!$isInCart && $stock > 0)
+            @if ($isInCart)
+                <button
+                    class="add-to-cart-btn shrink-0 w-12 h-12 rounded-xl bg-primary/90 flex items-center justify-center cursor-not-allowed opacity-80"
+                    disabled aria-disabled="true" title="{{ statictranslations('In Cart') }}"
+                    data-product-variant-id="{{ $variantId }}" data-product-id="{{ $master->id }}">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+            @elseif (!$isInCart && $stock > 0)
                 <button
                     class="add-to-cart-btn shrink-0 w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-all duration-300 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-95"
                     onclick="addToCart('{{ $variantId }}', '{{ $master->id }}')"

@@ -710,10 +710,76 @@ document.addEventListener("DOMContentLoaded", function () {
     // ─────────────────────────────────────────────────────────────────────────
     const addToCartForm = document.getElementById("addToCartForm");
     let clickedButton = null;
+    let isInCartForSelectedVariant = false;
 
     if (addToCartForm) {
         const _addBtn = document.getElementById("add-to-cart-btn");
+        const _addBtnLabel = document.getElementById("add-to-cart-btn-label");
         const _buyBtn = document.getElementById("buy-now-btn");
+        const _variantInput = document.getElementById("cart-variant-id");
+        const _productInput = addToCartForm.querySelector('input[name="product_id"]');
+        const _csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "";
+
+        function setAddToCartButtonState(inCart) {
+            isInCartForSelectedVariant = !!inCart;
+            if (!_addBtn) return;
+
+            if (isInCartForSelectedVariant) {
+                _addBtn.disabled = true;
+                _addBtn.setAttribute("aria-disabled", "true");
+                _addBtn.classList.add("opacity-60", "cursor-not-allowed");
+                _addBtn.classList.remove("hover:shadow-lg", "hover:-translate-y-0.5", "active:translate-y-0");
+                if (_addBtnLabel) {
+                    _addBtnLabel.textContent = trans('In Cart');
+                }
+            } else {
+                _addBtn.disabled = false;
+                _addBtn.removeAttribute("aria-disabled");
+                _addBtn.classList.remove("opacity-60", "cursor-not-allowed");
+                _addBtn.classList.add("hover:shadow-lg", "hover:-translate-y-0.5", "active:translate-y-0");
+                if (_addBtnLabel) {
+                    _addBtnLabel.textContent = trans('Add to Cart');
+                }
+            }
+        }
+
+        async function syncAddToCartStateFromServer() {
+            if (!_productInput) return;
+
+            const url = addToCartForm.dataset.itemStatusUrl;
+            if (!url) return;
+
+            const variantId = (_variantInput?.value || window.currentSelectedVariantId || "").trim();
+            const payload = {
+                product_id: Number(_productInput.value || 0),
+            };
+
+            if (variantId) {
+                payload.variant_id = Number(variantId);
+            }
+
+            try {
+                const resp = await fetch(url, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": _csrf,
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!resp.ok) return;
+
+                const data = await resp.json();
+                if (data && data.success) {
+                    setAddToCartButtonState(!!data.in_cart);
+                }
+            } catch (e) {
+                // Ignore transient network failures and keep current button state.
+            }
+        }
 
         if (_addBtn)
             _addBtn.addEventListener("click", () => {
@@ -726,6 +792,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         addToCartForm.addEventListener("submit", function (e) {
             e.preventDefault();
+
+            if (clickedButton !== "buy_now" && isInCartForSelectedVariant) {
+                return;
+            }
 
             const formData = new FormData(this);
             const isBuyNow = clickedButton === "buy_now";
@@ -767,6 +837,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                 window.location.href =
                                     data.redirect_to || window.CHECKOUT_URL || "/checkout?step=2";
                             }, 500);
+                        } else {
+                            setAddToCartButtonState(true);
                         }
                     } else {
                         const msg =
@@ -790,5 +862,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     else alert(msg);
                 });
         });
+
+        document.addEventListener("variantChanged", function () {
+            syncAddToCartStateFromServer();
+        });
+
+        window.addEventListener("cart:changed", function () {
+            syncAddToCartStateFromServer();
+        });
+
+        syncAddToCartStateFromServer();
     }
 });

@@ -265,7 +265,15 @@
             </div>
 
             {{-- Cart button — large touch target ── --}}
-            @if (!$isInCart && $stock > 0)
+            @if ($isInCart)
+                <button class="add-to-cart-btn shrink-0 w-10 h-10 rounded-xl bg-primary/90 flex items-center justify-center cursor-not-allowed opacity-80"
+                    disabled aria-disabled="true" title="{{ statictranslations('In Cart') }}"
+                    data-product-variant-id="{{ $variantId }}" data-product-id="{{ $master->id }}">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+            @elseif (!$isInCart && $stock > 0)
                 <button class="add-to-cart-btn shrink-0 w-10 h-10 rounded-xl bg-primary shadow-md shadow-primary/30 flex items-center justify-center transition-all duration-200 active:scale-90 active:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                     onclick="addToCart('{{ $variantId }}', '{{ $master->id }}')"
                     data-product-variant-id="{{ $variantId }}" data-product-id="{{ $master->id }}"
