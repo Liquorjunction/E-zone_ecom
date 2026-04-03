@@ -78,12 +78,15 @@ class AddressController extends Controller
             $address = $addressRepository->findById($address->id);
         }
 
+
         // return server-rendered HTML for AJAX
         if ($request->wantsJson() || $request->ajax()) {
+            $html = view('client.pages.dashboard._address_card', ['address' => $address])->render();
             return response()->json([
                 'success' => true,
                 'message' => statictranslations('Address saved successfully.'),
                 'address' => $address,
+                'html' => $html,
             ]);
         }
 

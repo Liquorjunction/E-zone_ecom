@@ -46,6 +46,48 @@ function ensureCityOption(selectEl, cityValue){
   selectEl.appendChild(customOption);
 }
 
+function getAddressSectionGrid(type){
+  if(!type) return null;
+  const section = document.querySelector(`section[data-section-type="${type}"]`);
+  return section ? section.querySelector('.grid') : null;
+}
+
+function buildEmptyAddressState(type){
+  const title = type === 'shipping' ? trans('Add Shipping Address') : trans('Add Billing Address');
+  return `
+    <div class="col-span-full text-center py-8">
+      <button type="button" onclick="openAddModal()" class="group flex flex-col items-center justify-center min-h-50 w-full border-3 border-dashed border-gray-300 rounded-2xl text-gray-400 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
+        <div class="bg-gray-100 group-hover:bg-primary/10 p-4 rounded-full mb-3 transition-colors duration-300">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+        </div>
+        <span class="font-semibold text-base">${title}</span>
+        <span class="text-sm text-gray-400 mt-1">${trans('Click to add')}</span>
+      </button>
+    </div>
+  `;
+}
+
+function removeEmptyAddressState(grid){
+  if(!grid) return;
+  const emptyState = grid.querySelector('.col-span-full');
+  if(emptyState) emptyState.remove();
+}
+
+function ensureEmptyAddressState(type){
+  const grid = getAddressSectionGrid(type);
+  if(!grid) return;
+  if(grid.querySelector('.address-card')) return;
+  if(!grid.querySelector('.col-span-full')){
+    grid.insertAdjacentHTML('beforeend', buildEmptyAddressState(type));
+  }
+}
+
+function getSectionTypeFromCard(card){
+  if(!card) return null;
+  const section = card.closest('section[data-section-type]');
+  return section ? section.dataset.sectionType : null;
+}
+
 function attachCityCountrySync(citySelectId, countryInputId){
   const citySelect = document.getElementById(citySelectId);
   const countryInput = document.getElementById(countryInputId);
@@ -483,6 +525,7 @@ function closeModal(){
 async function handleFormSubmit(e) {
   e.preventDefault();
   showAddressLoader();
+  let shouldReloadPage = false;
   const form = e.target;
   const isMobile = form.id === 'mobile-address-form-element';
   const url = form.action;
@@ -491,6 +534,11 @@ async function handleFormSubmit(e) {
   const fd = new FormData(form);
   const submitBtn = isMobile ? document.getElementById('mobile-form-submit-btn') : document.getElementById('form-submit');
   const originalBtnHtml = submitBtn.innerHTML;
+  const findSectionGrid = (type) => {
+    if(!type) return null;
+    const section = document.querySelector(`section[data-section-type="${String(type).toLowerCase()}"]`);
+    return section ? section.querySelector('.grid') : null;
+  };
 
   if(!validateAddressForm(form, isMobile)){
     return;
@@ -524,39 +572,17 @@ async function handleFormSubmit(e) {
     const data = json.data || json;
     const jsonResp = json; // preserve full response
 
-    // Update or add card using server-rendered HTML
-    const existing = document.getElementById('address-card-' + data.id);
-    const newCardHtml = jsonResp.html || null;
-    if(newCardHtml){
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = newCardHtml.trim();
-      const newCard = tempDiv.firstElementChild;
-
-      if(existing){
-        existing.replaceWith(newCard);
-      } else {
-        const grid = document.getElementById('addresses-grid');
-        let section = null;
-        if (data.type === 'shipping') {
-          section = grid.querySelector('section:nth-of-type(1) .grid');
-        } else if (data.type === 'billing') {
-          section = grid.querySelector('section:nth-of-type(2) .grid');
-        }
-        if (section) {
-          const emptyMsg = section.querySelector('.col-span-full');
-          if(emptyMsg) emptyMsg.remove();
-          section.appendChild(newCard);
-        } else {
-          grid.appendChild(newCard);
-        }
-      }
-    }
+    shouldReloadPage = true;
+    showAddressLoader();
 
     if(isMobile) closeMobileForm();
     else closeModal();
 
     clearFormErrors(form, isMobile);
-    showUniversalPopup(trans('Address saved successfully!'), 'success', 2000);
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 200);
 
   }catch(err){
     console.error(err);
@@ -568,7 +594,9 @@ async function handleFormSubmit(e) {
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalBtnHtml;
-    hideAddressLoader();
+    if(!shouldReloadPage){
+      hideAddressLoader();
+    }
   }
 }
 
@@ -602,9 +630,20 @@ async function deleteAddress(id){
         }
         const el = document.getElementById('address-card-' + id);
         if(el) {
+          const sectionType = getSectionTypeFromCard(el);
           el.style.opacity = '0';
           el.style.transform = 'scale(0.95)';
-          setTimeout(() => el.remove(), 300);
+          setTimeout(() => {
+            el.remove();
+            if(sectionType){
+              const emptyGrid = document.querySelector(`section[data-section-type="${sectionType}"] .grid`);
+              if(emptyGrid){
+                if(!emptyGrid.querySelector('.address-card')){
+                  emptyGrid.insertAdjacentHTML('beforeend', buildEmptyAddressState(sectionType));
+                }
+              }
+            }
+          }, 300);
         }
         showUniversalPopup(trans('Address deleted successfully'), 'success', 2000);
       }catch(e){

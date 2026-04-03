@@ -27,7 +27,7 @@
                 $billing = $billing ?? (collect($addresses ?? [])->where('type', 'billing')->values());
             @endphp
 
-            <section>
+            <section data-section-type="shipping">
                 <h3 class="text-xl font-semibold mb-4">{{ statictranslations('Shipping Addresses') }}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     @forelse($shipping as $address)
@@ -46,7 +46,7 @@
                 </div>
             </section>
 
-            <section>
+            <section data-section-type="billing">
                 <h3 class="text-xl font-semibold mb-4">{{ statictranslations('Billing Addresses') }}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     @forelse($billing as $address)
@@ -273,6 +273,6 @@
     </button>
 
     @push('scripts')
-        <script src="{{ asset('js/addresses.js') }}" defer></script>
+        <script src="{{ asset('js/addresses.js') }}?v={{ @filemtime(public_path('js/addresses.js')) }}" defer></script>
     @endpush
 @endsection
