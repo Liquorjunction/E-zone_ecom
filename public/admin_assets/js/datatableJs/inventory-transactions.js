@@ -38,7 +38,7 @@ $(function () {
             },
             { data: 'id', name: 'inventory_transactions.id' },
             { data: 'product_name', name: 'products.name' },
-            { data: 'quantity', name: 'inventory_transactions.quantity' },
+            { data: 'quantity_change', name: 'inventory_transactions.quantity_change' },
             { data: 'location_type', name: 'inventories.location_type' },
             { data: 'type', name: 'inventory_transactions.type' },
             { data: 'created_at', name: 'inventory_transactions.created_at' }

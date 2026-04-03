@@ -80,10 +80,26 @@ class InventoryTransactionsController extends Controller
                     return $transaction->after_quantity ?? 'N/A';
                 })
                 ->addColumn('quantity_change', function ($transaction) {
-                    return $transaction->quantity_change ?? 'N/A';
+                    $qty = $transaction->quantity_change ?? null;
+                    if ($qty === null) return 'N/A';
+                    $type = strtolower($transaction->type ?? '');
+                    if (in_array($type, ['in', 'adjustment_in', 'increase'])) {
+                        return '+' . abs($qty);
+                    } elseif (in_array($type, ['out', 'adjustment_out', 'decrease'])) {
+                        return '-' . abs($qty);
+                    }
+                    return $qty;
                 })
                 ->addColumn('quantity', function ($transaction) {
-                    return $transaction->quantity ?? 'N/A';
+                    $qty = $transaction->quantity ?? null;
+                    if ($qty === null) return 'N/A';
+                    $type = strtolower($transaction->type ?? '');
+                    if (in_array($type, ['in', 'adjustment_in', 'increase'])) {
+                        return '+' . abs($qty);
+                    } elseif (in_array($type, ['out', 'adjustment_out', 'decrease'])) {
+                        return '-' . abs($qty);
+                    }
+                    return $qty;
                 })
                 ->addColumn('type', function ($transaction) {
                     return $transaction->type ?? 'N/A';
