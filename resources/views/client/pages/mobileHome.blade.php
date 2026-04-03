@@ -194,7 +194,7 @@
                         <div class="w-full shrink-0 px-2">
                             <div class="grid grid-cols-2 gap-3">
                                 @foreach ($chunk as $productVariant)
-                                    @include('client.partials.product-card', ['product' => $productVariant])
+                                    @include('client.partials.product-card-mobile', ['product' => $productVariant])
                                 @endforeach
                             </div>
                         </div>
@@ -242,7 +242,7 @@
                             <div class="w-full shrink-0 px-2">
                                 <div class="grid grid-cols-2 gap-3">
                                     @foreach ($chunk as $productVariant)
-                                        @include('client.partials.product-card', ['product' => $productVariant])
+                                        @include('client.partials.product-card-mobile', ['product' => $productVariant])
                                     @endforeach
                                 </div>
                             </div>
