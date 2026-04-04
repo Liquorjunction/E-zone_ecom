@@ -46,10 +46,33 @@
         currentSlide: 0,
         itemsPerPage: 3,
         totalItems: {{ $categories->count() }},
+        touchStartX: null,
+        touchStartY: null,
         get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
         next() { if (this.currentSlide < this.totalSlides - 1) this.currentSlide++ },
-        prev() { if (this.currentSlide > 0) this.currentSlide-- }
-    }">
+        prev() { if (this.currentSlide > 0) this.currentSlide-- },
+        onTouchStart(event) {
+            const touch = event.touches && event.touches[0];
+            if (!touch) return;
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        },
+        onTouchEnd(event) {
+            const touch = event.changedTouches && event.changedTouches[0];
+            if (!touch || this.touchStartX === null || this.touchStartY === null) return;
+
+            const deltaX = touch.clientX - this.touchStartX;
+            const deltaY = touch.clientY - this.touchStartY;
+            this.touchStartX = null;
+            this.touchStartY = null;
+
+            if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+            if (deltaX < 0) this.next();
+            else this.prev();
+        }
+    }"
+    @touchstart.passive="onTouchStart($event)"
+    @touchend="onTouchEnd($event)">
         <div class="px-4">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Shop by Category') }}</h2>
@@ -118,11 +141,37 @@
         currentSlide: 0,
         totalItems: {{ $cards->take(4)->count() }},
         autoplay: null,
+        touchStartX: null,
+        touchStartY: null,
         next() { this.currentSlide = (this.currentSlide + 1) % this.totalItems },
+        prev() {
+            this.currentSlide = this.currentSlide === 0 ? this.totalItems - 1 : this.currentSlide - 1;
+        },
         init() {
             this.autoplay = setInterval(() => { this.next(); }, 4000);
+        },
+        onTouchStart(event) {
+            const touch = event.touches && event.touches[0];
+            if (!touch) return;
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        },
+        onTouchEnd(event) {
+            const touch = event.changedTouches && event.changedTouches[0];
+            if (!touch || this.touchStartX === null || this.touchStartY === null) return;
+
+            const deltaX = touch.clientX - this.touchStartX;
+            const deltaY = touch.clientY - this.touchStartY;
+            this.touchStartX = null;
+            this.touchStartY = null;
+
+            if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+            if (deltaX < 0) this.next();
+            else this.prev();
         }
-    }">
+    }"
+    @touchstart.passive="onTouchStart($event)"
+    @touchend="onTouchEnd($event)">
         <div class="px-4">
             <h2 class="text-lg font-bold text-gray-900 mb-4">{{ statictranslations('Featured Promotions') }}</h2>
 
@@ -169,12 +218,38 @@
         itemsPerPage: 2,
         totalItems: {{ isset($newArrivals) ? $newArrivals->count() : 0 }},
         autoplay: null,
+        touchStartX: null,
+        touchStartY: null,
         get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
         next() { this.currentSlide = (this.currentSlide + 1) % this.totalSlides },
+        prev() {
+            this.currentSlide = this.currentSlide === 0 ? this.totalSlides - 1 : this.currentSlide - 1;
+        },
         init() {
             this.autoplay = setInterval(() => { this.next(); }, 3500);
+        },
+        onTouchStart(event) {
+            const touch = event.touches && event.touches[0];
+            if (!touch) return;
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        },
+        onTouchEnd(event) {
+            const touch = event.changedTouches && event.changedTouches[0];
+            if (!touch || this.touchStartX === null || this.touchStartY === null) return;
+
+            const deltaX = touch.clientX - this.touchStartX;
+            const deltaY = touch.clientY - this.touchStartY;
+            this.touchStartX = null;
+            this.touchStartY = null;
+
+            if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+            if (deltaX < 0) this.next();
+            else this.prev();
         }
-    }">
+    }"
+    @touchstart.passive="onTouchStart($event)"
+    @touchend="onTouchEnd($event)">
         <div class="px-4">
             <div class="flex items-center justify-between mb-4">
                 <div>
@@ -220,9 +295,33 @@
             currentSlide: 0,
             itemsPerPage: 2,
             totalItems: {{ $bestSellerCount }},
+            touchStartX: null,
+            touchStartY: null,
             get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
-            next() { if (this.currentSlide < this.totalSlides - 1) this.currentSlide++ }
-        }">
+            next() { if (this.currentSlide < this.totalSlides - 1) this.currentSlide++ },
+            prev() { if (this.currentSlide > 0) this.currentSlide-- },
+            onTouchStart(event) {
+                const touch = event.touches && event.touches[0];
+                if (!touch) return;
+                this.touchStartX = touch.clientX;
+                this.touchStartY = touch.clientY;
+            },
+            onTouchEnd(event) {
+                const touch = event.changedTouches && event.changedTouches[0];
+                if (!touch || this.touchStartX === null || this.touchStartY === null) return;
+
+                const deltaX = touch.clientX - this.touchStartX;
+                const deltaY = touch.clientY - this.touchStartY;
+                this.touchStartX = null;
+                this.touchStartY = null;
+
+                if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+                if (deltaX < 0) this.next();
+                else this.prev();
+            }
+        }"
+        @touchstart.passive="onTouchStart($event)"
+        @touchend="onTouchEnd($event)">
             <div class="px-4">
                 <div class="flex items-center justify-between mb-4">
                     <div>

@@ -44,6 +44,8 @@
         slidesCount: {{ $sliders->count() }},
         progressKey: 0,
         autoplayInterval: null,
+        touchStartX: null,
+        touchStartY: null,
         startAutoplay() {
             this.autoplayInterval = setInterval(() => { this.next(); }, 5000);
         },
@@ -56,11 +58,34 @@
             this.activeSlide = (this.activeSlide === 0) ? this.slidesCount - 1 : this.activeSlide - 1;
             this.progressKey++;
         },
-        goTo(index) { this.activeSlide = index; this.progressKey++; }
+        goTo(index) { this.activeSlide = index; this.progressKey++; },
+        onTouchStart(event) {
+            const touch = event.touches && event.touches[0];
+            if (!touch) return;
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        },
+        onTouchEnd(event) {
+            const touch = event.changedTouches && event.changedTouches[0];
+            if (!touch || this.touchStartX === null || this.touchStartY === null) return;
+
+            const deltaX = touch.clientX - this.touchStartX;
+            const deltaY = touch.clientY - this.touchStartY;
+
+            this.touchStartX = null;
+            this.touchStartY = null;
+
+            if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+            if (deltaX < 0) this.next();
+            else this.prev();
+        }
     }"
     x-init="startAutoplay()"
     @mouseenter="stopAutoplay()"
-    @mouseleave="startAutoplay()">
+    @mouseleave="startAutoplay()"
+    @touchstart.passive="onTouchStart($event)"
+    @touchend="onTouchEnd($event)">
 
     {{-- Slides Wrapper --}}
     <div class="relative w-full h-full">
