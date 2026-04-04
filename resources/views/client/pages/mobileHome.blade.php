@@ -182,7 +182,7 @@
                         <div class="w-full shrink-0">
                             <a href="{{ $card->link ?? '#' }}" class="block relative h-48 rounded-xl overflow-hidden">
                                 <img src="{{ asset('storage/' . $card->image) }}" alt="{{ $card->title }}"
-                                    class="absolute inset-0 w-full h-full object-cover">
+                                    class="absolute inset-0 w-full h-full">
                                 <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
                                 <div class="absolute bottom-0 left-0 right-0 p-4">
                                     @php
