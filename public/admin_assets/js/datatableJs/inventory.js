@@ -24,7 +24,7 @@ $(function () {
         },
         columns: [
             { data: 'DT_RowIndex',    name: 'DT_RowIndex',    orderable: false, searchable: false },
-            { data: 'batch_no',       name: 'batch_no',        searchable: false },
+            { data: 'batch_no',       name: 'batch_no',        searchable: true },
             { data: 'created_at',     name: 'created_at' },
             { data: 'location',       name: 'location',        orderable: false, searchable: false },
             { data: 'items_summary',  name: 'items_summary',   searchable: false },

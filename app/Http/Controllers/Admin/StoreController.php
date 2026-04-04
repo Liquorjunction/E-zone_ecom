@@ -209,10 +209,15 @@ class StoreController extends Controller
     public function getDataForDataTable(StoreRepo $storeRepo, ReadStoreRequest $request)
     {
         try {
-            $stores = $storeRepo->getDataForDataTable();
+            $stores = $storeRepo->getDataForDataTable($request->all());
 
             return DataTables::of($stores)
                 ->addIndexColumn()
+                ->filterColumn('store_name', function ($query, $keyword) {
+                    $query->where('store_name->en', 'like', "%$keyword%")
+                          ->orWhere('store_name->fr', 'like', "%$keyword%")
+                          ->orWhere('store_name->ar', 'like', "%$keyword%");
+                })
                 ->addColumn('store_logo', function ($store) {
                     if ($store->store_logo) {
                         return asset('storage/' . $store->store_logo);

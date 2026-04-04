@@ -1,6 +1,16 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Create Store')
+@section('header-title', 'Create New Store')
+@section('header-description', 'Add a new store to manage your inventory across multiple locations.')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.stores.create') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
 <div class="container-fluid">

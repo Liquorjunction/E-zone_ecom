@@ -83,6 +83,12 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getDataForDataTable()
     {
-        return Store::withCount('inventories')->latest();
+        $query = Store::withCount('inventories')->latest();
+
+        if(isset(request()->status) && request()->status !== '') {
+            $query->where('status', request()->status);
+        }
+
+        return $query;
     }
 }

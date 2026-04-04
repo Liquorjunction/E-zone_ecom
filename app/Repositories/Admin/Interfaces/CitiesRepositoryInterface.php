@@ -11,5 +11,5 @@ interface CitiesRepositoryInterface
     public function updateCity($id, $request, $data = null);
     public function deleteCity($id);
     public function toggleCityStatus($id);
-    public function getDataForDataTable();
+    public function getDataForDataTable($request = null);
 }

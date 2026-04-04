@@ -69,8 +69,14 @@ class WarehouseRepository implements WarehouseRepositoryInterface
         return $warehouse;
     }
 
-    public function getDataForDataTable()
+    public function getDataForDataTable($request = null)
     {
-        return Warehouse::withCount('inventories')->latest();
+        $query = Warehouse::withCount('inventories')->latest();
+
+        if (isset($request['status']) && in_array($request['status'], ['active', 'inactive'])) {
+            $query->where('status', $request['status']);
+        }
+
+        return $query;
     }
 }

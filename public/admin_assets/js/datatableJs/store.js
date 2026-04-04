@@ -41,10 +41,15 @@ $(function () {
         });
     }
 
-    table.DataTable({
+    window.storeTable = table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: table.data("route"),
+        ajax: {
+            url: table.data("route"),
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val();
+            },
+        },
         columns: columns,
     });
 });

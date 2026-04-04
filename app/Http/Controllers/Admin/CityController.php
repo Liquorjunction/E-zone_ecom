@@ -158,10 +158,15 @@ class CityController extends Controller
     public function data(ReadCityRequest $request, CitiesRepo $cityRepo)
     {
         try {
-            $cities = $cityRepo->getDataForDataTable();
+            $cities = $cityRepo->getDataForDataTable($request->all());
 
             return DataTables::of($cities)
                 ->addIndexColumn()
+                ->filterColumn('city_name', function ($query, $keyword) {
+                    $query->where('city_name->en', 'like', "%{$keyword}%")
+                          ->orWhere('city_name->fr', 'like', "%{$keyword}%")
+                          ->orWhere('city_name->ar', 'like', "%{$keyword}%");
+                })
                 ->addColumn('city_name', function ($city) {
                     // Helper to show English title in the list
                     return $city->getTranslation('city_name', 'en');

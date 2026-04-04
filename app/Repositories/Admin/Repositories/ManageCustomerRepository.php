@@ -46,22 +46,13 @@ class ManageCustomerRepository implements ManageCustomerRepositoryInterface
         $customers = User::query();
 
         // Status filter
-        if ($request->filled('status')) {
-            $customers->where('is_active', $request->input('status'));
+        if (isset($request['status']) && in_array($request['status'], ['active', 'inactive'])) {
+            $customers->where('status', $request['status']);
         }
 
         // Date range filter
-        if ($request->filled('date_from')) {
-            $customers->whereDate('created_at', '>=', $request->input('date_from'));
-        }
-
-        if ($request->filled('date_to')) {
-            $customers->whereDate('created_at', '<=', $request->input('date_to'));
-        }
-
-        // Sorting
-        if ($request->has('sort_by') && $request->has('sort_order')) {
-            $customers->orderBy($request->input('sort_by'), $request->input('sort_order'));
+        if (isset($request['start_date']) && isset($request['end_date'])) {
+            $customers->whereBetween('created_at', [$request['start_date'], $request['end_date']]);
         }
 
         return $customers;

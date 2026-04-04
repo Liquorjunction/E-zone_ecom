@@ -489,5 +489,73 @@ Breadcrumbs::for('admin.products.show', function (BreadcrumbTrail $trail, $id) {
     $trail->push(statictranslations('View Product'), route('admin.products.show', $id));
 });
 
+// --- Stores ---
+Breadcrumbs::for('admin.stores.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Stores'), route('admin.stores.index'));
+});
+Breadcrumbs::for('admin.stores.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.stores.index');
+    $trail->push(statictranslations('Create Store'), route('admin.stores.create'));
+});
+Breadcrumbs::for('admin.stores.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.stores.index');
+    $trail->push(statictranslations('Edit Store'), route('admin.stores.edit'));
+});
+Breadcrumbs::for('admin.stores.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.stores.index');
+    $trail->push(statictranslations('View Store'), route('admin.stores.show', $id));
+});
 
+// --- Warehouse ---
+Breadcrumbs::for('admin.warehouses.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Warehouse'), route('admin.warehouses.index'));
+});
+Breadcrumbs::for('admin.warehouses.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.warehouses.index');
+    $trail->push(statictranslations('Create Warehouse'), route('admin.warehouses.create'));
+});
+Breadcrumbs::for('admin.warehouses.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.warehouses.index');
+    $trail->push(statictranslations('Edit Warehouse'), route('admin.warehouses.edit'));
+});
+Breadcrumbs::for('admin.warehouses.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.warehouses.index');
+    $trail->push(statictranslations('View Warehouse'), route('admin.warehouses.show', $id));
+});
+
+// --- Inventory Transactions ---
+Breadcrumbs::for('admin.inventory-transactions.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Inventory Transactions'), route('admin.inventory-transactions.index'));
+});
+
+// --- Cities ---
+Breadcrumbs::for('admin.cities.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Cities'), route('admin.cities.index'));
+});
+Breadcrumbs::for('admin.cities.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.cities.index');
+    $trail->push(statictranslations('Create City'), route('admin.cities.create'));
+});
+Breadcrumbs::for('admin.cities.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.cities.index');
+    $trail->push(statictranslations('Edit City'), route('admin.cities.edit'));
+});
+
+// --- Manage Customers ---
+Breadcrumbs::for('admin.customers.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Manage Customers'), route('admin.customers.index'));
+});
+Breadcrumbs::for('admin.customers.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.customers.index');
+    $trail->push(statictranslations('View Customer'), route('admin.customers.show', $id));
+});
+Breadcrumbs::for('admin.customers.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.customers.index');
+    $trail->push(statictranslations('Edit Customer'), route('admin.customers.edit', $id));
+});
 

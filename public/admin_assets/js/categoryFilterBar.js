@@ -19,24 +19,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // (updateFilterUI and filter chip UI removed)
-
     // ── Auto-open panel if filters active on load ─────────────────
     if (getActiveFilters().length > 0) {
         const panel = el("filter-panel");
         if (panel) new bootstrap.Collapse(panel, { toggle: false }).show();
-        // (removed: updateFilterUI)
     }
-
-    // ── Live update on input change ───────────────────────────────
-    // (removed: updateFilterUI on filter-input change/input)
-
-    // ── Reload DataTable on status radio change ──────────────────
-    document.querySelectorAll("input[name='status']").forEach(function (input) {
-        input.addEventListener("change", function () {
-            if (window.categoryTable) window.categoryTable.ajax.reload();
-        });
-    });
 
     // ── Form submit → prevent reload, reload DataTable ───────────
     const form = el("category-filter-bar");

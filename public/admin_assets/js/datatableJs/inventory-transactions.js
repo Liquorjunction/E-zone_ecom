@@ -27,7 +27,16 @@ $(function () {
         serverSide: true,
         autoWidth: false,
         responsive: true,
-        ajax: $('#inventory-transactions-table').data('source'),
+        ajax: {
+            url: $('#inventory-transactions-table').data('source'),
+            data: function (d) {
+                d.type = $('#filter-type').val();
+                d.product = $('#filter-product').val();
+                d.location_type = $('#filter-location-type').val();
+                d.date_from = $('#filter-date-from').val();
+                d.date_to = $('#filter-date-to').val();
+            }
+        },
         columns: [
             {
                 className: 'dt-control',
@@ -45,6 +54,8 @@ $(function () {
         ],
         order: [[1, 'desc']]
     });
+
+    window.inventoryTransactionsTable = table;
 
     $('#inventory-transactions-table tbody').on('click', 'td.dt-control', function () {
         var tr = $(this).closest('tr');

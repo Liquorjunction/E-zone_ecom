@@ -99,10 +99,13 @@ class ManageCustomerController extends Controller
     public function data(ReadCustomerRequest $request, ManageCustomerRepo $customerRepo)
     {
         try {
-            $query = $customerRepo->getDataForDataTable($request);
+        $query = $customerRepo->getDataForDataTable($request->all());
 
             return DataTables::eloquent($query)
                 ->addIndexColumn()
+                ->filterColumn('name', function ($query, $keyword) {
+                    $query->where('name', 'like', "%{$keyword}%");
+                })
                 ->addColumn('batch_checkbox', function ($customer) {
                     return '<input type="checkbox" class="customer-checkbox" value="' . $customer->id . '">';
                 })

@@ -7,6 +7,7 @@ use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface a
 use App\Http\Requests\Admin\InventoryTransactions\ReadInventoryTransactionsRequest;
 use Yajra\DataTables\Facades\DataTables;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class InventoryTransactionsController extends Controller
@@ -16,13 +17,38 @@ class InventoryTransactionsController extends Controller
         return view('admin.pages.inventory_transactions.index');
     }
 
-    public function getDataTable(InventoryTransactionsRepo $inventoryTransactionsRepo)
+    public function prepareTransactionTypes(InventoryTransactionsRepo $inventoryTransactionsRepo)
     {
         try {
-            $data = $inventoryTransactionsRepo->getdataforDataTable();
+            $types = $inventoryTransactionsRepo->getAllTransactionTypes();
+            return response()->json(['types' => $types], 200);
+        } catch (Exception $e) {
+            Log::error('Error fetching transaction types:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to fetch transaction types.'], 500);
+        }
+    }
+
+    public function getDataTable(Request $request, InventoryTransactionsRepo $inventoryTransactionsRepo)
+    {
+        try {
+            $filters = $request->only([
+                'type',
+                'product',
+                'location_type',
+                'date_from',
+                'date_to',
+            ]);
+
+            $data = $inventoryTransactionsRepo->getdataforDataTable($filters);
 
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->filterColumn('product_name', function ($query, $keyword) {
+                    $query->whereRaw("LOWER(products.name) LIKE ?", ["%{$keyword}%"])
+                        ->orWhereRaw("LOWER(product_variants.variant_name) LIKE ?", ["%{$keyword}%"])
+                        ->orWhereRaw("LOWER(inventories.batch_no) LIKE ?", ["%{$keyword}%"])
+                        ->orWhereRaw("LOWER(inventory_transactions.description) LIKE ?", ["%{$keyword}%"]);
+                })
                 ->addColumn('product_name', function ($transaction) {
                     $product_name = $transaction->product_name;
                     $varient_name = $transaction->variant_name;

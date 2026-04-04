@@ -1,16 +1,17 @@
-<div id="batch-actions" class="btn-group" role="group" style="display:none;">
+<div id="batch-actions" class="d-none align-items-center gap-2 px-2 py-1 bg-light border rounded-2">
+    <span id="batch-selected-count" class="badge bg-dark-subtle text-dark border">0 selected</span>
     <button type="button" id="batch-active-btn" class="btn btn-sm btn-outline-success"
         data-bs-toggle="tooltip" title="Activate Selected">
-        <i class="bi bi-check-circle me-1"></i>
+        <i class="bi bi-check-circle me-1"></i> Activate
     </button>
     <button type="button" id="batch-inactive-btn" class="btn btn-sm btn-outline-secondary"
         data-bs-toggle="tooltip" title="Deactivate Selected">
-        <i class="bi bi-x-circle me-1"></i>
+        <i class="bi bi-x-circle me-1"></i> Deactivate
     </button>
     @isset($showBatchDelete)
         <button type="button" id="batch-delete-btn" class="btn btn-sm btn-outline-danger"
             data-bs-toggle="tooltip" title="Delete Selected">
-            <i class="bi bi-trash me-1"></i>
+            <i class="bi bi-trash me-1"></i> Delete
         </button>
     @endisset
 </div>

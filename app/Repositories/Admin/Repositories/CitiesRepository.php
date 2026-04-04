@@ -50,8 +50,15 @@ class CitiesRepository implements CitiesRepositoryInterface
         return $city;
     }
 
-    public function getDataForDataTable()
+    public function getDataForDataTable($request = null)
     {
-        return city::query()->latest();
+        $query = city::query()->latest();
+
+        if (isset($request['status']) && in_array($request['status'], ['active', 'inactive'])) {
+            $query->where('status', $request['status']);
+        }
+
+        return $query;
+
     }
 }

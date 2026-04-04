@@ -16,6 +16,7 @@ function initBatchOperations(config) {
     const $table = $('#' + options.tableId);
     const $selectAllCheckbox = $('#' + options.selectAllCheckboxId);
     const $batchActions = $('#' + options.batchActionsId);
+    const $batchCount = $('#batch-selected-count');
     const $activeBtn = $('#' + options.activeBtnId);
     const $inactiveBtn = $('#' + options.inactiveBtnId);
     const $deleteBtn = $('#' + options.deleteBtnId);
@@ -39,11 +40,12 @@ function initBatchOperations(config) {
 
     function updateBatchActions() {
         const checkedCount = $(itemCheckboxSelector + ':checked').length;
-        if (checkedCount > 0) {
-            $batchActions.show();
-        } else {
-            $batchActions.hide();
+        if ($batchCount.length) {
+            $batchCount.text(checkedCount + ' selected');
         }
+
+        $batchActions.toggleClass('d-none', checkedCount === 0);
+        $batchActions.toggleClass('d-flex', checkedCount > 0);
     }
 
     function getSelectedIds() {
@@ -57,7 +59,7 @@ function initBatchOperations(config) {
     function resetCheckboxes() {
         $selectAllCheckbox.prop('checked', false);
         $(itemCheckboxSelector).prop('checked', false);
-        $batchActions.hide();
+        updateBatchActions();
     }
 
     // Batch delete handler
@@ -171,6 +173,11 @@ function initBatchOperations(config) {
 
     // Initial attachment
     attachBatchSelectHandlers();
+    $table.on('draw.dt', function() {
+        $selectAllCheckbox.prop('checked', false);
+        updateBatchActions();
+    });
+    updateBatchActions();
 
     // Return public API
     return {

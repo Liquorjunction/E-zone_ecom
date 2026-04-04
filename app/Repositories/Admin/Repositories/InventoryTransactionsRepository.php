@@ -32,7 +32,15 @@ class InventoryTransactionsRepository implements InventoryTransactionsRepository
             ->get();
     }
 
-    public function getdataforDataTable(array $filters = [])
+    public function getAllTransactionTypes(): Collection
+    {
+        return InventoryTransaction::select('type')
+            ->distinct()
+            ->get()
+            ->pluck('type');
+    }
+
+    public function getdataforDataTable(array $filters = []): Builder
     {
         $query = InventoryTransaction::query()
             ->select([
@@ -55,8 +63,29 @@ class InventoryTransactionsRepository implements InventoryTransactionsRepository
             ->join('products', 'inventories.product_id', '=', 'products.id')
             ->leftJoin('product_variants', 'inventories.product_variant_id', '=', 'product_variants.id');
 
-        if (isset($filters['type'])) {
+        if (!empty($filters['type'])) {
             $query->where('inventory_transactions.type', $filters['type']);
+        }
+
+        if (!empty($filters['product'])) {
+            $product = trim((string) $filters['product']);
+            $query->where(function (Builder $subQuery) use ($product) {
+                $subQuery->where('products.name', 'like', "%{$product}%")
+                    ->orWhere('product_variants.variant_name', 'like', "%{$product}%")
+                    ->orWhere('inventory_transactions.batch_no', 'like', "%{$product}%");
+            });
+        }
+
+        if (!empty($filters['location_type'])) {
+            $query->where('inventories.location_type', $filters['location_type']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->whereDate('inventory_transactions.created_at', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->whereDate('inventory_transactions.created_at', '<=', $filters['date_to']);
         }
 
         return $query;

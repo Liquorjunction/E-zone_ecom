@@ -14,10 +14,15 @@ $(function () {
         columns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
     }
 
-    table.DataTable({
+    window.warehouseTable = table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: table.data('route'),
+        ajax: {
+            url: table.data('route'),
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val();
+            }
+        },
         columns: columns,
     });
 });

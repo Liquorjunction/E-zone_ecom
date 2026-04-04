@@ -120,10 +120,56 @@ document.addEventListener("DOMContentLoaded", function () {
                     summary.shipping > 0
                         ? formatMoney(summary.shipping)
                         : "FREE";
+
+            // Step 1 side panel count
+            const itemTotalCountEl = document.getElementById("item-total-count");
+            if (itemTotalCountEl && typeof summary.itemCount !== "undefined") {
+                const count = Number(summary.itemCount || 0);
+                itemTotalCountEl.textContent = `${count} ${count === 1 ? "Item" : "Items"}`;
+            }
+
+            syncProceedButtonState(summary.itemCount);
         } catch (e) {
             console.error(e);
         }
     }
+
+    function syncProceedButtonState(itemCount) {
+        const proceedBtn = document.getElementById("proceedToCheckoutBtn");
+        if (!proceedBtn) return;
+
+        const messageEl = document.getElementById("checkout-stock-block-message");
+        const hasStockBlock = messageEl?.dataset?.stockBlock === "1";
+
+        const isEmpty = Number(itemCount || 0) <= 0;
+        const shouldDisable = hasStockBlock || isEmpty;
+
+        proceedBtn.disabled = shouldDisable;
+        proceedBtn.classList.toggle("opacity-60", shouldDisable);
+        proceedBtn.classList.toggle("cursor-not-allowed", shouldDisable);
+        proceedBtn.classList.toggle("pointer-events-none", shouldDisable);
+
+        if (!messageEl) return;
+
+        if (hasStockBlock) {
+            messageEl.classList.remove("hidden");
+            messageEl.textContent = trans("Please remove out-of-stock items before continuing to checkout.");
+            return;
+        }
+
+        if (isEmpty) {
+            messageEl.classList.remove("hidden");
+            messageEl.textContent = trans("Your cart is empty. Add items to continue to checkout.");
+            return;
+        }
+
+        messageEl.classList.add("hidden");
+    }
+
+    const initialItemCount = Number(
+        document.getElementById("item-total-count")?.textContent?.trim().split(" ")[0] || 0
+    );
+    syncProceedButtonState(initialItemCount);
 
     // Update single item via AJAX
     async function updateItem(itemId, quantity) {

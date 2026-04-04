@@ -306,6 +306,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         // Inventory Transactions Routes
         Route::prefix('inventory-transactions')->name('inventory-transactions.')->middleware('can:inventory-transaction.read,admin')->group(function () {
             Route::get('/', [InventoryTransactionsController::class, 'index'])->name('index');
+            Route::get('/types', [InventoryTransactionsController::class, 'prepareTransactionTypes'])->name('types');
             Route::get('/data', [InventoryTransactionsController::class, 'getDataTable'])->name('data');
         });
 

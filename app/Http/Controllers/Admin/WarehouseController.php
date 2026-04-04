@@ -211,9 +211,14 @@ class WarehouseController extends Controller
     public function getDataForDataTable(WarehouseRepo $warehouseRepo, ReadWarehouseRequest $request)
     {
         try {
-            $warehouses = $warehouseRepo->getDataForDataTable();
+            $warehouses = $warehouseRepo->getDataForDataTable($request->all());
             return DataTables::of($warehouses)
                 ->addIndexColumn()
+                ->filterColumn('warehouse_name', function ($query, $keyword) {
+                    $query->where('warehouse_name->en', 'like', "%{$keyword}%")
+                          ->orWhere('warehouse_name->fr', 'like', "%{$keyword}%")
+                          ->orWhere('warehouse_name->ar', 'like', "%{$keyword}%");
+                })
                 ->addColumn('warehouse_name', function ($warehouse) {
                     return $warehouse->getTranslation('warehouse_name', 'en');
                 })

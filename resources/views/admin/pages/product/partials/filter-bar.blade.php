@@ -15,7 +15,7 @@
             <form id="product-filter-bar" method="GET">
 
                 {{-- All filters in one aligned row --}}
-                <div class="d-flex flex-wrap align-items-center" style="gap:6.5rem !important;">
+                <div class="d-flex flex-wrap align-items-center" style="gap:6rem !important;">
 
                     {{-- Availability --}}
                     <div>
@@ -35,13 +35,19 @@
                         <div class="text-uppercase text-muted fw-semibold mb-2" style="font-size:0.65rem;letter-spacing:0.08em;">Status</div>
                         <div class="d-flex gap-3">
                             <div class="form-check mb-0">
-                                <input class="form-check-input filter-input" type="checkbox"
+                                <input class="form-check-input filter-input" type="radio"
+                                    name="status" value="all" id="status_all"
+                                    {{ request('status') === 'all' || !request()->has('status') ? 'checked' : '' }}>
+                                <label class="form-check-label small text-dark" for="status_all">All</label>
+                            </div>
+                            <div class="form-check mb-0">
+                                <input class="form-check-input filter-input" type="radio"
                                     name="status" value="active" id="status_active"
                                     {{ request('status') === 'active' ? 'checked' : '' }}>
                                 <label class="form-check-label small text-dark" for="status_active">Active</label>
                             </div>
                             <div class="form-check mb-0">
-                                <input class="form-check-input filter-input" type="checkbox"
+                                <input class="form-check-input filter-input" type="radio"
                                     name="status" value="inactive" id="status_inactive"
                                     {{ request('status') === 'inactive' ? 'checked' : '' }}>
                                 <label class="form-check-label small text-dark" for="status_inactive">Inactive</label>
@@ -70,12 +76,12 @@
                         <div class="d-flex align-items-center gap-2">
                             <input type="number" class="form-control form-control-sm filter-input"
                                 name="price_min" placeholder="Min"
-                                value="{{ request('price_min') }}" min="0" step="0.01"
+                                value="{{ request('price_min') }}" min="0" step="1"
                                 style="width:90px;">
                             <span class="text-muted small">—</span>
                             <input type="number" class="form-control form-control-sm filter-input"
                                 name="price_max" placeholder="Max"
-                                value="{{ request('price_max') }}" min="0" step="0.01"
+                                value="{{ request('price_max') }}" min="0" step="1"
                                 style="width:90px;">
                         </div>
                     </div>

@@ -207,16 +207,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateForwardNavigationState() {
-        const proceedButton = root.querySelector('[data-spa-step="2"]');
-        const blocked = hasBlockingStockIssue();
+        const proceedButton = document.getElementById('proceedToCheckoutBtn') || root.querySelector('[data-spa-step="2"]');
+        const blockedByStock = hasBlockingStockIssue();
+        const countText = document.getElementById('item-total-count')?.textContent || '0';
+        const itemCount = parseInt(String(countText).trim(), 10);
+        const blockedByEmptyCart = Number.isNaN(itemCount) ? false : itemCount <= 0;
+        const blocked = blockedByStock || blockedByEmptyCart;
 
         if (proceedButton) {
             proceedButton.disabled = blocked;
             proceedButton.classList.toggle('opacity-60', blocked);
             proceedButton.classList.toggle('cursor-not-allowed', blocked);
             proceedButton.classList.toggle('pointer-events-none', blocked);
-            if (blocked) {
+            if (blockedByStock) {
                 proceedButton.title = trans('Please remove out-of-stock items before continuing to checkout.');
+            } else if (blockedByEmptyCart) {
+                proceedButton.title = trans('Your cart is empty. Add items to continue to checkout.');
             } else {
                 proceedButton.removeAttribute('title');
             }
@@ -224,7 +230,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const blockMessage = document.getElementById('checkout-stock-block-message');
         if (blockMessage) {
-            blockMessage.classList.toggle('hidden', !blocked);
+            if (blockedByStock) {
+                blockMessage.classList.remove('hidden');
+                blockMessage.textContent = trans('Please remove out-of-stock items before continuing to checkout.');
+            } else if (blockedByEmptyCart) {
+                blockMessage.classList.remove('hidden');
+                blockMessage.textContent = trans('Your cart is empty. Add items to continue to checkout.');
+            } else {
+                blockMessage.classList.add('hidden');
+            }
         }
     }
 
@@ -688,6 +702,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (countEl && summary.itemCount !== undefined) {
             countEl.textContent = summary.itemCount + (summary.itemCount === 1 ? " Item" : " Items");
         }
+
+        updateForwardNavigationState();
     }
 
     async function updateItem(itemId, quantity) {
