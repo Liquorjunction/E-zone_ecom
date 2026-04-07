@@ -1,5 +1,10 @@
 $(document).ready(function () {
-    var hasActions = $('#cards-table').data('has-actions') === 1;
+    var $table = $('#cards-table');
+    if (!$table.length) {
+        return;
+    }
+
+    var hasActions = $table.data('has-actions') == 1;
     var columns = [
         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
         { data: 'image', name: 'image', orderable: false, searchable: false },
@@ -12,11 +17,19 @@ $(document).ready(function () {
         columns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
     }
 
-    $('#cards-table').DataTable({
+    var table = $table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: $('#cards-table').data('route'),
+        ajax: {
+            url: $table.data('route'),
+            type: 'GET',
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val() || 'all';
+            }
+        },
         columns: columns,
         order: [[1, 'asc']]
     });
+
+    window.cardsDataTable = table;
 });

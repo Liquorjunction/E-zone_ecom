@@ -73,13 +73,42 @@ class ReviewController extends Controller
         }
     }
 
-    public function data(ReviewRepo $reviewRepo)
+    public function getStatusList(ReviewRepo $reviewRepo)
     {
         try {
-            $review = $reviewRepo->getDataForDataTable();
+            $statuses = $reviewRepo->getStatusList();
+            return response()->json(['statuses' => $statuses]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to fetch review statuses.'], 500);
+        }
+    }
+
+    public function getRatingsList(ReviewRepo $reviewRepo)
+    {
+        try {
+            $ratings = $reviewRepo->getRatingList();
+            return response()->json(['ratings' => $ratings]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to fetch review ratings.'], 500);
+        }
+    }
+
+    public function data(ReviewRepo $reviewRepo, ReadReviewRequest $request)
+    {
+        try {
+            $review = $reviewRepo->getDataForDataTable($request->all());
 
             return DataTables::of($review)
             ->addIndexColumn()
+            ->filterColumn('product', function ($query, $keyword) {
+                $query->whereHas('product', function ($q) use ($keyword) {
+                    $q->where('name->en', 'like', "%$keyword%")
+                      ->orWhere('name->ar', 'like', "%$keyword%");
+                })->orWhereHas('productVariant', function ($q) use ($keyword) {
+                    $q->where('variant_name->en', 'like', "%$keyword%")
+                      ->orWhere('variant_name->ar', 'like', "%$keyword%");
+                });
+            })
             ->addColumn('product', function ($review) {
                 if (!$review->product) {
                     return 'N/A';

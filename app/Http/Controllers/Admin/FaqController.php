@@ -166,13 +166,37 @@ class FaqController extends Controller
         }
     }
 
+    public function faqCategoryList(FaqRepo $faqRepo)
+    {
+        try {
+            $categories = $faqRepo->getFaqCategoryList();
+
+            return response()->json([
+                'success' => true,
+                'data' => $categories,
+            ]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function data(ReadFaqRequest $request, FaqRepo $faqRepo)
     {
         try {
-            $faqs = $faqRepo->getDataForDataTable($request);
+            $faqs = $faqRepo->getDataForDataTable($request->all());
 
             return DataTables::of($faqs)
                 ->addIndexColumn()
+                ->filterColumn('question', function ($query, $keyword) {
+                    $query->where('question->en', 'like', "%$keyword%")
+                          ->orWhere('question->fr', 'like', "%$keyword%")
+                          ->orWhere('question->ar', 'like', "%$keyword%");
+                })
                 ->addColumn('question', function ($faq) {
                     // Helper to show English title in the list
                     return $faq->getTranslation('question', 'en');

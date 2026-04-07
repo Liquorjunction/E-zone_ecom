@@ -14,24 +14,28 @@
 @endsection
 
 @section('content')
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Quick Stats List</h5>
+    <div class="container-fluid py-4">
+
+        {{-- Page Header --}}
+        <div class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4 bg-white rounded-3 p-3">
+            <div>
+                <h4 class="fw-semibold mb-1">Quick Stats</h4>
+                <p class="text-secondary small mb-0">Manage the quick stats shown across the site</p>
+            </div>
             @can('quick_stats.create')
-                <div class="card-action d-flex gap-2 align-items-center">
-                    @include('admin.partials.batch-actions')
-                    <a id="add-quick-stat-btn" href="{{ route('admin.quick-stats.create') }}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i>Add New Quick Stat
-                    </a>
-                </div>
+                <a id="add-quick-stat-btn" href="{{ route('admin.quick-stats.create') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Add New Quick Stat
+                </a>
             @endcan
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
+
+        {{-- Quick Stats Table --}}
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
                 @php
                     $hasAction = auth()->user()->can('quick_stats.update') || auth()->user()->can('quick_stats.delete');
                 @endphp
-                <table id="quick-stats-table" class="table table-striped" role="grid"
+                <table id="quick-stats-table" class="table table-striped w-100" role="grid"
                     data-url="{{ route('admin.quick-stats.data') }}" data-has-action="{{ $hasAction ? 1 : 0 }}">
                     <thead>
                         <tr class="light">
@@ -44,8 +48,7 @@
                             @endcanany
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>

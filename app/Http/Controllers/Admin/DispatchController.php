@@ -97,6 +97,23 @@ class DispatchController extends Controller
         return response()->json(['inventory' => $result]);
     }
 
+    public function getStatusList(DispatchRepo $dispatchRepository)
+    {
+        try {
+            $statuses = $dispatchRepository->getDispatchStatusList();
+
+            return response()->json([
+                'success' => true,
+                'statuses' => $statuses,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function datatable(ReadDispatchRequest $request, DispatchRepo $dispatchRepository)
     {
         if ($request->ajax()) {
@@ -104,12 +121,56 @@ class DispatchController extends Controller
 
             return DataTables::of($query)
                 ->filter(function ($query) use ($request) {
-                    if ($request->has('status') && $request->status != '') {
-                        $query->where('status', $request->status);
+                    if ($request->filled('status')) {
+                        $query->where('status', $request->input('status'));
                     }
-                    if ($request->has('order_number') && $request->order_number != '') {
-                        $query->whereHas('order', function ($q) use ($request) {
-                            $q->where('order_number', 'like', "%{$request->order_number}%");
+
+                    if ($request->filled('order_number')) {
+                        $keyword = trim((string) $request->input('order_number'));
+                        $normalizedKeyword = ltrim($keyword, '#');
+
+                        $query->whereHas('order', function ($q) use ($keyword, $normalizedKeyword) {
+                            $q->where('order_number', 'like', "%{$keyword}%")
+                                ->orWhere('id', 'like', "%{$keyword}%");
+
+                            if ($normalizedKeyword !== $keyword && $normalizedKeyword !== '') {
+                                $q->orWhere('order_number', 'like', "%{$normalizedKeyword}%")
+                                    ->orWhere('id', 'like', "%{$normalizedKeyword}%");
+                            }
+                        });
+                    }
+
+                    $keyword = $request->input('search.value');
+                    if (!empty($keyword)) {
+                        $keyword = trim((string) $keyword);
+                        $normalizedKeyword = ltrim($keyword, '#');
+
+                        $query->where(function ($q) use ($keyword, $normalizedKeyword) {
+                            $q->where('order_dispatch.id', 'like', "%{$keyword}%")
+                                ->orWhere('order_dispatch.order_id', 'like', "%{$keyword}%")
+                                ->orWhereHas('order', function ($orderQuery) use ($keyword) {
+                                    $orderQuery->where('order_number', 'like', "%{$keyword}%")
+                                        ->orWhere('id', 'like', "%{$keyword}%");
+                                })
+                                ->orWhereHas('orderItem.product', function ($productQuery) use ($keyword) {
+                                    $productQuery->where('name->en', 'like', "%{$keyword}%")
+                                        ->orWhere('name->fr', 'like', "%{$keyword}%")
+                                        ->orWhere('name->ar', 'like', "%{$keyword}%");
+                                });
+
+                            if ($normalizedKeyword !== $keyword && $normalizedKeyword !== '') {
+                                $q->orWhere('order_dispatch.id', 'like', "%{$normalizedKeyword}%")
+                                    ->orWhere('order_dispatch.order_id', 'like', "%{$normalizedKeyword}%")
+                                    ->orWhereHas('order', function ($orderQuery) use ($normalizedKeyword) {
+                                        $orderQuery->where('order_number', 'like', "%{$normalizedKeyword}%")
+                                            ->orWhere('id', 'like', "%{$normalizedKeyword}%");
+                                    })
+                                    ->orWhereHas('orderItem.product', function ($productQuery) use ($normalizedKeyword) {
+                                        $productQuery->where('name->en', 'like', "%{$normalizedKeyword}%")
+                                            ->orWhere('name->fr', 'like', "%{$normalizedKeyword}%")
+                                            ->orWhere('name->ar', 'like', "%{$normalizedKeyword}%");
+                                    });
+                            }
                         });
                     }
                 })

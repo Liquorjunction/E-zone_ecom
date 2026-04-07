@@ -120,4 +120,19 @@ class OrderStatusService
 
         return Admin::where('id', $adminId)->exists() ? $adminId : null;
     }
+
+    public function getStatuses(): array
+    {
+        $statuses = array_keys($this->allowedTransitions);
+
+        foreach ($this->allowedTransitions as $transitions) {
+            foreach ($transitions as $status) {
+                if (!in_array($status, $statuses, true)) {
+                    $statuses[] = $status;
+                }
+            }
+        }
+
+        return $statuses;
+    }
 }

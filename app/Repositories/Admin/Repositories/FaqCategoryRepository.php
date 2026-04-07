@@ -56,8 +56,37 @@ class FaqCategoryRepository implements FaqCategoryRepositoryInterface
 
     public function getDataforDataTable($request = null)
     {
-        return FaqCategory::withCount('faqs')->latest();
+        $query = FaqCategory::withCount('faqs')->latest();
+
+        $getInput = function (string $key) use ($request) {
+            if (is_array($request)) {
+                return $request[$key] ?? null;
+            }
+
+            if (is_object($request) && method_exists($request, 'input')) {
+                return $request->input($key);
+            }
+
+            return null;
+        };
+
+        // Status filter
+        $status = $getInput('status');
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('status', $status);
+        }
+
+        // Date range filter
+        $startDate = $getInput('start_date') ?? $getInput('date_from');
+        $endDate = $getInput('end_date') ?? $getInput('date_to');
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        return $query;
     }
-
-
 }

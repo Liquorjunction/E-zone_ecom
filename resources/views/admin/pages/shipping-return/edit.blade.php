@@ -1,6 +1,16 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Edit Shipping & Return Policy')
+@section('header-title', 'Edit Shipping & Return Policy')
+@section('header-description', 'Edit the existing shipping and return policy displayed on the site')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.shipping-return.edit', $shippingAndReturn->id) as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
     <div class="container-fluid">

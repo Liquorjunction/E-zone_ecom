@@ -9,7 +9,7 @@ use App\Http\Requests\Admin\PrivacyPolicy\ReadPrivacyRequest;
 use App\Http\Requests\Admin\PrivacyPolicy\StorePrivacyRequest;
 use App\Http\Requests\Admin\PrivacyPolicy\UpdatePrivacyRequest;
 use App\Models\PrivacyPolicy;
-use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface as PrivacyPolicyRepo;
+use App\Repositories\Admin\Interfaces\PrivacyPolicyRepositoryInterface as PrivacyPolicyRepo;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
@@ -131,6 +131,11 @@ class PrivacyPolicyController extends Controller
 
         return DataTables::of($privacyPolicies)
             ->addIndexColumn()
+            ->filterColumn('title', function ($query, $keyword) {
+                $query->where('title->en', 'like', "%{$keyword}%")
+                    ->orWhere('title->fr', 'like', "%{$keyword}%")
+                    ->orWhere('title->ar', 'like', "%{$keyword}%");
+            })
             ->addColumn('title', function ($privacyPolicy) {
                 return $privacyPolicy->title;
             })

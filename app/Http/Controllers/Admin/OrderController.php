@@ -107,6 +107,28 @@ class OrderController extends Controller
         }
     }
 
+    public function getStatusList(OrderRepo $orderRepo, OrderStatus $orderStatusService)
+    {
+        try {
+            $statuses = $orderRepo->getStatusList($orderStatusService);
+            return response()->json(['success' => true, 'statuses' => $statuses]);
+        } catch (\Exception $e) {
+            Log::error('Get status list error: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Failed to retrieve statuses.'], 500);
+        }
+    }
+
+    public function getPaymentMethodsList(OrderRepo $orderRepo)
+    {
+        try {
+            $paymentMethods = $orderRepo->getPaymentMethodsList();
+            return response()->json(['success' => true, 'payment_methods' => $paymentMethods]);
+        } catch (\Exception $e) {
+            Log::error('Get payment methods error: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Failed to retrieve payment methods.'], 500);
+        }
+    }
+
     public function dataTable(ReadOrderRequest $request, OrderRepo $orderRepo, OrderStatus $orderStatusService)
     {
         try {
@@ -125,7 +147,18 @@ class OrderController extends Controller
                 'failed_delivery' => 'Failed Delivery',
             ];
             $markPaidStatuses = ['delivered', 'completed'];
-            return DataTables::of($orderRepo->getDataForDataTable())
+            return DataTables::of($orderRepo->getDataForDataTable($request->all()))
+                ->filterColumn('order_number', function ($query, $keyword) {
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('order_number', 'like', "%{$keyword}%")
+                            ->orWhere('email', 'like', "%{$keyword}%")
+                            ->orWhere('id', 'like', "%{$keyword}%")
+                            ->orWhereHas('user', function ($userQuery) use ($keyword) {
+                                $userQuery->where('name', 'like', "%{$keyword}%")
+                                    ->orWhere('email', 'like', "%{$keyword}%");
+                            });
+                    });
+                })
                 ->addColumn('order_number', fn($order) => $order->order_number ?? 'N/A')
                 ->addColumn('customer_name', function ($order) use ($orderRepo) {
                     return $orderRepo->getCustomerNameByOrderId($order->id) ?? 'N/A';

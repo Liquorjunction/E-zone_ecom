@@ -1,5 +1,16 @@
 @extends('admin.layouts.app')
 @section('title', 'Edit Why Shop With Us')
+@section('header-title', 'Edit Why Shop With Us')
+@section('header-description', 'Edit the Why Shop With Us content displayed on the site')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.whyshopwithus.edit', $entry) as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
 <div class="container-fluid">

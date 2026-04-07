@@ -25,11 +25,75 @@ class OrderRepository implements OrderRepositoryInterface
         return OrderItem::with('product', 'variant')->find($id);
     }
 
-    public function getDataForDataTable()
+    public function getStatusList(OrderStatusService $orderStatusService)
     {
-        return Order::with(['cancelledBy:id,name'])
+        return $orderStatusService->getStatuses();
+    }
+
+    public function getPaymentMethodsList()
+    {
+        return Order::first()?->PaymentMethods() ?? [];
+    }
+
+    public function getDataForDataTable($request)
+    {
+        $query = Order::with(['cancelledBy:id,name'])
             ->select(['id', 'order_number', 'user_id', 'email', 'total', 'status', 'payment_method', 'transaction_id', 'cancel_reason', 'cancelled_by', 'created_at'])
             ->orderBy('created_at', 'desc');
+
+        $getInput = function (string $key) use ($request) {
+            if (is_array($request)) {
+                return $request[$key] ?? null;
+            }
+
+            if (is_object($request) && method_exists($request, 'input')) {
+                return $request->input($key);
+            }
+
+            return null;
+        };
+
+        $status = $getInput('status');
+        if (!empty($status)) {
+            $query->where('status', $status);
+        }
+
+        $paymentMethod = $getInput('payment_method');
+        if (!empty($paymentMethod)) {
+            $query->where('payment_method', $paymentMethod);
+        }
+
+        $startDate = $getInput('start_date');
+        $endDate = $getInput('end_date');
+        if (!empty($startDate) && !empty($endDate)) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        } elseif (!empty($startDate)) {
+            $query->where('created_at', '>=', $startDate);
+        } elseif (!empty($endDate)) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        $paymentStatus = $getInput('payment_status');
+        if ($paymentStatus === 'paid') {
+            $query->where(function ($q) {
+                $q->whereNotNull('transaction_id')
+                    ->orWhere(function ($sub) {
+                        $sub->where('payment_method', 'cod')
+                            ->whereIn('status', ['delivered', 'completed']);
+                    });
+            });
+        } elseif ($paymentStatus === 'cancelled') {
+            $query->where('status', 'cancelled');
+        } elseif ($paymentStatus === 'pending') {
+            $query->whereNull('transaction_id')
+                ->where('status', '!=', 'cancelled')
+                ->where(function ($q) {
+                    $q->where('payment_method', '!=', 'cod')
+                        ->orWhereNotIn('status', ['delivered', 'completed']);
+                });
+        }
+
+        return $query;
     }
 
     public function getCustomerNameByOrderId($orderId)

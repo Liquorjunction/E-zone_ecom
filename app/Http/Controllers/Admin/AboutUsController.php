@@ -137,15 +137,17 @@ class AboutUsController extends Controller
             $data = $aboutUsRepo->getDataForDataTable($request);
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->filterColumn('title', function ($query, $keyword) {
+                    $query->where('title->en', 'like', "%$keyword%")
+                          ->orWhere('title->fr', 'like', "%$keyword%")
+                          ->orWhere('title->ar', 'like', "%$keyword%");
+                })
                 ->addColumn('title', function ($data) {
-                    // Fetch the title in english
                     $title = $data->getTranslation('title', 'en');
                     return $title;
                 })
                 ->addColumn('description', function ($data) {
-                    // Fetch the description in english
                     $description = $data->getTranslation('description', 'en');
-                    // Limit the description to 50 characters and its in html
                     return strlen(strip_tags($description)) > 50 ? substr(strip_tags($description), 0, 50) . '...' : strip_tags($description);
                 })
                 ->addColumn('created_at', function ($data) {

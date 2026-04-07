@@ -40,7 +40,13 @@ $(document).ready(function () {
     var table = $table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: dataUrl,
+        ajax: {
+            url: dataUrl,
+            type: 'GET',
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val() || 'all';
+            }
+        },
         columns: columns,
         order: [[4, 'asc']],
         pageLength: 10,
@@ -50,6 +56,9 @@ $(document).ready(function () {
             $('#select-all-sliders').prop('checked', false);
         }
     });
+
+    // Expose DataTable for filter bar interactions
+    window.sliderDataTable = table;
 
     // Initialize batch operations
     initBatchOperations({

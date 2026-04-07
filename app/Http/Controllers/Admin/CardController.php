@@ -137,11 +137,13 @@ class CardController extends Controller
             $cards = $cardRepo->getDataForDataTable($request->all());
             $getTable = DataTables::of($cards)
                 ->addIndexColumn()
+                ->filterColumn('title', function ($query, $keyword) {
+                    $query->where('title->en', 'like', "%$keyword%")
+                        ->orWhere('title->fr', 'like', "%$keyword%")
+                        ->orWhere('title->ar', 'like', "%$keyword%");
+                })
                 ->addColumn('title', function ($card) {
-                    // Fetch the title in english
                     $title = $card->getTranslation('title', 'en');
-
-                    // Limit the title to 50 characters
                     return strlen($title) > 50 ? substr($title, 0, 50).'...' : $title;
                 })
                 ->addColumn('description', function ($card) {

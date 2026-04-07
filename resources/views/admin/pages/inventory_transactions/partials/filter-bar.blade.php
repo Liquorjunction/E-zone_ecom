@@ -20,7 +20,7 @@
                         <select id="filter-type" name="type" class="form-select form-select-sm"
                             data-types-url="{{ route('admin.inventory-transactions.types') }}"
                             data-selected="{{ request('type', '') }}" style="width:200px;">
-                            <option value="">Loading types...</option>
+                            <option value="">Select Type</option>
                         </select>
                     </div>
 

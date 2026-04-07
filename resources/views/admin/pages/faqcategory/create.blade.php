@@ -1,5 +1,16 @@
 @extends('admin.layouts.app')
 @section('title', 'Create Faq Category')
+@section('header-title', 'Create Faq Category')
+@section('header-description', 'Create a new faq category to organize your frequently asked questions')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.faq-categories.create') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
     <div class="container-fluid">

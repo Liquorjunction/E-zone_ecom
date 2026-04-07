@@ -1,5 +1,16 @@
 @extends('admin.layouts.app')
 @section('title', 'Create Privacy Policy')
+@section('header-title', 'Privacy Policy Management')
+@section('header-description', 'Create and manage privacy policies displayed on the site')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.privacy-policy.create') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
     <div class="container-fluid">

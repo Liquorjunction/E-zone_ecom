@@ -7,12 +7,7 @@ $(document).ready(function () {
         table.data('hasAction') === true;
 
     var columns = [
-        {
-            data: "DT_RowIndex",
-            name: "DT_RowIndex",
-            orderable: false,
-            searchable: false,
-        },
+        { data: "DT_RowIndex", name: "DT_RowIndex", orderable: false, searchable: false,},
         { data: "title", name: "title" },
         { data: "description", name: "description" },
         { data: "updated_at", name: "updated_at" },
@@ -27,10 +22,22 @@ $(document).ready(function () {
         });
     }
 
-    table.DataTable({
+    var dataTable = table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: table.data("route"),
+        ajax: {
+            url: table.data("route"),
+            type: "GET",
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val() || 'all';
+                d.date_from = $("input[name='date_from']").val() || '';
+                d.date_to = $("input[name='date_to']").val() || '';
+            },
+        },
         columns: columns,
+        pageLength: 10,
+        responsive: true,
     });
+
+    window.privacyPolicyDataTable = dataTable;
 });

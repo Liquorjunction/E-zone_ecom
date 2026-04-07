@@ -13,10 +13,21 @@ $(document).ready(function () {
         columns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
     }
 
-    table.DataTable({
+    var faqsTable = table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: table.data('route'),
+        ajax: {
+            url: table.data('route'),
+            type: 'GET',
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val() || 'all';
+                d.category_id = $("#faq-category-filter").val() || '';
+                d.date_from = $("input[name='date_from']").val() || '';
+                d.date_to = $("input[name='date_to']").val() || '';
+            }
+        },
         columns: columns,
     });
+
+    window.faqsTable = faqsTable;
 });

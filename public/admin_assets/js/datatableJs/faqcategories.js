@@ -12,10 +12,23 @@ $(document).ready(function () {
         columns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
     }
 
-    table.DataTable({
+    var faqCategoriesTable = table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: table.data('route'),
+        ajax: {
+            url: table.data('route'),
+            type: 'GET',
+            data: function (d) {
+                d.status = $("input[name='status']:checked").val() || 'all';
+                d.start_date = $("input[name='start_date']").val() || '';
+                d.end_date = $("input[name='end_date']").val() || '';
+            }
+        },
         columns: columns,
+        order: [[1, 'asc']],
+        pageLength: 10,
+        responsive: true
     });
+
+    window.faqCategoriesTable = faqCategoriesTable;
 });

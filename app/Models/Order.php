@@ -109,4 +109,13 @@ class Order extends Model
     {
         return $this->belongsTo(Admin::class, 'cancelled_by');
     }
+
+    // Helpers
+    public function PaymentMethods()
+    {
+        return [
+            'cod' => 'Cash on Delivery',
+            'card' => 'Credit/Debit Card',
+        ];
+    }
 }

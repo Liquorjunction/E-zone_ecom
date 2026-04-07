@@ -11,5 +11,5 @@ interface CardRepositoryInterface
     public function updateCard($request, $id);
     public function deleteCard($id);
     public function updateStatus($id);
-    public function getDataForDataTable();
+    public function getDataForDataTable($request);
 }

@@ -156,8 +156,17 @@ class SliderRepository implements SliderRepositoryInterface
         return true;
     }
 
-    public function getDataForDataTable($params = null)
+    public function getDataForDataTable($request)
     {
-        return HeroSlider::query()->latest();
+        $query = HeroSlider::query()->latest();
+
+        $status = is_array($request) ? ($request['status'] ?? null) : $request->input('status');
+
+        // Apply filters if needed
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('is_active', $status === 'active');
+        }
+
+        return $query;
     }
 }

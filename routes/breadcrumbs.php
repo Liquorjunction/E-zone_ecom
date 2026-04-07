@@ -559,3 +559,116 @@ Breadcrumbs::for('admin.customers.edit', function (BreadcrumbTrail $trail, $id) 
     $trail->push(statictranslations('Edit Customer'), route('admin.customers.edit', $id));
 });
 
+// --- Why Shop With Us ---
+Breadcrumbs::for('admin.whyshopwithus.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Why Shop With Us'), route('admin.whyshopwithus.index'));
+});
+Breadcrumbs::for('admin.whyshopwithus.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.whyshopwithus.index');
+    $trail->push(statictranslations('Create Entry'), route('admin.whyshopwithus.create'));
+});
+Breadcrumbs::for('admin.whyshopwithus.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.whyshopwithus.index');
+    $trail->push(statictranslations('Edit Entry'), route('admin.whyshopwithus.edit', $id));
+});
+
+// --- Privacy Policy ---
+Breadcrumbs::for('admin.privacy-policy.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Privacy Policy'), route('admin.privacy-policy.index'));
+});
+Breadcrumbs::for('admin.privacy-policy.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.privacy-policy.index');
+    $trail->push(statictranslations('Create Entry'), route('admin.privacy-policy.create'));
+});
+Breadcrumbs::for('admin.privacy-policy.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.privacy-policy.index');
+    $trail->push(statictranslations('Edit Entry'), route('admin.privacy-policy.edit', $id));
+});
+
+// --- Terms & Conditions ---
+Breadcrumbs::for('admin.tncs.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Terms & Conditions'), route('admin.tncs.index'));
+});
+Breadcrumbs::for('admin.tncs.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.tncs.index');
+    $trail->push(statictranslations('Create Entry'), route('admin.tncs.create'));
+});
+Breadcrumbs::for('admin.tncs.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.tncs.index');
+    $trail->push(statictranslations('Edit Entry'), route('admin.tncs.edit', $id));
+});
+
+// --- Shipping & Returns ---
+Breadcrumbs::for('admin.shipping-return.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Shipping & Returns'), route('admin.shipping-return.index'));
+});
+Breadcrumbs::for('admin.shipping-return.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.shipping-return.index');
+    $trail->push(statictranslations('Create Entry'), route('admin.shipping-return.create'));
+});
+Breadcrumbs::for('admin.shipping-return.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.shipping-return.index');
+    $trail->push(statictranslations('Edit Entry'), route('admin.shipping-return.edit', $id));
+});
+
+// --- FAQ Categories ---
+Breadcrumbs::for('admin.faq-categories.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('FAQ Categories'), route('admin.faq-categories.index'));
+});
+Breadcrumbs::for('admin.faq-categories.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.faq-categories.index');
+    $trail->push(statictranslations('Create FAQ Category'), route('admin.faq-categories.create'));
+});
+Breadcrumbs::for('admin.faq-categories.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.faq-categories.index');
+    $trail->push(statictranslations('Edit FAQ Category'), route('admin.faq-categories.edit', $id));
+});
+
+// --- FAQ Questions ---
+Breadcrumbs::for('admin.faqs.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('FAQs'), route('admin.faqs.index'));
+});
+Breadcrumbs::for('admin.faqs.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.faqs.index');
+    $trail->push(statictranslations('Create FAQ'), route('admin.faqs.create'));
+});
+Breadcrumbs::for('admin.faqs.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.faqs.index');
+    $trail->push(statictranslations('Edit FAQ'), route('admin.faqs.edit', $id));
+});
+
+// --- Orders ---
+Breadcrumbs::for('admin.orders.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Orders'), route('admin.orders.index'));
+});
+Breadcrumbs::for('admin.orders.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.orders.index');
+    $trail->push(statictranslations('View Order'), route('admin.orders.show', $id));
+});
+
+// --- Dispatch ---
+Breadcrumbs::for('admin.dispatch.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Dispatch'), route('admin.dispatch.index'));
+});
+Breadcrumbs::for('admin.dispatch.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dispatch.index');
+    $trail->push(statictranslations('Create Dispatch'), route('admin.dispatch.create'));
+});
+
+// --- Reviews ---
+Breadcrumbs::for('admin.reviews.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Reviews'), route('admin.reviews.index'));
+});
+Breadcrumbs::for('admin.reviews.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.reviews.index');
+    $trail->push(statictranslations('Review Details'), route('admin.reviews.show', $id));
+});

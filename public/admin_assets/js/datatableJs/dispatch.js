@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    // Initialize Yajra DataTable
     var ajaxUrl = $('#dispatchTable').data('url');
     var table = $('#dispatchTable').DataTable({
         processing: true,
@@ -29,17 +28,5 @@ $(document).ready(function () {
         }
     });
 
-    // Custom Filters Event Listeners (Triggers an AJAX reload)
-    $('#filter_status, #filter_order_number').on('keyup change', function () {
-        table.draw();
-    });
-
-    // Clear Filters Button
-    $('#clear_filters').on('click', function(e) {
-        e.preventDefault();
-        $('#filter_status').val('');
-        $('#filter_order_number').val('');
-        table.search(''); // clear global search
-        table.draw();
-    });
+    window.dispatchTable = table;
 });

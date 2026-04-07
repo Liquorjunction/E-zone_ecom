@@ -13,5 +13,5 @@ interface SliderRepositoryInterface
     public function deleteSlider($id);
     public function batchDeleteSliders(array $ids);
     public function updateStatus($id);
-    public function getDataForDataTable();
+    public function getDataForDataTable($request);
 }

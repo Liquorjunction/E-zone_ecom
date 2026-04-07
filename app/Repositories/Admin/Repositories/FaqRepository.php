@@ -3,6 +3,7 @@
 namespace App\Repositories\Admin\Repositories;
 
 use App\Models\Faq;
+use App\Models\FaqCategory;
 use App\Repositories\Admin\Interfaces\FaqRepositoryInterface;
 
 class FaqRepository implements FaqRepositoryInterface
@@ -54,9 +55,39 @@ class FaqRepository implements FaqRepositoryInterface
         return $faq;
     }
 
-    public function getDataForDataTable()
+    public function getFaqCategoryList()
     {
-        return Faq::query()->latest();
+        return FaqCategory::where('status', 'active')->pluck('name', 'id');
+    }
+
+    public function getDataForDataTable($requests)
+    {
+        $query = Faq::query()->latest();
+
+        // Status filter
+        $status = is_array($requests) ? ($requests['status'] ?? null) : $requests->input('status');
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('status', $status);
+        }
+
+        // Date range filter
+        $dateFrom = is_array($requests) ? ($requests['date_from'] ?? null) : $requests->input('date_from');
+        $dateTo = is_array($requests) ? ($requests['date_to'] ?? null) : $requests->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+        } elseif ($dateFrom) {
+            $query->where('created_at', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $query->where('created_at', '<=', $dateTo);
+        }
+
+        // Category filter
+        $categoryId = is_array($requests) ? ($requests['category_id'] ?? null) : $requests->input('category_id');
+        if ($categoryId) {
+            $query->where('faq_category_id', $categoryId);
+        }
+
+        return $query;
     }
 
     public function deleteFaq($id)

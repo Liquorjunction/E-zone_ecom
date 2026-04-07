@@ -47,12 +47,27 @@ class ManageCustomerRepository implements ManageCustomerRepositoryInterface
 
         // Status filter
         if (isset($request['status']) && in_array($request['status'], ['active', 'inactive'])) {
-            $customers->where('status', $request['status']);
+            $customers->where('is_active', $request['status'] === 'active');
         }
 
         // Date range filter
-        if (isset($request['start_date']) && isset($request['end_date'])) {
-            $customers->whereBetween('created_at', [$request['start_date'], $request['end_date']]);
+        $startDate = $request['start_date'] ?? $request['date_from'] ?? null;
+        $endDate = $request['end_date'] ?? $request['date_to'] ?? null;
+
+        if (!empty($startDate) && !empty($endDate)) {
+            $customers->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
+        } elseif (!empty($startDate)) {
+            $customers->whereDate('created_at', '>=', $startDate);
+        } elseif (!empty($endDate)) {
+            $customers->whereDate('created_at', '<=', $endDate);
+        }
+
+        // Email verified filter
+        if (!empty($request['email_verified']) || (($request['verified'] ?? null) === 'verified')) {
+            $customers->whereNotNull('email_verified_at');
+        } elseif (($request['verified'] ?? null) === 'unverified') {
+            $customers->whereNull('email_verified_at');
         }
 
         return $customers;

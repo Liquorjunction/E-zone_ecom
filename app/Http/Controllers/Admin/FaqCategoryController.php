@@ -147,6 +147,11 @@ class FaqCategoryController extends Controller
 
             return DataTables::of($faqCategories)
                 ->addIndexColumn()
+                ->filterColumn('name', function ($query, $keyword) {
+                    $query->where('name->en', 'like', "%{$keyword}%")
+                        ->orWhere('name->fr', 'like', "%{$keyword}%")
+                        ->orWhere('name->ar', 'like', "%{$keyword}%");
+                })
                 ->addColumn('name', function ($faqCategory) {
                     // Helper to show English title in the list
                     return $faqCategory->getTranslation('name', 'en');

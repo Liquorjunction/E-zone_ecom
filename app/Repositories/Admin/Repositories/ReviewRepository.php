@@ -54,35 +54,57 @@ class ReviewRepository implements ReviewRepositoryInterface
         });
     }
 
-    public function getDataForDataTable()
+    public function getStatusList()
     {
+        return Review::select('is_approved')
+            ->distinct()
+            ->orderBy('is_approved')
+            ->pluck('is_approved')
+            ->values()
+            ->all();
+    }
+
+    public function getRatingList()
+    {
+        return Review::select('rating')
+            ->distinct()
+            ->orderBy('rating')
+            ->pluck('rating')
+            ->values()
+            ->all();
+    }
+
+    public function getDataForDataTable($request)
+    {
+        $filters = is_array($request) ? $request : [];
+
         $reviews = Review::query()
             ->with(['order', 'product', 'productVariant', 'user'])
             ->select('reviews.*')
             ->orderBy('created_at', 'desc');
 
         // is_approved filter
-        if (request()->filled('status')) {
-            $reviews->where('is_approved', request()->input('status'));
+        if (!empty($filters['status'])) {
+            $reviews->where('is_approved', $filters['status']);
         }
 
         // Date range filter
-        if (request()->filled('date_from')) {
-            $reviews->whereDate('created_at', '>=', request()->input('date_from'));
+        if (!empty($filters['date_from'])) {
+            $reviews->whereDate('created_at', '>=', $filters['date_from']);
         }
 
-        if (request()->filled('date_to')) {
-            $reviews->whereDate('created_at', '<=', request()->input('date_to'));
+        if (!empty($filters['date_to'])) {
+            $reviews->whereDate('created_at', '<=', $filters['date_to']);
         }
 
         // Rating filter
-        if (request()->filled('rating')) {
-            $reviews->where('rating', request()->input('rating'));
+        if (!empty($filters['rating'])) {
+            $reviews->where('rating', $filters['rating']);
         }
 
         // Sorting
-        if (request()->has('sort_by') && request()->has('sort_order')) {
-            $reviews->orderBy(request()->input('sort_by'), request()->input('sort_order'));
+        if (!empty($filters['sort_by']) && !empty($filters['sort_order'])) {
+            $reviews->orderBy($filters['sort_by'], $filters['sort_order']);
         }
 
         return $reviews;

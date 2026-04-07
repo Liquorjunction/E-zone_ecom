@@ -1,23 +1,137 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.getElementById('toggle-filters-btn');
-    const filtersCard = document.getElementById('filters-card');
-    const filterBtnText = document.getElementById('filter-btn-text');
-    const applyBtn = document.getElementById('apply-filters');
-    const clearBtn = document.getElementById('clear-filters');
-    const filterForm = document.getElementById('filter-form');
+    const filterPanel = document.getElementById('filter-panel');
+    const applyBtn = document.getElementById('apply-filters-btn');
+    const clearBtn = document.getElementById('reset-filters-btn');
+    const filterForm = document.getElementById('review-filter-bar');
+    const statusSelect = document.getElementById('status');
+    const ratingSelect = document.getElementById('rating');
 
-    if (!toggleBtn || !filtersCard) return;
-
-    // Toggle filters visibility
-    toggleBtn.addEventListener('click', function() {
-        if (filtersCard.style.display === 'none') {
-            filtersCard.style.display = 'block';
-            if (filterBtnText) filterBtnText.textContent = 'Hide Filters';
-        } else {
-            filtersCard.style.display = 'none';
-            if (filterBtnText) filterBtnText.textContent = 'Show Filters';
+    function setLoadingOption(select, label) {
+        if (!select) {
+            return;
         }
-    });
+
+        select.innerHTML = `<option value="">${label}</option>`;
+    }
+
+    function populateSelect(select, items, placeholderLabel, formatLabel) {
+        if (!select) {
+            return;
+        }
+
+        const currentValue = select.value;
+        select.innerHTML = `<option value="">${placeholderLabel}</option>`;
+
+        items.forEach(function(item) {
+            const option = document.createElement('option');
+            option.value = item.value;
+            option.textContent = formatLabel(item.value);
+            select.appendChild(option);
+        });
+
+        if (currentValue) {
+            select.value = currentValue;
+        }
+
+        select.dataset.loaded = '1';
+    }
+
+    function loadDropdownOptions(select, url, itemsKey, placeholderLabel, formatLabel) {
+        if (!select || select.dataset.loaded === '1' || !url) {
+            return;
+        }
+
+        select.dataset.loaded = 'loading';
+        setLoadingOption(select, 'Loading...');
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Failed to load dropdown options.');
+                }
+
+                return response.json();
+            })
+            .then(function(payload) {
+                const items = Array.isArray(payload[itemsKey]) ? payload[itemsKey] : [];
+                populateSelect(select, items.map(function(value) {
+                    return { value: value };
+                }), placeholderLabel, formatLabel);
+            })
+            .catch(function() {
+                setLoadingOption(select, placeholderLabel);
+                select.dataset.loaded = '0';
+            });
+    }
+
+    function formatStatusLabel(value) {
+        return String(value)
+            .replace(/[_-]+/g, ' ')
+            .replace(/\b\w/g, function(letter) {
+                return letter.toUpperCase();
+            });
+    }
+
+    function formatRatingLabel(value) {
+        const rating = Number(value);
+
+        if (!Number.isFinite(rating)) {
+            return String(value);
+        }
+
+        return rating === 1 ? '1 Star' : rating + ' Stars';
+    }
+
+    function handleLazyLoad(select) {
+        if (!select) {
+            return;
+        }
+
+        const url = select.dataset.listUrl;
+        const placeholderLabel = select.id === 'rating' ? 'All Ratings' : 'All';
+        const itemsKey = select.id === 'rating' ? 'ratings' : 'statuses';
+        const formatter = select.id === 'rating' ? formatRatingLabel : formatStatusLabel;
+
+        loadDropdownOptions(select, url, itemsKey, placeholderLabel, formatter);
+    }
+
+    function hasActiveFilters() {
+        const status = document.getElementById('status')?.value || '';
+        const dateFrom = document.getElementById('date_from')?.value || '';
+        const dateTo = document.getElementById('date_to')?.value || '';
+        const rating = document.getElementById('rating')?.value || '';
+
+        return !!(status || dateFrom || dateTo || rating);
+    }
+
+    if (filterPanel && typeof bootstrap !== 'undefined' && hasActiveFilters()) {
+        new bootstrap.Collapse(filterPanel, { toggle: false }).show();
+    }
+
+    if (statusSelect) {
+        setLoadingOption(statusSelect, 'Loading statuses...');
+        statusSelect.addEventListener('focus', function() {
+            handleLazyLoad(statusSelect);
+        });
+        statusSelect.addEventListener('mousedown', function() {
+            handleLazyLoad(statusSelect);
+        });
+    }
+
+    if (ratingSelect) {
+        setLoadingOption(ratingSelect, 'Loading ratings...');
+        ratingSelect.addEventListener('focus', function() {
+            handleLazyLoad(ratingSelect);
+        });
+        ratingSelect.addEventListener('mousedown', function() {
+            handleLazyLoad(ratingSelect);
+        });
+    }
 
     // Apply filters - reload DataTable with new parameters
     if (applyBtn) {
@@ -54,7 +168,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // Initialize - hide filters by default
-    filtersCard.style.display = 'none';
 });

@@ -48,8 +48,26 @@ class AboutUsRepository implements AboutUsRepositoryInterface
         return $aboutUs;
     }
 
-    public function getDataForDataTable()
+    public function getDataForDataTable($request)
     {
-        return AboutUs::query()->latest();
+        $query = AboutUs::query()->latest();
+
+        // Status filter
+        if (isset($request['status']) && in_array($request['status'], ['active', 'inactive'])) {
+            $query->where('status', $request['status']);
+        }
+
+        // Date range filter
+        $startDate = $request['start_date'] ?? $request['date_from'] ?? null;
+        $endDate = $request['end_date'] ?? $request['date_to'] ?? null;
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        return $query;
     }
 }

@@ -174,6 +174,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [FaqController::class, 'update'])->name('update')->middleware('can:faqs.update,admin');
             Route::delete('/destroy', [FaqController::class, 'destroy'])->name('destroy')->middleware('can:faqs.delete,admin');
             Route::patch('/toggle-status', [FaqController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:faqs.update,admin');
+            Route::get('/list', [FaqController::class, 'faqCategoryList'])->name('list');
         });
 
         // Terms and Conditions Routes
@@ -321,26 +322,20 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/edit', [OrderController::class, 'edit'])->name('edit')->middleware('can:order.update,admin');
             Route::get('/pdf', [OrderController::class, 'downloadInvoice'])->name('downloadInvoice')->middleware('can:order.read,admin');
             Route::get('/naps-order-detail', [OrderController::class, 'napsOrderDetail'])->name('naps-order-detail')->middleware('can:napsStatus.read,admin');
+            Route::get('/get-status-list', [OrderController::class, 'getStatusList'])->name('get-status-list')->middleware('can:napsStatus.read,admin');
+            Route::get('/get-payment-methods', [OrderController::class, 'getPaymentMethodsList'])->name('get-payment-methods')->middleware('can:napsStatus.read,admin');
+
         });
 
         // Dispatch Routes
         Route::prefix('dispatch')->name('dispatch.')->middleware('can:dispatch.read,admin')->group(function () {
             Route::get('/', [DispatchController::class, 'index'])->name('index')->middleware('can:dispatch.read,admin');
             Route::get('/data', [DispatchController::class, 'datatable'])->name('data');
+            Route::get('/status-list', [DispatchController::class, 'getStatusList'])->name('status-list')->middleware('can:dispatch.read,admin');
             Route::get('/create', [DispatchController::class, 'create'])->name('create')->middleware('can:dispatch.create,admin');
             Route::post('/store', [DispatchController::class, 'store'])->name('store')->middleware('can:dispatch.create,admin');
             Route::put('/{id}/status', [DispatchController::class, 'updateStatus'])->name('update-status')->middleware('can:dispatch.update,admin');
             Route::get('/item-inventory', [DispatchController::class, 'getItemInventory'])->name('item-inventory')->middleware('can:dispatch.read,admin');
-        });
-
-        // Review Routes
-        Route::prefix('reviews')->name('reviews.')->group(function () {
-            Route::get('/', [ReviewController::class, 'index'])->name('index');
-            Route::get('/pending', [ReviewController::class, 'pending'])->name('pending');
-            Route::get('/show', [ReviewController::class, 'show'])->name('show');
-            Route::post('/approve', [ReviewController::class, 'approve'])->name('approve');
-            Route::post('/reject', [ReviewController::class, 'reject'])->name('reject');
-            Route::delete('/destroy', [ReviewController::class, 'destroy'])->name('destroy');
         });
 
         // Discount Routes
@@ -423,6 +418,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [ReviewController::class, 'index'])->name('index'); // permission: reviews.read
             Route::get('/data', [ReviewController::class, 'data'])->name('data');
             Route::get('/show', [ReviewController::class, 'show'])->name('show')->middleware('can:reviews.read,admin');
+            Route::get('/status-list', [ReviewController::class, 'getStatusList'])->name('status-list');
+            Route::get('/rating-list', [ReviewController::class, 'getRatingsList'])->name('rating-list');
             Route::post('/approve', [ReviewController::class, 'approve'])->name('approve')->middleware('can:reviews.update,admin');
             Route::post('/reject', [ReviewController::class, 'reject'])->name('reject')->middleware('can:reviews.update,admin');
             Route::delete('/destroy', [ReviewController::class, 'destroy'])->name('destroy')->middleware('can:reviews.delete,admin');

@@ -197,6 +197,11 @@ class SliderController extends Controller
 
             return DataTables::of($sliders)
                 ->addIndexColumn()
+                ->filterColumn('title', function ($query, $keyword) {
+                    $query->where('title->en', 'like', "%{$keyword}%")
+                          ->orWhere('title->fr', 'like', "%{$keyword}%")
+                          ->orWhere('title->ar', 'like', "%{$keyword}%");
+                })
                 ->addColumn('batch_checkbox', function ($slider) {
                     return '<input type="checkbox" class="slider-checkbox" value="' . $slider->id . '">';
                 })

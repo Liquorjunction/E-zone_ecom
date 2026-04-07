@@ -9,10 +9,11 @@ $(document).ready(function () {
             url: dataUrl,
             type: 'GET',
             data: function(d) {
-                // Add filter parameters
-                d.status = $('#status-filter').val();
-                d.date_from = $('#date-from-filter').val();
-                d.date_to = $('#date-to-filter').val();
+                // Read filters from the current filter bar controls
+                d.status = $('input[name="status"]:checked').val() || 'all';
+                d.start_date = $('input[name="start_date"]').val() || '';
+                d.end_date = $('input[name="end_date"]').val() || '';
+                d.email_verified = $('#email_verified').is(':checked') ? 1 : '';
                 console.log('Sending filters:', d);
             },
             error: function(xhr, error, thrown) {

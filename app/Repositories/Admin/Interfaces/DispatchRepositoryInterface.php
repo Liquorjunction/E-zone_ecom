@@ -10,5 +10,6 @@ interface DispatchRepositoryInterface
     public function updateDispatch(int $id, array $data);
     public function getDispatchesByOrderId(int $orderId);
     public function getDispatchesByNamefromAdminTable(string $name);
+    public function getDispatchStatusList();
     public function getDataforDatatable();
 }

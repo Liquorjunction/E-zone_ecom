@@ -10,6 +10,6 @@ interface AboutUsRepositoryInterface
     public function updateAboutUsData($id, $request, $data = null);
     public function destroyAboutUsData($id);
     public function toggleAboutUsStatus($id);
-    public function getDataForDataTable();
+    public function getDataForDataTable($request);
 
 }

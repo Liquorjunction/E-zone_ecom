@@ -3,9 +3,9 @@
 namespace App\Repositories\Admin\Repositories;
 
 use App\Models\PrivacyPolicy;
-use App\Repositories\Admin\Interfaces\PrivacyPolicyRespositoryInterface;
+use App\Repositories\Admin\Interfaces\PrivacyPolicyRepositoryInterface;
 
-class PrivacyPolicyRespository implements PrivacyPolicyRespositoryInterface
+class PrivacyPolicyRepository implements PrivacyPolicyRepositoryInterface
 {
     public function getPrivacyPolicy()
     {
@@ -50,8 +50,28 @@ class PrivacyPolicyRespository implements PrivacyPolicyRespositoryInterface
         return $privacyPolicy;
     }
 
-    public function getDataForDataTable()
+    public function getDataForDataTable($request)
     {
-        return PrivacyPolicy::select(['id', 'title', 'description', 'status', 'created_at', 'updated_at'])->get();
+        $query = PrivacyPolicy::query()->latest();
+
+        // Status filter
+        $status = is_array($request) ? ($request['status'] ?? null) : $request->input('status');
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('status', $status);
+        }
+
+        // Date range filter
+        $dateFrom = is_array($request) ? ($request['date_from'] ?? null) : $request->input('date_from');
+        $dateTo = is_array($request) ? ($request['date_to'] ?? null) : $request->input('date_to');
+
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+        } elseif ($dateFrom) {
+            $query->where('created_at', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $query->where('created_at', '<=', $dateTo);
+        }
+
+        return $query;
     }
 }

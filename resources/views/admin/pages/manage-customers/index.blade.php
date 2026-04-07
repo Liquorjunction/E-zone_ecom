@@ -22,16 +22,16 @@
                 <p class="text-secondary small mb-0">View and manage all registered customers</p>
             </div>
             <div class="d-flex align-items-center gap-2">
+                @include('admin.partials.batch-actions')
                 <button type="button" class="btn btn-sm btn-outline-secondary position-relative"
                     data-bs-toggle="collapse" data-bs-target="#filter-panel"
                     aria-expanded="false" aria-controls="filter-panel">
                     <i class="fas fa-filter me-1"></i> Filters
                 </button>
-                @include('admin.partials.batch-actions')
             </div>
         </div>
 
-        @include('admin.partials.filters')
+        @include('admin.pages.manage-customers.partials.filter-bar')
 
         {{-- Table --}}
         <div class="card border-0 shadow-sm rounded-3">

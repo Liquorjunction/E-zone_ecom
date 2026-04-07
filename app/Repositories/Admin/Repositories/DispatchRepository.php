@@ -55,9 +55,23 @@ class DispatchRepository implements DispatchRepositoryInterface
         return $admin->name;
     }
 
+    public function getDispatchStatusList()
+    {
+        return Dispatch::select('status')
+            ->whereNotNull('status')
+            ->whereRaw("TRIM(status) != ''")
+            ->distinct()
+            ->orderBy('status')
+            ->pluck('status')
+            ->values()
+            ->all();
+    }
+
     public function getDataforDatatable()
     {
-        return Dispatch::with(['order', 'orderItem.product', 'inventory.store', 'inventory.warehouse', 'dispatchedBy'])
+        $query = Dispatch::with(['order', 'orderItem.product', 'inventory.store', 'inventory.warehouse', 'dispatchedBy'])
             ->select('order_dispatch.*');
+
+        return $query;
     }
 }

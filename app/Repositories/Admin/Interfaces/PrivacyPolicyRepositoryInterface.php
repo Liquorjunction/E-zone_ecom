@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Admin\Interfaces;
 
-interface PrivacyPolicyRespositoryInterface
+interface PrivacyPolicyRepositoryInterface
 {
     public function getPrivacyPolicy();
     public function getActivePrivacyPolicy();
@@ -10,5 +10,5 @@ interface PrivacyPolicyRespositoryInterface
     public function updatePrivacyPolicy($request, $id);
     public function destroyPrivacyPolicy($id);
     public function updatePrivacyPolicyStatus($id);
-    public function getDataForDataTable();
+    public function getDataForDataTable($request);
 }

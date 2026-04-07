@@ -23,40 +23,29 @@ class CardRepository implements CardRepositoryInterface
         return Card::find($id);
     }
 
-    // Update the signature to accept $data = null
     public function storeCard($request, $data = null)
     {
-        // If data was passed from controller (with translations), use it.
-        // Otherwise, fall back to the request's validated data.
         $data = $data ?? $request->validated();
-
-        // Ensure status is set (default to inactive if missing)
         $data['status'] = $data['status'] ?? 'inactive';
 
-        // Handle Image Upload (Must use $request to get the file)
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('cards', 'public');
             $data['image'] = $imagePath;
         }
 
-        // Create the card
-        // Spatie's HasTranslations trait will automatically convert the arrays
-        // (title, description, etc.) into JSON for the database.
         return Card::create($data);
     }
 
     public function updateCard($request, $id, $data = null)
     {
         $card = Card::findOrFail($id);
-
-        // Use passed data (with translations) or fallback to request
         $data = $data ?? $request->validated();
 
         if ($request->hasFile('image')) {
-            // Delete old image
             if ($card->image && Storage::disk('public')->exists($card->image)) {
                 Storage::disk('public')->delete($card->image);
             }
+
             $path = $request->file('image')->store('cards', 'public');
             $data['image'] = $path;
         }
@@ -70,7 +59,6 @@ class CardRepository implements CardRepositoryInterface
     {
         $card = Card::findOrFail($id);
 
-        // Delete Image from storage
         if ($card->image && Storage::disk('public')->exists($card->image)) {
             Storage::disk('public')->delete($card->image);
         }
@@ -87,9 +75,16 @@ class CardRepository implements CardRepositoryInterface
         return $card;
     }
 
-    public function getDataForDataTable()
+    public function getDataForDataTable($request)
     {
-        // Return query for Yajra DataTables
-        return Card::query()->latest();
+        $query = Card::query()->latest();
+
+        $status = is_array($request) ? ($request['status'] ?? null) : $request->input('status');
+
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('status', $status);
+        }
+
+        return $query;
     }
 }

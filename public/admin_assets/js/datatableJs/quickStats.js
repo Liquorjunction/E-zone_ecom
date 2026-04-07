@@ -67,6 +67,7 @@ $(document).ready(function () {
     var dataTable = $table.DataTable({
         processing: true,
         serverSide: true,
+        scrollX: true,
         ajax: {
             url: dataUrl,
             type: 'GET',
@@ -78,7 +79,7 @@ $(document).ready(function () {
         },
         columns: columns,
         pageLength: 10,
-        responsive: true,
+        responsive: false,
         drawCallback: function(settings) {
             // Re-check limit after table redraws (e.g., after delete)
             var totalRecords = settings.json ? settings.json.recordsTotal : 0;
