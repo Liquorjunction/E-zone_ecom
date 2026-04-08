@@ -1,6 +1,16 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Site Settings')
+@section('header-title', 'Site Settings Management')
+@section('header-description', 'Manage site-wide settings such as contact info, social media links, opening hours, and map iframe')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.site-settings.index') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
 <div class="container-fluid">

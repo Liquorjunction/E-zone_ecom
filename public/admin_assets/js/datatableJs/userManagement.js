@@ -2,12 +2,18 @@ $(document).ready(function () {
     var $userListTable = $("#user-list-table");
     var dataUrl = $userListTable.data("url");
 
-    $userListTable.DataTable({
+    window.userListTable = $userListTable.DataTable({
         processing: true,
         serverSide: true,
         ajax: {
             url: dataUrl,
             type: "GET",
+            data: function (d) {
+                d.status = $('.user-status-filter:checked').val() || '';
+                d.role_id = $('#role_id').val() || '';
+                d.date_from = $('#date_from').val() || '';
+                d.date_to = $('#date_to').val() || '';
+            }
         },
         columns: [
             { data: "DT_RowIndex", name: "DT_RowIndex", orderable: false, searchable: false },

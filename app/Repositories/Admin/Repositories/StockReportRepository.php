@@ -4,7 +4,6 @@ namespace App\Repositories\Admin\Repositories;
 
 use App\Models\Inventory;
 use App\Repositories\Admin\Interfaces\StockReportRepositoryInterface;
-use Illuminate\Support\Facades\Log;
 
 class StockReportRepository implements StockReportRepositoryInterface
 {
@@ -26,6 +25,7 @@ class StockReportRepository implements StockReportRepositoryInterface
         });
 
         $result = [];
+        $rowKey = 0;
         foreach ($grouped as $sku => $items) {
             // Aggregate totals for this SKU
             $skuTotals = [
@@ -56,8 +56,24 @@ class StockReportRepository implements StockReportRepositoryInterface
                 $skuTotals['available_qty'] += $availableQty;
                 $skuTotals['returned_qty'] += $returnedQty;
 
+                $locationType = 'N/A';
+                $locationName = 'N/A';
+
+                if ($inventory->warehouse_id && $inventory->warehouse) {
+                    $locationType = 'Warehouse';
+                    $locationName = $inventory->warehouse->warehouse_name;
+                } elseif ($inventory->store_id && $inventory->store) {
+                    $locationType = 'Store';
+                    $locationName = $inventory->store->store_name;
+                }
+
                 $rows[] = [
-                    'inventory' => $inventory,
+                    'batch_no' => $inventory->batch_no ?? 'N/A',
+                    'product_name' => optional($inventory->product)->name ?? 'N/A',
+                    'variant_name' => optional($inventory->variant)->variant_name ?? 'N/A',
+                    'brand_name' => optional(optional($inventory->product)->brand)->name ?? 'N/A',
+                    'location_type' => $locationType,
+                    'location_name' => $locationName,
                     'total_qty' => $totalQty,
                     'sold_qty' => $soldQty,
                     'reserved_qty' => $reservedQty,
@@ -68,16 +84,29 @@ class StockReportRepository implements StockReportRepositoryInterface
 
             // Use the first inventory for product/variant/brand/category info
             $first = $items->first();
+            $categoryName = optional($first->product?->category)?->getTranslation('category-name', 'en') ?? 'N/A';
+            $subCategoryName = optional($first->product?->subCategory)?->getTranslation('sub-category-name', 'en') ?? 'N/A';
+
             $result[] = [
+                'row_key' => $rowKey,
                 'sku' => $sku,
-                'product' => optional($first->product),
-                'variant' => optional($first->variant),
-                'brand' => optional(optional($first->product)->brand),
-                'category' => optional(optional($first->product)->category),
-                'subCategory' => optional(optional($first->product)->subCategory),
-                'rows' => $rows,
-                'totals' => $skuTotals,
+                'product_name' => optional($first->product)->name ?? 'N/A',
+                'variant_name' => optional($first->variant)->variant_name ?? 'N/A',
+                'brand_name' => optional(optional($first->product)->brand)->name ?? 'N/A',
+                'category_name' => $categoryName,
+                'sub_category_name' => $subCategoryName,
+                'batch_no' => $rows[0]['batch_no'] ?? null,
+                'has_children' => count($rows) > 1,
+                'child_count' => count($rows),
+                'child_rows' => $rows,
+                'total_qty' => $skuTotals['total_qty'],
+                'sold_qty' => $skuTotals['sold_qty'],
+                'reserved_qty' => $skuTotals['reserved_qty'],
+                'available_qty' => $skuTotals['available_qty'],
+                'returned_qty' => $skuTotals['returned_qty'],
             ];
+
+            $rowKey++;
         }
 
         return collect($result);

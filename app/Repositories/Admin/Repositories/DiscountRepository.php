@@ -66,12 +66,64 @@ class DiscountRepository implements DiscountRepositoryInterface
         return false;
     }
 
+    public function getDiscountTypeList()
+    {
+        return Discount::query()->select('type')->distinct()->pluck('type');
+    }
+
     /**
      * Return Query Builder for DataTables
      */
-    public function getDiscountsForDataTable(array $filters = [])
+    public function getDiscountsForDataTable($request)
     {
-        return Discount::query()->with(['targets']);
+        $query = Discount::query()->with(['targets']);
+
+        // Status filter
+        $status = is_array($request) ? ($request['status'] ?? null) : $request->input('status');
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('status', $status === 'active' ? 1 : 0);
+        }
+
+        // Date range filter
+        $dateFrom = is_array($request) ? ($request['date_from'] ?? null) : $request->input('date_from');
+        $dateTo = is_array($request) ? ($request['date_to'] ?? null) : $request->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+        } elseif ($dateFrom) {
+            $query->where('created_at', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $query->where('created_at', '<=', $dateTo);
+        }
+
+        // Type filter
+        $type = is_array($request) ? ($request['type'] ?? null) : $request->input('type');
+        if (!empty($type)) {
+            $query->where('type', $type);
+        }
+
+        // Validity filter: active/upcoming/expired based on starts_at and ends_at
+        $validity = is_array($request) ? ($request['validity'] ?? null) : $request->input('validity');
+        if (in_array($validity, ['active', 'upcoming', 'expired'], true)) {
+            $now = now();
+
+            if ($validity === 'active') {
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+                })->where(function ($q) use ($now) {
+                    $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+                });
+            }
+
+            if ($validity === 'upcoming') {
+                $query->whereNotNull('starts_at')->where('starts_at', '>', $now);
+            }
+
+            if ($validity === 'expired') {
+                $query->whereNotNull('ends_at')->where('ends_at', '<', $now);
+            }
+        }
+
+        return $query;
     }
 
     /**

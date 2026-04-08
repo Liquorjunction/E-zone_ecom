@@ -75,19 +75,30 @@ $(function () {
         });
     }
 
-    var table = tableEl.DataTable({
+    window.discountsTable = tableEl.DataTable({
         processing: true,
         serverSide: true,
         autoWidth: false,
         responsive: true,
-        ajax: tableEl.data("source"),
+        ajax: {
+            url: tableEl.data("source"),
+            data: function (d) {
+                var status = $('input[name="status"]:checked').val() || 'all';
+                var validity = $('input[name="validity"]:checked').val() || 'all';
+                d.status = status === 'all' ? '' : status;
+                d.validity = validity === 'all' ? '' : validity;
+                d.type = $('#discount_type').val() || '';
+                d.date_from = $('#date_from').val() || '';
+                d.date_to = $('#date_to').val() || '';
+            }
+        },
         columns: columns,
         order: [[1, "desc"]],
     });
 
     $("#discounts-table tbody").on("click", "td.dt-control", function () {
         var tr = $(this).closest("tr");
-        var row = table.row(tr);
+        var row = window.discountsTable.row(tr);
 
         if (row.child.isShown()) {
             row.child.hide();

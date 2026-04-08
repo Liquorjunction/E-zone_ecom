@@ -4,5 +4,5 @@ namespace App\Repositories\Admin\Interfaces;
 
 interface CouponUsageRepositoryInterface
 {
-    public function getDataForDataTable($filters = []);
+    public function getDataForDataTable($request);
 }

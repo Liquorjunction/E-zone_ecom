@@ -234,9 +234,28 @@ class DiscountController extends Controller
         }
     }
 
+    public function getDiscountTypeList(DiscountRepo $discountRepo)
+    {
+        try {
+            $types = $discountRepo->getDiscountTypeList();
+
+            return response()->json([
+                'success' => true,
+                'data' => $types
+            ]);
+        } catch (\Exception $e) {
+            Log::error('DiscountController.getDiscountTypeList: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch discount types',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function datatable(ReadDiscountRequest $request, DiscountRepo $discountRepo)
     {
-        $query = $discountRepo->getDiscountsForDataTable();
+        $query = $discountRepo->getDiscountsForDataTable($request->all());
 
         $query->with(['targets.target']);
 

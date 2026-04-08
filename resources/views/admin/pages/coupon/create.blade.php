@@ -1,6 +1,16 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Create Coupon')
+@section('header-title', 'Create New Coupon')
+@section('header-description', 'Configure coupon code, limits, and active dates')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.coupons.create') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
     <div class="container-fluid">

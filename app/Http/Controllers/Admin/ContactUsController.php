@@ -68,6 +68,26 @@ class ContactUsController extends Controller
         }
     }
 
+    public function getSubjectList(ContactUsRepo $contactUsRepo)
+    {
+        try {
+            $subjects = $contactUsRepo->getSubjectList();
+            return response()->json(['status' => true, 'data' => $subjects]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function getStatusList(ContactUsRepo $contactUsRepo)
+    {
+        try {
+            $statuses = $contactUsRepo->getStatusList();
+            return response()->json(['status' => true, 'data' => $statuses]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     public function datatable(ReadContactUsRequest $request, ContactUsRepo $contactUsRepo)
     {
         try {
@@ -77,9 +97,14 @@ class ContactUsController extends Controller
                 'resolved' => 'Resolved',
                 'closed' => 'Closed',
             ];
-            $contactUsData = $contactUsRepo->getDataForDataTable();
+            $contactUsData = $contactUsRepo->getDataForDataTable($request->all());
             return DataTables::of($contactUsData)
                 ->addIndexColumn()
+                ->filterColumn('TicketNumber', function ($query, $keyword) {
+                    $query->where('ticket_number', 'like', "%{$keyword}%")
+                        ->orWhere('name', 'like', "%{$keyword}%")
+                        ->orWhere('email', 'like', "%{$keyword}%");
+                })
                 ->addColumn('TicketNumber', function ($contactUs) {
                     return $contactUs->ticket_number ?? 'N/A';
                 })

@@ -280,9 +280,14 @@ class AdminRepository implements AdminRepositoryInterface
         }
     }
 
+    public function getRolesList()
+    {
+        return \Spatie\Permission\Models\Role::pluck('name', 'id');
+    }
+
     public function getDataForDataTable($request)
     {
-        return Admin::select([
+        $query = Admin::select([
             'id',
             'name',
             'email',
@@ -291,5 +296,32 @@ class AdminRepository implements AdminRepositoryInterface
             'profile_image',
             'created_at'
         ]);
+
+        // Status filter
+        $status = is_array($request) ? ($request['status'] ?? null) : $request->input('status');
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('status', $status);
+        }
+
+        // Date range filter
+        $dateFrom = is_array($request) ? ($request['date_from'] ?? null) : $request->input('date_from');
+        $dateTo = is_array($request) ? ($request['date_to'] ?? null) : $request->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+        } elseif ($dateFrom) {
+            $query->where('created_at', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $query->where('created_at', '<=', $dateTo);
+        }
+
+        // Role filter
+        $roleId = is_array($request) ? ($request['role_id'] ?? null) : $request->input('role_id');
+        if ($roleId) {
+            $query->whereHas('roles', function ($q) use ($roleId) {
+                $q->where('id', $roleId);
+            });
+        }
+
+        return $query;
     }
 }

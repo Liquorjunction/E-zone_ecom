@@ -1,6 +1,16 @@
 @extends('admin.layouts.app')
-
 @section('title', 'NAPS API Log Details')
+@section('header-title', 'NAPS API Log Details')
+@section('header-description', 'View and analyze the complete API response data for this log entry')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.naps-log.show', $napsLog) as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/viewLog.css') }}">

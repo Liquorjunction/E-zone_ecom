@@ -11,7 +11,8 @@ interface DiscountRepositoryInterface
     public function delete($id);
     public function getDiscountById($id);
     public function updateStatus($id);
-    public function getDiscountsForDataTable(array $filters = []);
+    public function getDiscountTypeList();
+    public function getDiscountsForDataTable($request);
     public function getProductVariants();
     public function formatTargetsCollection($items);
     public function getSelectLists();

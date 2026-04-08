@@ -1,6 +1,16 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Contact Enquiry')
+@section('header-title', 'Contact Us Enquiry Details')
+@section('header-description', 'View detailed information about the contact us enquiry submitted by the user')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.contact-us.show', $enquiry) as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
 
 @section('content')
     @php
@@ -15,12 +25,12 @@
     @endphp
 
     <div class="container-fluid py-2">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4 bg-white rounded-3 p-3">
             <div>
-                <h1 class="h4 mb-1">Contact Us Enquiry</h1>
-                <p class="text-muted mb-0">Review user details, message, status, and uploaded files in one place.</p>
+                <h4 class="fw-semibold mb-1">Contact Us Enquiries</h4>
+                <p class="text-secondary small mb-0">View and manage contact us enquiries submitted by users</p>
             </div>
-            <a href="{{ route('admin.activityLog.index') }}" class="btn btn-outline-secondary btn-sm">Back to list</a>
+            <a href="{{ route('admin.contact-us.index') }}" class="btn btn-outline-secondary btn-sm">Back to list</a>
         </div>
 
         <div class="row g-3">

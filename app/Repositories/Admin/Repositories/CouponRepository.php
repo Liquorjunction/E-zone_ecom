@@ -55,12 +55,23 @@ class CouponRepository implements CouponRepositoryInterface
         return $coupon->delete();
     }
 
-    public function updateStatus($id)
+    public function updateStatus($id, $status = null)
     {
         $coupon = Coupon::findOrFail($id);
-        $coupon->status = !$coupon->status;
+
+        if (!is_null($status)) {
+            $coupon->status = in_array($status, ['active', 1, '1', true], true);
+        } else {
+            $coupon->status = !$coupon->status;
+        }
+
         $coupon->save();
         return $coupon;
+    }
+
+    public function getCouponTypeList()
+    {
+        return Coupon::query()->select('coupon_type')->distinct()->pluck('coupon_type');
     }
 
     public function getDataForDataTable($filters = [])
@@ -68,27 +79,30 @@ class CouponRepository implements CouponRepositoryInterface
         $query = Coupon::query()
             ->select(['id', 'name', 'code', 'coupon_type', 'starts_at', 'ends_at', 'status'])->withCount('usages');
 
-        // Apply filters if provided
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+        // Apply status filter
+        if (isset($filters['status']) && in_array($filters['status'], ['active', 'inactive'], true)) {
+            $query->where('status', $filters['status'] === 'active' ? 1 : 0);
         }
 
-        // Apply global search filter
-        if (isset($filters['search']['value']) && !empty($filters['search']['value'])) {
-            $search = $filters['search']['value'];
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->orWhere('code', 'like', "%$search%")
-                    ->orWhere('coupon_type', 'like', "%$search%");
-            });
+        // Apply Date range filter
+        $startDate = $filters['start_date'] ?? $filters['date_from'] ?? null;
+        $endDate = $filters['end_date'] ?? $filters['date_to'] ?? null;
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->where('created_at', '<=', $endDate);
         }
 
-        // Apply ordering
-        if (isset($filters['order'][0]['column']) && isset($filters['order'][0]['dir'])) {
-            $columns = ['id', 'name', 'code', 'usages_count', 'coupon_type', 'starts_at', 'ends_at', 'status'];
-            $orderColumn = $columns[$filters['order'][0]['column']];
-            $orderDir = $filters['order'][0]['dir'];
-            $query->orderBy($orderColumn, $orderDir);
+        // Apply coupon type filter
+        if (!empty($filters['coupon_type'])) {
+            $query->where('coupon_type', $filters['coupon_type']);
+        }
+
+        // Apply Sort By Usage Count filter
+        if (isset($filters['sort_by_usage_count']) && in_array($filters['sort_by_usage_count'], ['asc', 'desc'], true)) {
+            $query->orderBy('usages_count', $filters['sort_by_usage_count']);
         }
 
         return $query;

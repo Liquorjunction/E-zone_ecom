@@ -41,6 +41,17 @@ class AdminAuthController extends Controller
         }
     }
 
+    public function getRolesList(AdminRepositoryInterface $adminRepository)
+    {
+        try {
+            $roles = $adminRepository->getRolesList();
+            return response()->json(['success' => true, 'data' => $roles], 200);
+        } catch (\Exception $e) {
+            Log::error('Error in AdminAuthController@getRolesList: '.$e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to retrieve roles.'], 500);
+        }
+    }
+
     public function data(AdminRepositoryInterface $adminRepository, ReadProfileRequest $request)
     {
         try {
@@ -48,6 +59,11 @@ class AdminAuthController extends Controller
 
             return DataTables::of($admins)
                 ->addIndexColumn()
+                ->filterColumn('role', function ($query, $keyword) {
+                    $query->whereHas('roles', function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%$keyword%");
+                    });
+                })
                 ->addColumn('role', function ($admin) {
                     return $admin->roles->pluck('name')->join(', ');
                 })

@@ -64,6 +64,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [AdminAuthController::class, 'show'])->name('view')->middleware('can:user management.read,admin');
             Route::put('/update', [AdminAuthController::class, 'update'])->name('update')->middleware('can:user management.update,admin');
             Route::patch('/toggle-status', [AdminAuthController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:user management.update,admin');
+            Route::get('/list', [AdminAuthController::class, 'getRolesList'])->name('list')->middleware('can:user management.read,admin');
         });
 
         // Profile routes
@@ -350,6 +351,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [DiscountController::class, 'update'])->name('update')->middleware('can:discount.update,admin');
             Route::delete('/destroy', [DiscountController::class, 'destroy'])->name('destroy')->middleware('can:discount.delete,admin');
             Route::patch('/toggle-status', [DiscountController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:discount.update,admin');
+            Route::get('/list', [DiscountController::class, 'getDiscountTypeList'])->name('list');
             Route::prefix('targets')->name('targets.')->group(function () {
                 Route::post('/', [DiscountController::class, 'storeTarget'])->name('store')->middleware('can:discount.create,admin');
                 Route::put('/update', [DiscountController::class, 'updateTarget'])->name('update')->middleware('can:discount.update,admin');
@@ -369,6 +371,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [CouponController::class, 'update'])->name('update')->middleware('can:coupon.update,admin');
             Route::delete('/destroy', [CouponController::class, 'destroy'])->name('destroy')->middleware('can:coupon.delete,admin');
             Route::patch('/update-status', [CouponController::class, 'updateStatus'])->name('updateStatus')->middleware('can:coupon.update,admin');
+            Route::get('/list', [CouponController::class, 'getCouponTypeList'])->name('list');
         });
 
         Route::prefix('coupon-usage')->name('coupon-usage.')->middleware('can:coupon.read,admin')->group(function () {
@@ -436,6 +439,7 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         // Reports Routes
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/stock', [StockReportController::class, 'index'])->name('stock');
+            Route::get('/stock/data', [StockReportController::class, 'data'])->name('stock.data');
         });
 
         // Site Settings Routes
@@ -456,6 +460,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [ContactUsController::class, 'show'])->name('show')->middleware('can:contact_us.read,admin');
             Route::post('/update-status', [ContactUsController::class, 'updateStatus'])->name('updateStatus')->middleware('can:contact_us.update,admin');
             Route::post('/add-note', [ContactUsController::class, 'AddAdminNotes'])->name('addNote')->middleware('can:contact_us.update,admin');
+            Route::get('/status-list', [ContactUsController::class, 'getStatusList'])->name('status-list');
+            Route::get('/subject-list', [ContactUsController::class, 'getSubjectList'])->name('subject-list');
         });
 
         // Activity Logs Routes

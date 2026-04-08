@@ -10,6 +10,7 @@ interface CouponRepositoryInterface
     public function storeCoupon($request, $data = null);
     public function updateCoupon($request, $id, $data = null);
     public function deleteCoupon($id);
-    public function updateStatus($id);
+    public function updateStatus($id, $status = null);
+    public function getCouponTypeList();
     public function getDataForDataTable($filters = []);
 }

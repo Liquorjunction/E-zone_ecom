@@ -18,16 +18,41 @@ class CouponUsageController extends Controller
     public function data(ReadCouponUsageRequest $request, CouponUsageRepo $couponUsageRepo)
     {
         try {
-            $filters = $request->only(['id', 'coupon_id', 'user_id', 'order_id', 'used_from', 'used_to']);
-            $couponUsages = $couponUsageRepo->getDataForDataTable($filters);
+            $couponUsages = $couponUsageRepo->getDataForDataTable($request->all());
 
             return DataTables::of($couponUsages)
                 ->addIndexColumn()
+                ->filterColumn('coupon_code', function ($query, $keyword) {
+                    $query->where(function ($searchQuery) use ($keyword) {
+                        $searchQuery->whereHas('coupon', function ($couponQuery) use ($keyword) {
+                            $couponQuery->where('code', 'like', "%{$keyword}%");
+                        })
+                        ->orWhereHas('user', function ($userQuery) use ($keyword) {
+                            $userQuery->where('name', 'like', "%{$keyword}%")
+                                ->orWhere('email', 'like', "%{$keyword}%");
+                        })
+                        ->orWhereHas('order', function ($orderQuery) use ($keyword) {
+                            $orderQuery->where('id', 'like', "%{$keyword}%");
+                        });
+                    });
+                })
+                ->addColumn('coupon_name', function ($usage) {
+                    return $usage->coupon?->name ?? 'N/A';
+                })
                 ->addColumn('coupon_code', function ($usage) {
-                    return strtoupper($usage['coupon_code'] ?? 'N/A');
+                    return strtoupper($usage->coupon?->code ?? 'N/A');
+                })
+                ->addColumn('user_name', function ($usage) {
+                    return $usage->user?->name ?? 'N/A';
+                })
+                ->addColumn('user_email', function ($usage) {
+                    return $usage->user?->email ?? 'N/A';
+                })
+                ->addColumn('order_id', function ($usage) {
+                    return $usage->order?->id ?? 'N/A';
                 })
                 ->addColumn('used_at', function ($usage) {
-                    return isset($usage['used_at']) ? \Carbon\Carbon::parse($usage['used_at'])->toDateTimeString() : 'N/A';
+                    return $usage->used_at ? \Carbon\Carbon::parse($usage->used_at)->toDateTimeString() : 'N/A';
                 })
                 ->rawColumns([])
                 ->make(true);

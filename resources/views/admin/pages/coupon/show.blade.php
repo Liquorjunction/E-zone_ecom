@@ -1,5 +1,17 @@
 @extends('admin.layouts.app')
 @section('title', 'Coupon Details')
+@section('header-title', 'Coupon Details')
+@section('header-description', 'View all information about this coupon')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.coupons.show', $coupon) as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
+
 @section('content')
     <div class="container py-5">
         <div class="row justify-content-center mb-4">

@@ -41,6 +41,11 @@ class RoleController extends Controller
 
             return DataTables::of($roles)
                 ->addIndexColumn()
+                ->filterColumn('role', function ($query, $keyword) {
+                    $query->whereHas('roles', function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%$keyword%");
+                    });
+                })
                 ->addColumn('action', function ($role) use ($request) {
                     $data['id'] = $role->id;
                     $data['view_url'] = $request->user()->can('role.read') ? route('admin.roles-permissions.show', ['id' => $role->id]): '';

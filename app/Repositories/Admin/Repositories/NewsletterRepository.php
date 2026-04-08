@@ -49,9 +49,20 @@ class NewsletterRepository implements NewsletterRepositoryInterface
     {
         $query = Newsletter::query();
 
-        if ($request->has('search') && !empty($request->input('search.value'))) {
-            $searchValue = $request->input('search.value');
-            $query->where('email', 'like', '%' . $searchValue . '%');
+        // Status filter
+        if (isset($request['status']) && in_array($request['status'], ['active', 'inactive'])) {
+            $query->where('status', $request['status']);
+        }
+
+        // Date range filter
+        $startDate = $request['start_date'] ?? $request['date_from'] ?? null;
+        $endDate = $request['end_date'] ?? $request['date_to'] ?? null;
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->where('created_at', '<=', $endDate);
         }
 
         return $query->select(['id', 'email', 'status', 'created_at']);

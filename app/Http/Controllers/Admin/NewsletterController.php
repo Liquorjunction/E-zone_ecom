@@ -60,6 +60,9 @@ class NewsletterController extends Controller
             $newsletters = $newsletterRepo->getDataForDataTable($request);
             return datatables()->of($newsletters)
                 ->addIndexColumn()
+                ->filterColumn('email', function ($query, $keyword) {
+                    $query->where('email', 'like', "%{$keyword}%");
+                })
                 ->addColumn('email', function ($newsletter) {
                     return $newsletter->email;
                 })

@@ -103,12 +103,29 @@ class CouponController extends Controller
         }
     }
 
+    public function getCouponTypeList(CouponRepo $couponRepo)
+    {
+        try {
+            $types = $couponRepo->getCouponTypeList();
+
+            return response()->json(['success' => true, 'data' => $types]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function data(ReadCouponRequest $request, CouponRepo $couponRepo)
     {
         $coupons = $couponRepo->getDataForDataTable($request->all());
 
         return DataTables::of($coupons)
             ->addIndexColumn()
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('name', 'like', "%$keyword%")
+                ->orWhere('code', 'like', "%$keyword%");
+            })
             ->addColumn('name', function ($coupon) {
                 return ucfirst($coupon->name);
             })

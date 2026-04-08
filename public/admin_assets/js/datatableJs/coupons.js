@@ -14,10 +14,20 @@ $(function () {
     if (hasAction) {
         columns.push({ data: 'action', name: 'action', orderable: false, searchable: false });
     }
-    table.DataTable({
+    window.couponsTable = table.DataTable({
         processing: true,
         serverSide: true,
-        ajax: table.data('source'),
+        ajax: {
+            url: table.data('source'),
+            data: function (d) {
+                var selectedStatus = $('input[name="status"]:checked').val() || 'all';
+                d.status = selectedStatus === 'all' ? '' : selectedStatus;
+                d.date_from = $('#date_from').val() || '';
+                d.date_to = $('#date_to').val() || '';
+                d.sort_by_usage_count = $('#sort_by_usage_count').val() || '';
+                d.coupon_type = $('#coupon_type').val() || '';
+            }
+        },
         columns: columns
     })
 });

@@ -1,8 +1,17 @@
 $(function() {
-    var table = $('#contactUsTable').DataTable({
+    window.contactUsTable = $('#contactUsTable').DataTable({
         processing: true,
         serverSide: true,
-        ajax: $('#contactUsTable').data('source'),
+        ajax: {
+            url: $('#contactUsTable').data('source'),
+            data: function (d) {
+                var status = $('input[name="status"]:checked').val() || 'all';
+                d.status = status === 'all' ? '' : status;
+                d.subject = $('#subject').val() || '';
+                d.date_from = $('#date_from').val() || '';
+                d.date_to = $('#date_to').val() || '';
+            }
+        },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'TicketNumber', name: 'ticket_number' },

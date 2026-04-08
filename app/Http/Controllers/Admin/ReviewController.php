@@ -116,9 +116,10 @@ class ReviewController extends Controller
                 $name = $review->product->getTranslation('name', 'en');
                 if ($review->productVariant) {
                     $variant = $review->productVariant->getTranslation('variant_name', 'en');
-                    return $name . ($variant ? ' - ' . $variant : '');
+                    $full = $name . ($variant ? ' - ' . $variant : '');
+                    return Str::limit($full, 50);
                 }
-                return $name;
+                return Str::limit($name, 50);
             })
             ->addColumn('user', function ($review) {
                 return $review->user ? $review->user->name : ($review->reviewer_name ?? 'N/A');

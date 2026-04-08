@@ -672,3 +672,77 @@ Breadcrumbs::for('admin.reviews.show', function (BreadcrumbTrail $trail, $id) {
     $trail->parent('admin.reviews.index');
     $trail->push(statictranslations('Review Details'), route('admin.reviews.show', $id));
 });
+
+// --- Coupons ---
+Breadcrumbs::for('admin.coupons.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Coupons'), route('admin.coupons.index'));
+});
+Breadcrumbs::for('admin.coupons.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.coupons.index');
+    $trail->push(statictranslations('Create Coupon'), route('admin.coupons.create'));
+});
+Breadcrumbs::for('admin.coupons.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.coupons.index');
+    $trail->push(statictranslations('Edit Coupon'), route('admin.coupons.edit', $id));
+});
+Breadcrumbs::for('admin.coupons.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.coupons.index');
+    $trail->push(statictranslations('View Coupon'), route('admin.coupons.show', $id));
+});
+
+// --- Coupon Usage ---
+Breadcrumbs::for('admin.coupon-usage.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Coupon Usage'), route('admin.coupon-usage.index'));
+});
+
+// --- Discounts ---
+Breadcrumbs::for('admin.discounts.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Discounts'), route('admin.discounts.index'));
+});
+Breadcrumbs::for('admin.discounts.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.discounts.index');
+    $trail->push(statictranslations('Create Discount'), route('admin.discounts.create'));
+});
+Breadcrumbs::for('admin.discounts.edit', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.discounts.index');
+    $trail->push(statictranslations('Edit Discount'), route('admin.discounts.edit', $id));
+});
+Breadcrumbs::for('admin.discounts.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.discounts.index');
+    $trail->push(statictranslations('View Discount'), route('admin.discounts.show', $id));
+});
+
+// --- Site Settings ---
+Breadcrumbs::for('admin.site-settings.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Site Settings'), route('admin.site-settings.index'));
+});
+
+// --- Contact Us ---
+Breadcrumbs::for('admin.contact-us.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Contact Us Messages'), route('admin.contact-us.index'));
+});
+Breadcrumbs::for('admin.contact-us.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.contact-us.index');
+    $trail->push(statictranslations('View Message'), route('admin.contact-us.show', $id));
+});
+
+// --- NAPS ---
+Breadcrumbs::for('admin.naps-log.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('NAPS'), route('admin.naps-log.index'));
+});
+Breadcrumbs::for('admin.naps-log.show', function (BreadcrumbTrail $trail, $id) {
+    $trail->parent('admin.naps-log.index');
+    $trail->push(statictranslations('View NAP'), route('admin.naps-log.show', $id));
+});
+
+// --- Reports ---
+Breadcrumbs::for('admin.reports.stock', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push(statictranslations('Stock Report'), route('admin.reports.stock'));
+});

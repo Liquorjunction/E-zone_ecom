@@ -57,28 +57,44 @@ class ContactUsRepository implements ContactUsRepositoryInterface
         return $entry->save();
     }
 
-    public function getDataForDataTable(array $filters = [])
+    public function getSubjectList()
+    {
+        return ContactUs::query()->select('subject')->distinct()->pluck('subject');
+    }
+
+    public function getStatusList()
+    {
+        return ContactUs::query()->select('status')->distinct()->pluck('status');
+    }
+
+    public function getDataForDataTable($request)
     {
         $query = ContactUs::latest();
 
-        if (!empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+        //  Status filter
+        $status = is_array($request) ? ($request['status'] ?? null) : $request->input('status');
+        if (in_array($status, ['open', 'in_progress', 'resolved', 'closed'], true)) {
+            $query->where('status', $status);
         }
 
-        if (!empty($filters['subject_id'])) {
-            $query->where('subject_id', $filters['subject_id']);
+        // Date range filter
+        $dateFrom = is_array($request) ? ($request['date_from'] ?? null) : $request->input('date_from');
+        $dateTo = is_array($request) ? ($request['date_to'] ?? null) : $request->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+        } elseif ($dateFrom) {
+            $query->where('created_at', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $query->where('created_at', '<=', $dateTo);
         }
 
-        if (!empty($filters['date_from'])) {
-            $query->whereDate('created_at', '>=', $filters['date_from']);
+        // Subject filter
+        $subject = is_array($request) ? ($request['subject'] ?? ($request['subject_id'] ?? null)) : ($request->input('subject') ?? $request->input('subject_id'));
+        if ($subject) {
+            $query->where('subject', $subject);
         }
 
-        if (!empty($filters['date_to'])) {
-            $query->whereDate('created_at', '<=', $filters['date_to']);
-        }
-
-        // Remove dd($query) for production
-        return $query->get();
+        return $query;
     }
 
     public function replayToEnquiry(int $id, string $admin_message): bool
