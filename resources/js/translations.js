@@ -4,5 +4,4 @@ function trans(key) {
         : key;
 }
 
-console.log("Loaded translations:", window.translations);
 window.trans = trans;

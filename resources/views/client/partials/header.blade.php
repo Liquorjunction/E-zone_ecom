@@ -17,11 +17,7 @@
             <div class="hidden md:flex flex-1 max-w-2xl mx-auto">
                 <form id="universal-search-form" class="relative w-full group/search" autocomplete="off"
                     onsubmit="return false;">
-                    <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within/search:text-primary pointer-events-none"
-                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within/search:text-primary pointer-events-none"></i>
                     <input id="universal-search-input" type="text"
                         placeholder="{{ statictranslations('Search electronics, brands, deals...') }}"
                         class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
@@ -31,10 +27,7 @@
                     <button type="button" data-search-clear="universal-search-input"
                         class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
                         aria-label="Clear search">
-                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
                     </button>
                     <div id="universal-search-results"
                         class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
@@ -54,18 +47,10 @@
                     <button @click="languageOpen = !languageOpen"
                         class="flex items-center gap-1.5 h-9 px-3 rounded-xl text-gray-500 text-xs font-bold
                                    hover:bg-gray-100 hover:text-gray-800 transition-all duration-150 tracking-wide">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                        </svg>
-                        <span class="uppercase">{{ session('locale', app()->getLocale()) }}</span>
-                        <svg class="w-2.5 h-2.5 text-gray-400 transition-transform duration-150"
+                        <span class="uppercase"><i class="fa-solid fa-globe w-4 h-4 pr-1 shrink-0"></i>{{ session('locale', app()->getLocale()) }}</span>
+                        <i class="fa-solid fa-chevron-down w-2.5 h-2.5 text-gray-400 transition-transform duration-150"
                             :class="{ 'rotate-180': languageOpen }" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M19 9l-7 7-7-7" />
-                        </svg>
+                            ></i>
                     </button>
 
                     <div x-show="languageOpen" x-cloak x-transition:enter="transition ease-out duration-150"
@@ -96,11 +81,7 @@
                 <a href="{{ route('product-compare') }}" title="{{ statictranslations('Compare') }}"
                     class="hidden md:flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-gray-100 hover:text-gray-800 transition-all duration-150 relative group/tip">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <rect x="3" y="7" width="7" height="13" rx="2" />
-                        <rect x="14" y="3" width="7" height="17" rx="2" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 15h4" />
-                    </svg>
+                    <i class="fa-solid fa-code-compare text-[15px]"></i>
                     <span
                         class="compare-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
                                  bg-blue-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
@@ -113,11 +94,7 @@
                 <a href="{{ route('dashboard.wishlist') }}" title="{{ statictranslations('Wishlist') }}"
                     class="hidden md:flex relative items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-red-50 hover:text-red-500 transition-all duration-150 group/tip">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                    <i class="fa-solid fa-heart text-[15px]"></i>
                     <span
                         class="wishlist-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
                                  bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
@@ -130,11 +107,7 @@
                 <a href="{{ route('cart') }}" title="{{ statictranslations('Cart') }}"
                     class="relative flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-primary/8 hover:text-primary transition-all duration-150 group/tip">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+                    <i class="fa-solid fa-cart-shopping text-[15px]"></i>
                     <span
                         class="cart-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
                                  bg-primary text-white text-[9px] rounded-full flex items-center justify-center font-bold
@@ -173,12 +146,8 @@
                                 </p>
                                 <p class="text-[10px] text-gray-400">{{ statictranslations('Account') }}</p>
                             </div>
-                            <svg class="w-3 h-3 text-gray-400 transition-transform duration-150 shrink-0"
-                                :class="{ 'rotate-180': accountOpen }" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
+                            <i class="fa-solid fa-chevron-down w-3 h-3 text-gray-400 transition-transform duration-150 shrink-0"
+                                :class="{ 'rotate-180': accountOpen }"></i>
                         </button>
 
                         <div x-show="accountOpen" x-cloak x-transition:enter="transition ease-out duration-150"
@@ -213,17 +182,14 @@
 
                                 {{-- Links --}}
                                 <nav class="p-1.5 space-y-0.5">
-                                    @foreach ([['route' => 'dashboard.overview', 'label' => 'Dashboard', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'], ['route' => 'dashboard.orders', 'label' => 'My Orders', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'], ['route' => 'dashboard.profile', 'label' => 'My Profile', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'], ['route' => 'dashboard.wishlist', 'label' => 'My Wishlist', 'icon' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z']] as $item)
-                                        <a href="{{ route($item['route']) }}"
+                                    @foreach ([['route' => 'dashboard.overview', 'label' => 'Dashboard', 'icon' => 'fa-table-cells'], ['route' => 'dashboard.orders', 'label' => 'My Orders', 'icon' => 'fa-box-archive'], ['route' => 'dashboard.profile', 'label' => 'My Profile', 'icon' => 'fa-user'], ['route' => 'dashboard.wishlist', 'label' => 'My Wishlist', 'icon' => 'fa-heart']] as $item)
+                                        @php($routeName = $item['route'])
+                                        <a href="{{ route($routeName) }}"
                                             class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700
                                               hover:bg-gray-50 hover:text-primary transition-all duration-100">
                                             <span
                                                 class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                    stroke-width="2" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="{{ $item['icon'] }}" />
-                                                </svg>
+                                                <i class="fa-solid {{ $item['icon'] }} text-xs"></i>
                                             </span>
                                             {{ statictranslations($item['label']) }}
                                         </a>
@@ -240,11 +206,7 @@
                                                            text-red-500 hover:bg-red-50 transition-all duration-100">
                                                 <span
                                                     class="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                        stroke-width="2" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                                    </svg>
+                                                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
                                                 </span>
                                                 {{ statictranslations('Logout') }}
                                             </button>
@@ -262,11 +224,7 @@
                               bg-primary shadow-md shadow-primary/25
                               hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-px
                               transition-all duration-150 active:translate-y-0 active:shadow-sm">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
+                        <i class="fa-solid fa-right-to-bracket w-4 text-center shrink-0"></i>
                         {{ statictranslations('Login') }}
                     </a>
                 @endauth
@@ -275,12 +233,8 @@
                 <button @click="mobileMenuOpen = !mobileMenuOpen"
                     class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-gray-600
                                hover:bg-gray-100 transition-all duration-150">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                        <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <i x-cloak x-show="!mobileMenuOpen" class="fa-solid fa-bars text-lg leading-none"></i>
+                    <i x-cloak x-show="mobileMenuOpen" class="fa-solid fa-xmark text-lg leading-none"></i>
                 </button>
 
             </div>{{-- end right cluster --}}
@@ -300,11 +254,7 @@
 
         {{-- Search --}}
         <div class="relative mb-3">
-            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
             <input id="universal-search-input-mobile" type="text"
                 placeholder="{{ statictranslations('Search products...') }}"
                 class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
@@ -313,10 +263,7 @@
             <button type="button" data-search-clear="universal-search-input-mobile"
                 class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
                 aria-label="Clear search">
-                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" stroke-width="2.5"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
             </button>
             <div id="universal-search-results-mobile"
                 class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
@@ -327,21 +274,12 @@
         <div class="grid grid-cols-2 gap-2 mb-3">
             <a href="{{ route('dashboard.wishlist') }}"
                 class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+                <i class="fa-solid fa-heart w-4 shrink-0 text-center"></i>
                 {{ statictranslations('Wishlist') }}
             </a>
             <a href="{{ route('product-compare') }}"
                 class="relative flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <rect x="3" y="7" width="7" height="13" rx="2" />
-                    <rect x="14" y="3" width="7" height="17" rx="2" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 15h4" />
-                </svg>
+                <i class="fa-solid fa-code-compare w-4 shrink-0 text-center"></i>
                 {{ statictranslations('Compare') }}
                 <span
                     class="compare-counter ml-auto min-w-4.25 h-4.25 px-0.5
@@ -403,10 +341,7 @@
                 <a href="{{ route('login') }}"
                     class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold
                           text-white bg-primary shadow-md shadow-primary/25 hover:bg-primary-dark transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    <i class="fa-solid fa-right-to-bracket w-4 text-center"></i>
                     {{ statictranslations('Login') }}
                 </a>
             </div>
