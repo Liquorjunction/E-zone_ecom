@@ -37,6 +37,11 @@ function setButtonVisual(btn, compared) {
     btn.classList.toggle('is-compared', compared);
     btn.setAttribute('aria-pressed', compared ? 'true' : 'false');
 
+    const hideOnCompared = btn.dataset.hideOnCompared === '1';
+    if (hideOnCompared) {
+        btn.classList.toggle('hidden', compared);
+    }
+
     if (btn.classList.contains('group-hover:opacity-100')) {
         btn.classList.toggle('opacity-100', compared);
         btn.classList.toggle('opacity-0', !compared);

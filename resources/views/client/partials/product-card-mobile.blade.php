@@ -184,9 +184,10 @@
                 aria-label="{{ statictranslations('Compare product') }}"
                 data-product-variant-id="{{ $variantId }}"
                 data-init-compared="{{ $isCompared ? '1' : '0' }}"
+              data-hide-on-compared="1"
                 class="compare-btn no-toast absolute bottom-2 left-2 z-10
                        w-8 h-8 rounded-full {{ $isCompared ? 'bg-blue-50 border-blue-200 is-compared' : 'bg-white/90 border-white/60' }} backdrop-blur-sm border shadow-md
-                       flex items-center justify-center transition-all duration-200 active:scale-95 focus:outline-none"
+                  flex items-center justify-center transition-all duration-200 active:scale-95 focus:outline-none {{ $isCompared ? 'hidden' : '' }}"
                 @if (!$variantId) disabled @endif>
             <svg class="w-4 h-4 {{ $isCompared ? 'text-blue-700' : 'text-blue-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-100"/>
