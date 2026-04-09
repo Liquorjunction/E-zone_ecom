@@ -31,15 +31,31 @@ function iconMarkup(sizeClass, compared) {
     return `<svg class="${sizeClass} ${strokeClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-200"/><rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="${barClass}"/><rect x="3" y="7" width="7" height="13" rx="2" stroke="currentColor"/><rect x="14" y="3" width="7" height="17" rx="2" stroke="currentColor"/></svg>`;
 }
 
+function shouldHideOnCompared(btn) {
+    if (!btn) return false;
+
+    if (btn.dataset.hideOnCompared === '1') {
+        return true;
+    }
+
+    // Fallback for already-rendered mobile buttons that may not have dataset flag.
+    return btn.classList.contains('absolute')
+        && btn.classList.contains('bottom-2')
+        && btn.classList.contains('left-2')
+        && btn.classList.contains('w-8')
+        && btn.classList.contains('h-8');
+}
+
 function setButtonVisual(btn, compared) {
     if (!btn) return;
 
     btn.classList.toggle('is-compared', compared);
     btn.setAttribute('aria-pressed', compared ? 'true' : 'false');
 
-    const hideOnCompared = btn.dataset.hideOnCompared === '1';
+    const hideOnCompared = shouldHideOnCompared(btn);
     if (hideOnCompared) {
         btn.classList.toggle('hidden', compared);
+        btn.style.display = compared ? 'none' : '';
     }
 
     if (btn.classList.contains('group-hover:opacity-100')) {
