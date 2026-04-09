@@ -75,7 +75,10 @@
     @touchend="onTouchEnd($event)">
         <div class="px-4">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Shop by Category') }}</h2>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Shop by Category') }}</h2>
+                    <p class="text-xs text-gray-600">{{ statictranslations('Browse our extensive collection') }}</p>
+                </div>
                 <div class="flex gap-1">
                     <button @click="prev()" :disabled="currentSlide === 0"
                         :class="currentSlide === 0 ? 'opacity-30' : ''"
@@ -94,12 +97,12 @@
                 </div>
             </div>
 
-            <div class="relative overflow-hidden -mx-2">
-                <div class="flex transition-transform duration-300 ease-out px-2"
+            <div class="relative overflow-hidden">
+                <div class="flex transition-transform duration-300 ease-out"
                     :style="`transform: translateX(-${currentSlide * 100}%)`">
                     @php $categoryChunks = $categories->chunk(3); @endphp
                     @foreach ($categoryChunks as $chunk)
-                        <div class="w-full shrink-0 px-2">
+                        <div class="w-full shrink-0">
                             <div class="grid grid-cols-3 gap-3">
                                 @foreach ($chunk as $category)
                                     <a href="{{ route('products.index', ['category' => $category->slug]) }}"
@@ -173,7 +176,10 @@
     @touchstart.passive="onTouchStart($event)"
     @touchend="onTouchEnd($event)">
         <div class="px-4">
-            <h2 class="text-lg font-bold text-gray-900 mb-4">{{ statictranslations('Featured Promotions') }}</h2>
+            <div class="mb-4">
+                <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Featured Promotions') }}</h2>
+                <p class="text-xs text-gray-600">{{ statictranslations('Handpicked deals just for you') }}</p>
+            </div>
 
             <div class="relative overflow-hidden rounded-xl">
                 <div class="flex transition-transform duration-500 ease-out"
@@ -211,6 +217,76 @@
             </div>
         </div>
     </section>
+
+    {{-- Mobile Deals & Discounts --}}
+    @php
+        $mobileDeals = ($deals ?? collect());
+        $mobileDealsChunks = $mobileDeals->chunk(2);
+        $mobileDealsCount = $mobileDeals->count();
+    @endphp
+    @if ($mobileDealsCount > 0)
+        <section class="py-6 bg-gray-50" x-data="{
+            currentSlide: 0,
+            itemsPerPage: 1,
+            totalItems: {{ $mobileDealsCount }},
+            get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
+            next() { if (this.currentSlide < this.totalSlides - 1) this.currentSlide++ },
+            prev() { if (this.currentSlide > 0) this.currentSlide-- },
+            onTouchStart(event) {
+                const touch = event.touches && event.touches[0];
+                if (!touch) return;
+                this.touchStartX = touch.clientX;
+                this.touchStartY = touch.clientY;
+            },
+            onTouchEnd(event) {
+                const touch = event.changedTouches && event.changedTouches[0];
+                if (!touch || this.touchStartX === null || this.touchStartY === null) return;
+
+                const deltaX = touch.clientX - this.touchStartX;
+                const deltaY = touch.clientY - this.touchStartY;
+                this.touchStartX = null;
+                this.touchStartY = null;
+
+                if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+                if (deltaX < 0) this.next();
+                else this.prev();
+            },
+            touchStartX: null,
+            touchStartY: null
+        }"
+        @touchstart.passive="onTouchStart($event)"
+        @touchend="onTouchEnd($event)">
+            <div class="px-4">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Deals & Discounts') }}</h2>
+                    <p class="text-xs text-gray-600">{{ statictranslations('Grab the best offers on top products') }}</p>
+                </div>
+
+                <div class="relative overflow-hidden">
+                    <div class="flex transition-transform duration-500 ease-out"
+                        :style="`transform: translateX(-${currentSlide * 100}%)`">
+                        @foreach ($mobileDealsChunks as $chunk)
+                            <div class="w-full shrink-0">
+                                <div class="grid grid-cols-2 gap-3">
+                                    @foreach ($chunk as $productVariant)
+                                        @include('client.partials.product-card-mobile', ['product' => $productVariant])
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-1.5 mt-4" x-show="totalSlides > 1">
+                    <template x-for="i in totalSlides" :key="i">
+                        <button @click="currentSlide = i - 1"
+                            :class="currentSlide === i - 1 ? 'bg-primary w-6' : 'bg-gray-300 w-1.5'"
+                            class="h-1.5 rounded-full transition-all"></button>
+                    </template>
+                </div>
+            </div>
+        </section>
+    @endif
 
     {{-- Mobile New Arrivals --}}
     <section class="py-6 bg-gray-50" x-data="{
@@ -254,19 +330,16 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('New Arrivals') }}</h2>
-                    <p class="text-xs text-gray-600">{{ statictranslations('Latest products') }}</p>
+                    <p class="text-xs text-gray-600">{{ statictranslations('The latest tech just landed') }}</p>
                 </div>
-                <a href="{{ route('products.index') }}" class="text-xs font-semibold text-primary">
-                    {{ statictranslations('View All') }} →
-                </a>
             </div>
 
-            <div class="relative overflow-hidden -mx-2">
-                <div class="flex transition-transform duration-500 ease-out px-2"
+            <div class="relative overflow-hidden">
+                <div class="flex transition-transform duration-500 ease-out"
                     :style="`transform: translateX(-${currentSlide * 100}%)`">
                     @php $newArrivalsChunks = ($newArrivals ?? collect())->chunk(2); @endphp
                     @foreach ($newArrivalsChunks as $chunk)
-                        <div class="w-full shrink-0 px-2">
+                        <div class="w-full shrink-0">
                             <div class="grid grid-cols-2 gap-3">
                                 @foreach ($chunk as $productVariant)
                                     @include('client.partials.product-card-mobile', ['product' => $productVariant])
@@ -326,19 +399,16 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Best Sellers') }}</h2>
-                        <p class="text-xs text-gray-600">{{ statictranslations('Top rated') }}</p>
-                    </div>
-                    <a href="{{ route('products.index') }}" class="text-xs font-semibold text-primary">
-                        {{ statictranslations('View All') }} →
-                    </a>
+                    <p class="text-xs text-gray-600">{{ statictranslations('Most loved by our customers') }}</p>
+                </div>
                 </div>
 
-                <div class="relative overflow-hidden -mx-2">
-                    <div class="flex transition-transform duration-500 ease-out px-2"
+                <div class="relative overflow-hidden">
+                    <div class="flex transition-transform duration-500 ease-out"
                         :style="`transform: translateX(-${currentSlide * 100}%)`">
                         @php $bestSellerChunks = ($bestSellers ?? collect())->chunk(2); @endphp
                         @foreach ($bestSellerChunks as $chunk)
-                            <div class="w-full shrink-0 px-2">
+                            <div class="w-full shrink-0">
                                 <div class="grid grid-cols-2 gap-3">
                                     @foreach ($chunk as $productVariant)
                                         @include('client.partials.product-card-mobile', ['product' => $productVariant])
@@ -365,6 +435,7 @@
     <section class="py-6 bg-gray-50">
         <div class="px-4">
             <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ statictranslations('Trusted Brands') }}</h2>
+            <p class="text-xs text-gray-600 text-center mb-4">{{ statictranslations("We partner with the world's leading technology brands") }}</p>
 
             @php
                 $brandCount = ($brands ?? collect())->count();
@@ -404,6 +475,7 @@
     <section class="py-6 bg-white">
         <div class="px-4">
             <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ statictranslations('Why Shop With Us?') }}</h2>
+            <p class="text-xs text-gray-600 text-center mb-4">{{ statictranslations('Experience excellence in every purchase') }}</p>
 
             @php
                 $whyShopWithUs = isset($whyShopWithUs) ? $whyShopWithUs : collect();

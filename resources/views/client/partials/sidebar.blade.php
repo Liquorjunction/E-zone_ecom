@@ -213,7 +213,7 @@
 {{-- ═══════════════════════════════════════════════════════
      MOBILE FAB
      ═══════════════════════════════════════════════════════ --}}
-<button @click="mobileSidebarOpen = true"
+<button x-cloak x-show="!mobileSidebarOpen" @click="mobileSidebarOpen = true"
         class="sidebar-mobile-open-btn lg:hidden p-4 text-white bg-primary rounded-full
                shadow-2xl shadow-primary/40 transition-all duration-200
                hover:scale-110 hover:shadow-primary/50 active:scale-95">
@@ -285,7 +285,7 @@
 
                     <div class="relative flex items-center rounded-2xl overflow-hidden transition-all duration-200 hover:bg-primary/5 hover:shadow-sm">
 
-                        <span class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-primary
+                        <span class="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 rounded-r-full bg-primary
                                      transition-all duration-250 ease-out opacity-0 h-0
                                      group-hover/item:opacity-100 group-hover/item:h-8"></span>
 
@@ -328,9 +328,9 @@
                     </div>
 
                     @if($category->subcategories->count() > 0)
-                        <div x-show="open"
-                             x-collapse.duration.200ms
-                             class="mt-1 ml-[3.25rem] space-y-0.5 pb-1 pl-3 border-l-2 border-primary/20">
+                            <div x-show="open"
+                                x-collapse.duration.200ms
+                                class="mt-1 ml-13 space-y-0.5 pb-1 pl-3 border-l-2 border-primary/20">
                             @foreach ($category->subcategories as $subcategory)
                                 @if (function_exists('countActiveVariants') ? countActiveVariants($subcategory->products) > 0 : (isset($countActiveVariants) ? $countActiveVariants($subcategory->products) > 0 : ($subcategory->products && $subcategory->products->where('status', 'active')->count() > 0)))
                                     <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"

@@ -132,7 +132,7 @@
             @if ($isBestseller)
                 <span class="inline-flex items-center bg-amber-500 text-white
                              text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm leading-none">
-                    🔥 {{ statictranslations('HOT') }}
+                    🔥 {{ statictranslations('Best Seller') }}
                 </span>
             @endif
         </div>
