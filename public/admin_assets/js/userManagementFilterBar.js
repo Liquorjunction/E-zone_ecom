@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterForm = document.getElementById('user-filter-bar');
     const applyBtn = document.getElementById('apply-filters-btn');
     const resetBtn = document.getElementById('reset-filters-btn');
-    const roleSelect = document.getElementById('role_id');
+    const roleSelect = document.getElementById('role');
     const statusCheckboxes = document.querySelectorAll('.user-status-filter');
     const dateFromInput = document.getElementById('date_from');
     const dateToInput = document.getElementById('date_to');
@@ -23,63 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
         );
     }
 
-    function loadRoles() {
-        if (!roleSelect || roleSelect.dataset.loaded === '1') {
-            return;
-        }
-
-        const url = roleSelect.dataset.listUrl;
-        if (!url) {
-            return;
-        }
-
-        roleSelect.dataset.loaded = 'loading';
-
-        fetch(url, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('Failed to load roles');
-                }
-                return response.json();
-            })
-            .then(function (payload) {
-                const selected = roleSelect.value || '';
-                const roles = payload && payload.data ? payload.data : {};
-
-                roleSelect.innerHTML = '<option value="">All Roles</option>';
-
-                if (Array.isArray(roles)) {
-                    roles.forEach(function (role) {
-                        const option = document.createElement('option');
-                        option.value = role.id;
-                        option.textContent = role.name;
-                        roleSelect.appendChild(option);
-                    });
-                } else {
-                    Object.keys(roles).forEach(function (id) {
-                        const option = document.createElement('option');
-                        option.value = id;
-                        option.textContent = roles[id];
-                        roleSelect.appendChild(option);
-                    });
-                }
-
-                if (selected) {
-                    roleSelect.value = selected;
-                }
-
-                roleSelect.dataset.loaded = '1';
-            })
-            .catch(function () {
-                roleSelect.dataset.loaded = '0';
-            });
-    }
-
     // Keep status single-select while keeping checkbox UI.
     statusCheckboxes.forEach(function (checkbox) {
         checkbox.addEventListener('change', function () {
@@ -92,11 +35,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-
-    if (roleSelect) {
-        roleSelect.addEventListener('focus', loadRoles);
-        roleSelect.addEventListener('mousedown', loadRoles);
-    }
 
     if (applyBtn) {
         applyBtn.addEventListener('click', function () {
@@ -116,6 +54,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (roleSelect) {
                 roleSelect.value = '';
+                if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+                    window.jQuery(roleSelect).trigger('change');
+                }
             }
 
             reloadTable();

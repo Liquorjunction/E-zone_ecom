@@ -21,7 +21,7 @@ $(document).ready(function () {
             type: 'GET',
             data: function (d) {
                 d.status = $("input[name='status']:checked").val() || 'all';
-                d.category_id = $("#faq-category-filter").val() || '';
+                d.category_id = $("#faq_category_id").val() || '';
                 d.date_from = $("input[name='date_from']").val() || '';
                 d.date_to = $("input[name='date_to']").val() || '';
             }

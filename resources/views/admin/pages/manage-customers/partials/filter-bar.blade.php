@@ -44,7 +44,7 @@
                         </div>
                     </div>
 
-                    <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                    <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                     {{-- Date Range --}}
                     <div>
@@ -59,7 +59,7 @@
                         </div>
                     </div>
 
-                    <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                    <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                     {{-- Email Verified --}}
                     <div>

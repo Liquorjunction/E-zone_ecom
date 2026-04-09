@@ -47,7 +47,7 @@
     $isContactUsSectionActive = request()->routeIs('admin.contact-us.*');
 @endphp
 
-<aside class="sidebar" role="navigation" aria-label="Admin Sidebar">
+<aside class="sidebar" id="adminSidebar" role="navigation" aria-label="Admin Sidebar">
     <div class="sidebar-header">
         <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
             <div class="logo-main">

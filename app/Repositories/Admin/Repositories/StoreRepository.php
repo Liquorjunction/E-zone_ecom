@@ -91,4 +91,18 @@ class StoreRepository implements StoreRepositoryInterface
 
         return $query;
     }
+
+    public function getStoreList($term = null)
+    {
+        $query = Store::select('id', 'store_name');
+
+        if ($term) {
+            $query->where(function($q) use ($term) {
+                $q->where('store_name->en', 'LIKE', '%' . $term . '%')
+                  ->orWhere('store_name->ar', 'LIKE', '%' . $term . '%');
+            });
+        }
+
+        return $query->get(['id', 'store_name']);
+    }
 }

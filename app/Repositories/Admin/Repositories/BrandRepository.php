@@ -92,4 +92,20 @@ class BrandRepository implements BrandRepositoryInterface
 
         return $query;
     }
+
+    public function getBrandList($term = null)
+    {
+        $query = Brand::where('status', 'active');
+
+        if (!empty($term)) {
+            $like = '%' . $term . '%';
+            $query->where(function ($builder) use ($like) {
+                $builder->orWhere('name->en', 'LIKE', $like)
+                    ->orWhere('name->fr', 'LIKE', $like)
+                    ->orWhere('name->ar', 'LIKE', $like);
+            });
+        }
+
+        return $query->get(['id', 'name']);
+    }
 }

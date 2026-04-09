@@ -30,7 +30,7 @@
                         class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary d-none"
                         style="font-size:0.65em;">0</span>
                 </button>
-                @can('city.create')
+                @can('cities.create')
                     <a href="{{ route('admin.cities.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus me-1"></i> Add City
                     </a>

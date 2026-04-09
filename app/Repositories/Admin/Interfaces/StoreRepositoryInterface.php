@@ -12,4 +12,5 @@ interface StoreRepositoryInterface
     public function deleteStore($id);
     public function updateStatus($id);
     public function getDataForDataTable();
+    public function getStoreList($term = null);
 }

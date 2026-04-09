@@ -15,6 +15,7 @@ use App\Repositories\Client\Interfaces\AuthRepositoryInterface as AuthRepo;
 use App\Services\PasswordResetService;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Services\CartService;
 use App\Services\VerifyEmailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -85,9 +86,10 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(LoginRequest $request, AuthRepo $authRepository)
+    public function login(LoginRequest $request, AuthRepo $authRepository, CartService $cartService)
     {
         $credentials = $request->only(['email', 'password']);
+        $guestSessionId = $request->session()->getId();
 
         $user = $authRepository->findUserByEmail($request->email);
 
@@ -99,6 +101,16 @@ class AuthController extends Controller
 
         if ($authRepository->authenticateUser($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            try {
+                $cartService->mergeSessionCartIntoUserCart((int) Auth::id(), $guestSessionId);
+            } catch (\Throwable $e) {
+                Log::warning('Guest cart merge failed after login.', [
+                    'user_id' => Auth::id(),
+                    'session_id' => $guestSessionId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return redirect()->intended(route('home'));
         }

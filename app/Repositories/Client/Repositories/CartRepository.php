@@ -26,6 +26,13 @@ class CartRepository implements CartRepositoryInterface
             ->firstOrCreate(['session_id' => $identifier->sessionId]);
     }
 
+    public function getCartBySessionId(string $sessionId)
+    {
+        return Cart::with('items.product', 'items.variant')
+            ->where('session_id', $sessionId)
+            ->first();
+    }
+
     public function getCartById(int $cartId)
     {
         return Cart::with('items.product', 'items.variant')->find($cartId);

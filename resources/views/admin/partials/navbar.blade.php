@@ -33,14 +33,14 @@
                 </div>
                 <h4 class="logo-title">{{ config('app.name') }}</h4>
             </a>
-            <div class="sidebar-toggle" data-toggle="sidebar" data-active="true">
+            <button type="button" class="sidebar-toggle" id="sidebarToggleBtn" data-sidebar-toggle="true" aria-label="Toggle sidebar" aria-controls="adminSidebar" aria-expanded="false">
                 <i class="icon">
                     <svg width="20px" class="icon-20" viewBox="0 0 24 24">
                         <path fill="currentColor"
                             d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" />
                     </svg>
                 </i>
-            </div>
+            </button>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">

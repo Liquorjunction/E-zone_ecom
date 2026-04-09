@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid pt-3">
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
@@ -29,11 +29,16 @@
 
                         <div class="form-group">
                             <label>Category</label>
-                            <select name="faq_category_id" class="form-control">
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ $faq->faq_category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                @endforeach
+                            <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#category-error-div" name="faq_category_id" id="faq_category_id"
+                                data-url="{{ route('admin.lists.faq-categories') }}">
+                                @if (old('faq_category_id', $faq->faq_category_id))
+                                    <option selected value="{{ old('faq_category_id', $faq->faq_category_id) }}">{{ $faq->category ? $faq->category->name : 'Selected Category' }}</option>
+                                @else
+                                    <option value="">Select Category</option>
+                                @endif
                             </select>
+                            <div id="category-error-div"></div>
+                            @error('faq_category_id') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
 
                         <ul class="nav nav-tabs" id="langTab" role="tablist">

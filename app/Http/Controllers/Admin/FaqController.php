@@ -166,25 +166,6 @@ class FaqController extends Controller
         }
     }
 
-    public function faqCategoryList(FaqRepo $faqRepo)
-    {
-        try {
-            $categories = $faqRepo->getFaqCategoryList();
-
-            return response()->json([
-                'success' => true,
-                'data' => $categories,
-            ]);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
     public function data(ReadFaqRequest $request, FaqRepo $faqRepo)
     {
         try {

@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\InventoryTransactionsController;
 use App\Http\Controllers\Admin\ManageCustomerController;
 use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\OptionController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\ProductController;
@@ -50,6 +51,21 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminAuthController::class, 'dashboard'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
+        // Options Routes
+        Route::prefix('lists')->name('lists.')->group(function () {
+            Route::get('/categories', [OptionController::class, 'getCategoryList'])->name('categories');
+            Route::get('/sub-categories', [OptionController::class, 'getSubCategoryList'])->name('sub-categories');
+            Route::get('/sub-categories-by-category', [OptionController::class, 'getSubCategoryListByCategoryId'])->name('sub-categories-by-category');
+            Route::get('/products', [OptionController::class, 'getProductList'])->name('products');
+            Route::get('/variants', [OptionController::class, 'getVariantListByProductId'])->name('variants');
+            Route::get('/varient', [OptionController::class, 'getVariantList'])->name('variantList');
+            Route::get('/warehouses', [OptionController::class, 'getWarehouseList'])->name('warehouses');
+            Route::get('/stores', [OptionController::class, 'getStoreList'])->name('stores');
+            Route::get('/brands', [OptionController::class, 'getBrandList'])->name('brands');
+            Route::get('/faq-categories', [OptionController::class, 'faqCategoryList'])->name('faq-categories');
+            Route::get('/roles', [OptionController::class, 'rolesList'])->name('roles');
+        });
+
         // Translation Routes
         Route::post('/translate-content', [TranslationController::class, 'translate'])->name('translate.content');
         Route::post('/translate-batch', [TranslationController::class, 'translateBatch'])->name('translate.batch');
@@ -64,7 +80,6 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::get('/show', [AdminAuthController::class, 'show'])->name('view')->middleware('can:user management.read,admin');
             Route::put('/update', [AdminAuthController::class, 'update'])->name('update')->middleware('can:user management.update,admin');
             Route::patch('/toggle-status', [AdminAuthController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:user management.update,admin');
-            Route::get('/list', [AdminAuthController::class, 'getRolesList'])->name('list')->middleware('can:user management.read,admin');
         });
 
         // Profile routes
@@ -175,7 +190,6 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [FaqController::class, 'update'])->name('update')->middleware('can:faqs.update,admin');
             Route::delete('/destroy', [FaqController::class, 'destroy'])->name('destroy')->middleware('can:faqs.delete,admin');
             Route::patch('/toggle-status', [FaqController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:faqs.update,admin');
-            Route::get('/list', [FaqController::class, 'faqCategoryList'])->name('list');
         });
 
         // Terms and Conditions Routes

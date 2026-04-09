@@ -13,16 +13,15 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid pt-3">
         <div class="row">
             <div class="col-lg-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    @can('coupon.create')
-                        <div>
-                            <h4 class="mb-1">Create Coupon</h4>
-                            <p class="text-muted mb-0">Configure coupon code, limits, and active dates</p>
-                        </div>
-                    @endcan
+                <div
+                    class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4 bg-white rounded-3 p-3">
+                    <div>
+                        <h4 class="fw-semibold mb-1">Create Coupon</h4>
+                        <p class="text-muted mb-0">Configure coupon code, limits, and active dates</p>
+                    </div>
                     <a href="{{ route('admin.coupons.index') }}" class="btn btn-soft-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Back to Coupons
                     </a>
@@ -125,9 +124,11 @@
                             <div class="row">
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Starts At</label>
-                                    <input type="datetime-local" name="starts_at" id="starts-at-field" class="form-control"
+                                    <input type="datetime-local" name="starts_at" id="starts-at-field"
+                                        class="form-control"
                                         value="{{ old('starts_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
-                                    <input type="hidden" name="starts_at" id="starts-at-hidden" value="{{ old('starts_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
+                                    <input type="hidden" name="starts_at" id="starts-at-hidden"
+                                        value="{{ old('starts_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-semibold">Ends At</label>

@@ -13,12 +13,13 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid pt-3">
         <div class="row">
             <div class="col-lg-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div
+                    class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4 bg-white rounded-3 p-3">
                     <div>
-                        <h4 class="mb-1">Edit Coupon</h4>
+                        <h4 class="fw-semibold mb-1">Edit Coupon</h4>
                         <p class="text-muted mb-0">{{ $coupon->name }} ({{ strtoupper($coupon->code) }})</p>
                     </div>
                     <a href="{{ route('admin.coupons.index') }}" class="btn btn-soft-secondary">

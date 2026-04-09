@@ -10,21 +10,25 @@
         storageKey: 'sidebarPinned',
         hoverDelay: 100,
         collapseDelay: 100,
+        mobileBreakpoint: 1200,
         classes: {
             sidebar: '.sidebar',
             pinBtn: '#sidebarPinBtn',
+            toggleBtn: '[data-sidebar-toggle], #sidebarToggleBtn',
             mainContent: '.main-content',
             navLink: '.sidebar .nav-link',
             subNav: '.sidebar .sub-nav',
             mini: 'sidebar-mini',
             hover: 'sidebar-hover',
             pinned: 'sidebar-pinned',
+            show: 'show',
+            bodyOpen: 'sidebar-open',
             active: 'active',
             sectionActive: 'section-active'
         }
     };
 
-    let sidebar, pinBtn, mainContent;
+    let sidebar, pinBtn, mainContent, sidebarToggleBtn, sidebarBackdrop;
     let isPinned = false;
     let hoverTimeout = null;
 
@@ -34,13 +38,15 @@
     function init() {
         sidebar = document.querySelector(CONFIG.classes.sidebar);
         pinBtn = document.querySelector(CONFIG.classes.pinBtn);
+        sidebarToggleBtn = document.querySelector(CONFIG.classes.toggleBtn);
         mainContent = document.querySelector(CONFIG.classes.mainContent);
 
-        if (!sidebar || !pinBtn) {
+        if (!sidebar) {
             console.warn('Sidebar elements not found');
             return;
         }
 
+        ensureBackdrop();
         loadState();
         setupEventListeners();
         updateUI();
@@ -69,7 +75,14 @@
      */
     function setupEventListeners() {
         // Pin button
-        pinBtn.addEventListener('click', handlePinClick);
+        if (pinBtn) {
+            pinBtn.addEventListener('click', handlePinClick);
+        }
+
+        // Main sidebar toggle from navbar
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.addEventListener('click', handleSidebarToggleClick);
+        }
 
         // Hover events
         sidebar.addEventListener('mouseenter', handleMouseEnter);
@@ -80,6 +93,12 @@
 
         // Window resize
         window.addEventListener('resize', debounce(handleResize, 250));
+
+        // Close mobile sidebar when tapping outside
+        document.addEventListener('click', handleDocumentClick);
+
+        // Close mobile sidebar with Escape
+        document.addEventListener('keydown', handleEscapeKey);
 
         // Collapse events
         const collapses = sidebar.querySelectorAll('.collapse');
@@ -102,6 +121,11 @@
         e.stopPropagation();
         e.preventDefault();
 
+        if (isMobileView()) {
+            toggleMobileSidebar();
+            return;
+        }
+
         isPinned = !isPinned;
         saveState();
         updateUI();
@@ -117,7 +141,7 @@
      * Handle mouse enter
      */
     function handleMouseEnter() {
-        if (isPinned) return;
+        if (isPinned || isMobileView()) return;
 
         clearTimeout(hoverTimeout);
         hoverTimeout = setTimeout(() => {
@@ -129,7 +153,7 @@
      * Handle mouse leave
      */
     function handleMouseLeave() {
-        if (isPinned) return;
+        if (isPinned || isMobileView()) return;
 
         clearTimeout(hoverTimeout);
         hoverTimeout = setTimeout(() => {
@@ -141,19 +165,67 @@
      * Handle sidebar click
      */
     function handleSidebarClick() {
-        if (isPinned) return;
+        if (isPinned || isMobileView()) return;
         clearTimeout(hoverTimeout);
+    }
+
+    /**
+     * Handle navbar sidebar toggle button click
+     */
+    function handleSidebarToggleClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isMobileView()) {
+            toggleMobileSidebar();
+            return;
+        }
+
+        isPinned = !isPinned;
+        saveState();
+        updateUI();
     }
 
     /**
      * Handle window resize
      */
     function handleResize() {
-        if (window.innerWidth < 768) {
-            sidebar.classList.add(CONFIG.classes.mini);
+        if (isMobileView()) {
+            closeMobileSidebar();
+            sidebar.classList.remove(CONFIG.classes.mini);
             sidebar.classList.remove(CONFIG.classes.pinned);
+            sidebar.classList.remove(CONFIG.classes.hover);
         } else {
+            sidebar.classList.remove(CONFIG.classes.show);
+            document.body.classList.remove(CONFIG.classes.bodyOpen);
             updateUI();
+        }
+
+        setSidebarToggleAria();
+    }
+
+    /**
+     * Close mobile sidebar when clicking outside
+     */
+    function handleDocumentClick(e) {
+        if (!isMobileView()) return;
+        if (!sidebar.classList.contains(CONFIG.classes.show)) return;
+
+        const clickedInsideSidebar = sidebar.contains(e.target);
+        const clickedToggle = sidebarToggleBtn && sidebarToggleBtn.contains(e.target);
+        const clickedBackdrop = sidebarBackdrop && sidebarBackdrop.contains(e.target);
+
+        if (!clickedInsideSidebar && !clickedToggle || clickedBackdrop) {
+            closeMobileSidebar();
+        }
+    }
+
+    /**
+     * Close mobile sidebar on Escape key
+     */
+    function handleEscapeKey(e) {
+        if (e.key === 'Escape' && isMobileView()) {
+            closeMobileSidebar();
         }
     }
 
@@ -202,27 +274,93 @@
 
         // Update active states BEFORE navigation
         updateActiveStatesInstantly(link);
+
+        if (isMobileView()) {
+            closeMobileSidebar();
+        }
     }
 
     /**
      * Update UI based on state
      */
     function updateUI() {
+        if (isMobileView()) {
+            sidebar.classList.remove(CONFIG.classes.mini);
+            sidebar.classList.remove(CONFIG.classes.pinned);
+            sidebar.classList.remove(CONFIG.classes.hover);
+            setSidebarToggleAria();
+            return;
+        }
+
         if (isPinned) {
             sidebar.classList.add(CONFIG.classes.pinned);
             sidebar.classList.remove(CONFIG.classes.mini);
             sidebar.classList.remove(CONFIG.classes.hover);
 
-            pinBtn.setAttribute('title', 'Unpin Sidebar');
-            pinBtn.setAttribute('aria-label', 'Unpin Sidebar');
+            if (pinBtn) {
+                pinBtn.setAttribute('title', 'Unpin Sidebar');
+                pinBtn.setAttribute('aria-label', 'Unpin Sidebar');
+            }
         } else {
             sidebar.classList.remove(CONFIG.classes.pinned);
             sidebar.classList.add(CONFIG.classes.mini);
             sidebar.classList.add(CONFIG.classes.hover);
 
-            pinBtn.setAttribute('title', 'Pin Sidebar');
-            pinBtn.setAttribute('aria-label', 'Pin Sidebar');
+            if (pinBtn) {
+                pinBtn.setAttribute('title', 'Pin Sidebar');
+                pinBtn.setAttribute('aria-label', 'Pin Sidebar');
+            }
         }
+
+        setSidebarToggleAria();
+    }
+
+    function isMobileView() {
+        return window.innerWidth < CONFIG.mobileBreakpoint;
+    }
+
+    function ensureBackdrop() {
+        sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+        if (!sidebarBackdrop) {
+            sidebarBackdrop = document.createElement('div');
+            sidebarBackdrop.className = 'sidebar-backdrop';
+            document.body.appendChild(sidebarBackdrop);
+        }
+    }
+
+    function openMobileSidebar() {
+        if (!isMobileView()) return;
+        sidebar.classList.add(CONFIG.classes.show);
+        document.body.classList.add(CONFIG.classes.bodyOpen);
+        setSidebarToggleAria();
+    }
+
+    function closeMobileSidebar() {
+        sidebar.classList.remove(CONFIG.classes.show);
+        document.body.classList.remove(CONFIG.classes.bodyOpen);
+        setSidebarToggleAria();
+    }
+
+    function toggleMobileSidebar() {
+        if (sidebar.classList.contains(CONFIG.classes.show)) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+    }
+
+    function setSidebarToggleAria() {
+        if (!sidebarToggleBtn) return;
+
+        if (isMobileView()) {
+            sidebarToggleBtn.setAttribute(
+                'aria-expanded',
+                sidebar.classList.contains(CONFIG.classes.show) ? 'true' : 'false'
+            );
+            return;
+        }
+
+        sidebarToggleBtn.setAttribute('aria-expanded', isPinned ? 'true' : 'false');
     }
 
     /**
@@ -414,6 +552,11 @@
             }
         },
         toggle() {
+            if (isMobileView()) {
+                toggleMobileSidebar();
+                return;
+            }
+
             isPinned = !isPinned;
             saveState();
             updateUI();

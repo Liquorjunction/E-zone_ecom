@@ -76,14 +76,20 @@
                             <div class="vr opacity-25 d-none d-md-block align-self-stretch"></div>
 
                             {{-- Role --}}
-                            <div>
+                            <div style="min-width: 280px;">
                                 <div class="text-uppercase text-muted fw-semibold mb-2"
                                     style="font-size:0.65rem;letter-spacing:0.08em;">Role</div>
-                                <select class="form-select form-select-sm" id="role_id" name="role_id"
-                                    data-list-url="{{ route('admin.user-management.list') }}" data-loaded="0"
-                                    style="width:190px;">
-                                    <option value="">All Roles</option>
+                                <select class="select2-ajax browser-default form-control" data-allow-clear="true"
+                                    data-error="#role-error-div" data-option-url="{{ route('admin.lists.roles') }}"
+                                    data-placeholder="Select role" id="role" name="role">
+                                    @if (old('role'))
+                                        <option selected value="{{ old('role') }}">{{ old('role') }}</option>
+                                    @endif
                                 </select>
+                                <div id="role-error-div"></div>
+                                @error('role')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="vr opacity-25 d-none d-md-block align-self-stretch"></div>
@@ -93,11 +99,11 @@
                                 <div class="text-uppercase text-muted fw-semibold mb-2"
                                     style="font-size:0.65rem;letter-spacing:0.08em;">Joining Date</div>
                                 <div class="d-flex align-items-center gap-2">
-                                    <input type="date" class="form-control form-control-sm filter-input" id="date_from" name="date_from"
-                                        value="{{ request('date_from') }}" style="width:145px;">
+                                    <input type="date" class="form-control form-control-sm filter-input" id="date_from"
+                                        name="date_from" value="{{ request('date_from') }}" style="width:145px;">
                                     <span class="text-muted small">—</span>
-                                    <input type="date" class="form-control form-control-sm filter-input" id="date_to" name="date_to"
-                                        value="{{ request('date_to') }}" style="width:145px;">
+                                    <input type="date" class="form-control form-control-sm filter-input" id="date_to"
+                                        name="date_to" value="{{ request('date_to') }}" style="width:145px;">
                                 </div>
                             </div>
                         </div>

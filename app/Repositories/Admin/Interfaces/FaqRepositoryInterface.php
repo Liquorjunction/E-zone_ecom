@@ -12,6 +12,6 @@ interface FaqRepositoryInterface
     public function updateFaq($id, $request);
     public function deleteFaq($id);
     public function updateFaqStatus($id);
-    public function getFaqCategoryList();
+    public function getFaqCategoryList($term = null);
     public function getDataforDataTable($requests);
 }

@@ -14,7 +14,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid pt-3">
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-sm border-0">
@@ -34,8 +34,7 @@
                     {{-- Action toggles between STORE and UPDATE routes based on existence of $referenceItem --}}
                     <form action="{{ isset($referenceItem) ? route('admin.inventory.update') : route('admin.inventory.store') }}"
                           method="POST"
-                          id="batch-form"
-                          data-variants-url="{{ route('admin.inventory.get-variants') }}">
+                          id="batch-form">
 
                         @csrf
                         @if(isset($referenceItem))
@@ -83,29 +82,42 @@
                                     {{-- Warehouse Dropdown --}}
                                     <div class="col-md-4" id="warehouse_div" style="{{ $locType !== 'warehouse' ? 'display:none;' : '' }}">
                                         <label class="form-label fw-bold small text-uppercase text-muted">Select Warehouse <span class="text-danger">*</span></label>
-                                        <select name="warehouse_id" class="form-select @error('warehouse_id') is-invalid @enderror">
-                                            <option value="">Choose Warehouse...</option>
-                                            @foreach($warehouses as $w)
-                                                <option value="{{ $w->id }}" {{ $selWarehouse == $w->id ? 'selected' : '' }}>
-                                                    {{ $w->warehouse_name ?? $w->name }}
-                                                </option>
-                                            @endforeach
+                                        @php
+                                            $selectedWarehouse = isset($warehouses) ? $warehouses->firstWhere('id', $selWarehouse) : null;
+                                            $selectedWarehouseText = $selectedWarehouse
+                                                ? ($selectedWarehouse->getTranslation('warehouse_name', app()->getLocale())
+                                                    ?? $selectedWarehouse->getTranslation('warehouse_name', 'en')
+                                                    ?? ('Warehouse #' . $selWarehouse))
+                                                : ('Warehouse #' . $selWarehouse);
+                                        @endphp
+                                        <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#warehouse-error-div" data-option-url="{{ route('admin.lists.warehouses') }}" data-placeholder="Select warehouse" id="warehouse_id" name="warehouse_id">
+                                            @if($selWarehouse)
+                                                <option selected value="{{ $selWarehouse }}">{{ $selectedWarehouseText }}</option>
+                                            @endif
                                         </select>
-                                        @error('warehouse_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        <div id="warehouse-error-div"></div>
+                                        @error('warehouse_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
 
                                     {{-- Store Dropdown --}}
                                     <div class="col-md-4" id="store_div" style="{{ $locType !== 'store' ? 'display:none;' : '' }}">
                                         <label class="form-label fw-bold small text-uppercase text-muted">Select Store <span class="text-danger">*</span></label>
-                                        <select name="store_id" class="form-select @error('store_id') is-invalid @enderror">
-                                            <option value="">Choose Store...</option>
-                                            @foreach($stores as $s)
-                                                <option value="{{ $s->id }}" {{ $selStore == $s->id ? 'selected' : '' }}>
-                                                    {{ $s->store_name ?? $s->name }}
-                                                </option>
-                                            @endforeach
+                                        @php
+                                            $selectedStore = isset($stores) ? $stores->firstWhere('id', $selStore) : null;
+                                            $selectedStoreText = $selectedStore
+                                                ? ($selectedStore->getTranslation('store_name', app()->getLocale())
+                                                    ?? $selectedStore->getTranslation('store_name', 'en')
+                                                    ?? $selectedStore->name
+                                                    ?? ('Store #' . $selStore))
+                                                : ('Store #' . $selStore);
+                                        @endphp
+                                        <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#store-error-div" data-option-url="{{ route('admin.lists.stores') }}" data-placeholder="Select store" id="store_id" name="store_id">
+                                            @if($selStore)
+                                                <option selected value="{{ $selStore }}">{{ $selectedStoreText }}</option>
+                                            @endif
                                         </select>
-                                        @error('store_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        <div id="store-error-div"></div>
+                                        @error('store_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
 
                                     {{-- Notes --}}
@@ -154,21 +166,24 @@
                                                 @foreach(old('items') as $key => $item)
                                                     <tr class="item-row">
                                                         <td>
-                                                            <select name="items[{{ $key }}][product_id]" class="form-select product-select" required>
+                                                            <select id="item_product_{{ $key }}" class="select2-ajax browser-default form-control product-select" data-allow-clear="true" data-error="#product-error-div" data-option-url="{{ route('admin.lists.products') }}" data-placeholder="Select Product" name="items[{{ $key }}][product_id]">
                                                                 <option value="">Select Product</option>
-                                                                @foreach($products as $p)
-                                                                    <option value="{{ $p->id }}" {{ ($item['product_id'] ?? '') == $p->id ? 'selected' : '' }}>
-                                                                        {{ $p->name }}
-                                                                    </option>
-                                                                @endforeach
+                                                                @if(!empty($item['product_id']))
+                                                                    <option value="{{ $item['product_id'] }}" selected>Product #{{ $item['product_id'] }}</option>
+                                                                @endif
                                                             </select>
-                                                            @error("items.$key.product_id") <div class="text-danger small">{{ $message }}</div> @enderror
+                                                            <div id="product-error-div"></div>
+                                                            @error('items.' . $key . '.product_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                                         </td>
                                                         <td>
-                                                            <select name="items[{{ $key }}][product_variant_id]" class="form-select variant-select">
+                                                            <select class="select2-ajax browser-default form-control variant-select" data-allow-clear="true" data-error="#variant-error-div" data-option-url="{{ route('admin.lists.variants') }}" data-placeholder="Select Variant" data-depends-on="#item_product_{{ $key }}" data-dependency-param="product_id" name="items[{{ $key }}][product_variant_id]">
                                                                 <option value="">Select Product First</option>
-                                                                {{-- Variants are re-fetched via JS, or you can check if variant ID is set and pre-fill just that one option --}}
+                                                                @if(!empty($item['product_variant_id']))
+                                                                    <option value="{{ $item['product_variant_id'] }}" selected>Variant #{{ $item['product_variant_id'] }}</option>
+                                                                @endif
                                                             </select>
+                                                            <div id="variant-error-div"></div>
+                                                            @error('items.' . $key . '.product_variant_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                                         </td>
                                                         <td>
                                                             <div class="input-group input-group-sm">
@@ -192,25 +207,30 @@
                                                 @foreach($batchItems as $key => $item)
                                                     <tr class="item-row">
                                                         <td>
-                                                            <select name="items[{{ $key }}][product_id]" class="form-select product-select" required>
-                                                                <option value="">Select Product</option>
-                                                                @foreach($products as $p)
-                                                                    <option value="{{ $p->id }}" {{ $item->product_id == $p->id ? 'selected' : '' }}>
-                                                                        {{ $p->name }}
+                                                            <select id="item_product_{{ $key }}" class="select2-ajax browser-default form-control product-select" data-allow-clear="true" data-error="#product-error-div" data-option-url="{{ route('admin.lists.products') }}" data-placeholder="Select Product" name="items[{{ $key }}][product_id]">
+                                                                @if($item->product)
+                                                                    <option value="{{ $item->product_id }}" selected>
+                                                                        {{ $item->product->getTranslation('name', app()->getLocale()) ?? $item->product->name ?? ('Product #' . $item->product_id) }}
                                                                     </option>
-                                                                @endforeach
+                                                                @else
+                                                                    <option value="">Select Product</option>
+                                                                @endif
                                                             </select>
+                                                            <div id="product-error-div"></div>
+                                                            @error('items.' . $key . '.product_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                                         </td>
                                                         <td>
-                                                            <select name="items[{{ $key }}][product_variant_id]" class="form-select variant-select">
+                                                            <select class="select2-ajax browser-default form-control variant-select" data-allow-clear="true" data-error="#variant-error-div" data-option-url="{{ route('admin.lists.variants') }}" data-placeholder="Select Variant" data-depends-on="#item_product_{{ $key }}" data-dependency-param="product_id" name="items[{{ $key }}][product_variant_id]">
                                                                 @if($item->variant)
                                                                     <option value="{{ $item->product_variant_id }}" selected>
-                                                                        {{ is_array($item->variant->variant_name) ? ($item->variant->getTranslation('variant_name', app()->getLocale()) ?? '') : $item->variant->variant_name }}
+                                                                        {{ $item->variant->getTranslation('variant_name', app()->getLocale()) ?? $item->variant->getTranslation('variant_name', 'en') ?? ('Variant #' . $item->product_variant_id) }}
                                                                     </option>
                                                                 @else
                                                                     <option value="">Select Product First</option>
                                                                 @endif
                                                             </select>
+                                                            <div id="variant-error-div"></div>
+                                                            @error('items.' . $key . '.product_variant_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                                         </td>
                                                         <td>
                                                             <div class="input-group input-group-sm">
@@ -253,15 +273,12 @@
 <template id="row-template">
     <tr class="item-row">
         <td>
-            <select name="items[INDEX][product_id]" class="form-select product-select" required>
+            <select id="item_product_INDEX" name="items[INDEX][product_id]" class="select2-ajax browser-default form-control product-select" data-allow-clear="true" data-option-url="{{ route('admin.lists.products') }}" data-placeholder="Select Product" required>
                 <option value="">Select Product</option>
-                @foreach($products as $p)
-                    <option value="{{ $p->id }}">{{ $p->name }}</option>
-                @endforeach
             </select>
         </td>
         <td>
-            <select name="items[INDEX][product_variant_id]" class="form-select variant-select">
+            <select name="items[INDEX][product_variant_id]" class="select2-ajax browser-default form-control variant-select" data-allow-clear="true" data-option-url="{{ route('admin.lists.variants') }}" data-placeholder="Select Variant" data-depends-on="#item_product_INDEX" data-dependency-param="product_id">
                 <option value="">Select Product First</option>
             </select>
         </td>

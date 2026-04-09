@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid pt-3">
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
@@ -139,40 +139,40 @@
                                         {{-- Relations --}}
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Brand</label>
-                                            <select name="brand_id" id="brand-select"
-                                                class="form-select select2-dropdown" required>
-                                                @foreach ($brands as $brand)
-                                                    <option value="{{ $brand->id }}"
-                                                        {{ $product->brand_id == $brand->id ? 'selected' : '' }}>
-                                                        {{ $brand->name }}
-                                                    </option>
-                                                @endforeach
+                                            <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#brand-error-div" data-option-url="{{ route('admin.lists.brands') }}" data-placeholder="Select brand" id="brand_id" name="brand_id">
+                                                @if (old('brand_id', $product->brand_id))
+                                                    {{-- Fetch the selected brand name from the brand_id --}}
+                                                    <option selected value="{{ old('brand_id', $product->brand_id) }}">{{ $product->brand->name }}</option>
+                                                @endif
                                             </select>
+                                            <div id="brand-error-div" class="invalid-feedback d-block"></div>
+                                            @error('brand_id')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Category</label>
-                                            <select name="category_id" id="category-select"
-                                                class="form-select select2-dropdown" required>
-                                                @foreach ($categories as $category)
-                                                    <option value="{{ $category->id }}"
-                                                        {{ $product->category_id == $category->id ? 'selected' : '' }}>
-                                                        {{ $category->getTranslation('category-name', 'en') }}
-                                                    </option>
-                                                @endforeach
+                                            <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#category-error-div" data-option-url="{{ route('admin.lists.categories') }}" data-placeholder="Select category" id="category_id" name="category_id">
+                                                @if (old('category_id', $product->category_id))
+                                                    <option selected value="{{ old('category_id', $product->category_id) }}">{{ $product->category->{'category-name'} }}</option>
+                                                @endif
                                             </select>
+                                            <div id="category-error-div" class="invalid-feedback d-block"></div>
+                                            @error('category_id')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Sub Category</label>
-                                            <select name="sub_category_id" id="subcategory-select"
-                                                class="form-select select2-dropdown" required>
-                                                @foreach ($subCategories as $subCategory)
-                                                    <option value="{{ $subCategory->id }}"
-                                                        data-category="{{ $subCategory->category_id }}"
-                                                        {{ $product->sub_category_id == $subCategory->id ? 'selected' : '' }}>
-                                                        {{ $subCategory->getTranslation('sub-category-name', 'en') }}
-                                                    </option>
-                                                @endforeach
+                                            <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#subcategory-error-div" data-option-url="{{ route('admin.lists.sub-categories-by-category') }}" data-placeholder="Select sub category" data-depends-on="#category_id" data-dependency-param="category_id" id="sub_category_id" name="sub_category_id">
+                                                @if (old('sub_category_id', $product->sub_category_id))
+                                                    <option selected value="{{ old('sub_category_id', $product->sub_category_id) }}">{{ $product->subCategory->{'sub-category-name'} }}</option>
+                                                @endif
                                             </select>
+                                            <div id="subcategory-error-div" class="invalid-feedback d-block"></div>
+                                            @error('sub_category_id')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </div>
 
                                         {{-- Parent Fields --}}

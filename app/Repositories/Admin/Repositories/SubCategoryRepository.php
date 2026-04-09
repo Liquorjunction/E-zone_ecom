@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Admin\Repositories;
 
+use App\Models\Categories;
 use App\Models\SubCategories;
 use Illuminate\Validation\ValidationException;
 use App\Repositories\Admin\Interfaces\SubCategoryRepositoryInterface;
@@ -112,6 +113,41 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
         $subCategory->save();
 
         return $subCategory;
+    }
+
+    public function getSubCategoryList($term = null)
+    {
+        $query = SubCategories::select('id', 'sub-category-name')
+            ->where('status', 'active');
+
+        if (!empty($term)) {
+            $like = '%' . $term . '%';
+            $query->where(function ($builder) use ($like) {
+                $builder->orWhere('sub-category-name->en', 'LIKE', $like)
+                    ->orWhere('sub-category-name->fr', 'LIKE', $like)
+                    ->orWhere('sub-category-name->ar', 'LIKE', $like);
+            });
+        }
+
+        return $query->get();
+    }
+
+    public function getSubCategoryListByCategoryId($term = null, $categoryId)
+    {
+        $query = SubCategories::select('id', 'sub-category-name')
+            ->where('status', 'active')
+            ->where('category_id', $categoryId);
+
+        if (!empty($term)) {
+            $like = '%' . $term . '%';
+            $query->where(function ($builder) use ($like) {
+                $builder->orWhere('sub-category-name->en', 'LIKE', $like)
+                    ->orWhere('sub-category-name->fr', 'LIKE', $like)
+                    ->orWhere('sub-category-name->ar', 'LIKE', $like);
+            });
+        }
+
+        return $query->get();
     }
 
     public function getDataForDataTable($request = null)

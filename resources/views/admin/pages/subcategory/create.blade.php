@@ -21,14 +21,12 @@
                         {{-- Parent Category --}}
                         <div class="mb-4">
                             <label class="form-label">Parent Category <span class="text-danger">*</span></label>
-                            <select name="category_id" class="form-control" required>
-                                <option value="">Select Category</option>
-                                @foreach ($categories as $cat)
-                                    <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
-                                        {{ $cat->getTranslation('category-name', 'en') }}
-                                    </option>
-                                @endforeach
+                            <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#category-error-div" data-option-url="{{ route('admin.lists.categories') }}" data-placeholder="Select category" id="category_id" name="category_id">
+                                @if (old('category_id'))
+                                    <option selected value="{{ old('category_id') }}">{{ old('category_id') }}</option>
+                                @endif
                             </select>
+                            <div id="category-error-div"></div>
                             @error('category_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -82,7 +80,7 @@
 
                     {{-- Right Column: Sidebar (Image & Status) --}}
                     <div class="col-lg-4 col-md-12">
-                        <div class="card border-1 p-3 shadow-sm">
+                        <div class="card border p-3 shadow-sm">
 
                             {{-- Image Upload --}}
                             <div class="text-center mb-3">

@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid pt-3">
     <div class="row">
         <div class="col-lg-12 mx-auto">
             <div class="card shadow-sm border-0 mb-4">

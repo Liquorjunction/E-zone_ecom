@@ -10,7 +10,7 @@
 
     onReady(function () {
         var filterForm = document.getElementById('faq-filter-bar');
-        var categorySelect = document.getElementById('faq-category-filter');
+        var categorySelect = document.getElementById('faq_category_id');
 
         if (!filterForm || !categorySelect) {
             return;
@@ -18,9 +18,6 @@
 
         var applyButton = filterForm.querySelector("button[type='submit']");
         var resetButton = document.getElementById('reset-filters-btn');
-        var categoriesUrl = filterForm.getAttribute('data-categories-url');
-        var categoriesLoaded = false;
-        var loadingCategories = false;
 
         function getTable() {
             return window.faqsTable || window.faqTable || null;
@@ -36,80 +33,17 @@
             dataTable.ajax.reload();
         }
 
-        function buildCategoryOption(value, label) {
-            var option = document.createElement('option');
-            option.value = String(value);
-            option.textContent = label;
-            return option;
-        }
-
-        function hasOptionValue(value) {
-            return Array.prototype.some.call(categorySelect.options, function (option) {
-                return String(option.value) === String(value);
-            });
-        }
-
-        function loadCategories() {
-            if (loadingCategories || !categoriesUrl) {
-                return;
-            }
-
-            loadingCategories = true;
-
-            var selectedValue = categorySelect.value || categorySelect.getAttribute('data-selected') || '';
-
-            fetch(categoriesUrl, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (payload) {
-                    var items = payload && payload.data ? payload.data : {};
-
-                    categorySelect.innerHTML = '';
-                    categorySelect.appendChild(buildCategoryOption('', 'All Categories'));
-
-                    Object.keys(items).forEach(function (id) {
-                        categorySelect.appendChild(buildCategoryOption(id, items[id]));
-                    });
-
-                    if (selectedValue && hasOptionValue(selectedValue)) {
-                        categorySelect.value = selectedValue;
-                    } else {
-                        categorySelect.value = '';
-                    }
-
-                    categoriesLoaded = true;
-                })
-                .catch(function () {
-                    categorySelect.innerHTML = '';
-                    categorySelect.appendChild(buildCategoryOption('', 'All Categories'));
-                    categorySelect.value = '';
-                })
-                .finally(function () {
-                    loadingCategories = false;
-                });
-        }
-
-        function ensureCategoriesLoaded() {
-            if (!categoriesLoaded) {
-                loadCategories();
-                return;
-            }
-
-            loadCategories();
-        }
-
         if (applyButton) {
             applyButton.addEventListener('click', function (event) {
                 event.preventDefault();
                 reloadTable();
             });
         }
+
+        filterForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            reloadTable();
+        });
 
         if (resetButton) {
             resetButton.addEventListener('click', function () {
@@ -134,7 +68,8 @@
             });
         }
 
-        categorySelect.addEventListener('click', ensureCategoriesLoaded);
-        categorySelect.addEventListener('focus', ensureCategoriesLoaded);
+        categorySelect.addEventListener('change', function () {
+            reloadTable();
+        });
     });
 })();

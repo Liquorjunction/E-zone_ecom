@@ -10,7 +10,7 @@ $(document).ready(function () {
             type: "GET",
             data: function (d) {
                 d.status = $('.user-status-filter:checked').val() || '';
-                d.role_id = $('#role_id').val() || '';
+                d.role_id = $('#role').val() || '';
                 d.date_from = $('#date_from').val() || '';
                 d.date_to = $('#date_to').val() || '';
             }

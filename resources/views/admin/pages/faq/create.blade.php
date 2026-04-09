@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid pt-3">
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
@@ -26,12 +26,14 @@
                         @csrf
                         <div class="form-group">
                             <label>Category <span class="text-danger">*</span></label>
-                            <select name="faq_category_id" class="form-control">
+                            <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#category-error-div" name="faq_category_id" id="faq_category_id" required
+                                data-url="{{ route('admin.lists.faq-categories') }}">
                                 <option value="">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('faq_category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                @endforeach
+                                @if (old('faq_category_id'))
+                                    <option selected value="{{ old('faq_category_id') }}">{{ old('faq_category_id') }}</option>
+                                @endif
                             </select>
+                            <div id="category-error-div"></div>
                             @error('faq_category_id') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
 

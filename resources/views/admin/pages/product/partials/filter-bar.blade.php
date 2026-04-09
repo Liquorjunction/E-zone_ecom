@@ -28,7 +28,7 @@
                         </div>
                     </div>
 
-                    <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                    <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                     {{-- Status --}}
                     <div>
@@ -55,7 +55,7 @@
                         </div>
                     </div>
 
-                    <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                    <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                     {{-- Bestseller --}}
                     <div>
@@ -68,7 +68,7 @@
                         </div>
                     </div>
 
-                    <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                    <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                     {{-- Price Range --}}
                     <div>
@@ -86,7 +86,7 @@
                         </div>
                     </div>
 
-                    <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                    <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                     {{-- Date Range --}}
                     <div>

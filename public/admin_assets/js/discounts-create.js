@@ -17,44 +17,41 @@ $(document).ready(function() {
         }
         lockStartDateField();
     const data = window._discountData || {};
-    let categories = data.categories || [];
-    let brands = data.brands || [];
-    let subcategories = data.subcategories || [];
-    let productVariants = data.productVariants || [];
+    let targetUrls = data.targetUrls || {};
     let rowIdx = data.rowIdx || 0;
 
+    function getTargetTypeConfig(type) {
+        var configs = {
+            category: {
+                url: targetUrls.category || '',
+                placeholder: 'Select Category'
+            },
+            brand: {
+                url: targetUrls.brand || '',
+                placeholder: 'Select Brand'
+            },
+            subcategory: {
+                url: targetUrls.subcategory || '',
+                placeholder: 'Select Subcategory'
+            },
+            product: {
+                url: targetUrls.product || '',
+                placeholder: 'Select Product Variant'
+            }
+        };
+
+        return configs[type] || null;
+    }
+
     function makeTargetIdFieldHtml(index, type, value = '') {
-        if (type === 'category') {
-            let options = '<option value="">Select Category</option>';
-            categories.forEach(function(cat) {
-                let selected = (value == cat.id) ? 'selected' : '';
-                options += `<option value="${cat.id}" ${selected}>${cat.name}</option>`;
-            });
-            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
-        } else if (type === 'brand') {
-            let options = '<option value="">Select Brand</option>';
-            brands.forEach(function(br) {
-                let selected = (value == br.id) ? 'selected' : '';
-                options += `<option value="${br.id}" ${selected}>${br.name}</option>`;
-            });
-            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
-        } else if (type === 'subcategory') {
-            let options = '<option value="">Select Subcategory</option>';
-            subcategories.forEach(function(sc) {
-                let selected = (value == sc.id) ? 'selected' : '';
-                options += `<option value="${sc.id}" ${selected}>${sc.name}</option>`;
-            });
-            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
-        } else if (type === 'product') {
-            let options = '<option value="">Select Variant</option>';
-            productVariants.forEach(function(p) {
-                let selected = (value == p.id) ? 'selected' : '';
-                options += `<option value="${p.id}" ${selected}>${p.name}</option>`;
-            });
-            return `<select name="targets[${index}][target_id]" class="form-select target-id-select">${options}</select>`;
-        } else {
-            return `<input type="number" name="targets[${index}][target_id]" class="form-control" placeholder="Enter ID (e.g., 105)" value="${value}" required>`;
+        var config = getTargetTypeConfig(type);
+
+        if (config) {
+            var selectedOption = value ? `<option selected value="${value}">${value}</option>` : '<option value=""></option>';
+            return `<select class="select2-ajax browser-default form-control target-id-select" data-allow-clear="true" data-option-url="${config.url}" data-placeholder="${config.placeholder}" name="targets[${index}][target_id]">${selectedOption}</select>`;
         }
+
+        return `<input type="number" name="targets[${index}][target_id]" class="form-control" placeholder="Enter ID (e.g., 105)" value="${value}" required>`;
     }
 
     function getLockedTargetType() {
@@ -90,9 +87,7 @@ $(document).ready(function() {
             if ($typeSelect.val() !== lockedType) {
                 $typeSelect.val(lockedType);
                 let $secondTd = $tr.find('td').eq(1);
-                let $existing = $secondTd.find('select, input');
-                let currentVal = $existing.length ? $existing.val() : '';
-                $secondTd.html(makeTargetIdFieldHtml(index, lockedType, currentVal));
+                $secondTd.html(makeTargetIdFieldHtml(index, lockedType, ''));
                 initializeSelect2($secondTd);
             }
         });
@@ -139,13 +134,8 @@ $(document).ready(function() {
             $select.val(lockedType);
             val = lockedType;
         }
-        let currentVal = '';
         let $secondTd = $tr.find('td').eq(1);
-        let $existing = $secondTd.find('select, input');
-        if ($existing.length) {
-            currentVal = $existing.val();
-        }
-        $secondTd.html(makeTargetIdFieldHtml(index, val, currentVal));
+        $secondTd.html(makeTargetIdFieldHtml(index, val, ''));
         // initialize select2 for replaced field
         initializeSelect2($secondTd);
         if ($tr.is($('#target-rows tr').not('.empty-message').first())) {
@@ -264,12 +254,17 @@ $(document).ready(function() {
     // Initialize Select2 for target id selects within a context (or whole document)
     function initializeSelect2($context) {
         $context = $context && $($context).length ? $($context) : $(document);
+        if (window.initSelect2Ajax) {
+            window.initSelect2Ajax($context);
+            return;
+        }
+
         $context.find('.target-id-select').each(function() {
             let $el = $(this);
-            if ($el.data('select2')) return; // already initialized
+            if ($el.data('select2')) return;
             $el.select2({
                 width: '100%',
-                placeholder: $el.find('option[value=""]').first().text() || 'Select',
+                placeholder: $el.data('placeholder') || 'Select option',
                 allowClear: true,
                 dropdownParent: $el.closest('.modal, form, .card')
             });

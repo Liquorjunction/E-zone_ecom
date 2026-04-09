@@ -12,4 +12,5 @@ interface BrandRepositoryInterface
     public function getBrand($id);
     public function updateBrandStatus($id);
     public function getDataforDatatable($request = null);
+    public function getBrandList($term = null);
 }

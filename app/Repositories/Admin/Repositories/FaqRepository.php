@@ -55,9 +55,20 @@ class FaqRepository implements FaqRepositoryInterface
         return $faq;
     }
 
-    public function getFaqCategoryList()
+    public function getFaqCategoryList($term = null)
     {
-        return FaqCategory::where('status', 'active')->pluck('name', 'id');
+        $query = FaqCategory::where('status', 'active');
+
+        if (!empty($term)) {
+            $like = '%' . $term . '%';
+            $query->where(function ($builder) use ($like) {
+                $builder->orWhere('name->en', 'LIKE', $like)
+                    ->orWhere('name->fr', 'LIKE', $like)
+                    ->orWhere('name->ar', 'LIKE', $like);
+            });
+        }
+
+        return $query->get(['id', 'name']);
     }
 
     public function getDataForDataTable($requests)

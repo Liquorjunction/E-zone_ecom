@@ -60,6 +60,20 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::with(['productVariants.images', 'productVariants.inventory'])->findOrFail($id);
     }
 
+    public function getVarientList($term = null)
+    {
+        $query = ProductVariant::query();
+        if (!empty($term)) {
+            $like = '%' . $term . '%';
+            $query->where(function ($builder) use ($like) {
+                $builder->orWhere('variant_name->en', 'LIKE', $like)
+                    ->orWhere('variant_name->fr', 'LIKE', $like)
+                    ->orWhere('variant_name->ar', 'LIKE', $like);
+            });
+        }
+        return $query->select('id', 'variant_name')->get();
+    }
+
     public function getDataforDataTable($request = null)
     {
         $query = Product::with([

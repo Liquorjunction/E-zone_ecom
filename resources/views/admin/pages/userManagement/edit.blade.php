@@ -59,15 +59,17 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">User Role:</label>
-                                    <select name="role" class="selectpicker form-control" data-style="py-0" required>
-                                        <option value="">Select Role</option>
-                                        @foreach ($roles as $role)
-                                            <option value="{{ $role->name }}"
-                                                {{ $admin->hasRole($role->name) ? 'selected' : '' }}>
-                                                {{ $role->name }}
-                                            </option>
-                                        @endforeach
+                                    <select class="select2-ajax browser-default form-control" data-allow-clear="true"
+                                        data-error="#role-error-div" data-option-url="{{ route('admin.lists.roles') }}"
+                                        data-placeholder="Select role" id="role" name="role">
+                                        @if (old('role', $admin->roles->first()->id ?? ''))
+                                            <option selected value="{{ old('role', $admin->roles->first()->id ?? '') }}">{{ $admin->roles->first()->name ?? 'Selected Role' }}</option>
+                                        @endif
                                     </select>
+                                    <div id="role-error-div"></div>
+                                    @error('role')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 interface CartRepositoryInterface
 {
     public function getCartForUserOrSession(CartIdentifier $identifier);
+    public function getCartBySessionId(string $sessionId);
     public function getCartById(int $cartId);
     public function addItem($cart, array $data);
     public function updateItem($cart, int $itemId, array $data);

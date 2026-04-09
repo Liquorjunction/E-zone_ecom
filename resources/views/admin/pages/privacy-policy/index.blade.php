@@ -29,7 +29,7 @@
                         class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary d-none"
                         style="font-size:0.65em;">0</span>
                 </button>
-                @can('privacy_policy.create')
+                @can('privacy_policies.create')
                     <a href="{{ route('admin.privacy-policy.create') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus-circle me-1"></i>Add New Privacy Policy
                     </a>
@@ -80,7 +80,7 @@
                                 </div>
                             </div>
 
-                            <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                            <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                             {{-- Date Range --}}
                             <div>

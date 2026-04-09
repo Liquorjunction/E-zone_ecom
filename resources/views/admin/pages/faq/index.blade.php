@@ -52,7 +52,7 @@
                 </div>
                 <div class="card-body p-4">
                     <form id="faq-filter-bar" method="GET"
-                        data-categories-url="{{ route('admin.faqs.list') }}">
+                        data-categories-url="{{ route('admin.lists.faq-categories') }}">
                         <div class="d-flex flex-wrap align-items-center gap-4">
                             {{-- Status --}}
                             <div>
@@ -60,37 +60,51 @@
                                     style="font-size:0.65rem;letter-spacing:0.08em;">Status</div>
                                 <div class="d-flex gap-3">
                                     <div class="form-check mb-0">
-                                        <input class="form-check-input filter-input" type="radio" name="status" value="all" id="status_all"
+                                        <input class="form-check-input filter-input" type="radio" name="status"
+                                            value="all" id="status_all"
                                             {{ request('status') === 'all' || !request()->has('status') ? 'checked' : '' }}>
                                         <label class="form-check-label small text-dark" for="status_all">All</label>
                                     </div>
                                     <div class="form-check mb-0">
-                                        <input class="form-check-input filter-input" type="radio" name="status" value="active" id="status_active"
+                                        <input class="form-check-input filter-input" type="radio" name="status"
+                                            value="active" id="status_active"
                                             {{ request('status') === 'active' ? 'checked' : '' }}>
                                         <label class="form-check-label small text-dark" for="status_active">Active</label>
                                     </div>
                                     <div class="form-check mb-0">
-                                        <input class="form-check-input filter-input" type="radio" name="status" value="inactive" id="status_inactive"
+                                        <input class="form-check-input filter-input" type="radio" name="status"
+                                            value="inactive" id="status_inactive"
                                             {{ request('status') === 'inactive' ? 'checked' : '' }}>
-                                        <label class="form-check-label small text-dark" for="status_inactive">Inactive</label>
+                                        <label class="form-check-label small text-dark"
+                                            for="status_inactive">Inactive</label>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                            <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                             {{-- Category --}}
-                            <div>
+                            <div style="min-width: 240px;">
                                 <div class="text-uppercase text-muted fw-semibold mb-2"
                                     style="font-size:0.65rem;letter-spacing:0.08em;">Category</div>
-                                <select class="form-select form-select-sm filter-input" id="faq-category-filter"
-                                    name="category_id" data-selected="{{ request('category_id', '') }}"
-                                    style="min-width:220px;">
-                                    <option value="">Select Category...</option>
+                                <select class="select2-ajax browser-default form-control" data-allow-clear="true"
+                                    data-error="#category-error-div" data-placeholder="Select Category"
+                                    name="faq_category_id" id="faq_category_id"
+                                    data-url="{{ route('admin.lists.faq-categories') }}">
+                                    @if (old('faq_category_id', request('faq_category_id')))
+                                        <option selected value="{{ old('faq_category_id', request('faq_category_id')) }}">
+                                            {{ request('faq_category_name', 'Selected Category') }}</option>
+                                    @else
+                                        <option value="">Select Category</option>
+                                    @endif
                                 </select>
+                                <div id="category-error-div"></div>
+                                @error('faq_category_id')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
 
-                            <div class="vr opacity-25 d-none d-md-block" style="height:40px;"></div>
+                            <div class="vr opacity-25 d-none d-md-block" style="height:auto;"></div>
 
                             {{-- Date Range --}}
                             <div>
@@ -126,11 +140,9 @@
         {{-- FAQ Table --}}
         <div class="card border-0 shadow-sm rounded-3">
             <div class="card-body">
-                @php
-                    $hasAction = auth()->user()->can('faqs.update') || auth()->user()->can('faqs.delete');
-                @endphp
                 <table id="faqs-table" class="table table-striped table-bordered w-100"
-                    data-route="{{ route('admin.faqs.data') }}" data-has-action="{{ $hasAction ? 1 : 0 }}">
+                    data-route="{{ route('admin.faqs.data') }}"
+                    data-has-action="{{ auth()->guard('admin')->user() && (auth()->guard('admin')->user()->can('faqs.update') || auth()->guard('admin')->user()->can('faqs.delete')) ? 1 : 0 }}">
                     <thead>
                         <tr>
                             <th>#</th>

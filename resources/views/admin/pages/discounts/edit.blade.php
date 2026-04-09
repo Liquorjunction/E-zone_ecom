@@ -13,12 +13,13 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid pt-3">
         <div class="row">
             <div class="col-lg-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div
+                    class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4 bg-white rounded-3 p-3">
                     <div>
-                        <h4 class="mb-1">Edit Discount</h4>
+                        <h4 class="fw-semibold mb-1">Edit Discount</h4>
                         <p class="text-muted mb-0">{{ $discount->getTranslation('name', 'en') }}</p>
                     </div>
                     <div>
@@ -265,45 +266,34 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        @if ($oldTarget['target_type'] == 'category')
-                                                            <select name="targets[{{ $index }}][target_id]"
-                                                                class="form-select target-id-select">
-                                                                <option value="">Select Category</option>
-                                                                @foreach ($categories ?? [] as $cat)
-                                                                    <option value="{{ $cat->id }}"
-                                                                        {{ $oldTarget['target_id'] == $cat->id ? 'selected' : '' }}>
-                                                                        {{ $cat->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        @elseif($oldTarget['target_type'] == 'brand')
-                                                            <select name="targets[{{ $index }}][target_id]"
-                                                                class="form-select">
-                                                                <option value="">Select Brand</option>
-                                                                @foreach ($brands ?? [] as $br)
-                                                                    <option value="{{ $br->id }}"
-                                                                        {{ $oldTarget['target_id'] == $br->id ? 'selected' : '' }}>
-                                                                        {{ $br->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        @elseif($oldTarget['target_type'] == 'subcategory')
-                                                            <select name="targets[{{ $index }}][target_id]"
-                                                                class="form-select">
-                                                                <option value="">Select Subcategory</option>
-                                                                @foreach ($subcategories ?? [] as $sc)
-                                                                    <option value="{{ $sc->id }}"
-                                                                        {{ $oldTarget['target_id'] == $sc->id ? 'selected' : '' }}>
-                                                                        {{ $sc->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        @elseif($oldTarget['target_type'] == 'product')
-                                                            <select name="targets[{{ $index }}][target_id]"
-                                                                class="form-select">
-                                                                <option value="">Select Variant</option>
-                                                                @foreach ($productVariants ?? [] as $p)
-                                                                    <option value="{{ $p->id }}"
-                                                                        {{ $oldTarget['target_id'] == $p->id ? 'selected' : '' }}>
-                                                                        {{ $p->name }}</option>
-                                                                @endforeach
+                                                        @php
+                                                            $targetTypeUrlMap = [
+                                                                'category' => route('admin.lists.categories'),
+                                                                'brand' => route('admin.lists.brands'),
+                                                                'subcategory' => route('admin.lists.sub-categories'),
+                                                                'product' => route('admin.lists.variantList'),
+                                                            ];
+                                                            $targetTypeLabels = [
+                                                                'category' => 'Category',
+                                                                'brand' => 'Brand',
+                                                                'subcategory' => 'Subcategory',
+                                                                'product' => 'Product variant',
+                                                            ];
+                                                            $targetType = $oldTarget['target_type'];
+                                                        @endphp
+                                                        @if (isset($targetTypeUrlMap[$targetType]))
+                                                            <select class="select2-ajax browser-default form-control"
+                                                                data-allow-clear="true"
+                                                                data-option-url="{{ $targetTypeUrlMap[$targetType] }}"
+                                                                data-placeholder="Select {{ $targetTypeLabels[$targetType] }}"
+                                                                name="targets[{{ $index }}][target_id]">
+                                                                @if (!empty($oldTarget['target_id']))
+                                                                    <option selected value="{{ $oldTarget['target_id'] }}">
+                                                                        {{ $oldTarget['target_name'] ?? $oldTarget['target_id'] }}
+                                                                    </option>
+                                                                @else
+                                                                    <option value="">Select {{ $targetTypeLabels[$targetType] }}</option>
+                                                                @endif
                                                             </select>
                                                         @else
                                                             <input type="number"
@@ -341,62 +331,34 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        @if ($t['target_type'] == 'category')
-                                                            <select name="targets[{{ $index }}][target_id]"
-                                                                class="form-select target-id-select">
-                                                                <option value="">Select Category</option>
-                                                                @foreach ($categories ?? [] as $cat)
-                                                                    <option value="{{ $cat->id }}"
-                                                                        {{ $t['target_id'] == $cat->id ? 'selected' : '' }}>
-                                                                        {{ $cat->name }}</option>
-                                                                @endforeach
+                                                        @php
+                                                            $targetTypeUrlMap = [
+                                                                'category' => route('admin.lists.categories'),
+                                                                'brand' => route('admin.lists.brands'),
+                                                                'subcategory' => route('admin.lists.sub-categories'),
+                                                                'product' => route('admin.lists.variantList'),
+                                                            ];
+                                                            $targetTypeLabels = [
+                                                                'category' => 'Category',
+                                                                'brand' => 'Brand',
+                                                                'subcategory' => 'Subcategory',
+                                                                'product' => 'Product variant',
+                                                            ];
+                                                            $targetType = $t['target_type'];
+                                                        @endphp
+                                                        @if (isset($targetTypeUrlMap[$targetType]))
+                                                            <select class="select2-ajax browser-default form-control"
+                                                                data-allow-clear="true"
+                                                                data-option-url="{{ $targetTypeUrlMap[$targetType] }}"
+                                                                data-placeholder="Select {{ $targetTypeLabels[$targetType] }}"
+                                                                name="targets[{{ $index }}][target_id]">
+                                                                @if (!empty($t['target_id']) && !empty($t['name']))
+                                                                    <option selected value="{{ $t['target_id'] }}">
+                                                                        {{ $t['name'] }}</option>
+                                                                @else
+                                                                    <option value="">Select {{ $targetTypeLabels[$targetType] }}</option>
+                                                                @endif
                                                             </select>
-                                                        @elseif($t['target_type'] == 'brand')
-                                                            <select name="targets[{{ $index }}][target_id]"
-                                                                class="form-select target-id-select">
-                                                                <option value="">Select Brand</option>
-                                                                @foreach ($brands ?? [] as $br)
-                                                                    <option value="{{ $br->id }}"
-                                                                        {{ $t['target_id'] == $br->id ? 'selected' : '' }}>
-                                                                        {{ $br->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        @elseif($t['target_type'] == 'subcategory')
-                                                            <select name="targets[{{ $index }}][target_id]"
-                                                                class="form-select target-id-select">
-                                                                <option value="">Select Subcategory</option>
-                                                                @foreach ($subcategories ?? [] as $sc)
-                                                                    <option value="{{ $sc->id }}"
-                                                                        {{ $t['target_id'] == $sc->id ? 'selected' : '' }}>
-                                                                        {{ $sc->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        @elseif($t['target_type'] == 'product')
-                                                            @php
-                                                                $variantIds = collect($productVariants ?? [])
-                                                                    ->pluck('id')
-                                                                    ->all();
-                                                            @endphp
-                                                            @if (in_array($t['target_id'], $variantIds))
-                                                                <select name="targets[{{ $index }}][target_id]"
-                                                                    class="form-select target-id-select">
-                                                                    <option value="">Select Variant</option>
-                                                                    @foreach ($productVariants ?? [] as $p)
-                                                                        <option value="{{ $p->id }}"
-                                                                            {{ $t['target_id'] == $p->id ? 'selected' : '' }}>
-                                                                            {{ $p->name }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            @else
-                                                                <div class="d-flex">
-                                                                    <input type="number"
-                                                                        name="targets[{{ $index }}][target_id]"
-                                                                        class="form-control me-2"
-                                                                        value="{{ $t['target_id'] }}" readonly>
-                                                                    <input type="text" class="form-control"
-                                                                        value="{{ $t['name'] ?? 'Unknown' }}" readonly>
-                                                                </div>
-                                                            @endif
                                                         @else
                                                             <input type="number"
                                                                 name="targets[{{ $index }}][target_id]"
@@ -449,29 +411,14 @@
 @push('scripts')
     <script>
         window._discountData = {
-            categories: @json($categories ?? []),
-            brands: @json($brands ?? []),
-            subcategories: @json($subcategories ?? []),
-            productVariants: @json($productVariants ?? []),
+            targetUrls: {
+                category: @json(route('admin.lists.categories')),
+                brand: @json(route('admin.lists.brands')),
+                subcategory: @json(route('admin.lists.sub-categories')),
+                product: @json(route('admin.lists.variantList')),
+            },
             rowIdx: {{ old('targets') ? count(old('targets')) : (isset($discount) && isset($discount->targets) ? $discount->targets->count() : 0) }}
         };
     </script>
-        {{-- Field NOt USED FOr NOW --}}
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var typeSelect = document.querySelector('select[name="type"]');
-            var maxDiscountWrapper = document.getElementById('max-discount-cap-wrapper');
-
-            function toggleMaxDiscount() {
-                if (typeSelect.value === 'percentage') {
-                    maxDiscountWrapper.style.display = '';
-                } else {
-                    maxDiscountWrapper.style.display = 'none';
-                }
-            }
-            typeSelect.addEventListener('change', toggleMaxDiscount);
-            toggleMaxDiscount(); // Initial call
-        });
-    </script> --}}
     <script src="{{ asset('admin_assets/js/discounts-create.js') }}"></script>
 @endpush

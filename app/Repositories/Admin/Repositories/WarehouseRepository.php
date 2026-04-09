@@ -79,4 +79,18 @@ class WarehouseRepository implements WarehouseRepositoryInterface
 
         return $query;
     }
+
+    public function getWarehouseList($term = null)
+    {
+        $query = Warehouse::query();
+
+        if (!empty($term)) {
+            $query->where(function ($q) use ($term) {
+                $q->where('warehouse_name->en', 'LIKE', '%' . $term . '%')
+                    ->orWhere('warehouse_name->ar', 'LIKE', '%' . $term . '%');
+            });
+        }
+
+        return $query->get(['id', 'warehouse_name']);
+    }
 }

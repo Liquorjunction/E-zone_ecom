@@ -12,4 +12,5 @@ interface WarehouseRepositoryInterface
     public function deleteWarehouse($id);
     public function updateStatus($id);
     public function getDataForDataTable($request = null);
+    public function getWarehouseList($term = null);
 }

@@ -115,4 +115,20 @@ class CategoryRepository implements CategoryRepositoryInterface
 
         return $query;
     }
+
+    public function getCategoryList($term = null)
+    {
+        $query = Categories::where('status', 'active');
+
+        if (!empty($term)) {
+            $like = '%' . $term . '%';
+            $query->where(function ($builder) use ($like) {
+                $builder->orWhere('category-name->en', 'LIKE', $like)
+                    ->orWhere('category-name->fr', 'LIKE', $like)
+                    ->orWhere('category-name->ar', 'LIKE', $like);
+            });
+        }
+
+        return $query->get(['id', 'category-name']);
+    }
 }

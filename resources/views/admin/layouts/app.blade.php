@@ -11,7 +11,7 @@
     @stack('styles')
 </head>
 
-<body class="  " data-bs-spy="scroll" data-bs-target="#elements-section" data-bs-offset="0" tabindex="0">
+<body class="sidebar-managed" data-bs-spy="scroll" data-bs-target="#elements-section" data-bs-offset="0" tabindex="0">
     {{-- Loading --}}
     @include('admin.components.laoding')
     {{-- Sidebar --}}

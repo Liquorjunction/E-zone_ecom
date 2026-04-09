@@ -14,7 +14,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid pt-3">
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
@@ -85,30 +85,26 @@
                             {{-- Warehouse Select --}}
                             <div class="col-md-6 mb-3" id="warehouse_div">
                                 <label class="form-label">Warehouse <span class="text-danger">*</span></label>
-                                <select name="warehouse_id" class="form-select @error('warehouse_id') is-invalid @enderror">
-                                    <option value="">Select Warehouse</option>
-                                    @foreach($warehouses as $w)
-                                        <option value="{{ $w->id }}"
-                                            {{ old('warehouse_id', $inventory->warehouse_id) == $w->id ? 'selected' : '' }}>
-                                            {{ $w->warehouse_name ?? $w->name }}
-                                        </option>
-                                    @endforeach
+                                <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#warehouse-error-div" data-option-url="{{ route('admin.lists.warehouses') }}" data-placeholder="Select warehouse" id="warehouse_id" name="warehouse_id">
+                                    @php($selectedWarehouseId = old('warehouse_id', $inventory->warehouse_id ?? $inventory->location_id))
+                                    @if(old('location_type', $inventory->location_type) === 'warehouse' && $selectedWarehouseId)
+                                        <option selected value="{{ $selectedWarehouseId }}">{{ optional($inventory->warehouse)->getTranslation('warehouse_name', app()->getLocale()) ?? optional($inventory->warehouse)->getTranslation('warehouse_name', 'en') ?? ('Warehouse #' . $selectedWarehouseId) }}</option>
+                                    @endif
                                 </select>
+                                <div id="warehouse-error-div"></div>
                                 @error('warehouse_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             {{-- Store Select --}}
                             <div class="col-md-6 mb-3 d-none" id="store_div">
                                 <label class="form-label">Store <span class="text-danger">*</span></label>
-                                <select name="store_id" class="form-select @error('store_id') is-invalid @enderror">
-                                    <option value="">Select Store</option>
-                                    @foreach($stores as $s)
-                                        <option value="{{ $s->id }}"
-                                            {{ old('store_id', $inventory->store_id) == $s->id ? 'selected' : '' }}>
-                                            {{ $s->store_name ?? $s->name }}
-                                        </option>
-                                    @endforeach
+                                <select class="select2-ajax browser-default form-control" data-allow-clear="true" data-error="#store-error-div" data-option-url="{{ route('admin.lists.stores') }}" data-placeholder="Select store" id="store_id" name="store_id">
+                                    @php($selectedStoreId = old('store_id', $inventory->store_id ?? $inventory->location_id))
+                                    @if(old('location_type', $inventory->location_type) === 'store' && $selectedStoreId)
+                                        <option selected value="{{ $selectedStoreId }}">{{ optional($inventory->store)->getTranslation('store_name', app()->getLocale()) ?? optional($inventory->store)->getTranslation('store_name', 'en') ?? optional($inventory->store)->name ?? ('Store #' . $selectedStoreId) }}</option>
+                                    @endif
                                 </select>
+                                <div id="store-error-div"></div>
                                 @error('store_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 

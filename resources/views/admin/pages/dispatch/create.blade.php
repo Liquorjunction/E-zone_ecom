@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4 px-2">
         @php
             $orderItems = $order->orderItems ?? [];
             $orderDispatches = \App\Models\Dispatch::where('order_id', isset($order) ? $order->id : 0)
@@ -22,27 +22,34 @@
         @endphp
 
         {{-- Page Header --}}
-        <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
-            <div>
-                <h4 class="fw-semibold mb-1">Create Dispatch</h4>
-                <p class="text-secondary small mb-0">Dispatch order items — split across one or multiple locations</p>
-                @if (isset($order) && $order->status)
-                    <div class="mt-2">
-                        <span
-                            class="badge
-                            @if ($order->status === 'partially_dispatched') bg-warning text-dark
-                            @elseif($order->status === 'dispatched') bg-primary
-                            @elseif($order->status === 'delivered') bg-success
-                            @elseif($order->status === 'cancelled') bg-danger
-                            @else bg-secondary @endif">
-                            {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                        </span>
+        <div class="row">
+            <div class="col-lg-12">
+                <div
+                    class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4 bg-white rounded-3 p-3">
+                    <div>
+                        <h4 class="fw-semibold mb-1">Create Dispatch</h4>
+                        <p class="text-secondary small mb-0">Dispatch order items — split across one or multiple locations
+                        </p>
+                        @if (isset($order) && $order->status)
+                            <div class="mt-2">
+                                <span
+                                    class="badge
+                                    @if ($order->status === 'partially_dispatched') bg-warning text-dark
+                                    @elseif($order->status === 'dispatched') bg-primary
+                                    @elseif($order->status === 'delivered') bg-success
+                                    @elseif($order->status === 'cancelled') bg-danger
+                                    @else bg-secondary @endif">
+                                    {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
-                @endif
+                    <a href="{{ route('admin.dispatch.index') }}"
+                        class="btn btn-light border d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div>
             </div>
-            <a href="{{ route('admin.dispatch.index') }}" class="btn btn-light border d-inline-flex align-items-center gap-2">
-                <i class="bi bi-arrow-left"></i> Back
-            </a>
         </div>
 
         {{-- Main form — JS injects hidden inputs before submit --}}
@@ -89,7 +96,8 @@
                                     <th class="text-uppercase text-muted small fw-semibold text-nowrap">Variant</th>
                                     <th class="text-uppercase text-muted small fw-semibold text-nowrap">Qty Status</th>
                                     <th class="text-uppercase text-muted small fw-semibold text-nowrap">Allocation</th>
-                                    <th class="text-uppercase text-muted small fw-semibold text-center text-nowrap">Action</th>
+                                    <th class="text-uppercase text-muted small fw-semibold text-center text-nowrap">Action
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -123,7 +131,8 @@
                                                 @if ($alreadyDispatched > 0)
                                                     <div class="small text-success mb-1">
                                                         <i class="bi bi-check-circle"></i> Dispatched:
-                                                        <span class="fw-bold font-monospace">{{ $alreadyDispatched }}</span>
+                                                        <span
+                                                            class="fw-bold font-monospace">{{ $alreadyDispatched }}</span>
                                                     </div>
                                                 @endif
                                                 @if ($remainingQty > 0)
@@ -199,7 +208,8 @@
                             <label class="form-label small fw-medium">
                                 Remarks <span class="text-muted">(optional)</span>
                             </label>
-                            <textarea class="form-control" id="remarks_textarea" rows="2" placeholder="Add any notes about this dispatch..."></textarea>
+                            <textarea class="form-control" id="remarks_textarea" rows="2"
+                                placeholder="Add any notes about this dispatch..."></textarea>
                         </div>
                     </div>
                     <div class="d-flex align-items-center justify-content-between mt-4">
@@ -225,7 +235,8 @@
 
                 <div class="modal-header border-0 bg-primary-subtle px-4 py-3">
                     <div>
-                        <div class="small text-uppercase text-primary fw-semibold letter-spacing-1">Dispatch allocation</div>
+                        <div class="small text-uppercase text-primary fw-semibold letter-spacing-1">Dispatch allocation
+                        </div>
                         <h5 class="modal-title fw-semibold mb-0" id="dispatchModalLabel">Dispatch Item</h5>
                         <div class="small text-muted mt-1" id="modal-item-subtitle"></div>
                     </div>
@@ -249,7 +260,8 @@
                         <div class="col-md-4">
                             <div class="border rounded-3 bg-light h-100 p-3 text-center">
                                 <div class="small text-muted text-uppercase fw-semibold mb-1">Still needed</div>
-                                <div class="fw-bold fs-3 font-monospace text-danger" id="modal-still-needed-display">0</div>
+                                <div class="fw-bold fs-3 font-monospace text-danger" id="modal-still-needed-display">0
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -266,7 +278,8 @@
                             <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
                                 <div>
                                     <h6 class="fw-semibold mb-1">Allocation rows</h6>
-                                    <div class="small text-muted">Split this item across one or more locations. A location can only be used once.</div>
+                                    <div class="small text-muted">Split this item across one or more locations. A location
+                                        can only be used once.</div>
                                 </div>
                                 <button type="button" id="add-split-btn"
                                     class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 d-none">
@@ -287,7 +300,8 @@
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div
+                    class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="small text-muted" id="modal-footer-hint"></div>
                     <div class="d-flex gap-2 ms-auto">
                         <button type="button"
@@ -326,10 +340,13 @@
                     </div>
                     <div class="col-lg-3 col-md-8">
                         <label class="form-label small fw-medium mb-1">Qty to dispatch</label>
-                        <input type="number" class="form-control split-qty-input font-monospace" min="1" value="" placeholder="0">
+                        <input type="number" class="form-control split-qty-input font-monospace" min="1"
+                            value="" placeholder="0">
                     </div>
                     <div class="col-lg-2 col-md-4 d-grid">
-                        <button type="button" class="btn btn-outline-danger remove-split-btn d-inline-flex align-items-center justify-content-center gap-1" title="Remove row">
+                        <button type="button"
+                            class="btn btn-outline-danger remove-split-btn d-inline-flex align-items-center justify-content-center gap-1"
+                            title="Remove row">
                             <i class="bi bi-x-lg"></i>
                             <span class="d-lg">Remove</span>
                         </button>

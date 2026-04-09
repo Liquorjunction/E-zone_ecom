@@ -281,4 +281,48 @@ class CartService
     {
         return $this->repo->clearCartItems($cart);
     }
+
+    public function mergeSessionCartIntoUserCart(int $userId, string $sessionId): bool
+    {
+        if ($userId <= 0 || trim($sessionId) === '') {
+            return false;
+        }
+
+        $sessionCart = $this->repo->getCartBySessionId($sessionId);
+        if (! $sessionCart || $sessionCart->items->isEmpty()) {
+            return false;
+        }
+
+        $userCart = $this->repo->getCartForUserOrSession(new CartIdentifier($userId, $sessionId));
+
+        if (! $userCart || $sessionCart->id === $userCart->id) {
+            return false;
+        }
+
+        $mergedAny = false;
+
+        foreach ($sessionCart->items as $sessionItem) {
+            try {
+                $this->addItemToCart($userCart, [
+                    'product_id' => $sessionItem->product_id,
+                    'variant_id' => $sessionItem->variant_id,
+                    'quantity' => (int) $sessionItem->quantity,
+                    'unit_price' => $sessionItem->unit_price,
+                ]);
+
+                $mergedAny = true;
+            } catch (\Throwable $e) {
+                $this->logger->warning('Skipping session cart item during merge.', [
+                    'user_id' => $userId,
+                    'session_id' => $sessionId,
+                    'cart_item_id' => $sessionItem->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        $this->clearCart($sessionCart);
+
+        return $mergedAny;
+    }
 }

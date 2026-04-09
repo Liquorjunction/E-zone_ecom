@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class AdminRepository implements AdminRepositoryInterface
 {
@@ -280,9 +281,16 @@ class AdminRepository implements AdminRepositoryInterface
         }
     }
 
-    public function getRolesList()
+    public function getRolesList($term = null)
     {
-        return \Spatie\Permission\Models\Role::pluck('name', 'id');
+        $query = Role::query()->select(['id', 'name']);
+
+        if (!empty($term)) {
+            $like = '%' . $term . '%';
+            $query->where('name', 'like', $like);
+        }
+
+        return $query->get();
     }
 
     public function getDataForDataTable($request)
