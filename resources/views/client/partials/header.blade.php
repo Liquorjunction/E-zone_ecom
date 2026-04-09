@@ -233,7 +233,7 @@
                 <button @click="mobileMenuOpen = !mobileMenuOpen"
                     class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-gray-600
                                hover:bg-gray-100 transition-all duration-150">
-                    <i x-cloak x-show="!mobileMenuOpen" class="fa-solid fa-bars text-lg leading-none"></i>
+                    <i x-show="!mobileMenuOpen" class="fa-solid fa-bars text-lg leading-none"></i>
                     <i x-cloak x-show="mobileMenuOpen" class="fa-solid fa-xmark text-lg leading-none"></i>
                 </button>
 
