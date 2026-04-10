@@ -74,27 +74,9 @@
     @touchstart.passive="onTouchStart($event)"
     @touchend="onTouchEnd($event)">
         <div class="px-4">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Shop by Category') }}</h2>
-                    <p class="text-xs text-gray-600">{{ statictranslations('Browse our extensive collection') }}</p>
-                </div>
-                <div class="flex gap-1">
-                    <button @click="prev()" :disabled="currentSlide === 0"
-                        :class="currentSlide === 0 ? 'opacity-30' : ''"
-                        class="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button @click="next()" :disabled="currentSlide === totalSlides - 1"
-                        :class="currentSlide === totalSlides - 1 ? 'opacity-30' : ''"
-                        class="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
+            <div class="mb-4 text-center">
+                <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Shop by Category') }}</h2>
+                <p class="text-xs text-gray-600">{{ statictranslations('Browse our extensive collection') }}</p>
             </div>
 
             <div class="relative overflow-hidden">
@@ -176,7 +158,7 @@
     @touchstart.passive="onTouchStart($event)"
     @touchend="onTouchEnd($event)">
         <div class="px-4">
-            <div class="mb-4">
+            <div class="mb-4 text-center">
                 <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Featured Promotions') }}</h2>
                 <p class="text-xs text-gray-600">{{ statictranslations('Handpicked deals just for you') }}</p>
             </div>
@@ -257,7 +239,7 @@
         @touchstart.passive="onTouchStart($event)"
         @touchend="onTouchEnd($event)">
             <div class="px-4">
-                <div class="mb-4">
+                <div class="mb-4 text-center">
                     <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Deals & Discounts') }}</h2>
                     <p class="text-xs text-gray-600">{{ statictranslations('Grab the best offers on top products') }}</p>
                 </div>
@@ -327,11 +309,9 @@
     @touchstart.passive="onTouchStart($event)"
     @touchend="onTouchEnd($event)">
         <div class="px-4">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('New Arrivals') }}</h2>
-                    <p class="text-xs text-gray-600">{{ statictranslations('The latest tech just landed') }}</p>
-                </div>
+            <div class="mb-4 text-center">
+                <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('New Arrivals') }}</h2>
+                <p class="text-xs text-gray-600">{{ statictranslations('The latest tech just landed') }}</p>
             </div>
 
             <div class="relative overflow-hidden">
@@ -396,11 +376,9 @@
         @touchstart.passive="onTouchStart($event)"
         @touchend="onTouchEnd($event)">
             <div class="px-4">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Best Sellers') }}</h2>
+                <div class="mb-4 text-center">
+                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Best Sellers') }}</h2>
                     <p class="text-xs text-gray-600">{{ statictranslations('Most loved by our customers') }}</p>
-                </div>
                 </div>
 
                 <div class="relative overflow-hidden">
@@ -469,12 +447,10 @@
     @touchstart.passive="onTouchStart($event)"
     @touchend="onTouchEnd($event)">
         <div class="px-4">
-            <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Trusted Brands') }}</h2>
-                        <p class="text-xs text-gray-600">{{ statictranslations("We partner with the world's leading technology brands") }}</p>
-                    </div>
-                </div>
+            <div class="mb-4 text-center">
+                <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Trusted Brands') }}</h2>
+                <p class="text-xs text-gray-600">{{ statictranslations("We partner with the world's leading technology brands") }}</p>
+            </div>
 
             <div class="relative overflow-hidden">
                 <div class="flex transition-transform duration-500 ease-out"
@@ -547,11 +523,9 @@
     @touchstart.passive="onTouchStart($event)"
     @touchend="onTouchEnd($event)">
         <div class="px-4">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Why Shop With Us?') }}</h2>
-                    <p class="text-xs text-gray-600">{{ statictranslations('Experience excellence in every purchase') }}</p>
-                </div>
+            <div class="mb-4 text-center">
+                <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Why Shop With Us?') }}</h2>
+                <p class="text-xs text-gray-600">{{ statictranslations('Experience excellence in every purchase') }}</p>
             </div>
 
             @if ($whyShopWithUs->isNotEmpty())
