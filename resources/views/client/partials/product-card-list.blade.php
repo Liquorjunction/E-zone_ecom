@@ -89,6 +89,39 @@
     } else {
         $isInCart = $master->cartItems()->whereHas('cart', function ($q) use ($user) { $q->where('user_id', $user?->id); })->exists();
     }
+
+    $contextSlug = $brand_slug ?? $category_slug ?? $subcategory_slug ?? null;
+    $productUrl = null;
+    if (!empty($brand_slug)) {
+        $productUrl = route('products.detail.brand', [
+            'brandSlug' => $brand_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($category_slug) && !empty($subcategory_slug)) {
+        $productUrl = route('products.detail.category-subcategory', [
+            'categorySlug' => $category_slug,
+            'subcategorySlug' => $subcategory_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($category_slug)) {
+        $productUrl = route('products.detail.category', [
+            'categorySlug' => $category_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($subcategory_slug)) {
+        $resolvedCategorySlug = $category_slug ?? optional($master->category)->slug;
+        if (!empty($resolvedCategorySlug)) {
+            $productUrl = route('products.detail.category-subcategory', [
+                'categorySlug' => $resolvedCategorySlug,
+                'subcategorySlug' => $subcategory_slug,
+                'slug' => $master->slug,
+            ]);
+        }
+    }
+    if (!$productUrl) {
+        $productUrl = route('products.detail', $master->slug);
+    }
+    $productUrl .= $isVariant ? '?variant=' . ($product->slug ?? '') : '';
 @endphp
 
 {{-- ═══════════════════════════════════════════════
@@ -100,7 +133,7 @@
 
     {{-- ── Image (fixed square, left side) ── --}}
     <div class="relative shrink-0 w-44 sm:w-52 bg-gray-50 overflow-hidden">
-        <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}"
+        <a href="{{ $productUrl }}"
            class="block w-full h-full aspect-square">
             <img src="{{ $imagePath }}"
                  alt="{{ $name }}"
@@ -194,7 +227,7 @@
         </div>
 
         {{-- Product name --}}
-        <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
+        <a href="{{ $productUrl }}">
             <h3 class="text-sm font-bold text-gray-900 line-clamp-2 mb-2.5
                        group-hover:text-primary transition-colors duration-200 leading-snug">
                 {{ $name }}

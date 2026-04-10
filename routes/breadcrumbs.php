@@ -21,8 +21,100 @@ Breadcrumbs::for('products.index', function (BreadcrumbTrail $trail) {
     $trail->push(statictranslations('Products'), route('products.index'));
 });
 
-// Home > Products > Product Detail
-Breadcrumbs::for('products.detail', function (BreadcrumbTrail $trail, $product) {
+// Home > (Brand/Category/SubCategory/Products) > Product Detail
+Breadcrumbs::for('products.detail', function (BreadcrumbTrail $trail, $product, $context = null) {
+    $normalizedContext = null;
+    if (is_string($context)) {
+        $normalizedContext = strtolower(trim($context));
+    }
+
+    if (is_array($context) && ($context['type'] ?? null) === 'brand') {
+        $brandContextSlug = strtolower(trim((string) ($context['brand_slug'] ?? '')));
+        $brandSlug = strtolower((string) ($product->brand->slug ?? ''));
+
+        if ($brandContextSlug && $brandContextSlug === $brandSlug) {
+            $trail->parent('brand.products', $product->brand->slug);
+            $trail->push(
+                $product->name,
+                route('products.detail.brand', [
+                    'brandSlug' => $product->brand->slug,
+                    'slug' => $product->slug,
+                ])
+            );
+            return;
+        }
+    }
+
+    if (is_array($context) && ($context['type'] ?? null) === 'category') {
+        $categoryContextSlug = strtolower(trim((string) ($context['category_slug'] ?? '')));
+        $categorySlug = strtolower((string) ($product->category->slug ?? ''));
+
+        if ($categoryContextSlug && $categoryContextSlug === $categorySlug) {
+            $trail->parent('category.products', $product->category);
+            $trail->push(
+                $product->name,
+                route('products.detail.category', [
+                    'categorySlug' => $product->category->slug,
+                    'slug' => $product->slug,
+                ])
+            );
+            return;
+        }
+    }
+
+    if (is_array($context) && ($context['type'] ?? null) === 'category_subcategory') {
+        $categoryContextSlug = strtolower(trim((string) ($context['category_slug'] ?? '')));
+        $subcategoryContextSlug = strtolower(trim((string) ($context['subcategory_slug'] ?? '')));
+        $categorySlug = strtolower((string) ($product->category->slug ?? ''));
+        $subCategorySlug = strtolower((string) ($product->subCategory->slug ?? ''));
+
+        if ($categoryContextSlug && $subcategoryContextSlug && $categoryContextSlug === $categorySlug && $subcategoryContextSlug === $subCategorySlug) {
+            $trail->parent('category.products', $product->category);
+            $trail->push(
+                $product->subCategory?->getTranslation('sub-category-name', app()->getLocale()) ?? $product->subCategory?->subcategory_name ?? $product->subCategory?->slug ?? statictranslations('SubCategory'),
+                route('subcategory.products', $product->subCategory->slug)
+            );
+            $trail->push(
+                $product->name,
+                route('products.detail.category-subcategory', [
+                    'categorySlug' => $product->category->slug,
+                    'subcategorySlug' => $product->subCategory->slug,
+                    'slug' => $product->slug,
+                ])
+            );
+            return;
+        }
+    }
+
+    $brandSlug = strtolower((string) ($product->brand->slug ?? ''));
+    $categorySlug = strtolower((string) ($product->category->slug ?? ''));
+    $subCategorySlug = strtolower((string) ($product->subCategory->slug ?? ''));
+
+    if ($normalizedContext && $normalizedContext === $brandSlug) {
+        $trail->parent('brand.products', $product->brand->slug);
+        $trail->push($product->name, route('products.detail.brand', ['brandSlug' => $product->brand->slug, 'slug' => $product->slug]));
+        return;
+    }
+
+    if ($normalizedContext && $normalizedContext === $categorySlug) {
+        $trail->parent('category.products', $product->category);
+        $trail->push($product->name, route('products.detail.category', ['categorySlug' => $product->category->slug, 'slug' => $product->slug]));
+        return;
+    }
+
+    if ($normalizedContext && $normalizedContext === $subCategorySlug) {
+        $trail->parent('subcategory.products', $product->subCategory->slug);
+        $trail->push(
+            $product->name,
+            route('products.detail.category-subcategory', [
+                'categorySlug' => $product->category->slug,
+                'subcategorySlug' => $product->subCategory->slug,
+                'slug' => $product->slug,
+            ])
+        );
+        return;
+    }
+
     $trail->parent('products.index');
     $trail->push($product->name, route('products.detail', $product->slug));
 });

@@ -63,15 +63,51 @@ Route::view('/sitemap', 'client.pages.sitemap')->name('sitemap');
 
 // Brands
 Route::get('/brands', [BrandController::class, 'index'])->name('brands');
-Route::get('/brand/{slug}', [BrandController::class, 'productsByBrand'])->name('brand.products');
+Route::get('/brands/{slug}', [BrandController::class, 'productsByBrand'])->name('brand.products');
+Route::get('/brands/{brandSlug}/{slug}', [ProductController::class, 'showByBrand'])->name('products.detail.brand');
+
+// Legacy brand URLs
+Route::get('/brand', function () {
+    return redirect()->route('brands');
+});
+Route::get('/brand/{slug}', function ($slug) {
+    return redirect()->route('brand.products', ['slug' => $slug]);
+});
+Route::get('/brand/{brandSlug}/{slug}', function ($brandSlug, $slug) {
+    return redirect()->route('products.detail.brand', ['brandSlug' => $brandSlug, 'slug' => $slug]);
+});
 
 // Categories
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-Route::get('/category/{slug}', [CategoryController::class, 'productsByCategory'])->name('category.products');
+Route::get('/categories/{slug}', [CategoryController::class, 'productsByCategory'])->name('category.products');
+Route::get('/categories/{categorySlug}/{slug}', [ProductController::class, 'showByCategory'])->name('products.detail.category');
+Route::get('/categories/{categorySlug}/{subcategorySlug}/{slug}', [ProductController::class, 'showByCategorySubcategory'])->name('products.detail.category-subcategory');
+
+// Legacy category URLs
+Route::get('/category', function () {
+    return redirect()->route('categories');
+});
+Route::get('/category/{slug}', function ($slug) {
+    return redirect()->route('category.products', ['slug' => $slug]);
+});
+Route::get('/category/{categorySlug}/{slug}', function ($categorySlug, $slug) {
+    return redirect()->route('products.detail.category', ['categorySlug' => $categorySlug, 'slug' => $slug]);
+});
+Route::get('/category/{categorySlug}/{subcategorySlug}/{slug}', function ($categorySlug, $subcategorySlug, $slug) {
+    return redirect()->route('products.detail.category-subcategory', ['categorySlug' => $categorySlug, 'subcategorySlug' => $subcategorySlug, 'slug' => $slug]);
+});
 
 // Subcategories
 Route::get('/subcategories', [SubCategoryController::class, 'index'])->name('subcategories');
-Route::get('/subcategory/{slug}', [SubCategoryController::class, 'productsBySubCategory'])->name('subcategory.products');
+Route::get('/subcategories/{slug}', [SubCategoryController::class, 'productsBySubCategory'])->name('subcategory.products');
+
+// Legacy subcategory URLs
+Route::get('/subcategory', function () {
+    return redirect()->route('subcategories');
+});
+Route::get('/subcategory/{slug}', function ($slug) {
+    return redirect()->route('subcategory.products', ['slug' => $slug]);
+});
 
 // Products
 Route::prefix('products')->name('products.')->group(function () {
@@ -85,7 +121,10 @@ Route::prefix('products')->name('products.')->group(function () {
 Route::get('/ajax/search', [SearchController::class, 'ajaxSearch']);
 Route::view('/new-arrivals', 'client.pages.new-arrivals')->name('new-arrivals');
 Route::view('/best-sellers', 'client.pages.best-sellers')->name('best-sellers');
-Route::get('/product-compare', [CompareController::class, 'index'])->name('product-compare');
+Route::get('/compare', [CompareController::class, 'index'])->name('product-compare');
+Route::get('/product-compare', function () {
+    return redirect()->route('product-compare');
+});
 Route::prefix('compare')->group(function () {
     Route::post('/add', [CompareController::class, 'add'])->name('compare.add');
     Route::post('/remove', [CompareController::class, 'remove'])->name('compare.remove');
@@ -191,9 +230,16 @@ Route::middleware('client.auth')->group(function () {
         Route::get('/checkout', [OrderController::class, 'show'])->name('checkout');
         Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
         Route::get('/order-detail', [OrderController::class, 'detail'])->name('order-detail');
-        Route::get('/client/orders/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
-        Route::get('/client/orders/invoice/download', [OrderController::class, 'downloadInvoice'])->name('client.orders.invoice.download');
-        Route::post('/client/orders/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
+        Route::get('/orders/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
+        Route::get('/orders/invoice/download', [OrderController::class, 'downloadInvoice'])->name('client.orders.invoice.download');
+        Route::post('/orders/cancel', [OrderController::class, 'cancel'])->name('client.orders.cancel');
+        Route::get('/client/orders/invoice', function () {
+            return redirect()->route('client.orders.invoice');
+        });
+        Route::get('/client/orders/invoice/download', function () {
+            return redirect()->route('client.orders.invoice.download');
+        });
+        Route::post('/client/orders/cancel', [OrderController::class, 'cancel']);
         Route::get('/checkout/address-section', [OrderController::class, 'addressSection'])->name('checkout.address-section');
 
         // Cart Operations
@@ -227,3 +273,4 @@ Route::middleware('client.auth')->group(function () {
         });
     });
 });
+

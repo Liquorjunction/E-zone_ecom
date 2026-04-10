@@ -18,7 +18,7 @@
 
             {{-- Breadcrumbs --}}
             <div class="mb-6">
-                {!! Breadcrumbs::render('products.detail', $product) !!}
+                {!! Breadcrumbs::render('products.detail', $product, $breadcrumbContext ?? null) !!}
             </div>
 
             {{-- ═══════════════════════════════════════════════════════════════

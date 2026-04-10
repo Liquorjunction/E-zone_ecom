@@ -82,12 +82,45 @@
     $warrantyRaw = $master->getTranslation('warranty', $locale) ?? '';
     $warranty = is_array($warrantyRaw) ? implode(' ', array_filter($warrantyRaw)) : (string) $warrantyRaw;
     $warranty = $warranty ?: '1 Year Warranty';
+
+    $contextSlug = $brand_slug ?? $category_slug ?? $subcategory_slug ?? null;
+    $productUrl = null;
+    if (!empty($brand_slug)) {
+        $productUrl = route('products.detail.brand', [
+            'brandSlug' => $brand_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($category_slug) && !empty($subcategory_slug)) {
+        $productUrl = route('products.detail.category-subcategory', [
+            'categorySlug' => $category_slug,
+            'subcategorySlug' => $subcategory_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($category_slug)) {
+        $productUrl = route('products.detail.category', [
+            'categorySlug' => $category_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($subcategory_slug)) {
+        $resolvedCategorySlug = $category_slug ?? optional($master->category)->slug;
+        if (!empty($resolvedCategorySlug)) {
+            $productUrl = route('products.detail.category-subcategory', [
+                'categorySlug' => $resolvedCategorySlug,
+                'subcategorySlug' => $subcategory_slug,
+                'slug' => $master->slug,
+            ]);
+        }
+    }
+    if (!$productUrl) {
+        $productUrl = route('products.detail', $master->slug);
+    }
+    $productUrl .= $isVariant ? '?variant=' . ($product->slug ?? '') : '';
 @endphp
 
 <div
     class="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border-2 border-gray-100 hover:border-primary/20">
     <div class="relative aspect-square bg-gray-100 overflow-hidden">
-        <a href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}"
+        <a href="{{ $productUrl }}"
             class="block w-full h-full">
             <img src="{{ $imagePath ?? 'https://via.placeholder.com/400x400?text=No+Image' }}" alt="{{ $name }}"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
@@ -195,8 +228,7 @@
             @endif
         </div>
 
-        <a
-            href="{{ route('products.detail', $master->slug) }}{{ $isVariant ? '?variant=' . ($product->slug ?? '') : '' }}">
+        <a href="{{ $productUrl }}">
             <h3
                 class="text-sm font-bold text-gray-900 line-clamp-2 mb-3 group-hover:text-primary transition-colors leading-snug">
                 {{ $name }}

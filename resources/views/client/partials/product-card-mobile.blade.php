@@ -84,7 +84,38 @@
         })->exists();
     }
 
-    $productUrl = route('products.detail', $master->slug) . ($isVariant ? '?variant=' . ($product->slug ?? '') : '');
+    $contextSlug = $brand_slug ?? $category_slug ?? $subcategory_slug ?? null;
+    $productUrl = null;
+    if (!empty($brand_slug)) {
+        $productUrl = route('products.detail.brand', [
+            'brandSlug' => $brand_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($category_slug) && !empty($subcategory_slug)) {
+        $productUrl = route('products.detail.category-subcategory', [
+            'categorySlug' => $category_slug,
+            'subcategorySlug' => $subcategory_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($category_slug)) {
+        $productUrl = route('products.detail.category', [
+            'categorySlug' => $category_slug,
+            'slug' => $master->slug,
+        ]);
+    } elseif (!empty($subcategory_slug)) {
+        $resolvedCategorySlug = $category_slug ?? optional($master->category)->slug;
+        if (!empty($resolvedCategorySlug)) {
+            $productUrl = route('products.detail.category-subcategory', [
+                'categorySlug' => $resolvedCategorySlug,
+                'subcategorySlug' => $subcategory_slug,
+                'slug' => $master->slug,
+            ]);
+        }
+    }
+    if (!$productUrl) {
+        $productUrl = route('products.detail', $master->slug);
+    }
+    $productUrl .= $isVariant ? '?variant=' . ($product->slug ?? '') : '';
 @endphp
 
 {{-- ═══════════════════════════════════════════════════════

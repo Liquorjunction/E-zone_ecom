@@ -55,6 +55,54 @@ class ProductController extends Controller
     public function show($slug, ProductRepo $productRepository)
     {
         $product = $productRepository->findActiveBySlug($slug);
+        return $this->renderProductDetail($product, null, $productRepository);
+    }
+
+    public function showByBrand(string $brandSlug, string $slug, ProductRepo $productRepository)
+    {
+        $product = $productRepository->findActiveBySlug($slug);
+
+        if (!$this->isValidProductBrandContext($product, $brandSlug)) {
+            abort(404);
+        }
+
+        return $this->renderProductDetail($product, [
+            'type' => 'brand',
+            'brand_slug' => $brandSlug,
+        ], $productRepository);
+    }
+
+    public function showByCategory(string $categorySlug, string $slug, ProductRepo $productRepository)
+    {
+        $product = $productRepository->findActiveBySlug($slug);
+
+        if (!$this->isValidProductCategoryContext($product, $categorySlug)) {
+            abort(404);
+        }
+
+        return $this->renderProductDetail($product, [
+            'type' => 'category',
+            'category_slug' => $categorySlug,
+        ], $productRepository);
+    }
+
+    public function showByCategorySubcategory(string $categorySlug, string $subcategorySlug, string $slug, ProductRepo $productRepository)
+    {
+        $product = $productRepository->findActiveBySlug($slug);
+
+        if (!$this->isValidProductCategorySubcategoryContext($product, $categorySlug, $subcategorySlug)) {
+            abort(404);
+        }
+
+        return $this->renderProductDetail($product, [
+            'type' => 'category_subcategory',
+            'category_slug' => $categorySlug,
+            'subcategory_slug' => $subcategorySlug,
+        ], $productRepository);
+    }
+
+    private function renderProductDetail(Product $product, $breadcrumbContext, ProductRepo $productRepository)
+    {
         $relatedProducts = $productRepository->getRelatedProducts($product);
         $bestsellers = $productRepository->getBestsellerVariants(8);
         $bestsellersIds = $bestsellers->pluck('id')->toArray();
@@ -85,13 +133,40 @@ class ProductController extends Controller
         if (request()->wantsJson()) {
             return response()->json([
                 'product' => $product,
+                'breadcrumb_context' => $breadcrumbContext,
                 'discount_info' => $discountInfo,
                 'variant_discounts' => $variantDiscounts,
                 'bestsellers_ids' => $bestsellersIds
             ]);
         }
 
-        return view('client.pages.product-detail', compact('product', 'relatedProducts', 'discountInfo', 'variantDiscounts', 'bestsellers', 'bestsellersIds'));
+        return view('client.pages.product-detail', compact('product', 'relatedProducts', 'discountInfo', 'variantDiscounts', 'bestsellers', 'bestsellersIds', 'breadcrumbContext'));
+    }
+
+    private function isValidProductBrandContext(Product $product, string $brandSlug): bool
+    {
+        return strtolower(trim((string) optional($product->brand)->slug)) === strtolower(trim($brandSlug));
+    }
+
+    private function isValidProductCategoryContext(Product $product, string $categorySlug): bool
+    {
+        return strtolower(trim((string) optional($product->category)->slug)) === strtolower(trim($categorySlug));
+    }
+
+    private function isValidProductCategorySubcategoryContext(Product $product, string $categorySlug, string $subcategorySlug): bool
+    {
+        $normalizedCategorySlug = strtolower(trim($categorySlug));
+        $normalizedSubcategorySlug = strtolower(trim($subcategorySlug));
+
+        $productCategorySlug = strtolower((string) optional($product->category)->slug);
+        $productSubcategorySlug = strtolower((string) optional($product->subCategory)->slug);
+        $subcategoryCategorySlug = strtolower((string) optional(optional($product->subCategory)->category)->slug);
+
+        return $normalizedCategorySlug !== ''
+            && $normalizedSubcategorySlug !== ''
+            && $normalizedCategorySlug === $productCategorySlug
+            && $normalizedSubcategorySlug === $productSubcategorySlug
+            && $normalizedCategorySlug === $subcategoryCategorySlug;
     }
 
     public function getVariantDiscount(Request $request)

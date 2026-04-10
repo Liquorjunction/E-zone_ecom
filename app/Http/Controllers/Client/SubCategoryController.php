@@ -16,11 +16,13 @@ class SubCategoryController extends Controller
 
     public function productsBySubCategory(Request $request, string $slug, SubCategoryRepo $subCategoryRepo)
     {
+        $subcategory = $subCategoryRepo->getSubCategoryBySlug($slug);
         $variants = $subCategoryRepo->getVariantsBySubCategorySlug($slug, 12);
         return view('client.pages.subcategory-products', [
-            'subcategory' => $subCategoryRepo->getSubCategoryBySlug($slug),
+            'subcategory' => $subcategory,
             'variants' => $variants,
-            'subcategory_slug' => $slug
+            'subcategory_slug' => $slug,
+            'category_slug' => optional(optional($subcategory)->category)->slug,
         ]);
     }
 }
