@@ -432,108 +432,169 @@
     @endif
 
     {{-- Mobile Brands --}}
-    <section class="py-6 bg-gray-50">
+    @php
+        $brandsCollection = ($brands ?? collect());
+        $brandChunks = $brandsCollection->chunk(6);
+        $brandCount = $brandsCollection->count();
+    @endphp
+    <section class="py-6 bg-gray-50" x-data="{
+        currentSlide: 0,
+        itemsPerPage: 6,
+        totalItems: {{ $brandCount }},
+        touchStartX: null,
+        touchStartY: null,
+        get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
+        next() { if (this.currentSlide < this.totalSlides - 1) this.currentSlide++ },
+        prev() { if (this.currentSlide > 0) this.currentSlide-- },
+        onTouchStart(event) {
+            const touch = event.touches && event.touches[0];
+            if (!touch) return;
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        },
+        onTouchEnd(event) {
+            const touch = event.changedTouches && event.changedTouches[0];
+            if (!touch || this.touchStartX === null || this.touchStartY === null) return;
+
+            const deltaX = touch.clientX - this.touchStartX;
+            const deltaY = touch.clientY - this.touchStartY;
+            this.touchStartX = null;
+            this.touchStartY = null;
+
+            if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+            if (deltaX < 0) this.next();
+            else this.prev();
+        }
+    }"
+    @touchstart.passive="onTouchStart($event)"
+    @touchend="onTouchEnd($event)">
         <div class="px-4">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ statictranslations('Trusted Brands') }}</h2>
-            <p class="text-xs text-gray-600 text-center mb-4">{{ statictranslations("We partner with the world's leading technology brands") }}</p>
-
-            @php
-                $brandCount = ($brands ?? collect())->count();
-                $duration = max(15, $brandCount * 2.5);
-            @endphp
-
-            <div class="brand-marquee-wrapper">
-                <div class="brand-marquee-inner" style="animation-duration: {{ $duration }}s;">
-                    <div class="brand-marquee">
-                        @foreach ($brands ?? collect() as $brand)
-                            @php
-                                $imgPath = $brand->image ? asset('storage/' . $brand->image) : 'https://logo.clearbit.com/' . ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
-                            @endphp
-                            <a href="{{ route('brand.products', $brand->slug ?? $brand->id) }}">
-                                <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
-                                    class="h-6 w-auto grayscale opacity-60">
-                            </a>
-                        @endforeach
-                    </div>
-                    <div class="brand-marquee" aria-hidden="true">
-                        @foreach ($brands ?? collect() as $brand)
-                            @php
-                                $imgPath = $brand->image ? asset('storage/' . $brand->image) : 'https://logo.clearbit.com/' . ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
-                            @endphp
-                            <a href="{{ route('brand.products', $brand->slug ?? $brand->id) }}">
-                                <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
-                                    class="h-6 w-auto grayscale opacity-60">
-                            </a>
-                        @endforeach
+            <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Trusted Brands') }}</h2>
+                        <p class="text-xs text-gray-600">{{ statictranslations("We partner with the world's leading technology brands") }}</p>
                     </div>
                 </div>
+
+            <div class="relative overflow-hidden">
+                <div class="flex transition-transform duration-500 ease-out"
+                    :style="`transform: translateX(-${currentSlide * 100}%)`">
+                    @foreach ($brandChunks as $chunk)
+                        <div class="w-full shrink-0 flex justify-center">
+                            <div class="grid grid-cols-3 gap-3 w-fit">
+                                @foreach ($chunk as $brand)
+                                    @php
+                                        $imgPath = $brand->image ? asset('storage/' . $brand->image) : 'https://logo.clearbit.com/' . ($brand->slug ?? preg_replace('/\s+/', '', strtolower($brand->name)));
+                                    @endphp
+                                    <a href="{{ route('brand.products', $brand->slug ?? $brand->id) }}"
+                                        class="bg-white rounded-xl p-3 flex items-center justify-center border border-gray-100">
+                                        <img src="{{ $imgPath }}" alt="{{ $brand->name }}"
+                                            class="h-6 w-auto grayscale opacity-70 object-contain">
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-1.5 mt-4" x-show="totalSlides > 1">
+                <template x-for="i in totalSlides" :key="i">
+                    <button @click="currentSlide = i - 1"
+                        :class="currentSlide === i - 1 ? 'bg-primary w-6' : 'bg-gray-300 w-1.5'"
+                        class="h-1.5 rounded-full transition-all"></button>
+                </template>
             </div>
         </div>
     </section>
 
     {{-- Mobile Why Choose --}}
-    <section class="py-6 bg-white">
-        <div class="px-4">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 text-center">{{ statictranslations('Why Shop With Us?') }}</h2>
-            <p class="text-xs text-gray-600 text-center mb-4">{{ statictranslations('Experience excellence in every purchase') }}</p>
+    @php
+        $whyShopWithUs = isset($whyShopWithUs) ? $whyShopWithUs : collect();
+        $locale = app()->getLocale();
+        $whyShopCount = $whyShopWithUs->count();
+        $whyShopChunks = $whyShopWithUs->chunk(4);
+    @endphp
+    <section class="py-6 bg-white" x-data="{
+        currentSlide: 0,
+        itemsPerPage: 4,
+        totalItems: {{ $whyShopCount }},
+        touchStartX: null,
+        touchStartY: null,
+        get totalSlides() { return Math.ceil(this.totalItems / this.itemsPerPage) },
+        next() { if (this.currentSlide < this.totalSlides - 1) this.currentSlide++ },
+        prev() { if (this.currentSlide > 0) this.currentSlide-- },
+        onTouchStart(event) {
+            const touch = event.touches && event.touches[0];
+            if (!touch) return;
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        },
+        onTouchEnd(event) {
+            const touch = event.changedTouches && event.changedTouches[0];
+            if (!touch || this.touchStartX === null || this.touchStartY === null) return;
 
-            @php
-                $whyShopWithUs = isset($whyShopWithUs) ? $whyShopWithUs : collect();
-                $locale = app()->getLocale();
-            @endphp
+            const deltaX = touch.clientX - this.touchStartX;
+            const deltaY = touch.clientY - this.touchStartY;
+            this.touchStartX = null;
+            this.touchStartY = null;
+
+            if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+            if (deltaX < 0) this.next();
+            else this.prev();
+        }
+    }"
+    @touchstart.passive="onTouchStart($event)"
+    @touchend="onTouchEnd($event)">
+        <div class="px-4">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900">{{ statictranslations('Why Shop With Us?') }}</h2>
+                    <p class="text-xs text-gray-600">{{ statictranslations('Experience excellence in every purchase') }}</p>
+                </div>
+            </div>
 
             @if ($whyShopWithUs->isNotEmpty())
-                <div class="grid grid-cols-2 gap-3">
-                    @foreach ($whyShopWithUs as $item)
-                        @php
-                            $title = $item->getTranslation('title', $locale, false) ?? $item->getTranslation('title', 'en', false);
-                            $description = $item->getTranslation('description', $locale, false) ?? $item->getTranslation('description', 'en', false);
-                            $icon = $item->icon ? asset('storage/' . ltrim($item->icon, '/')) : null;
-                        @endphp
-                        <div class="bg-gray-50 rounded-xl p-4 text-center">
-                            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                                @if ($icon)
-                                    <img src="{{ $icon }}" alt="{{ $title ?? 'Icon' }}" class="w-5 h-5 object-contain">
-                                @else
-                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                @endif
+                <div class="relative overflow-hidden">
+                    <div class="flex transition-transform duration-500 ease-out"
+                        :style="`transform: translateX(-${currentSlide * 100}%)`">
+                        @foreach ($whyShopChunks as $chunk)
+                            <div class="w-full shrink-0">
+                                <div class="grid grid-cols-2 gap-3">
+                                    @foreach ($chunk as $item)
+                                        @php
+                                            $title = $item->getTranslation('title', $locale, false) ?? $item->getTranslation('title', 'en', false);
+                                            $description = $item->getTranslation('description', $locale, false) ?? $item->getTranslation('description', 'en', false);
+                                            $icon = $item->icon ? asset('storage/' . ltrim($item->icon, '/')) : null;
+                                        @endphp
+                                        <div class="bg-gray-50 rounded-xl p-4 text-center">
+                                            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                                @if ($icon)
+                                                    <img src="{{ $icon }}" alt="{{ $title ?? 'Icon' }}" class="w-5 h-5 object-contain">
+                                                @else
+                                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                @endif
+                                            </div>
+                                            <h3 class="text-xs font-bold text-gray-900 mb-1">{{ $title ?? 'Feature' }}</h3>
+                                            <p class="text-[10px] text-gray-600 leading-relaxed line-clamp-2">{!! $description ?? '' !!}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                            <h3 class="text-xs font-bold text-gray-900 mb-1">{{ $title ?? 'Feature' }}</h3>
-                            <p class="text-[10px] text-gray-600 leading-relaxed line-clamp-2">{!! $description ?? '' !!}</p>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-1.5 mt-4" x-show="totalSlides > 1">
+                    <template x-for="i in totalSlides" :key="i">
+                        <button @click="currentSlide = i - 1"
+                            :class="currentSlide === i - 1 ? 'bg-primary w-6' : 'bg-gray-300 w-1.5'"
+                            class="h-1.5 rounded-full transition-all"></button>
+                    </template>
                 </div>
             @endif
         </div>
     </section>
-
-    <style>
-        .brand-marquee-wrapper {
-            overflow: hidden;
-            position: relative;
-        }
-        .brand-marquee-inner {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            width: max-content;
-            animation: marquee linear infinite;
-        }
-        .brand-marquee {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-        .brand-marquee a {
-            flex: 0 0 auto;
-            display: inline-flex;
-            align-items: center;
-        }
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-    </style>
 @endsection
