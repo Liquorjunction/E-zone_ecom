@@ -4,10 +4,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const updateUrl = root.dataset.updateUrl;
     const removeUrl = root.dataset.removeUrl;
-    const csrf =
-        document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute("content") || "";
+    const loginUrl = root.dataset.loginUrl || "/login";
+
+    function getCsrfToken() {
+        return (
+            document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute("content") || ""
+        );
+    }
+
+    async function requestJson(url, payload) {
+        const resp = await fetch(url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": getCsrfToken(),
+                Accept: "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (resp.status === 419) {
+            window.location.href = loginUrl;
+            return null;
+        }
+
+        const contentType = resp.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            throw new Error("Non-JSON response");
+        }
+
+        return await resp.json();
+    }
 
     function formatMoney(n) {
         return "$" + Number(n).toFixed(2);
@@ -175,21 +205,11 @@ document.addEventListener("DOMContentLoaded", function () {
     async function updateItem(itemId, quantity) {
         if (!updateUrl) return;
         try {
-            const resp = await fetch(updateUrl, {
-                method: "POST",
-                credentials: 'same-origin',
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrf,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({
-                    item_id: itemId,
-                    quantity: Number(quantity),
-                    shipping_method: getCurrentShippingMethod(),
-                }),
+            const data = await requestJson(updateUrl, {
+                item_id: itemId,
+                quantity: Number(quantity),
+                shipping_method: getCurrentShippingMethod(),
             });
-            const data = await resp.json();
             if (data && data.success) {
                 // Get the cart item row
                 const cartRow = document.querySelector(`.cart-item-row[data-item-id="${itemId}"]`);
@@ -248,21 +268,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
-            const resp = await fetch(updateUrl, {
-                method: "POST",
-                credentials: 'same-origin',
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrf,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({
-                    shipping_method: getCurrentShippingMethod(),
-                }),
+            const data = await requestJson(updateUrl, {
+                shipping_method: getCurrentShippingMethod(),
             });
-
-            const data = await resp.json();
-            if (resp.ok && data && data.success) {
+            if (data && data.success) {
                 updateSummary(data.summary);
             }
         } catch (e) {
@@ -270,24 +279,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Remove item via AJAX, fallback to hidden form submit
+    // Remove item via AJAX
     async function removeItem(itemId) {
-        if (!removeUrl) return submitFallback(itemId);
+        if (!removeUrl) return;
         try {
-            const resp = await fetch(removeUrl, {
-                method: "POST",
-                credentials: 'same-origin',
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrf,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({
-                    item_id: itemId,
-                    shipping_method: getCurrentShippingMethod(),
-                }),
+            const data = await requestJson(removeUrl, {
+                item_id: itemId,
+                shipping_method: getCurrentShippingMethod(),
             });
-            const data = await resp.json();
+
             if (data && data.success) {
                 // remove DOM row
                 const row = document.querySelector(
@@ -300,55 +300,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (window.Toast && typeof window.Toast.success === 'function') {
                     window.Toast.success({ title: trans('Success'), message: (data && data.message) ? data.message : trans('Item removed from cart.') });
                 }
-            } else {
-                submitFallback(itemId);
             }
         } catch (e) {
-            // fallback to form submit
-            submitFallback(itemId);
             if (typeof showUniversalPopup === 'function') {
                 showUniversalPopup(trans('Failed to remove item.')  , 'error', 3000);
             } else if (window.Toast && typeof window.Toast.error === 'function') {
                 window.Toast.error({ title: trans('Error'), message: trans('Failed to remove item.') });
             }
-        }
-    }
-
-    function submitFallback(itemId) {
-        const f = document.getElementById("remove-item-" + itemId);
-        if (f) {
-            try {
-                f.submit();
-            } catch (e) {
-                console.error(e);
-            }
-            return;
-        }
-
-        // If there's no existing form, create one and submit it as a safe fallback.
-        try {
-            const form = document.createElement("form");
-            form.method = "POST";
-            form.action = removeUrl || window.location.href;
-            form.style.display = "none";
-            form.id = "remove-item-" + itemId;
-
-            const token = document.createElement("input");
-            token.type = "hidden";
-            token.name = "_token";
-            token.value = csrf;
-            form.appendChild(token);
-
-            const iid = document.createElement("input");
-            iid.type = "hidden";
-            iid.name = "item_id";
-            iid.value = itemId;
-            form.appendChild(iid);
-
-            document.body.appendChild(form);
-            form.submit();
-        } catch (e) {
-            console.error("submitFallback failed", e);
         }
     }
 
@@ -393,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Remove handlers — support both old and new button class names
     document
-        .querySelectorAll(".remove-item-btn, .remove-item-ajax")
+        .querySelectorAll(".remove-item-btn, .remove-item-ajax, .summary-remove-item-btn")
         .forEach((btn) => {
             btn.addEventListener("click", function () {
                 const id = this.dataset.itemId;

@@ -34,6 +34,7 @@
             class="container mx-auto px-4 max-w-7xl"
             data-remove-url="{{ route('cart.remove') }}"
             data-update-url="{{ route('cart.update') }}"
+            data-login-url="{{ route('login') }}"
             data-step="{{ $step }}"
             data-shipping-method="{{ $totals['shipping_method'] ?? 'standard' }}">
 

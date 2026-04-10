@@ -24,7 +24,8 @@ $(function() {
             { data: 'actions', name: 'actions', orderable: false, searchable: false },
         ],
         order: [[0, 'desc']],
-        responsive: true,
+        responsive: false,
+        scrollX: true,
         autoWidth: false,
     });
 

@@ -38,27 +38,25 @@
         {{-- Reviews Table --}}
         <div class="card border-0 shadow-sm rounded-3">
             <div class="card-body">
-                <div class="table-responsive">
-                    <table id="reviews-table" class="table table-striped table-hover w-100"
-                        data-route="{{ route('admin.reviews.data') }}">
-                        <thead class="bg-light text-uppercase small">
-                            <tr>
-                                <th>ID</th>
-                                <th>Product</th>
-                                <th>Review</th>
-                                <th>User</th>
-                                <th>Order</th>
-                                <th>Rating</th>
-                                <th>Created At</th>
-                                <th>Approval Actions</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{-- Data Loaded via AJAX --}}
-                        </tbody>
-                    </table>
-                </div>
+                <table id="reviews-table" class="table table-striped table-hover w-100"
+                    data-route="{{ route('admin.reviews.data') }}">
+                    <thead class="bg-light text-uppercase small">
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Review</th>
+                            <th>User</th>
+                            <th>Order</th>
+                            <th>Rating</th>
+                            <th>Created At</th>
+                            <th>Approval Actions</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{-- Data Loaded via AJAX --}}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

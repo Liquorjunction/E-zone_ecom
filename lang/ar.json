@@ -1047,5 +1047,6 @@
     "Return to Cart": "العودة إلى السلة",
     "No order was placed.": "لم يتم وضع أي طلب.",
     "This item is currently unavailable. Remove it to continue checkout.": "هذا المنتج غير متوفر حالياً. قم بإزالته لمواصلة عملية الدفع.",
-    "Remove this item to complete checkout.": "قم بإزالة هذا العنصر لإكمال عملية الدفع."
+    "Remove this item to complete checkout.": "قم بإزالة هذا العنصر لإكمال عملية الدفع.",
+    "Your cart is empty. Add items to continue to checkout.": "سلتك فارغة. أضف عناصر لمواصلة عملية الدفع."
 }

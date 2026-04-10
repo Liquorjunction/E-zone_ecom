@@ -161,6 +161,7 @@
         'This item is currently unavailable. Remove it to continue checkout.' => statictranslations('This item is currently unavailable. Remove it to continue checkout.'),
         'Remove this item to complete checkout.' => statictranslations('Remove this item to complete checkout.'),
         'Out of stock' => statictranslations('Out of stock'),
+        'Your cart is empty. Add items to continue to checkout.' => statictranslations('Your cart is empty. Add items to continue to checkout.'),
     ];
 @endphp
 <script>

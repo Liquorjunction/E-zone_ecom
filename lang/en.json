@@ -1047,5 +1047,6 @@
     "Return to Cart": "Return to Cart",
     "No order was placed.": "No order was placed.",
     "This item is currently unavailable. Remove it to continue checkout.": "This item is currently unavailable. Remove it to continue checkout.",
-    "Remove this item to complete checkout.": "Remove this item to complete checkout."
+    "Remove this item to complete checkout.": "Remove this item to complete checkout.",
+    "Your cart is empty. Add items to continue to checkout.": "Your cart is empty. Add items to continue to checkout."
 }

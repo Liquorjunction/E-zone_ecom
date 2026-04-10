@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Session\TokenMismatchException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -36,6 +37,22 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Throwable $exception, Request $request) {
+            if ($exception instanceof TokenMismatchException) {
+                $redirectUrl = ($request->is('admin') || $request->is('admin/*'))
+                    ? route('admin.login')
+                    : route('login');
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => statictranslations('Your session has expired. Please sign in again.'),
+                        'redirect' => $redirectUrl,
+                    ], 419);
+                }
+
+                return redirect()->to($redirectUrl)
+                    ->with('error', statictranslations('Your session has expired. Please sign in again.'));
+            }
+
             // Only apply in production with debug disabled
             if (! app()->environment('production') || config('app.debug')) {
                 return null;
@@ -50,7 +67,6 @@ return Application::configure(basePath: dirname(__DIR__))
             $redirectExceptions = [
                 \Illuminate\Validation\ValidationException::class,
                 \Illuminate\Auth\AuthenticationException::class,
-                \Illuminate\Session\TokenMismatchException::class, // 419 CSRF
             ];
 
             foreach ($redirectExceptions as $class) {
