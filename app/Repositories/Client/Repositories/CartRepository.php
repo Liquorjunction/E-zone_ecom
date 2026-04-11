@@ -18,12 +18,40 @@ class CartRepository implements CartRepositoryInterface
     public function getCartForUserOrSession(CartIdentifier $identifier)
     {
         if ($identifier->userId) {
-            return Cart::with('items.product', 'items.variant')
-                ->firstOrCreate(['user_id' => $identifier->userId]);
+            $currentSessionId = (string) $identifier->sessionId;
+
+            $cart = Cart::with('items.product', 'items.variant')
+                ->where('user_id', $identifier->userId)
+                ->where(function ($query) use ($currentSessionId) {
+                    $query->whereNull('session_id')
+                        ->orWhere('session_id', $currentSessionId);
+                })
+                ->where(function ($query) {
+                    $query->whereNull('session_id')
+                        ->orWhere('session_id', 'not like', '%:buy-now');
+                })
+                ->orderByRaw('CASE WHEN session_id IS NULL THEN 0 ELSE 1 END')
+                ->orderByDesc('updated_at')
+                ->first();
+
+            if ($cart) {
+                return $cart;
+            }
+
+            $cart = Cart::create(['user_id' => $identifier->userId]);
+            return Cart::with('items.product', 'items.variant')->find($cart->id);
         }
 
-        return Cart::with('items.product', 'items.variant')
-            ->firstOrCreate(['session_id' => $identifier->sessionId]);
+        $cart = Cart::with('items.product', 'items.variant')
+            ->where('session_id', $identifier->sessionId)
+            ->first();
+
+        if ($cart) {
+            return $cart;
+        }
+
+        $cart = Cart::create(['session_id' => $identifier->sessionId]);
+        return Cart::with('items.product', 'items.variant')->find($cart->id);
     }
 
     public function getCartBySessionId(string $sessionId)

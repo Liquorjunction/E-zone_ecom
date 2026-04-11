@@ -84,10 +84,33 @@
     $warranty = $warranty ?: '1 Year Warranty';
 
     $user = Auth::user();
-    if ($isVariant) {
-        $isInCart = $product->cartItems()->whereHas('cart', function ($q) use ($user) { $q->where('user_id', $user?->id); })->exists();
+    $sessionId = session()->getId();
+    if (! $user) {
+        $isInCart = false;
+    } elseif ($isVariant) {
+        $isInCart = $product->cartItems()->whereHas('cart', function ($q) use ($user, $sessionId) {
+            $q->where('user_id', $user->id)
+                ->where(function ($inner) use ($sessionId) {
+                    $inner->whereNull('session_id')
+                        ->orWhere('session_id', $sessionId);
+                })
+                ->where(function ($inner) {
+                    $inner->whereNull('session_id')
+                        ->orWhere('session_id', 'not like', '%:buy-now');
+                });
+        })->exists();
     } else {
-        $isInCart = $master->cartItems()->whereHas('cart', function ($q) use ($user) { $q->where('user_id', $user?->id); })->exists();
+        $isInCart = $master->cartItems()->whereHas('cart', function ($q) use ($user, $sessionId) {
+            $q->where('user_id', $user->id)
+                ->where(function ($inner) use ($sessionId) {
+                    $inner->whereNull('session_id')
+                        ->orWhere('session_id', $sessionId);
+                })
+                ->where(function ($inner) {
+                    $inner->whereNull('session_id')
+                        ->orWhere('session_id', 'not like', '%:buy-now');
+                });
+        })->exists();
     }
 
     $contextSlug = $brand_slug ?? $category_slug ?? $subcategory_slug ?? null;
