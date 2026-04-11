@@ -206,7 +206,51 @@ document.addEventListener("DOMContentLoaded", function () {
     const qtyIncrease = document.getElementById("qty-increase");
     const addToCartBtn = document.getElementById("add-to-cart-btn");
     const buyNowBtn = document.getElementById("buy-now-btn");
+    const compareBtn = document.getElementById("product-compare-btn");
     let currentMaxStock = null;
+
+    function renderCompareIcon(compared) {
+        if (compared) {
+            return `<svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+        }
+
+        const strokeClass = compared ? "text-blue-700" : "text-blue-500";
+        const barClass = compared ? "text-blue-500" : "text-blue-400";
+
+        return `<svg class="w-5 h-5 ${strokeClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-200"/><rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="${barClass}"/><rect x="3" y="7" width="7" height="13" rx="2" stroke="currentColor"/><rect x="14" y="3" width="7" height="17" rx="2" stroke="currentColor"/></svg>`;
+    }
+
+    function updateDetailCompareButton(variantId) {
+        if (!compareBtn) return;
+
+        const idStr = variantId ? String(variantId) : "";
+        if (idStr) {
+            compareBtn.removeAttribute("disabled");
+            compareBtn.setAttribute("data-product-variant-id", idStr);
+        } else {
+            compareBtn.setAttribute("disabled", "disabled");
+            compareBtn.setAttribute("data-product-variant-id", "");
+        }
+
+        const comparedIds = Array.isArray(window.COMPARED_VARIANT_IDS)
+            ? window.COMPARED_VARIANT_IDS.map((x) => String(x))
+            : [];
+        const isCompared = !!idStr && comparedIds.includes(idStr);
+
+        compareBtn.classList.toggle("is-compared", isCompared);
+        compareBtn.setAttribute("aria-pressed", isCompared ? "true" : "false");
+        compareBtn.classList.toggle("bg-blue-50", isCompared);
+        compareBtn.classList.toggle("border-blue-200", isCompared);
+        compareBtn.classList.toggle("bg-white/90", !isCompared);
+        compareBtn.classList.toggle("border-gray-100", !isCompared);
+
+        const addLabel = typeof trans === "function" ? trans("Add to compare") : "Add to compare";
+        const removeLabel = typeof trans === "function" ? trans("Remove from compare") : "Remove from compare";
+        const label = isCompared ? removeLabel : addLabel;
+        compareBtn.setAttribute("title", label);
+        compareBtn.setAttribute("aria-label", label);
+        compareBtn.innerHTML = renderCompareIcon(isCompared);
+    }
 
     function setMaxStock(value) {
         const parsed = parseInt(value || "", 10);
@@ -402,6 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const cartVariantInput = document.getElementById("cart-variant-id");
         if (cartVariantInput) cartVariantInput.value = variantId || "";
+        updateDetailCompareButton(variantId);
 
         // ── Update gallery images ─────────────────────────────────────────
         try {
@@ -822,15 +867,17 @@ document.addEventListener("DOMContentLoaded", function () {
                             );
                         }
 
-                        const msg = data.message || trans('Item added to cart.');
-                        if (window.showUniversalPopup)
-                            showUniversalPopup(msg, "success", 2000);
-                        else if (window.Toast?.success)
-                            window.Toast.success({
-                                title: "Success",
-                                message: msg,
-                            });
-                        else alert(msg);
+                        if (!isBuyNow) {
+                            const msg = data.message || trans('Item added to cart.');
+                            if (window.showUniversalPopup)
+                                showUniversalPopup(msg, "success", 2000);
+                            else if (window.Toast?.success)
+                                window.Toast.success({
+                                    title: "Success",
+                                    message: msg,
+                                });
+                            else alert(msg);
+                        }
 
                         if (isBuyNow) {
                             setTimeout(() => {
@@ -867,10 +914,19 @@ document.addEventListener("DOMContentLoaded", function () {
             syncAddToCartStateFromServer();
         });
 
+        window.addEventListener("compare:changed", function (e) {
+            const ids = Array.isArray(e?.detail?.ids) ? e.detail.ids : null;
+            if (ids) {
+                window.COMPARED_VARIANT_IDS = ids.map((x) => Number(x));
+            }
+            updateDetailCompareButton(window.currentSelectedVariantId);
+        });
+
         window.addEventListener("cart:changed", function () {
             syncAddToCartStateFromServer();
         });
 
         syncAddToCartStateFromServer();
+        updateDetailCompareButton(window.currentSelectedVariantId);
     }
 });

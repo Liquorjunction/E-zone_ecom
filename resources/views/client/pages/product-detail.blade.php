@@ -8,6 +8,7 @@
         window.PRODUCT_ID = @json($product->id);
         window.PRODUCT_VARIANT_ID = null;
         window.IS_AUTHENTICATED = @json(auth('web')->check());
+        window.COMPARED_VARIANT_IDS = @json(collect(session('compare_variant_ids', []))->map(fn($id) => (int) $id)->values()->all());
         window.APP_LOCALE = @json(app()->getLocale());
         window.TRANSLATIONS = @json(json_decode(file_get_contents(base_path('lang/' . app()->getLocale() . '.json')), true));
     </script>
@@ -79,6 +80,8 @@
                                     isset($wishlistVariantIds) && $variantId
                                         ? in_array($variantId, $wishlistVariantIds)
                                         : false;
+                                $compareVariantIds = collect(session('compare_variant_ids', []))->map(fn($id) => (int) $id)->all();
+                                $isCompared = $variantId ? in_array((int) $variantId, $compareVariantIds, true) : false;
                             @endphp
                             <button type="button" data-product-variant-id="{{ $variantId }}"
                                 data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}"
@@ -89,6 +92,18 @@
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+
+                            <button type="button" id="product-compare-btn" aria-label="{{ statictranslations('Compare product') }}"
+                                data-product-variant-id="{{ $variantId }}" data-init-compared="{{ $isCompared ? '1' : '0' }}"
+                                class="compare-btn absolute top-16 right-4 w-10 h-10 rounded-xl bg-white/90 backdrop-blur-sm shadow-md border border-gray-100 flex items-center justify-center hover:bg-blue-50 hover:border-blue-200 transition-all z-10 {{ $isCompared ? 'is-compared' : '' }}"
+                                @if (!$variantId) disabled @endif>
+                                <svg class="w-5 h-5 {{ $isCompared ? 'text-blue-700' : 'text-blue-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-200"/>
+                                    <rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="{{ $isCompared ? 'text-blue-500' : 'text-blue-400' }}"/>
+                                    <rect x="3" y="7" width="7" height="13" rx="2" stroke="currentColor"/>
+                                    <rect x="14" y="3" width="7" height="17" rx="2" stroke="currentColor"/>
                                 </svg>
                             </button>
 
