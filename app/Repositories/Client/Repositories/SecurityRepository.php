@@ -12,10 +12,6 @@ class SecurityRepository implements SecurityRepositoryInterface
 {
 	public function getSessions(int $userId)
 	{
-		if (config('session.driver') !== 'database') {
-			return [];
-		}
-
 		return DB::table('sessions')
 			->where('user_id', $userId)
 			->orderBy('last_activity', 'desc')
@@ -24,10 +20,6 @@ class SecurityRepository implements SecurityRepositoryInterface
 
 	public function countSessions(int $userId): int
 	{
-		if (config('session.driver') !== 'database') {
-			return 0;
-		}
-
 		return (int) DB::table('sessions')
 			->where('user_id', $userId)
 			->count();
@@ -49,24 +41,17 @@ class SecurityRepository implements SecurityRepositoryInterface
 		$user->password = Hash::make($newPassword);
 		$user->setRememberToken(Str::random(60));
 		$user->save();
-
-		if (config('session.driver') === 'database') {
-			DB::table('sessions')->where('user_id', $user->id)->delete();
-		}
+		DB::table('sessions')->where('user_id', $user->id)->delete();
 	}
 
 	public function revokeSession(string $sessionId, int $userId): void
 	{
-		if (config('session.driver') === 'database') {
-			DB::table('sessions')->where('id', $sessionId)->where('user_id', $userId)->delete();
-		}
+		DB::table('sessions')->where('id', $sessionId)->where('user_id', $userId)->delete();
 	}
 
 	public function logoutAllSessions(int $userId): void
 	{
-		if (config('session.driver') === 'database') {
-			DB::table('sessions')->where('user_id', $userId)->delete();
-		}
+		DB::table('sessions')->where('user_id', $userId)->delete();
 	}
 }
 

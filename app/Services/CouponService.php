@@ -129,11 +129,6 @@ class CouponService
             $cart->id
         );
 
-        $cart->coupon_id = null;
-        $cart->coupon_code = null;
-        $cart->coupon_discount_amount = 0;
-        $cart->save();
-
         return [
             'success' => true,
             'message' => sprintf(statictranslations('Coupon applied! You saved %s%s'), config('app.CURRENCY_SYMBOL'), number_format($discountAmount, 2)),
@@ -168,10 +163,6 @@ class CouponService
     public function removeCoupon(Cart $cart): bool
     {
         $this->sessionCoupon->remove();
-        $cart->coupon_id = null;
-        $cart->coupon_code = null;
-        $cart->coupon_discount_amount = 0;
-        $cart->save();
         return true;
     }
 

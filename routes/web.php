@@ -144,6 +144,7 @@ Route::get('/cart/add', function () {
 });
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/item-status', [CartController::class, 'itemStatus'])->name('cart.itemStatus');
+Route::post('/cart/buy-now', [CartController::class, 'buyNow'])->name('cart.buyNow');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.applyCoupon');
@@ -241,9 +242,6 @@ Route::middleware('client.auth')->group(function () {
         });
         Route::post('/client/orders/cancel', [OrderController::class, 'cancel']);
         Route::get('/checkout/address-section', [OrderController::class, 'addressSection'])->name('checkout.address-section');
-
-        // Cart Operations
-        Route::post('/cart/buy-now', [CartController::class, 'buyNow'])->name('cart.buyNow');
 
         // Reviews
         Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');

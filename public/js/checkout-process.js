@@ -480,6 +480,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 credentials: "same-origin",
                 headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json", "X-CSRF-TOKEN": csrf },
             });
+
+            if (resp.redirected && resp.url) {
+                window.location.href = resp.url;
+                return;
+            }
+
+            var contentType = resp.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) {
+                window.location.href = (root.dataset.loginUrl || "/login");
+                return;
+            }
+
             var data = await resp.json();
             if (data.redirect) { window.location.href = data.redirect; return; }
             if (data.html) {
@@ -622,7 +634,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: { "X-CSRF-TOKEN": csrf, "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
                 body: new FormData(form),
             });
+
+            if (resp.redirected && resp.url) {
+                window.location.href = resp.url;
+                return;
+            }
+
             var data = await resp.json();
+            if (data.redirect) {
+                window.location.href = data.redirect;
+                return;
+            }
 
             if (data.success && data.html) {
                 var content = document.getElementById("checkout-step-content");

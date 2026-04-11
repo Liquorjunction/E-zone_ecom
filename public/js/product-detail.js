@@ -786,7 +786,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 clickedButton = "add_to_cart";
             });
         if (_buyBtn)
-            _buyBtn.addEventListener("click", () => {
+            _buyBtn.addEventListener("click", (e) => {
                 clickedButton = "buy_now";
             });
 

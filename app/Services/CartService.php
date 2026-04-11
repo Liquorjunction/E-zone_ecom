@@ -16,12 +16,19 @@ class CartService
     protected $repo;
     protected $productRepo;
     protected $logger;
+    protected SessionCouponService $sessionCoupon;
 
-    public function __construct(CartRepositoryInterface $repo, ProductRepositoryInterface $productRepo, LoggerInterface $logger)
+    public function __construct(
+        CartRepositoryInterface $repo,
+        ProductRepositoryInterface $productRepo,
+        LoggerInterface $logger,
+        SessionCouponService $sessionCoupon
+    )
     {
         $this->repo = $repo;
         $this->productRepo = $productRepo;
         $this->logger = $logger;
+        $this->sessionCoupon = $sessionCoupon;
     }
 
     public function addItem(CartIdentifier $cartId, array $payload)
@@ -196,6 +203,7 @@ class CartService
             }
 
             $this->clearBuyNowFlowState();
+            $this->sessionCoupon->remove();
 
             return $restored;
         } catch (\Throwable $e) {
@@ -258,8 +266,44 @@ class CartService
     {
         $cart = $this->repo->getCartForUserOrSession($cartId);
         $ok = $this->repo->removeItem($cart, $itemId);
+
+        if ($ok && $cart) {
+            $freshCart = $this->repo->getCartById((int) $cart->id);
+
+            if (! $freshCart || $freshCart->items->isEmpty()) {
+                $this->sessionCoupon->remove();
+                $this->clearBuyNowSessionStateIfReferencesCart((int) $cart->id);
+
+                // Remove empty guest/session cart rows so stale session carts cannot reappear.
+                if ($freshCart && !$freshCart->user_id) {
+                    $this->repo->clearCart($freshCart);
+                }
+            }
+        }
+
         $this->logger->info('Cart item removed', ['cart_id' => $cart->id ?? null, 'item_id' => $itemId, 'success' => $ok]);
         return $ok;
+    }
+
+    private function clearBuyNowSessionStateIfReferencesCart(int $cartId): void
+    {
+        if ($cartId <= 0) {
+            return;
+        }
+
+        $activeBuyNowCartId = (int) session()->get(self::SESSION_KEY_ACTIVE_BUY_NOW_CART_ID, 0);
+        $context = $this->getBuyNowContext();
+        $contextBuyNowCartId = (int) ($context['buy_now_cart_id'] ?? 0);
+        $contextPreviousCartId = (int) ($context['previous_cart_id'] ?? 0);
+
+        if (
+            $activeBuyNowCartId === $cartId
+            || $contextBuyNowCartId === $cartId
+            || $contextPreviousCartId === $cartId
+        ) {
+            $this->clearBuyNowFlowState();
+            session()->forget('checkout_mode');
+        }
     }
 
     public function getCart(CartIdentifier $cartId)
@@ -274,12 +318,16 @@ class CartService
 
     public function clearCart($cart)
     {
-        return $this->repo->clearCart($cart);
+        $result = $this->repo->clearCart($cart);
+        $this->sessionCoupon->remove();
+        return $result;
     }
 
     public function clearCartItems($cart)
     {
-        return $this->repo->clearCartItems($cart);
+        $result = $this->repo->clearCartItems($cart);
+        $this->sessionCoupon->remove();
+        return $result;
     }
 
     public function mergeSessionCartIntoUserCart(int $userId, string $sessionId): bool

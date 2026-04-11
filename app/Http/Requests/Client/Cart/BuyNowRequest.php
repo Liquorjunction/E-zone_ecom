@@ -3,13 +3,12 @@
 namespace App\Http\Requests\Client\Cart;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class BuyNowRequest extends FormRequest
 {
     public function authorize()
     {
-        return Auth::check();
+        return true;
     }
 
     public function rules()

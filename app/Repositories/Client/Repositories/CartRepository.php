@@ -159,7 +159,8 @@ class CartRepository implements CartRepositoryInterface
             ];
         }
 
-        $couponDiscount = $cart->coupon_discount_amount ?? 0;
+        // Coupon discount is resolved from SessionCouponService in PriceCalculatorService.
+        $couponDiscount = 0;
         $totalAfterDiscount = $subtotal - $totalDiscount;
         $finalTotal = max(0, $totalAfterDiscount - $couponDiscount);
 

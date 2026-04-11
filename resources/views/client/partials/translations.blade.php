@@ -162,6 +162,10 @@
         'Remove this item to complete checkout.' => statictranslations('Remove this item to complete checkout.'),
         'Out of stock' => statictranslations('Out of stock'),
         'Your cart is empty. Add items to continue to checkout.' => statictranslations('Your cart is empty. Add items to continue to checkout.'),
+        'Please log in to continue shopping.' => statictranslations('Please log in to continue shopping.'),
+        'Authentication Required' => statictranslations('Authentication Required'),
+        'Please log in to continue to checkout.' => statictranslations('Please log in to continue to checkout.'),
+        'Add to Cart' => statictranslations('Add to Cart')
     ];
 @endphp
 <script>

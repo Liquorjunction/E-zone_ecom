@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('session.driver') !== 'database') {
+            throw new RuntimeException('Invalid SESSION_DRIVER. This application requires database sessions.');
+        }
+
         // Force HTTPS in production to fix Mixed Content errors
         if ($this->app->environment('production')) {
             URL::forceScheme('https');

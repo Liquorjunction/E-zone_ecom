@@ -1049,5 +1049,8 @@
     "No order was placed.": "Aucune commande n'a été passée.",
     "This item is currently unavailable. Remove it to continue checkout.": "Cet article est actuellement indisponible. Supprimez-le pour continuer le paiement.",
     "Remove this item to complete checkout.": "Supprimez cet article pour terminer le paiement.",
-    "Your cart is empty. Add items to continue to checkout.": "Votre panier est vide. Ajoutez des articles pour continuer vers le paiement."
+    "Your cart is empty. Add items to continue to checkout.": "Votre panier est vide. Ajoutez des articles pour continuer vers le paiement.",
+    "Authentication Required": "Authentification requise",
+    "Please log in to continue to checkout.": "Veuillez vous connecter pour continuer vers le paiement.",
+    "Login to Checkout": "Connectez-vous pour le paiement"
 }

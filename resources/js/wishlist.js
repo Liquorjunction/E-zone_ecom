@@ -27,6 +27,27 @@ async function postJson(url, data) {
     return res;
 }
 
+function redirectToLogin() {
+    const current = window.location.pathname + window.location.search;
+    const loginUrl = '/login?redirect=' + encodeURIComponent(current);
+    window.location.href = loginUrl;
+}
+
+function handleAuthRedirect(res, json) {
+    if (!res) return false;
+
+    if (res.status === 401 || res.status === 419) {
+        if (json && json.redirect) {
+            window.location.href = json.redirect;
+        } else {
+            redirectToLogin();
+        }
+        return true;
+    }
+
+    return false;
+}
+
 function updateButtonState(button, added) {
     const id = String(button.dataset.productVariantId || button.dataset.variantId || button.dataset.productId || button.dataset.wid || '');
     if (!id) return;
@@ -81,6 +102,7 @@ document.addEventListener('click', async (ev) => {
         if (isWishlisted) {
             const res = await postJson('/client/wishlist/remove', { product_variant_id: id });
             const json = await res.json().catch(()=>({}));
+            if (handleAuthRedirect(res, json)) return;
             let count = (typeof json.count !== 'undefined') ? json.count : (typeof json.itemCount !== 'undefined' ? json.itemCount : undefined);
             if (typeof count === 'undefined') {
                 // fallback: count unique productVariantId from wishlisted buttons
@@ -143,6 +165,7 @@ document.addEventListener('click', async (ev) => {
         } else {
             const res = await postJson('/client/wishlist/add', { product_variant_id: id });
             const json = await res.json().catch(()=>({}));
+            if (handleAuthRedirect(res, json)) return;
             let count = (typeof json.count !== 'undefined') ? json.count : (typeof json.itemCount !== 'undefined' ? json.itemCount : undefined);
             if (typeof count === 'undefined') {
                 // fallback: count unique productVariantId from wishlisted buttons

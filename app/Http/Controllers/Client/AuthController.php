@@ -354,8 +354,24 @@ class AuthController extends Controller
         return view('client.partials.email-verification-pending');
     }
 
-    public function logout(LogoutRequest $request)
+    public function logout(LogoutRequest $request, CartService $cartService)
     {
+        try {
+            $activeBuyNowCart = $cartService->getActiveBuyNowCart();
+
+            if ($activeBuyNowCart) {
+                $cartService->clearCart($activeBuyNowCart);
+            }
+
+            $cartService->clearBuyNowFlowState();
+            $request->session()->forget('checkout_mode');
+        } catch (\Throwable $e) {
+            Log::warning('Failed to clear transient checkout state during logout.', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

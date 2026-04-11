@@ -20,6 +20,7 @@ use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepo;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface as CartRepo;
 use App\Repositories\Client\Interfaces\ReviewRepositoryInterface;
+use App\Services\SessionCouponService;
 
 class OrderController extends Controller
 {
@@ -67,12 +68,28 @@ class OrderController extends Controller
         CartRepo                  $cartRepo,
         OrderRepo                 $orderRepo,
         AddressRepo               $addressRepo,
-        PriceCalculatorService    $priceCalculator
+        PriceCalculatorService    $priceCalculator,
+        SessionCouponService      $sessionCoupon
     ) {
         $step   = (int) $request->get('step', 1);
         $cartId = CartIdentifier::fromRequest($request);
         $isBuyNowFlow = $request->boolean('buy_now');
         $request->session()->put('checkout_mode', $isBuyNowFlow ? 'buy_now' : 'normal');
+
+        if ($step === 2 && !Auth::check()) {
+            $loginUrl = route('login');
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success'  => false,
+                    'redirect' => $loginUrl,
+                    'message'  => statictranslations('Please login to continue checkout.'),
+                ], 401);
+            }
+
+            return redirect()->guest($loginUrl)
+                ->with('warning', statictranslations('Please login to continue checkout.'));
+        }
 
         if ($isBuyNowFlow) {
             $cart = $cartService->getActiveBuyNowCart();
@@ -125,13 +142,14 @@ class OrderController extends Controller
         }
 
         $itemsForView = $cart ? $cart->items : ($order ? $order->items : collect());
+        $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
 
         // ── AJAX request: return only the step content HTML ──────────────
         if ($request->ajax() || $request->wantsJson()) {
             $html = view('client.pages.checkout.partials._step-content', compact(
                 'step', 'cart', 'itemsForView', 'addresses', 'billingAddresses',
                 'cities', 'order', 'orders', 'totals'
-            ))->with('appliedCoupon', session('applied_coupon'))->render();
+            ))->with('appliedCoupon', $appliedCoupon)->render();
 
             return response()->json([
                 'success'  => true,
@@ -145,7 +163,7 @@ class OrderController extends Controller
         return view('client.pages.checkout-process', compact(
             'cart', 'step', 'addresses', 'billingAddresses', 'cities',
             'order', 'orders', 'totals', 'itemsForView'
-        ))->with('appliedCoupon', session('applied_coupon'));
+        ))->with('appliedCoupon', $appliedCoupon);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -160,6 +178,21 @@ class OrderController extends Controller
         AddressRepo            $addressRepo,
         PriceCalculatorService $priceCalculator
     ) {
+        if (!Auth::check()) {
+            $loginUrl = route('login');
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success'  => false,
+                    'redirect' => $loginUrl,
+                    'message'  => statictranslations('Please login to place your order.'),
+                ], 401);
+            }
+
+            return redirect()->guest($loginUrl)
+                ->with('warning', statictranslations('Please login to place your order.'));
+        }
+
         $cartId = CartIdentifier::fromRequest($request);
         $checkoutMode = (string) $request->session()->get('checkout_mode', 'normal');
         $cart = $checkoutMode === 'buy_now'

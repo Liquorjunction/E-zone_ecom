@@ -21,14 +21,31 @@ class SessionCouponService
 
     public function get(): ?array
     {
-        return Session::get(self::SESSION_KEY);
+        $coupon = Session::get(self::SESSION_KEY);
+
+        if (!is_array($coupon)) {
+            return null;
+        }
+
+        if (!isset($coupon['cart_id'], $coupon['discount_amount'])) {
+            $this->remove();
+            return null;
+        }
+
+        return $coupon;
     }
 
     public function getForCart(int $cartId): ?array
     {
         $coupon = $this->get();
 
-        if (!$coupon || ($coupon['cart_id'] ?? null) !== $cartId) {
+        if (!$coupon) {
+            return null;
+        }
+
+        if ((int) ($coupon['cart_id'] ?? 0) !== $cartId) {
+            // Any coupon tied to a different cart is stale in the current cart context.
+            $this->remove();
             return null;
         }
 
@@ -41,8 +58,7 @@ class SessionCouponService
     }
     public function hasForCart(int $cartId): bool
     {
-        $coupon = $this->get();
-        return $coupon && ($coupon['cart_id'] ?? null) === $cartId;
+        return $this->getForCart($cartId) !== null;
     }
     public function getCouponId(): ?int
     {

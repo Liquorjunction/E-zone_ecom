@@ -31,7 +31,7 @@
             wrapper.classList.add('toast-desktop','toast-enter');
             wrapper.innerHTML = `
                 <div class="toast-card bg-white/95 dark:bg-slate-800 rounded-lg p-3 shadow-lg ring-1 ring-slate-900/6 flex items-start gap-3 max-w-xs">
-                    <div class="flex-shrink-0 mt-1">
+                    <div class="shrink-0 mt-1">
                         <div class="w-9 h-9 rounded-md flex items-center justify-center" style="background: ${color}22">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 8v4l2 2" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -44,7 +44,7 @@
                         ${actionText ? `<div class="mt-2"><button class="toast-action text-sm font-medium hover:underline" style="color:${color}">${escapeHtml(actionText)}</button></div>` : ''}
                         <div class="toast-progress h-1 rounded mt-3" aria-hidden style="background: ${color}"></div>
                     </div>
-                    <div class="ml-3 flex-shrink-0 flex items-start">
+                    <div class="ml-3 shrink-0 flex items-start">
                         <button class="toast-close text-slate-400 hover:text-slate-600 focus:outline-none" aria-label="Close">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                         </button>
@@ -54,7 +54,7 @@
         } else {
             wrapper.classList.add('toast-mobile','toast-enter');
             wrapper.innerHTML = `
-                <div class="toast-card w-full max-w-[720px] bg-slate-900 text-white rounded-full px-4 py-3 flex items-center gap-3 shadow-lg">
+                <div class="toast-card w-full max-w-180 bg-slate-900 text-white rounded-full px-4 py-3 flex items-center gap-3 shadow-lg">
                     <div class="flex items-center justify-center w-9 h-9 rounded-md bg-white/5">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 8v4l2 2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
