@@ -946,7 +946,15 @@
                         <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">{{ statictranslations('You Might Also Like') }}</h2>
                         <div class="h-px flex-1 mx-6 bg-gray-200 hidden sm:block"></div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="grid grid-cols-2 gap-3 sm:hidden">
+                        @foreach ($relatedProducts as $relatedProduct)
+                            @include('client.partials.product-card-mobile', [
+                                'product' => $relatedProduct,
+                                'wishlistVariantIds' => $wishlistVariantIds ?? collect(),
+                            ])
+                        @endforeach
+                    </div>
+                    <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                         @foreach ($relatedProducts as $relatedProduct)
                             @include('client.partials.product-card', [
                                 'product' => $relatedProduct,
