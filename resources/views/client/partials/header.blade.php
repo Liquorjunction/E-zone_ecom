@@ -79,7 +79,7 @@
 
                 {{-- Compare --}}
                 <a href="{{ route('product-compare') }}" title="{{ statictranslations('Compare') }}"
-                    class="hidden md:flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
+                    class="flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-gray-100 hover:text-gray-800 transition-all duration-150 relative group/tip">
                     <i class="fa-solid fa-code-compare text-[15px]"></i>
                     <span
@@ -92,7 +92,7 @@
 
                 {{-- Wishlist --}}
                 <a href="{{ route('dashboard.wishlist') }}" title="{{ statictranslations('Wishlist') }}"
-                    class="hidden md:flex relative items-center justify-center w-9 h-9 rounded-xl text-gray-500
+                    class="flex relative items-center justify-center w-9 h-9 rounded-xl text-gray-500
                           hover:bg-red-50 hover:text-red-500 transition-all duration-150 group/tip">
                     <i class="fa-solid fa-heart text-[15px]"></i>
                     <span
@@ -268,24 +268,6 @@
             <div id="universal-search-results-mobile"
                 class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
             </div>
-        </div>
-
-        {{-- Quick links --}}
-        <div class="grid grid-cols-2 gap-2 mb-3">
-            <a href="{{ route('dashboard.wishlist') }}"
-                class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors">
-                <i class="fa-solid fa-heart w-4 shrink-0 text-center"></i>
-                {{ statictranslations('Wishlist') }}
-            </a>
-            <a href="{{ route('product-compare') }}"
-                class="relative flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors">
-                <i class="fa-solid fa-code-compare w-4 shrink-0 text-center"></i>
-                {{ statictranslations('Compare') }}
-                <span
-                    class="compare-counter ml-auto min-w-4.25 h-4.25 px-0.5
-                             bg-blue-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
-                             leading-none shadow-sm {{ ($compareCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $compareCount ?? 0 }}</span>
-            </a>
         </div>
 
         {{-- Language --}}
