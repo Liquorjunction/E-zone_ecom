@@ -322,7 +322,7 @@
 
                                     {{-- Product image --}}
                                     <a href="{{ $product['link'] }}"
-                                        class="block w-20 h-20 rounded-xl overflow-hidden bg-gray-100 group flex-shrink-0">
+                                        class="block w-20 h-20 rounded-xl overflow-hidden bg-gray-100 group shrink-0">
                                         <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
                                             class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-300">
                                     </a>
@@ -361,7 +361,7 @@
                             {{-- Add product slot --}}
                             @if ($products->count() < $maxCompare)
                                 <a href="{{ route('products.index') }}"
-                                    class="flex flex-col items-center justify-center w-36 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-colors gap-2 flex-shrink-0 py-6">
+                                    class="flex flex-col items-center justify-center w-36 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-colors gap-2 shrink-0 py-6">
                                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                     </svg>
@@ -393,7 +393,7 @@
                                             <p class="text-xs text-gray-400 truncate mb-0.5">
                                                 {{ Str::limit($product['name'], 12) }}
                                             </p>
-                                            <p class="text-xs font-semibold text-gray-900 break-words leading-tight">
+                                            <p class="text-xs font-semibold text-gray-900 wrap-break-word leading-tight">
                                                 {{ $product['specs'][$feature] ?? '—' }}
                                             </p>
                                         </div>

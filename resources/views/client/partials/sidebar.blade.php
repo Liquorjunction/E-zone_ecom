@@ -1,5 +1,19 @@
 {{-- Data injected via App\View\Composers\SidebarComposer --}}
 
+@php
+    $buildCategoryUrl = function ($category) {
+        $queryParts = ['category%5B%5D=' . rawurlencode($category->slug)];
+
+        foreach ($category->subcategories as $subcategory) {
+            if (isset($subcategory->slug)) {
+                $queryParts[] = 'subcategory%5B%5D=' . rawurlencode($subcategory->slug);
+            }
+        }
+
+        return route('products.index') . '?' . implode('&', $queryParts);
+    };
+@endphp
+
 {{-- ═══════════════════════════════════════════════════════
      DESKTOP SIDEBAR
      ═══════════════════════════════════════════════════════ --}}
@@ -86,7 +100,7 @@
                                      transition-all duration-250 ease-out opacity-0 h-0
                                      group-hover/item:opacity-100 group-hover/item:h-8"></span>
 
-                        <a href="{{ route('products.index', ['category' => $category->slug]) }}"
+                                <a href="{{ $buildCategoryUrl($category) }}"
                            data-category-link="{{ $category->slug }}"
                            class="category-sidebar-link flex items-center flex-1 min-w-0 py-2.5 transition-all duration-150 group-hover/item:text-primary"
                            :class="{ 'px-2 justify-center': sidebarCollapsed, 'pl-3 pr-1': !sidebarCollapsed }">
@@ -289,7 +303,7 @@
                                      transition-all duration-250 ease-out opacity-0 h-0
                                      group-hover/item:opacity-100 group-hover/item:h-8"></span>
 
-                        <a href="{{ route('products.index', ['category' => $category->slug]) }}"
+                                <a href="{{ $buildCategoryUrl($category) }}"
                            data-category-link="{{ $category->slug }}"
                            class="category-sidebar-link flex items-center flex-1 min-w-0 pl-3 pr-1 py-2.5 transition-all duration-150 group-hover/item:text-primary">
 
