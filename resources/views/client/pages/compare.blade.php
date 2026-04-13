@@ -344,6 +344,17 @@
                                         {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($product['price'], 2) }}
                                     </p>
 
+                                    <button
+                                        class="add-to-cart-btn w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-primary text-white text-xs font-semibold rounded-xl hover:shadow-md transform hover:-translate-y-0.5 transition-all"
+                                        data-product-variant-id="{{ $product['id'] }}"
+                                        data-product-id="{{ $product['product_id'] }}"
+                                        onclick="addToCart('{{ $product['id'] }}', '{{ $product['product_id'] }}')">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                        </svg>
+                                        {{ statictranslations('Add to Cart') }}
+                                    </button>
+
                                 </div>
                             @endforeach
 
@@ -358,24 +369,6 @@
                                 </a>
                             @endif
 
-                        </div>
-                    </div>
-
-                    {{-- Add to cart buttons strip --}}
-                    <div class="overflow-x-auto pb-1 -mx-1 px-1">
-                        <div class="flex gap-2 min-w-max">
-                            @foreach ($products as $product)
-                                <button
-                                    class="add-to-cart-btn flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-xs font-semibold rounded-xl hover:shadow-md transform hover:-translate-y-0.5 transition-all whitespace-nowrap"
-                                    data-product-variant-id="{{ $product['id'] }}"
-                                    data-product-id="{{ $product['product_id'] }}"
-                                    onclick="addToCart('{{ $product['id'] }}', '{{ $product['product_id'] }}')">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                                    </svg>
-                                    {{ Str::limit($product['name'], 14) }}
-                                </button>
-                            @endforeach
                         </div>
                     </div>
 

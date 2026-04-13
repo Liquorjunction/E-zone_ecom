@@ -11,7 +11,12 @@
 
         <div class="container mx-auto px-4 mt-8">
             @if ($deals->count())
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 gap-3 sm:hidden">
+                    @foreach ($deals as $product)
+                        @include('client.partials.product-card-mobile', ['product' => $product])
+                    @endforeach
+                </div>
+                <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     @foreach ($deals as $product)
                         @include('client.partials.product-card', ['product' => $product])
                     @endforeach

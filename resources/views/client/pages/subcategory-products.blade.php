@@ -30,7 +30,12 @@
                 <div class="mb-8">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-6">{{ statictranslations('Variants') }}</h2>
                     @if($variants && $variants->count())
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                        <div class="grid grid-cols-2 gap-3 sm:hidden">
+                            @foreach($variants as $variant)
+                                @include('client.partials.product-card-mobile', ['product' => $variant])
+                            @endforeach
+                        </div>
+                        <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
                             @foreach($variants as $variant)
                                 @include('client.partials.product-card', ['product' => $variant])
                             @endforeach
