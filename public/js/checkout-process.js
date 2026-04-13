@@ -219,6 +219,11 @@ document.addEventListener("DOMContentLoaded", function () {
             proceedButton.classList.toggle('opacity-60', blocked);
             proceedButton.classList.toggle('cursor-not-allowed', blocked);
             proceedButton.classList.toggle('pointer-events-none', blocked);
+            if (blocked) {
+                proceedButton.removeAttribute('data-spa-step');
+            } else {
+                proceedButton.setAttribute('data-spa-step', '2');
+            }
             if (blockedByStock) {
                 proceedButton.title = trans('Please remove out-of-stock items before continuing to checkout.');
             } else if (blockedByEmptyCart) {

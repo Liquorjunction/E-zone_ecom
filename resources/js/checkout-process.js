@@ -178,6 +178,11 @@ document.addEventListener("DOMContentLoaded", function () {
         proceedBtn.classList.toggle("opacity-60", shouldDisable);
         proceedBtn.classList.toggle("cursor-not-allowed", shouldDisable);
         proceedBtn.classList.toggle("pointer-events-none", shouldDisable);
+        if (shouldDisable) {
+            proceedBtn.removeAttribute("data-spa-step");
+        } else {
+            proceedBtn.setAttribute("data-spa-step", "2");
+        }
 
         if (!messageEl) return;
 
