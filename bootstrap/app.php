@@ -42,11 +42,23 @@ return Application::configure(basePath: dirname(__DIR__))
                     ? route('admin.login')
                     : route('login');
 
+                if ($request->hasSession()) {
+                    $request->session()->regenerateToken();
+                }
+
                 if ($request->expectsJson()) {
                     return response()->json([
                         'message' => statictranslations('Your session has expired. Please sign in again.'),
                         'redirect' => $redirectUrl,
+                        'csrf_token' => csrf_token(),
                     ], 419);
+                }
+
+                // For regular form submissions (common on mobile resume),
+                // recover in place instead of bouncing to login immediately.
+                if (! $request->is('admin') && ! $request->is('admin/*')) {
+                    return back()->withInput($request->except(['password', 'password_confirmation']))
+                        ->with('error', statictranslations('Your session was refreshed. Please submit again.'));
                 }
 
                 return redirect()->to($redirectUrl)

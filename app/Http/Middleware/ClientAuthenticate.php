@@ -16,6 +16,14 @@ class ClientAuthenticate extends Middleware
     {
         $guard = $this->auth->guard('web');
         if ($guard->check()) {
+            // When auth is restored from remember-me cookie on mobile resume,
+            // rotate session+CSRF once to avoid stale-token 419 bursts.
+            if (method_exists($guard, 'viaRemember') && $guard->viaRemember() && !$request->session()->has('remember_session_refreshed')) {
+                $request->session()->migrate(true);
+                $request->session()->regenerateToken();
+                $request->session()->put('remember_session_refreshed', true);
+            }
+
             $user = $guard->user();
             if ($user && !$user->is_active) {
                 $guard->logout();
