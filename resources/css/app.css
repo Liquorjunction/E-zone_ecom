@@ -23,6 +23,12 @@
     --color-foreground: oklch(0.2 0.05 232.2);
 }
 
+:root {
+    --app-vh: 100vh;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    DESIGN SYSTEM — Shared tokens & utilities
    ═══════════════════════════════════════════════════════════════ */
@@ -205,10 +211,15 @@ aside {
    ═══════════════════════════════════════════════════════════════ */
 .carousel-track {
     overflow-x: hidden;
-    overflow-x: clip;
     overflow-y: visible;
     overflow-clip-margin: 4px;
     position: relative;
+}
+
+@supports (overflow: clip) {
+    .carousel-track {
+        overflow-x: clip;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -930,52 +941,36 @@ body {
    ═══════════════════════════════════════════════════════════════ */
 .main-content-wrapper > div > div:first-child,
 .main-content-wrapper > div > section:first-child {
-    min-height: calc(100vh - var(--header-height));
+    min-height: calc(var(--app-vh) - var(--header-height));
 }
 
 /* Swiper container inside the hero section */
 .main-content-wrapper > div > div:first-child .swiper,
 .main-content-wrapper > div > section:first-child .swiper {
-    height: calc(100vh - var(--header-height)) !important;
-    min-height: calc(100vh - var(--header-height)) !important;
+    height: calc(var(--app-vh) - var(--header-height)) !important;
+    min-height: calc(var(--app-vh) - var(--header-height)) !important;
 }
 
-/* Modern viewport units for mobile browsers, including iOS Safari. */
-@supports (height: 100svh) {
-    .main-content-wrapper > div > div:first-child,
-    .main-content-wrapper > div > section:first-child {
-        min-height: calc(100svh - var(--header-height));
-    }
-
-    .main-content-wrapper > div > div:first-child .swiper,
-    .main-content-wrapper > div > section:first-child .swiper {
-        height: calc(100svh - var(--header-height)) !important;
-        min-height: calc(100svh - var(--header-height)) !important;
-    }
+#global-toasts-mobile {
+    bottom: max(1rem, calc(0.75rem + var(--safe-bottom)));
 }
 
-@supports (height: 100dvh) {
-    .main-content-wrapper > div > div:first-child,
-    .main-content-wrapper > div > section:first-child {
-        min-height: calc(100dvh - var(--header-height));
-    }
-
-    .main-content-wrapper > div > div:first-child .swiper,
-    .main-content-wrapper > div > section:first-child .swiper {
-        height: calc(100dvh - var(--header-height)) !important;
-        min-height: calc(100dvh - var(--header-height)) !important;
-    }
+.sidebar-mobile-open-btn {
+    bottom: max(1.5rem, calc(1rem + var(--safe-bottom)));
 }
 
-/* iOS Safari: prevent focus zoom and keep fixed FAB above home indicator. */
+.mobile-sidebar-drawer {
+    height: var(--app-vh);
+    max-height: var(--app-vh);
+    padding-bottom: var(--safe-bottom);
+    overscroll-behavior: contain;
+}
+
+/* iOS Safari: prevent focus zoom on form fields. */
 @supports (-webkit-touch-callout: none) {
     input,
     select,
     textarea {
         font-size: 16px;
-    }
-
-    .sidebar-mobile-open-btn {
-        bottom: calc(1.5rem + env(safe-area-inset-bottom));
     }
 }

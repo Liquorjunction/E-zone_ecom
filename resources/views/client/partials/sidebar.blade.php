@@ -19,7 +19,7 @@
      ═══════════════════════════════════════════════════════ --}}
 <aside x-cloak
     class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white z-30 transition-[width] duration-300 ease-out w-18 border-r-2 border-primary/30"
-    style="top: var(--header-height); max-height: calc(100vh - var(--header-height)); will-change: width; box-shadow: 2px 0 20px rgba(0,0,0,0.07);"
+    style="top: var(--header-height); max-height: calc(var(--app-vh) - var(--header-height)); will-change: width; box-shadow: 2px 0 20px rgba(0,0,0,0.07);"
     :class="{ 'w-18': sidebarCollapsed, 'w-68': !sidebarCollapsed }"
     @mouseenter.debounce.50ms="if(!pinned) sidebarCollapsed = false"
     @mouseleave.debounce.100ms="if(!pinned) sidebarCollapsed = true">
@@ -263,7 +263,7 @@
        x-transition:leave="transition ease-in duration-200 transform"
        x-transition:leave-start="translate-x-0"
        x-transition:leave-end="-translate-x-full"
-       class="lg:hidden fixed inset-y-0 left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
+    class="mobile-sidebar-drawer lg:hidden fixed inset-y-0 left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
        style="box-shadow: 6px 0 36px rgba(0,0,0,0.14);">
 
     {{-- Gradient accent line on right --}}
