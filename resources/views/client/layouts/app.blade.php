@@ -37,6 +37,18 @@
 
     <script>
         (function () {
+            function syncViewportHeightVar() {
+                var viewportHeight = window.innerHeight;
+                if (window.visualViewport && window.visualViewport.height) {
+                    viewportHeight = window.visualViewport.height;
+                }
+
+                document.documentElement.style.setProperty(
+                    '--app-vh',
+                    (viewportHeight * 0.01) + 'px'
+                );
+            }
+
             function syncHeaderHeight() {
                 var header = document.querySelector('header');
                 if (header) {
@@ -48,6 +60,7 @@
             }
 
             document.addEventListener('DOMContentLoaded', function () {
+                syncViewportHeightVar();
                 syncHeaderHeight();
 
                 var header = document.querySelector('header');
@@ -65,11 +78,20 @@
                 // events fire unpredictably (e.g. WKWebView / in-app browsers)
                 var polls = 0;
                 var poll = setInterval(function () {
+                    syncViewportHeightVar();
                     syncHeaderHeight();
                     if (++polls >= 6) clearInterval(poll);
                 }, 100);
+
+                if (window.visualViewport) {
+                    window.visualViewport.addEventListener('resize', syncViewportHeightVar, { passive: true });
+                    window.visualViewport.addEventListener('scroll', syncViewportHeightVar, { passive: true });
+                }
             });
 
+            window.addEventListener('orientationchange', syncViewportHeightVar);
+            window.addEventListener('resize', syncViewportHeightVar);
+            window.addEventListener('load', syncViewportHeightVar);
             window.addEventListener('load', syncHeaderHeight);
             window.addEventListener('resize', syncHeaderHeight);
         })();

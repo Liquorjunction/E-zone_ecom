@@ -274,9 +274,12 @@
             clipping the "View All Products" CTA beneath the browser chrome.
             top: var(--header-height) keeps the drawer below the fixed header.
             -webkit-transform: translateZ(0) promotes to GPU layer for smooth slide animation. --}}
-       style="top: 0;
-              height: 100vh;
-              height: 100dvh;
+    style="top: 0;
+        top: var(--header-height);
+        height: 100vh;
+        height: calc(100vh - var(--header-height));
+        height: calc((var(--app-vh) * 100) - var(--header-height));
+        height: calc(100dvh - var(--header-height));
               box-shadow: 6px 0 36px rgba(0,0,0,0.14);
               -webkit-backface-visibility: hidden;
               backface-visibility: hidden;
@@ -289,7 +292,7 @@
          style="background: linear-gradient(to bottom, rgba(68,155,195,1), rgba(68,155,195,0.5), transparent);"></div>
 
     {{-- Header --}}
-    <div class="shrink-0 sticky top-0 bg-white z-10 px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+    <div class="shrink-0 relative z-10 bg-white px-4 py-4 border-b border-gray-100 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
             <span class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,7 +315,7 @@
 
     {{-- Nav --}}
     {{-- iOS FIX: -webkit-overflow-scrolling: touch enables momentum/inertia scrolling inside the drawer on iOS --}}
-    <nav class="flex-1 overflow-y-auto py-2 px-2.5 custom-scrollbar"
+    <nav class="flex-1 min-h-0 overflow-y-auto py-2 px-2.5 custom-scrollbar"
          style="-webkit-overflow-scrolling: touch;">
         <ul class="space-y-0.5">
             @foreach ($sidebarCategories as $category)
@@ -388,7 +391,7 @@
     </nav>
 
     {{-- Footer CTA --}}
-    <div class="shrink-0 p-3 border-t border-gray-100">
+    <div class="mobile-sidebar-footer shrink-0 p-3 border-t border-gray-100">
         <a href="{{ route('products.index') }}"
            class="flex items-center justify-center gap-2.5 w-full px-4 py-2.5 text-sm font-semibold
                   text-white bg-primary rounded-2xl shadow-md shadow-primary/25
