@@ -204,6 +204,7 @@ aside {
                           edge cards' shadows aren't flush-cut
    ═══════════════════════════════════════════════════════════════ */
 .carousel-track {
+    overflow-x: hidden;
     overflow-x: clip;
     overflow-y: visible;
     overflow-clip-margin: 4px;
@@ -459,6 +460,7 @@ aside {
 
 html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
 }
 
 .skeleton {
@@ -913,6 +915,13 @@ body {
     }
 }
 
+/* iOS Safari: fixed background attachment is unreliable/janky */
+@supports (-webkit-touch-callout: none) {
+    .parallax-banner {
+        background-attachment: scroll;
+    }
+}
+
 /* ═══════════════════════════════════════════════════════════════
    HERO SLIDER — always fills exactly the remaining viewport
    The slider is the first child inside the content wrapper.
@@ -929,4 +938,44 @@ body {
 .main-content-wrapper > div > section:first-child .swiper {
     height: calc(100vh - var(--header-height)) !important;
     min-height: calc(100vh - var(--header-height)) !important;
+}
+
+/* Modern viewport units for mobile browsers, including iOS Safari. */
+@supports (height: 100svh) {
+    .main-content-wrapper > div > div:first-child,
+    .main-content-wrapper > div > section:first-child {
+        min-height: calc(100svh - var(--header-height));
+    }
+
+    .main-content-wrapper > div > div:first-child .swiper,
+    .main-content-wrapper > div > section:first-child .swiper {
+        height: calc(100svh - var(--header-height)) !important;
+        min-height: calc(100svh - var(--header-height)) !important;
+    }
+}
+
+@supports (height: 100dvh) {
+    .main-content-wrapper > div > div:first-child,
+    .main-content-wrapper > div > section:first-child {
+        min-height: calc(100dvh - var(--header-height));
+    }
+
+    .main-content-wrapper > div > div:first-child .swiper,
+    .main-content-wrapper > div > section:first-child .swiper {
+        height: calc(100dvh - var(--header-height)) !important;
+        min-height: calc(100dvh - var(--header-height)) !important;
+    }
+}
+
+/* iOS Safari: prevent focus zoom and keep fixed FAB above home indicator. */
+@supports (-webkit-touch-callout: none) {
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+
+    .sidebar-mobile-open-btn {
+        bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
 }
