@@ -263,14 +263,14 @@
        x-transition:leave="transition ease-in duration-200 transform"
        x-transition:leave-start="translate-x-0"
        x-transition:leave-end="-translate-x-full"
-    class="mobile-sidebar-drawer lg:hidden fixed inset-y-0 left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
-       style="box-shadow: 6px 0 36px rgba(0,0,0,0.14);">
+    class="mobile-sidebar-drawer lg:hidden fixed left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
+    style="box-shadow: 6px 0 36px rgba(0,0,0,0.14); top: var(--header-height);">
 
     {{-- Gradient accent line on right --}}
     <div class="absolute right-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"></div>
 
     {{-- Header --}}
-    <div class="shrink-0 sticky top-0 bg-white z-10 px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+    <div class="shrink-0 bg-white z-10 px-4 py-4 border-b border-gray-100 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
             <span class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

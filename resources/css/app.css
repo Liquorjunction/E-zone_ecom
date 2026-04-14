@@ -960,8 +960,8 @@ body {
 }
 
 .mobile-sidebar-drawer {
-    height: var(--app-vh);
-    max-height: var(--app-vh);
+    height: calc(var(--app-vh) - var(--header-height));
+    max-height: calc(var(--app-vh) - var(--header-height));
     padding-bottom: var(--safe-bottom);
     overscroll-behavior: contain;
 }
