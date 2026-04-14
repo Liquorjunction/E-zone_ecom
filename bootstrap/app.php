@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Session\TokenMismatchException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
@@ -41,6 +42,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 $redirectUrl = ($request->is('admin') || $request->is('admin/*'))
                     ? route('admin.login')
                     : route('login');
+
+                Log::warning('CSRF token mismatch detected.', [
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl(),
+                    'path' => $request->path(),
+                    'ip' => $request->ip(),
+                    'user_id' => optional($request->user('web'))->id,
+                    'is_authenticated' => $request->user('web') !== null,
+                    'remember_cookie_present' => collect(array_keys($request->cookies->all()))
+                        ->contains(fn ($key) => str_starts_with($key, 'remember_web_')),
+                    'user_agent' => substr((string) $request->userAgent(), 0, 255),
+                    'expects_json' => $request->expectsJson(),
+                ]);
 
                 if ($request->hasSession()) {
                     $request->session()->regenerateToken();
