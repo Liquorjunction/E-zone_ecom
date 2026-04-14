@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', config('app.name', 'E-Zone Electronics'))</title>
     <meta name="description" content="@yield('description', statictranslations('E-Zone Electronics - Your trusted source for quality electronics and gadgets.'))">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -35,11 +35,6 @@
 
     <script>
         (function () {
-            function syncViewportHeight() {
-                var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-                document.documentElement.style.setProperty('--app-vh', vh + 'px');
-            }
-
             function syncHeaderHeight() {
                 var header = document.querySelector('header');
                 if (header) {
@@ -50,20 +45,12 @@
                 }
             }
             document.addEventListener('DOMContentLoaded', function () {
-                syncViewportHeight();
                 syncHeaderHeight();
                 var header = document.querySelector('header');
                 if (header && window.ResizeObserver) {
                     new ResizeObserver(syncHeaderHeight).observe(header);
                 }
-                if (window.visualViewport) {
-                    window.visualViewport.addEventListener('resize', syncViewportHeight);
-                    window.visualViewport.addEventListener('scroll', syncViewportHeight);
-                }
             });
-            window.addEventListener('orientationchange', syncViewportHeight);
-            window.addEventListener('resize', syncViewportHeight);
-            window.addEventListener('load', syncViewportHeight);
             window.addEventListener('load', syncHeaderHeight);
             window.addEventListener('resize', syncHeaderHeight);
         })();
@@ -90,12 +77,11 @@
     }
 }"
     @keydown.escape.window="accountOpen = false; languageOpen = false; mobileMenuOpen = false; mobileSidebarOpen = false"
-    :class="(mobileSidebarOpen || mobileMenuOpen) ? 'overflow-hidden lg:overflow-x-hidden' : ''"
     class="font-sans antialiased bg-gray-50 text-slate-800">
 
     @include('client.partials.header')
 
-    <main class="flex main-content-wrapper" style="padding-top: var(--header-height); min-height: var(--app-vh);">
+    <main class="flex min-h-screen main-content-wrapper" style="padding-top: var(--header-height);">
 
         @include('client.partials.sidebar')
 
