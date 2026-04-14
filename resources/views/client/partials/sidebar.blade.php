@@ -254,7 +254,7 @@
      x-transition:leave="transition ease-in duration-150"
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0"
-     class="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
+    class="mobile-sidebar-backdrop lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
 
 
 {{-- ═══════════════════════════════════════════════════════
@@ -268,7 +268,7 @@
        x-transition:leave="transition ease-in duration-200 transform"
        x-transition:leave-start="translate-x-0"
        x-transition:leave-end="-translate-x-full"
-       class="lg:hidden fixed left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
+    class="mobile-sidebar-drawer lg:hidden fixed left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
        {{-- iOS FIX: use dvh (dynamic viewport height) with 100vh fallback.
             iOS Safari's shrinking URL bar makes `inset-y-0` / 100vh too tall,
             clipping the "View All Products" CTA beneath the browser chrome.
