@@ -114,7 +114,6 @@
                 <span>{{ statictranslations('We accept:') }}</span>
                 <span class="text-white font-bold">VISA</span>
                 <span class="text-white font-bold">MasterCard</span>
-                <span class="text-white font-bold">PayPal</span>
             </div>
             </div>
         </div>
