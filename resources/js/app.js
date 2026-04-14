@@ -62,5 +62,3 @@ document.addEventListener('click', function (ev) {
         window.Toast && window.Toast.show({ type, title, message, actionText });
     } catch (e) {}
 });
-
-

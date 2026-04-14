@@ -41,6 +41,9 @@
                 {{-- Language (desktop) --}}
                 <div class="hidden md:block relative"
                     @click.away="languageOpen = false; if(languageCloseTimeout){ clearTimeout(languageCloseTimeout); languageCloseTimeout = null }"
+                    {{-- iOS FIX: touchstart.away closes dropdown when tapping outside on iOS Safari
+                         where click events don't bubble from non-interactive elements --}}
+                    @touchstart.away.prevent="languageOpen = false; if(languageCloseTimeout){ clearTimeout(languageCloseTimeout); languageCloseTimeout = null }"
                     @mouseenter="languageOpen = true; if(languageCloseTimeout){ clearTimeout(languageCloseTimeout); languageCloseTimeout = null }"
                     @mouseleave="languageCloseTimeout = setTimeout(function(){ languageOpen = false }, 150)">
 
@@ -123,6 +126,8 @@
                 @auth
                     <div class="hidden md:block relative"
                         @click.away="accountOpen = false; if(accountCloseTimeout){ clearTimeout(accountCloseTimeout); accountCloseTimeout = null }"
+                        {{-- iOS FIX: touchstart.away closes dropdown when tapping outside on iOS Safari --}}
+                        @touchstart.away.prevent="accountOpen = false; if(accountCloseTimeout){ clearTimeout(accountCloseTimeout); accountCloseTimeout = null }"
                         @mouseenter="accountOpen = true; if(accountCloseTimeout){ clearTimeout(accountCloseTimeout); accountCloseTimeout = null }"
                         @mouseleave="accountCloseTimeout = setTimeout(function(){ accountOpen = false }, 150)">
 
@@ -161,7 +166,8 @@
 
                                 {{-- Profile strip --}}
                                 <div
-                                    class="flex items-center gap-3 px-4 py-3.5 bg-linear-to-br from-primary/5 to-primary/10 border-b border-gray-100/80">
+                                    class="flex items-center gap-3 px-4 py-3.5 bg-linear-to-br from-primary/5 to-primary/10 border-b border-gray-100/80"
+                                    style="background: linear-gradient(to bottom right, rgba(68,155,195,0.05), rgba(68,155,195,0.10));">
                                     @if (Auth::user()->avatar)
                                         <img src="{{ Str::startsWith(Auth::user()->avatar, ['http://', 'https://']) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}"
                                             alt="Avatar"
@@ -215,7 +221,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
                     {{-- Guest: Login only --}}
                 @else
@@ -242,10 +247,14 @@
     </div>{{-- end main bar --}}
 
     {{-- Bottom primary accent line --}}
-    <div class="h-px bg-linear-to-r from-primary/80 via-primary/30 to-transparent"></div>
+    {{-- iOS FIX: inline style fallback for bg-linear-to-r (Tailwind v4) in case build doesn't include it --}}
+    <div class="h-px bg-linear-to-r from-primary/80 via-primary/30 to-transparent"
+         style="background: linear-gradient(to right, rgba(68,155,195,0.8), rgba(68,155,195,0.3), transparent);"></div>
 
     {{-- Mobile dropdown --}}
     <div x-show="mobileMenuOpen" x-cloak @click.away="mobileMenuOpen = false"
+        {{-- iOS FIX: touchstart.away for tap-outside-to-close on iOS Safari --}}
+        @touchstart.away.prevent="mobileMenuOpen = false"
         x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1"
         x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1"
@@ -255,8 +264,10 @@
         {{-- Search --}}
         <div class="relative mb-3">
             <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            {{-- iOS FIX: font-size style forces 16px to prevent iOS Safari auto-zoom on focus --}}
             <input id="universal-search-input-mobile" type="text"
                 placeholder="{{ statictranslations('Search products...') }}"
+                style="font-size: 16px;"
                 class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                           transition-all duration-200">

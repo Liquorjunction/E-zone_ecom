@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="utf-8" />
+    {{-- iOS FIX: removed maximum-scale=1 to keep user accessibility zoom intact;
+         input font-size is set to 16px in app.css to prevent auto-zoom instead --}}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', config('app.name', 'E-Zone Electronics'))</title>
     <meta name="description" content="@yield('description', statictranslations('E-Zone Electronics - Your trusted source for quality electronics and gadgets.'))">
@@ -44,13 +46,30 @@
                     );
                 }
             }
+
             document.addEventListener('DOMContentLoaded', function () {
                 syncHeaderHeight();
+
                 var header = document.querySelector('header');
                 if (header && window.ResizeObserver) {
                     new ResizeObserver(syncHeaderHeight).observe(header);
                 }
+
+                // iOS FIX: fonts may not be loaded at DOMContentLoaded;
+                // re-sync once fonts are ready so announcement bar / font metrics are correct
+                if (document.fonts && document.fonts.ready) {
+                    document.fonts.ready.then(syncHeaderHeight);
+                }
+
+                // iOS FIX: short polling fallback for WebKit where font load
+                // events fire unpredictably (e.g. WKWebView / in-app browsers)
+                var polls = 0;
+                var poll = setInterval(function () {
+                    syncHeaderHeight();
+                    if (++polls >= 6) clearInterval(poll);
+                }, 100);
             });
+
             window.addEventListener('load', syncHeaderHeight);
             window.addEventListener('resize', syncHeaderHeight);
         })();

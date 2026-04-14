@@ -19,13 +19,18 @@
      ═══════════════════════════════════════════════════════ --}}
 <aside x-cloak
     class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white z-30 transition-[width] duration-300 ease-out w-18 border-r-2 border-primary/30"
-    style="top: var(--header-height); max-height: calc(100vh - var(--header-height)); will-change: width; box-shadow: 2px 0 20px rgba(0,0,0,0.07);"
+    style="top: var(--header-height); max-height: calc(100vh - var(--header-height)); will-change: width; box-shadow: 2px 0 20px rgba(0,0,0,0.07);
+           /* iOS FIX: force GPU compositing layer to prevent width-animation jitter on older iPhones */
+           -webkit-backface-visibility: hidden; backface-visibility: hidden;
+           -webkit-transform: translateZ(0); transform: translateZ(0);"
     :class="{ 'w-18': sidebarCollapsed, 'w-68': !sidebarCollapsed }"
     @mouseenter.debounce.50ms="if(!pinned) sidebarCollapsed = false"
     @mouseleave.debounce.100ms="if(!pinned) sidebarCollapsed = true">
 
     {{-- ── Gradient accent line on right (always visible) ── --}}
-    <div class="absolute right-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"></div>
+    {{-- iOS FIX: inline style fallback for bg-linear-to-b in case Tailwind v4 build is missing --}}
+    <div class="absolute right-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"
+         style="background: linear-gradient(to bottom, rgba(68,155,195,1), rgba(68,155,195,0.5), transparent);"></div>
 
     {{-- ── Header ── --}}
     <div class="shrink-0 z-10 border-b border-gray-100 flex items-center overflow-hidden"
@@ -263,11 +268,25 @@
        x-transition:leave="transition ease-in duration-200 transform"
        x-transition:leave-start="translate-x-0"
        x-transition:leave-end="-translate-x-full"
-       class="lg:hidden fixed inset-y-0 left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
-       style="box-shadow: 6px 0 36px rgba(0,0,0,0.14);">
+       class="lg:hidden fixed left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
+       {{-- iOS FIX: use dvh (dynamic viewport height) with 100vh fallback.
+            iOS Safari's shrinking URL bar makes `inset-y-0` / 100vh too tall,
+            clipping the "View All Products" CTA beneath the browser chrome.
+            top: var(--header-height) keeps the drawer below the fixed header.
+            -webkit-transform: translateZ(0) promotes to GPU layer for smooth slide animation. --}}
+       style="top: 0;
+              height: 100vh;
+              height: 100dvh;
+              box-shadow: 6px 0 36px rgba(0,0,0,0.14);
+              -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+              -webkit-transform: translateZ(0);
+              transform: translateZ(0);">
 
     {{-- Gradient accent line on right --}}
-    <div class="absolute right-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"></div>
+    {{-- iOS FIX: inline style fallback for bg-linear-to-b --}}
+    <div class="absolute right-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"
+         style="background: linear-gradient(to bottom, rgba(68,155,195,1), rgba(68,155,195,0.5), transparent);"></div>
 
     {{-- Header --}}
     <div class="shrink-0 sticky top-0 bg-white z-10 px-4 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -292,7 +311,9 @@
     </div>
 
     {{-- Nav --}}
-    <nav class="flex-1 overflow-y-auto py-2 px-2.5 custom-scrollbar">
+    {{-- iOS FIX: -webkit-overflow-scrolling: touch enables momentum/inertia scrolling inside the drawer on iOS --}}
+    <nav class="flex-1 overflow-y-auto py-2 px-2.5 custom-scrollbar"
+         style="-webkit-overflow-scrolling: touch;">
         <ul class="space-y-0.5">
             @foreach ($sidebarCategories as $category)
                 <li x-data="{ open: false }" class="group/item">
