@@ -61,6 +61,13 @@ Route::get('/showrooms', [ShowroomController::class, 'index'])->name('showrooms'
 Route::get('/showrooms/{slug}', [ShowroomController::class, 'show'])->name('showrooms.show');
 Route::view('/sitemap', 'client.pages.sitemap')->name('sitemap');
 
+// CSRF refresh endpoint (helps mobile browsers recover after background resume/BFCache restores)
+Route::get('/csrf-token', function () {
+    return response()->json([
+        'token' => csrf_token(),
+    ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+})->name('csrf.token');
+
 // Brands
 Route::get('/brands', [BrandController::class, 'index'])->name('brands');
 Route::get('/brands/{slug}', [BrandController::class, 'productsByBrand'])->name('brand.products');
