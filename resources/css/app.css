@@ -956,19 +956,19 @@ body {
 }
 
 /* iOS FIX: Safari can anchor fixed drawer/backdrop to the padded main container.
-   Shift both overlays up by header height so the mobile sidebar starts at true top. */
+    Keep overlay pinned to viewport top. */
 @supports (-webkit-touch-callout: none) {
     @media (max-width: 1023px) {
         .mobile-sidebar-drawer {
-            top: calc(-1 * var(--header-height)) !important;
-            height: calc(100dvh + var(--header-height)) !important;
-            min-height: calc(100dvh + var(--header-height)) !important;
+            top: 0 !important;
+            height: 100dvh !important;
+            min-height: 100dvh !important;
         }
 
         .mobile-sidebar-backdrop {
-            top: calc(-1 * var(--header-height)) !important;
+            top: 0 !important;
             bottom: auto !important;
-            height: calc(100dvh + var(--header-height)) !important;
+            height: 100dvh !important;
         }
     }
 }
