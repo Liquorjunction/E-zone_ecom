@@ -25,7 +25,7 @@
             'logo' => asset('icon/fav-icon-high-resArtboard-1-150x150.png'),
             'contactPoint' => [
                 '@type' => 'ContactPoint',
-                'telephone' => '+1-555-123-4567',
+                'telephone' => '+212665461262',
                 'contactType' => 'customer service',
             ]
         ];
