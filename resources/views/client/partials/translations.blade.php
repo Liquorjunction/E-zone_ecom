@@ -63,7 +63,7 @@
         'Submission failed.' => statictranslations('Submission failed.'),
         'Please enter a coupon code.' => statictranslations('Please enter a coupon code.'),
         'Applying...' => statictranslations('Applying...'),
-        'Coupon Applied!' => statictranslations('Coupon Applied!'),
+        'Coupon Applied!' => statictranslations('Coupon Applied'),
         'Invalid coupon code.' => statictranslations('Invalid coupon code.'),
         'Failed to remove coupon. Please try again.' => statictranslations('Failed to remove coupon. Please try again.'),
         'FREE' => statictranslations('FREE'),

@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                     </div>
                                     <div>
                                         <p class="font-bold text-gray-900 text-sm">${coupon.code}</p>
-                                        <p class="text-xs text-gray-600">${trans('Coupon Applied')}</p>
+                                        <p class="text-xs text-gray-600">${trans('Coupon Applied!')}</p>
                                     </div>
                                 </div>
                                 <button type="button" id="remove-coupon-btn${suffix}"
