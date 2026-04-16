@@ -521,7 +521,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var phone = document.getElementById("phone");
 
         if (email && !email.value.trim()) { showValidationError(email, trans('Email address is required')); hasErrors = true; }
-        if (phone && !phone.value.trim()) { showValidationError(phone, trans('Phone number is required')); hasErrors = true; }
+        if (phone && !phone.value.trim()) { showValidationError(phone, trans('Phone number is required.')); hasErrors = true; }
 
         var shippingSelect = document.getElementById("shippingAddressSelect");
         var manualFirst    = document.getElementById("firstName");
