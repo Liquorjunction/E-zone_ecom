@@ -143,12 +143,16 @@ class ProductRepository implements ProductRepositoryInterface
             $query->havingRaw('min_price <= ?', [$request['price_max']]);
         }
 
-        if (isset($request['date_from']) && isset($request['date_to'])) {
-            $query->whereBetween('created_at', [$request['date_from'], $request['date_to']]);
-        } elseif (isset($request['date_from'])) {
-            $query->where('created_at', '>=', $request['date_from']);
-        } elseif (isset($request['date_to'])) {
-            $query->where('created_at', '<=', $request['date_to']);
+        $dateFrom = is_array($request) ? ($request['date_from'] ?? null) : null;
+        $dateTo = is_array($request) ? ($request['date_to'] ?? null) : null;
+
+        if (!empty($dateFrom) && !empty($dateTo)) {
+            $query->whereDate('products.created_at', '>=', $dateFrom)
+                ->whereDate('products.created_at', '<=', $dateTo);
+        } elseif (!empty($dateFrom)) {
+            $query->whereDate('products.created_at', '>=', $dateFrom);
+        } elseif (!empty($dateTo)) {
+            $query->whereDate('products.created_at', '<=', $dateTo);
         }
 
         return $query;
