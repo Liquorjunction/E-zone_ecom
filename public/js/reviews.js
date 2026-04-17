@@ -473,7 +473,7 @@ async function handleReviewFormSubmit(e) {
     if(ratingError){
       ratingError.classList.remove('hidden');
     }
-    showUniversalPopup(trans('Please select a rating before submitting your review'), 'error', 3000);
+    showUniversalPopup(trans('Please select a rating before submitting your review.'), 'error', 3000);
     return;
   }
 
@@ -551,11 +551,11 @@ async function deleteReview(id){
     const json = await res.json();
 
     if(!res.ok){
-      showUniversalPopup(json.message || trans('Failed to delete review'), 'error', 3000);
+      showUniversalPopup(json.message || trans('Failed to delete review.'), 'error', 3000);
       return;
     }
 
-    showUniversalPopup(json.message || trans('Review deleted successfully'), 'success', 3000);
+    showUniversalPopup(json.message || trans('Review deleted successfully.'), 'success', 3000);
 
     // Remove review card from UI
     const reviewCard = document.getElementById('review-card-' + id);
@@ -589,7 +589,7 @@ function openEditReviewFromElem(elem){
   }
 
   if(!data.id){
-    showUniversalPopup(trans('Review data is missing'), 'error', 3000);
+    showUniversalPopup(trans('Review data is missing.'), 'error', 3000);
     return;
   }
 

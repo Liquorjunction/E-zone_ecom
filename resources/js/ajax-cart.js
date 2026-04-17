@@ -37,7 +37,7 @@ document.addEventListener('submit', function (ev) {
         try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: data })); } catch (e) {}
     }).catch(function (error) {
         const resp = error && error.response;
-        let msg = trans('Failed to add to cart');
+        let msg = trans('Failed to add to cart.');
         if (resp && resp.data && (resp.data.message || resp.data.error)) msg = resp.data.message || resp.data.error;
         try { window.Toast && window.Toast.error({ title: trans('Error'), message: msg }); } catch (e) {
             try { showUniversalPopup(msg, 'error', 3000); } catch(e2) { alert(msg); }

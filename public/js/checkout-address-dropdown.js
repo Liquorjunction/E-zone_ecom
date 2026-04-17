@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         setFieldValue('billing_country', shippingData.country);
                         setFieldValue('billing_phone', shippingData.phone);
                     } else {
-                        showValidationError(shippingSelect, trans('Please select a shipping address first'));
+                        showValidationError(shippingSelect, trans('Please select a shipping address first.'));
                         hasErrors = true;
                     }
                 }

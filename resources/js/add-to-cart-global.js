@@ -166,7 +166,7 @@ window.addToCart = function(variantId, productId) {
             try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: data })); } catch (e) {}
         }).catch(function (error) {
             const resp = error && error.response;
-            let msg = trans('Failed to add to cart');
+            let msg = trans('Failed to add to cart.');
             // If unauthenticated, redirect to login page
             if (resp && resp.status === 401) {
                 window.location.href = '/login';

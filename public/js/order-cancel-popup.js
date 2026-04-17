@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                         } else {
                             if (typeof window.showUniversalPopup === 'function') {
-                                window.showUniversalPopup((data && data.message) || trans('Failed to cancel order'), 'failure');
+                                window.showUniversalPopup((data && data.message) || trans('Failed to cancel order.'), 'failure');
                             }
                         }
                     }, 100);
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     setTimeout(() => {
                         if (typeof window.showUniversalPopup === 'function') {
-                            window.showUniversalPopup(trans('Failed to cancel order'), 'failure');
+                            window.showUniversalPopup(trans('Failed to cancel order.'), 'failure');
                         }
                     }, 100);
                 })

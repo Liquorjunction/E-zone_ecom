@@ -156,7 +156,7 @@ document.addEventListener('click', async (ev) => {
                         } catch (e) { window.location.reload(); }
                     }
                 } catch (e) {}
-                const msg = json.message || trans('Removed from wishlist');
+                const msg = json.message || trans('Removed from wishlist.');
                 try { window.Toast && window.Toast.success({ title: trans('Wishlist'), message: msg }); } catch (e) {}
             } else {
                 const msg = json.message || trans('Failed to remove');
@@ -180,10 +180,10 @@ document.addEventListener('click', async (ev) => {
             window._wishlistCount = count;
             if (res.ok) {
                 updateButtonState(btn, true);
-                const msg = json.message || trans('Added to wishlist');
+                const msg = json.message || trans('Added to wishlist.');
                 try { window.Toast && window.Toast.success({ title: trans('Wishlist'), message: msg }); } catch (e) {}
             } else {
-                const msg = json.message || trans('Failed to add to wishlist');
+                const msg = json.message || trans('Failed to add to wishlist.');
                 try { window.Toast && window.Toast.error({ title: trans('Wishlist'), message: msg }); } catch (e) {}
             }
         }
