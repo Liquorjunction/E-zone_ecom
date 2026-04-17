@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use Illuminate\Support\Facades\App;
 
 class InvoiceExportService
 {
@@ -10,8 +11,13 @@ class InvoiceExportService
     {
     }
 
-    public function renderInvoicePdf(Order $order): string
+    public function renderInvoicePdf(Order $order, ?string $locale = null): string
     {
+        $previousLocale = App::getLocale();
+        if (!empty($locale)) {
+            App::setLocale($locale);
+        }
+
         $order->loadMissing(['items.product', 'items.variant', 'user']);
         $totals = $this->priceCalculator->calculate($order);
         $sym = config('app.CURRENCY_SYMBOL', '$');
@@ -29,14 +35,18 @@ class InvoiceExportService
         $dompdf->set_option('isHtml5ParserEnabled', true);
         $dompdf->set_option('defaultFont', 'Helvetica');
 
-        return $pdf->loadView('invoices.invoice-pdf', [
-            'order' => $order,
-            'totals' => $totals,
-            'sym' => $sym,
-            'ship' => $ship,
-            'bill' => $bill,
-            'siteContent' => $siteContent,
-        ])->setPaper('a4', 'portrait')->output();
+        try {
+            return $pdf->loadView('invoices.invoice-pdf', [
+                'order' => $order,
+                'totals' => $totals,
+                'sym' => $sym,
+                'ship' => $ship,
+                'bill' => $bill,
+                'siteContent' => $siteContent,
+            ])->setPaper('a4', 'portrait')->output();
+        } finally {
+            App::setLocale($previousLocale);
+        }
     }
 
     public function filename(Order $order): string

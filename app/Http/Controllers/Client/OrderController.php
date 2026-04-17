@@ -350,6 +350,16 @@ class OrderController extends Controller
     public function invoice(OrderInvoiceRequest $request, OrderRepo $orderRepo, PriceCalculatorService $priceCalculator)
     {
         if (!Auth::check()) return redirect()->route('login');
+
+        $supportedLocales = ['en', 'fr', 'ar'];
+        $requestedLocale = (string) ($request->query('locale') ?: $request->session()->get('locale', app()->getLocale()));
+        $locale = in_array($requestedLocale, $supportedLocales, true) ? $requestedLocale : app()->getLocale();
+        if (in_array($locale, $supportedLocales, true)) {
+            $request->session()->put('locale', $locale);
+            $request->session()->put('locale_user_selected', true);
+            app()->setLocale($locale);
+        }
+
         $order = $orderRepo->findOrderWithRelations($request->input('id'), ['items.product','items.variant']);
         if (!$order || $order->user_id !== Auth::id()) abort(403);
         $totals = $priceCalculator->calculate($order);
@@ -361,7 +371,27 @@ class OrderController extends Controller
         if (!Auth::check()) return redirect()->route('login');
         $order = $orderRepo->findOrderWithRelations($request->input('id'), ['items.product','items.variant','user']);
         if (!$order || $order->user_id !== Auth::id()) abort(403);
-        $pdf      = $invoiceExportService->renderInvoicePdf($order);
+        $supportedLocales = ['en', 'fr', 'ar'];
+        $requestedLocale = (string) ($request->query('locale') ?: $request->session()->get('locale', app()->getLocale()));
+        $locale = in_array($requestedLocale, $supportedLocales, true) ? $requestedLocale : app()->getLocale();
+        if (in_array($locale, $supportedLocales, true)) {
+            $request->session()->put('locale', $locale);
+            $request->session()->put('locale_user_selected', true);
+        }
+
+        Log::info('Client invoice locale debug', [
+            'endpoint' => 'invoice_download',
+            'user_id' => Auth::id(),
+            'order_id' => $order->id,
+            'query_locale' => $request->query('locale'),
+            'session_locale' => $request->session()->get('locale'),
+            'session_locale_user_selected' => $request->session()->get('locale_user_selected'),
+            'resolved_locale' => $locale,
+            'app_locale_before_render' => app()->getLocale(),
+            'url' => $request->fullUrl(),
+        ]);
+
+        $pdf      = $invoiceExportService->renderInvoicePdf($order, $locale);
         $filename = $invoiceExportService->filename($order);
         return response($pdf, 200, [
             'Content-Type'        => 'application/pdf',

@@ -31,6 +31,17 @@
         $paymentStatus = ucfirst($order->payment_status ?? 'Pending');
         $orderStatus = ucfirst($order->status ?? 'Processing');
 
+        $paymentMethodRaw = strtolower((string) ($order->payment_method ?? ''));
+        $paymentMethodKey = match ($paymentMethodRaw) {
+            'cod', 'cash_on_delivery' => 'Cash on Delivery',
+            'card', 'online_payment' => 'Online Payment',
+            default => ucwords(str_replace('_', ' ', $paymentMethodRaw ?: 'N/A')),
+        };
+        $paymentMethodLabel = statictranslations($paymentMethodKey);
+
+        $shippingMethodKey = ucwords(str_replace('_', ' ', $totals['shipping_method'] ?? 'Standard'));
+        $shippingMethodLabel = statictranslations($shippingMethodKey);
+
         $shipName = $ship['name'] ?? trim(($ship['first_name'] ?? '') . ' ' . ($ship['last_name'] ?? ''));
         $shipStreet = $ship['street'] ?? ($ship['address'] ?? ($ship['address_line'] ?? ''));
         $shipCity = $ship['city'] ?? '';
@@ -263,15 +274,14 @@
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
                         {{ statictranslations('Placed') }}: <span
-                            class="font-semibold text-slate-700">{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span>
+                            class="font-semibold text-slate-700">{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('F j, Y, g:i A') }}</span>
                     </div>
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
                         {{ statictranslations('Order Status') }}: <span class="font-semibold text-slate-700">{{ $orderStatus }}</span></div>
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
-                        {{ statictranslations('Payment') }}: <span class="font-semibold text-slate-700">{{ $paymentMethod }}
-                            ({{ $paymentStatus }})</span></div>
+                        {{ statictranslations('Payment') }}: <span class="font-semibold text-slate-700">{{ $paymentMethodLabel }}</span></div>
                     {{-- <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
                         {{ statictranslations('Shipping') }}: <span class="font-semibold text-slate-700">{{ $shippingMethod }}</span></div> --}}

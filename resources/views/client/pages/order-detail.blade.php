@@ -60,14 +60,14 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         @if ($status === 'delivered' || $status === 'completed')
-                            <a href="{{ route('client.orders.invoice.download', ['id' => $order->id]) ?? '#' }}"
+                            <a href="{{ route('client.orders.invoice.download', ['id' => $order->id, 'locale' => app()->getLocale()]) ?? '#' }}"
                                 class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
                                 <span class="flex items-center gap-2">
                                     <i class="fa fa-download w-4 h-4"></i>
                                     {{ statictranslations('Download Invoice') }}
                                 </span>
                             </a>
-                            <a href="{{ route('client.orders.invoice', ['id' => $order->id]) ?? '#' }}"
+                            <a href="{{ route('client.orders.invoice', ['id' => $order->id, 'locale' => app()->getLocale()]) ?? '#' }}"
                                 class="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm">
                                 <span class="flex items-center gap-2">
                                     <i class="fa fa-eye w-4 h-4"></i>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Invoice #{{ $order->order_number ?? $order->id }}</title>
+    <title>{{ statictranslations('Invoice') }} #{{ $order->order_number ?? $order->id }}</title>
     <style>
         * {
             margin: 0;
@@ -436,6 +436,17 @@
         $paymentStatus = ucfirst($order->payment_status ?? 'Pending');
         $orderStatus = ucfirst($order->status ?? 'Processing');
 
+        $paymentMethodRaw = strtolower((string) ($order->payment_method ?? ''));
+        $paymentMethodKey = match ($paymentMethodRaw) {
+            'cod', 'cash_on_delivery' => 'Cash on Delivery',
+            'card', 'online_payment' => 'Online Payment',
+            default => ucwords(str_replace('_', ' ', $paymentMethodRaw ?: 'N/A')),
+        };
+        $paymentMethodLabel = statictranslations($paymentMethodKey);
+
+        $shippingMethodKey = ucwords(str_replace('_', ' ', $totals['shipping_method'] ?? 'Standard'));
+        $shippingMethodLabel = statictranslations($shippingMethodKey);
+
         $shipName = $ship['name'] ?? trim(($ship['first_name'] ?? '') . ' ' . ($ship['last_name'] ?? ''));
         $shipStreet = $ship['street'] ?? ($ship['address'] ?? ($ship['address_line'] ?? ''));
         $shipCity = $ship['city'] ?? '';
@@ -470,12 +481,12 @@
                                 <span class="logo-text-fallback">{{ config('app.name') }}</span>
                             @endif
                         </div>
-                        <div class="hdr-title">Invoice</div>
-                        <div class="hdr-ordernum">Order: {{ $orderNum }}</div>
+                        <div class="hdr-title">{{ statictranslations('Invoice') }}</div>
+                        <div class="hdr-ordernum">{{ statictranslations('Order') }}: {{ $orderNum }}</div>
                     </td>
                     <td class="hdr-right">
                         <div class="hdr-company">
-                            <div>{{ $siteContent->address ?? 'Not available' }}</div>
+                            <div>{{ $siteContent->address ?? statictranslations('Not available') }}</div>
                             @if ($siteContent->phone ?? null)
                                 <div>{{ $siteContent->phone }}</div>
                             @endif
@@ -491,12 +502,12 @@
             <tr>
                 <td style="width: 50%; text-align: left;">
                 <span class="invoice-chip">
-                    Placed: <span>{{ optional($order->created_at)->format('F j, Y, g:i A') }}</span>
+                    {{ statictranslations('Placed') }}: <span>{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('F j, Y, g:i A') }}</span>
                 </span>
                 </td>
                 <td style="width: 50%; text-align: right;">
                 <span class="invoice-chip">
-                    Payment: <span>{{ $paymentMethod }}</span>
+                    {{ statictranslations('Payment') }}: <span>{{ $paymentMethodLabel }}</span>
                 </span>
                 </td>
             </tr>
@@ -508,7 +519,7 @@
                 <tr>
                     <td class="col-l">
                         <div class="invoice-surface">
-                            <h4>Shipping Address</h4>
+                            <h4>{{ statictranslations('Shipping Address') }}</h4>
                             @if (!empty($ship))
                                 <div class="addr-name">{{ $shipName }}</div>
                                 @if ($shipStreet)
@@ -524,16 +535,16 @@
                                     <div class="addr-line">{{ $shipCountry }}</div>
                                 @endif
                                 @if ($shipPhone)
-                                    <div class="addr-phone">Phone: {{ $shipPhone }}</div>
+                                    <div class="addr-phone">{{ statictranslations('Phone') }}: {{ $shipPhone }}</div>
                                 @endif
                             @else
-                                <div class="addr-muted">No shipping address on record.</div>
+                                <div class="addr-muted">{{ statictranslations('No shipping address on record.') }}</div>
                             @endif
                         </div>
                     </td>
                     <td class="col-r">
                         <div class="invoice-surface">
-                            <h4>Billing Address</h4>
+                            <h4>{{ statictranslations('Billing Address') }}</h4>
                             @if (!empty($bill))
                                 <div class="addr-name">{{ $billName }}</div>
                                 @if ($billStreet)
@@ -549,13 +560,13 @@
                                     <div class="addr-line">{{ $billCountry }}</div>
                                 @endif
                                 @if ($billPhone)
-                                    <div class="addr-phone">Phone: {{ $billPhone }}</div>
+                                    <div class="addr-phone">{{ statictranslations('Phone') }}: {{ $billPhone }}</div>
                                 @endif
                             @elseif(!empty($ship))
                                 <div class="addr-name">{{ $shipName }}</div>
-                                <div class="addr-muted">Same as shipping address</div>
+                                <div class="addr-muted">{{ statictranslations('Same as shipping address') }}</div>
                             @else
-                                <div class="addr-muted">No billing address on record.</div>
+                                <div class="addr-muted">{{ statictranslations('No billing address on record.') }}</div>
                             @endif
                         </div>
                     </td>
@@ -563,18 +574,18 @@
             </table>
 
             <div class="section-heading">
-                <h3>Order Items</h3>
+                <h3>{{ statictranslations('Order Items') }}</h3>
             </div>
 
             <div class="invoice-items-wrap">
                 <table class="invoice-items">
                     <thead>
                         <tr>
-                            <th>Product</th>
+                            <th>{{ statictranslations('Product') }}</th>
                             <th>SKU</th>
-                            <th class="td-center">Qty</th>
-                            <th class="td-right">Unit Price</th>
-                            <th class="td-right">Total</th>
+                            <th class="td-center">{{ statictranslations('Qty') }}</th>
+                            <th class="td-right">{{ statictranslations('Unit Price') }}</th>
+                            <th class="td-right">{{ statictranslations('Total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -649,10 +660,10 @@
                 <tr>
                     <td class="col-l">
                         <div class="invoice-surface">
-                            <h4>Tax Summary</h4>
+                            <h4>{{ statictranslations('Tax Summary') }}</h4>
                             <table class="sum-table">
                                 <tr>
-                                    <td class="sum-label">Taxable Amount :</td>
+                                    <td class="sum-label">{{ statictranslations('Taxable Amount') }} :</td>
                                     <td class="sum-val">
                                         @if ($taxableAmount !== null)
                                             {{ $sym }} {{ number_format((float) $taxableAmount, 2) }}
@@ -662,7 +673,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="sum-label">VAT {{ number_format((float) $taxRate, 0) }}% :</td>
+                                    <td class="sum-label">{{ statictranslations('VAT') }} {{ number_format((float) $taxRate, 0) }}% :</td>
                                     <td class="sum-val">
                                         {{ $tax > 0 ? $sym . ' ' . number_format($tax, 2) : '-' }}
                                     </td>
@@ -671,7 +682,7 @@
                             <hr class="sum-divider">
                             <table class="sum-table">
                                 <tr>
-                                    <td class="sum-label">Total Tax Inclusive Amount :</td>
+                                    <td class="sum-label">{{ statictranslations('Total Tax Inclusive Amount') }} :</td>
                                     <td class="sum-val">{{ $sym }}
                                         {{ number_format($totalWithoutShipping, 2) }}</td>
                                 </tr>
@@ -680,11 +691,11 @@
                     </td>
                     <td class="col-r">
                         <div class="invoice-surface">
-                            <h4>Order Summary</h4>
+                            <h4>{{ statictranslations('Order Summary') }}</h4>
                             <table class="sum-table">
                                 <tr>
                                     <td class="sum-label">
-                                        Subtotal ({{ $order->items->sum('quantity') }} items) :
+                                        {{ statictranslations('Subtotal') }} ({{ $order->items->sum('quantity') }} {{ statictranslations('items') }}) :
                                     </td>
                                     @if($couponCode)
                                         <td class="sum-val">{{ $sym }} {{ number_format($subtotal, 2) }}</td>
@@ -695,7 +706,7 @@
                                 @if ($couponCode)
                                     <tr>
                                         <td class="sum-label">
-                                            Coupon Discount:
+                                            {{ statictranslations('Coupon Discount') }}:
                                             <span class="coupon-badge">{{ strtoupper($couponCode) }}</span>
                                         </td>
                                         <td class="sum-val text-green">
@@ -704,19 +715,19 @@
                                     </tr>
                                 @endif
                                 <tr>
-                                    <td class="sum-label">Shipping ({{ $shippingMethod }}) :</td>
+                                    <td class="sum-label">{{ statictranslations('Shipping') }} ({{ $shippingMethodLabel }}) :</td>
                                     <td class="sum-val">
                                         @if ($shippingCost > 0)
                                             {{ $sym }} {{ number_format($shippingCost, 2) }}
                                         @else
-                                            <span class="text-green">Free</span>
+                                            <span class="text-green">{{ statictranslations('Free') }}</span>
                                         @endif
                                     </td>
                                 </tr>
                             </table>
                             <table class="sum-table total-row-wrap">
                                 <tr>
-                                    <td class="total-label">Total :</td>
+                                    <td class="total-label">{{ statictranslations('Total') }} :</td>
                                     <td class="total-value">{{ $sym }} {{ number_format($total, 2) }}</td>
                                 </tr>
                             </table>
@@ -728,8 +739,8 @@
         </div>
 
         <div class="invoice-footer">
-            Thank you for shopping with {{ config('app.name') }}.
-            If you have any questions about your order, contact us at
+            {{ statictranslations('Thank you for shopping with') }} {{ config('app.name') }}.
+            {{ statictranslations('If you have any questions about your order, contact us at') }}
             <a href="mailto:{{ $siteContent->email ?? 'support@ezone.com' }}">
                 {{ $siteContent->email ?? 'support@ezone.com' }}
             </a>.
