@@ -274,7 +274,7 @@
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
                         {{ statictranslations('Placed') }}: <span
-                            class="font-semibold text-slate-700">{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('F j, Y, g:i A') }}</span>
+                            class="font-semibold text-slate-700">{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('F j, Y') }}</span>
                     </div>
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">

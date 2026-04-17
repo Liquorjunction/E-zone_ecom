@@ -51,7 +51,7 @@
                             {{-- Introduction / Last Updated Placeholder (Optional) --}}
                             <div class="mb-5 pb-6 border-b border-gray-100">
                                 <p class="text-sm text-gray-500 font-medium">
-                                    {{ statictranslations('Last Updated') }}: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->format('F d, Y') : 'N/A' }}</span>
+                                    {{ statictranslations('Last Updated') }}: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->locale(app()->getLocale())->translatedFormat('F d, Y') : 'N/A' }}</span>
                                 </p>
                                 <p>
                                     {{ statictranslations('Welcome to our About Us page. Here you can learn more about our company, our mission, and what we stand for.') }}

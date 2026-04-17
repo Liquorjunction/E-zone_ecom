@@ -50,7 +50,7 @@
                             {{-- Introduction / Last Updated Placeholder (Optional) --}}
                             <div class="mb-5 pb-6 border-b border-gray-100">
                                 <p class="text-sm text-gray-500 font-medium">
-                                    {{ statictranslations('Last Updated') }}: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->format('F d, Y') : 'N/A' }}</span>
+                                    {{ statictranslations('Last Updated') }}: <span class="text-gray-800">{{ isset($lastUpdated) && $lastUpdated ? $lastUpdated->locale(app()->getLocale())->translatedFormat('F d, Y') : 'N/A' }}</span>
                                 </p>
                                 <p>
                                     {{ statictranslations('Please read our privacy policy carefully to get a clear understanding of how we collect, use, protect or otherwise handle your Personally Identifiable Information in accordance with our website.') }}
