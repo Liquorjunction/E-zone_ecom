@@ -69,7 +69,7 @@ const fetchAndRender = async (url) => {
         }
 
         history.pushState({}, '', url);
-        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Removed auto scroll to results
     } catch (error) {
         console.error('Filter AJAX error:', error);
         window.location.href = url; // fallback to full navigation

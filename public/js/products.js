@@ -270,7 +270,7 @@ const fetchAndRender = async (url) => {
         updateActiveFilters(url);
         updateSidebarActiveState(url);
         history.pushState({}, "", url);
-        resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Removed auto scroll to results
     } catch (error) {
         console.error("Filter AJAX error:", error);
         // ─── FIX: fall back gracefully to a hard navigation instead of silent failure

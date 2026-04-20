@@ -88,7 +88,7 @@ $countActiveVariants = function ($products) {
                         NO <input type="range"> — those cause native step-snapping.
                         Two <div> thumbs are dragged via pointer events in JS.
                     --}}
-                    <div class="relative h-10 flex items-center touch-none select-none w-full overflow-x-hidden" data-range-root>
+                        <div class="relative h-10 flex items-center touch-none select-none w-11/12 mx-auto" data-range-root>
                             {{-- Grey background rail --}}
                             <div class="absolute left-0 right-0 h-1.5 bg-gray-200 rounded-full w-full"></div>
 

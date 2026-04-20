@@ -88,10 +88,7 @@ class AjaxPagination {
             }
 
             window.history.pushState({}, '', url.toString());
-
-            if (this.resultsEl) {
-                this.resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            // Removed auto scroll to results
         } catch (error) {
             console.error('Pagination error:', error);
             this.showError();
