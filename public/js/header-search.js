@@ -195,7 +195,20 @@ function initSearch(inputEl, resultsEl) {
 
     // ── Blur: hide results (small delay so link clicks still register) ──
     inputEl.addEventListener('blur', function () {
-        setTimeout(() => resultsEl.classList.add('hidden'), 200);
+        setTimeout(() => {
+            if (!resultsEl.matches(':hover')) {
+                resultsEl.classList.add('hidden');
+            }
+        }, 200);
+    });
+
+    // ── Click fallback: navigate explicitly so desktop clicks cannot be swallowed ──
+    resultsEl.addEventListener('click', function (event) {
+        const link = event.target.closest('a[href]');
+        if (!link) return;
+
+        event.preventDefault();
+        window.location.href = link.href;
     });
 
     // ── Focus: re-show results if content already exists ──
