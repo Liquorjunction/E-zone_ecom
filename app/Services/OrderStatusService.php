@@ -31,8 +31,8 @@ class OrderStatusService
         'dispatched' => ['ready_to_ship', 'cancelled'],
         'ready_to_ship' => ['shipped'],
         'shipped' => ['out_for_delivery', 'delivered'],
-        'out_for_delivery' => ['delivered', 'failed_delivery'],
-        'delivered' => ['completed', 'returned'],
+        'out_for_delivery' => ['delivered'], //, 'failed_delivery'],
+        'delivered' => ['completed'], //'returned'],
     ];
 
     // Handel Status Translation
@@ -67,16 +67,23 @@ class OrderStatusService
         ];
     }
 
-    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null, bool $sendNotification = true)
+    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null, ?int $userId = null, bool $sendNotification = true)
     {
         if (!$force && !$this->canTransition($order->status, $toStatus)) {
             throw new Exception("Invalid order transition from '{$order->status}' to '{$toStatus}'.");
         }
 
-        $statusActorId = $this->resolveAdminId($adminId);
+
+        // Only set status_changed_by for admin actions; set to null for client actions
+        if ($adminId) {
+            $statusActorId = $this->resolveAdminId($adminId);
+            $order->status_changed_by = $statusActorId;
+        } else {
+            $statusActorId = $userId ?? null;
+            $order->status_changed_by = null;
+        }
 
         $order->status = $toStatus;
-        $order->status_changed_by = $statusActorId;
         $order->status_changed_at = Carbon::now();
 
         if (in_array($toStatus, ['cancelled', 'refunded'], true)) {
