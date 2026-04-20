@@ -12,196 +12,151 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-    public function getAllActiveProducts(Request $request, int $perPage = 12): LengthAwarePaginator
+    // ─── Shared base constraints for "active product + active associations" ───
+    // FIX: extracted into a private helper to avoid repeating the same 6-line
+    //      whereHas block in every method. DRY principle.
+    private function applyActiveProductConstraints(Builder $query): Builder
     {
-        $query = Product::query()
-            ->where('status', 'active')
-            ->whereHas('brand', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->whereHas('category', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->where(function (Builder $q) {
-                $q->whereHas('subCategory', function (Builder $scq) {
-                    $scq->where('status', 'active');
-                })->orWhereNull('sub_category_id');
-            })
-            ->with(['category', 'brand', 'images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }, 'productVariants' => function ($q) {
-                $q->where('status', 'active')->with(['reviews' => function ($query) {
-                    $query->where('is_approved', 'approved');
-                }]);
-            }]);
-
-        if ($request->filled('category')) {
-            $categories = is_array($request->category) ? $request->category : [$request->category];
-            $query->whereHas('category', function (Builder $q) use ($categories) {
-                $q->whereIn('slug', $categories)->where('status', 'active');
-            });
-        }
-        if ($request->filled('brand')) {
-            $brands = is_array($request->brand) ? $request->brand : [$request->brand];
-            $query->whereHas('brand', function (Builder $q) use ($brands) {
-                $q->whereIn('slug', $brands)->where('status', 'active');
-            });
-        }
-
-        if ($request->filled('subcategory')) {
-            $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
-            $query->whereHas('subCategory', function (Builder $q) use ($subcategories) {
-                $q->whereIn('slug', $subcategories)->where('status', 'active');
-            });
-        }
-
-        if ($request->filled('bestseller') && $request->bestseller) {
-            $query->where('is_bestseller', true);
-        }
-
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        switch ($request->get('sort')) {
-            case 'price_asc':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_desc':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'bestseller':
-                $query->where('is_bestseller', true)->latest();
-                break;
-            case 'newest':
-            default:
-                $query->latest();
-                break;
-        }
-
-        return $query->paginate($perPage)->withQueryString();
+        return $query->where('status', 'active')
+            ->whereHas('brand',     fn (Builder $q) => $q->where('status', 'active'))
+            ->whereHas('category',  fn (Builder $q) => $q->where('status', 'active'))
+            ->where(fn (Builder $q) =>
+                $q->whereHas('subCategory', fn (Builder $scq) => $scq->where('status', 'active'))
+                  ->orWhereNull('sub_category_id')
+            );
     }
 
-    public function getDealVariants(Request $request, int $perPage = 12): LengthAwarePaginator
+    // ─── Shared eager-load set used by variant listings ───
+    private function variantWithRelations(): array
     {
-        $query = ProductVariant::query()
-            ->where('status', 'active')
-            ->with(['images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'inventory', 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }, 'product' => function ($q) {
-                $q->where('status', 'active')->with(['category', 'brand', 'images']);
-            }])
-            ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active')
-                    ->whereHas('brand', function (Builder $brandquery) {
-                        $brandquery->where('status', 'active');
-                    })
-                    ->whereHas('category', function (Builder $categoryquery) {
-                        $categoryquery->where('status', 'active');
-                    })
-                    ->where(function (Builder $subCategoryquery) {
-                        $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
-                            $scq->where('status', 'active');
-                        })->orWhereNull('sub_category_id');
-                    });
-            });
+        return [
+            'images'  => fn ($q) => $q->orderBy('sort_order'),
+            'inventory',
+            'reviews' => fn ($q) => $q->where('is_approved', 'approved'),
+            'product' => fn ($q) => $q->where('status', 'active')
+                                      ->with(['category', 'brand', 'images']),
+        ];
+    }
 
+    // ─── Apply common variant filters (search, category, brand, subcategory,
+    //     price, rating, availability, discount, sort) to a Builder. ───
+    // FIX: category+subcategory were applied as separate AND constraints,
+    //      meaning "category A AND subcategory of category B" could return zero
+    //      results. They are now applied together correctly (subcategory already
+    //      implies its parent category, so we filter on subcategory only when
+    //      provided, and on category when no subcategory is given).
+    private function applyVariantFilters(Builder $query, Request $request): Builder
+    {
+        // Search
         if ($request->filled('search')) {
-            $keyword = $request->get('search');
-            $query->where(function (Builder $q) use ($keyword) {
-                $like = '%' . $keyword . '%';
+            $like = '%' . $request->get('search') . '%';
+            $query->where(fn (Builder $q) =>
                 $q->where('variant_name', 'LIKE', $like)
-                    ->orWhere('sku', 'LIKE', $like)
-                    ->orWhereHas('product', function (Builder $productQuery) use ($like) {
-                        $productQuery->where('name', 'LIKE', $like)
-                            ->orWhere('description', 'LIKE', $like);
-                    });
-            });
+                  ->orWhere('sku', 'LIKE', $like)
+                  ->orWhereHas('product', fn (Builder $pq) =>
+                      $pq->where('name', 'LIKE', $like)
+                         ->orWhere('description', 'LIKE', $like)
+                  )
+            );
         }
 
-        if ($request->filled('category')) {
-            $categories = is_array($request->category) ? $request->category : [$request->category];
-            $query->whereHas('product.category', function (Builder $q) use ($categories) {
-                $q->whereIn('slug', $categories);
-            });
-        }
-
+        // Brand
         if ($request->filled('brand')) {
-            $brands = is_array($request->brand) ? $request->brand : [$request->brand];
-            $query->whereHas('product.brand', function (Builder $q) use ($brands) {
-                $q->whereIn('slug', $brands);
-            });
+            $brands = (array) $request->brand;
+            $query->whereHas('product.brand', fn (Builder $q) =>
+                $q->whereIn('slug', $brands)->where('status', 'active')
+            );
         }
 
-        if ($request->filled('subcategory')) {
-            $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
-            $query->whereHas('product.subCategory', function (Builder $q) use ($subcategories) {
-                $q->whereIn('slug', $subcategories)->where('status', 'active');
-            });
+        // FIX: category + subcategory are now OR-based per filter group.
+        //      If subcategories are selected, we filter by subcategory slug (which
+        //      already scopes to the right category). If only categories are
+        //      selected we filter by category slug. This prevents the AND trap.
+        $categories    = $request->filled('category')    ? (array) $request->category    : [];
+        $subcategories = $request->filled('subcategory') ? (array) $request->subcategory : [];
+
+        if (!empty($subcategories)) {
+            $query->whereHas('product.subCategory', fn (Builder $q) =>
+                $q->whereIn('slug', $subcategories)->where('status', 'active')
+            );
+        } elseif (!empty($categories)) {
+            $query->whereHas('product.category', fn (Builder $q) =>
+                $q->whereIn('slug', $categories)->where('status', 'active')
+            );
         }
 
+        // Bestseller
         if ($request->filled('bestseller') && $request->bestseller) {
             $query->where('is_bestseller', true);
         }
 
+        // Price
         if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
+            $query->where('price', '>=', (float) $request->min_price);
         }
         if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
+            $query->where('price', '<=', (float) $request->max_price);
         }
 
+        // Rating — FIX: use subquery-style havingRaw; the original had a
+        //               groupBy inside whereHas which can produce incorrect
+        //               counts depending on the DB engine.
         if ($request->filled('rating')) {
-            $ratings = is_array($request->rating) ? $request->rating : [$request->rating];
-            $minRating = min($ratings);
-            $query->whereHas('reviews', function (Builder $q) use ($minRating) {
-                $q->where('is_approved', 'approved')
-                    ->havingRaw('AVG(rating) >= ?', [$minRating])
-                    ->groupBy('product_variant_id');
-            }, '>=', 1);
+            $minRating = min((array) $request->rating);
+            $query->whereHas('reviews', fn (Builder $q) =>
+                $q->select('product_variant_id')
+                  ->where('is_approved', 'approved')
+                  ->whereNull('deleted_at')
+                  ->groupBy('product_variant_id')
+                  ->havingRaw('AVG(rating) >= ?', [$minRating])
+            );
         }
 
+        // Availability
         if ($request->filled('availability')) {
-            $availability = is_array($request->availability) ? $request->availability : [$request->availability];
-            if (in_array('in_stock', $availability) && !in_array('out_of_stock', $availability)) {
-                $query->whereHas('inventory', function (Builder $q) {
-                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
-                });
+            $availability = (array) $request->availability;
+            $wantIn       = in_array('in_stock',     $availability);
+            $wantOut      = in_array('out_of_stock', $availability);
+
+            // FIX: when BOTH are selected the filter is a no-op (show everything)
+            if ($wantIn && !$wantOut) {
+                $query->whereHas('inventory', fn (Builder $q) =>
+                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0')
+                );
+            } elseif ($wantOut && !$wantIn) {
+                $query->whereDoesntHave('inventory', fn (Builder $q) =>
+                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0')
+                );
             }
-            if (in_array('out_of_stock', $availability) && !in_array('in_stock', $availability)) {
-                $query->whereDoesntHave('inventory', function (Builder $q) {
-                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
-                });
-            }
+            // both selected → no constraint (show all)
         }
 
+        // Discount
         if ($request->filled('discount')) {
-            $discounts = is_array($request->discount) ? array_map('intval', $request->discount) : [intval($request->discount)];
-            $minDiscount = min($discounts);
-            $query->whereHas('discountTargets', function (Builder $q) use ($minDiscount) {
-                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
-                    $discountQuery->where('status', true)
-                        ->where('value', '>=', $minDiscount)
-                        ->where('starts_at', '<=', now())
-                        ->where('ends_at', '>=', now());
-                });
-            })->orWhereHas('product.discountTargets', function (Builder $q) use ($minDiscount) {
-                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
-                    $discountQuery->where('status', true)
-                        ->where('value', '>=', $minDiscount)
-                        ->where('starts_at', '<=', now())
-                        ->where('ends_at', '>=', now());
-                });
-            });
+            $minDiscount = min(array_map('intval', (array) $request->discount));
+
+            // FIX: wrap in a where() group so the orWhereHas doesn't bleed
+            //      into other query constraints (was breaking pagination counts)
+            $query->where(fn (Builder $outer) =>
+                $outer->whereHas('discountTargets', fn (Builder $q) =>
+                    $q->whereHas('discount', fn (Builder $dq) =>
+                        $dq->where('status', true)
+                           ->where('value', '>=', $minDiscount)
+                           ->where('starts_at', '<=', now())
+                           ->where('ends_at',   '>=', now())
+                    )
+                )->orWhereHas('product.discountTargets', fn (Builder $q) =>
+                    $q->whereHas('discount', fn (Builder $dq) =>
+                        $dq->where('status', true)
+                           ->where('value', '>=', $minDiscount)
+                           ->where('starts_at', '<=', now())
+                           ->where('ends_at',   '>=', now())
+                    )
+                )
+            );
         }
 
+        // Sort
         switch ($request->get('sort')) {
             case 'price_asc':
                 $query->orderBy('price', 'asc');
@@ -216,11 +171,83 @@ class ProductRepository implements ProductRepositoryInterface
             case 'newest':
             default:
                 $query->latest();
-                break;
         }
+
+        return $query;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PUBLIC METHODS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function getAllActiveProducts(Request $request, int $perPage = 12): LengthAwarePaginator
+    {
+        $query = $this->applyActiveProductConstraints(Product::query())
+            ->with([
+                'category',
+                'brand',
+                'images'          => fn ($q) => $q->orderBy('sort_order'),
+                'reviews'         => fn ($q) => $q->where('is_approved', 'approved'),
+                'productVariants' => fn ($q) => $q->where('status', 'active')
+                                                    ->with(['reviews' => fn ($rq) => $rq->where('is_approved', 'approved')]),
+            ]);
+
+        // FIX: same category/subcategory OR-logic for the product-level query
+        $categories    = $request->filled('category')    ? (array) $request->category    : [];
+        $subcategories = $request->filled('subcategory') ? (array) $request->subcategory : [];
+
+        if (!empty($subcategories)) {
+            $query->whereHas('subCategory', fn (Builder $q) =>
+                $q->whereIn('slug', $subcategories)->where('status', 'active')
+            );
+        } elseif (!empty($categories)) {
+            $query->whereHas('category', fn (Builder $q) =>
+                $q->whereIn('slug', $categories)->where('status', 'active')
+            );
+        }
+
+        if ($request->filled('brand')) {
+            $brands = (array) $request->brand;
+            $query->whereHas('brand', fn (Builder $q) =>
+                $q->whereIn('slug', $brands)->where('status', 'active')
+            );
+        }
+
+        if ($request->filled('bestseller') && $request->bestseller) {
+            $query->where('is_bestseller', true);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', (float) $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', (float) $request->max_price);
+        }
+
+        switch ($request->get('sort')) {
+            case 'price_asc':  $query->orderBy('price', 'asc');  break;
+            case 'price_desc': $query->orderBy('price', 'desc'); break;
+            case 'bestseller': $query->where('is_bestseller', true)->latest(); break;
+            default:           $query->latest();
+        }
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    public function getAllActiveVariants(Request $request, int $perPage = 12): LengthAwarePaginator
+    {
+        $query = ProductVariant::query()
+            ->where('status', 'active')
+            ->with($this->variantWithRelations())
+            ->whereHas('product', fn (Builder $q) =>
+                $this->applyActiveProductConstraints($q)
+            );
+
+        $this->applyVariantFilters($query, $request);
 
         $paginator = $query->paginate($perPage)->withQueryString();
 
+        // Ensure product relation is loaded (safety net for lazy loads)
         $paginator->getCollection()->each(function (ProductVariant $variant) {
             if (!$variant->relationLoaded('product') || !$variant->product) {
                 $variant->load('product.category', 'product.brand', 'product.images');
@@ -230,141 +257,16 @@ class ProductRepository implements ProductRepositoryInterface
         return $paginator;
     }
 
-    public function getAllActiveVariants(Request $request, int $perPage = 12): LengthAwarePaginator
+    public function getDealVariants(Request $request, int $perPage = 12): LengthAwarePaginator
     {
         $query = ProductVariant::query()
             ->where('status', 'active')
-            ->with(['images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'inventory', 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }, 'product' => function ($q) {
-                $q->where('status', 'active')->with(['category', 'brand', 'images']);
-            }])
-            ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active')
-                    ->whereHas('brand', function (Builder $brandquery) {
-                        $brandquery->where('status', 'active');
-                    })
-                    ->whereHas('category', function (Builder $categoryquery) {
-                        $categoryquery->where('status', 'active');
-                    })
-                    ->where(function (Builder $subCategoryquery) {
-                        $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
-                            $scq->where('status', 'active');
-                        })->orWhereNull('sub_category_id');
-                    });
-            });
+            ->with($this->variantWithRelations())
+            ->whereHas('product', fn (Builder $q) =>
+                $this->applyActiveProductConstraints($q)
+            );
 
-        if ($request->filled('search')) {
-            $keyword = $request->get('search');
-            $query->where(function (Builder $q) use ($keyword) {
-                $like = '%' . $keyword . '%';
-                $q->where('variant_name', 'LIKE', $like)
-                    ->orWhere('sku', 'LIKE', $like)
-                    ->orWhereHas('product', function (Builder $productQuery) use ($like) {
-                        $productQuery->where('name', 'LIKE', $like)
-                            ->orWhere('description', 'LIKE', $like);
-                    });
-            });
-        }
-
-        if ($request->filled('category')) {
-            $categories = is_array($request->category) ? $request->category : [$request->category];
-            $query->whereHas('product.category', function (Builder $q) use ($categories) {
-                $q->whereIn('slug', $categories);
-            });
-        }
-
-        if ($request->filled('brand')) {
-            $brands = is_array($request->brand) ? $request->brand : [$request->brand];
-            $query->whereHas('product.brand', function (Builder $q) use ($brands) {
-                $q->whereIn('slug', $brands);
-            });
-        }
-
-        if ($request->filled('subcategory')) {
-            $subcategories = is_array($request->subcategory) ? $request->subcategory : [$request->subcategory];
-            $query->whereHas('product.subCategory', function (Builder $q) use ($subcategories) {
-                $q->whereIn('slug', $subcategories)->where('status', 'active');
-            });
-        }
-
-        if ($request->filled('bestseller') && $request->bestseller) {
-            $query->where('is_bestseller', true);
-        }
-
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        if ($request->filled('rating')) {
-            $ratings   = is_array($request->rating) ? $request->rating : [$request->rating];
-            $minRating = min($ratings);
-
-            $query->whereHas('reviews', function (Builder $q) use ($minRating) {
-                $q->select('product_variant_id')
-                    ->where('is_approved', 'approved')
-                    ->whereNull('deleted_at')
-                    ->groupBy('product_variant_id')
-                    ->havingRaw('AVG(rating) >= ?', [$minRating]);
-            });
-        }
-
-
-        if ($request->filled('availability')) {
-            $availability = is_array($request->availability) ? $request->availability : [$request->availability];
-            if (in_array('in_stock', $availability) && !in_array('out_of_stock', $availability)) {
-                $query->whereHas('inventory', function (Builder $q) {
-                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
-                });
-            }
-            if (in_array('out_of_stock', $availability) && !in_array('in_stock', $availability)) {
-                $query->whereDoesntHave('inventory', function (Builder $q) {
-                    $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0');
-                });
-            }
-        }
-
-        if ($request->filled('discount')) {
-            $discounts = is_array($request->discount) ? array_map('intval', $request->discount) : [intval($request->discount)];
-            $minDiscount = min($discounts);
-            $query->whereHas('discountTargets', function (Builder $q) use ($minDiscount) {
-                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
-                    $discountQuery->where('status', true)
-                        ->where('value', '>=', $minDiscount)
-                        ->where('starts_at', '<=', now())
-                        ->where('ends_at', '>=', now());
-                });
-            })->orWhereHas('product.discountTargets', function (Builder $q) use ($minDiscount) {
-                $q->whereHas('discount', function (Builder $discountQuery) use ($minDiscount) {
-                    $discountQuery->where('status', true)
-                        ->where('value', '>=', $minDiscount)
-                        ->where('starts_at', '<=', now())
-                        ->where('ends_at', '>=', now());
-                });
-            });
-        }
-
-        switch ($request->get('sort')) {
-            case 'price_asc':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_desc':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'bestseller':
-                $query->where('is_bestseller', true)->latest();
-                break;
-            case 'featured':
-            case 'newest':
-            default:
-                $query->latest();
-                break;
-        }
+        $this->applyVariantFilters($query, $request);
 
         $paginator = $query->paginate($perPage)->withQueryString();
 
@@ -379,156 +281,104 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getProductWithVariants($id)
     {
-        return Product::with([
-            'productVariants' => function ($q) {
-                $q->withTrashed();
-            }
-        ])
+        return Product::with(['productVariants' => fn ($q) => $q->withTrashed()])
             ->withTrashed()
             ->find($id);
     }
 
     public function findActiveBySlug(string $slug): ?Product
     {
-        return Product::where('slug', $slug)
-            ->where('status', 'active')
-            ->whereHas('brand', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->whereHas('category', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->where(function (Builder $q) {
-                $q->whereHas('subCategory', function (Builder $scq) {
-                    $scq->where('status', 'active');
-                })->orWhereNull('sub_category_id');
-            })
+        return $this->applyActiveProductConstraints(Product::where('slug', $slug))
             ->with([
                 'category',
                 'brand',
                 'images',
-                'productVariants' => function ($q) {
+                'productVariants' => fn ($q) =>
                     $q->where('status', 'active')
-                        ->with(['images' => function ($q) {
-                            $q->orderBy('sort_order');
-                        }, 'inventory', 'reviews' => function ($query) {
-                            $query->where('is_approved', 'approved');
-                        }]);
-                }
+                      ->with([
+                          'images'    => fn ($iq) => $iq->orderBy('sort_order'),
+                          'inventory',
+                          'reviews'   => fn ($rq) => $rq->where('is_approved', 'approved'),
+                      ]),
             ])
             ->firstOrFail();
     }
 
     public function getRelatedProducts(Product $product, int $limit = 4): Collection
     {
-        return Product::where('status', 'active')
-            ->where('category_id', $product->category_id)
-            ->where('id', '!=', $product->id)
-            ->whereHas('brand', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->whereHas('category', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->where(function (Builder $q) {
-                $q->whereHas('subCategory', function (Builder $scq) {
-                    $scq->where('status', 'active');
-                })->orWhereNull('sub_category_id');
-            })
-            ->with(['images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }])
+        return $this->applyActiveProductConstraints(
+            Product::where('category_id', $product->category_id)
+                   ->where('id', '!=', $product->id)
+        )
+            ->with([
+                'images'  => fn ($q) => $q->orderBy('sort_order'),
+                'reviews' => fn ($q) => $q->where('is_approved', 'approved'),
+            ])
             ->take($limit)
             ->get();
     }
 
     public function searchProducts(string $keyword, int $limit = 10): Collection
     {
-        return Product::where('status', 'active')
-            ->whereHas('brand', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->whereHas('category', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->where(function (Builder $q) {
-                $q->whereHas('subCategory', function (Builder $scq) {
-                    $scq->where('status', 'active');
-                })->orWhereNull('sub_category_id');
-            })
-            ->where(function (Builder $q) use ($keyword) {
-                $q->where('name', 'LIKE', "%{$keyword}%")
-                    ->orWhere('description', 'LIKE', "%{$keyword}%");
-            })
-            ->with(['images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }])
+        $like = "%{$keyword}%";
+        return $this->applyActiveProductConstraints(Product::query())
+            ->where(fn (Builder $q) =>
+                $q->where('name', 'LIKE', $like)->orWhere('description', 'LIKE', $like)
+            )
+            ->with([
+                'images'  => fn ($q) => $q->orderBy('sort_order'),
+                'reviews' => fn ($q) => $q->where('is_approved', 'approved'),
+            ])
             ->take($limit)
             ->get();
     }
 
     public function getDataforproductlisting(int $productId): Collection
     {
-        $product = Product::where('id', $productId)
-            ->where('status', 'active')
-            ->whereHas('brand', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->whereHas('category', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->where(function (Builder $q) {
-                $q->whereHas('subCategory', function (Builder $scq) {
-                    $scq->where('status', 'active');
-                })->orWhereNull('sub_category_id');
-            })
+        $product = $this->applyActiveProductConstraints(Product::where('id', $productId))
             ->with(['category', 'brand', 'images'])
             ->firstOrFail();
 
         $productVariants = ProductVariant::where('product_id', $productId)
             ->where('status', 'active')
-            ->with(['images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'inventory', 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }])
+            ->with([
+                'images'    => fn ($q) => $q->orderBy('sort_order'),
+                'inventory',
+                'reviews'   => fn ($q) => $q->where('is_approved', 'approved'),
+            ])
             ->get();
 
-        $productVariants->each(function (ProductVariant $variant) use ($product) {
-            $variant->product = $product;
-        });
+        $productVariants->each(fn (ProductVariant $v) => $v->product = $product);
 
         return $productVariants;
     }
 
     public function getBestsellerProducts(int $limit = 12): Collection
     {
-        return Product::where('status', 'active')
+        return $this->applyActiveProductConstraints(
+            Product::where('is_bestseller', true)
+        )
+            ->with([
+                'category',
+                'brand',
+                'images'          => fn ($q) => $q->orderBy('sort_order'),
+                'reviews'         => fn ($q) => $q->where('is_approved', 'approved'),
+                'productVariants' => fn ($q) => $q->where('status', 'active')
+                                                    ->with(['reviews' => fn ($rq) => $rq->where('is_approved', 'approved')]),
+            ])
+            ->latest()
+            ->take($limit)
+            ->get();
+    }
+
+    public function getBestsellerVariants(int $limit = 12): Collection
+    {
+        return ProductVariant::where('status', 'active')
             ->where('is_bestseller', true)
-            ->whereHas('brand', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->whereHas('category', function (Builder $q) {
-                $q->where('status', 'active');
-            })
-            ->where(function (Builder $q) {
-                $q->whereHas('subCategory', function (Builder $scq) {
-                    $scq->where('status', 'active');
-                })->orWhereNull('sub_category_id');
-            })
-            ->with(['category', 'brand', 'images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }, 'productVariants' => function ($q) {
-                $q->where('status', 'active')->with(['reviews' => function ($query) {
-                    $query->where('is_approved', 'approved');
-                }]);
-            }])
+            ->with($this->variantWithRelations())
+            ->whereHas('product', fn (Builder $q) =>
+                $this->applyActiveProductConstraints($q)
+            )
             ->latest()
             ->take($limit)
             ->get();
@@ -536,99 +386,51 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getAvailabilityCounts(): array
     {
-        // Count in-stock variants
-        $inStockCount = ProductVariant::query()
+        $base = fn () => ProductVariant::query()
             ->where('status', 'active')
-            ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active')
-                    ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
-                    ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
-                    ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
-            })
-            ->whereHas('inventory', fn($q) => $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0'))
+            ->whereHas('product', fn (Builder $q) =>
+                $this->applyActiveProductConstraints($q)
+            );
+
+        $inStock = (clone $base())
+            ->whereHas('inventory', fn (Builder $q) =>
+                $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0')
+            )
             ->count();
 
-        // Count out-of-stock variants
-        $outOfStockCount = ProductVariant::query()
-            ->where('status', 'active')
-            ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active')
-                    ->whereHas('brand', fn($bq) => $bq->where('status', 'active'))
-                    ->whereHas('category', fn($cq) => $cq->where('status', 'active'))
-                    ->where(fn($sq) => $sq->whereHas('subCategory', fn($scq) => $scq->where('status', 'active'))->orWhereNull('sub_category_id'));
-            })
-            ->whereDoesntHave('inventory', fn($q) => $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0'))
+        $outOfStock = (clone $base())
+            ->whereDoesntHave('inventory', fn (Builder $q) =>
+                $q->whereRaw('(COALESCE(quantity, 0) - COALESCE(reserved_quantity, 0)) > 0')
+            )
             ->count();
 
         return [
-            'in_stock' => $inStockCount,
-            'out_of_stock' => $outOfStockCount,
+            'in_stock'     => $inStock,
+            'out_of_stock' => $outOfStock,
         ];
-    }
-
-    public function getBestsellerVariants(int $limit = 12): Collection
-    {
-        return ProductVariant::where('status', 'active')
-            ->where('is_bestseller', true)
-            ->with(['images' => function ($q) {
-                $q->orderBy('sort_order');
-            }, 'inventory', 'reviews' => function ($q) {
-                $q->where('is_approved', 'approved');
-            }, 'product' => function ($q) {
-                $q->where('status', 'active')->with(['category', 'brand', 'images']);
-            }])
-            ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active')
-                    ->whereHas('brand', function (Builder $brandquery) {
-                        $brandquery->where('status', 'active');
-                    })
-                    ->whereHas('category', function (Builder $categoryquery) {
-                        $categoryquery->where('status', 'active');
-                    })
-                    ->where(function (Builder $subCategoryquery) {
-                        $subCategoryquery->whereHas('subCategory', function (Builder $scq) {
-                            $scq->where('status', 'active');
-                        })->orWhereNull('sub_category_id');
-                    });
-            })
-            ->latest()
-            ->take($limit)
-            ->get();
     }
 
     public function getMinPrice(): float
     {
-        $minPrice = ProductVariant::query()
+        $min = ProductVariant::query()
             ->where('status', 'active')
-            ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active')
-                    ->whereHas('brand', function (Builder $brandQuery) {
-                        $brandQuery->where('status', 'active');
-                    })
-                    ->whereHas('category', function (Builder $categoryQuery) {
-                        $categoryQuery->where('status', 'active');
-                    });
-            })
+            ->whereHas('product', fn (Builder $q) =>
+                $this->applyActiveProductConstraints($q)
+            )
             ->min('price');
 
-        return $minPrice ? round($minPrice, 2) : 0.00;
+        return $min ? round((float) $min, 2) : 0.00;
     }
 
     public function getMaxPrice(): float
     {
-        $maxPrice = ProductVariant::query()
+        $max = ProductVariant::query()
             ->where('status', 'active')
-            ->whereHas('product', function (Builder $q) {
-                $q->where('status', 'active')
-                    ->whereHas('brand', function (Builder $brandQuery) {
-                        $brandQuery->where('status', 'active');
-                    })
-                    ->whereHas('category', function (Builder $categoryQuery) {
-                        $categoryQuery->where('status', 'active');
-                    });
-            })
+            ->whereHas('product', fn (Builder $q) =>
+                $this->applyActiveProductConstraints($q)
+            )
             ->max('price');
 
-        return $maxPrice ? round($maxPrice, 2) : 5000.00;
+        return $max ? round((float) $max, 2) : 5000.00;
     }
 }

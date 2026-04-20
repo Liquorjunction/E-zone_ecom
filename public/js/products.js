@@ -1,14 +1,18 @@
 // Client products page: AJAX filters, search, sort, view toggle
+// ─── FIX: "Clear All" used a hard navigation <a> tag, which bypassed JS state.
+//          We now handle it in JS so we can properly reset price sliders too.
+
+// ─────────────────────────────────────────────
+// FORM HELPERS
+// ─────────────────────────────────────────────
+
 const getFilterForm = () => {
-    // Get the visible filter form (in modal or sidebar)
-    const modalForm = document.querySelector(
-        "#mobile-filter-modal #filter-form",
-    );
+    const modal = document.getElementById("mobile-filter-modal");
+    const modalForm = modal
+        ? modal.querySelector("#filter-form")
+        : null;
     const sidebarForm = document.querySelector("aside #filter-form");
-    return modalForm &&
-        !document
-            .getElementById("mobile-filter-modal")
-            .classList.contains("hidden")
+    return modalForm && !modal.classList.contains("hidden")
         ? modalForm
         : sidebarForm || document.getElementById("filter-form");
 };
@@ -16,8 +20,9 @@ const getFilterForm = () => {
 const getFilterForms = () =>
     Array.from(document.querySelectorAll("#filter-form"));
 
+// ─── FIX: syncFormsData also re-initialises the price slider visuals in the
+//          target form after copying values, so the track highlight stays correct.
 const syncFormsData = (sourceForm = getFilterForm()) => {
-    // Sync data between all filter forms
     const forms = getFilterForms();
     if (forms.length <= 1 || !sourceForm) return;
 
@@ -26,19 +31,17 @@ const syncFormsData = (sourceForm = getFilterForm()) => {
     forms.forEach((form) => {
         if (form === sourceForm) return;
 
-        // Clear all inputs in secondary form
-        form.querySelectorAll(
-            'input[type="checkbox"], input[type="radio"]',
-        ).forEach((input) => {
-            input.checked = false;
-        });
-        form.querySelectorAll(
-            'input[type="text"], input[type="number"]',
-        ).forEach((input) => {
-            input.value = "";
-        });
+        // Clear checkboxes / radios
+        form
+            .querySelectorAll('input[type="checkbox"], input[type="radio"]')
+            .forEach((input) => (input.checked = false));
 
-        // Copy data from primary form
+        // Clear text / number inputs
+        form
+            .querySelectorAll('input[type="text"], input[type="number"]')
+            .forEach((input) => (input.value = ""));
+
+        // Copy values from source form
         for (const [key, value] of formData.entries()) {
             const inputs = form.querySelectorAll(`[name="${key}"]`);
             inputs.forEach((input) => {
@@ -50,54 +53,177 @@ const syncFormsData = (sourceForm = getFilterForm()) => {
             });
         }
 
-        // Sync priceDirty flag — without this, the synced form always thinks
-        // price is untouched and serializeForm drops it
+        // Sync price-range dirty flag
         const sourcePriceRange = sourceForm.querySelector("[data-price-range]");
         const targetPriceRange = form.querySelector("[data-price-range]");
         if (sourcePriceRange && targetPriceRange) {
             targetPriceRange.dataset.priceDirty =
                 sourcePriceRange.dataset.priceDirty;
+
+            // ─── FIX: also copy raw min/max values into the hidden range inputs
+            //         so the slider track renders correctly in the modal.
+            const sourceMin = sourcePriceRange.querySelector('[data-input="min"]');
+            const sourceMax = sourcePriceRange.querySelector('[data-input="max"]');
+            const targetMin = targetPriceRange.querySelector('[data-input="min"]');
+            const targetMax = targetPriceRange.querySelector('[data-input="max"]');
+            const targetRangeMin = targetPriceRange.querySelector('[data-range="min"]');
+            const targetRangeMax = targetPriceRange.querySelector('[data-range="max"]');
+            if (sourceMin && targetMin && targetRangeMin) {
+                targetMin.value = sourceMin.value;
+                targetRangeMin.value = sourceMin.value;
+            }
+            if (sourceMax && targetMax && targetRangeMax) {
+                targetMax.value = sourceMax.value;
+                targetRangeMax.value = sourceMax.value;
+            }
+
+            // Trigger a visual refresh on the target slider if the helper exists
+            refreshSliderVisuals(targetPriceRange);
         }
     });
 };
+
+// ─── FIX: lightweight helper to repaint a slider track without full re-init.
+function refreshSliderVisuals(container) {
+    const minRange = container.querySelector('[data-range="min"]');
+    const maxRange = container.querySelector('[data-range="max"]');
+    const track    = container.querySelector('[data-range-track]');
+    if (!minRange || !maxRange || !track) return;
+
+    const min  = parseFloat(minRange.min) || 0;
+    const max  = parseFloat(minRange.max) || 5000;
+    const minV = parseFloat(minRange.value) || min;
+    const maxV = parseFloat(maxRange.value) || max;
+
+    const left  = ((minV - min) / (max - min)) * 100;
+    const right = 100 - ((maxV - min) / (max - min)) * 100;
+    track.style.left  = left  + "%";
+    track.style.right = right + "%";
+}
+
+// ─────────────────────────────────────────────
+// ACTIVE FILTER BADGE HELPERS
+// ─────────────────────────────────────────────
 
 const updateSidebarActiveState = (url) => {
-    const urlObj = new URL(url, window.location.origin);
-    const params = urlObj.searchParams;
+    const params = new URL(url, window.location.origin).searchParams;
 
-    // Remove active state from all categories and subcategories
-    document.querySelectorAll("[data-category-link]").forEach((link) => {
-        link.classList.remove("!font-bold", "!text-primary", "bg-primary/10");
-    });
+    document.querySelectorAll("[data-category-link]").forEach((link) =>
+        link.classList.remove("!font-bold", "!text-primary", "bg-primary/10")
+    );
 
-    // Add active state to current filters
-    const categories = params.getAll("category[]");
-    categories.forEach((cat) => {
+    params.getAll("category[]").forEach((cat) => {
         const link = document.querySelector(`[data-category-link="${cat}"]`);
-        if (link) {
+        if (link)
             link.classList.add("!font-bold", "!text-primary", "bg-primary/10");
-        }
     });
 };
 
-const filterForms = getFilterForms();
-const resultsContainer = document.getElementById("products-results");
-const activeFiltersContainer = document.getElementById(
-    "active-filters-container",
-);
-const paginationContainer = document.getElementById("products-pagination");
-const loadingOverlay = document.getElementById("filter-loading");
-const searchInput = document.getElementById("products-search");
-const clearSearchBtn = document.getElementById("clear-search");
-const sortSelect = document.getElementById("products-sort");
-const viewGridBtn = document.getElementById("view-grid-btn");
-const viewListBtn = document.getElementById("view-list-btn");
-const clearFiltersBtn = document.getElementById("clear-filters");
-const applyFiltersBtn = document.getElementById("apply-mobile-filters");
-const filterBtn = document.getElementById("mobile-filter-btn");
-const filterModal = document.getElementById("mobile-filter-modal");
-const closeModalBtn = document.getElementById("close-modal");
-const closeModalBtnAlt = document.getElementById("close-modal-btn");
+const getSubcategoryLabel = (value) => {
+    const input = document.querySelector(
+        `input[name="subcategory[]"][value="${value}"]`
+    );
+    if (!input) return value;
+    const label = input.closest("label");
+    if (!label) return value;
+    const span = label.querySelector("span.ml-3");
+    return span ? span.textContent.trim() : value;
+};
+
+const getCategoryLabel = (value) => {
+    const input = document.querySelector(
+        `input[name="category[]"][value="${value}"]`
+    );
+    if (!input) return value.replace(/-/g, " ");
+    const label = input.closest("label");
+    if (!label) return value.replace(/-/g, " ");
+    const span = label.querySelector("span.ml-3, span[data-localized]");
+    return span ? span.textContent.trim() : label.textContent.trim();
+};
+
+const updateActiveFilters = (url) => {
+    if (!activeFiltersContainer) return;
+
+    const params = new URL(url, window.location.origin).searchParams;
+    let html = `<span class="text-sm font-medium text-gray-700">${trans("Active Filters:")}</span>`;
+    let hasFilters = false;
+
+    const makeChip = (label, color, type, value = "") => {
+        hasFilters = true;
+        return `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm ${color} hover:cursor-pointer hover:opacity-80 transition-opacity">
+            <span>${label}</span>
+            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="${type}" ${value ? `data-filter-value="${value}"` : ""}>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </span>`;
+    };
+
+    params.getAll("brand[]").forEach((v) =>
+        (html += makeChip(`<span class="capitalize">${v.replace(/-/g, " ")}</span>`, "bg-blue-100 text-blue-700", "brand", v))
+    );
+
+    params.getAll("category[]").forEach((v) =>
+        (html += makeChip(`<span class="capitalize">${getCategoryLabel(v)}</span>`, "bg-primary/10 text-primary", "category", v))
+    );
+
+    params.getAll("subcategory[]").forEach((v) =>
+        (html += makeChip(`Subcategory: ${getSubcategoryLabel(v)}`, "bg-indigo-100 text-indigo-700", "subcategory", v))
+    );
+
+    params.getAll("availability[]").forEach((v) =>
+        (html += makeChip(`<span class="capitalize">${v.replace(/_/g, " ")}</span>`, "bg-green-100 text-green-700", "availability", v))
+    );
+
+    params.getAll("rating[]").forEach((v) =>
+        (html += makeChip(`${v} Star${v !== "1" ? "s" : ""} and up`, "bg-yellow-100 text-yellow-700", "rating", v))
+    );
+
+    params.getAll("discount[]").forEach((v) =>
+        (html += makeChip(`${v}% off or more`, "bg-red-100 text-red-700", "discount", v))
+    );
+
+    // ─── FIX: use window.CURRENCY_SYMBOL with safe fallback
+    const currency = window.CURRENCY_SYMBOL || "";
+    const minPrice = params.get("min_price");
+    const maxPrice = params.get("max_price");
+    if (minPrice || maxPrice) {
+        html += makeChip(
+            `${currency}${minPrice || 0} – ${currency}${maxPrice || "max"}`,
+            "bg-purple-100 text-purple-700",
+            "price"
+        );
+    }
+
+    if (hasFilters) {
+        activeFiltersContainer.innerHTML = html;
+        activeFiltersContainer.style.display = "flex";
+        attachRemoveFilterListeners();
+    } else {
+        activeFiltersContainer.innerHTML = "";
+        activeFiltersContainer.style.display = "none";
+    }
+};
+
+// ─────────────────────────────────────────────
+// LOADING STATE
+// ─────────────────────────────────────────────
+
+const filterForms             = getFilterForms();
+const resultsContainer        = document.getElementById("products-results");
+const activeFiltersContainer  = document.getElementById("active-filters-container");
+const paginationContainer     = document.getElementById("products-pagination");
+const loadingOverlay          = document.getElementById("filter-loading");
+const searchInput             = document.getElementById("products-search");
+const clearSearchBtn          = document.getElementById("clear-search");
+const sortSelect              = document.getElementById("products-sort");
+const viewGridBtn             = document.getElementById("view-grid-btn");
+const viewListBtn             = document.getElementById("view-list-btn");
+const clearFiltersBtn         = document.getElementById("clear-filters");
+const applyFiltersBtn         = document.getElementById("apply-mobile-filters");
+const filterBtn               = document.getElementById("mobile-filter-btn");
+const filterModal             = document.getElementById("mobile-filter-modal");
+const closeModalBtn           = document.getElementById("close-modal");
+const closeModalBtnAlt        = document.getElementById("close-modal-btn");
 
 const debounce = (fn, delay = 300) => {
     let timer;
@@ -108,197 +234,39 @@ const debounce = (fn, delay = 300) => {
 };
 
 const showLoading = () => {
-    if (loadingOverlay) {
-        loadingOverlay.classList.remove("hidden");
-    } else if (resultsContainer) {
+    if (loadingOverlay) loadingOverlay.classList.remove("hidden");
+    else if (resultsContainer)
         resultsContainer.classList.add("opacity-50", "pointer-events-none");
-    }
 };
 
 const hideLoading = () => {
-    if (loadingOverlay) {
-        loadingOverlay.classList.add("hidden");
-    } else if (resultsContainer) {
+    if (loadingOverlay) loadingOverlay.classList.add("hidden");
+    else if (resultsContainer)
         resultsContainer.classList.remove("opacity-50", "pointer-events-none");
-    }
 };
 
+// ─────────────────────────────────────────────
+// FORM SERIALISATION
+// ─────────────────────────────────────────────
+
+// ─── FIX: FormData only includes inputs that HAVE a name attribute.
+//          price-range-slider.js strips name="" when slider is untouched,
+//          which already prevents price params from leaking. serializeForm
+//          no longer needs to double-check — it just trusts what FormData gives.
 const serializeForm = (form) => {
     const formData = new FormData(form);
-    const params = new URLSearchParams();
-    const priceRange = form.querySelector("[data-price-range]");
-    const defaultMin = priceRange
-        ? parseFloat(priceRange.dataset.defaultMin)
-        : null;
-    const defaultMax = priceRange
-        ? parseFloat(priceRange.dataset.defaultMax)
-        : null;
-    const isPriceDirty = priceRange && priceRange.dataset.priceDirty === "true";
+    const params   = new URLSearchParams();
 
     for (const [key, value] of formData.entries()) {
         if (value === null || value === undefined || value === "") continue;
-
-        if (key === "min_price" || key === "max_price") {
-            // Never include price if user has not explicitly touched the slider
-            if (!isPriceDirty) continue;
-            // Never include price if it is still at its default bound
-            if (
-                key === "min_price" &&
-                defaultMin !== null &&
-                parseFloat(value) === defaultMin
-            )
-                continue;
-            if (
-                key === "max_price" &&
-                defaultMax !== null &&
-                parseFloat(value) === defaultMax
-            )
-                continue;
-        }
-
         params.append(key, value);
     }
     return params;
 };
 
-const getSubcategoryLabel = (value) => {
-    const input = document.querySelector(
-        `input[name="subcategory[]"][value="${value}"]`,
-    );
-    if (!input) return value;
-    const label = input.closest("label");
-    if (!label) return value;
-    const labelText = label.querySelector("span.ml-3");
-    return labelText ? labelText.textContent.trim() : value;
-};
-
-const updateActiveFilters = (url) => {
-    const urlObj = new URL(url, window.location.origin);
-    const params = urlObj.searchParams;
-    let html =
-        '<span class="text-sm font-medium text-gray-700">' +
-        trans("Active Filters:") +
-        "</span>";
-    let hasFilters = false;
-
-    // Brand filters
-    const brands = params.getAll("brand[]");
-    brands.forEach((brand) => {
-        html += `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-brand="${brand}">
-            <span class="capitalize">${brand.replace(/-/g, " ")}</span>
-            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="brand" data-filter-value="${brand}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </span>`;
-        hasFilters = true;
-    });
-
-    // Category filters
-    const categories = params.getAll("category[]");
-    categories.forEach((cat) => {
-        // Try to get the localized label for the category
-        let label = cat;
-        const input = document.querySelector(
-            `input[name="category[]"][value="${cat}"]`,
-        );
-        if (input) {
-            const labelElem = input.closest("label");
-            if (labelElem) {
-                // Try to find a span with the localized name, fallback to label text
-                const localizedSpan = labelElem.querySelector(
-                    "span.ml-3, span[data-localized]",
-                );
-                if (localizedSpan) {
-                    label = localizedSpan.textContent.trim();
-                } else {
-                    label = labelElem.textContent.trim();
-                }
-            }
-        }
-        html += `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-category="${cat}">
-            <span class="capitalize">${label}</span>
-            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="category" data-filter-value="${cat}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </span>`;
-        hasFilters = true;
-    });
-
-    // Subcategory filters
-    const subcategories = params.getAll("subcategory[]");
-    subcategories.forEach((subcat) => {
-        // Try to get the localized label for the subcategory
-        let label = getSubcategoryLabel(subcat);
-        html += `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-subcategory="${subcat}">
-            <span>Subcategory: ${label}</span>
-            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="subcategory" data-filter-value="${subcat}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </span>`;
-        hasFilters = true;
-    });
-
-    // Availability filters
-    const availability = params.getAll("availability[]");
-    availability.forEach((avail) => {
-        html += `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-availability="${avail}">
-            <span class="capitalize">${avail.replace(/_/g, " ")}</span>
-            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="availability" data-filter-value="${avail}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </span>`;
-        hasFilters = true;
-    });
-
-    // Rating filters
-    const ratings = params.getAll("rating[]");
-    ratings.forEach((rating) => {
-        html += `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-rating="${rating}">
-            <span>${rating} Star${rating != "1" ? "s" : ""} and up</span>
-            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="rating" data-filter-value="${rating}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </span>`;
-        hasFilters = true;
-    });
-
-    // Discount filters
-    const discounts = params.getAll("discount[]");
-    discounts.forEach((disc) => {
-        html += `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-discount="${disc}">
-            <span>${disc}% off or more</span>
-            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="discount" data-filter-value="${disc}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </span>`;
-        hasFilters = true;
-    });
-
-    // Price range filters
-    const minPrice = params.get("min_price");
-    const maxPrice = params.get("max_price");
-    console.log('Currency Symbol: ', window.CURRENCY_SYMBOL);
-    if (minPrice || maxPrice) {
-        html += `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-price="true">
-        <span>${window.CURRENCY_SYMBOL}${minPrice || 0} - ${window.CURRENCY_SYMBOL}${maxPrice || 5000}</span>
-        <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="price">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-    </span>`;
-        hasFilters = true;
-    }
-
-    if (activeFiltersContainer) {
-        if (hasFilters) {
-            activeFiltersContainer.innerHTML = html;
-            activeFiltersContainer.style.display = "flex";
-            attachRemoveFilterListeners();
-        } else {
-            activeFiltersContainer.innerHTML = "";
-            activeFiltersContainer.style.display = "none";
-        }
-    }
-};
+// ─────────────────────────────────────────────
+// FETCH & RENDER
+// ─────────────────────────────────────────────
 
 const fetchAndRender = async (url) => {
     if (!resultsContainer) return;
@@ -308,18 +276,17 @@ const fetchAndRender = async (url) => {
             headers: { "X-Requested-With": "XMLHttpRequest" },
         });
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-        const html = await res.text();
+
+        const html   = await res.text();
         const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const newResults = doc.getElementById("products-results");
+        const doc    = parser.parseFromString(html, "text/html");
+
+        const newResults    = doc.getElementById("products-results");
         const newPagination = doc.getElementById("products-pagination");
 
-        if (newResults && resultsContainer) {
-            resultsContainer.innerHTML = newResults.innerHTML;
-        }
-        if (newPagination && paginationContainer) {
+        if (newResults)    resultsContainer.innerHTML    = newResults.innerHTML;
+        if (newPagination && paginationContainer)
             paginationContainer.innerHTML = newPagination.innerHTML;
-        }
 
         updateActiveFilters(url);
         updateSidebarActiveState(url);
@@ -327,6 +294,7 @@ const fetchAndRender = async (url) => {
         resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
         console.error("Filter AJAX error:", error);
+        // ─── FIX: fall back gracefully to a hard navigation instead of silent failure
         window.location.href = url;
     } finally {
         hideLoading();
@@ -334,71 +302,84 @@ const fetchAndRender = async (url) => {
 };
 
 const submitFilters = (event) => {
-    const sourceForm =
-        event?.target?.closest("#filter-form") || getFilterForm();
-    const form = sourceForm || getFilterForm();
+    const sourceForm = event?.target?.closest("#filter-form") || getFilterForm();
+    const form       = sourceForm || getFilterForm();
     if (!form) return;
     if (event) event.preventDefault();
     syncFormsData(form);
-    autoExpandCheckedCategories(); // Auto-expand after syncing forms
+    autoExpandCheckedCategories();
     const params = serializeForm(form);
-    const url = `${form.action}?${params.toString()}`;
+    const url    = `${form.action}?${params.toString()}`;
     fetchAndRender(url);
 };
 
+// ─────────────────────────────────────────────
+// VIEW TOGGLE
+// ─────────────────────────────────────────────
+
 const setActiveView = (view) => {
     getFilterForms().forEach((form) => {
-        const formViewInput = form.querySelector('input[name="view"]');
-        if (formViewInput) {
-            formViewInput.value = view;
-        }
+        const input = form.querySelector('input[name="view"]');
+        if (input) input.value = view;
     });
+
     if (view === "list") {
-        if (viewListBtn) {
-            viewListBtn.classList.add("bg-primary", "text-white");
-            viewListBtn.classList.remove("hover:bg-gray-100");
-        }
-        if (viewGridBtn) {
-            viewGridBtn.classList.remove("bg-primary", "text-white");
-            viewGridBtn.classList.add("hover:bg-gray-100");
-        }
+        viewListBtn?.classList.add("bg-primary", "text-white");
+        viewListBtn?.classList.remove("hover:bg-gray-100");
+        viewGridBtn?.classList.remove("bg-primary", "text-white");
+        viewGridBtn?.classList.add("hover:bg-gray-100");
     } else {
-        if (viewGridBtn) {
-            viewGridBtn.classList.add("bg-primary", "text-white");
-            viewGridBtn.classList.remove("hover:bg-gray-100");
-        }
-        if (viewListBtn) {
-            viewListBtn.classList.remove("bg-primary", "text-white");
-            viewListBtn.classList.add("hover:bg-gray-100");
-        }
+        viewGridBtn?.classList.add("bg-primary", "text-white");
+        viewGridBtn?.classList.remove("hover:bg-gray-100");
+        viewListBtn?.classList.remove("bg-primary", "text-white");
+        viewListBtn?.classList.add("hover:bg-gray-100");
     }
 };
 
+// ─────────────────────────────────────────────
+// REMOVE FILTER CHIPS
+// ─────────────────────────────────────────────
+
 const attachRemoveFilterListeners = () => {
     document.querySelectorAll(".remove-filter").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
+        // ─── FIX: clone-replace to avoid duplicate event listeners being stacked
+        const fresh = btn.cloneNode(true);
+        btn.replaceWith(fresh);
+        fresh.addEventListener("click", (e) => {
             e.preventDefault();
-            const filterType = btn.dataset.filterType;
-            const filterValue = btn.dataset.filterValue;
-            const forms = document.querySelectorAll("#filter-form");
+            const filterType  = fresh.dataset.filterType;
+            const filterValue = fresh.dataset.filterValue;
 
-            forms.forEach((form) => {
+            document.querySelectorAll("#filter-form").forEach((form) => {
                 if (filterType === "price") {
-                    const minInput = form.querySelector(
-                        'input[name="min_price"]',
-                    );
-                    const maxInput = form.querySelector(
-                        'input[name="max_price"]',
-                    );
-                    if (minInput) minInput.value = "";
-                    if (maxInput) maxInput.value = "";
+                    // ─── FIX: also reset slider dirty-state and strip name attrs
+                    const priceRange = form.querySelector("[data-price-range]");
+                    if (priceRange) {
+                        priceRange.dataset.priceDirty = "false";
+                        const minI = priceRange.querySelector('[data-input="min"]');
+                        const maxI = priceRange.querySelector('[data-input="max"]');
+                        const minR = priceRange.querySelector('[data-range="min"]');
+                        const maxR = priceRange.querySelector('[data-range="max"]');
+                        const defMin = parseFloat(priceRange.dataset.defaultMin) || 0;
+                        const defMax = parseFloat(priceRange.dataset.defaultMax) || 5000;
+                        [minI, minR].forEach((el) => { if (el) { el.value = defMin; el.removeAttribute("name"); } });
+                        [maxI, maxR].forEach((el) => { if (el) { el.value = defMax; el.removeAttribute("name"); } });
+                        refreshSliderVisuals(priceRange);
+                    }
                 } else {
-                    const inputs = form.querySelectorAll(
-                        `input[name="${filterType}[]"]`,
-                    );
-                    inputs.forEach((input) => {
+                    form.querySelectorAll(`input[name="${filterType}[]"]`).forEach((input) => {
                         if (input.value === filterValue) {
                             input.checked = false;
+                            // ─── FIX: if removing a subcategory, update parent checkbox state
+                            if (filterType === "subcategory") {
+                                updateParentCategoryCheckbox(input.dataset.categorySlug, form);
+                            }
+                            // ─── FIX: if removing a category, uncheck all its subcategories too
+                            if (filterType === "category") {
+                                form.querySelectorAll(
+                                    `input[name="subcategory[]"][data-category-slug="${filterValue}"]`
+                                ).forEach((sub) => (sub.checked = false));
+                            }
                         }
                     });
                 }
@@ -408,16 +389,99 @@ const attachRemoveFilterListeners = () => {
     });
 };
 
-// Bind events
+// ─────────────────────────────────────────────
+// CATEGORY / SUBCATEGORY LOGIC
+// ─────────────────────────────────────────────
+
+// ─── FIX: extracted helper so any code path can call it
+function updateParentCategoryCheckbox(categorySlug, container = document) {
+    if (!categorySlug) return;
+    const parentCheckbox = container.querySelector(
+        `.category-checkbox[data-category-slug="${categorySlug}"]`
+    );
+    if (!parentCheckbox) return;
+    const allSubs     = container.querySelectorAll(`.subcategory-checkbox[data-category-slug="${categorySlug}"]`);
+    const checkedSubs = container.querySelectorAll(`.subcategory-checkbox[data-category-slug="${categorySlug}"]:checked`);
+    // ─── FIX: use indeterminate visually; fully checked only when ALL subs checked
+    parentCheckbox.checked       = allSubs.length > 0 && checkedSubs.length === allSubs.length;
+    parentCheckbox.indeterminate = checkedSubs.length > 0 && checkedSubs.length < allSubs.length;
+}
+
+const subCategoryCheckboxes = document.querySelectorAll(".subcategory-checkbox");
+subCategoryCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+        updateParentCategoryCheckbox(this.dataset.categorySlug);
+    });
+});
+
+const categoryCheckboxes = document.querySelectorAll(".category-checkbox");
+categoryCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+        const slug    = this.dataset.categorySlug;
+        const related = document.querySelectorAll(`.subcategory-checkbox[data-category-slug="${slug}"]`);
+
+        // ─── FIX: when unchecking a category, also uncheck ALL its subcategories
+        related.forEach((sub) => (sub.checked = this.checked));
+
+        const container = document.querySelector(`.subcategories-container[data-category-slug="${slug}"]`);
+        if (container) {
+            container.classList.toggle("hidden", !this.checked);
+            const toggleSvg = document.querySelector(`.toggle-subcategories[data-category-slug="${slug}"] svg`);
+            if (toggleSvg) toggleSvg.classList.toggle("rotate-180", this.checked);
+        }
+    });
+});
+
+const toggleButtons = document.querySelectorAll(".toggle-subcategories");
+toggleButtons.forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const slug = this.dataset.categorySlug;
+        const container = document.querySelector(`.subcategories-container[data-category-slug="${slug}"]`);
+        if (!container) return;
+        container.classList.toggle("hidden");
+        this.querySelector("svg")?.classList.toggle("rotate-180");
+    });
+});
+
+// ─────────────────────────────────────────────
+// AUTO-EXPAND CHECKED CATEGORIES
+// ─────────────────────────────────────────────
+
+function autoExpandCheckedCategories(container = document) {
+    // expand if any sub is checked
+    container.querySelectorAll(".subcategory-checkbox:checked").forEach((cb) => {
+        const slug = cb.dataset.categorySlug;
+        container.querySelectorAll(`.subcategories-container[data-category-slug="${slug}"]`)
+            .forEach((el) => el.classList.remove("hidden"));
+        container.querySelectorAll(`.toggle-subcategories[data-category-slug="${slug}"] svg`)
+            .forEach((svg) => svg.classList.add("rotate-180"));
+    });
+
+    // expand if parent category is checked
+    container.querySelectorAll(".category-checkbox:checked").forEach((cb) => {
+        const slug = cb.dataset.categorySlug;
+        container.querySelectorAll(`.subcategories-container[data-category-slug="${slug}"]`)
+            .forEach((el) => el.classList.remove("hidden"));
+        container.querySelectorAll(`.toggle-subcategories[data-category-slug="${slug}"] svg`)
+            .forEach((svg) => svg.classList.add("rotate-180"));
+    });
+}
+
+// ─────────────────────────────────────────────
+// FORM EVENT BINDINGS
+// ─────────────────────────────────────────────
+
 if (filterForms.length) {
     filterForms.forEach((form) => {
         form.addEventListener("submit", submitFilters);
 
-        // Auto-submit when any filter input changes
         form.addEventListener("change", (e) => {
-            const target = e.target;
-            if (!target) return;
-            if (target.matches("input, select")) {
+            if (!e.target) return;
+            // ─── FIX: ignore changes on the hidden range inputs (they fire during
+            //         slider drag and would cause duplicate AJAX requests)
+            if (e.target.matches('[data-range="min"], [data-range="max"]')) return;
+            if (e.target.matches("input, select")) {
                 syncFormsData(form);
                 submitFilters(e);
             }
@@ -425,31 +489,27 @@ if (filterForms.length) {
     });
 }
 
-// Sync all forms when any change
-document
-    .querySelectorAll("#filter-form input, #filter-form select")
-    .forEach((input) => {
-        input.addEventListener("change", (e) => {
-            const sourceForm =
-                e.target?.closest("#filter-form") || getFilterForm();
-            syncFormsData(sourceForm);
-        });
-    });
+// ─── FIX: removed the duplicate per-input change listeners that were also
+//         calling syncFormsData — the form-level listener above is enough.
 
-// Mobile filter modal controls
+// ─────────────────────────────────────────────
+// MOBILE FILTER MODAL
+// ─────────────────────────────────────────────
+
 const openModal = () => {
     if (!filterModal) return;
     syncFormsData(getFilterForm());
-    const modalContent = document.getElementById("modal-content");
     filterModal.classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
+    const modalContent = document.getElementById("modal-content");
     if (modalContent) {
-        requestAnimationFrame(() => {
-            modalContent.classList.remove("translate-y-full");
-        });
+        requestAnimationFrame(() => modalContent.classList.remove("translate-y-full"));
     }
-    // Auto-expand checked categories after modal is visible and forms are synced
-    setTimeout(() => autoExpandCheckedCategories(), 50);
+    // Refresh slider visuals AFTER the modal is visible (layout is available)
+    setTimeout(() => {
+        filterModal.querySelectorAll("[data-price-range]").forEach(refreshSliderVisuals);
+        autoExpandCheckedCategories(filterModal);
+    }, 60);
 };
 
 const closeModal = () => {
@@ -469,233 +529,129 @@ const closeModal = () => {
     }
 };
 
-if (filterBtn) {
-    filterBtn.addEventListener("click", openModal);
-}
-if (closeModalBtn) {
-    closeModalBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        closeModal();
-    });
-}
-if (closeModalBtnAlt) {
-    closeModalBtnAlt.addEventListener("click", (e) => {
-        e.preventDefault();
-        closeModal();
-    });
-}
-if (filterModal) {
-    filterModal.addEventListener("click", (e) => {
-        if (e.target === filterModal) {
-            closeModal();
-        }
-    });
-}
+filterBtn?.addEventListener("click", openModal);
+closeModalBtn?.addEventListener("click", (e) => { e.preventDefault(); closeModal(); });
+closeModalBtnAlt?.addEventListener("click", (e) => { e.preventDefault(); closeModal(); });
+filterModal?.addEventListener("click", (e) => { if (e.target === filterModal) closeModal(); });
+
+// ─────────────────────────────────────────────
+// SEARCH
+// ─────────────────────────────────────────────
 
 if (searchInput) {
-    searchInput.addEventListener(
-        "input",
-        debounce(() => {
-            // Toggle clear button visibility
-            if (clearSearchBtn) {
-                clearSearchBtn.classList.toggle("hidden", !searchInput.value);
-            }
-            submitFilters();
-        }, 350),
-    );
-}
-
-if (clearSearchBtn) {
-    clearSearchBtn.addEventListener("click", () => {
-        searchInput.value = "";
-        clearSearchBtn.classList.add("hidden");
+    searchInput.addEventListener("input", debounce(() => {
+        clearSearchBtn?.classList.toggle("hidden", !searchInput.value);
         submitFilters();
-    });
+    }, 350));
 }
 
-if (sortSelect) {
-    sortSelect.addEventListener("change", submitFilters);
-}
+clearSearchBtn?.addEventListener("click", () => {
+    searchInput.value = "";
+    clearSearchBtn.classList.add("hidden");
+    submitFilters();
+});
 
+// ─────────────────────────────────────────────
+// SORT
+// ─────────────────────────────────────────────
+
+sortSelect?.addEventListener("change", submitFilters);
+
+// ─────────────────────────────────────────────
+// CLEAR ALL FILTERS
+// ─────────────────────────────────────────────
+
+// ─── FIX: the old "Clear All" was an <a> tag that did a full page reload,
+//         losing JS state. We intercept the button here and do a clean reset.
 if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener("click", () => {
+    clearFiltersBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+
         document.querySelectorAll("#filter-form").forEach((form) => {
             form.reset();
-        });
-        document
-            .querySelectorAll(".subcategories-container")
-            .forEach((container) => {
-                container.classList.add("hidden");
-            });
-        if (searchInput) searchInput.value = "";
-        if (clearSearchBtn) clearSearchBtn.classList.add("hidden");
-        if (sortSelect) sortSelect.value = "newest";
-        const priceRange = document.getElementById("price-range");
-        if (priceRange) priceRange.value = 0;
-        document
-            .querySelectorAll('[data-input="min"], [data-input="max"]')
-            .forEach((input) => {
-                input.value = "";
-                input.removeAttribute("name");
-            });
-        document.querySelectorAll("[data-price-range]").forEach((container) => {
-            container.dataset.priceDirty = "false";
-        });
-        submitFilters();
-    });
-}
 
-if (applyFiltersBtn) {
-    applyFiltersBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        submitFilters();
-        setTimeout(() => closeModal(), 300);
-    });
-}
+            // Reset price slider to default bounds
+            const priceRange = form.querySelector("[data-price-range]");
+            if (priceRange) {
+                const defMin = parseFloat(priceRange.dataset.defaultMin) || 0;
+                const defMax = parseFloat(priceRange.dataset.defaultMax) || 5000;
+                priceRange.dataset.priceDirty = "false";
 
-if (viewGridBtn) {
-    viewGridBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        setActiveView("grid");
-        submitFilters();
-    });
-}
+                priceRange.querySelectorAll('[data-input="min"], [data-range="min"]')
+                    .forEach((el) => { el.value = defMin; el.removeAttribute("name"); });
+                priceRange.querySelectorAll('[data-input="max"], [data-range="max"]')
+                    .forEach((el) => { el.value = defMax; el.removeAttribute("name"); });
 
-if (viewListBtn) {
-    viewListBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        setActiveView("list");
-        submitFilters();
-    });
-}
-
-// Initialize view state from hidden input
-const initialViewInput = document.querySelector(
-    '#filter-form input[name="view"]',
-);
-if (initialViewInput) {
-    setActiveView(initialViewInput.value || "grid");
-}
-
-// Ensure loading overlay is hidden on page load
-if (loadingOverlay) {
-    loadingOverlay.classList.add("hidden");
-}
-
-// Category/subcategory helpers
-const subCategoryCheckboxes = document.querySelectorAll(
-    ".subcategory-checkbox",
-);
-subCategoryCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", function () {
-        const categorySlug = this.dataset.categorySlug;
-        const parentCheckbox = document.querySelector(
-            `.category-checkbox[data-category-slug="${categorySlug}"]`,
-        );
-        const allSubcategories = document.querySelectorAll(
-            `.subcategory-checkbox[data-category-slug="${categorySlug}"]`,
-        );
-        const checkedSubcategories = document.querySelectorAll(
-            `.subcategory-checkbox[data-category-slug="${categorySlug}"]:checked`,
-        );
-
-        if (!parentCheckbox) return;
-
-        if (
-            checkedSubcategories.length === allSubcategories.length &&
-            allSubcategories.length > 0
-        ) {
-            parentCheckbox.checked = true;
-        } else {
-            parentCheckbox.checked = false;
-        }
-    });
-});
-
-const categoryCheckboxes = document.querySelectorAll(".category-checkbox");
-categoryCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", function () {
-        const categorySlug = this.dataset.categorySlug;
-        const relatedSubCheckboxes = document.querySelectorAll(
-            `.subcategory-checkbox[data-category-slug="${categorySlug}"]`,
-        );
-        relatedSubCheckboxes.forEach((sub) => {
-            sub.checked = this.checked;
-        });
-
-        const container = document.querySelector(
-            `.subcategories-container[data-category-slug="${categorySlug}"]`,
-        );
-        if (container) {
-            if (this.checked) {
-                container.classList.remove("hidden");
-                const toggleBtn = document.querySelector(
-                    `.toggle-subcategories[data-category-slug="${categorySlug}"] svg`,
-                );
-                if (toggleBtn) toggleBtn.classList.add("rotate-180");
-            } else {
-                container.classList.add("hidden");
-                const toggleBtn = document.querySelector(
-                    `.toggle-subcategories[data-category-slug="${categorySlug}"] svg`,
-                );
-                if (toggleBtn) toggleBtn.classList.remove("rotate-180");
+                refreshSliderVisuals(priceRange);
             }
-        }
-    });
-});
+        });
 
-const toggleButtons = document.querySelectorAll(".toggle-subcategories");
-toggleButtons.forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        const categorySlug = this.dataset.categorySlug;
-        const container = document.querySelector(
-            `.subcategories-container[data-category-slug="${categorySlug}"]`,
+        // Collapse all subcategory containers
+        document.querySelectorAll(".subcategories-container").forEach((c) =>
+            c.classList.add("hidden")
         );
-        if (!container) return;
-        container.classList.toggle("hidden");
-        const svg = this.querySelector("svg");
-        if (svg) svg.classList.toggle("rotate-180");
+        document.querySelectorAll(".toggle-subcategories svg").forEach((svg) =>
+            svg.classList.remove("rotate-180")
+        );
+
+        if (searchInput) searchInput.value = "";
+        clearSearchBtn?.classList.add("hidden");
+        if (sortSelect) sortSelect.value = "newest";
+
+        submitFilters();
     });
+}
+
+// ─────────────────────────────────────────────
+// APPLY (MOBILE)
+// ─────────────────────────────────────────────
+
+applyFiltersBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    submitFilters();
+    setTimeout(closeModal, 300);
 });
 
-// Initialize remove filter buttons
-attachRemoveFilterListeners();
+// ─────────────────────────────────────────────
+// VIEW BUTTONS
+// ─────────────────────────────────────────────
 
-// Sidebar sync: Intercept sidebar category/subcategory clicks and sync with filter form
+viewGridBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    setActiveView("grid");
+    submitFilters();
+});
+
+viewListBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    setActiveView("list");
+    submitFilters();
+});
+
+// ─────────────────────────────────────────────
+// SIDEBAR CATEGORY / SUBCATEGORY LINKS
+// ─────────────────────────────────────────────
+
 document.querySelectorAll(".category-sidebar-link").forEach((link) => {
     link.addEventListener("click", (e) => {
         e.preventDefault();
         const categorySlug = link.dataset.categoryLink;
         const forms = document.querySelectorAll("#filter-form");
 
-        // First, uncheck all categories in all forms
         forms.forEach((form) => {
-            form.querySelectorAll('input[name="category[]"]').forEach(
-                (checkbox) => {
-                    checkbox.checked = false;
-                },
-            );
-        });
+            form.querySelectorAll('input[name="category[]"]').forEach((cb) => (cb.checked = false));
+            form.querySelectorAll('input[name="subcategory[]"]').forEach((cb) => (cb.checked = false));
 
-        // Then check the selected category and its subcategories
-        forms.forEach((form) => {
-            const categoryCheckbox = form.querySelector(
-                `input[name="category[]"][value="${categorySlug}"]`,
-            );
-            if (categoryCheckbox) {
-                categoryCheckbox.checked = true;
-            }
+            const cb = form.querySelector(`input[name="category[]"][value="${categorySlug}"]`);
+            if (cb) cb.checked = true;
 
+            // ─── FIX: also check all subcategories of the selected category
             form.querySelectorAll(
-                `input[name="subcategory[]"][data-category-slug="${categorySlug}"]`,
-            ).forEach((checkbox) => {
-                checkbox.checked = true;
-            });
+                `input[name="subcategory[]"][data-category-slug="${categorySlug}"]`
+            ).forEach((sub) => (sub.checked = true));
         });
 
-        // Submit the filter form
-        setTimeout(() => submitFilters(), 100);
+        setTimeout(submitFilters, 50);
     });
 });
 
@@ -703,85 +659,42 @@ document.querySelectorAll(".subcategory-sidebar-link").forEach((link) => {
     link.addEventListener("click", (e) => {
         e.preventDefault();
         const subcategorySlug = link.dataset.subcategorySlug;
-        const categorySlug = link.dataset.categorySlug;
-        const forms = document.querySelectorAll("#filter-form");
+        const categorySlug    = link.dataset.categorySlug;
+        const forms           = document.querySelectorAll("#filter-form");
 
-        // First, uncheck all categories and subcategories
         forms.forEach((form) => {
-            form.querySelectorAll('input[name="category[]"]').forEach(
-                (checkbox) => {
-                    checkbox.checked = false;
-                },
-            );
-            form.querySelectorAll('input[name="subcategory[]"]').forEach(
-                (checkbox) => {
-                    checkbox.checked = false;
-                },
-            );
+            form.querySelectorAll('input[name="category[]"]').forEach((cb) => (cb.checked = false));
+            form.querySelectorAll('input[name="subcategory[]"]').forEach((cb) => (cb.checked = false));
+
+            const catCb = form.querySelector(`input[name="category[]"][value="${categorySlug}"]`);
+            if (catCb) catCb.checked = true;
+
+            const subCb = form.querySelector(`input[name="subcategory[]"][value="${subcategorySlug}"]`);
+            if (subCb) subCb.checked = true;
         });
 
-        // Check the selected category and subcategory
-        forms.forEach((form) => {
-            const categoryCheckbox = form.querySelector(
-                `input[name="category[]"][value="${categorySlug}"]`,
-            );
-            if (categoryCheckbox) {
-                categoryCheckbox.checked = true;
-            }
-
-            const subcategoryCheckbox = form.querySelector(
-                `input[name="subcategory[]"][value="${subcategorySlug}"]`,
-            );
-            if (subcategoryCheckbox) {
-                subcategoryCheckbox.checked = true;
-            }
-        });
-
-        // Submit the filter form
-        setTimeout(() => submitFilters(), 100);
+        setTimeout(submitFilters, 50);
     });
 });
 
-// Auto-expand subcategories based on checked checkboxes
-function autoExpandCheckedCategories(container = document) {
-    // Auto-expand if any subcategory is checked
-    container
-        .querySelectorAll(".subcategory-checkbox:checked")
-        .forEach((checkbox) => {
-            const categorySlug = checkbox.dataset.categorySlug;
-            const subcatContainers = container.querySelectorAll(
-                `.subcategories-container[data-category-slug="${categorySlug}"]`,
-            );
-            subcatContainers.forEach((subcatContainer) => {
-                subcatContainer.classList.remove("hidden");
-            });
-            const toggleBtns = container.querySelectorAll(
-                `.toggle-subcategories[data-category-slug="${categorySlug}"] svg`,
-            );
-            toggleBtns.forEach((btn) => {
-                btn.classList.add("rotate-180");
-            });
-        });
+// ─────────────────────────────────────────────
+// INITIALISE ON LOAD
+// ─────────────────────────────────────────────
 
-    // Auto-expand if parent category is checked
-    container
-        .querySelectorAll(".category-checkbox:checked")
-        .forEach((checkbox) => {
-            const categorySlug = checkbox.dataset.categorySlug;
-            const subcatContainers = container.querySelectorAll(
-                `.subcategories-container[data-category-slug="${categorySlug}"]`,
-            );
-            subcatContainers.forEach((subcatContainer) => {
-                subcatContainer.classList.remove("hidden");
-            });
-            const toggleBtns = container.querySelectorAll(
-                `.toggle-subcategories[data-category-slug="${categorySlug}"] svg`,
-            );
-            toggleBtns.forEach((btn) => {
-                btn.classList.add("rotate-180");
-            });
-        });
-}
+// Wire remove-filter buttons that are already in the DOM
+attachRemoveFilterListeners();
 
-// Run auto-expand on page load
+// Set correct view-toggle visual state
+const initialViewInput = document.querySelector('#filter-form input[name="view"]');
+if (initialViewInput) setActiveView(initialViewInput.value || "grid");
+
+// Hide loading overlay (safety net)
+if (loadingOverlay) loadingOverlay.classList.add("hidden");
+
+// Auto-expand categories that are already checked (e.g. from URL params)
 autoExpandCheckedCategories();
+
+// Initialise indeterminate state for partially-checked categories
+document.querySelectorAll(".category-checkbox").forEach((cb) =>
+    updateParentCategoryCheckbox(cb.dataset.categorySlug)
+);

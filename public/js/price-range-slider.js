@@ -1,10 +1,10 @@
-(function() {
+(function () {
     'use strict';
 
     const priceRanges = document.querySelectorAll('[data-price-range]');
     if (!priceRanges.length) return;
 
-    const priceGap = 100; // Minimum distance between min and max
+    const priceGap = 100; // Minimum gap between min and max handles
 
     function debounce(fn, delay = 300) {
         let timer;
@@ -19,118 +19,166 @@
         const maxPriceInput = container.querySelector('[data-input="max"]');
         const minPriceRange = container.querySelector('[data-range="min"]');
         const maxPriceRange = container.querySelector('[data-range="max"]');
-        const sliderTrack = container.querySelector('[data-range-track]');
-        const rangeRoot = container.querySelector('[data-range-root]');
+        const sliderTrack   = container.querySelector('[data-range-track]');
+        const rangeRoot     = container.querySelector('[data-range-root]');
 
         if (!minPriceInput || !maxPriceInput || !minPriceRange || !maxPriceRange || !rangeRoot) return;
 
-        const form = container.closest('form');
-        const minLimit = parseInt(minPriceRange.min) || 0;
-        const maxLimit = parseInt(minPriceRange.max) || 5000;
-        const step = parseInt(minPriceRange.step) || 1;
+        const form     = container.closest('form');
+        const minLimit = parseFloat(minPriceRange.min) || 0;
+        const maxLimit = parseFloat(minPriceRange.max) || 5000;
+        const step     = parseFloat(minPriceRange.step) || 1;
+
         const defaultMin = Number.isFinite(parseFloat(container.dataset.defaultMin))
             ? parseFloat(container.dataset.defaultMin)
             : minLimit;
         const defaultMax = Number.isFinite(parseFloat(container.dataset.defaultMax))
             ? parseFloat(container.dataset.defaultMax)
             : maxLimit;
-        let priceDirty = false;
 
-        function clampToLimits(val) {
-            return Math.min(Math.max(val, minLimit), maxLimit);
+        // ─── FIX: strip name attributes up-front so page load never submits
+        //         untouched price values (also guards against duplicate-form sync issues)
+        minPriceInput.removeAttribute('name');
+        maxPriceInput.removeAttribute('name');
+
+        // ─────────────────────────────
+        // UTILITY
+        // ─────────────────────────────
+
+        function clamp(val, lo, hi) {
+            return Math.min(Math.max(val, lo), hi);
         }
 
+        // ─── FIX: snap relative to minLimit, NOT to zero.
+        //         When minLimit=119 and step=50, snapping to multiples of 50
+        //         (e.g. 8050) and then writing that into an <input type="range"
+        //         min="119" step="50">, the browser re-snaps the stored value to
+        //         119 + N*50 = 8069, causing the phantom +19 drift.
+        //         We always snap relative to the range's own origin (minLimit).
         function clampToStep(val) {
-            const snapped = Math.round(val / step) * step;
-            if (Math.abs(snapped - maxLimit) <= step / 2) return maxLimit;
-            if (Math.abs(snapped - minLimit) <= step / 2) return minLimit;
-            return clampToLimits(snapped);
+            const stepsFromMin = Math.round((val - minLimit) / step);
+            const snapped = minLimit + stepsFromMin * step;
+            // honour the exact limits so they're always reachable
+            if (snapped >= maxLimit - step / 2) return maxLimit;
+            if (snapped <= minLimit + step / 2) return minLimit;
+            return clamp(snapped, minLimit, maxLimit);
         }
 
         function updateVisuals() {
             if (!sliderTrack) return;
-            const minVal = parseInt(minPriceRange.value) || minLimit;
-            const maxVal = parseInt(maxPriceRange.value) || maxLimit;
-            const left = ((minVal - minLimit) / (maxLimit - minLimit)) * 100;
-            const right = 100 - ((maxVal - minLimit) / (maxLimit - minLimit)) * 100;
-            sliderTrack.style.left = left + "%";
-            sliderTrack.style.right = right + "%";
+            const minV = parseFloat(minPriceRange.value) || minLimit;
+            const maxV = parseFloat(maxPriceRange.value) || maxLimit;
+            const left  = ((minV - minLimit) / (maxLimit - minLimit)) * 100;
+            const right = 100 - ((maxV - minLimit) / (maxLimit - minLimit)) * 100;
+            sliderTrack.style.left  = left + '%';
+            sliderTrack.style.right = right + '%';
         }
 
-        const notifyFilters = debounce(() => {
-            if (!form) return;
-            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-            form.dispatchEvent(submitEvent);
-        }, 150);
+        // ─────────────────────────────
+        // DIRTY / NAME STATE
+        // ─────────────────────────────
 
         function setInputNames(enabled) {
             if (enabled) {
                 if (minPriceInput.dataset.name) minPriceInput.name = minPriceInput.dataset.name;
                 if (maxPriceInput.dataset.name) maxPriceInput.name = maxPriceInput.dataset.name;
-                return;
+            } else {
+                minPriceInput.removeAttribute('name');
+                maxPriceInput.removeAttribute('name');
             }
-
-            minPriceInput.removeAttribute('name');
-            maxPriceInput.removeAttribute('name');
         }
 
         function updateDirtyState(minVal, maxVal) {
-            const minMatches = Math.abs(minVal - defaultMin) <= step / 2;
-            const maxMatches = Math.abs(maxVal - defaultMax) <= step / 2;
-            const isDefault = minMatches && maxMatches;
-            if (isDefault) {
-                priceDirty = false;
+            const atDefault =
+                Math.abs(minVal - defaultMin) <= step / 2 &&
+                Math.abs(maxVal - defaultMax) <= step / 2;
+
+            if (atDefault) {
                 container.dataset.priceDirty = 'false';
                 setInputNames(false);
-                return;
+            } else {
+                container.dataset.priceDirty = 'true';
+                setInputNames(true);
             }
-
-            priceDirty = true;
-            container.dataset.priceDirty = 'true';
-            setInputNames(true);
         }
 
+        // ─────────────────────────────
+        // NOTIFY FILTER FORM
+        // ─────────────────────────────
+
+        const notifyFilters = debounce(() => {
+            if (!form) return;
+            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        }, 150);
+
+        // ─────────────────────────────
+        // SET VALUES
+        // ─────────────────────────────
+
         function setValues(minVal, maxVal, options = {}) {
+            // ─── FIX: snap BOTH values to the step grid (relative to minLimit)
+            //         BEFORE writing them to the DOM. Without this, the browser's
+            //         own step-snapping for <input type="range"> silently mutates
+            //         the stored value on the next read, causing drift like +19
+            //         when minLimit is not itself a multiple of step (e.g. 119 with step=50).
+            minVal = clampToStep(clamp(minVal, minLimit, maxLimit));
+            maxVal = clampToStep(clamp(maxVal, minLimit, maxLimit));
+
+            // Enforce minimum gap between thumbs
+            if (maxVal - minVal < priceGap) {
+                if (maxVal >= maxLimit) {
+                    minVal = clampToStep(Math.max(minLimit, maxVal - priceGap));
+                } else {
+                    maxVal = clampToStep(Math.min(maxLimit, minVal + priceGap));
+                }
+            }
+
             minPriceRange.value = minVal;
             maxPriceRange.value = maxVal;
             minPriceInput.value = minVal;
             maxPriceInput.value = maxVal;
+
             updateVisuals();
             updateDirtyState(minVal, maxVal);
-            if (!options.silent) {
-                notifyFilters();
-            }
+
+            if (!options.silent) notifyFilters();
         }
 
+        // ─────────────────────────────
+        // INPUT HANDLERS
+        // ─────────────────────────────
+
         function handleMinInputChange() {
-            let val = parseInt(minPriceInput.value);
-            if (Number.isNaN(val)) val = minLimit;
-            val = clampToLimits(val);
-            const maxVal = parseInt(maxPriceInput.value) || maxLimit;
-
-            if (maxVal - val < priceGap) val = maxVal - priceGap;
-            if (val < minLimit) val = minLimit;
-
+            let val    = parseFloat(minPriceInput.value);
+            if (isNaN(val)) val = minLimit;
+            const maxVal = parseFloat(maxPriceRange.value) || maxLimit;
             setValues(val, maxVal);
         }
 
         function handleMaxInputChange() {
-            let val = parseInt(maxPriceInput.value);
-            if (Number.isNaN(val)) val = maxLimit;
-            val = clampToLimits(val);
-            const minVal = parseInt(minPriceInput.value) || minLimit;
-
-            if (val - minVal < priceGap) val = minVal + priceGap;
-            if (val > maxLimit) val = maxLimit;
-
+            let val    = parseFloat(maxPriceInput.value);
+            if (isNaN(val)) val = maxLimit;
+            const minVal = parseFloat(minPriceRange.value) || minLimit;
             setValues(minVal, val);
         }
 
+        minPriceInput.addEventListener('change', handleMinInputChange);
+        maxPriceInput.addEventListener('change', handleMaxInputChange);
+
+        // ─── FIX: also handle `input` (live typing) so the slider track moves
+        //         as the user types, not only on blur
+        minPriceInput.addEventListener('input', debounce(handleMinInputChange, 400));
+        maxPriceInput.addEventListener('input', debounce(handleMaxInputChange, 400));
+
+        // ─────────────────────────────
+        // POINTER / DRAG HANDLERS
+        // ─────────────────────────────
+
         function getValueFromPointer(clientX) {
-            const rect = rangeRoot.getBoundingClientRect();
-            const percent = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-            const raw = minLimit + percent * (maxLimit - minLimit);
-            return clampToStep(clampToLimits(raw));
+            const rect    = rangeRoot.getBoundingClientRect();
+            const percent = clamp((clientX - rect.left) / rect.width, 0, 1);
+            const raw     = minLimit + percent * (maxLimit - minLimit);
+            return clampToStep(raw);
         }
 
         let activeThumb = null;
@@ -138,29 +186,27 @@
         function startDrag(e) {
             if (e.pointerType === 'mouse' && e.button !== 0) return;
             const pointerValue = getValueFromPointer(e.clientX);
-            const minVal = parseInt(minPriceRange.value) || minLimit;
-            const maxVal = parseInt(maxPriceRange.value) || maxLimit;
-            const distToMin = Math.abs(pointerValue - minVal);
-            const distToMax = Math.abs(pointerValue - maxVal);
-            activeThumb = distToMin <= distToMax ? 'min' : 'max';
+            const minVal       = parseFloat(minPriceRange.value) || minLimit;
+            const maxVal       = parseFloat(maxPriceRange.value) || maxLimit;
+            const distMin      = Math.abs(pointerValue - minVal);
+            const distMax      = Math.abs(pointerValue - maxVal);
+
+            // ─── FIX: when equidistant, prefer 'max' thumb so small gaps don't
+            //         lock the min thumb in place
+            activeThumb = distMin < distMax ? 'min' : 'max';
             updateActiveThumb(pointerValue);
             rangeRoot.setPointerCapture(e.pointerId);
         }
 
         function updateActiveThumb(pointerValue) {
-            let minVal = parseInt(minPriceRange.value) || minLimit;
-            let maxVal = parseInt(maxPriceRange.value) || maxLimit;
+            let minVal = parseFloat(minPriceRange.value) || minLimit;
+            let maxVal = parseFloat(maxPriceRange.value) || maxLimit;
 
             if (activeThumb === 'min') {
-                minVal = pointerValue;
-                if (maxVal - minVal < priceGap) minVal = maxVal - priceGap;
-                if (minVal < minLimit) minVal = minLimit;
+                setValues(pointerValue, maxVal);
             } else if (activeThumb === 'max') {
-                maxVal = pointerValue;
-                if (maxVal - minVal < priceGap) maxVal = minVal + priceGap;
-                if (maxVal > maxLimit) maxVal = maxLimit;
+                setValues(minVal, pointerValue);
             }
-            setValues(minVal, maxVal);
         }
 
         function onDrag(e) {
@@ -174,68 +220,53 @@
             rangeRoot.releasePointerCapture(e.pointerId);
         }
 
-        minPriceInput.addEventListener('change', handleMinInputChange);
-        maxPriceInput.addEventListener('change', handleMaxInputChange);
-
-        rangeRoot.addEventListener('pointerdown', startDrag);
-        rangeRoot.addEventListener('pointermove', onDrag);
-        rangeRoot.addEventListener('pointerup', endDrag);
+        rangeRoot.addEventListener('pointerdown',   startDrag);
+        rangeRoot.addEventListener('pointermove',   onDrag);
+        rangeRoot.addEventListener('pointerup',     endDrag);
         rangeRoot.addEventListener('pointercancel', endDrag);
 
-        // Strip name attributes before init to prevent change events during
-        // setup from accidentally submitting price values
-        minPriceInput.removeAttribute('name');
-        maxPriceInput.removeAttribute('name');
+        // ─────────────────────────────
+        // INITIALISE FROM URL / DEFAULTS
+        // ─────────────────────────────
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlMin = urlParams.has('min_price') ? parseFloat(urlParams.get('min_price')) : null;
-        const urlMax = urlParams.has('max_price') ? parseFloat(urlParams.get('max_price')) : null;
+        const urlParams     = new URLSearchParams(window.location.search);
+        const urlMin        = urlParams.has('min_price') ? parseFloat(urlParams.get('min_price')) : null;
+        const urlMax        = urlParams.has('max_price') ? parseFloat(urlParams.get('max_price')) : null;
         const hasPriceFilter = urlMin !== null || urlMax !== null;
 
-        let minVal = hasPriceFilter && urlMin !== null ? urlMin : (parseInt(minPriceRange.value) || minLimit);
-        let maxVal = hasPriceFilter && urlMax !== null ? urlMax : (parseInt(maxPriceRange.value) || maxLimit);
+        const initMin = hasPriceFilter && urlMin !== null ? urlMin : defaultMin;
+        const initMax = hasPriceFilter && urlMax !== null ? urlMax : defaultMax;
 
-        if (maxVal - minVal < priceGap) {
-            minVal = Math.max(minLimit, maxVal - priceGap);
-        }
+        // Use silent: true so we don't fire AJAX on page load
+        setValues(initMin, initMax, { silent: true });
 
-        minPriceRange.value = minVal;
-        maxPriceRange.value = maxVal;
-        minPriceInput.value = minVal;
-        maxPriceInput.value = maxVal;
-        updateVisuals();
-
-        if (hasPriceFilter) {
-            // User had an explicit price filter — mark dirty and restore names
-            updateDirtyState(minVal, maxVal);
-        } else {
-            // No price filter — keep names stripped, dirty = false
+        if (!hasPriceFilter) {
+            // Ensure names are stripped when there is no active price filter
             container.dataset.priceDirty = 'false';
+            setInputNames(false);
         }
     }
 
     priceRanges.forEach(setupPriceRange);
 
-    // Remove min_price/max_price from form submission if unchanged from default (works for both normal and AJAX submits)
-    function handlePriceRangeFormSubmit(e) {
-        var form = e.target;
-        var priceRange = form.querySelector('[data-price-range]');
-        if (!priceRange) return;
-        var minInput = priceRange.querySelector('[data-input="min"]');
-        var maxInput = priceRange.querySelector('[data-input="max"]');
-        var defaultMin = parseFloat(priceRange.dataset.defaultMin);
-        var defaultMax = parseFloat(priceRange.dataset.defaultMax);
-        var minVal = parseFloat(minInput.value);
-        var maxVal = parseFloat(maxInput.value);
-        if (minInput && Math.abs(minVal - defaultMin) < 0.01) {
-            minInput.name = '';
-        }
-        if (maxInput && Math.abs(maxVal - defaultMax) < 0.01) {
-            maxInput.name = '';
-        }
-    }
-    // Register submit guard immediately (DOMContentLoaded already fired when scripts load)
-    document.querySelectorAll('form').forEach(function(form) {
-        form.addEventListener('submit', handlePriceRangeFormSubmit, true);
+    // ─── Guard: strip price inputs before ANY form submit if they are at default.
+    //     This is the last-resort safety net for non-AJAX (full-page) submits.
+    document.querySelectorAll('form').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            const priceRange = form.querySelector('[data-price-range]');
+            if (!priceRange) return;
+
+            const minInput = priceRange.querySelector('[data-input="min"]');
+            const maxInput = priceRange.querySelector('[data-input="max"]');
+            const defMin   = parseFloat(priceRange.dataset.defaultMin);
+            const defMax   = parseFloat(priceRange.dataset.defaultMax);
+
+            if (minInput && Math.abs(parseFloat(minInput.value) - defMin) < 0.01) {
+                minInput.removeAttribute('name');
+            }
+            if (maxInput && Math.abs(parseFloat(maxInput.value) - defMax) < 0.01) {
+                maxInput.removeAttribute('name');
+            }
+        }, true); // capture phase so it runs before the form data is collected
     });
 })();
