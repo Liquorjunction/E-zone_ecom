@@ -64,32 +64,81 @@ $countActiveVariants = function ($products) {
                     <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
                     {{ statictranslations('Price Range') }}
                 </h3>
-                <div class="space-y-3" data-price-range data-default-min="{{ $minPrice }}" data-default-max="{{ $maxPrice }}" data-price-dirty="false">
-                    <div class="flex items-center justify-between text-sm text-gray-600">
-                        <span>{{ config('app.CURRENCY_SYMBOL') }} {{ $minPrice }}</span>
-                        <span>{{ config('app.CURRENCY_SYMBOL') }} {{ $maxPrice }}+</span>
-                    </div>
-                    <div class="relative pt-6 pb-3 touch-none" data-range-root>
-                        <div class="absolute w-full h-2 bg-gray-200 rounded-lg top-2"></div>
-                        <div data-range-track class="absolute h-2 bg-primary rounded-lg top-2"></div>
-                        <input type="range" min="{{ $minPrice }}" max="{{ $maxPrice }}" step="50"
-                            value="{{ request('min_price', $minPrice) }}"
-                            data-range="min"
-                            class="absolute w-full h-2 top-2 appearance-none bg-transparent rounded-lg pointer-events-none">
-                        <input type="range" min="{{ $minPrice }}" max="{{ $maxPrice }}" step="50"
-                            value="{{ request('max_price', $maxPrice) }}"
-                            data-range="max"
-                            class="absolute w-full h-2 top-2 appearance-none bg-transparent rounded-lg pointer-events-none">
+                {{--
+                    data-floor = absolute minimum (0 or DB floor)
+                    data-ceil  = maximum from DB (maxPrice)
+                    JS reads these — no step, no native range input, no snapping.
+                --}}
+                <div class="space-y-3"
+                     data-price-range
+                     data-floor="{{ 0 }}"
+                     data-ceil="{{ $maxPrice }}"
+                     data-default-min="{{ 0 }}"
+                     data-default-max="{{ $maxPrice }}"
+                     data-price-dirty="false">
+
+                    {{-- Static label row --}}
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <span>{{ config('app.CURRENCY_SYMBOL') }}0</span>
+                        <span>{{ config('app.CURRENCY_SYMBOL') }}{{ number_format($maxPrice) }}+</span>
                     </div>
 
-                    <div class="flex items-center gap-2 mt-3">
-                        <input type="number" placeholder="Min" data-input="min" data-name="min_price"
-                            value="{{ request('min_price') }}"
-                            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
-                        <span class="text-gray-400">-</span>
-                        <input type="number" placeholder="Max" data-input="max" data-name="max_price"
-                            value="{{ request('max_price') }}"
-                            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
+                    {{--
+                        Custom slider track.
+                        NO <input type="range"> — those cause native step-snapping.
+                        Two <div> thumbs are dragged via pointer events in JS.
+                    --}}
+                    <div class="relative h-10 flex items-center touch-none select-none w-full overflow-x-hidden" data-range-root>
+                            {{-- Grey background rail --}}
+                            <div class="absolute left-0 right-0 h-1.5 bg-gray-200 rounded-full w-full"></div>
+
+                            {{-- Coloured active track (JS sets left / right) --}}
+                            <div data-range-track
+                                class="absolute h-1.5 bg-primary rounded-full"
+                                style="left:0%;right:0%"></div>
+
+                        {{-- Min thumb --}}
+                        <div data-thumb="min"
+                            role="slider"
+                            aria-label="{{ statictranslations('Minimum price') }}"
+                            tabindex="0"
+                            class="absolute w-5 h-5 -translate-x-1/2 rounded-full bg-white border-2 border-primary shadow cursor-grab active:cursor-grabbing focus:outline-none focus:ring-2 focus:ring-primary/40 z-10"
+                            style="left:0%"></div>
+
+                        {{-- Max thumb --}}
+                        <div data-thumb="max"
+                            role="slider"
+                            aria-label="{{ statictranslations('Maximum price') }}"
+                            tabindex="0"
+                            class="absolute w-5 h-5 -translate-x-1/2 rounded-full bg-white border-2 border-primary shadow cursor-grab active:cursor-grabbing focus:outline-none focus:ring-2 focus:ring-primary/40 z-10"
+                            style="left:100%"></div>
+                    </div>
+
+                    {{-- Number inputs — free-form, validated on blur / Enter --}}
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-1 items-center bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 focus-within:border-primary">
+                            <span class="text-sm text-gray-500 mr-1 whitespace-nowrap">{{ config('app.CURRENCY_SYMBOL') }}</span>
+                            <input type="number"
+                                   min="0"
+                                   max="{{ $maxPrice }}"
+                                   placeholder="0"
+                                   data-input="min"
+                                   data-name="min_price"
+                                   value="{{ request('min_price', '') }}"
+                                   class="w-full bg-transparent border-none outline-none focus:ring-0 text-sm">
+                        </div>
+                        <span class="text-gray-300 font-light">—</span>
+                        <div class="flex flex-1 items-center bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 focus-within:border-primary">
+                            <span class="text-sm text-gray-500 mr-1 whitespace-nowrap">{{ config('app.CURRENCY_SYMBOL') }}</span>
+                            <input type="number"
+                                   min="0"
+                                   max="{{ $maxPrice }}"
+                                   placeholder="{{ $maxPrice }}"
+                                   data-input="max"
+                                   data-name="max_price"
+                                   value="{{ request('max_price', '') }}"
+                                   class="w-full bg-transparent border-none outline-none focus:ring-0 text-sm">
+                        </div>
                     </div>
                 </div>
             </div>

@@ -60,46 +60,25 @@ const syncFormsData = (sourceForm = getFilterForm()) => {
             targetPriceRange.dataset.priceDirty =
                 sourcePriceRange.dataset.priceDirty;
 
-            // ─── FIX: also copy raw min/max values into the hidden range inputs
-            //         so the slider track renders correctly in the modal.
+            // Sync number input values into the target slider container,
+            // then call its reset/repaint API if available.
             const sourceMin = sourcePriceRange.querySelector('[data-input="min"]');
             const sourceMax = sourcePriceRange.querySelector('[data-input="max"]');
             const targetMin = targetPriceRange.querySelector('[data-input="min"]');
             const targetMax = targetPriceRange.querySelector('[data-input="max"]');
-            const targetRangeMin = targetPriceRange.querySelector('[data-range="min"]');
-            const targetRangeMax = targetPriceRange.querySelector('[data-range="max"]');
-            if (sourceMin && targetMin && targetRangeMin) {
-                targetMin.value = sourceMin.value;
-                targetRangeMin.value = sourceMin.value;
-            }
-            if (sourceMax && targetMax && targetRangeMax) {
-                targetMax.value = sourceMax.value;
-                targetRangeMax.value = sourceMax.value;
-            }
+            if (sourceMin && targetMin) targetMin.value = sourceMin.value;
+            if (sourceMax && targetMax) targetMax.value = sourceMax.value;
 
-            // Trigger a visual refresh on the target slider if the helper exists
-            refreshSliderVisuals(targetPriceRange);
+            // Use public API to repaint the custom slider in the target form
+            if (typeof targetPriceRange._sliderCommitFromInputs === "function") {
+                targetPriceRange._sliderCommitFromInputs({ silent: true });
+            }
         }
     });
 };
 
-// ─── FIX: lightweight helper to repaint a slider track without full re-init.
-function refreshSliderVisuals(container) {
-    const minRange = container.querySelector('[data-range="min"]');
-    const maxRange = container.querySelector('[data-range="max"]');
-    const track    = container.querySelector('[data-range-track]');
-    if (!minRange || !maxRange || !track) return;
-
-    const min  = parseFloat(minRange.min) || 0;
-    const max  = parseFloat(minRange.max) || 5000;
-    const minV = parseFloat(minRange.value) || min;
-    const maxV = parseFloat(maxRange.value) || max;
-
-    const left  = ((minV - min) / (max - min)) * 100;
-    const right = 100 - ((maxV - min) / (max - min)) * 100;
-    track.style.left  = left  + "%";
-    track.style.right = right + "%";
-}
+// refreshSliderVisuals removed — new custom slider manages its own paint()
+// via container._sliderReset() public API.
 
 // ─────────────────────────────────────────────
 // ACTIVE FILTER BADGE HELPERS
@@ -352,19 +331,9 @@ const attachRemoveFilterListeners = () => {
 
             document.querySelectorAll("#filter-form").forEach((form) => {
                 if (filterType === "price") {
-                    // ─── FIX: also reset slider dirty-state and strip name attrs
                     const priceRange = form.querySelector("[data-price-range]");
-                    if (priceRange) {
-                        priceRange.dataset.priceDirty = "false";
-                        const minI = priceRange.querySelector('[data-input="min"]');
-                        const maxI = priceRange.querySelector('[data-input="max"]');
-                        const minR = priceRange.querySelector('[data-range="min"]');
-                        const maxR = priceRange.querySelector('[data-range="max"]');
-                        const defMin = parseFloat(priceRange.dataset.defaultMin) || 0;
-                        const defMax = parseFloat(priceRange.dataset.defaultMax) || 5000;
-                        [minI, minR].forEach((el) => { if (el) { el.value = defMin; el.removeAttribute("name"); } });
-                        [maxI, maxR].forEach((el) => { if (el) { el.value = defMax; el.removeAttribute("name"); } });
-                        refreshSliderVisuals(priceRange);
+                    if (priceRange && typeof priceRange._sliderReset === "function") {
+                        priceRange._sliderReset();
                     }
                 } else {
                     form.querySelectorAll(`input[name="${filterType}[]"]`).forEach((input) => {
@@ -478,9 +447,8 @@ if (filterForms.length) {
 
         form.addEventListener("change", (e) => {
             if (!e.target) return;
-            // ─── FIX: ignore changes on the hidden range inputs (they fire during
-            //         slider drag and would cause duplicate AJAX requests)
-            if (e.target.matches('[data-range="min"], [data-range="max"]')) return;
+            // Ignore changes on data-input elements mid-typing (blur/Enter handled by slider)
+            if (e.target.matches('[data-input="min"], [data-input="max"]')) return;
             if (e.target.matches("input, select")) {
                 syncFormsData(form);
                 submitFilters(e);
@@ -505,9 +473,11 @@ const openModal = () => {
     if (modalContent) {
         requestAnimationFrame(() => modalContent.classList.remove("translate-y-full"));
     }
-    // Refresh slider visuals AFTER the modal is visible (layout is available)
+    // Repaint slider thumbs AFTER the modal is visible (layout box is available)
     setTimeout(() => {
-        filterModal.querySelectorAll("[data-price-range]").forEach(refreshSliderVisuals);
+        filterModal.querySelectorAll("[data-price-range]").forEach((pr) => {
+            if (typeof pr._sliderCommitFromInputs === "function") pr._sliderCommitFromInputs({ silent: true });
+        });
         autoExpandCheckedCategories(filterModal);
     }, 60);
 };
@@ -570,20 +540,10 @@ if (clearFiltersBtn) {
         document.querySelectorAll("#filter-form").forEach((form) => {
             form.reset();
 
-            // Reset price slider to default bounds
-            const priceRange = form.querySelector("[data-price-range]");
-            if (priceRange) {
-                const defMin = parseFloat(priceRange.dataset.defaultMin) || 0;
-                const defMax = parseFloat(priceRange.dataset.defaultMax) || 5000;
-                priceRange.dataset.priceDirty = "false";
-
-                priceRange.querySelectorAll('[data-input="min"], [data-range="min"]')
-                    .forEach((el) => { el.value = defMin; el.removeAttribute("name"); });
-                priceRange.querySelectorAll('[data-input="max"], [data-range="max"]')
-                    .forEach((el) => { el.value = defMax; el.removeAttribute("name"); });
-
-                refreshSliderVisuals(priceRange);
-            }
+            // Reset custom price slider via its public API
+            form.querySelectorAll("[data-price-range]").forEach((pr) => {
+                if (typeof pr._sliderReset === "function") pr._sliderReset();
+            });
         });
 
         // Collapse all subcategory containers
