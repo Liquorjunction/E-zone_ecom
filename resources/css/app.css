@@ -1,3 +1,28 @@
+/* ═══════════════════════════════════════════════════════════════
+   UNIVERSAL SEARCH DROPDOWN — Scrollbar fix
+   ═══════════════════════════════════════════════════════════════ */
+#universal-search-results {
+    border-radius: 1rem; /* Match .rounded-2xl */
+    overflow: hidden;
+}
+#universal-search-results .max-h-96 {
+    overflow-y: auto;
+    border-radius: 0 0 1rem 1rem;
+}
+#universal-search-results::-webkit-scrollbar {
+    width: 4px;
+    background: #f5f5f5;
+    border-radius: 1rem;
+}
+#universal-search-results::-webkit-scrollbar-thumb {
+    background: #a0daf1;
+    border-radius: 1rem;
+}
+/* For Firefox */
+#universal-search-results {
+    scrollbar-width: thin;
+    scrollbar-color: #a0daf1 #f5f5f5;
+}
 /* Import the font */
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
