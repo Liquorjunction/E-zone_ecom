@@ -62,8 +62,8 @@
                                     <select class="select2-ajax browser-default form-control" data-allow-clear="true"
                                         data-error="#role-error-div" data-option-url="{{ route('admin.lists.roles') }}"
                                         data-placeholder="Select role" id="role" name="role">
-                                        @if (old('role', $admin->roles->first()->id ?? ''))
-                                            <option selected value="{{ old('role', $admin->roles->first()->id ?? '') }}">{{ $admin->roles->first()->name ?? 'Selected Role' }}</option>
+                                        @if (old('role', $admin->roles->first()->name ?? ''))
+                                            <option selected value="{{ old('role', $admin->roles->first()->name ?? '') }}">{{ $admin->roles->first()->name ?? 'Selected Role' }}</option>
                                         @endif
                                     </select>
                                     <div id="role-error-div"></div>
