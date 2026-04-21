@@ -1,28 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════
-   UNIVERSAL SEARCH DROPDOWN — Scrollbar fix
-   ═══════════════════════════════════════════════════════════════ */
-#universal-search-results {
-    border-radius: 1rem; /* Match .rounded-2xl */
-    overflow: hidden;
-}
-#universal-search-results .max-h-96 {
-    overflow-y: auto;
-    border-radius: 0 0 1rem 1rem;
-}
-#universal-search-results::-webkit-scrollbar {
-    width: 4px;
-    background: #f5f5f5;
-    border-radius: 1rem;
-}
-#universal-search-results::-webkit-scrollbar-thumb {
-    background: #a0daf1;
-    border-radius: 1rem;
-}
-/* For Firefox */
-#universal-search-results {
-    scrollbar-width: thin;
-    scrollbar-color: #a0daf1 #f5f5f5;
-}
 /* Import the font */
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
@@ -286,9 +261,9 @@ body {
    browsers then override with the more precise `clip` value.
    ═══════════════════════════════════════════════════════════════ */
 .carousel-track {
-    overflow: hidden;           /* Safari < 16 fallback */
-    overflow-x: clip;           /* Safari 16+, Chrome — precise horizontal clip */
-    overflow-y: visible;        /* let card hover lift bleed vertically */
+    overflow: hidden; /* Safari < 16 fallback */
+    overflow-x: clip; /* Safari 16+, Chrome — precise horizontal clip */
+    overflow-y: visible; /* let card hover lift bleed vertically */
     overflow-clip-margin: 4px;
     position: relative;
 }
@@ -622,11 +597,7 @@ body {
 .gradient-text {
     /* iOS FIX: rgba fallback — -webkit-text-fill-color with oklch is unreliable on
        older WebKit; the hex-based gradient is the safe fallback */
-    background: linear-gradient(
-        135deg,
-        #449bc3 0%,
-        #2d6b8a 100%
-    );
+    background: linear-gradient(135deg, #449bc3 0%, #2d6b8a 100%);
     background: linear-gradient(
         135deg,
         oklch(0.69 0.14 232.2) 0%,
@@ -796,7 +767,9 @@ input[type="email"]:focus {
 }
 .prose-content pre,
 .prose-content code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family:
+        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
 }
 .prose-content pre {
     background: #111827;
@@ -1000,10 +973,14 @@ body {
             top: var(--header-height) !important;
             width: min(20rem, 92vw) !important;
             height: calc(100vh - var(--header-height)) !important;
-            height: calc((var(--app-vh) * 100) - var(--header-height)) !important;
+            height: calc(
+                (var(--app-vh) * 100) - var(--header-height)
+            ) !important;
             height: calc(100dvh - var(--header-height)) !important;
             min-height: calc(100vh - var(--header-height)) !important;
-            min-height: calc((var(--app-vh) * 100) - var(--header-height)) !important;
+            min-height: calc(
+                (var(--app-vh) * 100) - var(--header-height)
+            ) !important;
             min-height: calc(100dvh - var(--header-height)) !important;
         }
 
@@ -1011,7 +988,9 @@ body {
             top: var(--header-height) !important;
             bottom: auto !important;
             height: calc(100vh - var(--header-height)) !important;
-            height: calc((var(--app-vh) * 100) - var(--header-height)) !important;
+            height: calc(
+                (var(--app-vh) * 100) - var(--header-height)
+            ) !important;
             height: calc(100dvh - var(--header-height)) !important;
         }
     }
@@ -1111,4 +1090,30 @@ body {
     height: calc(100dvh - var(--header-height)) !important;
     min-height: calc(100vh - var(--header-height)) !important;
     min-height: calc(100dvh - var(--header-height)) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UNIVERSAL SEARCH DROPDOWN — Scrollbar fix
+   ═══════════════════════════════════════════════════════════════ */
+#universal-search-results {
+    border-radius: 1rem; /* Match .rounded-2xl */
+    overflow: hidden;
+}
+#universal-search-results .max-h-96 {
+    overflow-y: auto;
+    border-radius: 0 0 1rem 1rem;
+}
+#universal-search-results::-webkit-scrollbar {
+    width: 4px;
+    background: #f5f5f5;
+    border-radius: 1rem;
+}
+#universal-search-results::-webkit-scrollbar-thumb {
+    background: #a0daf1;
+    border-radius: 1rem;
+}
+/* For Firefox */
+#universal-search-results {
+    scrollbar-width: thin;
+    scrollbar-color: #a0daf1 #f5f5f5;
 }
