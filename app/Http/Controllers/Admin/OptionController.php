@@ -254,7 +254,7 @@ class OptionController extends Controller
             $roleOptions = [];
             foreach ($roles as $role) {
                 $roleOptions[] = [
-                    'id' => $role->id,
+                    'id' => $role->name,
                     'text' => $role->name,
                 ];
             }
