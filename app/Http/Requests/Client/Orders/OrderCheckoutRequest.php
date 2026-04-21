@@ -52,7 +52,7 @@ class OrderCheckoutRequest extends FormRequest
             'save_address' => ['sometimes', 'boolean'],
 
             'firstName' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
-            'lastName' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
+            'lastName' => ['nullable', 'string', 'max:255'],
             'address' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
             'city' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
@@ -80,7 +80,7 @@ class OrderCheckoutRequest extends FormRequest
             'billing_address.phone' => ['nullable', 'string', 'max:20'],
 
             'billing_firstName' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
-            'billing_lastName' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
+            'billing_lastName' => ['nullable', 'string', 'max:255'],
             'billing_address_line' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
             'billing_city' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
             'billing_state' => ['nullable', 'string', 'max:255'],
@@ -113,13 +113,13 @@ class OrderCheckoutRequest extends FormRequest
     {
         return [
             'firstName.required_without_all' => 'First name is required.',
-            'lastName.required_without_all' => 'Last name is required.',
+            // 'lastName.required_without_all' => 'Last name is required.',
             'address.required_without_all' => 'Address is required.',
             'city.required_without_all' => 'City is required.',
             'country.required_without_all' => 'Country is required.',
 
             'billing_firstName.required_without_all' => 'Billing first name is required.',
-            'billing_lastName.required_without_all' => 'Billing last name is required.',
+            // 'billing_lastName.required_without_all' => 'Billing last name is required.',
             'billing_address_line.required_without_all' => 'Billing address is required.',
             'billing_city.required_without_all' => 'Billing city is required.',
             'billing_country.required_without_all' => 'Billing country is required.',
