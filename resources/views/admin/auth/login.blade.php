@@ -44,9 +44,12 @@
                               </div>
                            </div>
                            <div class="col-lg-12">
-                              <div class="form-group">
+                              <div class="form-group position-relative">
                                  <label for="password" class="form-label">Password</label>
                                  <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" aria-describedby="password" placeholder=" " required>
+                                 <button type="button" class="btn btn-sm position-absolute" style="top: 38px; right: 10px; z-index: 2;" onclick="togglePasswordVisibility()" tabindex="-1">
+                                    <span id="togglePasswordIcon" class="bi bi-eye"></span>
+                                 </button>
                                  @error('password')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                  @enderror
@@ -63,6 +66,21 @@
                            <button type="submit" class="btn btn-primary">Sign In</button>
                         </div>
                      </form>
+                     <script>
+                        function togglePasswordVisibility() {
+                           const passwordInput = document.getElementById('password');
+                           const icon = document.getElementById('togglePasswordIcon');
+                           if (passwordInput.type === 'password') {
+                              passwordInput.type = 'text';
+                              icon.classList.remove('fa-eye');
+                              icon.classList.add('fa-eye-slash');
+                           } else {
+                              passwordInput.type = 'password';
+                              icon.classList.remove('fa-eye-slash');
+                              icon.classList.add('fa-eye');
+                           }
+                        }
+                     </script>
                   </div>
                </div>
             </div>
