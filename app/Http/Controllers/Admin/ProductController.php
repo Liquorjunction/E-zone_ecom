@@ -488,7 +488,9 @@ class ProductController extends Controller
                     $data['view_url'] = $request->user()->can('products.read') ? route('admin.products.show', ['id' => $product->id]) : '';
                     $data['edit_url'] = $request->user()->can('products.update') ? route('admin.products.edit', ['id' => $product->id]) : '';
 
-                    if ($request->user()->can('products.delete') && isset($product->productVariants_count) && $product->productVariants_count == 0) {
+                    $variantsCount = $product->productVariants->count();
+
+                    if ($request->user()->can('products.delete') && $variantsCount === 0) {
                         $data['delete_url'] = route('admin.products.destroy', ['id' => $product->id]);
                     } else {
                         $data['delete_url'] = '';

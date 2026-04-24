@@ -130,7 +130,7 @@
         </svg>
         <span id="mobile-review-back-label" class="sr-only">Back</span>
       </button>
-      <h3 id="mobile-review-modal-title" class="text-lg font-bold text-gray-900">Write a Review</h3>
+      <h3 id="mobile-review-modal-title" class="text-lg font-bold text-gray-900">{{ statictranslations('Write a Review') }}</h3>
       <div class="w-10"></div>
     </div>
   </div>
