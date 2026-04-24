@@ -178,20 +178,20 @@ class InventoryService
                 }
             }
 
+            $pendingAddedTransactions = [];
             foreach ($newMap as $key => $new) {
                 if (!isset($oldMap[$key])) {
-                    $this->inventoryTransactionRepo->create([
-                        'inventory_id' => null,
+                    $pendingAddedTransactions[$key] = [
                         'type' => 'added',
                         'quantity' => $new['quantity'],
                         'rate' => $new['cost_price'] ?? 0,
                         'batch_no' => $batchNo,
                         'created_by' => $adminId,
-                        'description' => 'Batch item added' . ' (inward)',
+                        'description' => 'Batch item added (inward)',
                         'before_quantity' => 0,
                         'after_quantity' => $new['quantity'],
                         'quantity_change' => $new['quantity'],
-                    ]);
+                    ];
                 }
             }
 
@@ -202,16 +202,14 @@ class InventoryService
 
             foreach ($created as $inv) {
                 $key = $inv->product_id . '-' . ($inv->product_variant_id ?? '0');
-                if (!isset($oldMap[$key])) {
-                    InventoryTransaction::where([
-                        ['batch_no', '=', $batchNo],
-                        ['type', '=', 'added'],
-                        ['inventory_id', '=', null],
-                        ['quantity', '=', $inv->quantity],
-                        ['rate', '=', $inv->cost_price],
-                    ])->update(['inventory_id' => $inv->id]);
+                if (isset($pendingAddedTransactions[$key])) {
+                    $tData = $pendingAddedTransactions[$key];
+                    $tData['inventory_id'] = $inv->id;
+
+                    $this->inventoryTransactionRepo->create($tData);
                 }
             }
+
             return $created;
         });
     }
