@@ -21,7 +21,7 @@
                             $text2 = $stat->getTranslation('text2', $locale, false) ?? $stat->getTranslation('text2', 'en', false);
                         @endphp
                         <div class="section-card stat-item flex items-center justify-center gap-3 p-4 rounded-2xl
-                                    bg-secondary-bg border border-gray-100 hover:border-primary/25
+                                    bg-transparent border border-gray-100 hover:border-primary/25
                                     shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.10)]
                                     transition-all duration-300 cursor-default">
                             <div class="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
