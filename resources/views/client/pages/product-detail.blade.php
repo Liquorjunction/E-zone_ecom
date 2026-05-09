@@ -36,8 +36,8 @@
                             <img id="main-product-image"
                                 src="{{ $product->cover_image ? asset('storage/' . $product->cover_image) : asset('images/placeholder-product.jpg') }}"
                                 alt="{{ is_array($product->name) ? $product->name[app()->getLocale()] ?? ($product->name['en'] ?? '') : $product->name }}"
-                                class="w-full h-full object-contain p-1 rounded-3xl transition-opacity duration-200" loading="lazy"
-                                decoding="async">
+                                class="w-full h-full object-contain p-1 rounded-3xl transition-opacity duration-200"
+                                loading="lazy" decoding="async">
 
                             {{-- Badges top-left --}}
                             @php
@@ -80,7 +80,9 @@
                                     isset($wishlistVariantIds) && $variantId
                                         ? in_array($variantId, $wishlistVariantIds)
                                         : false;
-                                $compareVariantIds = collect(session('compare_variant_ids', []))->map(fn($id) => (int) $id)->all();
+                                $compareVariantIds = collect(session('compare_variant_ids', []))
+                                    ->map(fn($id) => (int) $id)
+                                    ->all();
                                 $isCompared = $variantId ? in_array((int) $variantId, $compareVariantIds, true) : false;
                             @endphp
                             <button type="button" data-product-variant-id="{{ $variantId }}"
@@ -95,15 +97,20 @@
                                 </svg>
                             </button>
 
-                            <button type="button" id="product-compare-btn" aria-label="{{ statictranslations('Compare product') }}"
-                                data-product-variant-id="{{ $variantId }}" data-init-compared="{{ $isCompared ? '1' : '0' }}"
+                            <button type="button" id="product-compare-btn"
+                                aria-label="{{ statictranslations('Compare product') }}"
+                                data-product-variant-id="{{ $variantId }}"
+                                data-init-compared="{{ $isCompared ? '1' : '0' }}"
                                 class="compare-btn absolute top-16 right-4 w-10 h-10 rounded-xl bg-white/90 backdrop-blur-sm shadow-md border border-gray-100 flex items-center justify-center hover:bg-blue-50 hover:border-blue-200 transition-all z-10 {{ $isCompared ? 'is-compared' : '' }}"
                                 @if (!$variantId) disabled @endif>
-                                <svg class="w-5 h-5 {{ $isCompared ? 'text-blue-700' : 'text-blue-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor" class="text-blue-200"/>
-                                    <rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor" class="{{ $isCompared ? 'text-blue-500' : 'text-blue-400' }}"/>
-                                    <rect x="3" y="7" width="7" height="13" rx="2" stroke="currentColor"/>
-                                    <rect x="14" y="3" width="7" height="17" rx="2" stroke="currentColor"/>
+                                <svg class="w-5 h-5 {{ $isCompared ? 'text-blue-700' : 'text-blue-500' }}" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <rect x="3" y="7" width="7" height="13" rx="2" fill="currentColor"
+                                        class="text-blue-200" />
+                                    <rect x="14" y="3" width="7" height="17" rx="2" fill="currentColor"
+                                        class="{{ $isCompared ? 'text-blue-500' : 'text-blue-400' }}" />
+                                    <rect x="3" y="7" width="7" height="13" rx="2" stroke="currentColor" />
+                                    <rect x="14" y="3" width="7" height="17" rx="2" stroke="currentColor" />
                                 </svg>
                             </button>
 
@@ -115,7 +122,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                 </svg>
-                                Zoom
+                                {{ statictranslations('Zoom') }}
                             </div>
                         </div>
 
@@ -189,9 +196,7 @@
                                 $totalStock = 0;
                                 if ($product->productVariants && $product->productVariants->count() > 0) {
                                     $totalStock = $product->productVariants->sum(function ($v) {
-                                        return method_exists($v, 'getSellableStock')
-                                            ? $v->getSellableStock()
-                                            : 0;
+                                        return method_exists($v, 'getSellableStock') ? $v->getSellableStock() : 0;
                                     });
                                 } else {
                                     $totalStock = 0;
@@ -243,7 +248,8 @@
                                                 {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($originalPrice, 2) }}
                                             </div>
                                             <div class="flex items-baseline gap-2">
-                                                <span class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
+                                                <span
+                                                    class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
                                                 <span id="product-price"
                                                     class="text-4xl font-extrabold text-red-600 tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
                                                     {{ number_format($finalPrice, 2) }}</span>
@@ -251,13 +257,15 @@
                                             @if ($discountPercentage > 0)
                                                 <span
                                                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold self-start">
-                                                    {{ statictranslations('Save') }} {{ number_format($discountPercentage, 0) }}%
+                                                    {{ statictranslations('Save') }}
+                                                    {{ number_format($discountPercentage, 0) }}%
                                                 </span>
                                             @endif
                                         @else
                                             @php $minPrice = $product->productVariants->min('price'); @endphp
                                             <div class="flex items-baseline gap-2">
-                                                <span class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
+                                                <span
+                                                    class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
                                                 <span id="product-price"
                                                     class="text-4xl font-extrabold text-primary tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
                                                     {{ number_format($minPrice, 2) }}</span>
@@ -274,7 +282,8 @@
                                             @if ($discountPercentage > 0)
                                                 <span
                                                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold self-start">
-                                                    {{ statictranslations('Save') }} {{ number_format($discountPercentage, 0) }}%
+                                                    {{ statictranslations('Save') }}
+                                                    {{ number_format($discountPercentage, 0) }}%
                                                 </span>
                                             @endif
                                         @else
@@ -283,7 +292,8 @@
                                                 {{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
                                         @endif
                                     @endif
-                                    <span class="text-xs text-gray-400 font-medium">{{ statictranslations('incl. taxes') }}</span>
+                                    <span
+                                        class="text-xs text-gray-400 font-medium">{{ statictranslations('incl. taxes') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -295,7 +305,8 @@
                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                         clip-rule="evenodd" />
                                 </svg>
-                                <span class="text-sm font-semibold text-emerald-800">{{ $discountName }} {{ statictranslations('applied') }}!</span>
+                                <span class="text-sm font-semibold text-emerald-800">{{ $discountName }}
+                                    {{ statictranslations('applied') }}!</span>
                             </div>
                         @endif
                     </div>
@@ -396,12 +407,15 @@
                     @if ($product->productVariants && $product->productVariants->count() > 0)
                         <div class="space-y-3">
                             <div class="flex items-center justify-between">
-                                <label class="text-sm font-bold text-gray-800 uppercase tracking-wide">{{ statictranslations('Select Variant') }}</label>
+                                <label
+                                    class="text-sm font-bold text-gray-800 uppercase tracking-wide">{{ statictranslations('Select Variant') }}</label>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach ($product->productVariants as $variant)
                                     @php
-                                        $qty = (int) (method_exists($variant, 'getSellableStock') ? $variant->getSellableStock() : 0);
+                                        $qty = (int) (method_exists($variant, 'getSellableStock')
+                                            ? $variant->getSellableStock()
+                                            : 0);
                                         $variantImagePaths = [];
                                         if ($variant->relationLoaded('images')) {
                                             $variantImagePaths = $variant->images
@@ -521,9 +535,7 @@
                         $totalStock = 0;
                         if ($product->productVariants && $product->productVariants->count() > 0) {
                             $totalStock = $product->productVariants->sum(function ($v) {
-                                return method_exists($v, 'getSellableStock')
-                                    ? $v->getSellableStock()
-                                    : 0;
+                                return method_exists($v, 'getSellableStock') ? $v->getSellableStock() : 0;
                             });
                         } else {
                             $totalStock = 0;
@@ -531,10 +543,8 @@
                     @endphp
                     @if ($totalStock > 0)
                         <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}"
-                            data-add-url="{{ route('cart.add') }}"
-                            data-buy-now-url="{{ route('cart.buyNow') }}"
-                            data-item-status-url="{{ route('cart.itemStatus') }}"
-                            class="space-y-3">
+                            data-add-url="{{ route('cart.add') }}" data-buy-now-url="{{ route('cart.buyNow') }}"
+                            data-item-status-url="{{ route('cart.itemStatus') }}" class="space-y-3">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="variant_id" id="cart-variant-id" value="">
@@ -553,7 +563,8 @@
                                     </button>
                                     <input type="number" name="quantity" id="cart-quantity" value="1"
                                         class="w-12 text-center text-base font-bold text-gray-900 border-x-2 border-gray-200 focus:outline-none bg-transparent"
-                                        min="1" @if ($totalStock > 0) max="{{ $totalStock }}" @endif aria-label="Quantity">
+                                        min="1" @if ($totalStock > 0) max="{{ $totalStock }}" @endif
+                                        aria-label="Quantity">
                                     <button type="button" id="qty-increase"
                                         class="w-11 h-11 text-gray-500 hover:text-primary hover:bg-gray-50 transition-colors rounded-r-xl flex items-center justify-center"
                                         aria-label="Increase quantity">
@@ -682,7 +693,8 @@
                     {{-- ── Description tab ── --}}
                     <div id="description-tab" class="tab-content active prose-content">
                         <div class="prose prose-lg max-w-none">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ statictranslations('About This Product') }}</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                                {{ statictranslations('About This Product') }}</h3>
                             <div class="text-gray-700 leading-relaxed">
                                 {!! is_array($product->description)
                                     ? $product->description[app()->getLocale()] ?? ($product->description['en'] ?? '')
@@ -803,7 +815,8 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
-                                            <p class="text-gray-400 font-medium">{{ statictranslations('No specifications available.') }}</p>
+                                            <p class="text-gray-400 font-medium">
+                                                {{ statictranslations('No specifications available.') }}</p>
                                         </div>
                                     @endif
                                 </div>
@@ -818,7 +831,8 @@
                         <div class="space-y-8">
                             <div class="bg-gray-50/60 border border-gray-200 rounded-2xl p-6 shadow-sm">
                                 <div class="flex items-center justify-between mb-6">
-                                    <h4 class="text-xl font-bold text-gray-900">{{ statictranslations('Customer Reviews') }}</h4>
+                                    <h4 class="text-xl font-bold text-gray-900">
+                                        {{ statictranslations('Customer Reviews') }}</h4>
                                     @auth('web')
                                         {{-- Write review button can go here --}}
                                     @else
@@ -839,7 +853,8 @@
                                         <div id="avgRatingStars"
                                             class="flex items-center justify-center text-amber-400 text-2xl mb-2">☆☆☆☆☆
                                         </div>
-                                        <div id="reviewCount" class="text-sm text-gray-500 font-medium">{{ statictranslations('Loading reviews...') }}
+                                        <div id="reviewCount" class="text-sm text-gray-500 font-medium">
+                                            {{ statictranslations('Loading reviews...') }}
                                         </div>
                                     </div>
                                     <div id="ratingBreakdown" class="space-y-2.5"></div>
@@ -880,7 +895,28 @@
                                     {{ statictranslations('Shipping Options') }}
                                 </h4>
                                 <div class="space-y-3">
-                                    @foreach ([['icon' => 'M5 13l4 4L19 7', 'color' => 'green', 'title' => 'Free Standard Shipping', 'desc' => 'Orders over $50 · 5–7 business days'], ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'blue', 'title' => 'Express Delivery', 'desc' => '$9.99 · 1–2 business days'], ['icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'color' => 'purple', 'title' => 'Same Day Delivery', 'desc' => '$14.99 · Select areas only']] as $opt)
+                                    @foreach ([
+                                                [
+                                                    'icon' => 'M5 13l4 4L19 7',
+                                                    'color' => 'green',
+                                                    'title' => 'Free Standard Shipping',
+                                                    'desc' => statictranslations('Orders over') . ' ' . config('app.currency_symbol') . '50 · 5–7 ' . statictranslations('business days'),
+                                                ],
+
+                                                [
+                                                    'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                    'color' => 'blue',
+                                                    'title' => 'Express Delivery',
+                                                    'desc' => statictranslations('Express Delivery') . ' ' . config('app.currency_symbol') . '9.99 · 1–2 ' . statictranslations('business days'),
+                                                ],
+
+                                                [
+                                                    'icon' => 'M13 10V3L4 14h7v7l9-11h-7z',
+                                                    'color' => 'purple',
+                                                    'title' => 'Same Day Delivery',
+                                                    'desc' => statictranslations('Same Day Delivery') . ' ' . config('app.currency_symbol') . '14.99 · Select areas only',
+                                                ],
+                                            ] as $opt)
                                         <div
                                             class="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
                                             <div
@@ -892,8 +928,10 @@
                                                 </svg>
                                             </div>
                                             <div>
-                                                <div class="text-sm font-bold text-gray-900">{{ $opt['title'] }}</div>
-                                                <div class="text-xs text-gray-500">{{ $opt['desc'] }}</div>
+                                                <div class="text-sm font-bold text-gray-900">
+                                                    {{ statictranslations($opt['title']) }}</div>
+                                                <div class="text-xs text-gray-500">{{ statictranslations($opt['desc']) }}
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -911,7 +949,28 @@
                                     {{ statictranslations('Returns & Exchanges') }}
                                 </h4>
                                 <div class="space-y-3">
-                                    @foreach ([['color' => 'orange', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => '30-Day Returns', 'desc' => 'Full refund on eligible items'], ['color' => 'indigo', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => 'Free Exchanges', 'desc' => 'Different size or color at no cost'], ['color' => 'green', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => 'Easy Process', 'desc' => 'Print label or drop off anywhere']] as $opt)
+                                    @foreach ([
+                                                [
+                                                    'color' => 'orange',
+                                                    'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                    'title' => '30-Day Returns',
+                                                    'desc' => statictranslations('Full refund on eligible items'),
+                                                ],
+
+                                                [
+                                                    'color' => 'indigo',
+                                                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                    'title' => 'Free Exchanges',
+                                                    'desc' => statictranslations('Different size or color at no cost'),
+                                                ],
+
+                                                [
+                                                    'color' => 'green',
+                                                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                    'title' => 'Easy Process',
+                                                    'desc' => statictranslations('Print label or drop off anywhere'),
+                                                ],
+                                            ] as $opt)
                                         <div
                                             class="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
                                             <div
@@ -923,8 +982,10 @@
                                                 </svg>
                                             </div>
                                             <div>
-                                                <div class="text-sm font-bold text-gray-900">{{ $opt['title'] }}</div>
-                                                <div class="text-xs text-gray-500">{{ $opt['desc'] }}</div>
+                                                <div class="text-sm font-bold text-gray-900">
+                                                    {{ statictranslations($opt['title']) }}</div>
+                                                <div class="text-xs text-gray-500">{{ statictranslations($opt['desc']) }}
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -943,7 +1004,8 @@
             @if ($relatedProducts && $relatedProducts->count() > 0)
                 <div class="mb-12">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">{{ statictranslations('You Might Also Like') }}</h2>
+                        <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">
+                            {{ statictranslations('You Might Also Like') }}</h2>
                         <div class="h-px flex-1 mx-6 bg-gray-200 hidden sm:block"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 sm:hidden">

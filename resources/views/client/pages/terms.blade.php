@@ -31,7 +31,6 @@
                             {{-- Header Section --}}
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-8 border-b border-gray-100">
                                 <div>
-                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ statictranslations('Terms and Conditions') }}</h1>
                                     <p class="text-gray-500">{{ statictranslations('Agreement between User and') }} {{ config('app.name') }}</p>
                                 </div>
 
@@ -39,7 +38,7 @@
                                 <div class="inline-flex items-center px-4 py-2 bg-gray-50 border border-gray-100 rounded-full">
                                     <div class="w-2 h-2 rounded-full bg-green-500 mr-2.5 animate-pulse"></div>
                                     <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-2">{{ statictranslations('Last Updated') }}:</span>
-                                    <span class="text-sm font-bold text-gray-900">{{ $terms->updated_at->locale(app()->getLocale())->translatedFormat('M d, Y') }}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{ $terms->updated_at->locale(app()->getLocale())->translatedFormat('d F Y') }}</span>
                                 </div>
                             </div>
 

@@ -161,7 +161,7 @@
         const submitBtn = document.getElementById('submitReview');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
+        submitBtn.textContent = trans('Submitting...');
 
         try {
             const formData = new FormData(reviewForm);
@@ -313,12 +313,12 @@
         const diffTime = Math.abs(now - date);
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays === 0) return 'Today';
-        if (diffDays === 1) return 'Yesterday';
-        if (diffDays < 7) return `${diffDays} days ago`;
-        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-        if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-        return `${Math.floor(diffDays / 365)} years ago`;
+        if (diffDays === 0) return trans('Today');
+        if (diffDays === 1) return trans('Yesterday');
+        if (diffDays < 7) return trans('{count} days ago').replace('{count}', diffDays);
+        if (diffDays < 30) return trans('{count} weeks ago').replace('{count}', Math.floor(diffDays / 7));
+        if (diffDays < 365) return trans('{count} months ago').replace('{count}', Math.floor(diffDays / 30));
+        return trans('{count} years ago').replace('{count}', Math.floor(diffDays / 365));
     }
 
     function updateReviewStats() {
@@ -338,7 +338,10 @@
 
         document.getElementById('avgRating').textContent = avgRating;
         document.getElementById('avgRatingStars').innerHTML = generateStars(Math.round(avgRating));
-        document.getElementById('reviewCount').textContent = `Based on ${allReviews.length} review${allReviews.length !== 1 ? 's' : ''}`;
+        const reviewCountText = allReviews.length === 1
+            ? trans('Based on {count} review').replace('{count}', allReviews.length)
+            : trans('Based on {count} reviews').replace('{count}', allReviews.length);
+        document.getElementById('reviewCount').textContent = reviewCountText;
         updateHeaderReviewSummary(avgRating, allReviews.length);
         updateReviewsTabCount(allReviews.length);
 

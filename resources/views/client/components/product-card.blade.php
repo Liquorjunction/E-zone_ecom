@@ -33,7 +33,7 @@
                 </div>
             @else
                 <div class="absolute top-3 right-3 {{ $badgeColor ?? 'bg-green-500' }} text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
-                    {{ $badge ?? 'NEW' }}
+                    {{ statictranslations($badge ?? 'NEW') }}
                 </div>
             @endif
         </div>
