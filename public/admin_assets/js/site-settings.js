@@ -125,6 +125,18 @@
             const formData = new FormData(this);
             const data = {};
 
+            function setNestedValue(target, path, value) {
+                let current = target;
+                for (let i = 0; i < path.length - 1; i++) {
+                    const part = path[i];
+                    if (!Object.prototype.hasOwnProperty.call(current, part) || typeof current[part] !== 'object' || current[part] === null) {
+                        current[part] = {};
+                    }
+                    current = current[part];
+                }
+                current[path[path.length - 1]] = value;
+            }
+
             for (const [key, value] of formData.entries()) {
                 if (key.endsWith('[]')) {
                     const normalizedKey = key.slice(0, -2);
@@ -138,17 +150,13 @@
                     continue;
                 }
 
+                if (key.startsWith('infotext[')) {
+                    const parts = key.replace(/\]/g, '').split('[');
+                    setNestedValue(data, parts, value);
+                    continue;
+                }
+
                 data[key] = value;
-            }
-
-            if (Object.prototype.hasOwnProperty.call(data, 'infotext[text]') || Object.prototype.hasOwnProperty.call(data, 'infotext[url]')) {
-                data.infotext = {
-                    text: data['infotext[text]'] || '',
-                    url: data['infotext[url]'] || ''
-                };
-
-                delete data['infotext[text]'];
-                delete data['infotext[url]'];
             }
 
             delete data._method;

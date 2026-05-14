@@ -41,7 +41,7 @@ function initAnnouncementBar(text, url) {
         track.classList.remove('running');
         track.style.removeProperty('--ann-dur');
 
-        // Probe width with one unstyled item
+        // First, measure the text width
         const probe = makeItem(false, false);
         track.appendChild(probe);
 
@@ -54,14 +54,19 @@ function initAnnouncementBar(text, url) {
                 track.innerHTML = '';
                 track.appendChild(makeItem(false, false));
             } else {
-                // Overflow → marquee mode
+                // Overflow → marquee mode with clone
                 track.innerHTML = '';
                 track.appendChild(makeItem(true, false));
-                track.appendChild(makeItem(true, true)); // one clone
+                track.appendChild(makeItem(true, true)); // clone for seamless loop
 
-                const dur = ((track.offsetWidth / 2) / PX_PER_SEC).toFixed(2);
-                track.style.setProperty('--ann-dur', dur + 's');
-                track.classList.add('running');
+                // Wait for items to render, then calculate animation duration
+                requestAnimationFrame(function () {
+                    const trackW = track.offsetWidth;
+                    const halfW = trackW / 2;
+                    const dur = (halfW / PX_PER_SEC).toFixed(2);
+                    track.style.setProperty('--ann-dur', dur + 's');
+                    track.classList.add('running');
+                });
             }
         });
     }

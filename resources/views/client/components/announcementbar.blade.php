@@ -1,12 +1,26 @@
 @php
     $announcement = ['text' => '', 'url' => ''];
     $rawInfoText = $siteContent->infotext ?? [];
+    $currentLocale = app()->getLocale();
 
     if (is_string($rawInfoText)) {
         $announcement['text'] = trim($rawInfoText);
     } elseif (is_array($rawInfoText)) {
         if (array_key_exists('text', $rawInfoText) || array_key_exists('url', $rawInfoText)) {
-            $announcement['text'] = trim((string) ($rawInfoText['text'] ?? ''));
+            $rawText = $rawInfoText['text'] ?? '';
+
+            if (is_array($rawText)) {
+                $announcement['text'] = trim((string) (
+                    $rawText[$currentLocale]
+                    ?? $rawText['en']
+                    ?? $rawText['fr']
+                    ?? $rawText['ar']
+                    ?? ''
+                ));
+            } else {
+                $announcement['text'] = trim((string) $rawText);
+            }
+
             $announcement['url']  = trim((string) ($rawInfoText['url']  ?? ''));
         } else {
             foreach ($rawInfoText as $value) {

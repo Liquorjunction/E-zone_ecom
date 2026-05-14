@@ -12,6 +12,26 @@ use Illuminate\Http\Request;
 
 class SiteSettingController extends Controller
 {
+    private function applySmartAutoTranslations(array $data): array
+    {
+        // Keep the same behavior pattern as BrandController: only fill missing FR/AR from EN.
+        if (
+            isset($data['infotext']['text'])
+            && is_array($data['infotext']['text'])
+            && !empty($data['infotext']['text']['en'])
+        ) {
+            if (empty($data['infotext']['text']['fr'])) {
+                $data['infotext']['text']['fr'] = gtrans($data['infotext']['text']['en'], 'fr');
+            }
+
+            if (empty($data['infotext']['text']['ar'])) {
+                $data['infotext']['text']['ar'] = gtrans($data['infotext']['text']['en'], 'ar');
+            }
+        }
+
+        return $data;
+    }
+
     public function index(SiteSettingsRepo $siteSettingsRepository)
     {
         $siteSetting = $siteSettingsRepository->getFirstSiteSetting();
@@ -23,6 +43,9 @@ class SiteSettingController extends Controller
         try {
             $data = $request->validated();
             $data['site_status'] = $data['site_status'] ?? 'active';
+
+            $data = $this->applySmartAutoTranslations($data);
+
             $siteSetting = $siteSettingsRepository->createSiteSetting($data);
             return response()->json([
                 'success' => true,
@@ -49,6 +72,7 @@ class SiteSettingController extends Controller
             }
 
             $data = $request->validated();
+            $data = $this->applySmartAutoTranslations($data);
             $siteSetting = $siteSettingsRepository->updateSiteSetting($id, $data);
 
             if (!$siteSetting) {
@@ -105,7 +129,7 @@ class SiteSettingController extends Controller
         }
     }
 
-     public function AddMap(AddMapSiteSettingRequest $request, SiteSettingsRepo $siteSettingsRepository)
+    public function AddMap(AddMapSiteSettingRequest $request, SiteSettingsRepo $siteSettingsRepository)
     {
         try {
             $id = $request->query('id');

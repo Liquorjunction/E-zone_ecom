@@ -10,25 +10,39 @@ class SiteSettingsRepository implements SiteSettingsRepositoryInterface
 {
     private function normalizeInfoText($rawInfoText): array
     {
-        $infotext = ['text' => '', 'url' => ''];
+        $infotext = [
+            'text' => ['en' => '', 'fr' => '', 'ar' => ''],
+            'url' => '',
+        ];
 
         if (is_string($rawInfoText)) {
-            $infotext['text'] = trim($rawInfoText);
+            $infotext['text']['en'] = trim($rawInfoText);
         } elseif (is_array($rawInfoText)) {
             if (array_key_exists('text', $rawInfoText) || array_key_exists('url', $rawInfoText)) {
-                $infotext['text'] = trim((string) ($rawInfoText['text'] ?? ''));
+                $rawText = $rawInfoText['text'] ?? '';
+
+                if (is_array($rawText)) {
+                    $infotext['text']['en'] = trim((string) ($rawText['en'] ?? ''));
+                    $infotext['text']['fr'] = trim((string) ($rawText['fr'] ?? ''));
+                    $infotext['text']['ar'] = trim((string) ($rawText['ar'] ?? ''));
+                } elseif (is_string($rawText)) {
+                    $infotext['text']['en'] = trim($rawText);
+                }
+
                 $infotext['url'] = trim((string) ($rawInfoText['url'] ?? ''));
             } else {
                 foreach ($rawInfoText as $value) {
                     if (is_string($value) && trim($value) !== '') {
-                        $infotext['text'] = trim($value);
+                        $infotext['text']['en'] = trim($value);
                         break;
                     }
                 }
             }
         }
 
-        return ($infotext['text'] === '' && $infotext['url'] === '') ? [] : $infotext;
+        $hasAnyText = $infotext['text']['en'] !== '' || $infotext['text']['fr'] !== '' || $infotext['text']['ar'] !== '';
+
+        return (! $hasAnyText && $infotext['url'] === '') ? [] : $infotext;
     }
 
     public function getFirstSiteSetting()
