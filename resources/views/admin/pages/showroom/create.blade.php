@@ -181,13 +181,14 @@
                                         <label class="form-label">Opening Hours</label>
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-sm">
-                                                <thead><tr><th>Day</th><th>Open Time</th><th>Close Time</th></tr></thead>
+                                                <thead><tr><th>Day</th><th>Open Time</th><th>Close Time</th><th>Closed</th></tr></thead>
                                                 <tbody>
                                                     @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $day)
                                                     <tr>
                                                         <td>{{ $day }}</td>
-                                                        <td><input type="time" name="opening_hours[{{ strtolower($day) }}][open]" class="form-control form-control-sm" value="09:00"></td>
-                                                        <td><input type="time" name="opening_hours[{{ strtolower($day) }}][close]" class="form-control form-control-sm" value="18:00"></td>
+                                                        <td><input type="time" name="opening_hours[{{ strtolower($day) }}][open]" class="form-control form-control-sm open-time" value="09:00"></td>
+                                                        <td><input type="time" name="opening_hours[{{ strtolower($day) }}][close]" class="form-control form-control-sm close-time" value="18:00"></td>
+                                                        <td><input type="checkbox" name="opening_hours[{{ strtolower($day) }}][is_closed]" class="form-check-input is-closed-check" value="1"></td>
                                                     </tr>
                                                     @endforeach
                                                 </tbody>
@@ -197,7 +198,13 @@
 
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Gallery Images</label>
-                                        <input type="file" name="gallery_images[]" class="form-control" multiple accept="image/*">
+                                        <input type="file" name="gallery_images[]" id="gallery_images_input" class="form-control" multiple accept="image/*">
+
+                                        <!-- New Gallery Images Preview -->
+                                        <div class="mt-3" id="new-gallery-preview" style="display: none;">
+                                            <h6>Images to Upload</h6>
+                                            <div class="d-flex flex-wrap gap-2" id="new-gallery"></div>
+                                        </div>
                                     </div>
                                 </div>
 

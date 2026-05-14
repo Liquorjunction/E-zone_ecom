@@ -109,19 +109,41 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="rounded-3xl border border-gray-100 bg-white/95 shadow-lg p-6 ez-fade-up ez-delay-1">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">Gallery</h3>
-                            <div class="grid grid-cols-2 gap-3">
-                                @forelse ($images as $image)
-                                    <div class="rounded-2xl overflow-hidden border border-gray-100">
-                                        <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $name }}"
-                                            class="w-full h-32 object-cover transition duration-500 hover:scale-105">
-                                    </div>
-                                @empty
-                                    <div class="col-span-full text-gray-600">No images available.</div>
-                                @endforelse
+                    <div class="rounded-3xl border border-gray-100 bg-white/95 shadow-lg p-6 ez-fade-up ez-delay-1">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Gallery</h3>
+
+                        <!-- Main Image Area -->
+                        @if ($images->count() > 0)
+                            <div class="aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center mb-4 relative group">
+                                <img id="main-product-image"
+                                    src="{{ asset('storage/' . $images->first()->image) }}"
+                                    alt="{{ $name }}"
+                                    class="w-full h-full object-cover"
+                                    style="cursor: zoom-in;">
+                                <div class="absolute bottom-4 right-4 text-xs font-semibold px-3 py-1 rounded-lg backdrop-blur-sm bg-black/55 text-white opacity-0 group-hover:opacity-100 transition">
+                                    Click to zoom
+                                </div>
                             </div>
-                        </div>
+
+                            <!-- Thumbnail Grid -->
+                            <div class="flex gap-3 overflow-x-auto pb-2">
+                                @foreach ($images as $image)
+                                    <button type="button"
+                                        class="thumb-button flex-shrink-0 w-16 h-16 rounded-lg border-2 border-gray-200 overflow-hidden transition-all duration-200 hover:border-primary/50"
+                                        data-image="{{ asset('storage/' . $image->image) }}"
+                                        aria-label="View image">
+                                        <img src="{{ asset('storage/' . $image->image) }}"
+                                            alt="{{ $name }}"
+                                            class="w-full h-full object-cover">
+                                    </button>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-100 flex items-center justify-center">
+                                <p class="text-gray-500">No images available</p>
+                            </div>
+                        @endif
+                    </div>
 
                         <div class="rounded-3xl border border-gray-100 bg-white/95 shadow-lg p-6 ez-fade-up ez-delay-2">
                             <h3 class="text-lg font-bold text-gray-900 mb-4">Opening Hours</h3>
@@ -201,4 +223,6 @@
             </div>
         </div>
     </div>
-@endsection
+
+    @push('scripts')
+        <script src="{{ asset('js/product-image-gallery.js') }}"></script>

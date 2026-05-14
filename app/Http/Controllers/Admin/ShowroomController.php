@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\Showrooms\ReadShowroomRequest;
 use App\Http\Requests\Admin\Showrooms\EditShowroomRequest;
 use App\Repositories\Admin\Interfaces\ShowroomRepositoryInterface as ShowroomRepo;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -19,7 +20,8 @@ class ShowroomController extends Controller
 {
     public function index()
     {
-        return view('admin.pages.showroom.index');
+        $showroomCount = Showrooms::count();
+        return view('admin.pages.showroom.index', compact('showroomCount'));
     }
 
     public function show(ReadShowroomRequest $request, ShowroomRepo $showroomRepo)
@@ -29,7 +31,7 @@ class ShowroomController extends Controller
             $showroom = Showrooms::findOrFail($id);
 
             // Fetch Everything for Showroom->Id
-            $showroom->images = ShowroomImages::where('showroom_id', $showroom->id)->get();
+            $showroom->load('images');
 
             return view('admin.pages.showroom.show', compact('showroom'));
         } catch (\Exception $e) {
@@ -40,12 +42,22 @@ class ShowroomController extends Controller
 
     public function create()
     {
+        // Check if a showroom already exists
+        if (Showrooms::count() >= 1) {
+            return redirect()->route('admin.showrooms.index')->withErrors(['error' => 'Maximum 1 showroom allowed. Please edit the existing showroom instead.']);
+        }
+
         return view('admin.pages.showroom.create');
     }
 
     public function store(StoreShowroomRequest $request, ShowroomRepo $showroomRepo)
     {
         try {
+            // Check if a showroom already exists
+            if (Showrooms::count() >= 1) {
+                return redirect()->back()->withErrors(['error' => 'Maximum 1 showroom allowed. Please edit the existing showroom instead.'])->withInput();
+            }
+
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
@@ -121,6 +133,14 @@ class ShowroomController extends Controller
     public function destroy(DestroyShowroomRequest $request, ShowroomRepo $showroomRepo)
     {
         try {
+            // Check if there's only 1 showroom
+            if (Showrooms::count() <= 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete the only showroom. At least 1 showroom must exist.',
+                ], 403);
+            }
+
             $id = $request->validated()['id'];
             $showroomRepo->deleteShowroom($id);
 
@@ -159,6 +179,7 @@ class ShowroomController extends Controller
     {
         try {
             $showrooms = $showroomRepo->getDataForDataTable($request->all());
+            $showroomCount = Showrooms::count();
 
             return DataTables::of($showrooms)
                 ->addIndexColumn()
@@ -171,10 +192,11 @@ class ShowroomController extends Controller
                 ->addColumn('description', function ($showroom) {
                     return Str::limit($showroom->getTranslation('description', 'en'), 50, '...');
                 })
-                ->addColumn('action', function ($showroom) use ($request) {
+                ->addColumn('action', function ($showroom) use ($request, $showroomCount) {
                     $data['view_url'] = $request->user()->can('showrooms.read') ? route('admin.showrooms.show', ['id' => $showroom->id]) : '';
                     $data['edit_url'] = $request->user()->can('showrooms.update') ? route('admin.showrooms.edit', ['id' => $showroom->id]) : '';
-                    $data['delete_url'] = $request->user()->can('showrooms.delete') ? route('admin.showrooms.destroy', ['id' => $showroom->id]) : '';
+                    // Only allow delete if there's more than 1 showroom
+                    $data['delete_url'] = ($request->user()->can('showrooms.delete') && $showroomCount > 1) ? route('admin.showrooms.destroy', ['id' => $showroom->id]) : '';
                     $data['id'] = $showroom->id;
 
                     return view('admin.partials.datatable-actions', $data)->render();
@@ -195,6 +217,30 @@ class ShowroomController extends Controller
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
+    }
+
+    public function deleteImage(ShowroomImages $image)
+    {
+        try {
+            // Delete file from storage
+            if ($image->image && Storage::disk('public')->exists($image->image)) {
+                Storage::disk('public')->delete($image->image);
+            }
+
+            // Delete database record
+            $image->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Image deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete image.',
+            ], 500);
         }
     }
 }

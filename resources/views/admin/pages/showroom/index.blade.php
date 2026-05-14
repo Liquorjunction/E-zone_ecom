@@ -12,7 +12,9 @@
                             <h4 class="card-title">Showroom List</h4>
                         </div>
                         @can('showrooms.create')
-                            <a href="{{ route('admin.showrooms.create') }}" class="btn btn-primary btn-sm">Add New Showroom</a>
+                            @if($showroomCount == 0)
+                                <a href="{{ route('admin.showrooms.create') }}" class="btn btn-primary btn-sm">Add New Showroom</a>
+                            @endif
                         @endcan
                     </div>
                     <div class="card-body">
@@ -24,7 +26,7 @@
                                     auth()->user()->can('showrooms.read');
                             @endphp
                             <table id="showroom-table" class="table table-striped data-table" style="width: 100%"
-                                data-route="{{ route('admin.showrooms.data') }}" data-has-action="{{ $hasAction ? 1 : 0 }}">
+                                data-route="{{ route('admin.showrooms.data') }}" data-has-action="{{ $hasAction ? 1 : 0 }}" data-showroom-count="{{ $showroomCount }}">
                                 <thead>
                                     <tr>
                                         <th>No</th>

@@ -235,6 +235,7 @@
                                                             <th>Day</th>
                                                             <th>Open Time</th>
                                                             <th>Close Time</th>
+                                                            <th>Closed</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -243,17 +244,23 @@
                                                                 $key = strtolower($day);
                                                                 $open = $hours[$key]['open'] ?? '09:00';
                                                                 $close = $hours[$key]['close'] ?? '18:00';
+                                                                $isClosed = $hours[$key]['is_closed'] ?? false;
                                                             @endphp
                                                             <tr>
                                                                 <td>{{ $day }}</td>
                                                                 <td><input type="time"
                                                                         name="opening_hours[{{ $key }}][open]"
-                                                                        class="form-control form-control-sm"
+                                                                        class="form-control form-control-sm open-time"
                                                                         value="{{ $open }}"></td>
                                                                 <td><input type="time"
                                                                         name="opening_hours[{{ $key }}][close]"
-                                                                        class="form-control form-control-sm"
+                                                                        class="form-control form-control-sm close-time"
                                                                         value="{{ $close }}"></td>
+                                                                <td><input type="checkbox"
+                                                                        name="opening_hours[{{ $key }}][is_closed]"
+                                                                        class="form-check-input is-closed-check"
+                                                                        value="1"
+                                                                        {{ $isClosed ? 'checked' : '' }}></td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
@@ -262,15 +269,36 @@
                                         </div>
 
                                         <div class="col-md-12 mb-3">
-                                            <label class="form-label">Gallery Images (Replaces Old Gallery if
-                                                Uploaded)</label>
-                                            <input type="file" name="gallery_images[]" class="form-control" multiple
+                                            <label class="form-label">Gallery Images</label>
+                                            <input type="file" name="gallery_images[]" id="gallery_images_input" class="form-control" multiple
                                                 accept="image/*">
-                                            <div class="d-flex flex-wrap mt-2">
-                                                @foreach ($showroom->images as $img)
-                                                    <div class="me-2 mb-2"><img src="{{ asset('storage/' . $img->image) }}"
-                                                            style="height:60px; border-radius:4px;"></div>
-                                                @endforeach
+
+                                            <!-- Existing Gallery Images -->
+                                            @if ($showroom->images->count() > 0)
+                                            <div class="mt-3">
+                                                <h6>Existing Gallery Images</h6>
+                                                <div class="d-flex flex-wrap gap-2" id="existing-gallery">
+                                                    @foreach ($showroom->images as $img)
+                                                        <div class="position-relative gallery-image-item" data-image-id="{{ $img->id }}">
+                                                            <img src="{{ asset('storage/' . $img->image) }}"
+                                                                style="height:60px; width:60px; object-fit:cover; border-radius:4px;">
+                                                            <button type="button" class="btn btn-sm btn-danger delete-existing-image"
+                                                                style="position: absolute; top: -8px; right: -8px; padding: 2px 6px; font-size: 10px;"
+                                                                data-image-id="{{ $img->id }}"
+                                                                data-url="{{ route('admin.showrooms.image.delete', $img->id) }}"
+                                                                title="Delete Image">
+                                                                ×
+                                                            </button>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            @endif
+
+                                            <!-- New Gallery Images Preview -->
+                                            <div class="mt-3" id="new-gallery-preview" style="display: none;">
+                                                <h6>New Images to Upload</h6>
+                                                <div class="d-flex flex-wrap gap-2" id="new-gallery"></div>
                                             </div>
                                         </div>
                                     </div>

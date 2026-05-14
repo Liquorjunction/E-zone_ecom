@@ -160,4 +160,134 @@ document.addEventListener("DOMContentLoaded", function () {
             switchTab(prevTabId);
         });
     });
+
+    // --- OPENING HOURS: Toggle time inputs based on closed checkbox ---
+    const closedCheckboxes = document.querySelectorAll(".is-closed-check");
+
+    function updateTimeInputState(checkbox) {
+        const row = checkbox.closest("tr");
+        if (row) {
+            const openInput = row.querySelector(".open-time");
+            const closeInput = row.querySelector(".close-time");
+
+            if (checkbox.checked) {
+                openInput.disabled = true;
+                closeInput.disabled = true;
+                openInput.style.opacity = "0.5";
+                closeInput.style.opacity = "0.5";
+            } else {
+                openInput.disabled = false;
+                closeInput.disabled = false;
+                openInput.style.opacity = "1";
+                closeInput.style.opacity = "1";
+            }
+        }
+    }
+
+    closedCheckboxes.forEach((checkbox) => {
+        // Set initial state on page load
+        updateTimeInputState(checkbox);
+
+        // Update state on checkbox change
+        checkbox.addEventListener("change", function () {
+            updateTimeInputState(this);
+        });
+    });
+
+    // --- GALLERY IMAGES: Handle new image preview and deletion ---
+    const galleryInput = document.getElementById("gallery_images_input");
+    const newGalleryPreview = document.getElementById("new-gallery-preview");
+    const newGalleryContainer = document.getElementById("new-gallery");
+    let selectedFiles = [];
+
+    if (galleryInput) {
+        galleryInput.addEventListener("change", function (e) {
+            selectedFiles = Array.from(this.files);
+            renderNewGalleryPreview();
+        });
+    }
+
+    function renderNewGalleryPreview() {
+        if (selectedFiles.length === 0) {
+            newGalleryPreview.style.display = "none";
+            newGalleryContainer.innerHTML = "";
+            return;
+        }
+
+        newGalleryPreview.style.display = "block";
+        newGalleryContainer.innerHTML = "";
+
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const imageDiv = document.createElement("div");
+                imageDiv.className = "position-relative";
+                imageDiv.innerHTML = `
+                    <img src="${event.target.result}"
+                        style="height:60px; width:60px; object-fit:cover; border-radius:4px;">
+                    <button type="button" class="btn btn-sm btn-danger delete-new-image"
+                        style="position: absolute; top: -8px; right: -8px; padding: 2px 6px; font-size: 10px;"
+                        data-index="${index}"
+                        title="Delete Image">
+                        ×
+                    </button>
+                `;
+                newGalleryContainer.appendChild(imageDiv);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Delete new image from preview
+    document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("delete-new-image")) {
+            e.preventDefault();
+            const index = parseInt(e.target.dataset.index);
+            selectedFiles.splice(index, 1);
+
+            // Update the file input with remaining files using DataTransfer
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            galleryInput.files = dataTransfer.files;
+
+            renderNewGalleryPreview();
+        }
+    });
+
+    // Delete existing image
+    document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("delete-existing-image")) {
+            e.preventDefault();
+            const btn = e.target;
+            const imageId = btn.dataset.imageId;
+            const url = btn.dataset.url;
+            const imageItem = btn.closest(".gallery-image-item");
+
+            if (confirm("Are you sure you want to delete this image?")) {
+                // Show loading state
+                btn.disabled = true;
+                btn.textContent = "...";
+
+                axios.delete(url, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                }).then(function (response) {
+                    // Remove the image from DOM
+                    imageItem.remove();
+
+                    // If no images left, hide the existing gallery section
+                    const existingGallery = document.getElementById("existing-gallery");
+                    if (existingGallery && existingGallery.children.length === 0) {
+                        const section = existingGallery.parentElement;
+                        section.remove();
+                    }
+                }).catch(function (error) {
+                    alert("Failed to delete image. Please try again.");
+                    btn.disabled = false;
+                    btn.textContent = "×";
+                });
+            }
+        }
+    });
 });
