@@ -1,5 +1,8 @@
 @extends('client.layouts.app')
 
+@section('title', statictranslations('Our Home Appliance Products, Ezone Retails Morocco'))
+@section('description', statictranslations('Our Home Appliance Products, Ezone Retails Morocco'))
+
 @section('content')
     <script>
             window.CURRENCY_SYMBOL = @json(config('app.CURRENCY_SYMBOL'));

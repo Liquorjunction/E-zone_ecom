@@ -154,18 +154,36 @@
 
                                     <div class="row">
                                         <div class="col-12">
-                                            <label>Info Texts (max 3)</label>
+                                            <label>Info Text</label>
                                         </div>
                                         @php
-                                            $infoTexts = is_array($siteSetting->infotext) ? $siteSetting->infotext : (empty($siteSetting->infotext) ? [] : [$siteSetting->infotext]);
-                                            $maxInfoTexts = 3;
+                                            $infoText = ['text' => '', 'url' => ''];
+                                            if (is_array($siteSetting->infotext)) {
+                                                if (array_key_exists('text', $siteSetting->infotext) || array_key_exists('url', $siteSetting->infotext)) {
+                                                    $infoText['text'] = (string) ($siteSetting->infotext['text'] ?? '');
+                                                    $infoText['url'] = (string) ($siteSetting->infotext['url'] ?? '');
+                                                } else {
+                                                    $legacyText = '';
+                                                    foreach ($siteSetting->infotext as $value) {
+                                                        if (is_string($value) && trim($value) !== '') {
+                                                            $legacyText = $value;
+                                                            break;
+                                                        }
+                                                    }
+                                                    $infoText['text'] = $legacyText;
+                                                }
+                                            } elseif (is_string($siteSetting->infotext) && trim($siteSetting->infotext) !== '') {
+                                                $infoText['text'] = $siteSetting->infotext;
+                                            }
                                         @endphp
-                                        @for ($i = 0; $i < $maxInfoTexts; $i++)
-                                            <div class="col-12 mb-2">
-                                                <input type="text" class="form-control infotext-input" name="infotext[]" maxlength="1000"
-                                                    value="{{ $infoTexts[$i] ?? '' }}" placeholder="Info Text #{{ $i + 1 }}">
-                                            </div>
-                                        @endfor
+                                        <div class="col-md-8 mb-2">
+                                            <input type="text" class="form-control infotext-input" name="infotext[text]" maxlength="1000"
+                                                value="{{ $infoText['text'] }}" placeholder="Info text">
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <input type="url" class="form-control" name="infotext[url]" maxlength="1000"
+                                                value="{{ $infoText['url'] }}" placeholder="https://example.com/offer">
+                                        </div>
                                     </div>
 
                                     <div class="row">

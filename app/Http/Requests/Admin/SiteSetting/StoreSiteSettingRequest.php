@@ -33,23 +33,36 @@ class StoreSiteSettingRequest extends FormRequest
             'twitter' => 'nullable|url|max:255',
             'instagram' => 'nullable|url|max:255',
             'infotext' => 'nullable|array',
-            'infotext.*' => 'nullable|string|max:1000',
+            'infotext.text' => 'nullable|string|max:1000',
+            'infotext.url' => 'nullable|url|max:1000',
             'site_status' => 'nullable|in:active,inactive',
         ];
     }
 
     protected function prepareForValidation()
     {
-        $infotext = $this->input('infotext', $this->input('infotext[]'));
+        $rawInfoText = $this->input('infotext', $this->input('infotext[]'));
 
-        if (is_string($infotext)) {
-            $infotext = [$infotext];
+        $infotext = ['text' => '', 'url' => ''];
+
+        if (is_string($rawInfoText)) {
+            $infotext['text'] = trim($rawInfoText);
+        } elseif (is_array($rawInfoText)) {
+            if (array_key_exists('text', $rawInfoText) || array_key_exists('url', $rawInfoText)) {
+                $infotext['text'] = trim((string) ($rawInfoText['text'] ?? ''));
+                $infotext['url'] = trim((string) ($rawInfoText['url'] ?? ''));
+            } else {
+                foreach ($rawInfoText as $value) {
+                    if (is_string($value) && trim($value) !== '') {
+                        $infotext['text'] = trim($value);
+                        break;
+                    }
+                }
+            }
         }
 
-        if (is_array($infotext)) {
-            $infotext = array_values(array_filter($infotext, static function ($value) {
-                return $value !== null && $value !== '';
-            }));
+        if ($infotext['text'] === '' && $infotext['url'] === '') {
+            $infotext = [];
         }
 
         $this->merge([
@@ -80,8 +93,10 @@ class StoreSiteSettingRequest extends FormRequest
             'twitter.max' => 'The twitter url may not be greater than 255 characters.',
             'instagram.url' => 'The instagram url must be a valid url.',
             'instagram.max' => 'The instagram url may not be greater than 255 characters.',
-            'infotext.string' => 'The info text must be a string.',
-            'infotext.max' => 'The info text may not be greater than 1000 characters.',
+            'infotext.text.string' => 'The info text must be a string.',
+            'infotext.text.max' => 'The info text may not be greater than 1000 characters.',
+            'infotext.url.url' => 'The info text URL must be a valid URL.',
+            'infotext.url.max' => 'The info text URL may not be greater than 1000 characters.',
             'site_status.in' => 'The site status must be active or inactive.',
         ];
     }

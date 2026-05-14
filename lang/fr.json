@@ -282,6 +282,7 @@
     "your@email.com": "your@email.com",
     "N/A": "N / A",
     "NEW": "NOUVEAU",
+    "Need quick help?": "Besoin d'aide rapide ?",
     "Need Help with Your Order?": "Besoin d'aide pour votre commande ?",
     "Network error. Please check your connection.": "Erreur réseau. Veuillez vérifier votre connexion.",
     "New Arrivals": "Nouveautés",
@@ -406,6 +407,11 @@
     "SALE": "VENTE",
     "SKU": "UGS",
     "SSL Protected": "Protégé SSL",
+    "Contact us directly on WhatsApp for faster support.": "Contactez-nous directement sur WhatsApp pour une assistance plus rapide.",
+    "Contact us on WhatsApp": "Contactez-nous sur WhatsApp",
+    "Hi, I need help with my order.": "Bonjour, j'ai besoin d'aide concernant ma commande.",
+    "WhatsApp": "WhatsApp",
+    "WhatsApp contact is currently unavailable.": "Le contact WhatsApp est actuellement indisponible.",
     "Same as shipping": "Identique à l'expédition",
     "Same as shipping address": "Identique à l'adresse de livraison",
     "Sample Product": "Exemple de produit",
@@ -1087,5 +1093,12 @@
     "Your cart is empty. Add items to continue to checkout.": "Votre panier est vide. Ajoutez des articles pour continuer vers le paiement.",
     "Authentication Required": "Authentification requise",
     "Please log in to continue to checkout.": "Veuillez vous connecter pour continuer vers le paiement.",
-    "Login to Checkout": "Connectez-vous pour le paiement"
+    "OR": "OU",
+    "Login to Checkout": "Connectez-vous pour le paiement",
+    "Ezone Retails Morocco, Sharp & Roch Home Appliances in Casablanca": "Ezone Retails Maroc, Électroménager Sharp et Roch à Casablanca",
+    "Our Home Appliance Products, Ezone Retails Morocco": "Nos produits électroménagers, Ezone Retails Maroc",
+    "About Ezone Retails, Casablanca": "À propos d'Ezone Retails, Casablanca",
+    "Contact Us, Ezone Retails Casablanca": "Contactez-nous, Ezone Retails Casablanca",
+    "Frequently Asked Questions, Ezone Retails": "Questions fréquentes, Ezone Retails",
+    "Our Showroom in Casablanca, Ezone Retails": "Notre showroom à Casablanca, Ezone Retails"
 }

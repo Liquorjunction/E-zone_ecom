@@ -377,7 +377,7 @@
                                             </li>
                                         @endcan
 
-                                        {{-- @can('showrooms.read')
+                                        @can('showrooms.read')
                                             <li class="nav-item">
                                                 <a class="nav-link {{ request()->routeIs('admin.showrooms.*') ? 'active' : '' }}"
                                                     href="{{ route('admin.showrooms.index') }}">
@@ -387,7 +387,7 @@
                                                     <span class="item-name">Showrooms</span>
                                                 </a>
                                             </li>
-                                        @endcan --}}
+                                        @endcan
 
                                         @can('privacy_policies.read')
                                             <li class="nav-item">

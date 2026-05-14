@@ -1,5 +1,8 @@
 @extends('client.layouts.app')
 
+@section('title', statictranslations('Contact Us, Ezone Retails Casablanca'))
+@section('description', statictranslations('Contact Us, Ezone Retails Casablanca'))
+
 @section('content')
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">
         <div class="container mx-auto px-4">
@@ -20,19 +23,36 @@
                     <div>
                         <h3 class="font-bold text-green-800 text-lg">{{ statictranslations('Message Received!') }}</h3>
                         <p class="text-green-700 text-sm mt-1">
-                            {{ statictranslations('Your ticket') }} <strong>#{{ session('ticket_number', 'ENQ-XXXXXX') }}</strong> {{ statictranslations('has been created.') }}
-                            {{ statictranslations("We've sent a confirmation to your email. Our team will respond within") }} <strong>{{ statictranslations('24–48 hours') }}</strong>.
+                            {{ statictranslations('Your ticket') }}
+                            <strong>#{{ session('ticket_number', 'ENQ-XXXXXX') }}</strong>
+                            {{ statictranslations('has been created.') }}
+                            {{ statictranslations("We've sent a confirmation to your email. Our team will respond within") }}
+                            <strong>{{ statictranslations('24–48 hours') }}</strong>.
                         </p>
                     </div>
                 </div>
             @endif
 
+            @php
+                $addressText = trim((string) ($siteContent->address ?? ''));
+                $phoneText = trim((string) ($siteContent->phone ?? ''));
+                $emailText = trim((string) ($siteContent->email ?? ''));
+                $whatsappNumber = preg_replace('/[^0-9]/', '', $phoneText);
+                $hasWhatsApp = $whatsappNumber !== '';
+                $whatsAppMessage = rawurlencode(statictranslations('Hi, I need help with my order.'));
+                $whatsAppUrl = $hasWhatsApp ? "https://wa.me/{$whatsappNumber}?text={$whatsAppMessage}" : null;
+
+                $hasAddress = $addressText !== '';
+                $hasPhone = $phoneText !== '';
+                $hasEmail = $emailText !== '';
+            @endphp
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {{-- ─── CONTACT FORM ─────────────────────────────────────────── --}}
                 <div class="lg:col-span-2">
-                    <form action="{{ route('contact.submit') }}" method="POST" enctype="multipart/form-data" id="contactForm"
-                        class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
+                    <form action="{{ route('contact.submit') }}" method="POST" enctype="multipart/form-data"
+                        id="contactForm" class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
                         @csrf
 
                         <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -48,7 +68,8 @@
                                     <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
                                         {{ statictranslations('Full Name') }} <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="text" id="name" name="name" required value="{{ old('name') }}"
+                                    <input type="text" id="name" name="name" required
+                                        value="{{ old('name') }}"
                                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 @error('name') border-red-400 @enderror"
                                         placeholder="{{ statictranslations('John Doe') }}">
                                     @error('name')
@@ -59,7 +80,8 @@
                                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
                                         {{ statictranslations('Email Address') }} <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="email" id="email" name="email" required value="{{ old('email') }}"
+                                    <input type="email" id="email" name="email" required
+                                        value="{{ old('email') }}"
                                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 @error('email') border-red-400 @enderror"
                                         placeholder="{{ statictranslations('you@example.com') }}">
                                     @error('email')
@@ -74,7 +96,8 @@
                                     <label for="mobile" class="block text-sm font-semibold text-gray-700 mb-2">
                                         {{ statictranslations('Mobile Number') }} <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="tel" id="mobile" name="mobile" required value="{{ old('mobile') }}"
+                                    <input type="tel" id="mobile" name="mobile" required
+                                        value="{{ old('mobile') }}"
                                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 @error('mobile') border-red-400 @enderror"
                                         placeholder="{{ statictranslations('+212 123 456 789') }}">
                                     @error('mobile')
@@ -88,25 +111,34 @@
                                     <div class="relative">
                                         <select id="subject" name="subject" required
                                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 appearance-none bg-white cursor-pointer @error('subject') border-red-400 @enderror">
-                                            <option value="" disabled {{ old('subject') ? '' : 'selected' }}>{{ statictranslations('— Select a subject —') }}</option>
+                                            <option value="" disabled {{ old('subject') ? '' : 'selected' }}>
+                                                {{ statictranslations('— Select a subject —') }}</option>
                                             <option value="product_inquiry"
-                                                {{ old('subject') === 'product_inquiry' ? 'selected' : '' }}>{{ statictranslations('Product Inquiry') }}</option>
+                                                {{ old('subject') === 'product_inquiry' ? 'selected' : '' }}>
+                                                {{ statictranslations('Product Inquiry') }}</option>
                                             <option value="order_status"
-                                                {{ old('subject') === 'order_status' ? 'selected' : '' }}>{{ statictranslations('Order Status') }}</option>
+                                                {{ old('subject') === 'order_status' ? 'selected' : '' }}>
+                                                {{ statictranslations('Order Status') }}</option>
                                             <option value="return_replacement"
-                                                {{ old('subject') === 'return_replacement' ? 'selected' : '' }}>{{ statictranslations('Return / Replacement') }}</option>
+                                                {{ old('subject') === 'return_replacement' ? 'selected' : '' }}>
+                                                {{ statictranslations('Return / Replacement') }}</option>
                                             <option value="warranty_claim"
-                                                {{ old('subject') === 'warranty_claim' ? 'selected' : '' }}>{{ statictranslations('Warranty Claim') }}</option>
+                                                {{ old('subject') === 'warranty_claim' ? 'selected' : '' }}>
+                                                {{ statictranslations('Warranty Claim') }}</option>
                                             <option value="installation_support"
-                                                {{ old('subject') === 'installation_support' ? 'selected' : '' }}>{{ statictranslations('Installation Support') }}</option>
+                                                {{ old('subject') === 'installation_support' ? 'selected' : '' }}>
+                                                {{ statictranslations('Installation Support') }}</option>
                                             <option value="technical_issue"
-                                                {{ old('subject') === 'technical_issue' ? 'selected' : '' }}>{{ statictranslations('Technical Issue') }}</option>
+                                                {{ old('subject') === 'technical_issue' ? 'selected' : '' }}>
+                                                {{ statictranslations('Technical Issue') }}</option>
                                             <option value="bulk_purchase"
-                                                {{ old('subject') === 'bulk_purchase' ? 'selected' : '' }}>{{ statictranslations('Bulk Purchase Inquiry') }}</option>
+                                                {{ old('subject') === 'bulk_purchase' ? 'selected' : '' }}>
+                                                {{ statictranslations('Bulk Purchase Inquiry') }}</option>
                                             <option value="complaint"
-                                                {{ old('subject') === 'complaint' ? 'selected' : '' }}>{{ statictranslations('Complaint') }}</option>
-                                            <option value="other"
-                                                {{ old('subject') === 'other' ? 'selected' : '' }}>{{ statictranslations('Other') }}</option>
+                                                {{ old('subject') === 'complaint' ? 'selected' : '' }}>
+                                                {{ statictranslations('Complaint') }}</option>
+                                            <option value="other" {{ old('subject') === 'other' ? 'selected' : '' }}>
+                                                {{ statictranslations('Other') }}</option>
                                         </select>
                                         <span
                                             class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -138,7 +170,9 @@
                                         value="{{ old('order_number') }}"
                                         class="w-full px-4 py-3 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-amber-100 focus:border-amber-400 transition-all duration-300 bg-white"
                                         placeholder="{{ statictranslations('e.g. ORD-20240001') }}">
-                                    <p class="text-amber-600 text-xs mt-2">{{ statictranslations('You can find your order number in your confirmation email or order history.') }}</p>
+                                    <p class="text-amber-600 text-xs mt-2">
+                                        {{ statictranslations('You can find your order number in your confirmation email or order history.') }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -158,7 +192,9 @@
                                         value="{{ old('product_sku') }}"
                                         class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-300 bg-white"
                                         placeholder="{{ statictranslations('e.g. SKU-ABC-12345') }}">
-                                    <p class="text-blue-600 text-xs mt-2">{{ statictranslations('Find the SKU on the product label, packaging, or your invoice.') }}</p>
+                                    <p class="text-blue-600 text-xs mt-2">
+                                        {{ statictranslations('Find the SKU on the product label, packaging, or your invoice.') }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -179,7 +215,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                                     {{ statictranslations('Attachments') }}
-                                    <span class="font-normal text-gray-400 ml-1">{{ statictranslations('(Invoice, product images, screenshots — max 5 files, 5 MB each)') }}</span>
+                                    <span
+                                        class="font-normal text-gray-400 ml-1">{{ statictranslations('(Invoice, product images, screenshots — max 5 files, 5 MB each)') }}</span>
                                 </label>
 
                                 <div id="dropZone"
@@ -201,9 +238,11 @@
                                         </div>
                                         <p
                                             class="text-sm text-gray-500 group-hover:text-primary transition-colors duration-300">
-                                            <span class="font-semibold">{{ statictranslations('Click to upload') }}</span> {{ statictranslations('or drag & drop') }}
+                                            <span class="font-semibold">{{ statictranslations('Click to upload') }}</span>
+                                            {{ statictranslations('or drag & drop') }}
                                         </p>
-                                        <p class="text-xs text-gray-400">{{ statictranslations('PNG, JPG, PDF, DOC, XLS up to 5 MB each') }}</p>
+                                        <p class="text-xs text-gray-400">
+                                            {{ statictranslations('PNG, JPG, PDF, DOC, XLS up to 5 MB each') }}</p>
                                     </div>
                                 </div>
 
@@ -233,6 +272,65 @@
                             </button>
                         </div>
                     </form>
+
+                    {{-- OR Divider (centered pill) --}}
+                    <div class="relative w-full my-8">
+                        <div class="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-px bg-gray-200"></div>
+                        <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inline-flex items-center bg-white border border-gray-200 rounded-full px-4 py-1 shadow-sm z-10">
+                            <span class="text-sm text-gray-500 uppercase tracking-wide">{{ statictranslations('OR') }}</span>
+                        </div>
+                    </div>
+
+                    {{-- WhatsApp Chat Floating Button (only on contact page) --}}
+                    <div class="flex justify-between mt-6 bg-white rounded-2xl border border-green-100 p-6 md:p-8 relative overflow-hidden">
+
+                        {{-- Decorative background icon --}}
+                        <div
+                            class="absolute top-0 right-0 w-28 h-28 bg-green-50 rounded-bl-full flex items-start justify-end p-4 pointer-events-none">
+                        </div>
+
+                        <div class="relative z-10">
+                            {{-- Header with icon circle --}}
+                            <div class="flex items-center gap-3 mb-2">
+                                <div
+                                    class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32"
+                                        height="32" fill="green">
+                                        <path
+                                            d="M16 3C9.373 3 4 8.373 4 15c0 2.637.86 5.13 2.484 7.2L4 29l7.016-2.293A12.93 12.93 0 0 0 16 27c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 22.5c-2.07 0-4.09-.57-5.83-1.65l-.415-.25-4.17 1.36 1.37-4.06-.27-.42A9.98 9.98 0 0 1 6 15c0-5.514 4.486-10 10-10s10 4.486 10 10-4.486 10-10 10zm5.13-7.47c-.28-.14-1.65-.81-1.9-.9-.25-.09-.43-.14-.61.14-.18.28-.7.9-.86 1.08-.16.18-.32.2-.6.07-.28-.14-1.18-.44-2.25-1.4-.83-.74-1.39-1.65-1.55-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.32.42-.48.14-.16.18-.28.28-.46.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.02-.22-.53-.45-.46-.61-.47-.16-.01-.34-.01-.52-.01-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.3 0 1.36.99 2.68 1.13 2.87.14.18 1.95 2.98 4.73 4.06.66.28 1.18.45 1.58.58.66.21 1.26.18 1.74.11.53-.08 1.65-.67 1.88-1.32.23-.65.23-1.2.16-1.32-.07-.12-.25-.18-.53-.32z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-semibold text-gray-900 leading-tight">
+                                        {{ statictranslations('Need quick help?') }}
+                                    </h2>
+                                </div>
+                            </div>
+
+                            <p class="text-sm text-gray-500 mt-3 mb-4 leading-relaxed">
+                                {{ statictranslations('Contact us directly on WhatsApp for faster support.') }}
+                            </p>
+                        </div>
+
+                        <div class="relative z-10">
+                            @if ($hasWhatsApp)
+                                <a href="{{ $whatsAppUrl }}" target="_blank" rel="noopener"
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 active:scale-95 text-white text-sm font-medium transition-all duration-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32"
+                                        height="32" fill="white">
+                                        <path
+                                            d="M16 3C9.373 3 4 8.373 4 15c0 2.637.86 5.13 2.484 7.2L4 29l7.016-2.293A12.93 12.93 0 0 0 16 27c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 22.5c-2.07 0-4.09-.57-5.83-1.65l-.415-.25-4.17 1.36 1.37-4.06-.27-.42A9.98 9.98 0 0 1 6 15c0-5.514 4.486-10 10-10s10 4.486 10 10-4.486 10-10 10zm5.13-7.47c-.28-.14-1.65-.81-1.9-.9-.25-.09-.43-.14-.61.14-.18.28-.7.9-.86 1.08-.16.18-.32.2-.6.07-.28-.14-1.18-.44-2.25-1.4-.83-.74-1.39-1.65-1.55-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.32.42-.48.14-.16.18-.28.28-.46.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.02-.22-.53-.45-.46-.61-.47-.16-.01-.34-.01-.52-.01-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.3 0 1.36.99 2.68 1.13 2.87.14.18 1.95 2.98 4.73 4.06.66.28 1.18.45 1.58.58.66.21 1.26.18 1.74.11.53-.08 1.65-.67 1.88-1.32.23-.65.23-1.2.16-1.32-.07-.12-.25-.18-.53-.32z" />
+                                    </svg>
+                                    {{ statictranslations('Contact us on WhatsApp') }}
+                                </a>
+                            @else
+                                <p class="text-sm text-gray-400 italic">
+                                    {{ statictranslations('WhatsApp contact is currently unavailable.') }}
+                                </p>
+                            @endif
+                        </div>
+
+                    </div>
                 </div>
 
                 {{-- ─── RIGHT SIDEBAR ────────────────────────────────────────────── --}}
@@ -245,15 +343,6 @@
                             {{ statictranslations('Contact Info') }}
                         </h2>
                         <div class="space-y-4">
-                            @php
-                                $addressText = trim((string) ($siteContent->address ?? ''));
-                                $phoneText = trim((string) ($siteContent->phone ?? ''));
-                                $emailText = trim((string) ($siteContent->email ?? ''));
-
-                                $hasAddress = $addressText !== '';
-                                $hasPhone = $phoneText !== '';
-                                $hasEmail = $emailText !== '';
-                            @endphp
                             <div class="flex items-start gap-3">
                                 <div
                                     class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -266,7 +355,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Address') }}</h3>
+                                    <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Address') }}
+                                    </h3>
                                     <p class="text-gray-600 text-sm mt-0.5">
                                         {{ $hasAddress ? $addressText : statictranslations('N/A') }}
                                     </p>
@@ -283,8 +373,9 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Phone') }}</h3>
-                                    @if($hasPhone)
-                                        <a href="tel:{{ preg_replace('/\s+/', '', $phoneText) }}" class="text-primary text-sm hover:underline">{{ $phoneText }}</a>
+                                    @if ($hasPhone)
+                                        <a href="tel:{{ preg_replace('/\s+/', '', $phoneText) }}"
+                                            class="text-primary text-sm hover:underline">{{ $phoneText }}</a>
                                     @else
                                         <p class="text-gray-600 text-sm">{{ statictranslations('N/A') }}</p>
                                     @endif
@@ -301,7 +392,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Email') }}</h3>
-                                    @if($hasEmail)
+                                    @if ($hasEmail)
                                         <a href="mailto:{{ $emailText }}"
                                             class="text-primary text-sm hover:underline">{{ $emailText }}</a>
                                     @else
@@ -319,8 +410,11 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Response Time') }}</h3>
-                                    <p class="text-gray-600 text-sm mt-0.5">{{ statictranslations('Within') }} <strong>{{ statictranslations('24–48 hours') }}</strong></p>
+                                    <h3 class="font-semibold text-gray-900 text-sm">
+                                        {{ statictranslations('Response Time') }}</h3>
+                                    <p class="text-gray-600 text-sm mt-0.5">{{ statictranslations('Within') }}
+                                        <strong>{{ statictranslations('24–48 hours') }}</strong>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -355,7 +449,10 @@
                             $mapIframeRaw = trim((string) ($siteContent?->map_iframe ?? ''));
                             $mapUrl = null;
                             if ($mapIframeRaw !== '') {
-                                if (stripos($mapIframeRaw, '<iframe') !== false && preg_match('/src=["\']([^"\']+)["\']/i', $mapIframeRaw, $iframeSrcMatch)) {
+                                if (
+                                    stripos($mapIframeRaw, '<iframe') !== false &&
+                                    preg_match('/src=["\']([^"\']+)["\']/i', $mapIframeRaw, $iframeSrcMatch)
+                                ) {
                                     $mapUrl = $iframeSrcMatch[1];
                                 } elseif (filter_var($mapIframeRaw, FILTER_VALIDATE_URL)) {
                                     $mapUrl = $mapIframeRaw;
@@ -380,11 +477,14 @@
                                     {{ statictranslations('Working Hours') }}
                                 </h3>
                                 <div class="space-y-1.5 text-sm">
-                                    @if(!empty($openingHoursData))
-                                        @foreach($weekdayOrder as $dayKey => $dayLabel)
+                                    @if (!empty($openingHoursData))
+                                        @foreach ($weekdayOrder as $dayKey => $dayLabel)
                                             @php
                                                 $dayInfo = $openingHoursData[$dayKey] ?? [];
-                                                $isClosed = filter_var($dayInfo['is_closed'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                                                $isClosed = filter_var(
+                                                    $dayInfo['is_closed'] ?? false,
+                                                    FILTER_VALIDATE_BOOLEAN,
+                                                );
                                                 $openTime = $dayInfo['open'] ?? null;
                                                 $closeTime = $dayInfo['close'] ?? null;
 
@@ -397,14 +497,16 @@
                                             @endphp
                                             <div class="flex justify-between items-center">
                                                 <span class="text-gray-600">{{ $dayLabel }}</span>
-                                                <span class="font-medium {{ $timeLabel === statictranslations('Closed') ? 'text-red-500' : 'text-gray-900' }}">{{ $timeLabel }}</span>
+                                                <span
+                                                    class="font-medium {{ $timeLabel === statictranslations('Closed') ? 'text-red-500' : 'text-gray-900' }}">{{ $timeLabel }}</span>
                                             </div>
                                         @endforeach
                                     @else
-                                        @foreach($weekdayOrder as $dayLabel)
+                                        @foreach ($weekdayOrder as $dayLabel)
                                             <div class="flex justify-between items-center">
                                                 <span class="text-gray-600">{{ $dayLabel }}</span>
-                                                <span class="font-medium text-gray-500">{{ statictranslations('N/A') }}</span>
+                                                <span
+                                                    class="font-medium text-gray-500">{{ statictranslations('N/A') }}</span>
                                             </div>
                                         @endforeach
                                     @endif
@@ -423,14 +525,14 @@
                                 </h3>
                                 <div
                                     class="aspect-video bg-gray-200 rounded-xl overflow-hidden relative group cursor-pointer">
-                                    @if(!empty($mapUrl))
-                                        <iframe
-                                            src="{{ $mapUrl }}"
-                                            class="w-full h-full border-0" allowfullscreen="" loading="lazy"
-                                            referrerpolicy="no-referrer-when-downgrade" title="{{ statictranslations('Showroom Location') }}">
+                                    @if (!empty($mapUrl))
+                                        <iframe src="{{ $mapUrl }}" class="w-full h-full border-0"
+                                            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                                            title="{{ statictranslations('Showroom Location') }}">
                                         </iframe>
                                     @else
-                                        <div class="w-full h-full flex items-center justify-center text-sm text-gray-600 bg-gray-100">
+                                        <div
+                                            class="w-full h-full flex items-center justify-center text-sm text-gray-600 bg-gray-100">
                                             {{ statictranslations('Map not available (N/A)') }}
                                         </div>
                                     @endif
@@ -449,4 +551,3 @@
 @push('scripts')
     <script src="{{ asset('js/contact.js') }}"></script>
 @endpush
-

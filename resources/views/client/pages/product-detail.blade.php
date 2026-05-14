@@ -1,5 +1,19 @@
 @extends('client.layouts.app')
 
+@php
+    $metaProductName = is_array($product->name) ? ($product->name[app()->getLocale()] ?? ($product->name['en'] ?? '')) : $product->name;
+    $discountInfoForMeta = method_exists($product, 'getDiscountInfo') ? $product->getDiscountInfo() : [];
+    $metaFinalPrice = $discountInfoForMeta['final_price'] ?? ($product->productVariants && $product->productVariants->count() ? $product->productVariants->first()->price : ($product->price ?? 0));
+    $metaPriceText = number_format($metaFinalPrice, 2);
+    $metaTitle = $metaProductName . ', ' . $metaPriceText . ' ' . config('app.CURRENCY_SYMBOL') . ', Ezone Retails';
+    $metaDescription = trim(strip_tags(is_array($product->description) ? ($product->description[app()->getLocale()] ?? ($product->description['en'] ?? '')) : ($product->description ?? '')));
+    if (strlen($metaDescription) > 160) {
+        $metaDescription = \Illuminate\Support\Str::limit($metaDescription, 157, '...');
+    }
+@endphp
+
+@section('title', $metaTitle)
+@section('description', $metaDescription)
 
 @section('content')
     <script>

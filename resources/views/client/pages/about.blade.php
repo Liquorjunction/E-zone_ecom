@@ -1,5 +1,8 @@
 @extends('client.layouts.app')
 
+@section('title', statictranslations('About Ezone Retails, Casablanca'))
+@section('description', statictranslations('About Ezone Retails, Casablanca'))
+
 @section('content')
     <div class="bg-gray-50 min-h-screen pb-16">
 

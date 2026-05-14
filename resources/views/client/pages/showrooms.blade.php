@@ -1,4 +1,6 @@
 @extends('client.layouts.app')
+@section('title', statictranslations('Our Showroom in Casablanca, Ezone Retails'))
+@section('description', statictranslations('Our Showroom in Casablanca, Ezone Retails'))
 
 @section('content')
     @php
@@ -24,7 +26,7 @@
                 </div>
             </div>
 
-            {{-- <form method="GET" action="{{ route('showrooms') }}" class="mb-6 bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-4">
+            <form method="GET" action="{{ route('showrooms') }}" class="mb-6 bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-4">
                 <div class="flex flex-col lg:flex-row gap-4">
                     <div class="flex-1">
                         <div class="relative">
@@ -130,7 +132,7 @@
 
             <div class="mt-8">
                 {{ $showrooms->links() }}
-            </div> --}}
+            </div>
         </div>
     </div>
 @endsection

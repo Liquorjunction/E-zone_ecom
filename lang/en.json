@@ -281,6 +281,7 @@
     "your@email.com": "your@email.com",
     "N/A": "N/A",
     "NEW": "NEW",
+    "Need quick help?": "Need quick help?",
     "Need Help with Your Order?": "Need Help with Your Order?",
     "Network error. Please check your connection.": "Network error. Please check your connection.",
     "New Arrivals": "New Arrivals",
@@ -404,6 +405,11 @@
     "SALE": "SALE",
     "SKU": "SKU",
     "SSL Protected": "SSL Protected",
+    "Contact us directly on WhatsApp for faster support.": "Contact us directly on WhatsApp for faster support.",
+    "Contact us on WhatsApp": "Contact us on WhatsApp",
+    "Hi, I need help with my order.": "Hi, I need help with my order.",
+    "WhatsApp": "WhatsApp",
+    "WhatsApp contact is currently unavailable.": "WhatsApp contact is currently unavailable.",
     "Same as shipping": "Same as shipping",
     "Same as shipping address": "Same as shipping address",
     "Sample Product": "Sample Product",
@@ -1081,5 +1087,12 @@
     "Please log in to continue.": "Please log in to continue.",
     "Orders over": "Orders over",
     "business days": "business days",
-    "Select areas only": "Select areas only"
+    "OR": "OR",
+    "Select areas only": "Select areas only",
+    "Ezone Retails Morocco, Sharp & Roch Home Appliances in Casablanca": "Ezone Retails Morocco, Sharp & Roch Home Appliances in Casablanca",
+    "Our Home Appliance Products, Ezone Retails Morocco": "Our Home Appliance Products, Ezone Retails Morocco",
+    "About Ezone Retails, Casablanca": "About Ezone Retails, Casablanca",
+    "Contact Us, Ezone Retails Casablanca": "Contact Us, Ezone Retails Casablanca",
+    "Frequently Asked Questions, Ezone Retails": "Frequently Asked Questions, Ezone Retails",
+    "Our Showroom in Casablanca, Ezone Retails": "Our Showroom in Casablanca, Ezone Retails"
 }

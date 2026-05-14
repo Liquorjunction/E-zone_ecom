@@ -121,4 +121,29 @@ class ShowroomRepository implements ShowroomRepositoryInterface
     {
         return Showrooms::select('id', 'name', 'description', 'status', 'cover_image')->get();
     }
+
+    public function storeShowroomImage($request, $showroomId)
+    {
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $image) {
+                $imagePath = $image->store('showrooms', 'public');
+                ShowroomImages::create([
+                    'showroom_id' => $showroomId,
+                    'image' => $imagePath,
+                    'status' => 'active'
+                ]);
+            }
+        }
+    }
+
+    public function deleteShowroomImage($imageId)
+    {
+        $image = ShowroomImages::findOrFail($imageId);
+
+        if (Storage::disk('public')->exists($image->image)) {
+            Storage::disk('public')->delete($image->image);
+        }
+
+        $image->delete();
+    }
 }

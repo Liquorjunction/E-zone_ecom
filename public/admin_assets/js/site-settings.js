@@ -141,6 +141,16 @@
                 data[key] = value;
             }
 
+            if (Object.prototype.hasOwnProperty.call(data, 'infotext[text]') || Object.prototype.hasOwnProperty.call(data, 'infotext[url]')) {
+                data.infotext = {
+                    text: data['infotext[text]'] || '',
+                    url: data['infotext[url]'] || ''
+                };
+
+                delete data['infotext[text]'];
+                delete data['infotext[url]'];
+            }
+
             delete data._method;
             delete data._token;
 
@@ -385,7 +395,10 @@
             facebook: '',
             twitter: '',
             instagram: '',
-            infotext: '',
+            infotext: {
+                text: '',
+                url: ''
+            },
             site_status: 'active'
         };
 

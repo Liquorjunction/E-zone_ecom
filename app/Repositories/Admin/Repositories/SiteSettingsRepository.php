@@ -8,6 +8,29 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsRepository implements SiteSettingsRepositoryInterface
 {
+    private function normalizeInfoText($rawInfoText): array
+    {
+        $infotext = ['text' => '', 'url' => ''];
+
+        if (is_string($rawInfoText)) {
+            $infotext['text'] = trim($rawInfoText);
+        } elseif (is_array($rawInfoText)) {
+            if (array_key_exists('text', $rawInfoText) || array_key_exists('url', $rawInfoText)) {
+                $infotext['text'] = trim((string) ($rawInfoText['text'] ?? ''));
+                $infotext['url'] = trim((string) ($rawInfoText['url'] ?? ''));
+            } else {
+                foreach ($rawInfoText as $value) {
+                    if (is_string($value) && trim($value) !== '') {
+                        $infotext['text'] = trim($value);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return ($infotext['text'] === '' && $infotext['url'] === '') ? [] : $infotext;
+    }
+
     public function getFirstSiteSetting()
     {
         return SiteSetting::first();
@@ -22,9 +45,8 @@ class SiteSettingsRepository implements SiteSettingsRepositoryInterface
     {
         $siteSetting = SiteSetting::find($id);
         if ($siteSetting) {
-            // Ensure infotext is always an array
-            if (isset($data['infotext']) && !is_array($data['infotext'])) {
-                $data['infotext'] = [$data['infotext']];
+            if (array_key_exists('infotext', $data)) {
+                $data['infotext'] = $this->normalizeInfoText($data['infotext']);
             }
             $siteSetting->update($data);
 
@@ -38,9 +60,8 @@ class SiteSettingsRepository implements SiteSettingsRepositoryInterface
 
     public function createSiteSetting(array $data)
     {
-        // Ensure infotext is always an array
-        if (isset($data['infotext']) && !is_array($data['infotext'])) {
-            $data['infotext'] = [$data['infotext']];
+        if (array_key_exists('infotext', $data)) {
+            $data['infotext'] = $this->normalizeInfoText($data['infotext']);
         }
         $setting = SiteSetting::create($data);
 

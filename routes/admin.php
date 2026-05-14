@@ -239,6 +239,8 @@ Route::middleware(['web'])->prefix('admin')->name('admin.')->group(function () {
             Route::put('/update', [ShowroomController::class, 'update'])->name('update')->middleware('can:showrooms.update,admin');
             Route::delete('/destroy', [ShowroomController::class, 'destroy'])->name('destroy')->middleware('can:showrooms.delete,admin');
             Route::patch('/toggle-status', [ShowroomController::class, 'toggleStatus'])->name('toggleStatus')->middleware('can:showrooms.update,admin');
+            // Delete a single gallery image (only allowed to users who can update showrooms)
+            Route::post('/gallery-image-delete', [ShowroomController::class, 'deleteImage'])->name('deleteGalleryImage')->middleware('can:showrooms.update,admin');
         });
 
         // Brands Routes

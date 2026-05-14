@@ -281,6 +281,7 @@
     "your@email.com": "your@email.com",
     "N/A": "لا يوجد",
     "NEW": "جديد",
+    "Need quick help?": "هل تحتاج مساعدة سريعة؟",
     "Need Help with Your Order?": "هل تحتاج مساعدة بخصوص طلبك؟",
     "Network error. Please check your connection.": "خطأ في الشبكة. يرجى التحقق من الاتصال الخاص بك.",
     "New Arrivals": "وصل حديثا",
@@ -404,6 +405,11 @@
     "SALE": "جريء",
     "SKU": "رمز التخزين التعريفي",
     "SSL Protected": "محمية بتقنية SSL",
+    "Contact us directly on WhatsApp for faster support.": "تواصل معنا مباشرة عبر واتساب للحصول على دعم أسرع.",
+    "Contact us on WhatsApp": "تواصل معنا عبر واتساب",
+    "Hi, I need help with my order.": "مرحبًا، أحتاج إلى المساعدة بخصوص طلبي.",
+    "WhatsApp": "واتساب",
+    "WhatsApp contact is currently unavailable.": "جهة اتصال واتساب غير متاحة حاليًا.",
     "Same as shipping": "نفس الشحن",
     "Same as shipping address": "نفس عنوان الشحن",
     "Sample Product": "عينة من المنتج",
@@ -1080,5 +1086,12 @@
     "Please log in to proceed to checkout.": "يرجى تسجيل الدخول للمتابعة إلى الدفع.",
     "Orders over": "الطلبات التي تزيد عن",
     "business days": "أيام عمل",
-    "Select areas only": "مناطق محددة فقط"
+    "OR": "أو",
+    "Select areas only": "مناطق محددة فقط",
+    "Ezone Retails Morocco, Sharp & Roch Home Appliances in Casablanca": "إي زون ريتيلز المغرب، أجهزة شارب وروش المنزلية في الدار البيضاء",
+    "Our Home Appliance Products, Ezone Retails Morocco": "منتجاتنا من الأجهزة المنزلية، إي زون ريتيلز المغرب",
+    "About Ezone Retails, Casablanca": "حول إي زون ريتيلز، الدار البيضاء",
+    "Contact Us, Ezone Retails Casablanca": "اتصل بنا، إي زون ريتيلز الدار البيضاء",
+    "Frequently Asked Questions, Ezone Retails": "الأسئلة الشائعة، إي زون ريتيلز",
+    "Our Showroom in Casablanca, Ezone Retails": "معرضنا في الدار البيضاء، إي زون ريتيلز"
 }

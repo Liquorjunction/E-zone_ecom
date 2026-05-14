@@ -13,4 +13,6 @@ interface ShowroomRepositoryInterface
     public function updateShowroomStatus($id);
     public function getShowroomBySlug($slug);
     public function getDataForDataTable();
+    public function storeShowroomImage($request, $showroomId);
+    public function deleteShowroomImage($imageId);
 }
