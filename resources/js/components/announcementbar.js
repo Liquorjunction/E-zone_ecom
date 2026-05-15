@@ -25,7 +25,7 @@ function initAnnouncementBar(text, url) {
             btn.target = '_blank';
             btn.rel = 'noopener noreferrer';
             btn.className = 'inline-flex items-center gap-1 text-xs font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-yellow-300 text-blue-900 no-underline hover:bg-yellow-400 hover:scale-105 transition-all duration-150 flex-shrink-0 whitespace-nowrap';
-            btn.innerHTML = 'Click Here <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+            btn.innerHTML = `${trans('Click Here')} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
             item.appendChild(btn);
         }
 

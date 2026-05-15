@@ -191,7 +191,8 @@
         'Free Exchanges' => statictranslations('Free Exchanges'),
         'Different size or color at no cost' => statictranslations('Different size or color at no cost'),
         'Easy Process' => statictranslations('Easy Process'),
-        'Print label or drop off anywhere' => statictranslations('Print label or drop off anywhere')
+        'Print label or drop off anywhere' => statictranslations('Print label or drop off anywhere'),
+        'Click Here' => statictranslations('Click Here'),
     ];
 @endphp
 <script>
