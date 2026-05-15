@@ -36,9 +36,7 @@
 @endphp
 
 @if ($hasAnnouncement)
-@push('styles')
-    @vite('resources/css/components/announcementbar.css')
-@endpush
+
 
 <div class="relative overflow-hidden bg-linear-to-r from-primary-dark via-primary to-primary-dark"
      aria-label="Announcements" aria-live="polite">
@@ -58,6 +56,5 @@
             url: @json($announcement['url'])
         };
     </script>
-    @vite('resources/js/components/announcementbar.js')
 @endpush
 @endif

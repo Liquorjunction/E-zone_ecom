@@ -67,6 +67,7 @@ import './universal-popup';
 import './newsletter';
 import './prose';
 import './timer';
+import './components/announcementbar';
 
 axios.interceptors.response.use(function (response) {
     try {
