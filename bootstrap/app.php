@@ -4,6 +4,7 @@ use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\CheckSiteStatus;
 use App\Http\Middleware\ClientAuthenticate;
 use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\SanitizeInput;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
+            SanitizeInput::class,
             CheckSiteStatus::class,
             SetLocale::class,
         ]);

@@ -3,22 +3,19 @@ function initAnnouncementBar(text, url) {
 
     function makeItem(spaced, hidden) {
         const item = document.createElement('div');
-        item.className = 'inline-flex items-center gap-1.75 flex-shrink-0' + (spaced ? ' pr-18' : '');
+        item.className = 'inline-flex items-center gap-2 flex-shrink-0' + (spaced ? ' pr-18' : '');
         if (hidden) item.setAttribute('aria-hidden', 'true');
 
-        // Dot (animated pulse using Tailwind)
         const dot = document.createElement('span');
         dot.className = 'w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0 animate-pulse';
         dot.setAttribute('aria-hidden', 'true');
         item.appendChild(dot);
 
-        // Text
         const textSpan = document.createElement('span');
         textSpan.className = 'text-xs font-medium text-white text-opacity-90 tracking-widest';
         textSpan.textContent = text;
         item.appendChild(textSpan);
 
-        // Button (if URL exists)
         if (url) {
             const btn = document.createElement('a');
             btn.href = url;
@@ -41,7 +38,6 @@ function initAnnouncementBar(text, url) {
         track.classList.remove('running');
         track.style.removeProperty('--ann-dur');
 
-        // First, measure the text width
         const probe = makeItem(false, false);
         track.appendChild(probe);
 
@@ -50,23 +46,20 @@ function initAnnouncementBar(text, url) {
             const barW = inner.offsetWidth;
 
             if (itemW + 32 <= barW) {
-                // Content fits → stay centered, no animation
                 track.innerHTML = '';
                 track.appendChild(makeItem(false, false));
             } else {
-                // Overflow → marquee mode with clone
                 track.innerHTML = '';
                 track.appendChild(makeItem(true, false));
                 track.appendChild(makeItem(true, true)); // clone for seamless loop
 
-                // Wait for items to render, then calculate animation duration
-                requestAnimationFrame(function () {
+                setTimeout(function () {
                     const trackW = track.offsetWidth;
                     const halfW = trackW / 2;
                     const dur = (halfW / PX_PER_SEC).toFixed(2);
                     track.style.setProperty('--ann-dur', dur + 's');
                     track.classList.add('running');
-                });
+                }, 0);
             }
         });
     }
@@ -80,12 +73,9 @@ function initAnnouncementBar(text, url) {
     window.addEventListener('resize', init);
 }
 
-// Export for module and global usage
 export { initAnnouncementBar };
 window.initAnnouncementBar = initAnnouncementBar;
 
-// Auto-initialize if data is available
 if (window.__announcementData) {
     initAnnouncementBar(window.__announcementData.text, window.__announcementData.url);
 }
-

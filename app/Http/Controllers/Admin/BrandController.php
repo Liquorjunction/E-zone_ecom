@@ -186,7 +186,7 @@ class BrandController extends Controller
 
                     return view('admin.partials.datatable-actions', $data)->render();
                 })
-                ->rawColumns(['image', 'name', 'status', 'action'])
+                ->rawColumns(['image', 'status', 'action'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error($e->getMessage());

@@ -21,7 +21,7 @@
                 $announcement['text'] = trim((string) $rawText);
             }
 
-            $announcement['url']  = trim((string) ($rawInfoText['url']  ?? ''));
+            $announcement['url'] = trim((string) ($rawInfoText['url'] ?? ''));
         } else {
             foreach ($rawInfoText as $value) {
                 if (is_string($value) && trim($value) !== '') {
@@ -37,14 +37,13 @@
 
 @if ($hasAnnouncement)
 
-
 <div class="relative overflow-hidden bg-linear-to-r from-primary-dark via-primary to-primary-dark"
      aria-label="Announcements" aria-live="polite">
 
     <div class="ann-stripe-bg absolute inset-0"></div>
 
     <div class="flex items-center justify-center overflow-hidden py-1.5 px-4 relative z-10" id="ann-inner">
-        <div class="flex whitespace-nowrap" id="ann-track"></div>
+        <div class="ann-track flex whitespace-nowrap" id="ann-track"></div>
     </div>
 </div>
 
