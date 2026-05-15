@@ -167,9 +167,11 @@
                                                 <span class="font-semibold">{{ $data['label'] }}</span>
                                                 @php
                                                     $hours = $data['hours'];
+                                                    $isClosed = false;
                                                     if (is_array($hours)) {
                                                         if (isset($hours['is_closed']) && $hours['is_closed']) {
                                                             $displayHours = statictranslations('Closed');
+                                                            $isClosed = true;
                                                         } else {
                                                             $open = $hours['open'] ?? '';
                                                             $close = $hours['close'] ?? '';
@@ -178,6 +180,7 @@
                                                                 $displayHours = $open . ' - ' . $close;
                                                             } else {
                                                                 $displayHours = statictranslations('Closed');
+                                                                $isClosed = true;
                                                             }
                                                         }
                                                     } else {
@@ -186,12 +189,13 @@
                                                             $displayHours = statictranslations('Open');
                                                         } elseif ($val === '0' || $val === 'false' || $hours === false || empty($val)) {
                                                             $displayHours = statictranslations('Closed');
+                                                            $isClosed = true;
                                                         } else {
                                                             $displayHours = $hours;
                                                         }
                                                     }
                                                 @endphp
-                                                <span>{{ $displayHours }}</span>
+                                                <span class="{{ $isClosed ? 'text-red-600 font-semibold' : '' }}">{{ $displayHours }}</span>
                                             </li>
                                         @endforeach
                                     </ul>
