@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (textarea) {
             const container = document.createElement("div");
             container.className = "quill-editor";
+            container.id = `editor_description_${lang}`;
             container.style.height = "200px";
             textarea.parentNode.insertBefore(container, textarea);
             textarea.style.display = "none";
@@ -83,6 +84,9 @@ document.addEventListener("DOMContentLoaded", function () {
             quill.on("text-change", function () {
                 textarea.value = quill.root.innerHTML;
             });
+
+            container.__quill = quill;
+            textarea.__quill = quill;
 
             quillEditors[lang] = quill;
         }

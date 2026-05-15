@@ -11,7 +11,14 @@
                         <div class="header-title">
                             <h4 class="card-title">Edit Showroom: {{ $showroom->getTranslation('name', 'en') }}</h4>
                         </div>
-                        <a href="{{ route('admin.showrooms.index') }}" class="btn btn-primary btn-sm">Back to List</a>
+                        <div class="card-action">
+                            <button type="button" class="btn btn-sm btn-primary btn-translate-all" id="btn-translate-all"
+                                data-url="{{ route('admin.translate.batch') }}"
+                                data-fields='["name","address","description","city","state","country"]'>
+                                <i class="bi bi-translate me-2"></i> Translate All Fields
+                            </button>
+                            <a href="{{ route('admin.showrooms.index') }}" class="btn btn-primary btn-sm">Back to List</a>
+                        </div>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('admin.showrooms.update', $showroom->id) }}" method="POST"
@@ -74,7 +81,18 @@
                                                             <textarea name="address[en]" id="address_en" class="form-control" rows="2" required>{{ $showroom->getTranslation('address', 'en') }}</textarea>
                                                         </div>
                                                         <div class="col-md-12 mb-3">
-                                                            <label class="form-label">Description (EN)</label>
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <label class="form-label mb-0">Description (EN)</label>
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <small class="text-muted mb-0">Please use this for translating descriptions</small>
+                                                                    <button type="button" class="btn btn-sm btn-info text-white btn-translate-auto"
+                                                                        data-url="{{ route('admin.translate.content') }}" data-source="editor_description_en"
+                                                                        data-target-base="description"
+                                                                        data-quill="true">
+                                                                        <i class="bi bi-translate mr-1"></i> Translate to Others
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                             <textarea name="description[en]" id="description_en" class="form-control" rows="4">{{ $showroom->getTranslation('description', 'en') }}</textarea>
                                                         </div>
                                                         <div class="col-md-4 mb-3">
