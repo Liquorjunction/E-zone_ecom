@@ -1,5 +1,5 @@
 // --- Translate All Fields Button Handler ---
-$(document).on("click", "#btn-translate-all", function (e) {
+$(document).on("click", ".btn-translate-all", function (e) {
     e.preventDefault();
     var btn = $(this);
     var url = btn.data("url");
@@ -23,11 +23,17 @@ $(document).on("click", "#btn-translate-all", function (e) {
         fields.forEach(function(field) {
             if (result.fr && result.fr[field] !== undefined) {
                 var inputFr = document.getElementById(field + '_fr');
-                if (inputFr) inputFr.value = result.fr[field];
+                if (inputFr) {
+                    inputFr.value = result.fr[field];
+                    if (inputFr.__quill) inputFr.__quill.root.innerHTML = result.fr[field];
+                }
             }
             if (result.ar && result.ar[field] !== undefined) {
                 var inputAr = document.getElementById(field + '_ar');
-                if (inputAr) inputAr.value = result.ar[field];
+                if (inputAr) {
+                    inputAr.value = result.ar[field];
+                    if (inputAr.__quill) inputAr.__quill.root.innerHTML = result.ar[field];
+                }
             }
         });
         btn.prop("disabled", false).text("Translate All Fields");
@@ -202,11 +208,46 @@ document.addEventListener("DOMContentLoaded", function () {
     const galleryInput = document.getElementById("gallery_images_input");
     const newGalleryPreview = document.getElementById("new-gallery-preview");
     const newGalleryContainer = document.getElementById("new-gallery");
+    const toastElement = document.getElementById("globalToast");
+    const toastMessageElement = document.getElementById("toastMessage");
     let selectedFiles = [];
+
+    function showToast(message, title) {
+        if (!toastElement || !toastMessageElement) {
+            alert(message);
+            return;
+        }
+
+        const toastTitle = toastElement.querySelector(".toast-header strong");
+        if (toastTitle && title) {
+            toastTitle.textContent = title;
+        }
+
+        toastMessageElement.textContent = message;
+
+        if (typeof bootstrap !== "undefined" && bootstrap.Toast) {
+            const toast = bootstrap.Toast.getOrCreateInstance(toastElement, { delay: 3500 });
+            toast.show();
+        } else {
+            alert(message);
+        }
+    }
 
     if (galleryInput) {
         galleryInput.addEventListener("change", function (e) {
-            selectedFiles = Array.from(this.files);
+                selectedFiles = Array.from(this.files);
+
+                const MAX_GALLERY_IMAGES = 5;
+
+                if (selectedFiles.length > MAX_GALLERY_IMAGES) {
+                    showToast(`You can select up to ${MAX_GALLERY_IMAGES} images only.`, "Gallery Limit");
+                    selectedFiles = selectedFiles.slice(0, MAX_GALLERY_IMAGES);
+
+                    const dataTransfer = new DataTransfer();
+                    selectedFiles.forEach(file => dataTransfer.items.add(file));
+                    this.files = dataTransfer.files;
+                }
+
             renderNewGalleryPreview();
         });
     }

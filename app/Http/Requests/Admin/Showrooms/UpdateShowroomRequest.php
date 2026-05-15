@@ -62,6 +62,8 @@ class UpdateShowroomRequest extends FormRequest
             // FIX: Changed 'json' to 'array'
             'opening_hours' => 'nullable|array',
 
+            'gallery_images' => 'nullable|array|max:5',
+
             // FIX: Cover image should be nullable on Update (user might not change it)
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
 
@@ -92,6 +94,9 @@ class UpdateShowroomRequest extends FormRequest
             'cover_image.image' => 'The cover image must be an image file.',
             'cover_image.mimes' => 'The cover image must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
             'cover_image.max' => 'The cover image may not be greater than 2MB.',
+            'gallery_images.max' => 'You may upload up to 5 gallery images only.',
+            'gallery_images.array' => 'The gallery images field must be a valid list of images.',
+            'gallery_images.*.uploaded' => 'Each gallery image may not be greater than 2MB.',
             'gallery_images.*.image' => 'Each gallery image must be an image file.',
             'gallery_images.*.mimes' => 'Each gallery image must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
             'gallery_images.*.max' => 'Each gallery image may not be greater than 2MB.',

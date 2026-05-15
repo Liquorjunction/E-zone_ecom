@@ -61,10 +61,23 @@ class StoreShowroomRequest extends FormRequest
             // FIX: Changed 'json' to 'array' because standard HTML forms submit arrays
             'opening_hours' => 'nullable|array',
 
+            'gallery_images' => 'nullable|array|max:5',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048',
+
             'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:2048', // Kept required for Step 1
 
             // FIX: Removed 'slug' rule entirely. The Model generates this automatically.
             'status' => 'nullable|in:active,inactive',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'gallery_images.max' => 'You may upload up to 5 gallery images only.',
+            'gallery_images.array' => 'The gallery images field must be a valid list of images.',
+            'gallery_images.*.uploaded' => 'Each gallery image may not be greater than 2MB.',
+            'gallery_images.*.max' => 'Each gallery image may not be greater than 2MB.',
         ];
     }
 

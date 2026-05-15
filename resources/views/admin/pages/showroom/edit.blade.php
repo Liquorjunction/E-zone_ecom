@@ -46,12 +46,6 @@
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <label class="form-label mb-0"><strong>Showroom Details</strong></label>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <button type="button" class="btn btn-primary btn-translate-all"
-                                                        id="btn-translate-all"
-                                                        data-url="{{ route('admin.translate.batch') }}"
-                                                        data-fields='["name", "address", "description", "city", "state", "country"]'>
-                                                        <i class="bi bi-translate me-2"></i> Translate All Fields
-                                                    </button>
                                                     <ul class="nav nav-pills nav-pills-sm mb-0 ms-2" id="langTabEdit"
                                                         role="tablist">
                                                         <li class="nav-item"><a class="nav-link active py-1 px-3"
@@ -190,44 +184,60 @@
                                         </div>
 
                                         {{-- Common Fields --}}
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Email</label>
-                                            <input type="email" name="email" class="form-control"
-                                                value="{{ $showroom->email }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Phone</label>
-                                            <input type="text" name="phone" class="form-control"
-                                                value="{{ $showroom->phone }}" required>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Pincode</label>
-                                            <input type="text" name="pincode" class="form-control"
-                                                value="{{ $showroom->pincode }}" required>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Sort Order</label>
-                                            <input type="number" name="sort_order" class="form-control"
-                                                value="{{ $showroom->sort_order }}">
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Status</label>
-                                            <select name="status" class="form-select">
-                                                <option value="active"
-                                                    {{ $showroom->status == 'active' ? 'selected' : '' }}>Active</option>
-                                                <option value="inactive"
-                                                    {{ $showroom->status == 'inactive' ? 'selected' : '' }}>Inactive
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label">Update Cover Image</label>
-                                            <input type="file" name="cover_image" class="form-control"
-                                                accept="image/*">
-                                            @if ($showroom->cover_image)
-                                                <img src="{{ asset('storage/' . $showroom->cover_image) }}" alt="Cover"
-                                                    class="mt-2" style="height: 60px; border-radius: 4px;">
-                                            @endif
+                                        <div class="col-12 mb-3">
+                                            <div class="border rounded p-3 bg-light">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <div>
+                                                        <h6 class="mb-1">Contact & Media</h6>
+                                                        <small class="text-muted">Edit the main showroom contact details and update the main image here.</small>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row g-3">
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">Email</label>
+                                                        <input type="email" name="email" class="form-control"
+                                                            value="{{ $showroom->email }}" required>
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">Phone</label>
+                                                        <input type="text" name="phone" class="form-control"
+                                                            value="{{ $showroom->phone }}" required>
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">Pincode</label>
+                                                        <input type="text" name="pincode" class="form-control"
+                                                            value="{{ $showroom->pincode }}" required>
+                                                    </div>
+                                                    <div class="col-md-4 mb-3 d-none">
+                                                        <label class="form-label">Sort Order</label>
+                                                        <input type="number" name="sort_order" class="form-control"
+                                                            value="{{ $showroom->sort_order }}">
+                                                    </div>
+                                                    <div class="col-md-4 mb-3 d-none">
+                                                        <label class="form-label">Status</label>
+                                                        <select name="status" class="form-select">
+                                                            <option value="active"
+                                                                {{ $showroom->status == 'active' ? 'selected' : '' }}>Active</option>
+                                                            <option value="inactive"
+                                                                {{ $showroom->status == 'inactive' ? 'selected' : '' }}>Inactive
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12 mb-0 pt-2">
+                                                        <label class="form-label">Update Cover Image</label>
+                                                        <input type="file" name="cover_image" class="form-control"
+                                                            accept="image/*">
+                                                        @if ($showroom->cover_image)
+                                                            <div class="mt-2 d-flex align-items-center gap-3">
+                                                                <img src="{{ asset('storage/' . $showroom->cover_image) }}" alt="Cover"
+                                                                    class="rounded" style="height: 72px; width: 72px; object-fit: cover;">
+                                                                <small class="text-muted">Current cover image</small>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-end mt-3">
@@ -237,86 +247,124 @@
                                 </div>
 
                                 <div class="tab-pane fade" id="step2" role="tabpanel">
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Map Iframe</label>
-                                            <textarea name="map_iframe" class="form-control" rows="3">{{ $showroom->map_iframe }}</textarea>
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="border rounded p-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div>
+                                                        <h6 class="mb-1">Map Embed</h6>
+                                                        <small class="text-muted">Update the iframe used for map display on the showroom page.</small>
+                                                    </div>
+                                                </div>
+                                                <textarea name="map_iframe" class="form-control" rows="4" placeholder="Paste map iframe code here">{{ $showroom->map_iframe }}</textarea>
+                                            </div>
                                         </div>
 
                                         @php $hours = $showroom->opening_hours ?? []; @endphp
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Opening Hours</label>
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-sm">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Day</th>
-                                                            <th>Open Time</th>
-                                                            <th>Close Time</th>
-                                                            <th>Closed</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
-                                                            @php
-                                                                $key = strtolower($day);
-                                                                $open = $hours[$key]['open'] ?? '09:00';
-                                                                $close = $hours[$key]['close'] ?? '18:00';
-                                                                $isClosed = $hours[$key]['is_closed'] ?? false;
-                                                            @endphp
+                                        <div class="col-12">
+                                            <div class="border rounded p-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div>
+                                                        <h6 class="mb-1">Opening Hours</h6>
+                                                        <small class="text-muted">Toggle a day closed to disable its time fields.</small>
+                                                    </div>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-sm align-middle mb-0">
+                                                        <thead>
                                                             <tr>
-                                                                <td>{{ $day }}</td>
-                                                                <td><input type="time"
-                                                                        name="opening_hours[{{ $key }}][open]"
-                                                                        class="form-control form-control-sm open-time"
-                                                                        value="{{ $open }}"></td>
-                                                                <td><input type="time"
-                                                                        name="opening_hours[{{ $key }}][close]"
-                                                                        class="form-control form-control-sm close-time"
-                                                                        value="{{ $close }}"></td>
-                                                                <td><input type="checkbox"
-                                                                        name="opening_hours[{{ $key }}][is_closed]"
-                                                                        class="form-check-input is-closed-check"
-                                                                        value="1"
-                                                                        {{ $isClosed ? 'checked' : '' }}></td>
+                                                                <th style="width: 22%;">Day</th>
+                                                                <th style="width: 26%;">Open Time</th>
+                                                                <th style="width: 26%;">Close Time</th>
+                                                                <th style="width: 16%;">Closed</th>
                                                             </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
+                                                                @php
+                                                                    $key = strtolower($day);
+                                                                    $open = $hours[$key]['open'] ?? '09:00';
+                                                                    $close = $hours[$key]['close'] ?? '18:00';
+                                                                    $isClosed = $hours[$key]['is_closed'] ?? false;
+                                                                @endphp
+                                                                <tr>
+                                                                    <td class="fw-medium">{{ $day }}</td>
+                                                                    <td><input type="time"
+                                                                            name="opening_hours[{{ $key }}][open]"
+                                                                            class="form-control form-control-sm open-time"
+                                                                            value="{{ $open }}"></td>
+                                                                    <td><input type="time"
+                                                                            name="opening_hours[{{ $key }}][close]"
+                                                                            class="form-control form-control-sm close-time"
+                                                                            value="{{ $close }}"></td>
+                                                                    <td><input type="checkbox"
+                                                                            name="opening_hours[{{ $key }}][is_closed]"
+                                                                            class="form-check-input is-closed-check"
+                                                                            value="1"
+                                                                            {{ $isClosed ? 'checked' : '' }}></td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Gallery Images</label>
-                                            <input type="file" name="gallery_images[]" id="gallery_images_input" class="form-control" multiple
-                                                accept="image/*">
-
-                                            <!-- Existing Gallery Images -->
-                                            @if ($showroom->images->count() > 0)
-                                            <div class="mt-3">
-                                                <h6>Existing Gallery Images</h6>
-                                                <div class="d-flex flex-wrap gap-2" id="existing-gallery">
-                                                    @foreach ($showroom->images as $img)
-                                                        <div class="position-relative gallery-image-item" data-image-id="{{ $img->id }}">
-                                                            <img src="{{ asset('storage/' . $img->image) }}"
-                                                                style="height:60px; width:60px; object-fit:cover; border-radius:4px;">
-                                                            <button type="button" class="btn btn-sm btn-danger delete-existing-image"
-                                                                style="position: absolute; top: -8px; right: -8px; padding: 2px 6px; font-size: 10px;"
-                                                                data-image-id="{{ $img->id }}"
-                                                                data-url="{{ route('admin.showrooms.image.delete', $img->id) }}"
-                                                                title="Delete Image">
-                                                                ×
-                                                            </button>
-                                                        </div>
-                                                    @endforeach
+                                        <div class="col-12">
+                                            <div class="border rounded p-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div>
+                                                        <h6 class="mb-1">Gallery Images</h6>
+                                                        <small class="text-muted">Add up to 5 images or remove existing ones as needed.</small>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            @endif
+                                                <input type="file" name="gallery_images[]" id="gallery_images_input" class="form-control @error('gallery_images') is-invalid @enderror" multiple
+                                                    accept="image/*">
 
-                                            <!-- New Gallery Images Preview -->
-                                            <div class="mt-3" id="new-gallery-preview" style="display: none;">
-                                                <h6>New Images to Upload</h6>
-                                                <div class="d-flex flex-wrap gap-2" id="new-gallery"></div>
+                                                @php
+                                                    $galleryErrorMessages = [];
+                                                    foreach ($errors->getMessages() as $key => $messages) {
+                                                        if (\Illuminate\Support\Str::startsWith($key, 'gallery_images')) {
+                                                            $galleryErrorMessages = array_merge($galleryErrorMessages, $messages);
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @if (!empty($galleryErrorMessages))
+                                                    <div class="invalid-feedback d-block mt-2">
+                                                        @foreach ($galleryErrorMessages as $message)
+                                                            <div>{{ $message }}</div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+
+                                                <!-- Existing Gallery Images -->
+                                                @if ($showroom->images->count() > 0)
+                                                <div class="mt-3">
+                                                    <h6 class="mb-2">Existing Gallery Images</h6>
+                                                    <div class="d-flex flex-wrap gap-2" id="existing-gallery">
+                                                        @foreach ($showroom->images as $img)
+                                                            <div class="position-relative gallery-image-item" data-image-id="{{ $img->id }}">
+                                                                <img src="{{ asset('storage/' . $img->image) }}"
+                                                                    style="height:60px; width:60px; object-fit:cover; border-radius:4px;">
+                                                                <button type="button" class="btn btn-sm btn-danger delete-existing-image"
+                                                                    style="position: absolute; top: -8px; right: -8px; padding: 2px 6px; font-size: 10px;"
+                                                                    data-image-id="{{ $img->id }}"
+                                                                    data-url="{{ route('admin.showrooms.image.delete', $img->id) }}"
+                                                                    title="Delete Image">
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                @endif
+
+                                                <!-- New Gallery Images Preview -->
+                                                <div class="mt-3" id="new-gallery-preview" style="display: none;">
+                                                    <h6>New Images to Upload</h6>
+                                                    <div class="d-flex flex-wrap gap-2" id="new-gallery"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

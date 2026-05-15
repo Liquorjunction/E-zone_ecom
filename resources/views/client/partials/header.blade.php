@@ -1,7 +1,9 @@
 <header class="bg-white z-50 sticky top-0" style="box-shadow: 0 1px 0 #e5e7eb, 0 4px 24px rgba(0,0,0,0.06);">
 
-    {{-- ══ Announcement bar — only renders when there is actual non-empty text ══ --}}
-    @include('client.components.announcementbar')
+    {{-- ══ Announcement bar — only renders on the home page ══ --}}
+    @if (request()->routeIs('home'))
+        @include('client.components.announcementbar')
+    @endif
 
     {{-- ══ Main bar ══ --}}
     <div class="px-4 sm:px-6 lg:px-8 py-2.5">
