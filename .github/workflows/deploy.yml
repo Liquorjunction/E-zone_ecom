@@ -1,3 +1,4 @@
+# CI CD Apply In Development Branch Only
 name: Deploy Website
 
 on:
