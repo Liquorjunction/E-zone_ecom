@@ -1,4 +1,10 @@
-@import 'tailwindcss';
+/* Import the font */
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+/* Toast-specific styles (small, kept separate) */
+@import "./toast.css";
+@import "./components/announcementbar.css";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,15 +12,423 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 
-    /* Custom colors */
     --color-primary: oklch(0.69 0.14 232.2);
     --color-background: oklch(0.69 0.14 232.2 / 0.05);
+    --color-secondary-bg: oklch(0.69 0.14 232.2 / 0.15);
+    --color-primary-dark: oklch(0.5 0.12 232.2);
+    --color-foreground: oklch(0.2 0.05 232.2);
 }
 
-/* Define animations the standard way — outside @theme */
+/* iOS FIX: provide a safe default for --header-height so padding-top on
+   <main> and sidebar top/height are never 0 before JS fires */
+:root {
+    --header-height: 60px;
+    --app-vh: 1vh;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Shared tokens & utilities
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Hide the spin buttons in WebKit browsers */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide spin buttons in Firefox */
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/* Alpine.js Cloak */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Performance optimizations */
+aside {
+    will-change: width;
+    /* iOS FIX: removed `contain: layout style` — it creates a new stacking context
+       that interferes with z-index on iOS, and the layout containment can clip
+       overflow shadows. GPU compositing is achieved via translateZ(0) instead. */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* iOS FIX: on mobile the sidebar is full-screen so contain would be wrong anyway */
+@media (max-width: 1023px) {
+    aside {
+        will-change: auto;
+    }
+}
+
+.main-content-wrapper {
+    will-change: margin-left;
+}
+
+/* iOS FIX: cursor: pointer on body makes every element a "tappable target" in
+   iOS Safari, which is required for Alpine's @click.away to fire when the user
+   taps outside a dropdown onto a plain div/p/span.
+   We undo it on pointer devices so the cursor looks correct on desktop. */
+body {
+    cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+    body {
+        cursor: default;
+    }
+    a,
+    button,
+    [role="button"],
+    label[for],
+    select {
+        cursor: pointer;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UNIFIED CARD SYSTEM
+   All interactive cards share the same elevation/hover signature.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Base card — applies to section-cards, product cards, feature cards */
+.card,
+.section-card,
+.product-card {
+    transition:
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.25s ease;
+}
+
+/* Unified hover lift: same feel everywhere */
+.section-card:hover,
+.product-card:hover {
+    transform: translateY(-6px);
+}
+
+/* Subtle primary tint shimmer on section-card hover */
+.section-card {
+    position: relative;
+    overflow: visible;
+}
+.section-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    /* iOS FIX: rgba fallback before oklch() */
+    background: linear-gradient(
+        135deg,
+        transparent 40%,
+        rgba(68, 155, 195, 0.05) 100%
+    );
+    background: linear-gradient(
+        135deg,
+        transparent 40%,
+        oklch(0.69 0.14 232.2 / 0.05) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.section-card:hover::before {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCT CARD — badges (no pulsing animations on badges)
+   ═══════════════════════════════════════════════════════════════ */
+.product-badge {
+    /* Badges are static — intentionally no pulse animation */
+    animation: none !important;
+    box-shadow: none !important;
+}
+
+/* Product card image zoom */
+.product-card .group:hover img,
+.product-card:hover img {
+    transform: scale(1.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROMO / BANNER CARDS
+   ═══════════════════════════════════════════════════════════════ */
+.promo-card {
+    position: relative;
+    isolation: isolate;
+}
+.promo-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    /* iOS FIX: rgba fallbacks before oklch() */
+    border: 2px solid rgba(68, 155, 195, 0);
+    border: 2px solid oklch(0.69 0.14 232.2 / 0);
+    box-shadow:
+        inset 0 0 0 0 rgba(68, 155, 195, 0),
+        0 0 0 0 rgba(68, 155, 195, 0);
+    box-shadow:
+        inset 0 0 0 0 oklch(0.69 0.14 232.2 / 0),
+        0 0 0 0 oklch(0.69 0.14 232.2 / 0);
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.35s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+.promo-card:hover::after {
+    border-color: rgba(68, 155, 195, 0.55);
+    border-color: oklch(0.69 0.14 232.2 / 0.55);
+    box-shadow:
+        inset 0 0 30px rgba(68, 155, 195, 0.08),
+        0 16px 40px rgba(68, 155, 195, 0.2);
+    box-shadow:
+        inset 0 0 30px oklch(0.69 0.14 232.2 / 0.08),
+        0 16px 40px oklch(0.69 0.14 232.2 / 0.2);
+}
+.promo-card img {
+    transition:
+        transform 0.6s ease,
+        filter 0.35s ease;
+    filter: brightness(0.92);
+}
+.promo-card:hover img {
+    transform: scale(1.05);
+    filter: brightness(1);
+}
+.promo-cta-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: white;
+    transition: gap 0.25s ease;
+}
+.promo-card:hover .promo-cta-arrow {
+    gap: 0.65rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAV BUTTONS (carousel prev/next)
+   ═══════════════════════════════════════════════════════════════ */
+.nav-btn {
+    position: relative;
+    overflow: hidden;
+}
+.nav-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    transform: scale(0);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+}
+.nav-btn:not(:disabled):hover::after {
+    transform: scale(1);
+}
+.nav-btn svg {
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s;
+}
+.nav-btn:not(:disabled):hover svg {
+    color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CAROUSEL TRACK — clips slide pages horizontally only,
+   so card hover lift (translateY) and box-shadows are never cut.
+
+   iOS FIX: overflow-x: clip was added in Safari 16 (Sept 2022).
+   On Safari < 16 it silently falls through to `visible`, making
+   carousel slides bleed outside the track. Adding `overflow: hidden`
+   as the first declaration provides the safe fallback; supporting
+   browsers then override with the more precise `clip` value.
+   ═══════════════════════════════════════════════════════════════ */
+.carousel-track {
+    overflow: hidden; /* Safari < 16 fallback */
+    overflow-x: clip; /* Safari 16+, Chrome — precise horizontal clip */
+    overflow-y: visible; /* let card hover lift bleed vertically */
+    overflow-clip-margin: 4px;
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION HEADERS — unified across all home sections
+   ═══════════════════════════════════════════════════════════════ */
+.section-header-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    margin-top: 1.25rem;
+}
+.section-header-divider span:nth-child(1) {
+    display: block;
+    width: 2rem;
+    height: 3px;
+    border-radius: 9999px;
+    background: var(--color-primary);
+}
+.section-header-divider span:nth-child(2) {
+    display: block;
+    width: 0.75rem;
+    height: 3px;
+    border-radius: 9999px;
+    /* iOS FIX: rgba fallback before oklch() */
+    background: rgba(68, 155, 195, 0.4);
+    background: oklch(0.69 0.14 232.2 / 0.4);
+}
+.section-header-divider span:nth-child(3) {
+    display: block;
+    width: 0.375rem;
+    height: 3px;
+    border-radius: 9999px;
+    /* iOS FIX: rgba fallback before oklch() */
+    background: rgba(68, 155, 195, 0.2);
+    background: oklch(0.69 0.14 232.2 / 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS — primary CTA consistency
+   ═══════════════════════════════════════════════════════════════ */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.5rem;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    /* iOS FIX: rgba fallback before oklch() */
+    box-shadow: 0 2px 8px rgba(68, 155, 195, 0.25);
+    box-shadow: 0 2px 8px oklch(0.69 0.14 232.2 / 0.25);
+}
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+    /* iOS FIX: rgba fallback before oklch() */
+    box-shadow: 0 8px 24px rgba(68, 155, 195, 0.35);
+    box-shadow: 0 8px 24px oklch(0.69 0.14 232.2 / 0.35);
+    transform: translateY(-1px);
+}
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX: Remove unintended pulsing from ALL .bg-red-500 elements.
+   Only badge-pulse-dot class should pulse (in-stock indicator only).
+   ═══════════════════════════════════════════════════════════════ */
+.bg-red-500 {
+    animation: none;
+    box-shadow: none;
+}
+
+/* Retained intentional ping for in-stock dot — uses Tailwind's animate-ping */
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+@layer utilities {
+    .animate-infinite-scroll {
+        animation: infinite-scroll 25s linear infinite;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Custom scrollbar for sidebar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        /* iOS FIX: rgba fallback before oklch() */
+        background: rgba(68, 155, 195, 0.25);
+        background: oklch(0.69 0.14 232.2 / 0.25);
+        border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        /* iOS FIX: rgba fallback before oklch() */
+        background: rgba(68, 155, 195, 0.5);
+        background: oklch(0.69 0.14 232.2 / 0.5);
+    }
+
+    .text-responsive-xs {
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+    }
+    .text-responsive-sm {
+        font-size: clamp(0.875rem, 2.5vw, 1rem);
+    }
+    .text-responsive-base {
+        font-size: clamp(1rem, 3vw, 1.125rem);
+    }
+    .text-responsive-lg {
+        font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+    }
+    .text-responsive-xl {
+        font-size: clamp(1.25rem, 4vw, 1.5rem);
+    }
+    .text-responsive-2xl {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+    .text-responsive-3xl {
+        font-size: clamp(2rem, 6vw, 3rem);
+    }
+    .text-responsive-4xl {
+        font-size: clamp(3rem, 8vw, 4rem);
+    }
+
+    #global-toasts,
+    #global-toasts-mobile,
+    #global-toasts-desktop {
+        pointer-events: none;
+    }
+    #global-toasts-inner > .toast,
+    #global-toasts-mobile-inner > .toast {
+        pointer-events: auto;
+    }
+
+    .print\:hidden {
+        display: none !important;
+    }
+    .print\:block {
+        display: block !important;
+    }
+    .print\:text-black {
+        color: black !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
 @keyframes infinite-scroll {
     0% {
         transform: translateX(0);
@@ -24,8 +438,683 @@
     }
 }
 
-@layer utilities {
-    .animate-infinite-scroll {
-        animation: infinite-scroll 25s linear infinite;
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
     }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes count-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BRAND MARQUEE
+   ═══════════════════════════════════════════════════════════════ */
+.brand-marquee-wrapper {
+    overflow: hidden;
+    position: relative;
+}
+.brand-marquee-inner {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    width: max-content;
+    will-change: transform;
+    animation: marquee linear infinite;
+}
+.brand-marquee {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+.brand-marquee a {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.25rem;
+}
+.brand-marquee img {
+    display: block;
+    height: 2.25rem;
+    max-height: 2.5rem;
+    width: auto;
+    object-fit: contain;
+}
+.brand-marquee-inner:hover {
+    animation-play-state: paused;
+}
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MISC HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* iOS FIX: wrap scroll-behavior in prefers-reduced-motion so it doesn't
+   fight iOS momentum scrolling when the user hasn't opted into smooth scroll */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+.skeleton {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(to right, #f0f0f0 8%, #e0e0e0 18%, #f0f0f0 33%);
+    background-size: 1000px 100%;
+}
+
+.image-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.stat-item {
+    animation: count-up 0.5s ease-out forwards;
+}
+.stat-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.stat-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+.stat-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+.stat-item:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition:
+        opacity 0.6s ease-out,
+        transform 0.6s ease-out;
+}
+.fade-in-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+.ripple-effect::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%) scale(0);
+}
+.ripple-effect:active::after {
+    animation: ripple 0.6s ease-out;
+}
+
+.gradient-text {
+    /* iOS FIX: rgba fallback — -webkit-text-fill-color with oklch is unreliable on
+       older WebKit; the hex-based gradient is the safe fallback */
+    background: linear-gradient(135deg, #449bc3 0%, #2d6b8a 100%);
+    background: linear-gradient(
+        135deg,
+        oklch(0.69 0.14 232.2) 0%,
+        oklch(0.5 0.12 232.2) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL TRANSITIONS — keep smooth but not excessive
+   ═══════════════════════════════════════════════════════════════ */
+button,
+a {
+    transition-property:
+        color, background-color, border-color, box-shadow, transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+
+/* Focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    /* iOS FIX: rgba fallback before oklch() */
+    outline: 2px solid rgba(68, 155, 195, 1);
+    outline: 2px solid oklch(0.69 0.14 232.2);
+    outline-offset: 2px;
+}
+
+/* Newsletter email input */
+input[type="email"]:focus {
+    transform: scale(1.01);
+    transition: transform 0.2s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   iOS FIX: Prevent iOS Safari auto-zoom on input focus.
+   Safari zooms in whenever an input has font-size < 16px.
+   Setting font-size: 16px on touch devices prevents this without
+   disabling user zoom (which would harm accessibility).
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1023px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="search"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROSE / RICH TEXT
+   ═══════════════════════════════════════════════════════════════ */
+.prose-content h2,
+.prose-content h3,
+.prose-content h4,
+.prose-content h5,
+.prose-content h6 {
+    font-size: revert !important;
+    font-weight: revert !important;
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+    line-height: revert !important;
+}
+.prose-content p {
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+.prose-content ul {
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+.prose-content ol {
+    list-style-type: decimal !important;
+    padding-left: 1.5rem !important;
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+.prose-content ul ul {
+    list-style-type: circle !important;
+}
+.prose-content ul ul ul {
+    list-style-type: square !important;
+}
+.prose-content ol ol {
+    list-style-type: lower-alpha !important;
+}
+.prose-content ol ol ol {
+    list-style-type: lower-roman !important;
+}
+
+/* Quill often stores bullet lists as <ol><li data-list="bullet">...</li></ol>. */
+.prose-content ol li[data-list="bullet"] {
+    list-style-type: disc !important;
+}
+.prose-content ol li[data-list="ordered"] {
+    list-style-type: decimal !important;
+}
+.prose-content li {
+    margin-top: revert !important;
+    margin-bottom: revert !important;
+}
+.prose-content strong {
+    font-weight: revert !important;
+}
+
+.prose-content {
+    color: #374151;
+    line-height: 1.75;
+    word-break: break-word;
+}
+.prose-content a {
+    /* iOS FIX: rgba fallback before oklch() */
+    color: rgba(68, 155, 195, 1);
+    color: oklch(0.69 0.14 232.2);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.prose-content h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #111827;
+}
+.prose-content h2 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    margin-top: 1.25rem;
+    margin-bottom: 0.65rem;
+    color: #111827;
+}
+.prose-content h3 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    margin-top: 1rem;
+    margin-bottom: 0.6rem;
+    color: #111827;
+}
+.prose-content h4,
+.prose-content h5,
+.prose-content h6 {
+    color: #111827;
+    margin-top: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+.prose-content blockquote {
+    border-left: 4px solid #d1d5db;
+    margin: 1rem 0;
+    padding: 0.25rem 0 0.25rem 1rem;
+    color: #4b5563;
+    font-style: italic;
+}
+.prose-content hr {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 1.5rem 0;
+}
+.prose-content pre,
+.prose-content code {
+    font-family:
+        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+}
+.prose-content pre {
+    background: #111827;
+    color: #f9fafb;
+    padding: 0.875rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    line-height: 1.6;
+}
+.prose-content code {
+    background: #f3f4f6;
+    color: #111827;
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.35rem;
+}
+.prose-content pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+}
+.prose-content img,
+.prose-content video,
+.prose-content iframe {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+.prose-content .prose-media-wrap {
+    margin: 1rem 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+}
+.prose-content .prose-media-wrap iframe {
+    width: 100%;
+    min-height: 320px;
+}
+.prose-content .prose-table-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+.prose-content table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+}
+.prose-content th,
+.prose-content td {
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+}
+.prose-content th {
+    background: #f9fafb;
+    color: #111827;
+}
+
+/* Quill indentation support for nested list items. */
+.prose-content .ql-indent-1 {
+    margin-left: 1.5rem;
+}
+.prose-content .ql-indent-2 {
+    margin-left: 3rem;
+}
+.prose-content .ql-indent-3 {
+    margin-left: 4.5rem;
+}
+.prose-content .ql-indent-4 {
+    margin-left: 6rem;
+}
+.prose-content .ql-indent-5 {
+    margin-left: 7.5rem;
+}
+.prose-content .ql-indent-6 {
+    margin-left: 9rem;
+}
+
+/* Quill checklist compatibility on frontend. */
+.prose-content li.prose-li-check,
+.prose-content li[data-list="check"],
+.prose-content li[data-list="checked"],
+.prose-content li[data-list="unchecked"] {
+    list-style: none !important;
+    position: relative;
+    padding-left: 1.4rem;
+}
+.prose-content li.prose-li-check::before,
+.prose-content li[data-list="check"]::before,
+.prose-content li[data-list="unchecked"]::before {
+    content: "\2610";
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
+    color: #6b7280;
+}
+.prose-content li[data-list="checked"]::before {
+    content: "\2611";
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
+    color: #6b7280;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOASTS
+   ═══════════════════════════════════════════════════════════════ */
+#global-toasts,
+#global-toasts-mobile,
+#global-toasts-desktop {
+    pointer-events: none;
+}
+#global-toasts-inner > .toast,
+#global-toasts-mobile-inner > .toast {
+    pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 50;
+    /* iOS FIX: promote header to its own GPU compositing layer.
+       Without this, iOS Safari can drop the fixed header behind
+       other stacking contexts during scroll or keyboard appearance.
+       -webkit- prefix required for older WebKit. */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+.main-content-wrapper {
+    transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    /* padding-top is on <main> inline style only — do not add here */
+}
+
+main > div[style*="margin-left"] {
+    transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: margin-left;
+}
+
+body,
+html,
+main {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Sidebar open button: always visible on mobile, above overlays */
+.sidebar-mobile-open-btn {
+    z-index: 1050 !important;
+    position: fixed !important;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+    .sidebar-mobile-open-btn {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    main > .flex-1 {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 1023px) {
+    main > div[style*="margin-left"] {
+        margin-left: 0 !important;
+    }
+
+    .mobile-sidebar-drawer {
+        width: min(20rem, 92vw);
+        max-width: 100vw;
+    }
+
+    .mobile-sidebar-footer {
+        padding-bottom: calc(0.75rem + var(--safe-bottom));
+    }
+}
+
+/* iOS FIX: Safari can anchor fixed drawer/backdrop to the padded main container.
+    Keep overlay pinned to viewport top. */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 1023px) {
+        .mobile-sidebar-drawer {
+            top: var(--header-height) !important;
+            width: min(20rem, 92vw) !important;
+            height: calc(100vh - var(--header-height)) !important;
+            height: calc(
+                (var(--app-vh) * 100) - var(--header-height)
+            ) !important;
+            height: calc(100dvh - var(--header-height)) !important;
+            min-height: calc(100vh - var(--header-height)) !important;
+            min-height: calc(
+                (var(--app-vh) * 100) - var(--header-height)
+            ) !important;
+            min-height: calc(100dvh - var(--header-height)) !important;
+        }
+
+        .mobile-sidebar-backdrop {
+            top: var(--header-height) !important;
+            bottom: auto !important;
+            height: calc(100vh - var(--header-height)) !important;
+            height: calc(
+                (var(--app-vh) * 100) - var(--header-height)
+            ) !important;
+            height: calc(100dvh - var(--header-height)) !important;
+        }
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    /* iOS FIX: rgba fallback before oklch() */
+    background: rgba(68, 155, 195, 0.35);
+    background: oklch(0.69 0.14 232.2 / 0.35);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    /* iOS FIX: rgba fallback before oklch() */
+    background: rgba(68, 155, 195, 0.6);
+    background: oklch(0.69 0.14 232.2 / 0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+
+@media (hover: none) {
+    button:active,
+    a:active {
+        transform: scale(0.98);
+    }
+}
+
+@media print {
+    header,
+    footer,
+    .no-print {
+        display: none;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PARALLAX (large screens)
+   ═══════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+    .parallax-banner {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO SLIDER — always fills exactly the remaining viewport
+   The slider is the first child inside the content wrapper.
+   No matter what the header height is (with or without the
+   announcement bar), this ensures zero gap at the bottom.
+
+   iOS FIX: use dvh (dynamic viewport height) units with 100vh
+   as the fallback. 100vh on iOS Safari equals the *maximum*
+   viewport height (URL bar hidden), so the hero is often too tall
+   and causes a scrollbar. 100dvh adapts to the actual visible height.
+   ═══════════════════════════════════════════════════════════════ */
+.main-content-wrapper > div > div:first-child,
+.main-content-wrapper > div > section:first-child {
+    min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
+}
+
+/* Swiper container inside the hero section */
+.main-content-wrapper > div > div:first-child .swiper,
+.main-content-wrapper > div > section:first-child .swiper {
+    height: calc(100vh - var(--header-height)) !important;
+    height: calc(100dvh - var(--header-height)) !important;
+    min-height: calc(100vh - var(--header-height)) !important;
+    min-height: calc(100dvh - var(--header-height)) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UNIVERSAL SEARCH DROPDOWN — Scrollbar fix
+   ═══════════════════════════════════════════════════════════════ */
+#universal-search-results {
+    border-radius: 1rem; /* Match .rounded-2xl */
+    overflow: hidden;
+}
+#universal-search-results .max-h-96 {
+    overflow-y: auto;
+    border-radius: 0 0 1rem 1rem;
+}
+#universal-search-results::-webkit-scrollbar {
+    width: 4px;
+    background: #f5f5f5;
+    border-radius: 1rem;
+}
+#universal-search-results::-webkit-scrollbar-thumb {
+    background: #a0daf1;
+    border-radius: 1rem;
+}
+/* For Firefox */
+#universal-search-results {
+    scrollbar-width: thin;
+    scrollbar-color: #a0daf1 #f5f5f5;
 }

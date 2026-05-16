@@ -1,0 +1,58 @@
+@extends('admin.layouts.app')
+@section('header-title', 'Role & Permission')
+@section('header-description', 'Manage roles and permissions for the system')
+@section('breadcrumbs')
+    @foreach (Breadcrumbs::generate('admin.user-management.role-permission') as $breadcrumb)
+        @if ($breadcrumb->url && !$loop->last)
+            <li class="breadcrumb-item"><a href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</a></li>
+        @else
+            <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb->title }}</li>
+        @endif
+    @endforeach
+@endsection
+
+@section('content')
+    <div class="container-fluid py-4">
+        <div class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4 bg-white rounded-3 p-3">
+            <div>
+                <h4 class="fw-semibold mb-1">Roles List</h4>
+                <p class="text-secondary small mb-0">Manage roles and permissions for the system</p>
+            </div>
+
+            @can('role.create')
+                <a href="{{ route('admin.roles-permissions.create') }}" class="btn btn-primary btn-sm d-inline-flex align-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 me-1" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" width="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    New Role
+                </a>
+            @endcan
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="roles-table" class="table table-striped table-hover w-100" role="grid"
+                        data-bs-toggle="data-table" data-url="{{ route('admin.roles-permissions.data') }}">
+                        <thead class="bg-light text-uppercase small">
+                            <tr>
+                                <th>#</th>
+                                <th>Role Name</th>
+                                <th>Guard</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('admin_assets/js/datatableJs/rolePermission.js') }}"></script>
+@endpush

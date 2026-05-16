@@ -1,0 +1,122 @@
+@if (!empty($dispatch_btn))
+    <button type="button" class="btn btn-sm btn-icon btn-primary dispatch-action"
+        data-dispatch-id="{{ $id }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Dispatch"
+        aria-label="Dispatch">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 10h10M7 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    </button>
+@endif
+@if (!empty($edit_url))
+    <a class="btn btn-sm btn-icon btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-original-title="Edit"
+        href="{{ $edit_url }}" aria-label="Edit" data-bs-original-title="Edit">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M11.4925 2.78906H7.75349C4.67849 2.78906 2.75049 4.96606 2.75049 8.04806V16.3621C2.75049 19.4441 4.66949 21.6211 7.75349 21.6211H16.5775C19.6625 21.6211 21.5815 19.4441 21.5815 16.3621V12.3341"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M8.82812 10.921L16.3011 3.44799C17.2321 2.51799 18.7411 2.51799 19.6721 3.44799L20.8891 4.66499C21.8201 5.59599 21.8201 7.10599 20.8891 8.03599L13.3801 15.545C12.9731 15.952 12.4211 16.181 11.8451 16.181H8.09912L8.19312 12.401C8.20712 11.845 8.43412 11.315 8.82812 10.921Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M15.1655 4.60254L19.7315 9.16854" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </a>
+@endif
+@if (!empty($delete_url))
+    <button type="button" class="btn btn-sm btn-icon btn-danger delete-action"
+        data-delete-url="{{ $delete_url }}"
+        data-delete-id="{{ $product_id ?? $id ?? $model_id ?? '' }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Delete"
+        aria-label="Delete"
+        data-bs-original-title="Delete">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M19.3248 9.46826C19.3248 9.46826 18.7818 16.2033 18.4668 19.0403C18.3168 20.3953 17.4798 21.1893 16.1088 21.2143C13.4998 21.2613 10.8878 21.2643 8.27979 21.2093C6.96079 21.1823 6.13779 20.3783 5.99079 19.0473C5.67379 16.1853 5.13379 9.46826 5.13379 9.46826"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M20.708 6.23975H3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                <path
+                    d="M17.4406 6.23973C16.6556 6.23973 15.9796 5.68473 15.8256 4.91573L15.5826 3.69973C15.4326 3.13873 14.9246 2.75073 14.3456 2.75073H10.1126C9.53358 2.75073 9.02558 3.13873 8.87558 3.69973L8.63258 4.91573C8.47858 5.68473 7.80258 6.23973 7.01758 6.23973"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </button>
+@endif
+@if (isset($view_url))
+    <a class="btn btn-sm btn-icon btn-info" data-bs-toggle="tooltip" data-bs-placement="top" data-original-title="View"
+        href="{{ $view_url }}" aria-label="View" data-bs-original-title="View">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M15.58 12C15.58 13.98 13.98 15.58 12 15.58C10.02 15.58 8.42004 13.98 8.42004 12C8.42004 10.02 10.02 8.42004 12 8.42004C13.98 8.42004 15.58 10.02 15.58 12Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path
+                    d="M12 20.27C15.53 20.27 18.82 18.19 21.11 14.59C22.01 13.18 22.01 10.81 21.11 9.39997C18.82 5.79997 15.53 3.71997 12 3.71997C8.46997 3.71997 5.17997 5.79997 2.88997 9.39997C1.98997 10.81 1.98997 13.18 2.88997 14.59C5.17997 18.19 8.46997 20.27 12 20.27Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </a>
+@endif
+@if (isset($accept_url))
+    <button type="button" class="btn btn-sm btn-icon btn-success accept-action"
+        data-accept-url="{{ $accept_url }}"
+        data-accept-id="{{ $product_id ?? $id ?? $model_id ?? '' }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Accept"
+        aria-label="Accept"
+        data-bs-original-title="Accept">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M5 13L9 17L19 7"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </button>
+@endif
+@if (isset($cancel_url))
+    <button type="button" class="btn btn-sm btn-icon btn-danger cancel-action"
+        data-cancel-url="{{ $cancel_url }}"
+        data-cancel-id="{{ $product_id ?? $id ?? $model_id ?? '' }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="Cancel"
+        aria-label="Cancel"
+        data-bs-original-title="Cancel">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M6 18L18 6M6 6l12 12"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </span>
+    </button>
+@endif
+@if (isset($naps_status_url))
+    <button type="button" class="btn btn-sm btn-icon btn-secondary naps-status-action"
+        data-naps-url="{{ $naps_status_url }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-original-title="NAPS Payment Status"
+        aria-label="NAPS Payment Status"
+        data-bs-original-title="NAPS Payment Status">
+        <span class="btn-inner">
+            <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 6v6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    </button>
+@endif

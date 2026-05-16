@@ -1,121 +1,337 @@
-<header class="bg-white shadow-lg sticky top-0 z-50 border-b-2 border-primary">
-    <div class="container lg:max-w-screen px-4 py-3">
-        <div class="flex items-center justify-between">
+<header class="bg-white z-50 sticky top-0" style="box-shadow: 0 1px 0 #e5e7eb, 0 4px 24px rgba(0,0,0,0.06);">
 
-            <div class="flex items-center space-x-4">
-                <button @click="sidebarCollapsed = !sidebarCollapsed"
-                    class="hidden lg:flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 text-primary">
-                    <svg class="w-6 h-6 transition-transform duration-300" :class="{ 'rotate-90': sidebarCollapsed }"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
-                        </path>
-                    </svg>
-                </button>
+    {{-- ══ Announcement bar — only renders on the home page ══ --}}
+    @if (request()->routeIs('home'))
+        @include('client.components.announcementbar')
+    @endif
 
-                <a href="{{ route('home') }}" class="flex items-center group">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
-                        class="w-24 h-16 object-contain transition-transform duration-300 group-hover:scale-105">
-                </a>
+    {{-- ══ Main bar ══ --}}
+    <div class="px-4 sm:px-6 lg:px-8 py-2.5">
+        <div class="flex items-center gap-4">
 
-                <nav class="hidden lg:flex items-center space-x-8">
-                    <a href="{{ route('home') }}"
-                        class="relative font-medium transition-colors duration-300 group hover:opacity-80 text-primary">
-                        Home
-                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                    <a href="{{ route('products') }}"
-                        class="relative font-medium transition-colors duration-300 group hover:opacity-80 text-primary">
-                        Products
-                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                    <a href="{{ route('cart') }}"
-                        class="relative font-medium transition-colors duration-300 group flex items-center hover:opacity-80 text-primary">
-                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                            </PATH>
-                        </svg>
-                        Cart
-                        <span
-                            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
-                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                    </a>
-                </nav>
+            {{-- Logo --}}
+            <a href="{{ route('home') }}" class="shrink-0 flex items-center group">
+                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                    class="h-11 sm:h-13 lg:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
+            </a>
+
+            {{-- Search --}}
+            <div class="hidden md:flex flex-1 max-w-2xl mx-auto">
+                <form id="universal-search-form" class="relative w-full group/search" autocomplete="off"
+                    onsubmit="return false;">
+                    <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within/search:text-primary pointer-events-none"></i>
+                    <input id="universal-search-input" type="text"
+                        placeholder="{{ statictranslations('Search electronics, brands, deals...') }}"
+                        class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
+                               focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
+                               transition-all duration-200 placeholder:text-gray-400 text-gray-700"
+                        autocomplete="off">
+                    <button type="button" data-search-clear="universal-search-input"
+                        class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                        aria-label="Clear search">
+                        <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
+                    </button>
+                    <div id="universal-search-results"
+                        class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
+                    </div>
+                </form>
             </div>
 
-            <div class="hidden md:flex flex-1 max-w-md mx-6">
-                <div class="relative w-full group">
-                    <input type="text" placeholder="Search for electronics, deals..."
-                        class="w-full pl-12 pr-4 py-2.5 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
-                    <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+            {{-- ── Right cluster ── --}}
+            <div class="flex items-center gap-0.5 ml-auto">
+
+                {{-- Language (desktop) --}}
+                <div class="hidden md:block relative"
+                    @click.away="languageOpen = false; if(languageCloseTimeout){ clearTimeout(languageCloseTimeout); languageCloseTimeout = null }"
+                    @mouseenter="languageOpen = true; if(languageCloseTimeout){ clearTimeout(languageCloseTimeout); languageCloseTimeout = null }"
+                    @mouseleave="languageCloseTimeout = setTimeout(function(){ languageOpen = false }, 150)">
+
+                    <button @click="languageOpen = !languageOpen"
+                        class="flex items-center gap-1.5 h-9 px-3 rounded-xl text-gray-500 text-xs font-bold
+                                   hover:bg-gray-100 hover:text-gray-800 transition-all duration-150 tracking-wide">
+                        <span class="uppercase"><i class="fa-solid fa-globe w-4 h-4 pr-1 shrink-0"></i>{{ session('locale', app()->getLocale()) }}</span>
+                        <i class="fa-solid fa-chevron-down w-2.5 h-2.5 text-gray-400 transition-transform duration-150"
+                            :class="{ 'rotate-180': languageOpen }" fill="none" stroke="currentColor"
+                            ></i>
+                    </button>
+
+                    <div x-show="languageOpen" x-cloak x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-1"
+                        class="absolute right-0 top-full mt-1.5 w-40 z-50">
+                        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 overflow-hidden">
+                            @foreach (['en' => 'English', 'fr' => 'Français', 'ar' => 'العربية'] as $code => $label)
+                                <a href="{{ route('lang.switch', $code) }}"
+                                    class="flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors duration-100
+                                      {{ app()->getLocale() == $code ? 'bg-primary/8 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                    <span
+                                        class="w-6 h-6 rounded-lg {{ app()->getLocale() == $code ? 'bg-primary/15 text-primary' : 'bg-gray-100 text-gray-500' }} flex items-center justify-center text-[10px] font-bold shrink-0 uppercase">{{ $code }}</span>
+                                    {{ $label }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Thin separator --}}
+                <div class="hidden md:block w-px h-5 bg-gray-200 mx-1.5"></div>
+
+                {{-- Compare --}}
+                <a href="{{ route('product-compare') }}" title="{{ statictranslations('Compare') }}"
+                    class="flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
+                          hover:bg-gray-100 hover:text-gray-800 transition-all duration-150 relative group/tip">
+                    <i class="fa-solid fa-code-compare text-[15px]"></i>
+                    <span
+                        class="compare-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
+                                 bg-blue-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
+                                 leading-none shadow-sm {{ ($compareCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $compareCount ?? 0 }}</span>
+                    <span
+                        class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ statictranslations('Compare') }}</span>
+                </a>
+
+                {{-- Wishlist --}}
+                <a href="{{ route('dashboard.wishlist') }}" title="{{ statictranslations('Wishlist') }}"
+                    class="flex relative items-center justify-center w-9 h-9 rounded-xl text-gray-500
+                          hover:bg-red-50 hover:text-red-500 transition-all duration-150 group/tip">
+                    <i class="fa-solid fa-heart text-[15px]"></i>
+                    <span
+                        class="wishlist-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
+                                 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold
+                                 leading-none shadow-sm {{ ($wishlistCount ?? 0) == 0 ? 'hidden' : '' }}">{{ $wishlistCount ?? 0 }}</span>
+                    <span
+                        class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ statictranslations('Wishlist') }}</span>
+                </a>
+
+                {{-- Cart --}}
+                <a href="{{ route('cart') }}" title="{{ statictranslations('Cart') }}"
+                    class="relative flex items-center justify-center w-9 h-9 rounded-xl text-gray-500
+                          hover:bg-primary/8 hover:text-primary transition-all duration-150 group/tip">
+                    <i class="fa-solid fa-cart-shopping text-[15px]"></i>
+                    <span
+                        class="cart-counter absolute -top-0.5 -right-0.5 min-w-4.25 h-4.25 px-0.5
+                                 bg-primary text-white text-[9px] rounded-full flex items-center justify-center font-bold
+                                 leading-none shadow-sm shadow-primary/30">{{ $cartItemCount ?? 0 }}</span>
+                    <span
+                        class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity duration-150 pointer-events-none z-50">{{ statictranslations('Cart') }}</span>
+                </a>
+
+                {{-- Thin separator --}}
+                <div class="hidden md:block w-px h-5 bg-gray-200 mx-1.5"></div>
+
+                {{-- Account / Login ── desktop --}}
+                @auth
+                    <div class="hidden md:block relative"
+                        @click.away="accountOpen = false; if(accountCloseTimeout){ clearTimeout(accountCloseTimeout); accountCloseTimeout = null }"
+                        @mouseenter="accountOpen = true; if(accountCloseTimeout){ clearTimeout(accountCloseTimeout); accountCloseTimeout = null }"
+                        @mouseleave="accountCloseTimeout = setTimeout(function(){ accountOpen = false }, 150)">
+
+                        <button @click="accountOpen = !accountOpen"
+                            class="flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-xl
+                                       hover:bg-gray-100 transition-all duration-150 group">
+                            {{-- Avatar --}}
+                            @if (Auth::user()->avatar)
+                                <img src="{{ Str::startsWith(Auth::user()->avatar, ['http://', 'https://']) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}"
+                                    alt="Avatar"
+                                    class="w-7 h-7 rounded-lg object-cover ring-2 ring-primary/20 shrink-0">
+                            @else
+                                <div
+                                    class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center ring-2 ring-primary/15 shrink-0">
+                                    <span
+                                        class="text-xs font-bold text-primary leading-none">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                </div>
+                            @endif
+                            <div class="hidden lg:block text-left leading-tight">
+                                <p class="text-xs font-semibold text-gray-800 max-w-18 truncate">{{ Auth::user()->name }}
+                                </p>
+                                <p class="text-[10px] text-gray-400">{{ statictranslations('Account') }}</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-down w-3 h-3 text-gray-400 transition-transform duration-150 shrink-0"
+                                :class="{ 'rotate-180': accountOpen }"></i>
+                        </button>
+
+                        <div x-show="accountOpen" x-cloak x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 translate-y-1"
+                            class="absolute right-0 top-full mt-1.5 w-60 z-50">
+                            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+
+                                {{-- Profile strip --}}
+                                <div
+                                    class="flex items-center gap-3 px-4 py-3.5 bg-linear-to-br from-primary/5 to-primary/10 border-b border-gray-100/80">
+                                    @if (Auth::user()->avatar)
+                                        <img src="{{ Str::startsWith(Auth::user()->avatar, ['http://', 'https://']) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}"
+                                            alt="Avatar"
+                                            class="w-9 h-9 rounded-xl object-cover ring-2 ring-white shadow-sm shrink-0">
+                                    @else
+                                        <div
+                                            class="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center ring-2 ring-white shadow-sm shrink-0">
+                                            <span
+                                                class="font-bold text-primary">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                        </div>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 truncate leading-tight">
+                                            {{ Auth::user()->name }}</p>
+                                        <p class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</p>
+                                    </div>
+                                </div>
+
+                                {{-- Links --}}
+                                <nav class="p-1.5 space-y-0.5">
+                                    @foreach ([['route' => 'dashboard.overview', 'label' => 'Dashboard', 'icon' => 'fa-table-cells'], ['route' => 'dashboard.orders', 'label' => 'My Orders', 'icon' => 'fa-box-archive'], ['route' => 'dashboard.profile', 'label' => 'My Profile', 'icon' => 'fa-user'], ['route' => 'dashboard.wishlist', 'label' => 'My Wishlist', 'icon' => 'fa-heart']] as $item)
+                                        @php($routeName = $item['route'])
+                                        <a href="{{ route($routeName) }}"
+                                            class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700
+                                              hover:bg-gray-50 hover:text-primary transition-all duration-100">
+                                            <span
+                                                class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                                <i class="fa-solid {{ $item['icon'] }} text-xs"></i>
+                                            </span>
+                                            {{ statictranslations($item['label']) }}
+                                        </a>
+                                    @endforeach
+                                </nav>
+
+                                {{-- Logout --}}
+                                <div class="px-1.5 pb-1.5 pt-0">
+                                    <div class="border-t border-gray-100 pt-1.5">
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit"
+                                                class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium
+                                                           text-red-500 hover:bg-red-50 transition-all duration-100">
+                                                <span
+                                                    class="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
+                                                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                                                </span>
+                                                {{ statictranslations('Logout') }}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Guest: Login only --}}
+                @else
+                    <a href="{{ route('login') }}"
+                        class="hidden md:flex items-center gap-2 h-9 px-4 rounded-xl text-sm font-semibold text-white
+                              bg-primary shadow-md shadow-primary/25
+                              hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-px
+                              transition-all duration-150 active:translate-y-0 active:shadow-sm">
+                        <i class="fa-solid fa-right-to-bracket w-4 text-center shrink-0"></i>
+                        {{ statictranslations('Login') }}
+                    </a>
+                @endauth
+
+                {{-- Mobile hamburger --}}
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-gray-600
+                               hover:bg-gray-100 transition-all duration-150">
+                    <i x-show="!mobileMenuOpen" class="fa-solid fa-bars text-lg leading-none"></i>
+                    <i x-cloak x-show="mobileMenuOpen" class="fa-solid fa-xmark text-lg leading-none"></i>
+                </button>
+
+            </div>{{-- end right cluster --}}
+        </div>{{-- end flex row --}}
+    </div>{{-- end main bar --}}
+
+    {{-- Bottom primary accent line --}}
+    <div class="h-px bg-linear-to-r from-primary/80 via-primary/30 to-transparent"></div>
+
+    {{-- Mobile dropdown --}}
+    <div x-show="mobileMenuOpen" x-cloak @click.away="mobileMenuOpen = false"
+        x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1"
+        x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1"
+        class="md:hidden absolute top-full left-0 right-0 z-50 px-4 pb-4 pt-2 bg-white border-t border-gray-100"
+        style="box-shadow: 0 16px 40px rgba(0,0,0,0.10);">
+
+        {{-- Search --}}
+        <div class="relative mb-3">
+            <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <input id="universal-search-input-mobile" type="text"
+                placeholder="{{ statictranslations('Search products...') }}"
+                class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
+                          focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
+                          transition-all duration-200">
+            <button type="button" data-search-clear="universal-search-input-mobile"
+                class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                aria-label="Clear search">
+                <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
+            </button>
+            <div id="universal-search-results-mobile"
+                class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 hidden">
+            </div>
+        </div>
+
+        {{-- Language --}}
+        <div class="mb-3">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 px-0.5">
+                {{ statictranslations('Language') }}</p>
+            <div class="grid grid-cols-3 gap-1.5">
+                @foreach (['en' => 'EN', 'fr' => 'FR', 'ar' => 'AR'] as $code => $label)
+                    <a href="{{ route('lang.switch', $code) }}"
+                        class="flex items-center justify-center py-2 rounded-xl text-xs font-bold transition-all duration-150
+                          {{ app()->getLocale() == $code ? 'bg-primary text-white shadow-md shadow-primary/20' : 'bg-gray-100 text-gray-600 hover:bg-primary/8 hover:text-primary' }}">
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Auth --}}
+        @auth
+            <div class="border-t border-gray-100 pt-3">
+                <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-primary/5 mb-2">
+                    @if (Auth::user()->avatar)
+                        <img src="{{ Str::startsWith(Auth::user()->avatar, ['http://', 'https://']) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}"
+                            alt="Avatar" class="w-8 h-8 rounded-xl object-cover ring-2 ring-primary/20 shrink-0">
+                    @else
+                        <div
+                            class="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center ring-2 ring-primary/20 shrink-0">
+                            <span
+                                class="text-sm font-bold text-primary">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                        </div>
+                    @endif
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-gray-900 truncate leading-tight">{{ Auth::user()->name }}</p>
+                        <p class="text-xs text-gray-400">{{ Auth::user()->email }}</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <a href="{{ route('dashboard.overview') }}"
+                        class="flex items-center justify-center py-2.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-primary/8 hover:text-primary transition-colors">
+                        {{ statictranslations('Dashboard') }}
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                            class="w-full flex items-center justify-center py-2.5 rounded-xl text-xs font-semibold bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
+                            {{ statictranslations('Logout') }}
+                        </button>
+                    </form>
                 </div>
             </div>
-
-            <div class="hidden md:flex items-center space-x-3">
+        @else
+            <div class="border-t border-gray-100 pt-3">
                 <a href="{{ route('login') }}"
-                    class="font-medium px-4 py-2 rounded-full transition-all duration-300 hover:bg-gray-100 text-primary">
-                    Login
-                </a>
-                <a href="{{ route('register') }}"
-                    class="text-white px-6 py-2.5 rounded-full font-medium shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl bg-primary">
-                    Register
+                    class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold
+                          text-white bg-primary shadow-md shadow-primary/25 hover:bg-primary-dark transition-all duration-150">
+                    <i class="fa-solid fa-right-to-bracket w-4 text-center"></i>
+                    {{ statictranslations('Login') }}
                 </a>
             </div>
-
-            <div class="md:hidden">
-                <button class="text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-all duration-300"
-                    onclick="toggleMobileMenu()">
-                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="md:hidden mt-3">
-            <div class="relative">
-                <input type="text" placeholder="Search products..."
-                    class="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-opacity-20 bg-white">
-                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </div>
-        </div>
+        @endauth
     </div>
 
-    <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
-        <nav class="container mx-auto px-4 py-4 space-y-2">
-            <a href="{{ route('home') }}" class="block py-2 px-4 rounded-lg transition-colors hover:bg-gray-100 text-primary">
-                Home
-            </a>
-            <a href="{{ route('products') }}" class="block py-2 px-4 rounded-lg transition-colors hover:bg-gray-100 text-primary">
-                Products
-            </a>
-            <a href="{{ route('cart') }}" class="block py-2 px-4 rounded-lg transition-colors hover:bg-gray-100 text-primary">
-                Cart
-            </a>
-            <div class="border-t border-gray-200 my-2 pt-2">
-                <a href="{{ route('login') }}" class="block py-2 px-4 rounded-lg transition-colors hover:bg-gray-100 text-primary">
-                    Login
-                </a>
-                <a href="{{ route('register') }}" class="block py-2 px-4 text-white rounded-lg text-center mt-2 bg-primary">
-                    Register
-                </a>
-            </div>
-        </nav>
-    </div>
+    <script src="{{ asset('js/header-search.js') }}"></script>
+
 </header>
-
-<script>
-    function toggleMobileMenu() {
-        const menu = document.getElementById('mobileMenu');
-        menu.classList.toggle('hidden');
-    }
-</script>

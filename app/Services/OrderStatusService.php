@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Admin;
+use App\Models\Order;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Exception;
+
+class OrderStatusService
+{
+    // protected $allowedTransitions = [
+    //     'pending' => ['order_confirmation', 'cancelled'],
+    //     'order_confirmation' => ['processing', 'cancelled'],
+    //     'processing' => ['ready_to_ship', 'shipped', 'partially_shipped', 'dispatched', 'cancelled'],
+    //     'ready_to_ship' => ['shipped', 'partially_shipped', 'dispatched', 'cancelled'],
+    //     'partially_shipped' => ['shipped', 'dispatched', 'cancelled'],
+    //     'dispatched' => ['shipped', 'out_for_delivery', 'delivered', 'returned'],
+    //     'shipped' => ['out_for_delivery', 'delivered', 'returned'],
+    //     'out_for_delivery' => ['delivered', 'returned', 'failed_delivery'],
+    //     'delivered' => ['completed', 'returned'],
+    //     'completed' => ['returned'],
+    // ];
+
+    protected $allowedTransitions = [
+        'pending' => ['order_confirmation', 'cancelled'],
+        'paid' => ['order_confirmation', 'cancelled', 'refunded'],
+        'order_confirmation' => ['partially_dispatched', 'dispatched', 'cancelled'],
+        'partially_dispatched' => ['dispatched', 'cancelled'],
+        'dispatched' => ['ready_to_ship', 'cancelled'],
+        'ready_to_ship' => ['shipped'],
+        'shipped' => ['out_for_delivery', 'delivered'],
+        'out_for_delivery' => ['delivered'], //, 'failed_delivery'],
+        'delivered' => ['completed'], //'returned'],
+    ];
+
+    // Handel Status Translation
+    protected $statusTranslations = [];
+
+    protected $mailTriggerService;
+
+    public function getTranslatedStatus(string $status): string
+    {
+        return $this->statusTranslations[$status] ?? ucfirst(str_replace('_', ' ', $status));
+    }
+
+    public function __construct(MailTriggerService $mailTriggerService)
+    {
+        $this->mailTriggerService = $mailTriggerService;
+
+        $this->statusTranslations = [
+            'pending' => statictranslations('Pending'),
+            'paid' => statictranslations('Paid'),
+            'order_confirmation' => statictranslations('Order Confirmation'),
+            'partially_dispatched' => statictranslations('Partially Dispatched'),
+            'dispatched' => statictranslations('Dispatched'),
+            'ready_to_ship' => statictranslations('Ready to Ship'),
+            'shipped' => statictranslations('Shipped'),
+            'out_for_delivery' => statictranslations('Out for Delivery'),
+            'delivered' => statictranslations('Delivered'),
+            'completed' => statictranslations('Completed'),
+            'cancelled' => statictranslations('Cancelled'),
+            'refunded' => statictranslations('Refunded'),
+            'returned' => statictranslations('Returned'),
+            'failed_delivery' => statictranslations('Failed Delivery')
+        ];
+    }
+
+    public function changeStatus(Order $order, string $toStatus, ?string $reason = null, bool $force = false, ?int $adminId = null, ?int $userId = null, bool $sendNotification = true)
+    {
+        if (!$force && !$this->canTransition($order->status, $toStatus)) {
+            throw new Exception("Invalid order transition from '{$order->status}' to '{$toStatus}'.");
+        }
+
+
+        // Only set status_changed_by for admin actions; set to null for client actions
+        if ($adminId) {
+            $statusActorId = $this->resolveAdminId($adminId);
+            $order->status_changed_by = $statusActorId;
+        } else {
+            $statusActorId = $userId ?? null;
+            $order->status_changed_by = null;
+        }
+
+        $order->status = $toStatus;
+        $order->status_changed_at = Carbon::now();
+
+        if (in_array($toStatus, ['cancelled', 'refunded'], true)) {
+            $order->cancel_reason = $reason;
+            $order->cancelled_by = $statusActorId;
+            $order->cancelled_at = Carbon::now();
+        }
+
+        $order->save();
+
+        if ($sendNotification) {
+            $this->mailTriggerService->sendOrderStatusUpdate($order, $toStatus);
+        }
+
+        return $order;
+    }
+
+    public function canTransition(string $from, string $to): bool
+    {
+        if ($from === $to)
+            return true;
+
+        return isset($this->allowedTransitions[$from]) &&
+            in_array($to, $this->allowedTransitions[$from]);
+    }
+
+    public function getAvailableTransitions(string $currentStatus): array
+    {
+        return $this->allowedTransitions[$currentStatus] ?? [];
+    }
+
+    protected function resolveAdminId(?int $adminId): ?int
+    {
+        if (! $adminId) {
+            $adminId = Auth::guard('admin')->id();
+        }
+
+        if (! $adminId) {
+            return null;
+        }
+
+        return Admin::where('id', $adminId)->exists() ? $adminId : null;
+    }
+
+    public function getStatuses(): array
+    {
+        $statuses = array_keys($this->allowedTransitions);
+
+        foreach ($this->allowedTransitions as $transitions) {
+            foreach ($transitions as $status) {
+                if (!in_array($status, $statuses, true)) {
+                    $statuses[] = $status;
+                }
+            }
+        }
+
+        return $statuses;
+    }
+}

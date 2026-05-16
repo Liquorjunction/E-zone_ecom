@@ -1,0 +1,365 @@
+/**
+ * Address Dropdown Handler for Checkout Process
+ * Handles dropdown selection and populates hidden form fields
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Shipping Address Dropdown Handler
+    const shippingSelect = document.getElementById('shippingAddressSelect');
+    const shippingDisplay = document.getElementById('selectedShippingDisplay');
+
+    function readAddressData(option) {
+        if (!option) return null;
+
+        return {
+            name: option.dataset.name || '',
+            street: option.dataset.street || '',
+            city: option.dataset.city || '',
+            postalCode: option.dataset.postalCode || '',
+            country: option.dataset.country || 'Morocco',
+            phone: option.dataset.phone || ''
+        };
+    }
+
+    function splitName(fullName) {
+        const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+        return {
+            firstName: parts[0] || '',
+            lastName: parts.slice(1).join(' ')
+        };
+    }
+
+    function formatLocation(city, postalCode) {
+        return [city, postalCode].filter(Boolean).join(', ');
+    }
+
+    function syncShippingRequirementMode() {
+        const manualShippingIds = ['firstName', 'lastName', 'address', 'city', 'zip', 'country'];
+        const usingSavedAddressDropdown = !!shippingSelect;
+
+        manualShippingIds.forEach((id) => {
+            const input = document.getElementById(id);
+            if (!input) return;
+
+            // Avoid native browser validation on hidden manual fields.
+            input.required = !usingSavedAddressDropdown;
+        });
+
+        if (shippingSelect) {
+            shippingSelect.required = true;
+        }
+    }
+
+    // Ensure required attributes match visible/active shipping UI mode on load.
+    syncShippingRequirementMode();
+
+    if (shippingSelect) {
+        shippingSelect.addEventListener('change', function() {
+            const option = this.options[this.selectedIndex];
+            const addr = readAddressData(option);
+            if (!addr || !addr.name) {
+                clearShippingFields();
+                if (shippingDisplay) shippingDisplay.classList.add('hidden');
+                return;
+            }
+            const nameParts = splitName(addr.name);
+            setFieldValue('firstName', nameParts.firstName);
+            setFieldValue('lastName', nameParts.lastName);
+            setFieldValue('address', addr.street);
+            setFieldValue('city', addr.city);
+            setFieldValue('zip', addr.postalCode);
+            setFieldValue('country', addr.country);
+            if (shippingDisplay) {
+                document.getElementById('displayShippingName').textContent = addr.name;
+                document.getElementById('displayShippingStreet').textContent = addr.street;
+                document.getElementById('displayShippingCity').textContent = formatLocation(addr.city, addr.postalCode);
+                shippingDisplay.classList.remove('hidden');
+            }
+            const billingSameCheckbox = document.getElementById('billingSameAsShipping');
+            if (billingSameCheckbox && billingSameCheckbox.checked) {
+                setTimeout(() => {
+                    setFieldValue('billing_firstName', nameParts.firstName);
+                    setFieldValue('billing_lastName', nameParts.lastName);
+                    setFieldValue('billing_address_line', addr.street);
+                    setFieldValue('billing_city', addr.city);
+                    setFieldValue('billing_zip', addr.postalCode);
+                    setFieldValue('billing_country', addr.country);
+                    setFieldValue('billing_phone', addr.phone);
+                }, 50);
+            }
+        });
+        // Trigger change on load if default is selected
+        if (shippingSelect.value) {
+            shippingSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Removed logic for toggling manual address fields and Add/Use Different Address button
+
+
+    // Billing Address Dropdown Handler
+    const billingSelect = document.getElementById('billingAddressSelect');
+    const billingDisplay = document.getElementById('selectedBillingDisplay');
+
+    if (billingSelect) {
+        billingSelect.addEventListener('change', function() {
+            const option = this.options[this.selectedIndex];
+            const addr = readAddressData(option);
+            if (!addr || !addr.name) {
+                // Clear fields if no valid selection
+                clearBillingFields();
+                if (billingDisplay) billingDisplay.classList.add('hidden');
+                return;
+            }
+
+            const nameParts = splitName(addr.name);
+
+            setFieldValue('billing_firstName', nameParts.firstName);
+            setFieldValue('billing_lastName', nameParts.lastName);
+            setFieldValue('billing_address_line', addr.street);
+            setFieldValue('billing_city', addr.city);
+            setFieldValue('billing_zip', addr.postalCode);
+            setFieldValue('billing_country', addr.country);
+            setFieldValue('billing_phone', addr.phone);
+
+            if (billingDisplay) {
+                document.getElementById('displayBillingName').textContent = addr.name;
+                document.getElementById('displayBillingStreet').textContent = addr.street;
+                document.getElementById('displayBillingCity').textContent = formatLocation(addr.city, addr.postalCode);
+                billingDisplay.classList.remove('hidden');
+            }
+        });
+
+        // Trigger change on load if default is selected
+        if (billingSelect.value) {
+            billingSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Billing Same as Shipping Checkbox Handler
+    const billingSameCheckbox = document.getElementById('billingSameAsShipping');
+    const billingFields = document.getElementById('billingFields');
+
+    if (billingSameCheckbox && billingFields) {
+        // Function to copy shipping to billing
+        function copyShippingToBilling() {
+            const shippingData = {
+                firstName: document.getElementById('firstName')?.value || '',
+                lastName: document.getElementById('lastName')?.value || '',
+                address: document.getElementById('address')?.value || '',
+                city: document.getElementById('city')?.value || '',
+                zip: document.getElementById('zip')?.value || '',
+                country: document.getElementById('country')?.value || 'Morocco',
+                phone: document.getElementById('phone')?.value || ''
+            };
+
+            setFieldValue('billing_firstName', shippingData.firstName);
+            setFieldValue('billing_lastName', shippingData.lastName);
+            setFieldValue('billing_address_line', shippingData.address);
+            setFieldValue('billing_city', shippingData.city);
+            setFieldValue('billing_zip', shippingData.zip);
+            setFieldValue('billing_country', shippingData.country);
+            setFieldValue('billing_phone', shippingData.phone);
+        }
+
+        billingSameCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                billingFields.classList.add('hidden');
+                // Copy shipping to billing when checkbox is checked
+                copyShippingToBilling();
+                if (billingDisplay) billingDisplay.classList.add('hidden');
+            } else {
+                billingFields.classList.remove('hidden');
+                // Clear billing fields when unchecked
+                clearBillingFields();
+            }
+        });
+
+        // Trigger on page load
+        if (billingSameCheckbox.checked) {
+            billingFields.classList.add('hidden');
+            // Copy shipping to billing on page load if checkbox is checked
+            setTimeout(() => {
+                copyShippingToBilling();
+            }, 100); // Small delay to ensure shipping address is loaded
+        }
+    }
+
+    // Form Validation on Submit
+    // Bind to the actual checkout form element rendered on the page.
+    const checkoutForm = (shippingSelect && shippingSelect.closest('form')) || document.querySelector('#checkout-root form[action]');
+    if (checkoutForm) {
+        checkoutForm.setAttribute('novalidate', 'novalidate');
+
+        checkoutForm.addEventListener('submit', function(e) {
+            // Clear previous validation errors
+            clearValidationErrors();
+
+            let hasErrors = false;
+
+            // Only validate if we're on step 2 (shipping/billing address fields exist)
+            const isStep2 = shippingSelect && shippingSelect.offsetParent !== null;
+
+            // Keep billing and shipping independent unless "Same as shipping" is checked.
+            if (isStep2) {
+                const shippingData = {
+                    firstName: document.getElementById('firstName')?.value || '',
+                    lastName: document.getElementById('lastName')?.value || '',
+                    address: document.getElementById('address')?.value || '',
+                    city: document.getElementById('city')?.value || '',
+                    zip: document.getElementById('zip')?.value || '',
+                    country: document.getElementById('country')?.value || 'Morocco',
+                    phone: document.getElementById('phone')?.value || ''
+                };
+
+                if (billingSameCheckbox && billingSameCheckbox.checked) {
+                    if (shippingData.firstName && shippingData.lastName && shippingData.address) {
+                        setFieldValue('billing_firstName', shippingData.firstName);
+                        setFieldValue('billing_lastName', shippingData.lastName);
+                        setFieldValue('billing_address_line', shippingData.address);
+                        setFieldValue('billing_city', shippingData.city);
+                        setFieldValue('billing_zip', shippingData.zip);
+                        setFieldValue('billing_country', shippingData.country);
+                        setFieldValue('billing_phone', shippingData.phone);
+                    } else {
+                        showValidationError(shippingSelect, trans('Please select a shipping address first.'));
+                        hasErrors = true;
+                    }
+                }
+            }
+
+            // Validate shipping address
+            if (shippingSelect && !shippingSelect.value) {
+                showValidationError(shippingSelect, trans('Please select a shipping address'));
+                hasErrors = true;
+            }
+
+            // Validate billing address (if not same as shipping)
+            if (billingSameCheckbox && !billingSameCheckbox.checked) {
+                if (billingSelect) {
+                    // Auth user with saved billing addresses - one must be selected.
+                    if (!billingSelect.value) {
+                        showValidationError(billingSelect, trans('Please select a billing address'));
+                        hasErrors = true;
+                    }
+                } else {
+                    // No billingAddressSelect means zero saved billing addresses.
+                    // Unchecking "same as shipping" with no address to select is
+                    // always invalid — block unconditionally regardless of hidden
+                    // field values (they may hold stale shipping data).
+                    var billingSection = document.getElementById('billingAddressSection');
+                    var anchorEl = billingSection || document.getElementById('billingFields');
+                    if (anchorEl) {
+                        showValidationError(anchorEl, trans('Please add a billing address, or use the same as shipping'));
+                    }
+                    var addBillingBtn = document.getElementById('addBillingAddressBtnEmpty');
+                    if (addBillingBtn) {
+                        addBillingBtn.classList.add('ring-4', 'ring-red-400', 'scale-105');
+                        setTimeout(function() {
+                            addBillingBtn.classList.remove('ring-4', 'ring-red-400', 'scale-105');
+                        }, 2500);
+                    }
+                    hasErrors = true;
+                }
+            }
+
+            // Validate required fields
+            const requiredFields = ['email', 'phone'];
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(fieldName);
+                if (field && !field.value.trim()) {
+                    showValidationError(field, `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`);
+                    hasErrors = true;
+                }
+            });
+
+
+            if (hasErrors) {
+                e.preventDefault();
+
+                // Scroll to first error
+                const firstError = document.querySelector('.validation-error');
+                if (firstError) {
+                    firstError.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            }
+        });
+    }
+
+    // Helper Functions
+    function setFieldValue(fieldId, value) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            // Ensure value is always a string
+            const stringValue = String(value || '');
+            field.value = stringValue;
+            // Set the attribute as well to ensure it's in the DOM
+            field.setAttribute('value', stringValue);
+        }
+    }
+
+    function clearShippingFields() {
+        setFieldValue('firstName', '');
+        setFieldValue('lastName', '');
+        setFieldValue('address', '');
+        setFieldValue('city', '');
+        setFieldValue('zip', '');
+    }
+
+    function clearBillingFields() {
+        setFieldValue('billing_firstName', '');
+        setFieldValue('billing_lastName', '');
+        setFieldValue('billing_address_line', '');
+        setFieldValue('billing_city', '');
+        setFieldValue('billing_zip', '');
+        setFieldValue('billing_country', 'Morocco');
+        setFieldValue('billing_phone', '');
+    }
+
+    function showValidationError(element, message) {
+        // Remove existing error for this element
+        const existingError = element.parentElement.querySelector('.validation-error');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        // Create error message with animation
+        const errorDiv = document.createElement('p');
+        errorDiv.className = 'validation-error mt-2 text-sm text-red-600 font-semibold flex items-center gap-1 animate-shake';
+        errorDiv.innerHTML = `
+            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+            ${message}
+        `;
+
+        // Add error styling to field with visual feedback
+        element.classList.add('border-red-500', 'border-2', 'focus:border-red-500', 'focus:ring-red-500', 'bg-red-50');
+        element.classList.remove('border-gray-200');
+
+        // Insert error message
+        element.parentElement.appendChild(errorDiv);
+    }
+
+    function clearValidationErrors() {
+        const errors = document.querySelectorAll('.validation-error');
+
+        // Remove all validation error messages
+        errors.forEach(error => error.remove());
+
+        // Remove error styling from all fields
+        document.querySelectorAll('.border-red-500').forEach(field => {
+            field.classList.remove('border-red-500', 'border-2', 'focus:border-red-500', 'focus:ring-red-500', 'bg-red-50');
+            field.classList.add('border-gray-200');
+        });
+
+        // Remove notification banner if exists
+        const banner = document.getElementById('validationErrorBanner');
+        if (banner) {
+            banner.remove();
+        }
+    }
+});

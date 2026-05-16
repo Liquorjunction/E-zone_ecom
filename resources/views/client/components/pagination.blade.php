@@ -4,7 +4,7 @@
     <div class="{{ $containerClasses }}">
         <!-- Results Count -->
         <p class="text-sm text-gray-600">
-            Showing <span class="font-semibold">{{ $paginator->firstItem() }}-{{ $paginator->lastItem() }}</span> of <span class="font-semibold">{{ $paginator->total() }}</span> results
+            {{ statictranslations('Showing') }} <span class="font-semibold">{{ $paginator->firstItem() }}-{{ $paginator->lastItem() }}</span> {{ statictranslations('of') }} <span class="font-semibold">{{ $paginator->total() }}</span> {{ statictranslations('results') }}
         </p>
 
         <!-- Pagination Controls -->

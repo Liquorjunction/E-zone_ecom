@@ -1,0 +1,94 @@
+#stockReportTable tbody tr.sku-parent-row {
+    background-color: #e8edf5 !important;
+    border-left: 4px solid #4a6fa5 !important;
+    font-weight: 600;
+}
+#stockReportTable tbody tr.sku-parent-row.has-children {
+    background-color: #dce4f0 !important;
+    border-left: 4px solid #2c5282 !important;
+}
+#stockReportTable tbody tr.sku-child-row {
+    background-color: #ffffff !important;
+    border-left: 4px solid #a8c0e8 !important;  /* lighter than parent */
+}
+#stockReportTable tbody tr.sku-child-row td:nth-child(3) {
+    padding-left: 2rem !important;
+    color: #555;
+    font-size: 0.875rem;
+}
+#stockReportTable tbody tr.sku-child-row:last-of-type {
+    border-bottom: 2px solid #c8d8ef !important;
+}
+.expand-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1.5px solid #4a6fa5;
+    background: #fff;
+    color: #4a6fa5;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.expand-btn:hover {
+    background: #4a6fa5;
+    color: #fff;
+}
+
+.expand-btn.expanded i {
+    transform: rotate(180deg);
+}
+
+.expand-btn i {
+    display: inline-block;
+    transition: transform 0.25s ease;
+}
+.sku-badge {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+}
+
+.qty-badge {
+    font-size: 0.82rem;
+    min-width: 36px;
+    display: inline-block;
+}
+
+.child-batch-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.82rem;
+    color: #3a5a8c;
+    font-weight: 500;
+}
+#stockReportTableWrapper {
+    width: 100%;
+}
+
+#stockReportTable thead th {
+    background-color: #2c3e50;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+#stockReportTable td {
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+#stockReportTable.table-bordered td,
+#stockReportTable.table-bordered th {
+    border-color: #d0d9e8;
+}
+
+.expand-cell {
+    width: 44px;
+    min-width: 44px;
+}

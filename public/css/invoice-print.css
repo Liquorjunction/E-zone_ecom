@@ -1,0 +1,25 @@
+@media print {
+    .no-print { display: none !important; }
+    body, html {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box;
+    }
+    @page {
+        margin: 0;
+        size: A4;
+    }
+    .min-h-screen.invoice-bg {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    .py-12 { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .px-2 { padding-left: 0 !important; padding-right: 0 !important; }
+    .max-w-2xl {
+        margin-top: 0 !important;
+    }
+}
+.invoice-bg {
+    background: repeating-linear-gradient(135deg, #f3f4f6 0px, #f3f4f6 20px, #e5e7eb 20px, #e5e7eb 40px);
+}

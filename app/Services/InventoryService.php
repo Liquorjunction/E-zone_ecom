@@ -1,0 +1,539 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Product;
+use App\Models\InventoryTransaction;
+use App\Repositories\Admin\Interfaces\InventoryRepositoryInterface;
+use App\Repositories\Admin\Interfaces\InventoryTransactionsRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
+class InventoryService
+{
+    protected $inventoryRepo;
+    protected $inventoryTransactionRepo;
+
+    public function __construct(InventoryRepositoryInterface $inventoryRepo, InventoryTransactionsRepositoryInterface $inventoryTransactionRepo)
+    {
+        $this->inventoryRepo = $inventoryRepo;
+        $this->inventoryTransactionRepo = $inventoryTransactionRepo;
+    }
+
+    public function create(array $data, int $adminId = 1)
+    {
+        $batchData = array_merge($data, [
+            'items' => [
+                [
+                    'product_id' => $data['product_id'],
+                    'product_variant_id' => $data['product_variant_id'] ?? null,
+                    'quantity' => $data['quantity'],
+                    'cost_price' => $data['cost_price'] ?? 0,
+                ]
+            ]
+        ]);
+
+        return $this->createBatch($batchData, $adminId);
+    }
+
+    public function createBatch(array $batchData, int $adminId = 1)
+    {
+        return DB::transaction(function () use ($batchData, $adminId) {
+            $batchNo = $batchData['batch_no'] ?? 'BATCH-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+
+            $locationType = $batchData['location_type'];
+            $warehouseId = ($locationType === 'warehouse') ? $batchData['warehouse_id'] : null;
+            $storeId = ($locationType === 'store') ? $batchData['store_id'] : null;
+            $status = $batchData['status'] ?? 'active';
+            $notes = $batchData['notes'] ?? null;
+
+            $createdItems = [];
+
+            foreach ($batchData['items'] as $item) {
+                if (empty($item['product_id']) || !isset($item['quantity'])) continue;
+
+                $inventory = $this->inventoryRepo->create([
+                    'product_id' => $item['product_id'],
+                    'product_variant_id' => $item['product_variant_id'] ?? null,
+                    'location_type' => $locationType,
+                    'warehouse_id' => $warehouseId,
+                    'store_id' => $storeId,
+                    'quantity' => $item['quantity'],
+                    'cost_price' => $item['cost_price'] ?? 0,
+                    'batch_no' => $batchNo,
+                    'status' => $status,
+                    'notes' => $notes,
+                ]);
+
+                $createdItems[] = $inventory;
+
+                try {
+                    $this->inventoryTransactionRepo->create([
+                        'inventory_id' => $inventory->id,
+                        'type' => 'inward',
+                        'quantity' => $inventory->quantity,
+                        'rate' => $inventory->cost_price ?? 0,
+                        'batch_no' => $batchNo,
+                        'created_by' => $adminId,
+                        'description' => 'Batch import: ' . $batchNo,
+                        'before_quantity' => null,
+                        'after_quantity' => $inventory->quantity,
+                        'quantity_change' => $inventory->quantity,
+                    ]);
+                } catch (\Throwable $e) {
+                }
+            }
+
+            return $createdItems;
+        });
+    }
+
+    public function update(int $id, array $data, int $adminId = 1)
+    {
+        $inventory = $this->inventoryRepo->find($id);
+        if ($inventory) {
+            $oldQuantity = $inventory->quantity;
+            $inventory = $this->inventoryRepo->update($id, $data);
+
+            if (array_key_exists('quantity', $data)) {
+                $delta = $inventory->quantity - $oldQuantity;
+                if ($delta != 0) {
+                    try {
+                        $this->inventoryTransactionRepo->create([
+                            'inventory_id' => $inventory->id,
+                            'type' => ($delta > 0) ? 'inward' : 'outward',
+                            'quantity' => abs($delta),
+                            'rate' => $inventory->cost_price ?? 0,
+                            'batch_no' => $inventory->batch_no,
+                            'created_by' => $adminId,
+                            'description' => 'Inventory quantity updated' . ($delta > 0 ? ' (inward)' : ' (outward)'),
+                            'before_quantity' => $oldQuantity,
+                            'after_quantity' => $inventory->quantity,
+                            'quantity_change' => $delta,
+                        ]);
+                    } catch (\Throwable $e) {
+                        Log::error('Error creating inventory transaction: ' . $e->getMessage());
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function updateBatch($id, array $data, int $adminId = 1)
+    {
+        $referenceItem = $this->inventoryRepo->find($id);
+        if (!$referenceItem) throw new \Exception('Original batch not found.');
+
+        $batchNo = $referenceItem->batch_no;
+
+        return DB::transaction(function () use ($data, $batchNo, $adminId) {
+            $oldItems = $this->inventoryRepo->getByBatchNo($batchNo);
+            $oldMap = [];
+            foreach ($oldItems as $item) {
+                $key = $item->product_id . '-' . ($item->product_variant_id ?? '0');
+                $oldMap[$key] = $item;
+            }
+
+            $newMap = [];
+            foreach ($data['items'] as $item) {
+                $key = $item['product_id'] . '-' . (($item['product_variant_id'] ?? '0'));
+                $newMap[$key] = $item;
+            }
+
+            foreach ($oldMap as $key => $old) {
+                if (isset($newMap[$key])) {
+                    $new = $newMap[$key];
+                    $qtyChange = $new['quantity'] - $old->quantity;
+                    if ($qtyChange != 0 || ($old->cost_price != ($new['cost_price'] ?? 0))) {
+                        $this->inventoryTransactionRepo->create([
+                            'inventory_id' => $old->id,
+                            'type' => 'update',
+                            'quantity' => $new['quantity'],
+                            'rate' => $new['cost_price'] ?? 0,
+                            'batch_no' => $batchNo,
+                            'created_by' => $adminId,
+                            'description' => 'Batch item updated' . (($qtyChange > 0) ? ' (inward)' : ' (outward)'),
+                            'before_quantity' => $old->quantity,
+                            'after_quantity' => $new['quantity'],
+                            'quantity_change' => $qtyChange,
+                        ]);
+                    }
+                } else {
+                    $this->inventoryTransactionRepo->create([
+                        'inventory_id' => $old->id,
+                        'type' => 'removed',
+                        'quantity' => 0,
+                        'rate' => $old->cost_price,
+                        'batch_no' => $batchNo,
+                        'created_by' => $adminId,
+                        'description' => 'Batch item removed' . ' (outward)',
+                        'before_quantity' => $old->quantity,
+                        'after_quantity' => 0,
+                        'quantity_change' => -$old->quantity,
+                    ]);
+                }
+            }
+
+            $pendingAddedTransactions = [];
+            foreach ($newMap as $key => $new) {
+                if (!isset($oldMap[$key])) {
+                    $pendingAddedTransactions[$key] = [
+                        'type' => 'added',
+                        'quantity' => $new['quantity'],
+                        'rate' => $new['cost_price'] ?? 0,
+                        'batch_no' => $batchNo,
+                        'created_by' => $adminId,
+                        'description' => 'Batch item added (inward)',
+                        'before_quantity' => 0,
+                        'after_quantity' => $new['quantity'],
+                        'quantity_change' => $new['quantity'],
+                    ];
+                }
+            }
+
+            $this->inventoryRepo->deleteByBatchNo($batchNo);
+
+            $data['batch_no'] = $batchNo;
+            $created = $this->createBatch($data, Auth::id());
+
+            foreach ($created as $inv) {
+                $key = $inv->product_id . '-' . ($inv->product_variant_id ?? '0');
+                if (isset($pendingAddedTransactions[$key])) {
+                    $tData = $pendingAddedTransactions[$key];
+                    $tData['inventory_id'] = $inv->id;
+
+                    $this->inventoryTransactionRepo->create($tData);
+                }
+            }
+
+            return $created;
+        });
+    }
+
+    public function updateStatus($id)
+    {
+        $inventory = $this->inventoryRepo->find($id);
+        if ($inventory) {
+            $newStatus = $inventory->status === 'active' ? 'inactive' : 'active';
+            return $this->inventoryRepo->update($id, ['status' => $newStatus]);
+        }
+        return false;
+    }
+
+    public function delete(int $id, int $adminId = 1)
+    {
+        $inventory = $this->inventoryRepo->find($id);
+        if ($inventory) {
+            if ($inventory->quantity > 0) {
+                try {
+                    $this->inventoryTransactionRepo->create([
+                        'inventory_id' => $inventory->id,
+                        'type' => 'outward',
+                        'quantity' => -1 * $inventory->quantity,
+                        'rate' => $inventory->cost_price ?? 0,
+                        'batch_no' => $inventory->batch_no,
+                        'created_by' => $adminId,
+                        'description' => 'Inventory record deleted' . ' (outward)',
+                        'before_quantity' => $inventory->quantity,
+                        'after_quantity' => 0,
+                        'quantity_change' => -1 * $inventory->quantity,
+                    ]);
+                } catch (\Throwable $e) {
+                }
+            }
+            return $this->inventoryRepo->delete($id);
+        }
+        return false;
+    }
+
+    public function seedAllProductsWithInventory(array $data, int $adminId = 1): array
+    {
+        return DB::transaction(function () use ($data, $adminId) {
+            $batchNo = $data['batch_no'] ?? 'SEED-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+            $locationType = $data['location_type'];
+            $warehouseId = ($locationType === 'warehouse') ? ($data['warehouse_id'] ?? null) : null;
+            $storeId = ($locationType === 'store') ? ($data['store_id'] ?? null) : null;
+            $quantity = (float) ($data['quantity'] ?? 100);
+            $notes = $data['notes'] ?? null;
+
+            $products = Product::with(['productVariants' => function ($query) {
+                $query->orderBy('id');
+            }])->get();
+
+            $created = 0;
+            $items = [];
+
+            foreach ($products as $product) {
+                $variantList = $product->productVariants && $product->productVariants->count() > 0
+                    ? $product->productVariants
+                    : collect([null]);
+
+                foreach ($variantList as $variant) {
+                    $variantId = $variant?->id;
+                    $targetCostPrice = $this->resolveLowerInventoryCostPrice(
+                        $product->price,
+                        $variant?->price
+                    );
+
+                    $payload = [
+                        'product_id' => $product->id,
+                        'product_variant_id' => $variantId,
+                        'location_type' => $locationType,
+                        'warehouse_id' => $warehouseId,
+                        'store_id' => $storeId,
+                        'cost_price' => $targetCostPrice,
+                        'quantity' => $quantity,
+                        'batch_no' => $batchNo,
+                        'status' => 'active',
+                        'notes' => $notes,
+                    ];
+
+                    $inventory = $this->inventoryRepo->create($payload);
+                    $created++;
+                    $items[] = $inventory;
+
+                    try {
+                        $this->inventoryTransactionRepo->create([
+                            'inventory_id' => $inventory->id,
+                            'type' => 'inward',
+                            'quantity' => $quantity,
+                            'rate' => $targetCostPrice,
+                            'batch_no' => $batchNo,
+                            'created_by' => $adminId,
+                            'description' => 'Bulk inventory seed: ' . $batchNo,
+                            'before_quantity' => 0,
+                            'after_quantity' => $quantity,
+                            'quantity_change' => $quantity,
+                        ]);
+                    } catch (\Throwable $e) {
+                    }
+                }
+            }
+
+            return [
+                'batch_no' => $batchNo,
+                'created' => $created,
+                'items' => $items,
+            ];
+        });
+    }
+
+    private function resolveLowerInventoryCostPrice($productPrice, $variantPrice = null): float
+    {
+        $productPrice = (float) ($productPrice ?? 0);
+        $variantPrice = $variantPrice === null ? null : (float) $variantPrice;
+
+        if ($variantPrice === null || $variantPrice <= 0) {
+            return max(0, $productPrice);
+        }
+
+        if ($productPrice <= 0) {
+            return max(0, $variantPrice);
+        }
+
+        return max(0, min($productPrice, $variantPrice));
+    }
+
+    // FIFO Style Reservation
+    public function reserveStock(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId = 1)
+    {
+        $remaining = $quantity;
+        $rows = $this->inventoryRepo->getForReservation($productId, $variantId, 'asc');
+
+        foreach ($rows as $inv) {
+            if ($remaining <= 0) break;
+
+            $availableToReserve = max(0, $inv->quantity - $inv->reserved_quantity);
+            if ($availableToReserve <= 0) continue;
+
+            $take = min($availableToReserve, $remaining);
+            $before = $inv->reserved_quantity;
+
+            $this->inventoryRepo->update($inv->id, ['reserved_quantity' => $before + $take]);
+
+            try {
+                $this->inventoryTransactionRepo->create([
+                    'inventory_id' => $inv->id,
+                    'type' => 'reserve',
+                    'quantity' => $take,
+                    'rate' => $inv->cost_price ?? 0,
+                    'batch_no' => $inv->batch_no,
+                    'created_by' => $adminId,
+                    'description' => 'Reserved for ' . $referenceType . 'Id: ' . '#' . $referenceId,
+                    'reference_type' => $referenceType,
+                    'reference_id' => $referenceId,
+                    'before_quantity' => $before,
+                    'after_quantity' => $before + $take,
+                    'quantity_change' => $take,
+                ]);
+            } catch (\Throwable $e) {
+            }
+
+            $remaining -= $take;
+        }
+
+        $reserved = $quantity - $remaining;
+        return $reserved;
+    }
+
+    // LIFO Style Release
+    public function releaseReservation(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId = 1)
+    {
+        $remaining = $quantity;
+        $rows = $this->inventoryRepo->getForReservation($productId, $variantId, 'desc');
+
+        foreach ($rows as $inv) {
+            if ($remaining <= 0) break;
+
+            $reserved = max(0, $inv->reserved_quantity);
+            if ($reserved <= 0) continue;
+
+            $take = min($reserved, $remaining);
+            $before = $inv->reserved_quantity;
+
+            $this->inventoryRepo->update($inv->id, ['reserved_quantity' => max(0, $before - $take)]);
+
+            try {
+                $this->inventoryTransactionRepo->create([
+                    'inventory_id' => $inv->id,
+                    'type' => 'release',
+                    'quantity' => $take,
+                    'rate' => $inv->cost_price ?? 0,
+                    'batch_no' => $inv->batch_no,
+                    'created_by' => $adminId,
+                    'description' => 'Reservation released for ' . $referenceType . 'Id: ' . '#' . $referenceId,
+                    'reference_type' => $referenceType,
+                    'reference_id' => $referenceId,
+                    'before_quantity' => $before,
+                    'after_quantity' => max(0, $before - $take),
+                    'quantity_change' => -1 * $take,
+                ]);
+            } catch (\Throwable $e) {
+            }
+
+            $remaining -= $take;
+        }
+
+        return $quantity - $remaining;
+    }
+
+    public function releaseDispatched(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId)
+    {
+        $remaining = $quantity;
+        $adminId = $adminId ?? Auth::guard('admin')->id();
+        $rows = $this->inventoryRepo->getForDispatchRelease($productId, $variantId);
+
+        foreach ($rows as $inv) {
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $reserved = max(0, $inv->reserved_quantity);
+            if ($reserved <= 0) {
+                continue;
+            }
+
+            $take = min($reserved, $remaining);
+            $before = $inv->reserved_quantity;
+            $after = max(0, $before - $take);
+
+            $this->inventoryRepo->update($inv->id, ['reserved_quantity' => $after]);
+
+            $this->inventoryTransactionRepo->create([
+                'inventory_id' => $inv->id,
+                'type' => 'release',
+                'quantity' => $take,
+                'rate' => $inv->cost_price ?? 0,
+                'batch_no' => $inv->batch_no,
+                'created_by' => $adminId,
+                'description' => 'Order cancelled, released dispatch reservation for ' . $referenceType . ' #' . $referenceId,
+                'reference_type' => $referenceType,
+                'reference_id' => $referenceId,
+                'before_quantity' => $before,
+                'after_quantity' => $after,
+                'quantity_change' => -1 * $take,
+            ]);
+
+            $remaining -= $take;
+        }
+
+        return $quantity - $remaining;
+    }
+
+    public function restoreDispatchedInventory(int $inventoryId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId = 1)
+    {
+        $inventory = $this->inventoryRepo->findWithLock($inventoryId);
+
+        if (! $inventory) {
+            throw new \Exception('Inventory record not found for dispatched stock reversal.');
+        }
+
+        $before = (float) $inventory->quantity;
+        $after = $before + $quantity;
+
+        $this->inventoryRepo->update($inventory->id, ['quantity' => $after]);
+
+        $this->inventoryTransactionRepo->create([
+            'inventory_id' => $inventory->id,
+            'type' => 'restock',
+            'quantity' => $quantity,
+            'rate' => $inventory->cost_price ?? 0,
+            'batch_no' => $inventory->batch_no,
+            'created_by' => $adminId,
+            'description' => 'Order cancelled, restocked dispatched quantity for ' . $referenceType . ' #' . $referenceId,
+            'reference_type' => $referenceType,
+            'reference_id' => $referenceId,
+            'before_quantity' => $before,
+            'after_quantity' => $after,
+            'quantity_change' => $quantity,
+        ]);
+
+        return $inventory->refresh();
+    }
+
+    public function processReturn(int $productId, ?int $variantId, float $quantity, ?string $referenceType = null, ?int $referenceId = null, int $adminId = 1)
+    {
+        $inv = $this->inventoryRepo->getLatestInward($productId, $variantId);
+
+        if (! $inv) {
+            $inv = $this->inventoryRepo->create([
+                'product_id' => $productId,
+                'product_variant_id' => $variantId,
+                'location_type' => 'warehouse',
+                'warehouse_id' => null,
+                'store_id' => null,
+                'quantity' => 0,
+                'cost_price' => 0,
+                'batch_no' => 'RET-' . date('Ymd') . '-' . strtoupper(Str::random(4)),
+                'status' => 'active',
+            ]);
+        }
+
+        $before = $inv->quantity;
+        $this->inventoryRepo->update($inv->id, ['quantity' => $before + $quantity]);
+
+        try {
+            $this->inventoryTransactionRepo->create([
+                'inventory_id' => $inv->id,
+                'type' => 'return',
+                'quantity' => $quantity,
+                'rate' => $inv->cost_price ?? 0,
+                'batch_no' => $inv->batch_no,
+                'created_by' => $adminId,
+                'description' => 'Customer return for ' . $referenceType . 'Id: ' . '#' . $referenceId,
+                'reference_type' => $referenceType,
+                'reference_id' => $referenceId,
+                'before_quantity' => $before,
+                'after_quantity' => $before + $quantity,
+                'quantity_change' => $quantity,
+            ]);
+        } catch (\Throwable $e) {
+        }
+
+        return $inv;
+    }
+}

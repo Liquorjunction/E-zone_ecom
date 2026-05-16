@@ -1,0 +1,45 @@
+.iti {
+    width: 100%;
+}
+.iti--separate-dial-code .iti__selected-flag {
+    border-top-left-radius: 0.75rem;
+    border-bottom-left-radius: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-right: none;
+    background: #fff;
+    height: 54px;
+}
+.iti__country-list {
+    border-radius: 0.75rem;
+    font-size: 1rem;
+}
+.iti__flag-container {
+    height: 48px;
+}
+.iti__tel-input {
+    border-top-right-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-left: none;
+    background: #fff;
+    height: 48px;
+    padding-left: 0.75rem;
+    padding-right: 1rem;
+    color: #111827;
+    font-size: 1rem;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+.iti__tel-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.2);
+}
+.iti--separate-dial-code .iti__tel-input {
+    border-left: none;
+}
+@media (max-width: 640px) {
+    .iti__tel-input, .iti--separate-dial-code .iti__selected-flag {
+        height: 44px;
+        font-size: 0.95rem;
+    }
+}

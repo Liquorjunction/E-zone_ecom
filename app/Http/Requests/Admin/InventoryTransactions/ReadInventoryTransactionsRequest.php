@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Http\Requests\Admin\InventoryTransactions;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+
+class ReadInventoryTransactionsRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return Auth::guard('admin')->user()->can('inventory-transaction.read');
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+
+    public function rules()
+    {
+        return [
+            'id'   => 'required',
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'id.required' => 'Id is required',
+        ];
+    }
+    public function attributes()
+    {
+        return [
+            'id'   => 'Id',
+        ];
+    }
+}

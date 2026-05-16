@@ -1,0 +1,34 @@
+@keyframes ann-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+.ann-track {
+    will-change: transform;
+}
+
+.ann-track.running {
+    animation: ann-scroll var(--ann-dur, 20s) linear infinite;
+}
+
+.ann-track:hover {
+    animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ann-track {
+        animation: none !important;
+    }
+}
+
+/* Stripe pattern background */
+.ann-stripe-bg {
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        rgba(255, 255, 255, 0.025) 1px,
+        transparent 2px,
+        transparent 48px
+    );
+    pointer-events: none;
+}
