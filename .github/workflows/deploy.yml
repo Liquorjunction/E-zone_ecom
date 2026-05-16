@@ -21,4 +21,4 @@ jobs:
           script: |
             cd staging.ezoneretails.com
 
-            git pull origin main
+            git pull origin development
