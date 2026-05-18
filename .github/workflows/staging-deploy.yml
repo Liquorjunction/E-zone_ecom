@@ -1,4 +1,4 @@
-# CI CD Apply In dispatch_Master Branch Only
+# CI CD Apply In  staging dispatch_Master Branch Only
 name: Deploy Website
 
 on:
