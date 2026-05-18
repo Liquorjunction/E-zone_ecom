@@ -26,14 +26,38 @@ class MXPlusService
             $url = $this->config['base_url'] . 'napspayment/createtocken24';
             $macValue = md5($this->config['institution_id'] . $this->config['cx_user']);
             $payload = [
-                'institution_id' => $this->config['institution_id'],
-                'cx_user' => $this->config['cx_user'],
-                'cx_password' => $this->config['cx_password'],
-                'cx_reason' => '00',
-                'mac_value' => $macValue,
-            ];
-            $response = Http::post($url, $payload);
+    "cx_user" => "NAPS",
+    "cx_password" => "2e6a98abb5b23339ad14601d3bedc1d23847498cb18daf8cfc98c2a2095ec8",
+     "cx_reason" => "00",
+    "mac_value" => "d8be7c5638519aac35506c0ea82ae2d9",
+    "institution_id" => "11010"
+];
+ 
+            
 
+            
+            // [
+            //     'institution_id' => $this->config['institution_id'],
+            //     'cx_user' => $this->config['cx_user'],
+            //     'cx_password' => $this->config['cx_password'],
+            //     'cx_reason' => '00',
+            //     'mac_value' => $macValue,
+            // ];
+            
+            
+            Log::info('request payload for create token API', [
+            'payload' => $payload,
+        ]);
+            
+            $response = Http::post($url, $payload);
+            Log::info('response data for create token API', [
+            'response' => $response,
+        ]);
+             Log::error('MXPlus Token Generation Failed', [
+                'response' => $response,
+                'url' => $url,
+                'payload' => $payload,
+            ]);
             $responseData = $response->json() ?? [];
 
             // Log the API response
@@ -103,8 +127,17 @@ class MXPlusService
             'zipcode' => $data['zip'] ?? '',
         ];
 
-        $response = Http::post($url, $payload);
-
+Log::info('request data for make payment API', [
+            'payload' => $payload,
+        ]);
+        
+        $response = Http::timeout(30)
+    ->retry(3, 2000)
+    ->asJson()
+    ->post($url, $payload);
+    Log::info('response data for make payment API', [
+            'response' => $response,
+        ]);
         $responseData = $response->json() ?? [];
 
         // Log the API response
