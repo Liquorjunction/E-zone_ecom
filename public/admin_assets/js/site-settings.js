@@ -396,7 +396,7 @@
         }
 
         const data = {
-            name: 'E-Zone',
+            name: 'Ezone',
             email: 'info@e-zone.com',
             phone: '',
             address: '',

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Under Maintenance - {{ config('app.name', 'E-Zone Electronics') }}</title>
+    <title>Site Under Maintenance - {{ config('app.name', 'Ezone Electronics') }}</title>
     <link rel="icon" href="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" type="image/x-icon">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -21,7 +21,7 @@
     <header class="bg-white border-b border-gray-200">
         <div class="container mx-auto px-4 py-6">
             <div class="flex justify-center">
-                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Electronics"
+                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Electronics"
                     class="h-16 sm:h-20 object-contain">
             </div>
         </div>

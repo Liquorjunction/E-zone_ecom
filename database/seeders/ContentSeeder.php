@@ -24,8 +24,8 @@ class ContentSeeder extends Seeder
         AboutUs::firstOrCreate(
             ['id' => 1],
             [
-                'title' => ['en' => 'About E-Zone', 'ar' => 'حول إي زون'],
-                'description' => ['en' => '<h2>Welcome to E-Zone</h2><p>Your trusted destination for all electronics and technology needs. We offer a wide range of products from leading brands with competitive prices and excellent customer service.</p><h3>Our Mission</h3><p>To provide the best electronics and technology products to our customers.</p><h3>Our Vision</h3><p>To be the leading electronics retailer in the region.</p>', 'ar' => '<h2>مرحبا بكم في إي زون</h2><p>وجهتك الموثوقة لجميع احتياجات الإلكترونيات والتكنولوجيا. نحن نقدم مجموعة واسعة من المنتجات من العلامات التجارية الرائدة بأسعار تنافسية وخدمة عملاء ممتازة.</p>'],
+                'title' => ['en' => 'About Ezone', 'ar' => 'حول إي زون'],
+                'description' => ['en' => '<h2>Welcome to Ezone</h2><p>Your trusted destination for all electronics and technology needs. We offer a wide range of products from leading brands with competitive prices and excellent customer service.</p><h3>Our Mission</h3><p>To provide the best electronics and technology products to our customers.</p><h3>Our Vision</h3><p>To be the leading electronics retailer in the region.</p>', 'ar' => '<h2>مرحبا بكم في إي زون</h2><p>وجهتك الموثوقة لجميع احتياجات الإلكترونيات والتكنولوجيا. نحن نقدم مجموعة واسعة من المنتجات من العلامات التجارية الرائدة بأسعار تنافسية وخدمة عملاء ممتازة.</p>'],
                 'status' => 1,
             ]
         );
@@ -79,8 +79,8 @@ class ContentSeeder extends Seeder
         $faqs = [
             [
                 'category_name_en' => 'General',
-                'question' => ['en' => 'What is E-Zone?', 'ar' => 'ما هو إي زون؟'],
-                'answer' => ['en' => 'E-Zone is a leading electronics retailer offering a wide range of products from top brands.', 'ar' => 'إي زون هو بائع تجزئة رائد للإلكترونيات يقدم مجموعة واسعة من المنتجات من أفضل العلامات التجارية.'],
+                'question' => ['en' => 'What is Ezone?', 'ar' => 'ما هو إي زون؟'],
+                'answer' => ['en' => 'Ezone is a leading electronics retailer offering a wide range of products from top brands.', 'ar' => 'إي زون هو بائع تجزئة رائد للإلكترونيات يقدم مجموعة واسعة من المنتجات من أفضل العلامات التجارية.'],
             ],
             [
                 'category_name_en' => 'General',

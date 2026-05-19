@@ -5,7 +5,7 @@
             <script>
                 document.write(new Date().getFullYear())
             </script>
-            by E-Zone Electronics
+            by Ezone Electronics
         </div>
     </div>
 </footer>

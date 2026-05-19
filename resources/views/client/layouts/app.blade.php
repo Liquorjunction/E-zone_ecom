@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     @php
-        $rawTitle = trim($__env->yieldContent('title') ?: config('app.name', 'E-Zone Electronics'));
-        $rawDescription = trim($__env->yieldContent('description') ?: statictranslations('E-Zone Electronics - Your trusted source for quality electronics and gadgets.'));
+        $rawTitle = trim($__env->yieldContent('title') ?: config('app.name', 'Ezone Electronics'));
+        $rawDescription = trim($__env->yieldContent('description') ?: statictranslations('Ezone Electronics - Your trusted source for quality electronics and gadgets.'));
         $title = __($rawTitle);
         $description = __($rawDescription);
         $descriptionText = strip_tags($description);
@@ -51,7 +51,7 @@
         $organizationLd = [
             '@context' => 'https://schema.org',
             '@type' => 'Organization',
-            'name' => 'E-Zone Electronics',
+            'name' => 'Ezone Electronics',
             'url' => url('/'),
             'logo' => asset('icon/fav-icon-high-resArtboard-1-150x150.png'),
             'contactPoint' => [
@@ -176,7 +176,7 @@
                 @php
                     $whatsappNumber = preg_replace('/[^0-9]/', '', get_site_setting('phone', ''));
                 @endphp
-                <a href="https://wa.me/{{ $whatsappNumber }}?text=Hi" target="_blank" rel="noopener"
+                <a href="https://wa.me/{{ $whatsappNumber }}?text=Bonjour, je souhaite obtenir des informations sur vos produits." target="_blank" rel="noopener"
                     aria-label="Chat on WhatsApp"
                     class="fixed z-50 bottom-6 right-6 md:bottom-8 md:right-8 bg-green-500 hover:bg-green-600 rounded-full shadow-lg p-3 flex items-center justify-center transition-colors duration-300"
                     style="box-shadow: 0 4px 16px rgba(0,0,0,0.18);">

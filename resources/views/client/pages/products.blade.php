@@ -1,7 +1,7 @@
 @extends('client.layouts.app')
 
 @section('title', statictranslations('Our Home Appliance Products, Ezone Retails Morocco'))
-@section('description', statictranslations('Our Home Appliance Products, Ezone Retails Morocco'))
+@section('description', statictranslations('Browse a wide selection of home appliances and electronics from trusted brands across Morocco, including kitchen essentials, cooling, cleaning, audio, and everyday household devices. Use the filters to narrow results by price, category, availability, discount, rating, and subcategory, then switch between grid and list views to compare options quickly. Whether you are looking for a specific replacement item or exploring the latest releases, this page helps you discover products that fit your budget and needs. Product availability, pricing, and featured selections are updated to support fast shopping decisions, and the search tools make it easy to refine your results when you know exactly what you want.'))
 
 @section('content')
     <script>

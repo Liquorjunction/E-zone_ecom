@@ -1,7 +1,7 @@
 @extends('client.layouts.app')
 
-@section('title', statictranslations('Sitemap') . ' - ' . statictranslations('E-Zone Electronics'))
-@section('description', statictranslations('Complete sitemap of E-Zone Electronics. Find all pages including products, account management, support, and more.'))
+@section('title', statictranslations('Sitemap') . ' - ' . statictranslations('Ezone Electronics'))
+@section('description', statictranslations('Complete sitemap of Ezone Electronics. Find all pages including products, account management, support, and more.'))
 
 @section('content')
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen py-8">

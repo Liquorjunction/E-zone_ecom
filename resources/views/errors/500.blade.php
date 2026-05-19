@@ -1,6 +1,6 @@
 @extends('client.layouts.app')
 
-@section('title', 'Internal Server Error - E-Zone Electronics')
+@section('title', 'Internal Server Error - Ezone Electronics')
 @section('description', 'We are experiencing technical difficulties. Please try again later or contact our support team.')
 
 @section('content')

@@ -5,7 +5,7 @@
                 <div class="flex-wrap d-flex justify-content-between align-items-center">
                     <div>
                         <h1>@yield('header-title', 'Welcome!')</h1>
-                        <p>@yield('header-description', 'To E-Zone Electronics Admin Panel.')</p>
+                        <p>@yield('header-description', 'To Ezone Electronics Admin Panel.')</p>
                         {{-- Breadcrumbs --}}
                         @hasSection('breadcrumbs')
                             <nav aria-label="breadcrumb">

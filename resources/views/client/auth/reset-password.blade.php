@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ statictranslations(config('app.name', 'E-Zone Electronics')) }} - {{ statictranslations('Reset Password') }}</title>
+    <title>{{ statictranslations(config('app.name', 'Ezone Electronics')) }} - {{ statictranslations('Reset Password') }}</title>
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
@@ -32,7 +32,7 @@
                     </a>
                 </div>
                 <div class="relative z-10 flex justify-center">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo" class="h-30 object-contain brightness-0 invert">
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo" class="h-30 object-contain brightness-0 invert">
                 </div>
 
                 <!-- Main Content -->
@@ -120,7 +120,7 @@
 
                 <!-- Logo for Mobile -->
                 <div class="lg:hidden text-center mb-8">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo" class="mx-auto w-24 h-18 object-contain">
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo" class="mx-auto w-24 h-18 object-contain">
                 </div>
 
                 <!-- Header -->
