@@ -60,7 +60,7 @@ Route::get('/shipping-returns', [ShippingAndReturnsController::class, 'index'])-
 Route::view('/support', 'client.pages.support')->name('support');
 Route::get('/showrooms', [ShowroomController::class, 'index'])->name('showrooms');
 Route::get('/showrooms/{slug}', [ShowroomController::class, 'show'])->name('showrooms.show');
-Route::redirect('/sitemap', '/sitemap.xml');
+// Route::redirect('/sitemap', '/sitemap.xml');
 Route::get('/sitemap.xml', [SiteMapController::class, 'index'])->name('sitemap');
 
 // CSRF refresh endpoint (helps mobile browsers recover after background resume/BFCache restores)
