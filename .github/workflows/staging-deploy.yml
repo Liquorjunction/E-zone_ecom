@@ -1,0 +1,25 @@
+# CI CD Apply In  staging dispatch_Master Branch Only
+name: Deploy Website
+
+on:
+  push:
+    branches:
+      - dispatch_Master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+
+          script: |
+            cd staging.ezoneretails.com
+
+            git pull origin dispatch_Master

@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10.1",
         "rap2hpoutre/fast-excel": "^5.6",
         "spatie/laravel-permission": "^6.23",
+        "spatie/laravel-sitemap": "^8.0",
         "spatie/laravel-sluggable": "^3.7",
         "spatie/laravel-translatable": "^6.11",
         "stichoza/google-translate-php": "^5.3",

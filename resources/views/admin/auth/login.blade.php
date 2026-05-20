@@ -11,10 +11,10 @@
                      <a href="{{ url('/dashboard') }}" class="navbar-brand d-flex align-items-center mb-3">
                         <div class="logo-main">
                            <div class="logo-normal">
-                              <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-zone Logo" class="img-fluid" loading="lazy" height="80px" width="80px"/>
+                              <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo" class="img-fluid" loading="lazy" height="80px" width="80px"/>
                            </div>
                            <div class="logo-mini">
-                              <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-zone Logo" loading="lazy"/>
+                              <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo" loading="lazy"/>
                            </div>
                         </div>
                         <h4 class="logo-title ms-3">Admin</h4>

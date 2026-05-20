@@ -1,7 +1,7 @@
 @extends('client.layouts.app')
 
 @section('title', statictranslations('Frequently Asked Questions, Ezone Retails'))
-@section('description', statictranslations('Frequently Asked Questions, Ezone Retails'))
+@section('description', statictranslations('Find clear answers about shopping with Ezone Retails Morocco, including product selection, ordering, delivery, returns, warranties, and after-sales support. This FAQ page is designed to help customers quickly resolve common questions before or after a purchase, so you can shop with confidence and save time. Use the category navigation to jump directly to the topic you need, or scan the expanded answers for detailed guidance about services, account use, and contact options. If your question is not covered here, the support links on the page make it easy to reach the team for personalized help and additional assistance.'))
 
 @section('content')
     <div class="bg-gray-50 min-h-screen pb-16">

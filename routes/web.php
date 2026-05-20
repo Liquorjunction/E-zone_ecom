@@ -19,6 +19,7 @@ use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\ReviewController;
 use App\Http\Controllers\Client\SearchController;
+use App\Http\Controllers\Client\SiteMapController;
 use App\Http\Controllers\Client\SecurityController;
 use App\Http\Controllers\Client\ShowroomController;
 use App\Http\Controllers\Client\ShippingAndReturnsController;
@@ -59,7 +60,8 @@ Route::get('/shipping-returns', [ShippingAndReturnsController::class, 'index'])-
 Route::view('/support', 'client.pages.support')->name('support');
 Route::get('/showrooms', [ShowroomController::class, 'index'])->name('showrooms');
 Route::get('/showrooms/{slug}', [ShowroomController::class, 'show'])->name('showrooms.show');
-Route::view('/sitemap', 'client.pages.sitemap')->name('sitemap');
+// Route::redirect('/sitemap', '/sitemap.xml');
+Route::get('/sitemap.xml', [SiteMapController::class, 'index'])->name('sitemap');
 
 // CSRF refresh endpoint (helps mobile browsers recover after background resume/BFCache restores)
 Route::get('/csrf-token', function () {

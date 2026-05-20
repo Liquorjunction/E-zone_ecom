@@ -11,7 +11,7 @@
 
             {{-- Logo --}}
             <a href="{{ route('home') }}" class="shrink-0 flex items-center group">
-                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo"
                     class="h-11 sm:h-13 lg:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
             </a>
 

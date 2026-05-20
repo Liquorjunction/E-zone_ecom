@@ -1,6 +1,6 @@
 @extends('client.layouts.app')
 
-@section('title', 'Page Not Found - E-Zone Electronics')
+@section('title', 'Page Not Found - Ezone Electronics')
 @section('description', 'The page you are looking for could not be found. Browse our sitemap or return to the homepage.')
 
 @section('content')

@@ -1,6 +1,6 @@
-# E-zone_ecom
+# Ezone_ecom
 
-E-zone_ecom is a Laravel-based seller/admin e-commerce platform with modular code organization for products, inventory, orders, and storefront.
+Ezone_ecom is a Laravel-based seller/admin e-commerce platform with modular code organization for products, inventory, orders, and storefront.
 
 ## Project Quickstart
 

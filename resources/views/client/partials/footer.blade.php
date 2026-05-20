@@ -4,7 +4,7 @@
         <div class="flex flex-col lg:flex-row justify-between items-center gap-8 border-b border-gray-700 pb-10 mb-10">
 
             <a href="{{ route('home') }}" class="shrink-0">
-                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-zone Logo" class="h-20">
+                <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo" class="h-20">
             </a>
 
             <div class="w-full lg:w-1/2 max-w-md">
@@ -77,7 +77,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <i class="fas fa-phone text-primary shrink-0 text-lg"></i>
-                        <a href="tel:+1234567890" class="hover:text-white transition-colors">{{ $siteContent ->phone ?? statictranslations('N/A') }}</a>
+                        <a href="tel:{{ $siteContent->phone ?? '' }}" class="hover:text-white transition-colors">{{ $siteContent->phone ?? statictranslations('N/A') }}</a>
                     </div>
                     <div class="flex items-center gap-3">
                         <i class="fas fa-envelope text-primary shrink-0 text-lg"></i>
@@ -90,7 +90,7 @@
 
         <div class="border-t border-gray-700 pt-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p>&copy; {{ date('Y') }} E-zone. {{ statictranslations('All rights reserved.') }}</p>
+            <p>&copy; {{ date('Y') }} Ezone. {{ statictranslations('All rights reserved.') }}</p>
 
             <div class="flex items-center space-x-5">
                 @isset($siteContent->facebook)

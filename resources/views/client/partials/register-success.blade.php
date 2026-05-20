@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ statictranslations(config('app.name', 'E-Zone Electronics')) }} - {{ statictranslations('Registration Successful') }}</title>
+    <title>{{ statictranslations(config('app.name', 'Ezone Electronics')) }} - {{ statictranslations('Registration Successful') }}</title>
     <link rel="icon" href="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" type="image/x-icon">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
@@ -35,14 +35,14 @@
                     </a>
                 </div>
                 <div class="relative z-10 flex justify-center">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo"
                         class="h-30 object-contain brightness-0 invert">
                 </div>
 
                 <!-- Main Content -->
                 <div class="space-y-6">
                     <div>
-                        <h1 class="text-4xl font-bold mb-4">{{ statictranslations('Welcome to E-Zone!') }}</h1>
+                        <h1 class="text-4xl font-bold mb-4">{{ statictranslations('Welcome to Ezone!') }}</h1>
                         <p class="text-lg text-white/90">{{ statictranslations('Complete your registration by verifying your email address to start your shopping journey!') }}</p>
                     </div>
 
@@ -57,7 +57,7 @@
                             </div>
                             <div>
                                 <h3 class="font-semibold text-base">{{ statictranslations('Registration Submitted') }}</h3>
-                                <p class="text-sm text-white/80 mt-1">{{ statictranslations('Your E-Zone account awaits email verification') }}</p>
+                                <p class="text-sm text-white/80 mt-1">{{ statictranslations('Your Ezone account awaits email verification') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -124,7 +124,7 @@
 
                 <!-- Logo for Mobile -->
                 <div class="lg:hidden text-center mb-8">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo"
                         class="mx-auto w-24 h-18 object-contain">
                 </div>
 
@@ -144,7 +144,7 @@
                         </div>
                     </div>
                     <h2 class="text-3xl lg:text-3xl font-bold text-gray-900 mb-2 text-center">{{ statictranslations("You're Almost There!") }} 🎉</h2>
-                    <p class="text-gray-600 text-center">{{ statictranslations('Just one final step to unlock your E-Zone account') }}</p>
+                    <p class="text-gray-600 text-center">{{ statictranslations('Just one final step to unlock your Ezone account') }}</p>
                 </div>
 
                 <!-- Success Message -->
@@ -187,7 +187,7 @@
                         </div>
                         <div class="ml-4">
                             <h4 class="text-sm font-medium text-gray-900">📧 Find the Email</h4>
-                            <p class="mt-1 text-sm text-gray-600">{{ statictranslations('Check your inbox (and spam folder just in case) for an email from E-Zone with the subject "Verify Your E-Zone Account"') }}</p>
+                            <p class="mt-1 text-sm text-gray-600">{{ statictranslations('Check your inbox (and spam folder just in case) for an email from Ezone with the subject "Verify Your Ezone Account"') }}</p>
                         </div>
                     </div>
 

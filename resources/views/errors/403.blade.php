@@ -1,6 +1,6 @@
 @extends('client.layouts.app')
 
-@section('title', 'Access Forbidden - E-Zone Electronics')
+@section('title', 'Access Forbidden - Ezone Electronics')
 @section('description', 'You do not have permission to access this page. Please contact support if you believe this is an error.')
 
 @section('content')

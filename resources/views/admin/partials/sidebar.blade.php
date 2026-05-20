@@ -52,11 +52,11 @@
         <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
             <div class="logo-main">
                 <div class="logo-normal">
-                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="E-Zone Logo"
+                    <img src="{{ asset('icon/Ezone-Logo-New-2025-Website.png') }}" alt="Ezone Logo"
                         style="height: 120px; width: 120px; object-fit: contain;" />
                 </div>
                 <div class="logo-mini">
-                    <img src="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" alt="E-Zone Mini Logo"
+                    <img src="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" alt="Ezone Mini Logo"
                         style="height: 50px; width: 50px; object-fit: contain;" />
                 </div>
             </div>
