@@ -4,6 +4,7 @@
     $brandName = $brand ? $brand->name : Str::title($brand_slug);
 @endphp
 
+@section('title', statictranslations($brandName . ' Products in Morocco — Ezone'))
 @section('description', statictranslations('Explore a focused collection of ' . $brandName . ' home appliances and electronics at Ezone Retails Morocco, with products selected to make brand-specific browsing simple and efficient. You can review available items, compare options, and move through the catalog with the same shopping tools used across the site, including clear product cards, pagination, and responsive layout support. This page is useful when you want to see everything we currently carry from ' . $brandName . ' in one place, whether you are searching for a replacement item, comparing models, or discovering new additions. Availability, pricing, and product assortment may change over time to reflect current stock and featured selections.'))
 
 @section('content')
