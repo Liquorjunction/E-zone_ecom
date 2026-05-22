@@ -1,5 +1,6 @@
 @extends('client.layouts.app')
 
+@section('title', statictranslations('Terms and Conditions — Ezone Morocco'))
 @section('description', statictranslations('Review the terms and conditions that govern purchases, services, and use of the Ezone Retails Morocco website. This page explains the responsibilities of both the customer and the store, including ordering rules, payment expectations, delivery guidance, product usage, and any service limitations that may apply. Reading these terms before completing an order helps you understand how transactions are handled, what to expect after purchase, and how to contact the team if you need clarification. The document is provided to support transparent shopping and to make the buying process easier, safer, and more predictable for every visitor.'))
 
 @section('content')
