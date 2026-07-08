@@ -35,8 +35,16 @@ class SliderController extends Controller
 
             // --- Smart Auto-Translate Logic ---
             foreach (['title', 'subtitle', 'button_text'] as $field) {
-                // Skip if English value is missing (should be caught by validation, but safe check)
+                // Skip if English value is missing
                 if (! isset($data[$field]['en'])) {
+                    continue;
+                }
+
+                // If English value is cleared/empty, clear French and Arabic values too
+                if ($data[$field]['en'] === null || trim($data[$field]['en']) === '') {
+                    $data[$field]['en'] = '';
+                    $data[$field]['fr'] = '';
+                    $data[$field]['ar'] = '';
                     continue;
                 }
 
@@ -78,6 +86,14 @@ class SliderController extends Controller
             // --- Smart Auto-Translate Logic ---
             foreach (['title', 'subtitle', 'button_text'] as $field) {
                 if (! isset($data[$field]['en'])) {
+                    continue;
+                }
+
+                // If English value is cleared/empty, clear French and Arabic values too
+                if ($data[$field]['en'] === null || trim($data[$field]['en']) === '') {
+                    $data[$field]['en'] = '';
+                    $data[$field]['fr'] = '';
+                    $data[$field]['ar'] = '';
                     continue;
                 }
 

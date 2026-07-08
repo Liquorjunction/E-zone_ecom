@@ -48,6 +48,25 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-card-text text-secondary me-2 fs-5"></i>
+                                    <span class="fw-semibold">Minimum Cart Amount</span>
+                                </div>
+                                <div class="ms-4">
+                                    <span class="text-dark">
+                                        @if(isset($coupon->min_order_amount))
+                                            {{ config('app.CURRENCY_SYMBOL') }} {{ $coupon->min_order_amount }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-1">
                                     <i class="bi bi-type-bold text-primary me-2 fs-5"></i>
                                     <span class="fw-semibold">Type</span>
                                 </div>
@@ -87,6 +106,15 @@
                                 </div>
                                 <div class="ms-4">
                                     <span class="text-dark">{{ $coupon->usage_limit ?? 'No Limit' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-person-check text-warning me-2 fs-5"></i>
+                                    <span class="fw-semibold">Usage Limit Per User</span>
+                                </div>
+                                <div class="ms-4">
+                                    <span class="text-dark">{{ $coupon->usage_limit_per_user ?? 'No Limit' }}</span>
                                 </div>
                             </div>
                             <div class="col-md-6">

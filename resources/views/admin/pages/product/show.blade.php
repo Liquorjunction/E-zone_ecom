@@ -49,7 +49,7 @@
                                         <ul class="list-group list-group-flush bg-transparent">
                                             <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
                                                 <strong>Base Price:</strong>
-                                                <span>${{ number_format($product->price, 2) }}</span>
+                                                <span>{{ money_format_number($product->price) }}</span>
                                             </li>
                                             <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
                                                 <strong>SKU:</strong> <span>{{ $product->sku }}</span>
@@ -187,7 +187,7 @@
                                                                                 <span class="text-muted">—</span>
                                                                             @endif
                                                                         </td>
-                                                                        <td>${{ number_format($variant->price, 2) }}</td>
+                                                                        <td>{{ money_format_number($variant->price) }}</td>
                                                                         <td>{{ $variant->sku }}</td>
                                                                         <td>
                                                                             <span class="badge bg-{{ $variant->status == 'active' ? 'success' : 'secondary' }}">{{ ucfirst($variant->status) }}</span>

@@ -643,12 +643,12 @@
                                 <td class="td-right td-price">
                                     @if ($lineDiscount > 0)
                                         <span class="price-original">
-                                            {{ $sym }} {{ number_format($originalUnitPrice, 2) }}
+                                            {{ money_format_number($originalUnitPrice) }}
                                         </span>
                                     @endif
-                                    <span>{{ $sym }} {{ number_format($unitPrice, 2) }}</span>
+                                    <span>{{ money_format_number($unitPrice) }}</span>
                                 </td>
-                                <td class="td-right td-total">{{ $sym }} {{ number_format($lineTotal, 2) }}
+                                <td class="td-right td-total">{{ money_format_number($lineTotal) }}
                                 </td>
                             </tr>
                         @endforeach
@@ -666,7 +666,7 @@
                                     <td class="sum-label">{{ statictranslations('Taxable Amount') }} :</td>
                                     <td class="sum-val">
                                         @if ($taxableAmount !== null)
-                                            {{ $sym }} {{ number_format((float) $taxableAmount, 2) }}
+                                            {{ money_format_number((float) $taxableAmount) }}
                                         @else
                                             -
                                         @endif
@@ -675,7 +675,7 @@
                                 <tr>
                                     <td class="sum-label">{{ statictranslations('VAT') }} {{ number_format((float) $taxRate, 0) }}% :</td>
                                     <td class="sum-val">
-                                        {{ $tax > 0 ? $sym . ' ' . number_format($tax, 2) : '-' }}
+                                        {{ $tax > 0 ? money_format_number($tax) : '-' }}
                                     </td>
                                 </tr>
                             </table>
@@ -683,8 +683,7 @@
                             <table class="sum-table">
                                 <tr>
                                     <td class="sum-label">{{ statictranslations('Total Tax Inclusive Amount') }} :</td>
-                                    <td class="sum-val">{{ $sym }}
-                                        {{ number_format($totalWithoutShipping, 2) }}</td>
+                                    <td class="sum-val">{{ money_format_number($totalWithoutShipping) }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -698,9 +697,9 @@
                                         {{ statictranslations('Subtotal') }} ({{ $order->items->sum('quantity') }} {{ statictranslations('items') }}) :
                                     </td>
                                     @if($couponCode)
-                                        <td class="sum-val">{{ $sym }} {{ number_format($subtotal, 2) }}</td>
+                                        <td class="sum-val">{{ money_format_number($subtotal) }}</td>
                                     @else
-                                        <td class="sum-val">{{ $sym }} {{ number_format($subtotalAfterDiscount, 2) }}</td>
+                                        <td class="sum-val">{{ money_format_number($subtotalAfterDiscount) }}</td>
                                     @endif
                                 </tr>
                                 @if ($couponCode)
@@ -710,7 +709,7 @@
                                             <span class="coupon-badge">{{ strtoupper($couponCode) }}</span>
                                         </td>
                                         <td class="sum-val text-green">
-                                            {{ $couponDiscount > 0 ? '- ' . $sym . ' ' . number_format($couponDiscount, 2) : '-' }}
+                                            {{ $couponDiscount > 0 ? '- ' . money_format_number($couponDiscount) : '-' }}
                                         </td>
                                     </tr>
                                 @endif
@@ -718,7 +717,7 @@
                                     <td class="sum-label">{{ statictranslations('Shipping') }} ({{ $shippingMethodLabel }}) :</td>
                                     <td class="sum-val">
                                         @if ($shippingCost > 0)
-                                            {{ $sym }} {{ number_format($shippingCost, 2) }}
+                                            {{ money_format_number($shippingCost) }}
                                         @else
                                             <span class="text-green">{{ statictranslations('Free') }}</span>
                                         @endif
@@ -728,7 +727,7 @@
                             <table class="sum-table total-row-wrap">
                                 <tr>
                                     <td class="total-label">{{ statictranslations('Total') }} :</td>
-                                    <td class="total-value">{{ $sym }} {{ number_format($total, 2) }}</td>
+                                    <td class="total-value">{{ money_format_number($total) }}</td>
                                 </tr>
                             </table>
                         </div>

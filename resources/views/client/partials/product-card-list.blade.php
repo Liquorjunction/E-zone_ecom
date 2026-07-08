@@ -30,7 +30,7 @@
                         @if ($productDiscountInfo['discount_percentage'] > 0)
                             {{ number_format($productDiscountInfo['discount_percentage'], 0) }}% {{ statictranslations('OFF') }}
                         @else
-                            {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($productDiscountInfo['discount_amount'], 2) }} {{ statictranslations('OFF') }}
+                            {{ money_format_number($productDiscountInfo['discount_amount']) }} {{ statictranslations('OFF') }}
                         @endif
                     </span>
                 @endif
@@ -149,15 +149,15 @@
                 @if ($itemDiscountInfo['has_discount'])
                     <div class="flex flex-col leading-tight">
                         <span class="text-xs text-gray-400 line-through">
-                            {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($itemDiscountInfo['original_price'], 2) }}
+                            {{ money_format_number($itemDiscountInfo['original_price']) }}
                         </span>
                         <span class="text-2xl font-bold text-red-600">
-                            {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($itemDiscountInfo['final_price'], 2) }}
+                            {{ money_format_number($itemDiscountInfo['final_price']) }}
                         </span>
                     </div>
                 @else
                     <span class="text-2xl font-bold text-primary">
-                        {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($itemDiscountInfo['final_price'], 2) }}
+                        {{ money_format_number($itemDiscountInfo['final_price']) }}
                     </span>
                 @endif
             </div>

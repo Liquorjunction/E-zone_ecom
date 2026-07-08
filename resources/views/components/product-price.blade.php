@@ -21,10 +21,10 @@
     @if($hasDiscount)
         <div class="price-with-discount">
             <span class="original-price text-muted text-decoration-line-through">
-                {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($originalPrice, 2) }}
+                {{ money_format_number($originalPrice) }}
             </span>
             <span class="final-price text-danger fw-bold fs-5">
-                {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($finalPrice, 2) }}
+                {{ money_format_number($finalPrice) }}
             </span>
             @if($discountPercentage > 0)
                 <span class="discount-badge badge bg-danger ms-2">
@@ -32,7 +32,7 @@
                 </span>
             @else
                 <span class="discount-badge badge bg-danger ms-2">
-                    {{ statictranslations('Save') }} {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($discountAmount, 2) }}
+                    {{ statictranslations('Save') }} {{ money_format_number($discountAmount) }}
                 </span>
             @endif
         </div>
@@ -42,7 +42,7 @@
     @else
         <div class="price-no-discount">
             <span class="current-price fw-bold fs-5">
-                {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($price, 2) }}
+                {{ money_format_number($price) }}
             </span>
         </div>
     @endif

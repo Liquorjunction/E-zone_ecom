@@ -243,7 +243,7 @@
                                                 {{ str_repeat('★', (int) floor($product['rating'])) . str_repeat('☆', max(0, 5 - (int) floor($product['rating']))) }}
                                                 <span class="ml-2 text-sm text-gray-500">({{ $product['reviews'] }})</span>
                                             </div>
-                                            <p class="text-xl font-bold text-primary mb-3">{{ config('app.CURRENCY_SYMBOL') }}{{ number_format($product['price'], 2) }}</p>
+                                            <p class="text-xl font-bold text-primary mb-3">{{ money_format_number($product['price']) }}</p>
                                             <button
                                                 class="add-to-cart-btn w-full px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
                                                 data-product-variant-id="{{ $product['id'] }}"
@@ -341,7 +341,7 @@
 
                                     {{-- Price --}}
                                     <p class="text-sm font-bold text-primary">
-                                        {{ config('app.CURRENCY_SYMBOL') }}{{ number_format($product['price'], 2) }}
+                                        {{ money_format_number($product['price']) }}
                                     </p>
 
                                     <button

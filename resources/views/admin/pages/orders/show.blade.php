@@ -84,7 +84,7 @@
                                     </tr>
                                     <tr>
                                         <th>Total</th>
-                                        <td>{{ config('app.CURRENCY_SYMBOL') }} {{ isset($order->total) ? number_format($order->total, 2) : 'N/A' }}</td>
+                                        <td>{{ isset($order->total) ? money_format_number($order->total) : 'N/A' }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -226,18 +226,14 @@
                                                     <td>{{ $qty }}</td>
                                                     <td>
                                                         @if (isset($discount) && $discount > 0)
-                                                            <del>{{ config('app.CURRENCY_SYMBOL') }}
-                                                                {{ number_format($unitPriceOriginal, 2) }}</del>
+                                                            <del>{{ money_format_number($unitPriceOriginal) }}</del>
                                                             <br>
-                                                            {{ config('app.CURRENCY_SYMBOL') }}
-                                                            {{ number_format($unitPrice, 2) }}
+                                                            {{ money_format_number($unitPrice) }}
                                                         @else
-                                                            {{ config('app.CURRENCY_SYMBOL') }}
-                                                            {{ number_format($unitPrice, 2) }}
+                                                            {{ money_format_number($unitPrice) }}
                                                         @endif
                                                     </td>
-                                                    <td>{{ config('app.CURRENCY_SYMBOL') }}
-                                                        {{ number_format($lineTotal, 2) }}</td>
+                                                    <td>{{ money_format_number($lineTotal) }}</td>
                                                 </tr>
                                             @empty
                                                 <tr>
@@ -262,8 +258,7 @@
                                                 <th class="w-50">Subtotal</th>
                                                 @if (isset($order->coupon_id))
                                                     <td>
-                                                        {{ config('app.CURRENCY_SYMBOL') }}
-                                                        {{ isset($order->subtotal) ? number_format($order->subtotal, 2) : '-' }}
+                                                        {{ isset($order->subtotal) ? money_format_number($order->subtotal) : '-' }}
                                                     </td>
                                                 @else
                                                     <td>
@@ -271,27 +266,23 @@
                                                             $totalWithoutShipping =
                                                                 $order->total - $order->shipping_cost;
                                                         @endphp
-                                                        {{ config('app.CURRENCY_SYMBOL') }}
-                                                        {{ isset($totalWithoutShipping) ? number_format($totalWithoutShipping, 2) : '-' }}
+                                                        {{ isset($totalWithoutShipping) ? money_format_number($totalWithoutShipping) : '-' }}
                                                     </td>
                                                 @endif
                                             </tr>
                                             <tr>
                                                 <th>Coupon Discount</th>
-                                                <td>-{{ config('app.CURRENCY_SYMBOL') }}
-                                                    {{ isset($order->coupon_discount_amount) ? number_format($order->coupon_discount_amount, 2) : '-' }}
-                                                </td>
+                                                <td>-{{ isset($order->coupon_discount_amount) ? money_format_number($order->coupon_discount_amount) : '-' }}</td>
                                             </tr>
                                             {{-- <tr>
                                                 <th>Shipping</th>
-                                                    <td>{{ config('app.CURRENCY_SYMBOL') }} {{ isset($order->shipping_amount) ? number_format($order->shipping_amount, 2) : (isset($order->shipping_cost) ? number_format($order->shipping_cost, 2) : '-') }}
+                                                    <td>{{ isset($order->shipping_amount) ? money_format_number($order->shipping_amount) : (isset($order->shipping_cost) ? money_format_number($order->shipping_cost) : '-') }}
                                                 </td>
                                             </tr> --}}
                                             <tr class="table-active font-weight-bold">
                                                 <th>Total</th>
                                                 <td class="font-weight-bold">
-                                                    {{ config('app.CURRENCY_SYMBOL') }}
-                                                    {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
+                                                    {{ isset($order->total) ? money_format_number($order->total) : '-' }}
                                                 </td>
                                             </tr>
                                         </table>
@@ -305,9 +296,7 @@
                                         <table class="table table-sm mb-0">
                                             <tr>
                                                 <th>Taxable Amount</th>
-                                                <td>{{ config('app.CURRENCY_SYMBOL') }}
-                                                    {{ isset($order->taxable_amount) ? number_format($order->taxable_amount, 2) : '-' }}
-                                                </td>
+                                                <td>{{ isset($order->taxable_amount) ? money_format_number($order->taxable_amount) : '-' }}</td>
                                             </tr>
                                             <tr>
                                                 <th>Tax Rate</th>
@@ -317,15 +306,12 @@
                                             </tr>
                                             <tr>
                                                 <th>Tax Amount</th>
-                                                <td>{{ config('app.CURRENCY_SYMBOL') }}
-                                                    {{ isset($order->tax_amount) ? number_format($order->tax_amount, 2) : (isset($order->tax) ? number_format($order->tax, 2) : '-') }}
-                                                </td>
+                                                <td>{{ isset($order->tax_amount) ? money_format_number($order->tax_amount) : (isset($order->tax) ? money_format_number($order->tax) : '-') }}</td>
                                             </tr>
                                             <tr class="table-active font-weight-bold">
                                                 <th>Total Tax Inclusive Amount</th>
                                                 <td class="font-weight-bold">
-                                                    {{ config('app.CURRENCY_SYMBOL') }}
-                                                    {{ isset($order->total) ? number_format($order->total, 2) : '-' }}
+                                                    {{ isset($order->total) ? money_format_number($order->total) : '-' }}
                                                 </td>
                                             </tr>
                                         </table>

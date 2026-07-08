@@ -4,8 +4,8 @@
     $metaProductName = is_array($product->name) ? ($product->name[app()->getLocale()] ?? ($product->name['en'] ?? '')) : $product->name;
     $discountInfoForMeta = method_exists($product, 'getDiscountInfo') ? $product->getDiscountInfo() : [];
     $metaFinalPrice = $discountInfoForMeta['final_price'] ?? ($product->productVariants && $product->productVariants->count() ? $product->productVariants->first()->price : ($product->price ?? 0));
-    $metaPriceText = number_format($metaFinalPrice, 2);
-    $metaTitle = $metaProductName . ', ' . $metaPriceText . ' ' . config('app.CURRENCY_SYMBOL') . ', Ezone Retails';
+    $metaPriceText = money_format_number($metaFinalPrice);
+    $metaTitle = $metaProductName . ', ' . $metaPriceText . ', Ezone Retails';
     $metaDescription = trim(strip_tags(is_array($product->description) ? ($product->description[app()->getLocale()] ?? ($product->description['en'] ?? '')) : ($product->description ?? '')));
     if (strlen($metaDescription) > 160) {
         $metaDescription = \Illuminate\Support\Str::limit($metaDescription, 157, '...');
@@ -259,14 +259,13 @@
                                     @if ($variantCount > 1)
                                         @if ($hasDiscount)
                                             <div class="text-xl text-gray-400 line-through">
-                                                {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($originalPrice, 2) }}
+                                                {{ money_format_number($originalPrice) }}
                                             </div>
                                             <div class="flex items-baseline gap-2">
                                                 <span
                                                     class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
                                                 <span id="product-price"
-                                                    class="text-4xl font-extrabold text-red-600 tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
-                                                    {{ number_format($finalPrice, 2) }}</span>
+                                                    class="text-4xl font-extrabold text-red-600 tracking-tight">{{ money_format_number($finalPrice) }}</span>
                                             </div>
                                             @if ($discountPercentage > 0)
                                                 <span
@@ -281,18 +280,16 @@
                                                 <span
                                                     class="text-xs text-gray-500 font-medium">{{ statictranslations('From') }}</span>
                                                 <span id="product-price"
-                                                    class="text-4xl font-extrabold text-primary tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
-                                                    {{ number_format($minPrice, 2) }}</span>
+                                                    class="text-4xl font-extrabold text-primary tracking-tight">{{ money_format_number($minPrice) }}</span>
                                             </div>
                                         @endif
                                     @else
                                         @if ($hasDiscount)
                                             <div class="text-xl text-gray-400 line-through">
-                                                {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($originalPrice, 2) }}
+                                                {{ money_format_number($originalPrice) }}
                                             </div>
                                             <span id="product-price"
-                                                class="text-4xl font-extrabold text-red-600 tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($finalPrice, 2) }}</span>
+                                                class="text-4xl font-extrabold text-red-600 tracking-tight">{{ money_format_number($finalPrice) }}</span>
                                             @if ($discountPercentage > 0)
                                                 <span
                                                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold self-start">
@@ -302,8 +299,7 @@
                                             @endif
                                         @else
                                             <span id="product-price"
-                                                class="text-4xl font-extrabold text-primary tracking-tight">{{ config('app.CURRENCY_SYMBOL') }}
-                                                {{ number_format($finalPrice > 0 ? $finalPrice : $product->price, 2) }}</span>
+                                                class="text-4xl font-extrabold text-primary tracking-tight">{{ money_format_number($finalPrice > 0 ? $finalPrice : $product->price) }}</span>
                                         @endif
                                     @endif
                                     <span
@@ -510,13 +506,11 @@
                                                 @if ($variantHasDiscount)
                                                     <div class="flex flex-col">
                                                         <div class="text-xs text-gray-400 line-through">
-                                                            {{ config('app.CURRENCY_SYMBOL') }}
-                                                            {{ number_format($variantDiscountPayload['original_price'], 2) }}
+                                                            {{ money_format_number($variantDiscountPayload['original_price']) }}
                                                         </div>
                                                         <div class="flex items-center gap-1.5">
                                                             <span
-                                                                class="text-base font-extrabold text-red-600">{{ config('app.CURRENCY_SYMBOL') }}
-                                                                {{ number_format($variantDiscountPayload['final_price'], 2) }}</span>
+                                                                class="text-base font-extrabold text-red-600">{{ money_format_number($variantDiscountPayload['final_price']) }}</span>
                                                             @if (($variantDiscountPayload['discount_percentage'] ?? 0) > 0)
                                                                 <span
                                                                     class="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">-{{ number_format($variantDiscountPayload['discount_percentage'], 0) }}%</span>
@@ -525,8 +519,7 @@
                                                     </div>
                                                 @else
                                                     <div class="text-base font-extrabold text-primary">
-                                                        {{ config('app.CURRENCY_SYMBOL') }}
-                                                        {{ number_format($variant->price, 2) }}
+                                                        {{ money_format_number($variant->price) }}
                                                     </div>
                                                 @endif
                                                 @if ($qty > 0)

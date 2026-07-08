@@ -318,8 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 try { $sub.select2('destroy'); } catch (e) { }
             }
 
-            $sub.empty();
-            $sub[0].appendChild(fragment);
+            if ($sub && $sub[0]) {
+                $sub.empty();
+                $sub[0].appendChild(fragment);
+            }
 
             if (curVal && $sub.find(`option[value="${curVal}"]`).length) $sub.val(curVal);
             else $sub.val('');
@@ -457,8 +459,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!row) return;
             const fr = row.querySelector('input[name*="[name][fr]"]');
             const ar = row.querySelector('input[name*="[name][ar]"]');
-            if (fr && isEmpty(fr.value)) fr.value = e.target.value;
-            if (ar && isEmpty(ar.value)) ar.value = e.target.value;
+            if (e.target.value.trim() === '') {
+                if (fr) fr.value = '';
+                if (ar) ar.value = '';
+            } else {
+                if (fr && isEmpty(fr.value)) fr.value = e.target.value;
+                if (ar && isEmpty(ar.value)) ar.value = e.target.value;
+            }
         }
     });
 
@@ -555,6 +562,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         bootstrap.Modal.getInstance(variantModal).hide();
     });
+
+    // Auto-clear other language tabs when English text is cleared
+    const syncClearProductFields = (enSelector, otherSelectors) => {
+        const enField = select(enSelector);
+        if (enField) {
+            enField.addEventListener('input', function() {
+                if (this.value.trim() === '') {
+                    otherSelectors.forEach(selector => {
+                        const otherField = select(selector);
+                        if (otherField) {
+                            otherField.value = '';
+                            otherField.dispatchEvent(new Event('input'));
+                        }
+                    });
+                }
+            });
+        }
+    };
+    syncClearProductFields('input[name="name[en]"]', ['input[name="name[fr]"]', 'input[name="name[ar]"]']);
+    syncClearProductFields('input[name="dimensions[en]"]', ['input[name="dimensions[fr]"]', 'input[name="dimensions[ar]"]']);
+    syncClearProductFields('input[name="warranty[en]"]', ['input[name="warranty[fr]"]', 'input[name="warranty[ar]"]']);
+
+    // Clear Quill editors for FR and AR when EN is cleared
+    const quillEn = quillEditors['quill-description-en']?.quill;
+    if (quillEn) {
+        quillEn.on('text-change', () => {
+            const text = quillEn.getText().trim();
+            if (text.length === 0) {
+                ['fr', 'ar'].forEach(lang => {
+                    const qObj = quillEditors[`quill-description-${lang}`];
+                    if (qObj && qObj.quill) {
+                        qObj.quill.setContents([]);
+                        const hid = select(`#${qObj.hiddenId}`);
+                        if (hid) {
+                            hid.value = '';
+                            hid.dispatchEvent(new Event('input'));
+                        }
+                    }
+                });
+            }
+        });
+    }
 
     const form = select('#product-form'); if (form) form.addEventListener('submit', () => saveAllQuillContents());
 });

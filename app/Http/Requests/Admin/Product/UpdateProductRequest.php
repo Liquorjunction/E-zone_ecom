@@ -41,8 +41,14 @@ class UpdateProductRequest extends FormRequest
 
             // Specs
             'dimensions.en' => 'nullable|string',
+            'dimensions.fr' => 'nullable|string',
+            'dimensions.ar' => 'nullable|string',
             'specifications.en' => 'nullable|array',
+            'specifications.fr' => 'nullable|array',
+            'specifications.ar' => 'nullable|array',
             'warranty.en' => 'nullable|string',
+            'warranty.fr' => 'nullable|string',
+            'warranty.ar' => 'nullable|string',
 
             'status' => 'nullable|in:active,inactive',
             'is_bestseller' => 'nullable|boolean',

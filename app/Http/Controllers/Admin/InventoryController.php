@@ -212,8 +212,7 @@ class InventoryController extends Controller
                 ->addColumn('items_summary', fn($row) => '<span class="badge bg-info">' . $row->items_count . ' Items</span>')
                 ->addColumn('total_quantity', fn($row) => $row->total_quantity)
                 ->addColumn('subtotal_cost', function ($row) {
-                    $symbol = config('app.CURRENCY_SYMBOL', '$');
-                    return '<span class="badge bg-success">' . $symbol . number_format($row->subtotal_cost, 2) . '</span>';
+                    return '<span class="badge bg-success">' . money_format_number($row->subtotal_cost) . '</span>';
                 })
                 ->addColumn('action', function ($row) use ($request, $inventoryRepo) {
                     $canRead   = $request->user()->can('inventories.read');

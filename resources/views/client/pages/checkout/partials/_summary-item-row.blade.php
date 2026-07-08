@@ -67,13 +67,13 @@
             @endif
 
             @if ($hasDiscount)
-                <span class="text-xs text-gray-400 line-through">{{ $sym }} {{ number_format($lineTotal, 2) }}<br/></span>
+                <span class="text-xs text-gray-400 line-through">{{ money_format_number($lineTotal) }}<br/></span>
                 <span class="summary-item-price text-sm font-bold text-red-600">
-                    {{ $sym }} {{ number_format($lineFinal, 2) }}
+                    {{ money_format_number($lineFinal) }}
                 </span>
             @else
                 <p class="summary-item-price text-sm font-bold text-primary mt-1">
-                    {{ $sym }} {{ number_format($lineFinal, 2) }}
+                    {{ money_format_number($lineFinal) }}
                 </p>
             @endif
         </div>
