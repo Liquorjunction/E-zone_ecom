@@ -14,6 +14,7 @@ if (! function_exists('money_format_number')) {
         $amount = $amount ?? 0;
         $symbol = $symbol ?? env('CURRENCY_SYMBOL', config('app.CURRENCY_SYMBOL', '$'));
 
-        return $symbol . number_format((float) $amount, $decimals, '.', ',');
+        $formatted = number_format((float) $amount, $decimals, '.', ',');
+        return ($symbol !== null && $symbol !== '') ? $symbol . ' ' . $formatted : $formatted;
     }
 }
