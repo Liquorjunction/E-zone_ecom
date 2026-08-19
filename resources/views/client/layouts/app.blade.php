@@ -2,11 +2,27 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C8M4Z1RBX5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-C8M4Z1RBX5');
+    </script>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     @php
         $rawTitle = trim($__env->yieldContent('title') ?: config('app.name', 'Ezone Electronics'));
-        $rawDescription = trim($__env->yieldContent('description') ?: statictranslations('Ezone Electronics - Your trusted source for quality electronics and gadgets.'));
+        $rawDescription = trim(
+            $__env->yieldContent('description') ?:
+            statictranslations('Ezone Electronics - Your trusted source for quality electronics and gadgets.'),
+        );
         $title = __($rawTitle);
         $description = __($rawDescription);
         $descriptionText = strip_tags($description);
@@ -15,11 +31,14 @@
         }
         $ogTitle = trim($__env->yieldContent('og_title') ?: $title);
         $ogDescription = trim($__env->yieldContent('og_description') ?: $descriptionText);
-        $defaultOgImage = file_exists(public_path('images/og-default.jpg')) ? asset('images/og-default.jpg') : asset('icon/fav-icon-high-resArtboard-1-150x150.png');
+        $defaultOgImage = file_exists(public_path('images/og-default.jpg'))
+            ? asset('images/og-default.jpg')
+            : asset('icon/fav-icon-high-resArtboard-1-150x150.png');
         $ogImage = trim($__env->yieldContent('og_image') ?: $defaultOgImage);
         $ogUrl = trim($__env->yieldContent('og_url') ?: url()->current());
 
         // dd($title, $description, $descriptionText, $ogTitle, $ogDescription, $ogImage, $ogUrl);
+
     @endphp
 
     <title>{{ $title }}</title>
@@ -176,8 +195,8 @@
                 @php
                     $whatsappNumber = preg_replace('/[^0-9]/', '', get_site_setting('phone', ''));
                 @endphp
-                <a href="https://wa.me/{{ $whatsappNumber }}?text=Bonjour, je souhaite obtenir des informations sur vos produits." target="_blank" rel="noopener"
-                    aria-label="Chat on WhatsApp"
+                <a href="https://wa.me/{{ $whatsappNumber }}?text=Bonjour, je souhaite obtenir des informations sur vos produits."
+                    target="_blank" rel="noopener" aria-label="Chat on WhatsApp"
                     class="fixed z-50 bottom-6 right-6 md:bottom-8 md:right-8 bg-green-500 hover:bg-green-600 rounded-full shadow-lg p-3 flex items-center justify-center transition-colors duration-300"
                     style="box-shadow: 0 4px 16px rgba(0,0,0,0.18);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"
