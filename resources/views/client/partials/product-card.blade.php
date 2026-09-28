@@ -222,6 +222,7 @@
                     class="add-to-cart-btn shrink-0 w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-all duration-300 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-95"
                     onclick="addToCart('{{ $variantId }}', '{{ $master->id }}')"
                     data-product-variant-id="{{ $variantId }}" data-product-id="{{ $master->id }}"
+                    data-ga-item="{{ json_encode($ga4Item ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) }}"
                     @if (!$variantId) disabled @endif>
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         stroke-width="2.5">

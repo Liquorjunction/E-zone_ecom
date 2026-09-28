@@ -2,6 +2,51 @@ document.addEventListener("DOMContentLoaded", function () {
     // ─────────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
+    function ga4ItemForVariant(variantId) {
+        const catalog = window.GA4_ITEMS || {};
+        if (variantId && catalog[String(variantId)]) {
+            return catalog[String(variantId)];
+        }
+        const initialId = window.GA4_INITIAL_VARIANT_ID;
+        if (initialId && catalog[String(initialId)]) {
+            return catalog[String(initialId)];
+        }
+        const firstKey = Object.keys(catalog)[0];
+        return firstKey ? catalog[firstKey] : null;
+    }
+
+    function trackProductView() {
+        try {
+            if (window.__ga4ViewItemSent || !window.ezoneGa4) return;
+            const variantId = document.getElementById("cart-variant-id")?.value;
+            const item = ga4ItemForVariant(variantId);
+            if (!item) return;
+            window.__ga4ViewItemSent = true;
+            const price = Number(item.price) || 0;
+            window.ezoneGa4.event("view_item", {
+                currency: "MAD",
+                value: price,
+                items: [Object.assign({}, item, { quantity: 1 })],
+            });
+        } catch (e) {}
+    }
+
+    function trackAddToCart() {
+        try {
+            if (!window.ezoneGa4) return;
+            const variantId = document.getElementById("cart-variant-id")?.value;
+            const item = ga4ItemForVariant(variantId);
+            if (!item) return;
+            const quantity = Math.max(1, Number(document.getElementById("cart-quantity")?.value || 1));
+            const price = Number(item.price) || 0;
+            window.ezoneGa4.event("add_to_cart", {
+                currency: "MAD",
+                value: Math.round(price * quantity * 100) / 100,
+                items: [Object.assign({}, item, { quantity: quantity })],
+            });
+        } catch (e) {}
+    }
+
     function formatPrice(price) {
         return parseFloat(price).toLocaleString("en-US", {
             minimumFractionDigits: 2,
@@ -748,7 +793,10 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (e) {
             setActiveVariant(variantButtons[0]);
         }
+
     }
+
+    trackProductView();
 
     // ─────────────────────────────────────────────────────────────────────────
     // Add to cart form
@@ -868,6 +916,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
 
                         if (!isBuyNow) {
+                            trackAddToCart();
                             const msg = data.message || trans('Item added to cart.');
                             if (window.showUniversalPopup)
                                 showUniversalPopup(msg, "success", 2000);

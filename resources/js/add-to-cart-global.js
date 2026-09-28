@@ -160,6 +160,21 @@ window.addToCart = function(variantId, productId) {
             headers: Object.assign({ 'Content-Type': 'multipart/form-data', 'X-SKIP-TOAST': '1' }, csrf ? { 'X-CSRF-TOKEN': csrf } : {})
         }).then(function (resp) {
             const data = resp && resp.data;
+            try {
+                if (data && data.success && window.ezoneGa4) {
+                    const gaButton = document.querySelector('button.add-to-cart-btn[data-product-variant-id="' + variantId + '"]');
+                    const raw = gaButton ? gaButton.getAttribute('data-ga-item') : '';
+                    const item = raw ? JSON.parse(raw) : null;
+                    if (item && item.item_id) {
+                        const price = Number(item.price) || 0;
+                        window.ezoneGa4.event('add_to_cart', {
+                            currency: 'MAD',
+                            value: price,
+                            items: [Object.assign({}, item, { quantity: 1 })],
+                        });
+                    }
+                }
+            } catch (e) {}
             const msg = (data && (data.message || (data.success ? data.success : null))) || trans('Item added to cart');
             try { window.Toast && window.Toast.success({ title: trans('Added'), message: msg }); } catch (e) { alert(msg); }
             try { markButtonsInCart(variantId, productId); } catch (e) {}

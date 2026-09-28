@@ -13,6 +13,7 @@ use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\SessionCouponService;
 use App\Services\PriceCalculatorService;
+use App\Support\Ga4Ecommerce;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -196,8 +197,10 @@ class CartController extends Controller
         $appliedCoupon    = $cart ? $sessionCoupon->getForCart($cart->id) : null;
 
         $itemsForView = $cart ? $cart->items : collect();
+        $ga4Ecommerce = Ga4Ecommerce::cartPayload($cart, $totals);
+        $ga4Purchase = null;
 
-        return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'billingAddresses', 'cities', 'appliedCoupon', 'itemsForView'));
+        return view('client.pages.checkout-process', compact('cart', 'totals', 'addresses', 'billingAddresses', 'cities', 'appliedCoupon', 'itemsForView', 'ga4Ecommerce', 'ga4Purchase'));
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -13,6 +13,7 @@ use App\Services\CartService;
 use App\Services\InvoiceExportService;
 use App\Services\OrderService;
 use App\Services\PriceCalculatorService;
+use App\Support\Ga4Ecommerce;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -143,6 +144,12 @@ class OrderController extends Controller
 
         $itemsForView = $cart ? $cart->items : ($order ? $order->items : collect());
         $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
+        $ga4Ecommerce = in_array($step, [1, 2], true)
+            ? Ga4Ecommerce::cartPayload($cart, $totals)
+            : null;
+        $ga4Purchase = ($step === 3 && $order && $request->session()->has('order_id'))
+            ? Ga4Ecommerce::purchasePayload($order)
+            : null;
 
         // ── AJAX request: return only the step content HTML ──────────────
         if ($request->ajax() || $request->wantsJson()) {
@@ -156,13 +163,14 @@ class OrderController extends Controller
                 'step'     => $step,
                 'html'     => $html,
                 'order_id' => $order?->id,
+                'ecommerce' => $ga4Ecommerce,
             ]);
         }
 
         // ── Normal full-page request ─────────────────────────────────────
         return view('client.pages.checkout-process', compact(
             'cart', 'step', 'addresses', 'billingAddresses', 'cities',
-            'order', 'orders', 'totals', 'itemsForView'
+            'order', 'orders', 'totals', 'itemsForView', 'ga4Ecommerce', 'ga4Purchase'
         ))->with('appliedCoupon', $appliedCoupon);
     }
 
@@ -249,6 +257,7 @@ class OrderController extends Controller
                     'order_id'         => $order->id,
                     'order_number'     => $order->order_number,
                     'order_detail_url' => route('order-detail', ['order' => $order->id]),
+                    'ecommerce'        => Ga4Ecommerce::purchasePayload($order),
                 ]);
             }
 

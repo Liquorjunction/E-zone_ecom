@@ -4,6 +4,7 @@ namespace App\ViewModels;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Support\Ga4Ecommerce;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
@@ -52,7 +53,28 @@ class ProductCardViewModel
             'warranty' => $this->resolveWarranty($master, $locale),
             'productUrl' => $this->resolveProductUrl($master),
             'isInCart' => $this->resolveCartState($master, $isVariant),
+            'ga4Item' => $this->resolveGa4Item($master, $isVariant, $itemDiscountInfo),
         ];
+    }
+
+    private function resolveGa4Item(Product $master, bool $isVariant, array $itemDiscountInfo): array
+    {
+        $variant = null;
+        if ($isVariant && $this->product instanceof ProductVariant) {
+            $variant = $this->product;
+            if (!$variant->relationLoaded('product')) {
+                $variant->setRelation('product', $master);
+            }
+        } else {
+            $variant = $master->relationLoaded('productVariants')
+                ? $master->productVariants->first()
+                : $master->productVariants()->first();
+        }
+
+        $price = $itemDiscountInfo['final_price'] ?? ($variant?->price ?? $master->price ?? 0);
+        $item = Ga4Ecommerce::item($variant, $master, 1, $price);
+
+        return $item ?? [];
     }
 
     private function resolveName(Product $master, string $locale, bool $isVariant): string

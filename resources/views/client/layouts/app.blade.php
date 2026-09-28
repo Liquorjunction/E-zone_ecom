@@ -38,6 +38,7 @@
     <meta name="twitter:description" content="{{ $ogDescription }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/ga4-ecommerce.js') }}"></script>
 
     <link rel="icon" href="{{ asset('icon/fav-icon-high-resArtboard-1-150x150.png') }}" type="image/x-icon">
 

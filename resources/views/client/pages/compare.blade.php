@@ -180,10 +180,18 @@
                 }
             }
 
+            $gaItem = \App\Support\Ga4Ecommerce::item(
+                $variant,
+                $product,
+                1,
+                (float) ($discount['final_price'] ?? $variant->price ?? 0)
+            ) ?? [];
+
             return [
                 'id' => $variant->id,
                 'product_id' => $product?->id,
                 'name' => (string) $productName,
+                'ga_item' => $gaItem,
                 'link' => $productLink,
                 'image' => $image,
                 'price' => (float) ($discount['final_price'] ?? $variant->price ?? 0),
@@ -248,6 +256,7 @@
                                                 class="add-to-cart-btn w-full px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
                                                 data-product-variant-id="{{ $product['id'] }}"
                                                 data-product-id="{{ $product['product_id'] }}"
+                                                data-ga-item="{{ json_encode($product['ga_item'] ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) }}"
                                                 onclick="addToCart('{{ $product['id'] }}', '{{ $product['product_id'] }}')">
                                                 {{ statictranslations('Add to Cart') }}
                                             </button>
@@ -348,6 +357,7 @@
                                         class="add-to-cart-btn w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-primary text-white text-xs font-semibold rounded-xl hover:shadow-md transform hover:-translate-y-0.5 transition-all"
                                         data-product-variant-id="{{ $product['id'] }}"
                                         data-product-id="{{ $product['product_id'] }}"
+                                        data-ga-item="{{ json_encode($product['ga_item'] ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) }}"
                                         onclick="addToCart('{{ $product['id'] }}', '{{ $product['product_id'] }}')">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>

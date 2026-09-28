@@ -19,6 +19,8 @@
             CURRENCY_SYMBOL : @json(config('app.CURRENCY_SYMBOL', '$')),
             CURRENCY_CODE   : @json(config('app.CURRENCY_CODE',   'USD')),
         };
+        window.__ga4Checkout = @json($ga4Ecommerce ?? null);
+        window.__ga4Purchase = @json($ga4Purchase ?? null);
         window.__checkoutRoutes = {
             show    : @json(route('checkout')),
             process : @json(route('checkout.process')),

@@ -151,6 +151,14 @@ if (contactForm) {
                 } else {
                     alert(data.message);
                 }
+                try {
+                    if (window.ezoneGa4) {
+                        const subject = (formData.get('subject') || '').toString();
+                        window.ezoneGa4.event('generate_lead', {
+                            form_id: subject === 'bulk_purchase' ? 'quote' : 'contact',
+                        });
+                    }
+                } catch (e) {}
                 contactForm.reset();
                 renderFileList([]);
             } else {

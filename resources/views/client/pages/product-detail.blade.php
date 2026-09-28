@@ -21,6 +21,28 @@
         window.CHECKOUT_URL = @json(route('checkout', ['step' => 2]));
         window.PRODUCT_ID = @json($product->id);
         window.PRODUCT_VARIANT_ID = null;
+        @php
+            $ga4Items = [];
+            $ga4InitialVariant = $product->productVariants->first();
+            if (request()->filled('variant')) {
+                $ga4Requested = $product->productVariants->firstWhere('slug', request('variant'));
+                if ($ga4Requested) {
+                    $ga4InitialVariant = $ga4Requested;
+                }
+            }
+            foreach ($product->productVariants as $ga4Variant) {
+                $ga4Discount = $variantDiscounts[$ga4Variant->id] ?? null;
+                $ga4Price = is_array($ga4Discount)
+                    ? ($ga4Discount['final_price'] ?? $ga4Variant->price)
+                    : $ga4Variant->price;
+                $ga4Built = \App\Support\Ga4Ecommerce::item($ga4Variant, $product, 1, $ga4Price);
+                if ($ga4Built) {
+                    $ga4Items[(string) $ga4Variant->id] = $ga4Built;
+                }
+            }
+        @endphp
+        window.GA4_ITEMS = @json($ga4Items);
+        window.GA4_INITIAL_VARIANT_ID = @json($ga4InitialVariant?->id);
         window.IS_AUTHENTICATED = @json(auth('web')->check());
         window.COMPARED_VARIANT_IDS = @json(collect(session('compare_variant_ids', []))->map(fn($id) => (int) $id)->values()->all());
         window.APP_LOCALE = @json(app()->getLocale());

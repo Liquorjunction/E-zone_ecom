@@ -502,6 +502,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.html) {
                 if (content) content.innerHTML = data.html;
                 updateProgressBar(step);
+                if (Object.prototype.hasOwnProperty.call(data, "ecommerce")) {
+                    window.__ga4Checkout = data.ecommerce;
+                }
+                trackCheckoutStep(step, data.ecommerce || null);
                 runStepInits();
                 syncCheckoutActionStates();
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -655,6 +659,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 var content = document.getElementById("checkout-step-content");
                 if (content) content.innerHTML = data.html;
                 updateProgressBar(3);
+                if (data.ecommerce && window.ezoneGa4) {
+                    window.ezoneGa4.event("purchase", data.ecommerce);
+                }
                 window.__checkoutSubmitting = false;
                 window.scrollTo({ top: 0, behavior: "smooth" });
             } else {
@@ -1155,7 +1162,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- Change Listeners ---
     root.addEventListener("change", function (e) {
         if (e.target.name === "shipping_method") { refreshTotalsForShipping(); return; }
-        if (e.target.name === "payment_method")  { syncCardDetailsVisibility(); return; }
+        if (e.target.name === "payment_method")  { syncCardDetailsVisibility(); trackAddPaymentInfo(); return; }
     });
 
     var allowNavigation = false;
@@ -1195,8 +1202,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }, true);
 
+    function trackCheckoutStep(step, payload) {
+        try {
+            if (!payload || !window.ezoneGa4) return;
+            if (step === 1) window.ezoneGa4.event("view_cart", payload);
+            if (step === 2) window.ezoneGa4.event("begin_checkout", payload);
+        } catch (e) {}
+    }
+
+    function trackAddPaymentInfo() {
+        try {
+            if (String(root.dataset.step) !== "2") return;
+            if (!window.__ga4Checkout || !window.ezoneGa4) return;
+            var method = document.querySelector('input[name="payment_method"]:checked');
+            window.ezoneGa4.event("add_payment_info", Object.assign({}, window.__ga4Checkout, {
+                payment_type: method ? method.value : "",
+            }));
+        } catch (e) {}
+    }
+
     runStepInits();
     syncCheckoutActionStates();
+    trackCheckoutStep(parseInt(root.dataset.step || "1", 10), window.__ga4Checkout || null);
+    if (window.__ga4Purchase && window.ezoneGa4) {
+        window.ezoneGa4.event("purchase", window.__ga4Purchase);
+    }
 });
 
 // ═══════════════════════════════════════════════════════════════
