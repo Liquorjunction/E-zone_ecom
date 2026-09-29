@@ -397,13 +397,12 @@
                                     <td class="px-4 py-2 text-center text-gray-600">{{ $qty }}</td>
                                     <td class="px-4 py-2 text-right text-gray-700">
                                         @if ($lineDiscount > 0)
-                                            <span class="text-xs text-gray-400 line-through mr-1">{{ $sym }}
-                                                {{ number_format($originalUnitPrice, 2) }}</span>
+                                            <span class="text-xs text-gray-400 line-through mr-1">{{ money_format_number($originalUnitPrice) }}</span>
                                         @endif
-                                        <span>{{ $sym }} {{ number_format($unitPrice, 2) }}</span>
+                                        <span>{{ money_format_number($unitPrice) }}</span>
                                     </td>
                                     <td class="px-4 py-2 text-right text-gray-900 font-semibold">
-                                        <span>{{ $sym }} {{ number_format($lineTotal, 2) }}</span>
+                                        <span>{{ money_format_number($lineTotal) }}</span>
                                     </td>
                                 </tr>
                             @endforeach
@@ -421,7 +420,7 @@
                         <span class="text-gray-600">{{ statictranslations('Taxable Amount') }} :</span>
                         <span class="font-medium">
                             @if ($taxableAmount !== null)
-                                {{ $sym }} {{ number_format((float) $taxableAmount, 2) }}
+                                {{ money_format_number((float) $taxableAmount) }}
                             @else
                                 -
                             @endif
@@ -430,13 +429,13 @@
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-600">{{ statictranslations('VAT') }} {{ number_format((float) $taxRate, 0) }}% :</span>
                         <span class="font-medium">
-                            <span class="font-semibold">{{ $tax > 0 ? $sym . ' ' . number_format($tax, 2) : '-' }}</span>
+                            <span class="font-semibold">{{ $tax > 0 ? money_format_number($tax) : '-' }}</span>
                         </span>
                     </div>
                     <div class="flex justify-between text-sm border-t pt-2 mt-2"></div>
                     <div class="flex justify-between text-sm mt-1">
                         <span class="text-gray-600">{{ statictranslations('Total Tax Inclusive Amount') }} :</span>
-                        <span class="font-medium">{{ $sym }} {{ number_format($totalWithoutShipping, 2) }}</span>
+                        <span class="font-medium">{{ money_format_number($totalWithoutShipping) }}</span>
                     </div>
                 </div>
 
@@ -447,9 +446,9 @@
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-600">{{ statictranslations('Subtotal') }} ({{ $order->items->sum('quantity') }} {{ statictranslations('items') }}) :</span>
                         @if ($couponCode)
-                            <span class="font-medium">{{ $sym }} {{ number_format($subtotal, 2) }}</span>
+                            <span class="font-medium">{{ money_format_number($subtotal) }}</span>
                         @else
-                            <span class="font-medium">{{ $sym }} {{ number_format($subtotalAfterDiscount, 2) }}</span>
+                            <span class="font-medium">{{ money_format_number($subtotalAfterDiscount) }}</span>
                         @endif
                     </div>
 
@@ -461,14 +460,14 @@
                                     class="ml-1 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">{{ strtoupper($couponCode) }}</span>
                             </span>
                             <span
-                                class="text-green-600 font-medium">{{ $couponDiscount > 0 ? '− ' . $sym . ' ' . number_format($couponDiscount, 2) : '-' }}</span>
+                                class="text-green-600 font-medium">{{ $couponDiscount > 0 ? '− ' . money_format_number($couponDiscount) : '-' }}</span>
                         </div>
                     @endif
 
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-600">{{ statictranslations('Shipping') }} ({{ $shippingMethod }}) :</span>
                         @if ($shippingCost > 0)
-                            <span>{{ $sym }} {{ number_format($shippingCost, 2) }}</span>
+                            <span>{{ money_format_number($shippingCost) }}</span>
                         @else
                             <span class="text-green-600 font-medium">{{ statictranslations('Free') }}</span>
                         @endif
@@ -477,7 +476,7 @@
                     <div
                         class="flex justify-between text-base mt-3 border-t pt-2 font-bold bg-primary/5 rounded-lg px-2 py-1 invoice-total-highlight">
                         <span class="text-gray-800">{{ statictranslations('Total') }} :</span>
-                        <span class="text-primary text-lg">{{ $sym }} {{ number_format($total, 2) }}</span>
+                        <span class="text-primary text-lg">{{ money_format_number($total) }}</span>
                     </div>
                 </div>
             </div>

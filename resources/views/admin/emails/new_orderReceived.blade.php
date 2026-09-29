@@ -85,7 +85,7 @@
                     <p style="margin: 0; padding: 0; color: #6b7280; font-size: 14px; font-family: Arial, Helvetica, sans-serif;">{{ $item->quantity }}</p>
                 </td>
                 <td align="right" style="padding: 11px 16px;">
-                    <p style="margin: 0; padding: 0; color: #1a1a2e; font-size: 14px; font-weight: 500; font-family: Arial, Helvetica, sans-serif;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($item->unit_price, 2) }}</p>
+                    <p style="margin: 0; padding: 0; color: #1a1a2e; font-size: 14px; font-weight: 500; font-family: Arial, Helvetica, sans-serif;">{{ money_format_number($item->unit_price) }}</p>
                 </td>
             </tr>
         @endforeach
@@ -98,7 +98,7 @@
                     <tr>
                         <td style="padding: 10px 16px 4px 16px;">
                             <p style="margin: 0; color: #9ca3af; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Sous-total: <span style="color: #374151; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->subtotal ?? $order->total, 2) }}</span>
+                                Sous-total: <span style="color: #374151; font-weight: 500; margin-left: 16px;">{{ money_format_number($order->subtotal ?? $order->total) }}</span>
                             </p>
                         </td>
                     </tr>
@@ -107,7 +107,7 @@
                     <tr>
                         <td style="padding: 4px 16px;">
                             <p style="margin: 0; color: #9ca3af; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Remise sur le prix catalogue: <span style="color: #16a34a; font-weight: 500; margin-left: 16px;">−{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->discount_amount, 2) }}</span>
+                                Remise sur le prix catalogue: <span style="color: #16a34a; font-weight: 500; margin-left: 16px;">−{{ money_format_number($order->discount_amount) }}</span>
                             </p>
                         </td>
                     </tr>
@@ -117,7 +117,7 @@
                     <tr>
                         <td style="padding: 4px 16px;">
                             <p style="margin: 0; color: #9ca3af; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Remise Coupon: <span style="color: #16a34a; font-weight: 500; margin-left: 16px;">−{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->coupon_discount_amount, 2) }}</span>
+                                Remise Coupon: <span style="color: #16a34a; font-weight: 500; margin-left: 16px;">−{{ money_format_number($order->coupon_discount_amount) }}</span>
                             </p>
                         </td>
                     </tr>
@@ -127,7 +127,7 @@
                     <tr>
                         <td style="padding: 4px 16px;">
                             <p style="margin: 0; color: #9ca3af; font-size: 13px; font-family: Arial, Helvetica, sans-serif; text-align: right;">
-                                Livraison: <span style="color: #374151; font-weight: 500; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->shipping_cost, 2) }}</span>
+                                Livraison: <span style="color: #374151; font-weight: 500; margin-left: 16px;">{{ money_format_number($order->shipping_cost) }}</span>
                             </p>
                         </td>
                     </tr>
@@ -137,7 +137,7 @@
                     <tr>
                         <td style="padding: 10px 16px 14px 16px; border-top: 1px solid #e0e4f0;">
                             <p style="margin: 0; font-size: 15px; font-family: Arial, Helvetica, sans-serif; text-align: right; color: #4361ee;">
-                                Total Général: <span style="font-weight: 700; font-size: 17px; margin-left: 16px;">{{config('app.CURRENCY_SYMBOL')}}{{ number_format($order->total, 2) }}</span>
+                                Total Général: <span style="font-weight: 700; font-size: 17px; margin-left: 16px;">{{ money_format_number($order->total) }}</span>
                             </p>
                         </td>
                     </tr>

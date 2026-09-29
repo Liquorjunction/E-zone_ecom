@@ -214,6 +214,29 @@
                 linkSelector: 'input[name="button_link"]',
                 message: 'Button link is required when button text is provided.'
             });
+
+            // Auto-clear other language tabs when English text is cleared for subtitle and button_text
+            const syncClearOnEnglishEmpty = (enFieldId, otherFieldIds) => {
+                const enField = document.getElementById(enFieldId);
+                if (enField) {
+                    enField.addEventListener('input', function() {
+                        if (this.value.trim() === '') {
+                            otherFieldIds.forEach(id => {
+                                const otherField = document.getElementById(id);
+                                if (otherField) {
+                                    otherField.value = '';
+                                    // Trigger input event to update button link guard
+                                    otherField.dispatchEvent(new Event('input'));
+                                }
+                            });
+                        }
+                    });
+                }
+            };
+
+            syncClearOnEnglishEmpty('button_text_en', ['button_text_fr', 'button_text_ar']);
+            syncClearOnEnglishEmpty('subtitle_en', ['subtitle_fr', 'subtitle_ar']);
+            syncClearOnEnglishEmpty('title_en', ['title_fr', 'title_ar']);
         });
     </script>
 @endpush

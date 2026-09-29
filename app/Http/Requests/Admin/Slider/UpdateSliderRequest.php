@@ -25,9 +25,13 @@ class UpdateSliderRequest extends FormRequest
 
             'subtitle' => 'nullable|array',
             'subtitle.en' => 'nullable|string|max:255',
+            'subtitle.fr' => 'nullable|string|max:255',
+            'subtitle.ar' => 'nullable|string|max:255',
 
             'button_text' => 'nullable|array',
             'button_text.en' => 'nullable|string|max:50',
+            'button_text.fr' => 'nullable|string|max:50',
+            'button_text.ar' => 'nullable|string|max:50',
 
             // Standard Fields
             'button_link' => 'nullable|url|max:255',

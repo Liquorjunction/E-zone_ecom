@@ -79,8 +79,8 @@ $countActiveVariants = function ($products) {
 
                     {{-- Static label row --}}
                     <div class="flex items-center justify-between text-sm text-gray-500">
-                        <span>{{ config('app.CURRENCY_SYMBOL') }}0</span>
-                        <span>{{ config('app.CURRENCY_SYMBOL') }}{{ number_format($maxPrice) }}+</span>
+                        <span>{{ money_format_number(0, 0) }}</span>
+                        <span>{{ money_format_number($maxPrice, 0) }}+</span>
                     </div>
 
                     {{--

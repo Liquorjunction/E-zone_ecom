@@ -40,7 +40,7 @@ if (!function_exists('format_currency')) {
      */
     function format_currency(float $amount, bool $showSymbol = true): string
     {
-        $formatted = number_format($amount, 2);
-        return $showSymbol ? config('app.CURRENCY_SYMBOL', '$') . $formatted : $formatted;
+        $symbol = $showSymbol ? config('app.CURRENCY_SYMBOL', '$') : '';
+        return money_format_number($amount, 2, $symbol);
     }
 }

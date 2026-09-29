@@ -113,7 +113,7 @@ class CouponService
                 'message' => sprintf(
                     statictranslations('Minimum order amount of %s%s required to use this coupon.'),
                     config('app.CURRENCY_SYMBOL'),
-                    number_format($coupon->min_order_amount, 2)
+                    money_format_number($coupon->min_order_amount, 2, '')
                 ),
                 'discount' => null,
             ];
@@ -131,7 +131,7 @@ class CouponService
 
         return [
             'success' => true,
-            'message' => sprintf(statictranslations('Coupon applied! You saved %s%s'), config('app.CURRENCY_SYMBOL'), number_format($discountAmount, 2)),
+            'message' => sprintf(statictranslations('Coupon applied! You saved %s%s'), config('app.CURRENCY_SYMBOL'), money_format_number($discountAmount, 2, '')),
             'discount' => $discountAmount,
             'coupon' => [
                 'id' => $coupon->id,

@@ -25,7 +25,7 @@
     <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
         <span class="text-gray-600 font-medium">{{ statictranslations('MRP') }}</span>
         <span id="{{ $subtotalId }}" class="font-bold text-gray-900">
-            {{ $sym }} {{ number_format($totals['subtotal'] ?? 0, 2) }}
+            {{ money_format_number($totals['subtotal'] ?? 0) }}
         </span>
     </div>
 
@@ -41,7 +41,7 @@
                 {{ statictranslations('Discount on MRP') }}
             </span>
             <span id="{{ $discId }}" class="font-bold">
-                -{{ $sym }} {{ number_format($totals['total_item_discount'] ?? 0, 2) }}
+                -{{ money_format_number($totals['total_item_discount'] ?? 0) }}
             </span>
         </div>
     @else
@@ -66,7 +66,7 @@
             <span class="font-semibold">{{ statictranslations('Coupon Discount') }}</span>
         </div>
         <span id="{{ $couponDiscId }}" class="font-bold">
-            @if($couponApplied) -{{ $sym }} {{ number_format($totals['coupon_discount'], 2) }} @endif
+            @if($couponApplied) -{{ money_format_number($totals['coupon_discount']) }} @endif
         </span>
     </div>
 
@@ -75,7 +75,7 @@
         <div class="flex justify-between text-gray-600 text-base">
             <span>{{ statictranslations('Shipping') }}</span>
             <span id="{{ $shippingId }}" class="font-bold text-green-600">
-                {{ ($totals['shipping_cost'] ?? 0) > 0 ? $sym . ' ' . number_format($totals['shipping_cost'], 2) : statictranslations('FREE') }}
+                {{ ($totals['shipping_cost'] ?? 0) > 0 ? money_format_number($totals['shipping_cost']) : statictranslations('FREE') }}
             </span>
         </div>
     @endif
@@ -86,7 +86,7 @@
             <span class="text-xl font-bold text-gray-900">{{ statictranslations('Total') }}</span>
             <span id="{{ $totalId }}"
                 class="text-xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                {{ $sym }} {{ number_format($totals['final_total'] ?? 0, 2) }}
+                {{ money_format_number($totals['final_total'] ?? 0) }}
             </span>
         </div>
     </div>

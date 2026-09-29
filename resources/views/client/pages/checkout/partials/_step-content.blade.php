@@ -469,14 +469,14 @@
                         <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
                             <span class="text-gray-600 font-medium">{{ statictranslations('MRP') }}</span>
                             <span
-                                class="font-bold text-gray-900">{{ $sym }}{{ number_format($order->subtotal ?? 0, 2) }}</span>
+                                class="font-bold text-gray-900">{{ money_format_number($order->subtotal ?? 0) }}</span>
                         </div>
                         @if (($order->discount_amount ?? 0) > 0)
                             <div
                                 class="flex justify-between text-green-600 text-base bg-green-50 px-4 py-3 rounded-xl">
                                 <span>{{ statictranslations('Discount on MRP') }}</span>
                                 <span
-                                    class="font-bold">-{{ $sym }}{{ number_format($order->discount_amount, 2) }}</span>
+                                    class="font-bold">-{{ money_format_number($order->discount_amount) }}</span>
                             </div>
                         @endif
                         @if (($order->coupon_discount_amount ?? 0) > 0)
@@ -484,7 +484,7 @@
                                 class="flex justify-between items-center text-purple-600 text-base bg-purple-50 px-4 py-3 rounded-xl">
                                 <span class="font-semibold">{{ statictranslations('Coupon Discount') }} - </span>
                                 <span
-                                    class="font-bold">-{{ $sym }}{{ number_format($order->coupon_discount_amount, 2) }}</span>
+                                    class="font-bold">-{{ money_format_number($order->coupon_discount_amount) }}</span>
                             </div>
                         @endif
                         <div class="border-t-2 border-gray-100 pt-4">
@@ -492,7 +492,7 @@
                                 <span class="text-xl font-bold text-gray-900">Total</span>
                                 <span
                                     class="text-xl font-bold bg-linear-to-r from-green-500 to-green-400 bg-clip-text text-transparent">
-                                    {{ $sym }}{{ number_format($order->total ?? 0, 2) }}
+                                    {{ money_format_number($order->total ?? 0) }}
                                 </span>
                             </div>
                         </div>

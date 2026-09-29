@@ -94,11 +94,11 @@
             {{-- Price --}}
             <div class="flex items-baseline gap-2 mb-3">
               <span class="text-base lg:text-lg font-bold text-primary">
-                ${{ number_format($price, 2) }}
+                {{ money_format_number($price) }}
               </span>
               @if($originalPrice && $originalPrice > $price)
                 <span class="text-xs lg:text-sm text-gray-400 line-through">
-                  ${{ number_format($originalPrice, 2) }}
+                  {{ money_format_number($originalPrice) }}
                 </span>
               @endif
             </div>

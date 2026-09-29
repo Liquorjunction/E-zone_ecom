@@ -136,12 +136,12 @@
                                                     <span class="text-muted">-</span>
                                                 @endif
                                             </td>
-                                            <td>{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->cost_price, 2) }}</td>
+                                            <td>{{ money_format_number($item->cost_price) }}</td>
                                             <td>
                                                 <span class="fw-bold">{{ (int) $item->quantity }}</span>
                                             </td>
                                             <td class="fw-bold text-primary">
-                                                {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($item->cost_price * $item->quantity, 0) }}
+                                                {{ money_format_number($item->cost_price * $item->quantity, 0) }}
                                             </td>
                                             <td>
                                                 <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#history-{{ $item->id }}" aria-expanded="false" aria-controls="history-{{ $item->id }}">
@@ -219,7 +219,7 @@
                                         <td colspan="4" class="text-end fw-bold">Total:</td>
                                         <td class="fw-bold">{{ (int) $batchItems->sum('quantity') }}</td>
                                         <td class="fw-bold text-primary">
-                                            {{ config('app.CURRENCY_SYMBOL') }} {{ number_format($batchItems->sum(function ($i) {return $i->cost_price * $i->quantity;}),2) }}
+                                            {{ money_format_number($batchItems->sum(function ($i) {return $i->cost_price * $i->quantity;}), 2) }}
                                         </td>
                                         <td></td>
                                     </tr>

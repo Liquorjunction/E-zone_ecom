@@ -339,19 +339,16 @@
                                                         <div>
                                                             <span
                                                                 class="inline-block text-xs text-gray-400 line-through opacity-75">
-                                                                {{ config('app.CURRENCY_SYMBOL') }}
-                                                                {{ number_format($item->unit_price_original * $item->quantity, 2) }}
+                                                                {{ money_format_number($item->unit_price_original * $item->quantity) }}
                                                             </span>
                                                         </div>
                                                         <span class="text-2xl font-bold text-red-600">
-                                                            {{ config('app.CURRENCY_SYMBOL') }}
-                                                            {{ number_format($item->unit_price * $item->quantity, 2) }}
+                                                            {{ money_format_number($item->unit_price * $item->quantity) }}
                                                         </span>
                                                     </div>
                                                 @else
                                                     <span class="text-2xl font-bold text-primary">
-                                                        {{ config('app.CURRENCY_SYMBOL') }}
-                                                        {{ number_format($item->unit_price * $item->quantity, 2) }}
+                                                        {{ money_format_number($item->unit_price * $item->quantity) }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -474,8 +471,7 @@
                         <div class="space-y-3 mb-4 pb-4 border-b-2 border-gray-100">
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">{{ statictranslations('Subtotal') }}</span>
-                                <span class="font-semibold text-gray-900">{{ config('app.CURRENCY_SYMBOL') }}
-                                    {{ number_format($subtotal, 2) }}</span>
+                                <span class="font-semibold text-gray-900">{{ money_format_number($subtotal) }}</span>
                             </div>
 
                             @if ($itemDiscount > 0)
@@ -489,8 +485,7 @@
                                         </svg>
                                         {{ statictranslations('Item Discounts') }}
                                     </span>
-                                    <span class="font-semibold text-green-600">-{{ config('app.CURRENCY_SYMBOL') }}
-                                        {{ number_format($itemDiscount, 2) }}</span>
+                                    <span class="font-semibold text-green-600">-{{ money_format_number($itemDiscount) }}</span>
                                 </div>
                             @endif
 
@@ -507,8 +502,7 @@
                                                     class="font-semibold">{{ $order->coupon_code }}</span></span>
                                         @endif
                                     </span>
-                                    <span class="font-semibold text-purple-600">-{{ config('app.CURRENCY_SYMBOL') }}
-                                        {{ number_format($couponDiscount, 2) }}</span>
+                                    <span class="font-semibold text-purple-600">-{{ money_format_number($couponDiscount) }}</span>
                                 </div>
                             @endif
                             {{--
@@ -518,7 +512,7 @@
                                     @if ($shipping == 0)
                                         <span class="text-green-600">Free</span>
                                     @else
-                                        <span>{{ config('app.CURRENCY_SYMBOL') }} {{ number_format($shipping, 2) }}</span>
+                                        <span>{{ money_format_number($shipping) }}</span>
                                         @if ($order->shipping_method)
                                             <span
                                                 class="text-xs text-gray-500">({{ ucfirst($order->shipping_method) }})</span>
@@ -530,8 +524,7 @@
 
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-base lg:text-lg font-bold text-gray-900">Total</span>
-                            <span class="text-xl lg:text-2xl font-bold text-primary">{{ config('app.CURRENCY_SYMBOL') }}
-                                {{ number_format($total, 2) }}</span>
+                            <span class="text-xl lg:text-2xl font-bold text-primary">{{ money_format_number($total) }}</span>
                         </div>
 
                         <div class="space-y-3">

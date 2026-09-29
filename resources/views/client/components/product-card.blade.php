@@ -28,7 +28,7 @@
                     @if($productDiscountInfo['discount_percentage'] > 0)
                         -{{ number_format($productDiscountInfo['discount_percentage'], 0) }}%
                     @else
-                        ${{ number_format($productDiscountInfo['discount_amount'], 2) }} OFF
+                        {{ money_format_number($productDiscountInfo['discount_amount'], 2, '') }} OFF
                     @endif
                 </div>
             @else
@@ -72,7 +72,7 @@
             @if(isset($oldPrice))
                 <span class="text-sm text-gray-400 line-through">{{ $oldPrice }}</span>
             @elseif($productDiscountInfo && $productDiscountInfo['has_discount'] && isset($productDiscountInfo['original_price']))
-                <span class="text-sm text-gray-400 line-through">${{ number_format($productDiscountInfo['original_price'], 2) }}</span>
+                <span class="text-sm text-gray-400 line-through">{{ money_format_number($productDiscountInfo['original_price'], 2, '') }}</span>
             @endif
         </div>
 

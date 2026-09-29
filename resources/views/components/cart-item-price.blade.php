@@ -17,10 +17,10 @@
         <div class="price-breakdown">
             <div class="d-flex justify-content-between align-items-center">
                 <span class="text-muted small">
-                    {{ $quantity }} × {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($unitPrice, 2) }}
+                    {{ $quantity }} × {{ money_format_number($unitPrice) }}
                 </span>
                 <span class="text-muted text-decoration-line-through">
-                    {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineTotal, 2) }}
+                    {{ money_format_number($lineTotal) }}
                 </span>
             </div>
             @if($discountName)
@@ -29,14 +29,14 @@
                     <i class="bi bi-tag"></i> {{ $discountName }}
                 </small>
                 <span class="text-success">
-                    -{{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineDiscount, 2) }}
+                    -{{ money_format_number($lineDiscount) }}
                 </span>
             </div>
             @endif
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="fw-bold">{{ statictranslations('Total') }}:</span>
                 <span class="fw-bold text-danger fs-5">
-                    {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineFinal, 2) }}
+                    {{ money_format_number($lineFinal) }}
                 </span>
             </div>
         </div>
@@ -44,10 +44,10 @@
         <div class="price-no-discount">
             <div class="d-flex justify-content-between align-items-center">
                 <span class="text-muted">
-                    {{ $quantity }} × {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($unitPrice, 2) }}
+                    {{ $quantity }} × {{ money_format_number($unitPrice) }}
                 </span>
                 <span class="fw-bold fs-5">
-                    {{ config('app.CURRENCY_SYMBOL', '$') }}{{ number_format($lineTotal, 2) }}
+                    {{ money_format_number($lineTotal) }}
                 </span>
             </div>
         </div>

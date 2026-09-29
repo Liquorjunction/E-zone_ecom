@@ -514,7 +514,7 @@ class ProductController extends Controller
                             'product_id' => $product->id,
                             'name' => $variantName,
                             'sku' => $variant->sku,
-                            'price' => number_format($variant->price, 2),
+                            'price' => money_format_number($variant->price, 2, ''),
                             'status' => $variant->status,
                             'is_bestseller' => $variant->is_bestseller,
                             'can_update' => $request->user()->can('products.update'),

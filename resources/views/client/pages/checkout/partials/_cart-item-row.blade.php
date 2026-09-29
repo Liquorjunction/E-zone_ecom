@@ -106,7 +106,7 @@
             {{-- Price display --}}
             <div class="text-right">
                 @if ($hasDiscount)
-                    <div class="text-lg text-gray-400 line-through mb-1">{{ $sym }} {{ number_format($lineTotal, 2) }}</div>
+                    <div class="text-lg text-gray-400 line-through mb-1">{{ money_format_number($lineTotal) }}</div>
 
                     @if ($lineDiscount > 0)
                         <div class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1">
@@ -114,17 +114,17 @@
                                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
                                 <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            {{ statictranslations('Save') }} {{ $sym }} {{ number_format($lineDiscount, 2) }}
+                            {{ statictranslations('Save') }} {{ money_format_number($lineDiscount) }}
                         </div>
                     @endif
 
                     <p class="text-3xl font-bold text-red-600 item-line-total" id="item-line-total-{{ $item->id }}">
-                        {{ $sym }} {{ number_format($lineFinal, 2) }}
+                        {{ money_format_number($lineFinal) }}
                     </p>
                 @else
                     <p class="text-3xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent item-line-total"
                         id="item-line-total-{{ $item->id }}">
-                        {{ $sym }} {{ number_format($lineFinal, 2) }}
+                        {{ money_format_number($lineFinal) }}
                     </p>
                 @endif
             </div>

@@ -71,7 +71,7 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Product Name (EN) <span class="text-danger">*</span></label>
-                                                        <input type="text" name="name[en]" class="form-control"
+                                                        <input type="text" name="name[en]" id="name_en" class="form-control"
                                                             value="{{ old('name.en') }}" required>
                                                     </div>
                                                     <div class="mb-3">
@@ -86,7 +86,7 @@
                                                 <div class="tab-pane fade" id="basic-fr">
                                                     <div class="mb-3">
                                                         <label class="form-label">Product Name (FR)</label>
-                                                        <input type="text" name="name[fr]" class="form-control" value="{{ old('name.fr') }}">
+                                                        <input type="text" name="name[fr]" id="name_fr" class="form-control" value="{{ old('name.fr') }}">
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Description (FR)</label>
@@ -100,7 +100,7 @@
                                                 <div class="tab-pane fade" id="basic-ar">
                                                     <div class="mb-3 text-end" dir="rtl">
                                                         <label class="form-label">Product Name (AR)</label>
-                                                        <input type="text" name="name[ar]" class="form-control" value="{{ old('name.ar') }}">
+                                                        <input type="text" name="name[ar]" id="name_ar" class="form-control" value="{{ old('name.ar') }}">
                                                     </div>
                                                     <div class="mb-3 text-end" dir="rtl">
                                                         <label class="form-label">Description (AR)</label>
@@ -206,12 +206,12 @@
                                                             dir="{{ $lang === 'ar' ? 'rtl' : 'ltr' }}">
                                                             <div class="col-md-6 mb-3">
                                                                 <label class="form-label">Dimensions ({{ strtoupper($lang) }})</label>
-                                                                <input type="text" name="dimensions[{{ $lang }}]"
+                                                                <input type="text" name="dimensions[{{ $lang }}]" id="dimensions_{{ $lang }}"
                                                                     class="form-control" placeholder="e.g. 10x10x5 cm">
                                                             </div>
                                                             <div class="col-md-6 mb-3">
                                                                 <label class="form-label">Warranty ({{ strtoupper($lang) }})</label>
-                                                                <input type="text" name="warranty[{{ $lang }}]"
+                                                                <input type="text" name="warranty[{{ $lang }}]" id="warranty_{{ $lang }}"
                                                                     class="form-control" placeholder="e.g. 2 Years">
                                                             </div>
                                                             <div class="col-md-12">

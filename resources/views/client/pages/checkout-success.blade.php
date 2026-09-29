@@ -176,7 +176,7 @@
                 <div class="flex-1">
                   <h3 class="font-semibold text-gray-900 text-sm mb-1">{{ $it->product->name ?? ($it->name ?? 'Product') }}</h3>
                   <p class="text-xs text-gray-500 mb-2">Qty: {{ $it->quantity }}</p>
-                  <p class="font-bold text-primary">${{ number_format(($it->unit_price ?? ($it->price ?? 0)) * $it->quantity, 2) }}</p>
+                  <p class="font-bold text-primary">{{ money_format_number(($it->unit_price ?? ($it->price ?? 0)) * $it->quantity) }}</p>
                 </div>
               </div>
             @empty
@@ -187,21 +187,21 @@
           <div class="space-y-3 mb-6">
             <div class="flex justify-between text-gray-600">
               <span>{{ statictranslations('Subtotal') }}</span>
-              <span class="font-semibold">${{ number_format($subtotal, 2) }}</span>
+              <span class="font-semibold">{{ money_format_number($subtotal) }}</span>
             </div>
             {{-- <div class="flex justify-between text-gray-600">
               <span>{{ statictranslations('Shipping') }}</span>
-              <span class="font-semibold text-green-600">{{ $shipping > 0 ? '$'.number_format($shipping,2) : 'FREE' }}</span>
+              <span class="font-semibold text-green-600">{{ $shipping > 0 ? money_format_number($shipping) : 'FREE' }}</span>
             </div> --}}
             <div class="flex justify-between text-gray-600">
               <span>{{ statictranslations('Tax') }} ({{ config('tax.rate', 20) }}{{ statictranslations('% included') }})</span>
-              <span class="font-semibold">${{ number_format($tax, 2) }}</span>
+              <span class="font-semibold">{{ money_format_number($tax) }}</span>
             </div>
 
             <div class="border-t-2 border-gray-100 pt-3">
               <div class="flex justify-between items-center">
                 <span class="text-xl font-bold text-gray-900">{{ statictranslations('Total') }}</span>
-                <span class="text-3xl font-bold text-primary">${{ number_format($total, 2) }}</span>
+                <span class="text-3xl font-bold text-primary">{{ money_format_number($total) }}</span>
               </div>
             </div>
           </div>

@@ -89,7 +89,7 @@ class OrderStatusMail extends Mailable
         private function buildFallbackInvoicePdf(): string
         {
                 $sym = config('app.CURRENCY_SYMBOL', '$');
-                $total = number_format((float) ($this->order->total ?? 0), 2);
+                $total = money_format_number($this->order->total ?? 0, 2, '');
                 $orderNumber = e($this->order->order_number ?: ('ORDER-' . $this->order->id));
                 $customerName = e($this->user->name ?? 'Customer');
                 $date = e(optional($this->order->created_at)->format('F j, Y, g:i A') ?: now()->format('F j, Y, g:i A'));

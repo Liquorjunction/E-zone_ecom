@@ -109,6 +109,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // -----------------------------------------------------------
+    // 3. AUTO-CLEAR OTHER LANGUAGES WHEN ENGLISH IS CLEARED
+    // -----------------------------------------------------------
+    const englishInputs = document.querySelectorAll('[id$="_en"]');
+    englishInputs.forEach(enInput => {
+        enInput.addEventListener('input', function() {
+            if (this.value.trim() === '') {
+                const baseId = this.id.slice(0, -3); // remove '_en'
+                const frInput = document.getElementById(baseId + '_fr');
+                const arInput = document.getElementById(baseId + '_ar');
+                if (frInput) {
+                    frInput.value = '';
+                    frInput.dispatchEvent(new Event('input'));
+                }
+                if (arInput) {
+                    arInput.value = '';
+                    arInput.dispatchEvent(new Event('input'));
+                }
+                // Handle Quill editor if any
+                const frQuill = document.getElementById('editor_' + baseId + '_fr');
+                const arQuill = document.getElementById('editor_' + baseId + '_ar');
+                if (frQuill && frQuill.__quill) {
+                    frQuill.__quill.root.innerHTML = '';
+                }
+                if (arQuill && arQuill.__quill) {
+                    arQuill.__quill.root.innerHTML = '';
+                }
+            }
+        });
+    });
+
      // --- Helper: Update Field (Smart Detection) ---
     function updateField(elementId, content) {
         const el = document.getElementById(elementId);
