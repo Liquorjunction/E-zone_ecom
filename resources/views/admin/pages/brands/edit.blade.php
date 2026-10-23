@@ -350,14 +350,19 @@
                                         <div class="row g-3">
                                             {{-- Lifestyle Image Column --}}
                                             <div class="col-md-3">
-                                                <label class="form-label small fw-bold mb-1">Lifestyle Photo</label>
+                                                <label class="form-label small fw-bold mb-1">Lifestyle Photo <span class="text-danger">*</span></label>
                                                 <div class="bg-light rounded border p-1 text-center mb-2" style="height: 120px;">
                                                     <img src="{{ $showcase->image ? asset('storage/' . $showcase->image) : asset('images/no_image.jpg') }}"
                                                          alt="Showcase Preview"
                                                          class="img-fluid rounded showcase-preview-img"
                                                          style="max-height: 110px; width: 100%; object-fit: cover;">
                                                 </div>
-                                                <input type="file" name="showcases[{{ $sIndex }}][image]" class="form-control form-control-sm showcase-file-input" accept="image/*">
+                                                <input type="file" name="showcases[{{ $sIndex }}][image]"
+                                                       class="form-control form-control-sm showcase-file-input @error("showcases.{$sIndex}.image") is-invalid @enderror"
+                                                       accept="image/*">
+                                                @error("showcases.{$sIndex}.image")
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
                                                 <div class="form-text text-2xs text-muted">Recommended: 800×600 or 1:1 square.</div>
                                             </div>
 
@@ -408,9 +413,14 @@
                                                         <div class="tab-pane fade show active" id="sc-en-{{ $sIndex }}">
                                                             <div class="row g-2">
                                                                 <div class="col-md-6">
-                                                                    <label class="form-label small fw-bold mb-1">Title (EN)</label>
-                                                                    <input type="text" name="showcases[{{ $sIndex }}][title][en]" class="form-control form-control-sm showcase-title-en"
-                                                                           value="{{ $showcase->getTranslation('title', 'en', false) }}" placeholder="e.g. Laundry">
+                                                                    <label class="form-label small fw-bold mb-1">Card Name / Title (EN) <span class="text-danger">*</span></label>
+                                                                    <input type="text" name="showcases[{{ $sIndex }}][title][en]"
+                                                                           class="form-control form-control-sm showcase-title-en @error("showcases.{$sIndex}.title.en") is-invalid @enderror"
+                                                                           value="{{ old("showcases.{$sIndex}.title.en", $showcase->getTranslation('title', 'en', false)) }}"
+                                                                           placeholder="e.g. Laundry" required>
+                                                                    @error("showcases.{$sIndex}.title.en")
+                                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                                    @enderror
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label class="form-label small fw-bold mb-1">Button Text (EN)</label>
@@ -579,14 +589,14 @@
             <div class="row g-3">
                 {{-- Lifestyle Image Column --}}
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold mb-1">Lifestyle Photo</label>
+                    <label class="form-label small fw-bold mb-1">Lifestyle Photo <span class="text-danger">*</span></label>
                     <div class="bg-light rounded border p-1 text-center mb-2" style="height: 120px;">
                         <img src="{{ asset('images/no_image.jpg') }}"
                              alt="Showcase Preview"
                              class="img-fluid rounded showcase-preview-img"
                              style="max-height: 110px; width: 100%; object-fit: cover;">
                     </div>
-                    <input type="file" name="showcases[__INDEX__][image]" class="form-control form-control-sm showcase-file-input" accept="image/*">
+                    <input type="file" name="showcases[__INDEX__][image]" class="form-control form-control-sm showcase-file-input" accept="image/*" required>
                     <div class="form-text text-2xs text-muted">Recommended: 800×600 or 1:1 square.</div>
                 </div>
 
@@ -637,9 +647,9 @@
                             <div class="tab-pane fade show active" id="sc-en-__INDEX__">
                                 <div class="row g-2">
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold mb-1">Title (EN)</label>
+                                        <label class="form-label small fw-bold mb-1">Card Name / Title (EN) <span class="text-danger">*</span></label>
                                         <input type="text" name="showcases[__INDEX__][title][en]" class="form-control form-control-sm showcase-title-en"
-                                               placeholder="e.g. Laundry">
+                                               placeholder="e.g. Laundry" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold mb-1">Button Text (EN)</label>
@@ -952,6 +962,128 @@
                         });
                 }
             });
+
+            // 5. Client-Side Validation before Form Submission
+            const brandForm = document.getElementById('brand-wizard-form');
+            if (brandForm) {
+                brandForm.addEventListener('submit', function(e) {
+                    const showcaseItems = document.querySelectorAll('.showcase-item');
+                    let hasError = false;
+                    let firstErrorElement = null;
+
+                    showcaseItems.forEach((card) => {
+                        const deleteFlag = card.querySelector('.showcase-delete-flag');
+                        if ((deleteFlag && deleteFlag.value === '1') || card.style.display === 'none') {
+                            return;
+                        }
+
+                        // Validate Card Name / Title (EN)
+                        const titleInput = card.querySelector('.showcase-title-en');
+                        if (titleInput) {
+                            if (!titleInput.value.trim()) {
+                                hasError = true;
+                                titleInput.classList.add('is-invalid');
+                                let feedback = titleInput.parentNode.querySelector('.invalid-feedback');
+                                if (!feedback) {
+                                    feedback = document.createElement('div');
+                                    feedback.className = 'invalid-feedback d-block';
+                                    titleInput.parentNode.appendChild(feedback);
+                                }
+                                feedback.textContent = 'Card Name is required.';
+
+                                if (!firstErrorElement) {
+                                    firstErrorElement = { element: titleInput, card: card, tab: 'en' };
+                                }
+                            } else {
+                                titleInput.classList.remove('is-invalid');
+                                const feedback = titleInput.parentNode.querySelector('.invalid-feedback');
+                                if (feedback) feedback.remove();
+                            }
+                        }
+
+                        // Validate Lifestyle Photo
+                        const fileInput = card.querySelector('.showcase-file-input');
+                        const previewImg = card.querySelector('.showcase-preview-img');
+                        const hasExistingImage = previewImg && previewImg.src && !previewImg.src.includes('no_image.jpg');
+                        const hasSelectedFile = fileInput && fileInput.files && fileInput.files.length > 0;
+
+                        if (fileInput) {
+                            if (!hasSelectedFile && !hasExistingImage) {
+                                hasError = true;
+                                fileInput.classList.add('is-invalid');
+                                let feedback = fileInput.parentNode.querySelector('.invalid-feedback');
+                                if (!feedback) {
+                                    feedback = document.createElement('div');
+                                    feedback.className = 'invalid-feedback d-block';
+                                    fileInput.parentNode.appendChild(feedback);
+                                }
+                                feedback.textContent = 'Lifestyle photo is required.';
+
+                                if (!firstErrorElement) {
+                                    firstErrorElement = { element: fileInput, card: card, tab: null };
+                                }
+                            } else {
+                                fileInput.classList.remove('is-invalid');
+                                const feedback = fileInput.parentNode.querySelector('.invalid-feedback');
+                                if (feedback) feedback.remove();
+                            }
+                        }
+                    });
+
+                    if (hasError) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Switch to Step 3 tab
+                        const step3TabBtn = document.querySelector('button[data-bs-target="#step3"]');
+                        if (step3TabBtn) {
+                            bootstrap.Tab.getOrCreateInstance(step3TabBtn).show();
+                        }
+
+                        if (firstErrorElement) {
+                            if (firstErrorElement.tab === 'en') {
+                                const cardIndex = firstErrorElement.card.getAttribute('data-index');
+                                const enTabBtn = firstErrorElement.card.querySelector(`button[data-bs-target="#sc-en-${cardIndex}"]`);
+                                if (enTabBtn) {
+                                    bootstrap.Tab.getOrCreateInstance(enTabBtn).show();
+                                }
+                            }
+                            firstErrorElement.element.focus();
+                            firstErrorElement.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        return false;
+                    }
+                });
+            }
+
+            // Clear errors on real-time input/change
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('showcase-title-en') && e.target.value.trim()) {
+                    e.target.classList.remove('is-invalid');
+                    const feedback = e.target.parentNode.querySelector('.invalid-feedback');
+                    if (feedback) feedback.remove();
+                }
+            });
+
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('showcase-file-input') && e.target.files.length > 0) {
+                    e.target.classList.remove('is-invalid');
+                    const feedback = e.target.parentNode.querySelector('.invalid-feedback');
+                    if (feedback) feedback.remove();
+                }
+            });
+
+            // Auto-switch to tab containing server-side validation error on load
+            const firstServerInvalid = document.querySelector('.is-invalid, .invalid-feedback.d-block');
+            if (firstServerInvalid) {
+                const tabPane = firstServerInvalid.closest('.tab-pane');
+                if (tabPane && tabPane.id) {
+                    const tabTrigger = document.querySelector(`button[data-bs-target="#${tabPane.id}"]`);
+                    if (tabTrigger) {
+                        bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+                    }
+                }
+            }
         });
     </script>
 @endpush

@@ -52,17 +52,64 @@ class UpdateBrandRequest extends FormRequest
             'showcases.*.category_id' => 'nullable',
             'showcases.*.sub_category_id' => 'nullable',
             'showcases.*.title' => 'nullable|array',
+            'showcases.*.title.en' => 'nullable|string|max:255',
+            'showcases.*.title.fr' => 'nullable|string|max:255',
+            'showcases.*.title.ar' => 'nullable|string|max:255',
             'showcases.*.description' => 'nullable|array',
             'showcases.*.button_text' => 'nullable|array',
-            'showcases.*.button_text.en' => 'nullable|string',
-            'showcases.*.button_text.fr' => 'nullable|string',
-            'showcases.*.button_text.ar' => 'nullable|string',
-            'showcases.*.button_url' => 'nullable|string',
+            'showcases.*.button_text.en' => 'nullable|string|max:255',
+            'showcases.*.button_text.fr' => 'nullable|string|max:255',
+            'showcases.*.button_text.ar' => 'nullable|string|max:255',
+            'showcases.*.button_url' => 'nullable|string|max:500',
             'showcases.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:5120',
             'showcases.*.sort_order' => 'nullable|integer',
             'showcases.*.status' => 'nullable|in:active,inactive',
             'showcases.*._delete' => 'nullable',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $showcases = $this->input('showcases', []);
+            if (is_array($showcases)) {
+                foreach ($showcases as $index => $showcase) {
+                    if (!empty($showcase['_delete']) && $showcase['_delete'] == '1') {
+                        continue;
+                    }
+
+                    // Card Name (title.en) is mandatory
+                    if (empty($showcase['title']['en']) || trim((string)($showcase['title']['en'] ?? '')) === '') {
+                        $validator->errors()->add(
+                            "showcases.{$index}.title.en",
+                            "The card name (Title EN) is required for showcase card #" . ($index + 1) . "."
+                        );
+                    }
+
+                    // Image is mandatory
+                    $hasNewFile = $this->hasFile("showcases.{$index}.image");
+                    $scId = !empty($showcase['id']) ? (int)$showcase['id'] : null;
+
+                    if (!$hasNewFile) {
+                        if ($scId) {
+                            $existing = \App\Models\BrandCategoryShowcase::find($scId);
+                            if (!$existing || empty($existing->image)) {
+                                $validator->errors()->add(
+                                    "showcases.{$index}.image",
+                                    "The lifestyle photo is required for showcase card #" . ($index + 1) . "."
+                                );
+                            }
+                        } else {
+                            // Newly added showcase card during edit
+                            $validator->errors()->add(
+                                "showcases.{$index}.image",
+                                "The lifestyle photo is required for showcase card #" . ($index + 1) . "."
+                            );
+                        }
+                    }
+                }
+            }
+        });
     }
 
     public function messages()
@@ -71,6 +118,9 @@ class UpdateBrandRequest extends FormRequest
             'name.en.unique' => 'Name must be unique',
             'name.required' => 'Name is required',
             'status.required' => 'Status is required',
+            'showcases.*.image.image' => 'Showcase photo must be a valid image.',
+            'showcases.*.image.mimes' => 'Showcase photo must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',
+            'showcases.*.image.max' => 'Showcase photo may not be greater than 5MB.',
         ];
     }
 
