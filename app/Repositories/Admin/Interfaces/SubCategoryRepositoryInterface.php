@@ -13,6 +13,6 @@ interface SubCategoryRepositoryInterface
     public function deleteSubCategory($id);
     public function updateStatus($id);
     public function getSubCategoryList($term = null);
-    public function getSubCategoryListByCategoryId($term = null, $categoryId);
+    public function getSubCategoryListByCategoryId($term = null, $categoryId = null);
     public function getDataForDataTable($request = null);
 }

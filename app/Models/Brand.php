@@ -18,12 +18,14 @@ class Brand extends Model
     public $guard_name = 'admin';
     protected $guarded = [];
 
-    public $translatable = ['name'];
+    public $translatable = ['name', 'tagline', 'description'];
 
     protected $fillable = [
         'name',
         'image',
         'slug',
+        'tagline',
+        'description',
         'status',
     ];
 
@@ -43,6 +45,30 @@ class Brand extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function banners()
+    {
+        return $this->hasMany(BrandBanner::class)->orderBy('sort_order', 'asc');
+    }
+
+    public function activeBanners()
+    {
+        return $this->hasMany(BrandBanner::class)
+            ->where('status', 'active')
+            ->orderBy('sort_order', 'asc');
+    }
+
+    public function categoryShowcases()
+    {
+        return $this->hasMany(BrandCategoryShowcase::class)->orderBy('sort_order', 'asc');
+    }
+
+    public function activeCategoryShowcases()
+    {
+        return $this->hasMany(BrandCategoryShowcase::class)
+            ->where('status', 'active')
+            ->orderBy('sort_order', 'asc');
     }
 
     public function variants()

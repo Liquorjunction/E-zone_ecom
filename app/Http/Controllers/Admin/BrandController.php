@@ -32,7 +32,7 @@ class BrandController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            foreach (['name'] as $field) {
+            foreach (['name', 'tagline', 'description'] as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
@@ -43,6 +43,21 @@ class BrandController extends Controller
 
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                }
+            }
+
+            if (isset($data['showcases']) && is_array($data['showcases'])) {
+                foreach ($data['showcases'] as &$sc) {
+                    foreach (['title', 'description'] as $f) {
+                        if (isset($sc[$f]['en']) && !empty($sc[$f]['en'])) {
+                            if (empty($sc[$f]['fr'])) {
+                                $sc[$f]['fr'] = gtrans($sc[$f]['en'], 'fr');
+                            }
+                            if (empty($sc[$f]['ar'])) {
+                                $sc[$f]['ar'] = gtrans($sc[$f]['en'], 'ar');
+                            }
+                        }
+                    }
                 }
             }
             // ----------------------------------
@@ -60,7 +75,11 @@ class BrandController extends Controller
     public function edit(EditBrandRequest $request)
     {
         $id = $request->validated()['id'];
-        $brand = Brand::findOrFail($id);
+        $brand = Brand::with([
+            'banners',
+            'categoryShowcases.category',
+            'categoryShowcases.subCategory',
+        ])->findOrFail($id);
 
         return view('admin.pages.brands.edit', compact('brand'));
     }
@@ -72,7 +91,7 @@ class BrandController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            foreach (['name'] as $field) {
+            foreach (['name', 'tagline', 'description'] as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;
                 }
@@ -83,6 +102,21 @@ class BrandController extends Controller
 
                 if (empty($data[$field]['ar'])) {
                     $data[$field]['ar'] = gtrans($data[$field]['en'], 'ar');
+                }
+            }
+
+            if (isset($data['showcases']) && is_array($data['showcases'])) {
+                foreach ($data['showcases'] as &$sc) {
+                    foreach (['title', 'description'] as $f) {
+                        if (isset($sc[$f]['en']) && !empty($sc[$f]['en'])) {
+                            if (empty($sc[$f]['fr'])) {
+                                $sc[$f]['fr'] = gtrans($sc[$f]['en'], 'fr');
+                            }
+                            if (empty($sc[$f]['ar'])) {
+                                $sc[$f]['ar'] = gtrans($sc[$f]['en'], 'ar');
+                            }
+                        }
+                    }
                 }
             }
             // ----------------------------------

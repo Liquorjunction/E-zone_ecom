@@ -920,7 +920,7 @@ main > div[style*="margin-left"] {
 body,
 html,
 main {
-    overflow-x: hidden;
+    overflow-x: clip;
     width: 100%;
 }
 

@@ -132,7 +132,7 @@ class SubCategoryRepository implements SubCategoryRepositoryInterface
         return $query->get();
     }
 
-    public function getSubCategoryListByCategoryId($term = null, $categoryId)
+    public function getSubCategoryListByCategoryId($term = null, $categoryId = null)
     {
         $query = SubCategories::select('id', 'sub-category-name')
             ->where('status', 'active')

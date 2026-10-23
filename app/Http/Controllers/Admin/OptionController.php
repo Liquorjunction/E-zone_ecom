@@ -40,6 +40,11 @@ class OptionController extends Controller
         try {
             $term = $request->input('q', '');
             $categoryId = $request->input('category_id');
+
+            if (empty($categoryId)) {
+                return response()->json(['results' => []]);
+            }
+
             $subCategories = $subCategoryRepo->getSubCategoryListByCategoryId($term, $categoryId);
             $subCategoryOptions = [];
             foreach ($subCategories as $subCategory) {

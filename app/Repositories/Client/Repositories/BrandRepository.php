@@ -10,16 +10,20 @@ use App\Models\DiscountTarget;
 
 class BrandRepository implements BrandRepositoryInterface
 {
-    public function getVariantsByBrandSlug(string $slug, int $perPage = 12)
+    public function getVariantsByBrandSlug(string $slug, int $perPage = 12, $categoryId = null)
     {
         $brand = $this->getBrandBySlug($slug);
         if ($brand) {
-            return $brand->variants()
+            $query = $brand->variants()
                 ->where('product_variants.status', 'active')
-                ->whereHas('product', function($query) {
+                ->whereHas('product', function($query) use ($categoryId) {
                     $query->where('status', 'active');
-                })
-                ->paginate($perPage);
+                    if ($categoryId) {
+                        $query->where('category_id', $categoryId);
+                    }
+                });
+
+            return $query->paginate($perPage)->appends(request()->query());
         }
         return null;
     }
@@ -31,17 +35,27 @@ class BrandRepository implements BrandRepositoryInterface
 
     public function getBrandBySlug(string $slug)
     {
-        return Brand::where('slug', $slug)->where('status', 'active')->first();
+        return Brand::with([
+            'activeBanners',
+            'activeCategoryShowcases' => function ($q) {
+                $q->with(['category', 'subCategory']);
+            }
+        ])->where('slug', $slug)->where('status', 'active')->first();
     }
 
-    public function getProductsByBrandSlug(string $slug, int $perPage = 12)
+    public function getProductsByBrandSlug(string $slug, int $perPage = 12, $categoryId = null)
     {
         $brand = $this->getBrandBySlug($slug);
         if ($brand) {
-            return $brand->products()
+            $query = $brand->products()
                 ->with(['images', 'category', 'productVariants.images', 'productVariants'])
-                ->where('status', 'active')
-                ->paginate($perPage);
+                ->where('status', 'active');
+
+            if ($categoryId) {
+                $query->where('category_id', $categoryId);
+            }
+
+            return $query->paginate($perPage)->appends(request()->query());
         }
         return null;
     }
