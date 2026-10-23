@@ -44,12 +44,27 @@
                 $catTitle = $sc->category->getTranslation('category-name', app()->getLocale(), false);
             }
 
+            $buttonText = $sc->getTranslation('button_text', app()->getLocale(), false);
+            if (empty($buttonText)) {
+                $buttonText = statictranslations('View') . ' ' . statictranslations($catTitle ?: 'Products');
+            } else {
+                $buttonText = statictranslations($buttonText);
+            }
+
+            $buttonUrl = $sc->button_url;
+            if (empty($buttonUrl)) {
+                $buttonUrl = !empty($sc->category_id)
+                    ? (url()->current() . '?category=' . $sc->category_id . '#products-catalog')
+                    : '#products-catalog';
+            }
+
             $featuredCategories[] = [
                 'id' => $sc->slug ?: ('category-' . $sc->id),
-                'category_id' => $sc->category_id,
                 'title' => $catTitle ?: 'Category',
                 'description' => $sc->getTranslation('description', app()->getLocale(), false) ?: '',
                 'image' => $sc->image ? asset('storage/' . $sc->image) : asset('images/no_image.jpg'),
+                'button_text' => $buttonText,
+                'button_url' => $buttonUrl,
             ];
         }
     }
@@ -265,9 +280,9 @@
                                         </p>
 
                                         <div>
-                                            <a href="{{ !empty($category['category_id']) ? url()->current() . '?category=' . $category['category_id'] . '#products-catalog' : '#products-catalog' }}"
+                                            <a href="{{ $category['button_url'] }}"
                                                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-xs sm:text-sm shadow-xs hover:shadow transition-all group/btn">
-                                                <span>{{ statictranslations('View') }} {{ statictranslations($category['title']) }}</span>
+                                                <span>{{ $category['button_text'] }}</span>
                                                 <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                                 </svg>

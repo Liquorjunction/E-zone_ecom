@@ -12,7 +12,7 @@ class BrandCategoryShowcase extends Model
 
     protected $table = 'brand_category_showcases';
 
-    public $translatable = ['title', 'description'];
+    public $translatable = ['title', 'description', 'button_text'];
 
     protected $fillable = [
         'brand_id',
@@ -21,6 +21,8 @@ class BrandCategoryShowcase extends Model
         'slug',
         'title',
         'description',
+        'button_text',
+        'button_url',
         'image',
         'sort_order',
         'status',

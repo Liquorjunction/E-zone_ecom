@@ -48,7 +48,7 @@ class BrandController extends Controller
 
             if (isset($data['showcases']) && is_array($data['showcases'])) {
                 foreach ($data['showcases'] as &$sc) {
-                    foreach (['title', 'description'] as $f) {
+                    foreach (['title', 'description', 'button_text'] as $f) {
                         if (isset($sc[$f]['en']) && !empty($sc[$f]['en'])) {
                             if (empty($sc[$f]['fr'])) {
                                 $sc[$f]['fr'] = gtrans($sc[$f]['en'], 'fr');
@@ -107,7 +107,7 @@ class BrandController extends Controller
 
             if (isset($data['showcases']) && is_array($data['showcases'])) {
                 foreach ($data['showcases'] as &$sc) {
-                    foreach (['title', 'description'] as $f) {
+                    foreach (['title', 'description', 'button_text'] as $f) {
                         if (isset($sc[$f]['en']) && !empty($sc[$f]['en'])) {
                             if (empty($sc[$f]['fr'])) {
                                 $sc[$f]['fr'] = gtrans($sc[$f]['en'], 'fr');

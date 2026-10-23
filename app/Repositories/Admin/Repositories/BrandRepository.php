@@ -167,6 +167,8 @@ class BrandRepository implements BrandRepositoryInterface
                     $showcase->sub_category_id = !empty($showcaseData['sub_category_id']) ? $showcaseData['sub_category_id'] : null;
                     $showcase->title = $showcaseData['title'] ?? $showcase->title;
                     $showcase->description = $showcaseData['description'] ?? $showcase->description;
+                    $showcase->button_text = $showcaseData['button_text'] ?? $showcase->button_text;
+                    $showcase->button_url = !empty($showcaseData['button_url']) ? $showcaseData['button_url'] : null;
                     $showcase->sort_order = isset($showcaseData['sort_order']) ? (int)$showcaseData['sort_order'] : $showcase->sort_order;
                     $showcase->status = $showcaseData['status'] ?? $showcase->status;
 
@@ -195,6 +197,8 @@ class BrandRepository implements BrandRepositoryInterface
                     'sub_category_id' => !empty($showcaseData['sub_category_id']) ? $showcaseData['sub_category_id'] : null,
                     'title' => $showcaseData['title'] ?? null,
                     'description' => $showcaseData['description'] ?? null,
+                    'button_text' => $showcaseData['button_text'] ?? null,
+                    'button_url' => $showcaseData['button_url'] ?? null,
                     'image' => $imagePath,
                     'slug' => $slug,
                     'sort_order' => isset($showcaseData['sort_order']) ? (int)$showcaseData['sort_order'] : 0,

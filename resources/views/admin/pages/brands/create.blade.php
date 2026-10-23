@@ -254,7 +254,7 @@
                             <i class="bi bi-info-circle-fill me-2 fs-5"></i>
                             <div>
                                 <strong>Category Showcase Cards:</strong> These render in an alternating left/right layout on the brand page.
-                                Linking each card to a store <strong>Category</strong> enables visitors to click "View [Category]" and instantly filter the catalog.
+                                Add custom Button Text and Button URL (such as an anchor <code>#products-catalog</code> or a category page) to direct visitors anywhere you want.
                             </div>
                         </div>
 
@@ -377,32 +377,18 @@
 
                 <div class="col-md-9">
                     <div class="row g-2 mb-3">
-                        <div class="col-md-5">
-                            <label class="form-label small fw-bold mb-1">Linked Category (for product filtering) <span class="text-danger">*</span></label>
-                            <select name="showcases[__INDEX__][category_id]"
-                                    class="showcase-category-select browser-default form-control form-control-sm"
-                                    data-allow-clear="true"
-                                    data-placeholder="Select category"
-                                    id="category_id___INDEX__"
-                                    required>
-                            </select>
+                        <div class="col-md-7">
+                            <label class="form-label small fw-bold mb-1">Button URL (Target Link)</label>
+                            <input type="text" name="showcases[__INDEX__][button_url]" class="form-control form-control-sm showcase-btn-url"
+                                   placeholder="e.g. #products-catalog or /category/refrigerators">
+                            <div class="form-text text-2xs text-muted">Page link or anchor ID for the card's CTA button.</div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold mb-1">Linked Subcategory (optional)</label>
-                            <select name="showcases[__INDEX__][sub_category_id]"
-                                    class="showcase-subcategory-select browser-default form-control form-control-sm"
-                                    data-allow-clear="true"
-                                    data-placeholder="Select sub category"
-                                    id="sub_category_id___INDEX__"
-                                    disabled>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Sort Order</label>
                             <input type="number" name="showcases[__INDEX__][sort_order]" class="form-control form-control-sm"
                                    value="__SORT_ORDER__" min="0">
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-2">
                             <label class="form-label small fw-bold mb-1">Status</label>
                             <select name="showcases[__INDEX__][status]" class="form-select form-select-sm">
                                 <option value="active" selected>Active</option>
@@ -432,12 +418,17 @@
                         <div class="tab-content">
                             <div class="tab-pane fade show active" id="sc-en-__INDEX__">
                                 <div class="row g-2">
-                                    <div class="col-md-5">
+                                    <div class="col-md-6">
                                         <label class="form-label small fw-bold mb-1">Title (EN)</label>
                                         <input type="text" name="showcases[__INDEX__][title][en]" class="form-control form-control-sm showcase-title-en"
                                                placeholder="e.g. Laundry">
                                     </div>
-                                    <div class="col-md-7">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold mb-1">Button Text (EN)</label>
+                                        <input type="text" name="showcases[__INDEX__][button_text][en]" class="form-control form-control-sm showcase-btn-text-en"
+                                               placeholder="e.g. View Laundry">
+                                    </div>
+                                    <div class="col-12">
                                         <label class="form-label small fw-bold mb-1">Description (EN)</label>
                                         <textarea name="showcases[__INDEX__][description][en]" rows="2" class="form-control form-control-sm showcase-desc-en"
                                                   placeholder="With Sharp Washing Machines, enjoy clothes that are ultra-clean..."></textarea>
@@ -447,12 +438,17 @@
 
                             <div class="tab-pane fade" id="sc-fr-__INDEX__">
                                 <div class="row g-2">
-                                    <div class="col-md-5">
+                                    <div class="col-md-6">
                                         <label class="form-label small fw-bold mb-1">Title (FR)</label>
                                         <input type="text" name="showcases[__INDEX__][title][fr]" class="form-control form-control-sm showcase-title-fr"
                                                placeholder="e.g. Buanderie">
                                     </div>
-                                    <div class="col-md-7">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold mb-1">Button Text (FR)</label>
+                                        <input type="text" name="showcases[__INDEX__][button_text][fr]" class="form-control form-control-sm showcase-btn-text-fr"
+                                               placeholder="e.g. Voir la buanderie">
+                                    </div>
+                                    <div class="col-12">
                                         <label class="form-label small fw-bold mb-1">Description (FR)</label>
                                         <textarea name="showcases[__INDEX__][description][fr]" rows="2" class="form-control form-control-sm showcase-desc-fr"
                                                   placeholder="Description en français..."></textarea>
@@ -462,12 +458,17 @@
 
                             <div class="tab-pane fade" id="sc-ar-__INDEX__">
                                 <div class="row g-2" dir="rtl">
-                                    <div class="col-md-5">
+                                    <div class="col-md-6">
                                         <label class="form-label small fw-bold mb-1">Title (AR)</label>
                                         <input type="text" name="showcases[__INDEX__][title][ar]" class="form-control form-control-sm showcase-title-ar"
                                                placeholder="e.g. غسيل الملابس">
                                     </div>
-                                    <div class="col-md-7">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold mb-1">Button Text (AR)</label>
+                                        <input type="text" name="showcases[__INDEX__][button_text][ar]" class="form-control form-control-sm showcase-btn-text-ar"
+                                               placeholder="e.g. عرض منتجات الغسيل">
+                                    </div>
+                                    <div class="col-12">
                                         <label class="form-label small fw-bold mb-1">Description (AR)</label>
                                         <textarea name="showcases[__INDEX__][description][ar]" rows="2" class="form-control form-control-sm showcase-desc-ar"
                                                   placeholder="وصف بالعربية..."></textarea>
@@ -584,90 +585,6 @@
                 if (showcaseBadge) showcaseBadge.textContent = activeCount;
             }
 
-            function setupShowcaseCategorySelects(card) {
-                const $card = $(card);
-                const $catSelect = $card.find('.showcase-category-select');
-                const $subSelect = $card.find('.showcase-subcategory-select');
-
-                if (!$catSelect.length || !$subSelect.length) return;
-
-                if (!$catSelect.data('select2')) {
-                    $catSelect.select2({
-                        width: '100%',
-                        placeholder: 'Select category',
-                        allowClear: true,
-                        ajax: {
-                            url: '{{ route("admin.lists.categories") }}',
-                            dataType: 'json',
-                            delay: 250,
-                            data: function(params) {
-                                return { q: params.term || '' };
-                            },
-                            processResults: function(data) {
-                                return { results: (data && data.results) ? data.results : [] };
-                            }
-                        }
-                    });
-                }
-
-                if (!$subSelect.data('select2')) {
-                    $subSelect.select2({
-                        width: '100%',
-                        placeholder: 'Select sub category',
-                        allowClear: true,
-                        ajax: {
-                            url: '{{ route("admin.lists.sub-categories-by-category") }}',
-                            dataType: 'json',
-                            delay: 250,
-                            transport: function(params, success, failure) {
-                                const currentCatId = $catSelect.val();
-                                if (!currentCatId) {
-                                    return success({ results: [] });
-                                }
-                                return $.ajax(params).then(success).fail(failure);
-                            },
-                            data: function(params) {
-                                return {
-                                    q: params.term || '',
-                                    category_id: $catSelect.val() || ''
-                                };
-                            },
-                            processResults: function(data) {
-                                return { results: (data && data.results) ? data.results : [] };
-                            }
-                        }
-                    });
-                }
-
-                function syncSubCategoryState(forceClear = false) {
-                    const catId = $catSelect.val();
-                    const hasCategory = Boolean(catId);
-
-                    $subSelect.prop('disabled', !hasCategory);
-
-                    if (forceClear || !hasCategory) {
-                        $subSelect.val(null).trigger('change');
-                    }
-
-                    const $container = $subSelect.next('.select2-container');
-                    if ($container.length) {
-                        if (hasCategory) {
-                            $container.removeClass('select2-container--disabled');
-                            $container.find('.select2-selection').attr('aria-disabled', 'false').removeAttr('tabindex');
-                        } else {
-                            $container.addClass('select2-container--disabled');
-                            $container.find('.select2-selection').attr('aria-disabled', 'true').attr('tabindex', '-1');
-                        }
-                    }
-                }
-
-                syncSubCategoryState(false);
-
-                $catSelect.off('change.cat_sync').on('change.cat_sync', function() {
-                    syncSubCategoryState(true);
-                });
-            }
-
             if (addShowcaseBtn) {
                 addShowcaseBtn.addEventListener('click', function() {
                     if (noShowcasesMsg) noShowcasesMsg.style.display = 'none';
@@ -676,11 +593,8 @@
                         .replace(/__INDEX__/g, showcaseCounter)
                         .replace(/__SORT_ORDER__/g, showcaseCounter);
                     showcasesContainer.insertAdjacentHTML('beforeend', newHtml);
-                    const newCard = showcasesContainer.lastElementChild;
                     showcaseCounter++;
                     updateShowcaseBadge();
-
-                    setupShowcaseCategorySelects(newCard);
                 });
             }
 
@@ -718,11 +632,14 @@
                     const card = transBtn.closest('.showcase-item');
                     const titleEn = card.querySelector('.showcase-title-en');
                     const descEn = card.querySelector('.showcase-desc-en');
+                    const btnTextEn = card.querySelector('.showcase-btn-text-en');
+
                     const titleVal = titleEn ? titleEn.value.trim() : '';
                     const descVal = descEn ? descEn.value.trim() : '';
+                    const btnTextVal = btnTextEn ? btnTextEn.value.trim() : '';
 
-                    if (!titleVal && !descVal) {
-                        alert('Please fill in the English Title or Description before translating.');
+                    if (!titleVal && !descVal && !btnTextVal) {
+                        alert('Please fill in the English Title, Description, or Button Text before translating.');
                         return;
                     }
 
@@ -730,7 +647,12 @@
                     transBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Translating...';
                     transBtn.disabled = true;
 
-                    axios.post('{{ route("admin.translate.batch") }}', { fields: { title: titleVal, description: descVal } })
+                    const payload = {};
+                    if (titleVal) payload.title = titleVal;
+                    if (descVal) payload.description = descVal;
+                    if (btnTextVal) payload.button_text = btnTextVal;
+
+                    axios.post('{{ route("admin.translate.batch") }}', { fields: payload })
                         .then(function(res) {
                             if (res.data && res.data.success && res.data.translations) {
                                 const trans = res.data.translations;
@@ -745,6 +667,15 @@
                                     const descAr = card.querySelector('.showcase-desc-ar');
                                     if (descFr && trans.description.fr) descFr.value = trans.description.fr;
                                     if (descAr && trans.description.ar) descAr.value = trans.description.ar;
+                                }
+                                if (trans.button_text) {
+                                    const btnTextFr = card.querySelector('.showcase-btn-text-fr');
+                                    const btnTextAr = card.querySelector('.showcase-btn-text-ar');
+                                    if (btnTextFr && trans.button_text.fr) btnTextFr.value = trans.button_text.fr;
+                                    if (btnTextAr && trans.button_text.ar) btnTextAr.value = trans.button_text.ar;
+                                }
+                                if (typeof showSuccessToast === 'function') {
+                                    showSuccessToast();
                                 }
                             }
                         })
