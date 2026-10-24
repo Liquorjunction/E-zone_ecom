@@ -23,7 +23,7 @@ class BrandRepository implements BrandRepositoryInterface
                     }
                 });
 
-            return $query->paginate($perPage)->appends(request()->query());
+            return $query->paginate($perPage)->appends(request()->query())->fragment('products-catalog');
         }
         return null;
     }
@@ -55,7 +55,7 @@ class BrandRepository implements BrandRepositoryInterface
                 $query->where('category_id', $categoryId);
             }
 
-            return $query->paginate($perPage)->appends(request()->query());
+            return $query->paginate($perPage)->appends(request()->query())->fragment('products-catalog');
         }
         return null;
     }

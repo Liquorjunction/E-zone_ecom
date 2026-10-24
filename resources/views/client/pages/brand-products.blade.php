@@ -297,49 +297,8 @@
                 @endif
 
                 {{-- 6. All Products Catalog Section --}}
-                <div id="products-catalog" class="scroll-mt-40 mb-8 pt-4">
-                    @if (!empty($selected_category_id))
-                        @php
-                            $currentFilteredCat = \App\Models\Categories::find($selected_category_id);
-                        @endphp
-                        @if ($currentFilteredCat)
-                            <div class="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-                                <span>{{ statictranslations('Filtered by:') }} {{ $currentFilteredCat->getTranslation('category-name', app()->getLocale(), false) }}</span>
-                                <a href="{{ route('brand.products', $brand->slug) }}#products-catalog" class="hover:text-primary-dark font-bold ml-1 text-sm leading-none" title="{{ statictranslations('Clear filter') }}">&times;</a>
-                            </div>
-                        @endif
-                    @endif
-
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                            {{ $brand->name }} — {{ statictranslations('All Products') }}
-                        </h2>
-                        @if ($products && $products->total())
-                            <span class="text-sm font-medium text-gray-500">
-                                {{ $products->total() }} {{ statictranslations('products available') }}
-                            </span>
-                        @endif
-                    </div>
-
-                    @if ($products && $products->count())
-                        <div class="grid grid-cols-2 gap-3 sm:hidden">
-                            @foreach ($products as $product)
-                                @include('client.partials.product-card-mobile', ['product' => $product])
-                            @endforeach
-                        </div>
-                        <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            @foreach ($products as $product)
-                                @include('client.partials.product-card', ['product' => $product])
-                            @endforeach
-                        </div>
-                        <div class="mt-8">
-                            {{ $products->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-16 text-gray-500 text-lg">
-                            {{ statictranslations('No products found for this brand.') }}
-                        </div>
-                    @endif
+                <div id="products-catalog" class="scroll-mt-40 mb-8 pt-4 relative transition-opacity duration-300">
+                    @include('client.pages.partials.brand-products-catalog')
                 </div>
             @else
                 <div class="mt-16 text-center">
@@ -387,3 +346,123 @@
         }
     </style>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const catalogContainer = document.getElementById('products-catalog');
+            if (!catalogContainer) return;
+
+            function scrollToCatalog() {
+                const headerOffset = 90;
+                const elementPosition = catalogContainer.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: Math.max(0, offsetPosition),
+                    behavior: 'smooth'
+                });
+            }
+
+            function loadCatalog(url, updateHistory = true) {
+                // Apply subtle loading fade & prevent duplicate clicks
+                catalogContainer.classList.add('opacity-40', 'pointer-events-none');
+
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP error ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data && data.html) {
+                        catalogContainer.innerHTML = data.html;
+
+                        if (updateHistory) {
+                            window.history.pushState({ brandCatalogUrl: url }, '', url);
+                        }
+
+                        // Re-initialize Alpine tree inside catalog if Alpine exists
+                        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                            window.Alpine.initTree(catalogContainer);
+                        }
+
+                        // Smoothly scroll to the top of products catalog section
+                        scrollToCatalog();
+                    } else {
+                        window.location.href = url;
+                    }
+                })
+                .catch(function (error) {
+                    console.error('AJAX catalog pagination failed:', error);
+                    window.location.href = url;
+                })
+                .finally(function () {
+                    catalogContainer.classList.remove('opacity-40', 'pointer-events-none');
+                });
+            }
+
+            // Delegate click for pagination and filter links inside #products-catalog
+            catalogContainer.addEventListener('click', function (e) {
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                const href = link.getAttribute('href');
+                if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+                // Intercept pagination buttons (e.g. inside nav / page-link) or brand clear filter button
+                const isPaginationLink = link.closest('.brand-pagination-wrapper') ||
+                                         link.closest('nav[role="navigation"]') ||
+                                         link.classList.contains('page-link') ||
+                                         href.includes('page=');
+                const isFilterClearLink = link.classList.contains('brand-filter-clear-btn');
+
+                if (isPaginationLink || isFilterClearLink) {
+                    e.preventDefault();
+                    loadCatalog(href, true);
+                }
+            });
+
+            // Delegate click on showcase card CTA buttons if they target category filter or #products-catalog
+            document.querySelectorAll('.showcase-item a, a[href*="#products-catalog"]').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (!href) return;
+
+                    // If link is an in-page anchor like #products-catalog
+                    if (href === '#products-catalog') {
+                        e.preventDefault();
+                        scrollToCatalog();
+                        return;
+                    }
+
+                    // If link has category filter on the current brand page (e.g. ?category=1#products-catalog)
+                    if (href.includes('category=') && (href.includes(window.location.pathname) || href.startsWith('?'))) {
+                        e.preventDefault();
+                        loadCatalog(href, true);
+                    }
+                });
+            });
+
+            // Handle Browser History (Back / Forward buttons)
+            window.addEventListener('popstate', function (e) {
+                if (e.state && e.state.brandCatalogUrl) {
+                    loadCatalog(e.state.brandCatalogUrl, false);
+                } else if (window.location.search.includes('page=') || window.location.search.includes('category=')) {
+                    loadCatalog(window.location.href, false);
+                }
+            });
+
+            // Auto-scroll on initial load if page was opened with ?page= or #products-catalog
+            if (window.location.search.includes('page=') || window.location.hash === '#products-catalog') {
+                setTimeout(scrollToCatalog, 150);
+            }
+        });
+    </script>
+@endpush

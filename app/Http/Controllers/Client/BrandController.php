@@ -24,8 +24,21 @@ class BrandController extends Controller
     {
         $categoryId = $request->query('category');
         $products = $brandRepo->getVariantsByBrandSlug($slug, 12, $categoryId);
+        $brand = $brandRepo->getBrandBySlug($slug);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('client.pages.partials.brand-products-catalog', [
+                    'brand' => $brand,
+                    'products' => $products,
+                    'brand_slug' => $slug,
+                    'selected_category_id' => $categoryId,
+                ])->render(),
+            ]);
+        }
+
         return view('client.pages.brand-products', [
-            'brand' => $brandRepo->getBrandBySlug($slug),
+            'brand' => $brand,
             'products' => $products,
             'brand_slug' => $slug,
             'selected_category_id' => $categoryId,
