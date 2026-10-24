@@ -38,7 +38,7 @@ class UpdateBrandRequest extends FormRequest
             'status' => 'required|in:active,inactive',
 
             // Banners
-            'banners' => 'nullable|array',
+            'banners' => 'required|array|min:1',
             'banners.*.id' => 'nullable|integer',
             'banners.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,ico,tiff,avif|max:5120',
             'banners.*.alt_text' => 'nullable|array',
@@ -71,6 +71,43 @@ class UpdateBrandRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            // Validate Banners
+            $banners = $this->input('banners', []);
+            $activeBannersCount = 0;
+            if (is_array($banners)) {
+                foreach ($banners as $index => $banner) {
+                    if (!empty($banner['_delete']) && $banner['_delete'] == '1') {
+                        continue;
+                    }
+                    $activeBannersCount++;
+
+                    $hasNewFile = $this->hasFile("banners.{$index}.image");
+                    $bId = !empty($banner['id']) ? (int)$banner['id'] : null;
+
+                    if (!$hasNewFile) {
+                        if ($bId) {
+                            $existing = \App\Models\BrandBanner::find($bId);
+                            if (!$existing || empty($existing->image)) {
+                                $validator->errors()->add(
+                                    "banners.{$index}.image",
+                                    "The banner image is required for banner slide #" . ($index + 1) . "."
+                                );
+                            }
+                        } else {
+                            $validator->errors()->add(
+                                "banners.{$index}.image",
+                                "The banner image is required for banner slide #" . ($index + 1) . "."
+                            );
+                        }
+                    }
+                }
+            }
+
+            if ($activeBannersCount < 1) {
+                $validator->errors()->add('banners', 'At least 1 hero banner slide is mandatory.');
+            }
+
+            // Validate Showcases
             $showcases = $this->input('showcases', []);
             if (is_array($showcases)) {
                 foreach ($showcases as $index => $showcase) {
@@ -106,6 +143,18 @@ class UpdateBrandRequest extends FormRequest
                                 "The lifestyle photo is required for showcase card #" . ($index + 1) . "."
                             );
                         }
+                    }
+
+                    // Button URL is mandatory if Button Text is entered
+                    $hasBtnText = !empty(trim((string)($showcase['button_text']['en'] ?? ''))) ||
+                                  !empty(trim((string)($showcase['button_text']['fr'] ?? ''))) ||
+                                  !empty(trim((string)($showcase['button_text']['ar'] ?? '')));
+
+                    if ($hasBtnText && empty(trim((string)($showcase['button_url'] ?? '')))) {
+                        $validator->errors()->add(
+                            "showcases.{$index}.button_url",
+                            "The Button URL is required for showcase card #" . ($index + 1) . " when Button Text is provided."
+                        );
                     }
                 }
             }

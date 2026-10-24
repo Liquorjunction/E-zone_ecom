@@ -361,7 +361,11 @@ body {
         scrollbar-width: none;
     }
 
-    /* Custom scrollbar for sidebar */
+    /* Custom scrollbar */
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(68, 155, 195, 0.35) transparent;
+    }
     .custom-scrollbar::-webkit-scrollbar {
         width: 4px;
     }

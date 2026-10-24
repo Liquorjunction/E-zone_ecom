@@ -51,12 +51,7 @@
                 $buttonText = statictranslations($buttonText);
             }
 
-            $buttonUrl = $sc->button_url;
-            if (empty($buttonUrl)) {
-                $buttonUrl = !empty($sc->category_id)
-                    ? (url()->current() . '?category=' . $sc->category_id . '#products-catalog')
-                    : '#products-catalog';
-            }
+            $buttonUrl = trim((string)($sc->button_url ?? ''));
 
             $featuredCategories[] = [
                 'id' => $sc->slug ?: ('category-' . $sc->id),
@@ -266,28 +261,34 @@
                                     <div class="{{ $imageOnRight ? 'lg:col-start-2' : 'lg:col-start-1' }} lg:row-start-1 h-64 sm:h-80 lg:h-full relative bg-gray-100 overflow-hidden">
                                         <img src="{{ $category['image'] }}"
                                              alt="{{ $category['title'] }}"
-                                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                             class="absolute inset-0 w-full h-full object-fill group-hover:scale-105 transition-transform duration-500">
                                     </div>
 
                                     {{-- Content Side: Only Heading, Description, and Button --}}
-                                    <div class="{{ $imageOnRight ? 'lg:col-start-1' : 'lg:col-start-2' }} lg:row-start-1 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
-                                        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight mb-3 sm:mb-4">
+                                    <div class="{{ $imageOnRight ? 'lg:col-start-1' : 'lg:col-start-2' }} lg:row-start-1 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white min-h-0 overflow-hidden">
+                                        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight mb-3 sm:mb-4 shrink-0">
                                             {{ statictranslations($category['title']) }}
                                         </h3>
 
-                                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-6 sm:mb-8">
-                                            {{ statictranslations($category['description']) }}
-                                        </p>
+                                        @if (!empty(trim((string)$category['description'])))
+                                            <div class="overflow-y-auto max-h-36 sm:max-h-44 lg:max-h-[155px] pr-2 text-sm sm:text-base text-gray-600 leading-relaxed custom-scrollbar break-words">
+                                                <p class="whitespace-pre-line">
+                                                    {{ statictranslations($category['description']) }}
+                                                </p>
+                                            </div>
+                                        @endif
 
-                                        <div>
-                                            <a href="{{ $category['button_url'] }}"
-                                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-xs sm:text-sm shadow-xs hover:shadow transition-all group/btn">
-                                                <span>{{ $category['button_text'] }}</span>
-                                                <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                </svg>
-                                            </a>
-                                        </div>
+                                        @if (!empty($category['button_url']))
+                                            <div class="shrink-0 mt-5 sm:mt-6">
+                                                <a href="{{ $category['button_url'] }}"
+                                                   class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-xs sm:text-sm shadow-xs hover:shadow transition-all group/btn">
+                                                    <span>{{ $category['button_text'] }}</span>
+                                                    <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        @endif
                                     </div>
 
                                 </div>
