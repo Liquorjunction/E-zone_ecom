@@ -22,10 +22,10 @@
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('admin.brands.index') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa fa-arrow-left me-1"></i> Back to Brands
+                    <i class="bi bi-arrow-left me-1"></i> Back to Brands
                 </a>
                 <button type="submit" form="brand-wizard-form" class="btn btn-sm btn-primary">
-                    <i class="fa fa-save me-1"></i> Create Brand
+                    <i class="bi bi-save me-1"></i> Create Brand
                 </button>
             </div>
         </div>
@@ -203,7 +203,7 @@
                         {{-- Step 1 Navigation --}}
                         <div class="d-flex justify-content-end mt-4">
                             <button type="button" class="btn btn-primary next-step" data-next="step2">
-                                Next: Hero Banners <i class="fa fa-arrow-right ms-1"></i>
+                                Next: Hero Banners <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                         </div>
                     </div>
@@ -238,10 +238,10 @@
                         {{-- Step 2 Navigation --}}
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-secondary prev-step" data-prev="step1">
-                                <i class="fa fa-arrow-left me-1"></i> Previous: Brand Info
+                                <i class="bi bi-arrow-left me-1"></i> Previous: Brand Info
                             </button>
                             <button type="button" class="btn btn-primary next-step" data-next="step3">
-                                Next: Category Showcases <i class="fa fa-arrow-right ms-1"></i>
+                                Next: Category Showcases <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                         </div>
                     </div>
@@ -276,10 +276,10 @@
                         {{-- Step 3 Navigation --}}
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-secondary prev-step" data-prev="step2">
-                                <i class="fa fa-arrow-left me-1"></i> Previous: Hero Banners
+                                <i class="bi bi-arrow-left me-1"></i> Previous: Hero Banners
                             </button>
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fa fa-save me-1"></i> Create Brand
+                                <i class="bi bi-save me-1"></i> Create Brand
                             </button>
                         </div>
                     </div>
@@ -338,7 +338,7 @@
 
                 <div class="col-md-1 col-sm-6 text-end">
                     <button type="button" class="btn btn-outline-danger btn-sm remove-banner-btn" title="Remove Banner">
-                        <i class="fa fa-trash"></i>
+                        <i class="bi bi-trash-fill"></i>
                     </button>
                 </div>
             </div>
@@ -357,7 +357,7 @@
                 <span class="fw-bold showcase-header-title text-dark">New Category Showcase</span>
             </div>
             <button type="button" class="btn btn-outline-danger btn-sm remove-showcase-btn py-0 px-2" title="Remove Card">
-                <i class="fa fa-trash me-1"></i> Remove
+                <i class="bi bi-trash me-1"></i> Remove
             </button>
         </div>
 
