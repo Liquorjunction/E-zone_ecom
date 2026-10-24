@@ -38,7 +38,7 @@ class BrandRepository implements BrandRepositoryInterface
             $brand = Brand::create($brandData);
 
             $this->syncBanners($brand, $request);
-            $this->syncCategoryShowcases($brand, $request);
+            $this->syncCategoryShowcases($brand, $request, $data);
 
             return $brand;
         });
@@ -69,7 +69,7 @@ class BrandRepository implements BrandRepositoryInterface
             $brand->update($brandData);
 
             $this->syncBanners($brand, $request);
-            $this->syncCategoryShowcases($brand, $request);
+            $this->syncCategoryShowcases($brand, $request, $data);
 
             return $brand;
         });
@@ -133,9 +133,11 @@ class BrandRepository implements BrandRepositoryInterface
         }
     }
 
-    protected function syncCategoryShowcases(Brand $brand, $request)
+    protected function syncCategoryShowcases(Brand $brand, $request, $data = null)
     {
-        $showcasesData = $request->input('showcases', []);
+        $showcasesData = (isset($data['showcases']) && is_array($data['showcases']))
+            ? $data['showcases']
+            : $request->input('showcases', []);
         if (!is_array($showcasesData)) {
             return;
         }
@@ -167,7 +169,7 @@ class BrandRepository implements BrandRepositoryInterface
                     $showcase->sub_category_id = !empty($showcaseData['sub_category_id']) ? $showcaseData['sub_category_id'] : null;
                     $showcase->title = $showcaseData['title'] ?? $showcase->title;
                     $showcase->description = $showcaseData['description'] ?? $showcase->description;
-                    $showcase->button_text = $showcaseData['button_text'] ?? $showcase->button_text;
+                    $showcase->button_text = array_key_exists('button_text', $showcaseData) ? $showcaseData['button_text'] : $showcase->button_text;
                     $showcase->button_url = !empty($showcaseData['button_url']) ? $showcaseData['button_url'] : null;
                     $showcase->sort_order = isset($showcaseData['sort_order']) ? (int)$showcaseData['sort_order'] : $showcase->sort_order;
                     $showcase->status = $showcaseData['status'] ?? $showcase->status;

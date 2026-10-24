@@ -145,10 +145,8 @@ class UpdateBrandRequest extends FormRequest
                         }
                     }
 
-                    // Button URL is mandatory if Button Text is entered
-                    $hasBtnText = !empty(trim((string)($showcase['button_text']['en'] ?? ''))) ||
-                                  !empty(trim((string)($showcase['button_text']['fr'] ?? ''))) ||
-                                  !empty(trim((string)($showcase['button_text']['ar'] ?? '')));
+                    // Button URL is mandatory if Button Text (EN) is entered
+                    $hasBtnText = !empty(trim((string)($showcase['button_text']['en'] ?? '')));
 
                     if ($hasBtnText && empty(trim((string)($showcase['button_url'] ?? '')))) {
                         $validator->errors()->add(
@@ -164,7 +162,7 @@ class UpdateBrandRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.en.unique' => 'Name must be unique',
+            'name.en.unique' => 'A brand with this name already exists. Please choose a different name.',
             'name.required' => 'Name is required',
             'status.required' => 'Status is required',
             'showcases.*.image.image' => 'Showcase photo must be a valid image.',

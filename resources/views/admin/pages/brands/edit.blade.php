@@ -1029,11 +1029,21 @@
 
                         // 3. Button URL is mandatory if Button Text is entered
                         const btnUrlInput = card.querySelector('.showcase-btn-url');
-                        const btnTextInputs = card.querySelectorAll('input[name*="[button_text]"]');
-                        let hasButtonText = false;
-                        btnTextInputs.forEach(bt => {
-                            if (bt.value && bt.value.trim() !== '') hasButtonText = true;
-                        });
+                        const btnTextEn = card.querySelector('.showcase-btn-text-en');
+                        const btnTextFr = card.querySelector('.showcase-btn-text-fr');
+                        const btnTextAr = card.querySelector('.showcase-btn-text-ar');
+
+                        const hasEnBtnText = btnTextEn && btnTextEn.value.trim() !== '';
+
+                        // If primary English button text is empty, auto-clear secondary translations
+                        if (!hasEnBtnText) {
+                            if (btnTextFr) btnTextFr.value = '';
+                            if (btnTextAr) btnTextAr.value = '';
+                        }
+
+                        const hasButtonText = hasEnBtnText ||
+                            (btnTextFr && btnTextFr.value.trim() !== '') ||
+                            (btnTextAr && btnTextAr.value.trim() !== '');
 
                         if (hasButtonText) {
                             if (!btnUrlInput || !btnUrlInput.value.trim()) {
@@ -1414,6 +1424,19 @@
                         switchTab('step3');
                         return false;
                     }
+
+                    // Prevent double submit race conditions
+                    if (brandForm.dataset.submitting === 'true') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    brandForm.dataset.submitting = 'true';
+                    setTimeout(function() {
+                        const submitButtons = document.querySelectorAll('button[type="submit"][form="brand-wizard-form"], #brand-wizard-form button[type="submit"]');
+                        submitButtons.forEach(btn => {
+                            btn.disabled = true;
+                        });
+                    }, 50);
                 });
             }
 
@@ -1425,22 +1448,38 @@
                 if (e.target.classList.contains('showcase-title-en') && e.target.value.trim()) {
                     clearFieldError(e.target);
                 }
-                if (e.target.classList.contains('showcase-btn-url') && e.target.value.trim()) {
-                    clearFieldError(e.target);
+                if (e.target.classList.contains('showcase-btn-url')) {
+                    const card = e.target.closest('.showcase-item');
+                    if (card) {
+                        const btnTextEn = card.querySelector('.showcase-btn-text-en');
+                        const hasEnBtnText = btnTextEn && btnTextEn.value.trim() !== '';
+                        if (!hasEnBtnText || e.target.value.trim()) {
+                            clearFieldError(e.target);
+                        }
+                    }
                 }
                 if (e.target.name && e.target.name.includes('[button_text]')) {
                     const card = e.target.closest('.showcase-item');
                     if (card) {
                         const btnUrlInput = card.querySelector('.showcase-btn-url');
-                        const btnTextInputs = card.querySelectorAll('input[name*="[button_text]"]');
-                        let hasAnyBtnText = false;
-                        btnTextInputs.forEach(bt => {
-                            if (bt.value && bt.value.trim() !== '') hasAnyBtnText = true;
-                        });
-                        if (!hasAnyBtnText && btnUrlInput) {
-                            clearFieldError(btnUrlInput);
-                        } else if (hasAnyBtnText && btnUrlInput && btnUrlInput.value.trim()) {
-                            clearFieldError(btnUrlInput);
+                        const btnTextEn = card.querySelector('.showcase-btn-text-en');
+                        const btnTextFr = card.querySelector('.showcase-btn-text-fr');
+                        const btnTextAr = card.querySelector('.showcase-btn-text-ar');
+
+                        // If user clears English button text, automatically clear FR and AR button texts
+                        if (e.target.classList.contains('showcase-btn-text-en') && !e.target.value.trim()) {
+                            if (btnTextFr) btnTextFr.value = '';
+                            if (btnTextAr) btnTextAr.value = '';
+                            if (btnUrlInput) clearFieldError(btnUrlInput);
+                        } else {
+                            const hasAnyBtnText = (btnTextEn && btnTextEn.value.trim() !== '') ||
+                                                  (btnTextFr && btnTextFr.value.trim() !== '') ||
+                                                  (btnTextAr && btnTextAr.value.trim() !== '');
+                            if (!hasAnyBtnText && btnUrlInput) {
+                                clearFieldError(btnUrlInput);
+                            } else if (hasAnyBtnText && btnUrlInput && btnUrlInput.value.trim()) {
+                                clearFieldError(btnUrlInput);
+                            }
                         }
                     }
                 }

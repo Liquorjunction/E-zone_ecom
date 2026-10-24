@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\Brands\ReadBrandRequest;
 use App\Http\Requests\Admin\Brands\EditBrandRequest;
 use App\Repositories\Admin\Interfaces\BrandRepositoryInterface as BrandRepo;
 use App\Models\Brand;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
@@ -48,7 +49,19 @@ class BrandController extends Controller
 
             if (isset($data['showcases']) && is_array($data['showcases'])) {
                 foreach ($data['showcases'] as &$sc) {
-                    foreach (['title', 'description', 'button_text'] as $f) {
+                    if (empty(trim((string)($sc['button_text']['en'] ?? '')))) {
+                        $sc['button_text'] = ['en' => '', 'fr' => '', 'ar' => ''];
+                        $sc['button_url'] = null;
+                    } else {
+                        if (empty($sc['button_text']['fr'])) {
+                            $sc['button_text']['fr'] = gtrans($sc['button_text']['en'], 'fr');
+                        }
+                        if (empty($sc['button_text']['ar'])) {
+                            $sc['button_text']['ar'] = gtrans($sc['button_text']['en'], 'ar');
+                        }
+                    }
+
+                    foreach (['title', 'description'] as $f) {
                         if (isset($sc[$f]['en']) && !empty($sc[$f]['en'])) {
                             if (empty($sc[$f]['fr'])) {
                                 $sc[$f]['fr'] = gtrans($sc[$f]['en'], 'fr');
@@ -65,10 +78,25 @@ class BrandController extends Controller
             $brandRepo->createBrand($request, $data);
 
             return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully.');
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
+        } catch (QueryException $e) {
+            Log::error('Brand create database error: ' . $e->getMessage());
 
-            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+            $errorCode = $e->errorInfo[1] ?? null;
+            if ($errorCode == 1062 || str_contains($e->getMessage(), '1062') || str_contains($e->getMessage(), 'Duplicate entry')) {
+                return redirect()->back()
+                    ->withErrors(['name.en' => 'A brand with this name already exists. Please choose a different name.'])
+                    ->withInput();
+            }
+
+            return redirect()->back()
+                ->withErrors(['error' => 'A database error occurred while creating the brand. Please try again.'])
+                ->withInput();
+        } catch (\Exception $e) {
+            Log::error('Brand create error: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An unexpected error occurred while creating the brand. Please try again.'])
+                ->withInput();
         }
     }
 
@@ -107,7 +135,19 @@ class BrandController extends Controller
 
             if (isset($data['showcases']) && is_array($data['showcases'])) {
                 foreach ($data['showcases'] as &$sc) {
-                    foreach (['title', 'description', 'button_text'] as $f) {
+                    if (empty(trim((string)($sc['button_text']['en'] ?? '')))) {
+                        $sc['button_text'] = ['en' => '', 'fr' => '', 'ar' => ''];
+                        $sc['button_url'] = null;
+                    } else {
+                        if (empty($sc['button_text']['fr'])) {
+                            $sc['button_text']['fr'] = gtrans($sc['button_text']['en'], 'fr');
+                        }
+                        if (empty($sc['button_text']['ar'])) {
+                            $sc['button_text']['ar'] = gtrans($sc['button_text']['en'], 'ar');
+                        }
+                    }
+
+                    foreach (['title', 'description'] as $f) {
                         if (isset($sc[$f]['en']) && !empty($sc[$f]['en'])) {
                             if (empty($sc[$f]['fr'])) {
                                 $sc[$f]['fr'] = gtrans($sc[$f]['en'], 'fr');
@@ -124,10 +164,25 @@ class BrandController extends Controller
             $brandRepo->updateBrand($request, $id, $data);
 
             return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully.');
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
+        } catch (QueryException $e) {
+            Log::error('Brand update database error: ' . $e->getMessage());
 
-            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+            $errorCode = $e->errorInfo[1] ?? null;
+            if ($errorCode == 1062 || str_contains($e->getMessage(), '1062') || str_contains($e->getMessage(), 'Duplicate entry')) {
+                return redirect()->back()
+                    ->withErrors(['name.en' => 'A brand with this name already exists. Please choose a different name.'])
+                    ->withInput();
+            }
+
+            return redirect()->back()
+                ->withErrors(['error' => 'A database error occurred while updating the brand. Please try again.'])
+                ->withInput();
+        } catch (\Exception $e) {
+            Log::error('Brand update error: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An unexpected error occurred while updating the brand. Please try again.'])
+                ->withInput();
         }
     }
 
