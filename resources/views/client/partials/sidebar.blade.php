@@ -18,7 +18,7 @@
      DESKTOP SIDEBAR
      ═══════════════════════════════════════════════════════ --}}
 <aside x-cloak
-    class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 bg-white z-30 transition-[width] duration-300 ease-out w-18 border-r-2 border-primary/30"
+    class="hidden lg:flex lg:flex-col fixed inset-y-0 left-0 rtl:right-0 rtl:left-auto bg-white z-30 transition-[width] duration-300 ease-out w-18 border-r-2 rtl:border-l-2 rtl:border-r-0 border-primary/30"
     style="top: var(--header-height); max-height: calc(100vh - var(--header-height)); will-change: width; box-shadow: 2px 0 20px rgba(0,0,0,0.07);
            /* iOS FIX: force GPU compositing layer to prevent width-animation jitter on older iPhones */
            -webkit-backface-visibility: hidden; backface-visibility: hidden;
@@ -27,9 +27,9 @@
     @mouseenter.debounce.50ms="if(!pinned) sidebarCollapsed = false"
     @mouseleave.debounce.100ms="if(!pinned) sidebarCollapsed = true">
 
-    {{-- ── Gradient accent line on right (always visible) ── --}}
+    {{-- ── Gradient accent line on edge (always visible) ── --}}
     {{-- iOS FIX: inline style fallback for bg-linear-to-b in case Tailwind v4 build is missing --}}
-    <div class="absolute right-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"
+    <div class="absolute right-0 rtl:left-0 rtl:right-auto top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"
          style="background: linear-gradient(to bottom, rgba(68,155,195,1), rgba(68,155,195,0.5), transparent);"></div>
 
     {{-- ── Header ── --}}
@@ -100,15 +100,15 @@
                                 hover:bg-primary/5 hover:shadow-sm"
                          :class="{ 'justify-center': sidebarCollapsed }">
 
-                        {{-- Hover left accent bar --}}
-                        <span class="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 rounded-r-full bg-primary
+                        {{-- Hover accent bar --}}
+                        <span class="absolute left-0 rtl:right-0 rtl:left-auto top-1/2 -translate-y-1/2 w-0.75 rounded-r-full rtl:rounded-l-full rtl:rounded-r-none bg-primary
                                      transition-all duration-250 ease-out opacity-0 h-0
                                      group-hover/item:opacity-100 group-hover/item:h-8"></span>
 
-                                <a href="{{ $buildCategoryUrl($category) }}"
+                        <a href="{{ $buildCategoryUrl($category) }}"
                            data-category-link="{{ $category->slug }}"
                            class="category-sidebar-link flex items-center flex-1 min-w-0 py-2.5 transition-all duration-150 group-hover/item:text-primary"
-                           :class="{ 'px-2 justify-center': sidebarCollapsed, 'pl-3 pr-1': !sidebarCollapsed }">
+                           :class="{ 'px-2 justify-center': sidebarCollapsed, 'pl-3 pr-1 rtl:pr-3 rtl:pl-1': !sidebarCollapsed }">
 
                             {{-- Icon container --}}
                             <span class="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl
@@ -131,8 +131,8 @@
                                   x-transition:enter="transition ease-out duration-200 delay-50"
                                   x-transition:enter-start="opacity-0 translate-x-2"
                                   x-transition:enter-end="opacity-100 translate-x-0"
-                                  class="ml-3 flex-1 truncate text-sm font-medium text-gray-700
-                                         group-hover/item:text-primary leading-snug transition-colors duration-150">
+                                  class="ml-3 rtl:mr-3 rtl:ml-0 flex-1 truncate text-sm font-medium text-gray-700
+                                         group-hover/item:text-primary leading-snug transition-colors duration-150 text-start">
                                 {{ $category->{'category-name'} }}
                             </span>
                         </a>
@@ -145,11 +145,11 @@
                                     x-transition:enter-end="opacity-100"
                                     @click.prevent="open = !open"
                                     type="button"
-                                    class="shrink-0 mr-2.5 w-6 h-6 flex items-center justify-center rounded-lg
+                                    class="shrink-0 mr-2.5 rtl:ml-2.5 rtl:mr-0 w-6 h-6 flex items-center justify-center rounded-lg
                                            text-gray-400 group-hover/item:text-primary
                                            hover:bg-primary/10 transition-all duration-150">
-                                <svg class="w-3.5 h-3.5 transition-transform duration-250"
-                                     :class="{ 'rotate-90': open }"
+                                <svg class="w-3.5 h-3.5 transition-transform duration-250 rtl:rotate-180"
+                                     :class="{ 'rotate-90 rtl:rotate-90': open }"
                                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                                 </svg>
@@ -158,10 +158,10 @@
 
                         {{-- Collapsed tooltip --}}
                         <div x-show="sidebarCollapsed"
-                             class="pointer-events-none absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium
+                             class="pointer-events-none absolute left-full rtl:right-full rtl:left-auto ml-3 rtl:mr-3 rtl:ml-0 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium
                                     rounded-lg whitespace-nowrap opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 z-50
-                                    shadow-lg before:content-[''] before:absolute before:right-full before:top-1/2 before:-translate-y-1/2
-                                    before:border-4 before:border-transparent before:border-r-gray-900">
+                                    shadow-lg before:content-[''] before:absolute before:right-full rtl:before:left-full rtl:before:right-auto before:top-1/2 before:-translate-y-1/2
+                                    before:border-4 before:border-transparent before:border-r-gray-900 rtl:before:border-l-gray-900 rtl:before:border-r-transparent">
                             {{ $category->{'category-name'} }}
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                     @if($category->subcategories->count() > 0)
                         <div x-show="!sidebarCollapsed && open"
                              x-collapse.duration.200ms
-                             class="mt-1 ml-13 space-y-0.5 pb-1 pl-3 border-l-2 border-primary/20">
+                             class="mt-1 ml-13 rtl:mr-13 rtl:ml-0 space-y-0.5 pb-1 pl-3 rtl:pr-3 rtl:pl-0 border-l-2 rtl:border-r-2 rtl:border-l-0 border-primary/20">
                             @foreach ($category->subcategories as $subcategory)
                                 @if (function_exists('countActiveVariants') ? countActiveVariants($subcategory->products) > 0 : (isset($countActiveVariants) ? $countActiveVariants($subcategory->products) > 0 : ($subcategory->products && $subcategory->products->where('status', 'active')->count() > 0)))
                                     <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
@@ -178,7 +178,7 @@
                                        data-category-slug="{{ $category->slug }}"
                                        class="subcategory-sidebar-link group/sub flex items-center gap-2.5 px-3 py-2
                                               text-xs text-gray-500 rounded-xl transition-all duration-150
-                                              hover:bg-primary/5 hover:text-primary hover:pl-4 hover:font-medium">
+                                              hover:bg-primary/5 hover:text-primary hover:pl-4 rtl:hover:pr-4 rtl:hover:pl-3 hover:font-medium">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/sub:bg-primary shrink-0 transition-colors duration-150"></span>
                                         <span class="truncate">{{ $subcategory->{'sub-category-name'} }}</span>
                                     </a>
@@ -263,12 +263,12 @@
 <aside x-show="mobileSidebarOpen"
        x-cloak
        x-transition:enter="transition ease-out duration-250 transform"
-       x-transition:enter-start="-translate-x-full"
+       x-transition:enter-start="{{ app()->getLocale() === 'ar' ? 'translate-x-full' : '-translate-x-full' }}"
        x-transition:enter-end="translate-x-0"
        x-transition:leave="transition ease-in duration-200 transform"
        x-transition:leave-start="translate-x-0"
-       x-transition:leave-end="-translate-x-full"
-    class="mobile-sidebar-drawer lg:hidden fixed left-0 w-80 bg-white z-50 flex flex-col border-r-2 border-primary/30"
+       x-transition:leave-end="{{ app()->getLocale() === 'ar' ? 'translate-x-full' : '-translate-x-full' }}"
+    class="mobile-sidebar-drawer lg:hidden fixed left-0 rtl:right-0 rtl:left-auto w-80 bg-white z-50 flex flex-col border-r-2 rtl:border-l-2 rtl:border-r-0 border-primary/30"
        {{-- iOS FIX: use dvh (dynamic viewport height) with 100vh fallback.
             iOS Safari's shrinking URL bar makes `inset-y-0` / 100vh too tall,
             clipping the "View All Products" CTA beneath the browser chrome.
@@ -286,9 +286,9 @@
               -webkit-transform: translateZ(0);
               transform: translateZ(0);">
 
-    {{-- Gradient accent line on right --}}
+    {{-- Gradient accent line on edge --}}
     {{-- iOS FIX: inline style fallback for bg-linear-to-b --}}
-    <div class="absolute right-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"
+    <div class="absolute right-0 rtl:left-0 rtl:right-auto top-0 bottom-0 w-0.5 bg-linear-to-b from-primary via-primary/50 to-transparent pointer-events-none z-20"
          style="background: linear-gradient(to bottom, rgba(68,155,195,1), rgba(68,155,195,0.5), transparent);"></div>
 
     {{-- Header --}}
@@ -323,13 +323,13 @@
 
                     <div class="relative flex items-center rounded-2xl overflow-hidden transition-all duration-200 hover:bg-primary/5 hover:shadow-sm">
 
-                        <span class="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 rounded-r-full bg-primary
+                        <span class="absolute left-0 rtl:right-0 rtl:left-auto top-1/2 -translate-y-1/2 w-0.75 rounded-r-full rtl:rounded-l-full rtl:rounded-r-none bg-primary
                                      transition-all duration-250 ease-out opacity-0 h-0
                                      group-hover/item:opacity-100 group-hover/item:h-8"></span>
 
-                                <a href="{{ $buildCategoryUrl($category) }}"
+                        <a href="{{ $buildCategoryUrl($category) }}"
                            data-category-link="{{ $category->slug }}"
-                           class="category-sidebar-link flex items-center flex-1 min-w-0 pl-3 pr-1 py-2.5 transition-all duration-150 group-hover/item:text-primary">
+                           class="category-sidebar-link flex items-center flex-1 min-w-0 pl-3 pr-1 rtl:pr-3 rtl:pl-1 py-2.5 transition-all duration-150 group-hover/item:text-primary">
 
                             <span class="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl
                                          bg-gray-100 group-hover/item:bg-primary/10
@@ -345,8 +345,8 @@
                                 @endif
                             </span>
 
-                            <span class="ml-3 flex-1 truncate text-sm font-medium text-gray-700
-                                         group-hover/item:text-primary transition-colors duration-150">
+                            <span class="ml-3 rtl:mr-3 rtl:ml-0 flex-1 truncate text-sm font-medium text-gray-700
+                                         group-hover/item:text-primary transition-colors duration-150 text-start">
                                 {{ $category->{'category-name'} }}
                             </span>
                         </a>
@@ -354,10 +354,10 @@
                         @if($category->subcategories->count() > 0)
                             <button @click.prevent="open = !open"
                                     type="button"
-                                    class="shrink-0 mr-2.5 w-6 h-6 flex items-center justify-center rounded-lg
+                                    class="shrink-0 mr-2.5 rtl:ml-2.5 rtl:mr-0 w-6 h-6 flex items-center justify-center rounded-lg
                                            text-gray-400 group-hover/item:text-primary hover:bg-primary/10 transition-all duration-150">
-                                <svg class="w-3.5 h-3.5 transition-transform duration-250"
-                                     :class="{ 'rotate-90': open }"
+                                <svg class="w-3.5 h-3.5 transition-transform duration-250 rtl:rotate-180"
+                                     :class="{ 'rotate-90 rtl:rotate-90': open }"
                                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                                 </svg>
@@ -366,9 +366,9 @@
                     </div>
 
                     @if($category->subcategories->count() > 0)
-                            <div x-show="open"
-                                x-collapse.duration.200ms
-                                class="mt-1 ml-13 space-y-0.5 pb-1 pl-3 border-l-2 border-primary/20">
+                        <div x-show="open"
+                             x-collapse.duration.200ms
+                             class="mt-1 ml-13 rtl:mr-13 rtl:ml-0 space-y-0.5 pb-1 pl-3 rtl:pr-3 rtl:pl-0 border-l-2 rtl:border-r-2 rtl:border-l-0 border-primary/20">
                             @foreach ($category->subcategories as $subcategory)
                                 @if (function_exists('countActiveVariants') ? countActiveVariants($subcategory->products) > 0 : (isset($countActiveVariants) ? $countActiveVariants($subcategory->products) > 0 : ($subcategory->products && $subcategory->products->where('status', 'active')->count() > 0)))
                                     <a href="{{ route('products.index', ['category' => $category->slug, 'subcategory' => $subcategory->slug]) }}"
@@ -376,7 +376,7 @@
                                        data-category-slug="{{ $category->slug }}"
                                        class="subcategory-sidebar-link group/sub flex items-center gap-2.5 px-3 py-2
                                               text-xs text-gray-500 rounded-xl transition-all duration-150
-                                              hover:bg-primary/5 hover:text-primary hover:pl-4 hover:font-medium">
+                                              hover:bg-primary/5 hover:text-primary hover:pl-4 rtl:hover:pr-4 rtl:hover:pl-3 hover:font-medium">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/sub:bg-primary shrink-0 transition-colors duration-150"></span>
                                         <span class="truncate">{{ $subcategory->{'sub-category-name'} }}</span>
                                     </a>

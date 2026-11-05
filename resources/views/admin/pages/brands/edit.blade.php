@@ -794,7 +794,7 @@
                     return;
                 }
 
-                const container = inputElement.closest('.mb-2, .mb-3, .form-group, .col-md-5, .col-md-6, .col-md-3, .col-12') || inputElement.parentNode;
+                const container = inputElement.closest('.col-md-7, .col-md-5, .col-md-6, .col-md-3, .col-md-4, .col-12, [class*="col-"], .form-group, .mb-2, .mb-3') || inputElement.parentNode;
                 let feedback = container.querySelector('.invalid-feedback.client-feedback');
                 if (!feedback) {
                     feedback = document.createElement('div');
@@ -825,7 +825,7 @@
                     return;
                 }
 
-                const container = inputElement.closest('.mb-2, .mb-3, .form-group, .col-md-5, .col-md-6, .col-md-3, .col-12') || inputElement.parentNode;
+                const container = inputElement.closest('.col-md-7, .col-md-5, .col-md-6, .col-md-3, .col-md-4, .col-12, [class*="col-"], .form-group, .mb-2, .mb-3') || inputElement.parentNode;
                 if (container) {
                     const clientFeedback = container.querySelector('.invalid-feedback.client-feedback');
                     if (clientFeedback) clientFeedback.remove();
@@ -1455,6 +1455,8 @@
                         const hasEnBtnText = btnTextEn && btnTextEn.value.trim() !== '';
                         if (!hasEnBtnText || e.target.value.trim()) {
                             clearFieldError(e.target);
+                        } else {
+                            setFieldError(e.target, 'Button URL is mandatory when Button Text is provided.');
                         }
                     }
                 }
@@ -1477,8 +1479,12 @@
                                                   (btnTextAr && btnTextAr.value.trim() !== '');
                             if (!hasAnyBtnText && btnUrlInput) {
                                 clearFieldError(btnUrlInput);
-                            } else if (hasAnyBtnText && btnUrlInput && btnUrlInput.value.trim()) {
-                                clearFieldError(btnUrlInput);
+                            } else if (hasAnyBtnText && btnUrlInput) {
+                                if (btnUrlInput.value.trim()) {
+                                    clearFieldError(btnUrlInput);
+                                } else {
+                                    setFieldError(btnUrlInput, 'Button URL is mandatory when Button Text is provided.');
+                                }
                             }
                         }
                     }

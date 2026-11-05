@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
     <!-- Google tag (gtag.js) -->
@@ -177,13 +177,27 @@
 
         @include('client.partials.sidebar')
 
-        <div class="flex-1 w-full transition-[margin-left] duration-300 ease-out relative z-0" id="main-content-inner"
-            style="margin-left: 0"
-            x-bind:style="isLg ? (sidebarCollapsed ? 'margin-left:4.5rem' : 'margin-left:17rem') : 'margin-left:0'">
+        @php
+            $isRtl = app()->getLocale() === 'ar';
+        @endphp
+
+        <div class="flex-1 w-full transition-[margin-inline-start] duration-300 ease-out relative z-0" id="main-content-inner"
+            style="margin-inline-start: 0; {{ $isRtl ? 'margin-right: 0;' : 'margin-left: 0;' }}"
+            x-bind:style="isLg ? (sidebarCollapsed ? 'margin-inline-start:4.5rem; {{ $isRtl ? 'margin-right:4.5rem;' : 'margin-left:4.5rem;' }}' : 'margin-inline-start:17rem; {{ $isRtl ? 'margin-right:17rem;' : 'margin-left:17rem;' }}') : 'margin-inline-start:0; {{ $isRtl ? 'margin-right:0;' : 'margin-left:0;' }}'">
             <script>
                 (function() {
                     var el = document.getElementById('main-content-inner');
-                    if (el && window.innerWidth >= 1024) el.style.marginLeft = '4.5rem';
+                    var isRtl = document.documentElement.dir === 'rtl';
+                    if (el && window.innerWidth >= 1024) {
+                        el.style.marginInlineStart = '4.5rem';
+                        if (isRtl) {
+                            el.style.marginRight = '4.5rem';
+                            el.style.marginLeft = '0';
+                        } else {
+                            el.style.marginLeft = '4.5rem';
+                            el.style.marginRight = '0';
+                        }
+                    }
                 })();
             </script>
 
@@ -198,7 +212,7 @@
                 @endphp
                 <a href="https://wa.me/{{ $whatsappNumber }}?text=Bonjour, je souhaite obtenir des informations sur vos produits."
                     target="_blank" rel="noopener" aria-label="Chat on WhatsApp"
-                    class="fixed z-50 bottom-6 right-6 md:bottom-8 md:right-8 bg-green-500 hover:bg-green-600 rounded-full shadow-lg p-3 flex items-center justify-center transition-colors duration-300"
+                    class="fixed z-50 bottom-6 right-6 md:bottom-8 md:right-8 rtl:right-auto rtl:left-6 rtl:md:left-8 bg-green-500 hover:bg-green-600 rounded-full shadow-lg p-3 flex items-center justify-center transition-colors duration-300"
                     style="box-shadow: 0 4px 16px rgba(0,0,0,0.18);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"
                         fill="white">

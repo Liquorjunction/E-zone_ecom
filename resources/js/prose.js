@@ -1,7 +1,29 @@
 const PROSE_SELECTOR = '.prose-content';
+const ARABIC_REGEX = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
 
 function isElement(node) {
     return node && node.nodeType === Node.ELEMENT_NODE;
+}
+
+function normalizeTextDirection(root) {
+    const isDocRtl = document.documentElement.getAttribute('dir') === 'rtl';
+    const textSample = (root.textContent || '').trim().slice(0, 500);
+    const hasArabicText = ARABIC_REGEX.test(textSample);
+
+    if (isDocRtl || hasArabicText) {
+        root.setAttribute('dir', 'rtl');
+        root.classList.add('prose-rtl');
+    }
+
+    // Inspect child block-level elements for Quill RTL classes or mixed Arabic content
+    root.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, div, table').forEach((child) => {
+        if (child.classList.contains('ql-direction-rtl') || child.getAttribute('dir') === 'rtl') {
+            child.setAttribute('dir', 'rtl');
+        } else if (!isDocRtl && ARABIC_REGEX.test((child.textContent || '').slice(0, 200))) {
+            child.setAttribute('dir', 'rtl');
+            child.classList.add('ql-direction-rtl');
+        }
+    });
 }
 
 function normalizeQuillLists(root) {
@@ -113,6 +135,7 @@ function normalizeSingleRoot(root) {
         return;
     }
 
+    normalizeTextDirection(root);
     normalizeQuillLists(root);
     normalizeTables(root);
     normalizeMedia(root);

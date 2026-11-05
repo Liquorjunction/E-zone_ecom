@@ -24,9 +24,9 @@
                     @csrf
                     <label for="footer-email" class="sr-only">{{ statictranslations('Email address') }}</label>
                     <input type="email" name="email" id="footer-email" placeholder="{{ statictranslations('Enter your email address') }}"
-                        class="w-full bg-gray-800 border-gray-700 text-white rounded-l-md py-3 px-5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        class="w-full bg-gray-800 border-gray-700 text-white rounded-l-md rtl:rounded-r-md rtl:rounded-l-none py-3 px-5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                     <button type="submit" aria-label="{{ statictranslations('Subscribe') }}"
-                        class="shrink-0 bg-primary text-white rounded-r-md py-3 px-5 font-medium hover:bg-primary-dark transition-colors">
+                        class="shrink-0 bg-primary text-white rounded-r-md rtl:rounded-l-md rtl:rounded-r-none py-3 px-5 font-medium hover:bg-primary-dark transition-colors">
                         {{ statictranslations('Subscribe') }}
                     </button>
                 </form>

@@ -1,5 +1,5 @@
 /* Import the font */
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 /* Toast-specific styles (small, kept separate) */
@@ -876,6 +876,160 @@ input[type="email"]:focus {
     left: 0;
     top: 0.05rem;
     color: #6b7280;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUILL RTF ALIGNMENTS & TEXT DIRECTIONS
+   ═══════════════════════════════════════════════════════════════ */
+.ql-align-center {
+    text-align: center !important;
+}
+.ql-align-right {
+    text-align: right !important;
+}
+.ql-align-left {
+    text-align: left !important;
+}
+.ql-align-justify {
+    text-align: justify !important;
+}
+.ql-direction-rtl {
+    direction: rtl !important;
+    text-align: right !important;
+}
+.ql-direction-ltr {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RTL TYPOGRAPHY & PROSE (ARABIC SUPPORT)
+   ═══════════════════════════════════════════════════════════════ */
+[dir="rtl"],
+[dir="rtl"] body,
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select,
+[dir="rtl"] button {
+    font-family: "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+[dir="rtl"] .prose-content,
+.prose-content[dir="rtl"],
+.prose-content.prose-rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .prose-content ul,
+[dir="rtl"] .prose-content ol,
+.prose-content[dir="rtl"] ul,
+.prose-content[dir="rtl"] ol,
+.prose-content.prose-rtl ul,
+.prose-content.prose-rtl ol {
+    padding-left: 0 !important;
+    padding-right: 1.5rem !important;
+}
+
+[dir="rtl"] .prose-content blockquote,
+.prose-content[dir="rtl"] blockquote,
+.prose-content.prose-rtl blockquote {
+    border-left: none !important;
+    border-right: 4px solid #d1d5db !important;
+    padding: 0.25rem 1rem 0.25rem 0 !important;
+}
+
+[dir="rtl"] .prose-content th,
+[dir="rtl"] .prose-content td,
+.prose-content[dir="rtl"] th,
+.prose-content[dir="rtl"] td,
+.prose-content.prose-rtl th,
+.prose-content.prose-rtl td {
+    text-align: right !important;
+}
+
+/* RTL Quill Indentation */
+[dir="rtl"] .prose-content .ql-indent-1,
+.prose-content[dir="rtl"] .ql-indent-1,
+.prose-content.prose-rtl .ql-indent-1 {
+    margin-left: 0 !important;
+    margin-right: 1.5rem !important;
+}
+[dir="rtl"] .prose-content .ql-indent-2,
+.prose-content[dir="rtl"] .ql-indent-2,
+.prose-content.prose-rtl .ql-indent-2 {
+    margin-left: 0 !important;
+    margin-right: 3rem !important;
+}
+[dir="rtl"] .prose-content .ql-indent-3,
+.prose-content[dir="rtl"] .ql-indent-3,
+.prose-content.prose-rtl .ql-indent-3 {
+    margin-left: 0 !important;
+    margin-right: 4.5rem !important;
+}
+[dir="rtl"] .prose-content .ql-indent-4,
+.prose-content[dir="rtl"] .ql-indent-4,
+.prose-content.prose-rtl .ql-indent-4 {
+    margin-left: 0 !important;
+    margin-right: 6rem !important;
+}
+[dir="rtl"] .prose-content .ql-indent-5,
+.prose-content[dir="rtl"] .ql-indent-5,
+.prose-content.prose-rtl .ql-indent-5 {
+    margin-left: 0 !important;
+    margin-right: 7.5rem !important;
+}
+[dir="rtl"] .prose-content .ql-indent-6,
+.prose-content[dir="rtl"] .ql-indent-6,
+.prose-content.prose-rtl .ql-indent-6 {
+    margin-left: 0 !important;
+    margin-right: 9rem !important;
+}
+
+/* RTL Quill Checklist */
+[dir="rtl"] .prose-content li.prose-li-check,
+[dir="rtl"] .prose-content li[data-list="check"],
+[dir="rtl"] .prose-content li[data-list="checked"],
+[dir="rtl"] .prose-content li[data-list="unchecked"],
+.prose-content[dir="rtl"] li.prose-li-check,
+.prose-content[dir="rtl"] li[data-list="check"],
+.prose-content[dir="rtl"] li[data-list="checked"],
+.prose-content[dir="rtl"] li[data-list="unchecked"],
+.prose-content.prose-rtl li.prose-li-check,
+.prose-content.prose-rtl li[data-list="check"],
+.prose-content.prose-rtl li[data-list="checked"],
+.prose-content.prose-rtl li[data-list="unchecked"] {
+    padding-left: 0 !important;
+    padding-right: 1.4rem !important;
+}
+
+[dir="rtl"] .prose-content li.prose-li-check::before,
+[dir="rtl"] .prose-content li[data-list="check"]::before,
+[dir="rtl"] .prose-content li[data-list="unchecked"]::before,
+.prose-content[dir="rtl"] li.prose-li-check::before,
+.prose-content[dir="rtl"] li[data-list="check"]::before,
+.prose-content[dir="rtl"] li[data-list="unchecked"]::before,
+.prose-content.prose-rtl li.prose-li-check::before,
+.prose-content.prose-rtl li[data-list="check"]::before,
+.prose-content.prose-rtl li[data-list="unchecked"]::before {
+    left: auto !important;
+    right: 0 !important;
+}
+
+[dir="rtl"] .prose-content li[data-list="checked"]::before,
+.prose-content[dir="rtl"] li[data-list="checked"]::before,
+.prose-content.prose-rtl li[data-list="checked"]::before {
+    left: auto !important;
+    right: 0 !important;
+}
+
+/* Layout & Shell RTL Overrides */
+[dir="rtl"] #sidebar {
+    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.08) !important;
+}
+[dir="rtl"] .sidebar-mobile-open-btn {
+    right: 1.5rem !important;
+    left: auto !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════

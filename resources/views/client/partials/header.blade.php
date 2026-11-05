@@ -19,15 +19,15 @@
             <div class="hidden md:flex flex-1 max-w-2xl mx-auto">
                 <form id="universal-search-form" class="relative w-full group/search" autocomplete="off"
                     onsubmit="return false;">
-                    <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within/search:text-primary pointer-events-none"></i>
+                    <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within/search:text-primary pointer-events-none"></i>
                     <input id="universal-search-input" type="text"
                         placeholder="{{ statictranslations('Search electronics, brands, deals...') }}"
-                        class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
+                        class="w-full pl-10 pr-10 rtl:pr-10 rtl:pl-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                                transition-all duration-200 placeholder:text-gray-400 text-gray-700"
                         autocomplete="off">
                     <button type="button" data-search-clear="universal-search-input"
-                        class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                        class="hidden absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
                         aria-label="Clear search">
                         <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
                     </button>
@@ -38,7 +38,7 @@
             </div>
 
             {{-- ── Right cluster ── --}}
-            <div class="flex items-center gap-0.5 ml-auto">
+            <div class="flex items-center gap-0.5 ml-auto rtl:ml-0 rtl:mr-auto">
 
                 {{-- Language (desktop) --}}
                 <div class="hidden md:block relative"
@@ -49,7 +49,7 @@
                     <button @click="languageOpen = !languageOpen"
                         class="flex items-center gap-1.5 h-9 px-3 rounded-xl text-gray-500 text-xs font-bold
                                    hover:bg-gray-100 hover:text-gray-800 transition-all duration-150 tracking-wide">
-                        <span class="uppercase"><i class="fa-solid fa-globe w-4 h-4 pr-1 shrink-0"></i>{{ session('locale', app()->getLocale()) }}</span>
+                        <span class="uppercase"><i class="fa-solid fa-globe w-4 h-4 pr-1 rtl:pr-0 rtl:pl-1 shrink-0"></i>{{ session('locale', app()->getLocale()) }}</span>
                         <i class="fa-solid fa-chevron-down w-2.5 h-2.5 text-gray-400 transition-transform duration-150"
                             :class="{ 'rotate-180': languageOpen }" fill="none" stroke="currentColor"
                             ></i>
@@ -61,7 +61,7 @@
                         x-transition:leave="transition ease-in duration-100"
                         x-transition:leave-start="opacity-100 translate-y-0"
                         x-transition:leave-end="opacity-0 translate-y-1"
-                        class="absolute right-0 top-full mt-1.5 w-40 z-50">
+                        class="absolute right-0 rtl:right-auto rtl:left-0 top-full mt-1.5 w-40 z-50">
                         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 overflow-hidden">
                             @foreach (['en' => 'English', 'fr' => 'Français', 'ar' => 'العربية'] as $code => $label)
                                 <a href="{{ route('lang.switch', $code) }}"
@@ -143,7 +143,7 @@
                                         class="text-xs font-bold text-primary leading-none">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
                                 </div>
                             @endif
-                            <div class="hidden lg:block text-left leading-tight">
+                            <div class="hidden lg:block text-left rtl:text-right leading-tight">
                                 <p class="text-xs font-semibold text-gray-800 max-w-18 truncate">{{ Auth::user()->name }}
                                 </p>
                                 <p class="text-[10px] text-gray-400">{{ statictranslations('Account') }}</p>
@@ -158,7 +158,7 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-1"
-                            class="absolute right-0 top-full mt-1.5 w-60 z-50">
+                            class="absolute right-0 rtl:right-auto rtl:left-0 top-full mt-1.5 w-60 z-50">
                             <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
 
                                 {{-- Profile strip --}}
@@ -256,14 +256,14 @@
 
         {{-- Search --}}
         <div class="relative mb-3">
-            <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <i class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
             <input id="universal-search-input-mobile" type="text"
                 placeholder="{{ statictranslations('Search products...') }}"
-                class="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
+                class="w-full pl-10 pr-10 rtl:pr-10 rtl:pl-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-2xl
                           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:bg-white
                           transition-all duration-200">
             <button type="button" data-search-clear="universal-search-input-mobile"
-                class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                class="hidden absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
                 aria-label="Clear search">
                 <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
             </button>

@@ -255,7 +255,7 @@
                             <div id="{{ $category['id'] }}"
                                  class="scroll-mt-40 bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden group">
 
-                                <div class="grid grid-cols-1 lg:grid-cols-2 lg:h-[400px]">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 lg:min-h-[420px]">
 
                                     {{-- Image / Visual Side --}}
                                     <div class="{{ $imageOnRight ? 'lg:col-start-2' : 'lg:col-start-1' }} lg:row-start-1 h-64 sm:h-80 lg:h-full relative bg-gray-100 overflow-hidden">
@@ -264,26 +264,28 @@
                                              class="absolute inset-0 w-full h-full object-fill group-hover:scale-105 transition-transform duration-500">
                                     </div>
 
-                                    {{-- Content Side: Only Heading, Description, and Button --}}
-                                    <div class="{{ $imageOnRight ? 'lg:col-start-1' : 'lg:col-start-2' }} lg:row-start-1 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white min-h-0 overflow-hidden">
-                                        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight mb-3 sm:mb-4 shrink-0">
-                                            {{ statictranslations($category['title']) }}
-                                        </h3>
+                                    {{-- Content Side: Heading, Description, and Action Button --}}
+                                    <div class="{{ $imageOnRight ? 'lg:col-start-1' : 'lg:col-start-2' }} lg:row-start-1 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-white min-h-0 overflow-hidden">
+                                        <div class="flex-1 min-h-0 flex flex-col justify-center">
+                                            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight mb-3 sm:mb-4 shrink-0">
+                                                {{ statictranslations($category['title']) }}
+                                            </h3>
 
-                                        @if (!empty(trim((string)$category['description'])))
-                                            <div class="overflow-y-auto max-h-36 sm:max-h-44 lg:max-h-[155px] pr-2 text-sm sm:text-base text-gray-600 leading-relaxed custom-scrollbar break-words">
-                                                <p class="whitespace-pre-line">
-                                                    {{ statictranslations($category['description']) }}
-                                                </p>
-                                            </div>
-                                        @endif
+                                            @if (!empty(trim((string)$category['description'])))
+                                                <div class="overflow-y-auto max-h-32 sm:max-h-40 lg:max-h-[160px] pr-2 rtl:pr-0 rtl:pl-2 text-sm sm:text-base text-gray-600 leading-relaxed custom-scrollbar break-words">
+                                                    <p class="whitespace-pre-line">
+                                                        {{ statictranslations($category['description']) }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                        </div>
 
                                         @if (!empty($category['button_url']))
-                                            <div class="shrink-0 mt-5 sm:mt-6">
+                                            <div class="shrink-0 mt-4 sm:mt-5 pt-1">
                                                 <a href="{{ $category['button_url'] }}"
                                                    class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-xs sm:text-sm shadow-xs hover:shadow transition-all group/btn">
                                                     <span>{{ $category['button_text'] }}</span>
-                                                    <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 rtl:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                                     </svg>
                                                 </a>
