@@ -163,6 +163,12 @@ class OrderController extends Controller
                 ->addColumn('customer_name', function ($order) use ($orderRepo) {
                     return $orderRepo->getCustomerNameByOrderId($order->id) ?? 'N/A';
                 })
+                ->addColumn('client_type', function ($order) {
+                    if (($order->client_type ?? 'registered') === 'guest' || (method_exists($order, 'isGuest') && $order->isGuest())) {
+                        return '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Guest</span>';
+                    }
+                    return '<span class="badge bg-info-subtle text-info border border-info-subtle">Registered</span>';
+                })
                 ->addColumn('email', fn($order) => $order->email ?? optional($order->user)->email ?? 'N/A')
                 ->addColumn('total', fn($order) => config('app.CURRENCY_SYMBOL') .' '. ($order->total ?? 'N/A'))
                 ->addColumn('created_at', fn($order) => $order->created_at->format('d M Y, h:i A'))
@@ -242,7 +248,7 @@ class OrderController extends Controller
 
                     return view('admin.partials.datatable-actions', $actions)->render();
                 })
-                ->rawColumns(['status', 'cancelled_by', 'action'])
+                ->rawColumns(['status', 'cancelled_by', 'action', 'client_type'])
                 ->make(true);
         } catch (\Exception $e) {
             Log::error('Order dataTable error: ' . $e->getMessage(), ['exception' => $e]);

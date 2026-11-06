@@ -241,6 +241,27 @@
                             </svg>
                         </button>
                     </div>
+
+                    @if (request()->has('checkout') || (isset($cartItemCount) && $cartItemCount > 0))
+                        <div class="relative my-4">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-3 bg-white text-gray-500 font-medium">{{ statictranslations('Or') }}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a href="{{ route('checkout', ['step' => 2, 'mode' => 'guest']) }}"
+                                class="w-full flex justify-center items-center px-6 py-3.5 border-2 border-primary/20 text-base font-bold text-primary bg-primary/5 rounded-xl shadow-xs transition-all duration-200 hover:bg-primary hover:text-white focus:outline-none">
+                                <span>{{ statictranslations('Proceed as Guest') }}</span>
+                                <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </a>
+                        </div>
+                    @endif
                 </form>
 
                 <!-- Sign Up Link -->

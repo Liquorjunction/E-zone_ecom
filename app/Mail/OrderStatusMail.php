@@ -19,13 +19,21 @@ class OrderStatusMail extends Mailable
     public $status;
     public $reviewUrl;
     public $trackingUrl;
+    public $recipientName;
 
-    public function __construct(User $user, Order $order, $status)
+    public function __construct(?User $user, Order $order, $status)
     {
         $this->user = $user;
         $this->order = $order;
         $this->status = strtolower($status);
-        $this->reviewUrl = route('order-detail', $order->order_number);
+        $this->recipientName = $user?->name ?? $order->shippingAddressRecord?->name ?? $order->guestUser?->name ?? ($order->shipping_address['name'] ?? 'Client');
+
+        if ($order->isGuest()) {
+            $this->reviewUrl = \Illuminate\Support\Facades\URL::signedRoute('guest.order-detail', ['order' => $order->order_number]);
+        } else {
+            $this->reviewUrl = route('order-detail', $order->order_number);
+        }
+
         // Provide tracking URL for shipped and out_for_delivery mails
         if (in_array($this->status, ['shipped', 'out_for_delivery'])) {
             $this->trackingUrl = $order->tracking_url ?? null;
@@ -50,7 +58,11 @@ class OrderStatusMail extends Mailable
 
         $mail = $this->subject('Order ' . ucfirst(str_replace('_', ' ', $this->status)) . ' - #' . $this->order->order_number)
             ->view($view)
-            ->with(['trackingUrl' => $this->trackingUrl]);
+            ->with([
+                'trackingUrl'   => $this->trackingUrl,
+                'recipientName' => $this->recipientName,
+                'user'          => $this->user,
+            ]);
 
         if ($this->status === 'delivered') {
             $filename = 'invoice-' . ($this->order->order_number ?: ('ORDER-' . $this->order->id)) . '.pdf';

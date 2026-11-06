@@ -17,7 +17,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getOrderById($id)
     {
-        return Order::with(['items.product', 'items.variant', 'user'])->find($id);
+        return Order::with(['items.product', 'items.variant', 'user', 'guestUser', 'shippingAddressRecord', 'billingAddressRecord'])->find($id);
     }
 
     public function getOrderItemById($id)
@@ -38,7 +38,7 @@ class OrderRepository implements OrderRepositoryInterface
     public function getDataForDataTable($request)
     {
         $query = Order::with(['cancelledBy:id,name'])
-            ->select(['id', 'order_number', 'user_id', 'email', 'total', 'status', 'payment_method', 'transaction_id', 'cancel_reason', 'cancelled_by', 'created_at'])
+            ->select(['id', 'order_number', 'user_id', 'client_type', 'guest_user_id', 'email', 'total', 'status', 'payment_method', 'transaction_id', 'cancel_reason', 'cancelled_by', 'created_at'])
             ->orderBy('created_at', 'desc');
 
         $getInput = function (string $key) use ($request) {
@@ -56,6 +56,11 @@ class OrderRepository implements OrderRepositoryInterface
         $status = $getInput('status');
         if (!empty($status)) {
             $query->where('status', $status);
+        }
+
+        $clientType = $getInput('client_type');
+        if (!empty($clientType) && in_array($clientType, ['guest', 'registered'], true)) {
+            $query->where('client_type', $clientType);
         }
 
         $paymentMethod = $getInput('payment_method');
@@ -98,7 +103,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getCustomerNameByOrderId($orderId)
     {
-        $order = Order::with('user')->find($orderId);
+        $order = Order::with(['user', 'guestUser', 'shippingAddressRecord'])->find($orderId);
         if (! $order) {
             return null;
         }
@@ -107,7 +112,11 @@ class OrderRepository implements OrderRepositoryInterface
             return $order->user->name ?? ($order->user->email ?? 'N/A');
         }
 
-        return $order->customer_name ?? $order->shipping_address['name'] ?? null;
+        if ($order->guestUser) {
+            return $order->guestUser->name ?? ($order->guestUser->email ?? 'Guest');
+        }
+
+        return $order->customer_name ?? ($order->shipping_address['name'] ?? 'Guest');
     }
 
     public function findOrderWithRelations(int $orderId, array $relations = [])

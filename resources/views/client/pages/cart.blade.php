@@ -144,14 +144,23 @@
                                 </svg>
                                 {{ statictranslations('Have a Coupon Code?') }}
                             </h3>
-                            <div class="flex gap-3">
-                                <input type="text" placeholder="{{ statictranslations('Enter coupon code') }}"
-                                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
-                                <button
-                                    class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
-                                    {{ statictranslations('Apply') }}
-                                </button>
-                            </div>
+                            @if (!Auth::check())
+                                <p class="text-xs text-gray-500">
+                                    {{ statictranslations('Coupons are exclusive to registered members.') }}
+                                    <a href="{{ route('login', ['checkout' => 1]) }}" class="text-primary font-bold hover:underline ml-1">
+                                        {{ statictranslations('Log in to apply') }}
+                                    </a>
+                                </p>
+                            @else
+                                <div class="flex gap-3">
+                                    <input type="text" placeholder="{{ statictranslations('Enter coupon code') }}"
+                                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
+                                    <button
+                                        class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
+                                        {{ statictranslations('Apply') }}
+                                    </button>
+                                </div>
+                            @endif
                         </div>
 
                     </div>
@@ -188,10 +197,24 @@
                             </div>
 
                             <!-- Checkout Button -->
-                            <a href="{{ route('checkout') }}"
-                                class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-3">
-                                {{ statictranslations('Proceed to Checkout') }}
-                            </a>
+                            @if (!Auth::check())
+                                <a href="{{ route('checkout', ['step' => 2, 'mode' => 'guest']) }}"
+                                    class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-2 flex items-center justify-center gap-2">
+                                    <span>{{ statictranslations('Proceed as Guest') }}</span>
+                                    <svg class="w-5 h-5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </a>
+                                <a href="{{ route('login', ['checkout' => 1]) }}"
+                                    class="block w-full px-6 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white text-center font-bold rounded-xl transition-all duration-300 mb-3 text-sm">
+                                    {{ statictranslations('Log In to Checkout') }}
+                                </a>
+                            @else
+                                <a href="{{ route('checkout') }}"
+                                    class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-3">
+                                    {{ statictranslations('Proceed to Checkout') }}
+                                </a>
+                            @endif
 
                             <!-- Continue Shopping Button -->
                             <a href="{{ route('products.index') }}"

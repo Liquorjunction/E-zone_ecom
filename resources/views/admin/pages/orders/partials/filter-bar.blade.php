@@ -12,7 +12,7 @@
         </div>
         <div class="card-body px-4 py-4">
             <form action="{{ route('admin.orders.index') }}" method="GET">
-                <div class="d-flex flex-wrap align-items-start" style="gap:6rem;">
+                <div class="d-flex flex-wrap align-items-start" style="gap:2.5rem;">
                     {{-- Status --}}
                     <div>
                         <div class="text-uppercase text-muted fw-semibold mb-2"
@@ -27,6 +27,20 @@
                                     {{ ucfirst($status->name) }}
                                 </option>
                             @endforeach --}}
+                        </select>
+                    </div>
+
+                    <div class="vr opacity-25 d-none d-md-block align-self-stretch"></div>
+
+                    {{-- Client Type --}}
+                    <div>
+                        <div class="text-uppercase text-muted fw-semibold mb-2"
+                            style="font-size:0.65rem;letter-spacing:0.08em;">Client Type</div>
+                        <select id="client_type" name="client_type" class="form-select form-select-sm filter-input"
+                            data-selected="{{ request('client_type', '') }}" style="width:180px;">
+                            <option value="">All Orders</option>
+                            <option value="guest" {{ request('client_type') === 'guest' ? 'selected' : '' }}>Guest Orders</option>
+                            <option value="registered" {{ request('client_type') === 'registered' ? 'selected' : '' }}>Registered Customer Orders</option>
                         </select>
                     </div>
 

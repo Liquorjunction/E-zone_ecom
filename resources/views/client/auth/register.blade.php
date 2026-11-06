@@ -156,6 +156,18 @@
                     </div>
                 @endif
 
+                @if (request()->filled('email'))
+                    <div class="mb-6 p-4 rounded-2xl bg-blue-50 border border-blue-200 text-sm text-blue-800 flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <strong class="font-semibold block mb-0.5">{{ statictranslations('Complete Your Account') }}</strong>
+                            {{ statictranslations('Finish creating your account to link your past guest orders and enjoy faster checkout.') }}
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Registration Form -->
                 <form class="space-y-4 @if (session('success')) hidden @endif" action="{{ route('register.store') }}" method="POST">
                     @csrf
@@ -166,7 +178,7 @@
                     <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Full Name') }}</label>
-                        <input type="text" name="name" id="name" value="{{ old('name', $prefilled['name'] ?? '') }}" required
+                        <input type="text" name="name" id="name" value="{{ old('name', $prefilled['name'] ?? request('name', '')) }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                             placeholder="{{ statictranslations('John Doe') }}">
                     </div>
@@ -174,7 +186,7 @@
                     <!-- Phone Number -->
                     <div>
                         <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone Number') }}</label>
-                        <input type="tel" name="phone" id="phone" value="{{ old('phone', $prefilled['phone'] ?? '') }}" required
+                        <input type="tel" name="phone" id="phone" value="{{ old('phone', $prefilled['phone'] ?? request('phone', '')) }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                             placeholder="{{ statictranslations('e.g. +212 612345678') }}">
                         <input type="hidden" name="country_code" id="country_code" value="" style="height: 53px !important;">
@@ -183,7 +195,7 @@
                     <!-- Email -->
                     <div>
                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address') }}</label>
-                        <input type="email" name="email" id="email" value="{{ old('email', $prefilled['email'] ?? '') }}" required
+                        <input type="email" name="email" id="email" value="{{ old('email', $prefilled['email'] ?? request('email', '')) }}" required
                             class="appearance-none block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                             placeholder="{{ statictranslations('you@example.com') }}">
                     </div>

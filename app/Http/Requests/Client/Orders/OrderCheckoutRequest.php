@@ -4,7 +4,10 @@ namespace App\Http\Requests\Client\Orders;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class OrderCheckoutRequest extends FormRequest
 {
@@ -59,7 +62,7 @@ class OrderCheckoutRequest extends FormRequest
             'zip' => ['nullable', 'regex:/^\d{1,10}$/'],
             'postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'country' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => Auth::check() ? ['nullable', 'string', 'max:20'] : ['required', 'string', 'max:20'],
 
             'shipping_address' => ['nullable', 'array'],
             'shipping_address.name' => ['required_with:shipping_address', 'string', 'max:255'],
@@ -97,7 +100,64 @@ class OrderCheckoutRequest extends FormRequest
             'cardNumber' => ['nullable', 'string', 'digits_between:12,19', 'required_if:payment_method,card', 'required_if:payment,card'],
             'expiry' => ['nullable', 'string', 'required_if:payment_method,card', 'required_if:payment,card'],
             'cvv' => ['nullable', 'string', 'digits_between:3,4', 'required_if:payment_method,card', 'required_if:payment,card'],
+
+            'g-recaptcha-response' => ['nullable', 'string'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            if (!Auth::check()) {
+                // 1. Mandatory Email OTP Verification Check
+                $submittedEmail = strtolower(trim((string) $this->input('email', '')));
+                $verifiedEmail  = (string) session('guest_email_verified', '');
+
+                if (empty($submittedEmail)) {
+                    $validator->errors()->add('email', statictranslations('Email address is required.'));
+                } elseif (empty($verifiedEmail) || $verifiedEmail !== $submittedEmail) {
+                    $validator->errors()->add('email', statictranslations('Please verify your email address with the verification code sent to your inbox before placing the order.'));
+                }
+
+                // 2. Mandatory CAPTCHA Verification Check (Google reCAPTCHA)
+                $secret = config('services.recaptcha.secret_key');
+                $token  = (string) $this->input('g-recaptcha-response', '');
+
+                if (!empty($secret)) {
+                    if (empty($token)) {
+                        $validator->errors()->add('recaptcha', statictranslations('Please complete the security CAPTCHA verification before proceeding.'));
+                    } elseif (!$this->verifyRecaptcha($token, $secret)) {
+                        $validator->errors()->add('recaptcha', statictranslations('Security CAPTCHA verification failed. Please try again.'));
+                    }
+                }
+            }
+        });
+    }
+
+    protected function verifyRecaptcha(string $token, string $secret): bool
+    {
+        try {
+            $response = Http::asForm()->timeout(5)->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret'   => $secret,
+                'response' => $token,
+                'remoteip' => $this->ip(),
+            ]);
+
+            $json = $response->json();
+            $success = (bool) ($json['success'] ?? false);
+            if (!$success) {
+                Log::warning('reCAPTCHA siteverify rejected token from Google', [
+                    'json' => $json,
+                    'token_preview' => substr($token, 0, 15) . '...',
+                    'ip' => $this->ip(),
+                ]);
+            }
+
+            return $success;
+        } catch (\Throwable $e) {
+            Log::error('reCAPTCHA verification request error: ' . $e->getMessage());
+            return app()->environment('local', 'testing');
+        }
     }
 
     // protected function prepareForValidation(): void

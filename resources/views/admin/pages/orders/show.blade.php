@@ -93,17 +93,27 @@
                                 <h6>Customer</h6>
                                 <table class="table table-borderless table-sm">
                                     <tr>
+                                        <th>Client Type</th>
+                                        <td>
+                                            @if (($order->client_type ?? 'registered') === 'guest' || (method_exists($order, 'isGuest') && $order->isGuest()))
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Guest</span>
+                                            @else
+                                                <span class="badge bg-info-subtle text-info border border-info-subtle">Registered</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th>Name</th>
-                                        <td>{{ $order->user->name ?? ($order->customer_name ?? ($order->user->email ?? 'N/A')) }}
+                                        <td>{{ $order->user->name ?? ($order->guestUser->name ?? ($order->customer_name ?? ($shipping['name'] ?? 'N/A'))) }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Email</th>
-                                        <td>{{ $order->user->email ?? ($order->customer_email ?? 'N/A') }}</td>
+                                        <td>{{ $order->email ?? ($order->user->email ?? ($order->guestUser->email ?? ($order->customer_email ?? 'N/A'))) }}</td>
                                     </tr>
                                     <tr>
                                         <th>Phone</th>
-                                        <td>{{ $order->phone_no ?? ($order->user->phone ?? ($order->customer_phone ?? ($shipping['phone'] ?? 'N/A'))) }}
+                                        <td>{{ $order->phone_no ?? ($order->guestUser->phone ?? ($order->user->phone ?? ($order->customer_phone ?? ($shipping['phone'] ?? 'N/A')))) }}
                                         </td>
                                     </tr>
                                 </table>

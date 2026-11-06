@@ -44,6 +44,7 @@
                         <tr>
                             <th>Order ID</th>
                             <th>Customer Name</th>
+                            <th>Client Type</th>
                             <th>Email</th>
                             <th>Amount</th>
                             <th>Date</th>

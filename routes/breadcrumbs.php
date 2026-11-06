@@ -321,6 +321,12 @@ Breadcrumbs::for('order-detail', function (BreadcrumbTrail $trail) {
     $trail->push(statictranslations('Order Detail'), route('order-detail', ['order' => $orderId]));
 });
 
+// Home > Guest Order Detail
+Breadcrumbs::for('guest.order-detail', function (BreadcrumbTrail $trail, $order = null) {
+    $trail->parent('home');
+    $trail->push(statictranslations('Order Detail'), url()->current());
+});
+
 // Home > All Brands
 Breadcrumbs::for('brands', function (BreadcrumbTrail $trail) {
     $trail->parent('home');

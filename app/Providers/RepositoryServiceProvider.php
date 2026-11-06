@@ -145,6 +145,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\Client\Interfaces\SearchRepositoryInterface::class, \App\Repositories\Client\Repositories\SearchRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\SubCategoryRepositoryInterface::class, \App\Repositories\Client\Repositories\SubCategoryRepository::class);
         $this->app->bind(\App\Repositories\Client\Interfaces\DealRepositoryInterface::class, \App\Repositories\Client\Repositories\DealRepository::class);
+        $this->app->bind(\App\Repositories\Client\Interfaces\GuestUserRepositoryInterface::class, \App\Repositories\Client\Repositories\GuestUserRepository::class);
     }
 
     /**

@@ -7,6 +7,7 @@ $(document).ready(function () {
             type: 'GET',
             data: function (d) {
                 d.status = $('#status').val() || '';
+                d.client_type = $('#client_type').val() || '';
                 d.payment_method = $('#payment_method').val() || '';
                 d.payment_status = $('#payment_status').val() || '';
                 d.start_date = $("input[name='start_date']").val() || '';
@@ -16,6 +17,7 @@ $(document).ready(function () {
         columns: [
             { data: 'order_number', name: 'order_number' },
             { data: 'customer_name', name: 'customer_name' },
+            { data: 'client_type', name: 'client_type' },
             { data: 'email', name: 'email' },
             { data: 'total', name: 'total' },
             { data: 'created_at', name: 'created_at' },

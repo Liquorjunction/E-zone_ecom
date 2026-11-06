@@ -10,6 +10,7 @@ use App\Http\Controllers\Client\ContactUsController;
 use App\Http\Controllers\Client\CompareController;
 use App\Http\Controllers\Client\DealController;
 use App\Http\Controllers\Client\FaqController;
+use App\Http\Controllers\Client\GuestAuthController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\InventoryController;
 use App\Http\Controllers\Client\NewsletterController;
@@ -166,6 +167,18 @@ Route::post('/inventory/transactions', [InventoryController::class, 'transaction
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
+// Orders & Checkout (Accessible to both guests and authenticated users)
+Route::get('/checkout', [OrderController::class, 'show'])->name('checkout');
+Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
+Route::get('/checkout/address-section', [OrderController::class, 'addressSection'])->name('checkout.address-section');
+Route::get('/guest/order/{order:order_number}', [OrderController::class, 'guestOrderDetail'])->name('guest.order-detail')->where('order', '.*')->middleware('signed');
+
+// Guest Checkout Security & Validation (OTP, Existing User Check, Inline Login)
+Route::post('/checkout/guest/send-otp', [GuestAuthController::class, 'sendOtp'])->name('checkout.guest.send-otp')->middleware('throttle:5,1');
+Route::post('/checkout/guest/verify-otp', [GuestAuthController::class, 'verifyOtp'])->name('checkout.guest.verify-otp')->middleware('throttle:10,1');
+Route::post('/checkout/check-existing-user', [GuestAuthController::class, 'checkExistingUser'])->name('checkout.check-existing-user')->middleware('throttle:15,1');
+Route::post('/checkout/inline-login', [GuestAuthController::class, 'inlineLogin'])->name('checkout.inline-login')->middleware('throttle:5,1');
+
 // Demo/Process Pages
 Route::view('/checkout-process', 'client.pages.checkout-process')->name('checkout-process');
 Route::view('/checkout-demo', 'client.pages.checkout')->name('checkout.demo');
@@ -236,9 +249,7 @@ Route::middleware('client.auth')->group(function () {
             Route::view('/rewards', 'client.pages.dashboard.rewards')->name('rewards');
         });
 
-        // Orders & Checkout
-        Route::get('/checkout', [OrderController::class, 'show'])->name('checkout');
-        Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.process');
+        // Orders & Invoices (Registered Users)
         Route::get('/order-detail', [OrderController::class, 'detail'])->name('order-detail');
         Route::get('/orders/invoice', [OrderController::class, 'invoice'])->name('client.orders.invoice');
         Route::get('/orders/invoice/download', [OrderController::class, 'downloadInvoice'])->name('client.orders.invoice.download');
@@ -250,7 +261,6 @@ Route::middleware('client.auth')->group(function () {
             return redirect()->route('client.orders.invoice.download');
         });
         Route::post('/client/orders/cancel', [OrderController::class, 'cancel']);
-        Route::get('/checkout/address-section', [OrderController::class, 'addressSection'])->name('checkout.address-section');
 
         // Reviews
         Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');

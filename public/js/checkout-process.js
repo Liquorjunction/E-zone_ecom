@@ -372,6 +372,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return document.getElementById('billingFields') || document.getElementById('billingAddressSection');
         }
 
+        if (field === 'recaptcha' || field === 'g-recaptcha-response') {
+            return document.getElementById('g-recaptcha-container');
+        }
+
         return null;
     }
 
@@ -553,29 +557,74 @@ document.addEventListener("DOMContentLoaded", function () {
                     hasErrors = true;
                 }
             } else {
-                // No billingAddressSelect in the DOM means the user has zero saved
-                // billing addresses. If they unchecked "same as shipping" there is
-                // nothing valid to use — block unconditionally and tell them to add
-                // one via the modal. Never rely on hidden-field values here because
-                // they may still hold stale shipping data from the initial copy.
-                var billingSection = document.getElementById("billingAddressSection");
-                var anchorEl = billingFields || billingSection;
-                if (anchorEl) {
-                    showValidationError(anchorEl, trans('Please add a billing address, or use the same as shipping'));
+                var manualBillingFirst = document.getElementById("billing_firstName");
+                if (manualBillingFirst && manualBillingFirst.type !== "hidden") {
+                    ["billing_firstName", "billing_lastName", "billing_address_line", "billing_city", "billing_country"].forEach(function (id) {
+                        var f = document.getElementById(id);
+                        if (f && !f.value.trim()) { showValidationError(f, trans('This field is required.')); hasErrors = true; }
+                    });
+                } else {
+                    // Auth user with no saved billing addresses
+                    var billingSection = document.getElementById("billingAddressSection");
+                    var anchorEl = billingFields || billingSection;
+                    if (anchorEl) {
+                        showValidationError(anchorEl, trans('Please add a billing address, or use the same as shipping'));
+                    }
+                    var addBillingBtn = document.getElementById("addBillingAddressBtnEmpty");
+                    if (addBillingBtn) {
+                        addBillingBtn.classList.add("ring-4", "ring-red-400", "scale-105");
+                        setTimeout(function() {
+                            addBillingBtn.classList.remove("ring-4", "ring-red-400", "scale-105");
+                        }, 2500);
+                    }
+                    hasErrors = true;
                 }
-                var addBillingBtn = document.getElementById("addBillingAddressBtnEmpty");
-                if (addBillingBtn) {
-                    addBillingBtn.classList.add("ring-4", "ring-red-400", "scale-105");
-                    setTimeout(function() {
-                        addBillingBtn.classList.remove("ring-4", "ring-red-400", "scale-105");
-                    }, 2500);
-                }
-                hasErrors = true;
             }
         }
 
         var paymentMethod = document.querySelector('input[name="payment_method"]:checked');
         if (!paymentMethod) { showToast(trans('Please select a payment method.'), "error"); hasErrors = true; }
+
+        if (!window.__isUserLoggedIn) {
+            // Check OTP verification
+            var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
+            var currentEmail  = (email ? email.value : "").toLowerCase().trim();
+
+            if (!verifiedEmail || verifiedEmail !== currentEmail) {
+                var emailContainer = document.getElementById("guest-email-otp-container") || email;
+                showValidationError(emailContainer, trans('Please verify your email address with the verification code before placing your order.'));
+                hasErrors = true;
+            }
+
+            // Check Google reCAPTCHA token
+            var recaptchaContainer = document.getElementById("g-recaptcha-container");
+            var siteKey = recaptchaContainer ? (recaptchaContainer.dataset.sitekey || window.__recaptchaSiteKey) : window.__recaptchaSiteKey;
+
+            var recaptchaToken = "";
+            if (window.grecaptcha && typeof window.grecaptcha.getResponse === "function") {
+                try {
+                    recaptchaToken = (window.__recaptchaWidgetId !== undefined && window.__recaptchaWidgetId !== null)
+                        ? window.grecaptcha.getResponse(window.__recaptchaWidgetId)
+                        : window.grecaptcha.getResponse();
+                } catch (e) {
+                    recaptchaToken = window.grecaptcha.getResponse();
+                }
+            }
+            if (!recaptchaToken) {
+                var recaptchaEl = document.querySelector('textarea[name="g-recaptcha-response"], input[name="g-recaptcha-response"]');
+                recaptchaToken = (recaptchaEl ? recaptchaEl.value : "").trim();
+            }
+
+            if (siteKey && !recaptchaToken) {
+                var recaptchaErr = document.getElementById("recaptcha-error-msg");
+                if (recaptchaErr) {
+                    recaptchaErr.textContent = trans('Please complete the security CAPTCHA verification.');
+                    recaptchaErr.classList.remove("hidden");
+                }
+                showValidationError(recaptchaContainer, trans('Please complete the security verification.'));
+                hasErrors = true;
+            }
+        }
 
         if (hasErrors) {
             var firstError = document.querySelector(".validation-error");
@@ -598,7 +647,7 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         Object.entries(map).forEach(function ([name, val]) {
-            var h = form.querySelector('input[type="hidden"][name="' + name + '"]');
+            var h = form.querySelector('[name="' + name + '"]');
             if (h) { h.value = val; h.setAttribute("value", val); }
         });
     }
@@ -637,11 +686,27 @@ document.addEventListener("DOMContentLoaded", function () {
         var routes     = window.__checkoutRoutes || {};
         var processUrl = routes.process || form.action;
 
+        var formData = new FormData(form);
+
+        // Ensure valid reCAPTCHA token is attached to formData
+        if (window.grecaptcha && typeof window.grecaptcha.getResponse === "function") {
+            try {
+                var token = (window.__recaptchaWidgetId !== undefined && window.__recaptchaWidgetId !== null)
+                    ? window.grecaptcha.getResponse(window.__recaptchaWidgetId)
+                    : window.grecaptcha.getResponse();
+                if (token) {
+                    formData.set("g-recaptcha-response", token);
+                }
+            } catch (e) {
+                console.warn("reCAPTCHA getResponse error:", e);
+            }
+        }
+
         try {
             var resp = await fetch(processUrl, {
                 method: "POST", credentials: "same-origin",
                 headers: { "X-CSRF-TOKEN": csrf, "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
-                body: new FormData(form),
+                body: formData,
             });
 
             if (resp.redirected && resp.url) {
@@ -664,6 +729,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 window.__checkoutSubmitting = false;
                 window.scrollTo({ top: 0, behavior: "smooth" });
+                initPostOrderModal();
             } else {
                 if (data.errors) {
                     renderValidationErrors(data.errors);
@@ -1048,12 +1114,376 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    //  PHASE 2: GUEST OTP & RECAPTCHA & SOW #11 EXISTING ACCOUNT
+    // ═══════════════════════════════════════════════════════════════
+    var otpTimerInterval = null;
+
+    window.onRecaptchaSuccess = function (token) {
+        var err = document.getElementById("recaptcha-error-msg");
+        if (err) err.classList.add("hidden");
+        var container = document.getElementById("g-recaptcha-container");
+        if (container) clearValidationErrorFor(container);
+    };
+
+    window.onRecaptchaExpired = function () {
+        var err = document.getElementById("recaptcha-error-msg");
+        if (err) {
+            err.textContent = trans('Security verification expired. Please tick the checkbox again.');
+            err.classList.remove("hidden");
+        }
+    };
+
+    window.onRecaptchaLoaded = function () {
+        initRecaptchaWidget();
+    };
+
+    function initRecaptchaWidget() {
+        var container = document.getElementById("g-recaptcha-container");
+        if (container && window.grecaptcha && typeof window.grecaptcha.render === "function") {
+            try {
+                if (container.dataset.rendered === "1") return;
+                var siteKey = container.dataset.sitekey || window.__recaptchaSiteKey;
+                if (!siteKey) return;
+
+                window.__recaptchaWidgetId = window.grecaptcha.render(container, {
+                    sitekey: siteKey,
+                    callback: window.onRecaptchaSuccess,
+                    "expired-callback": window.onRecaptchaExpired,
+                });
+                container.dataset.rendered = "1";
+            } catch (e) {
+                console.warn("reCAPTCHA render error", e);
+            }
+        }
+    }
+
+    function initGuestOtpVerification() {
+        var emailInput = document.getElementById("email");
+        var sendOtpBtn = document.getElementById("sendOtpBtn");
+        var verifyOtpBtn = document.getElementById("verifyOtpBtn");
+        var resendOtpBtn = document.getElementById("resendOtpBtn");
+        var otpCodeInput = document.getElementById("guest_otp_code");
+        var feedbackMsg = document.getElementById("otp-feedback-msg");
+
+        if (!emailInput) return;
+
+        // Reset verification state if email changes
+        emailInput.addEventListener("input", function () {
+            var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
+            var currentEmail = emailInput.value.toLowerCase().trim();
+            if (verifiedEmail && currentEmail !== verifiedEmail) {
+                window.__guestEmailVerified = "";
+                document.getElementById("otp-verified-badge")?.classList.add("hidden");
+                document.getElementById("otp-send-action")?.classList.remove("hidden");
+                document.getElementById("otp-send-action")?.classList.add("flex");
+                document.getElementById("otp-input-block")?.classList.add("hidden");
+            }
+        });
+
+        function startOtpCooldown(seconds) {
+            if (otpTimerInterval) clearInterval(otpTimerInterval);
+            var countdownEl = document.getElementById("resendOtpCountdown");
+            if (resendOtpBtn) resendOtpBtn.disabled = true;
+
+            var remaining = seconds;
+            if (countdownEl) countdownEl.textContent = trans('Resend in ') + remaining + 's';
+
+            otpTimerInterval = setInterval(function () {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(otpTimerInterval);
+                    if (resendOtpBtn) resendOtpBtn.disabled = false;
+                    if (countdownEl) countdownEl.textContent = trans('Resend Code');
+                } else {
+                    if (countdownEl) countdownEl.textContent = trans('Resend in ') + remaining + 's';
+                }
+            }, 1000);
+        }
+
+        async function handleSendOtp() {
+            var emailVal = emailInput.value.trim();
+            if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+                showValidationError(emailInput, trans('Please enter a valid email address first.'));
+                emailInput.focus();
+                return;
+            }
+
+            if (sendOtpBtn) {
+                sendOtpBtn.disabled = true;
+                sendOtpBtn.textContent = trans('Sending...');
+            }
+            if (feedbackMsg) feedbackMsg.classList.add("hidden");
+
+            try {
+                var resp = await fetch(window.__checkoutRoutes.sendOtp, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify({ email: emailVal }),
+                });
+
+                var data = await resp.json();
+
+                if (resp.ok && data.success) {
+                    showToast(data.message || trans('Verification code sent to your email.'), "success");
+                    document.getElementById("otp-send-action")?.classList.add("hidden");
+                    document.getElementById("otp-send-action")?.classList.remove("flex");
+                    document.getElementById("otp-input-block")?.classList.remove("hidden");
+                    if (otpCodeInput) {
+                        otpCodeInput.value = "";
+                        otpCodeInput.focus();
+                    }
+                    startOtpCooldown(data.cooldown || 60);
+                } else if (resp.status === 429) {
+                    showToast(data.message || trans('Please wait before requesting another code.'), "error");
+                    document.getElementById("otp-send-action")?.classList.add("hidden");
+                    document.getElementById("otp-send-action")?.classList.remove("flex");
+                    document.getElementById("otp-input-block")?.classList.remove("hidden");
+                    startOtpCooldown(data.cooldown || 60);
+                } else {
+                    showToast(data.message || trans('Failed to send verification code.'), "error");
+                }
+            } catch (err) {
+                console.error("sendOtp error", err);
+                showToast(trans('Failed to send verification code. Please check your connection.'), "error");
+            } finally {
+                if (sendOtpBtn) {
+                    sendOtpBtn.disabled = false;
+                    sendOtpBtn.innerHTML = '<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>' + trans('Verify Email');
+                }
+            }
+        }
+
+        async function handleVerifyOtp() {
+            var emailVal = emailInput.value.trim();
+            var codeVal  = (otpCodeInput ? otpCodeInput.value : "").trim();
+
+            if (!codeVal || codeVal.length !== 6) {
+                if (feedbackMsg) {
+                    feedbackMsg.textContent = trans('Please enter the 6-digit code.');
+                    feedbackMsg.className = "text-xs font-medium mt-2 text-red-500";
+                    feedbackMsg.classList.remove("hidden");
+                }
+                otpCodeInput?.focus();
+                return;
+            }
+
+            if (verifyOtpBtn) {
+                verifyOtpBtn.disabled = true;
+                verifyOtpBtn.textContent = trans('Verifying...');
+            }
+            if (feedbackMsg) feedbackMsg.classList.add("hidden");
+
+            try {
+                var resp = await fetch(window.__checkoutRoutes.verifyOtp, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify({ email: emailVal, otp: codeVal }),
+                });
+
+                var data = await resp.json();
+
+                if (resp.ok && data.success) {
+                    window.__guestEmailVerified = (data.verified_email || emailVal).toLowerCase().trim();
+                    showToast(data.message || trans('Email verified successfully.'), "success");
+                    document.getElementById("otp-input-block")?.classList.add("hidden");
+                    document.getElementById("otp-send-action")?.classList.add("hidden");
+                    document.getElementById("otp-verified-badge")?.classList.remove("hidden");
+                    document.getElementById("otp-verified-badge")?.classList.add("flex");
+                } else {
+                    if (feedbackMsg) {
+                        feedbackMsg.textContent = data.message || trans('Invalid code.');
+                        feedbackMsg.className = "text-xs font-medium mt-2 text-red-500";
+                        feedbackMsg.classList.remove("hidden");
+                    }
+                    if (data.locked) {
+                        if (resendOtpBtn) resendOtpBtn.disabled = false;
+                    }
+                }
+            } catch (err) {
+                console.error("verifyOtp error", err);
+                if (feedbackMsg) {
+                    feedbackMsg.textContent = trans('Verification failed. Please check your connection.');
+                    feedbackMsg.className = "text-xs font-medium mt-2 text-red-500";
+                    feedbackMsg.classList.remove("hidden");
+                }
+            } finally {
+                if (verifyOtpBtn) {
+                    verifyOtpBtn.disabled = false;
+                    verifyOtpBtn.textContent = trans('Verify Code');
+                }
+            }
+        }
+
+        sendOtpBtn?.addEventListener("click", handleSendOtp);
+        resendOtpBtn?.addEventListener("click", handleSendOtp);
+        verifyOtpBtn?.addEventListener("click", handleVerifyOtp);
+    }
+
+    function initExistingAccountCheck() {
+        if (window.__isUserLoggedIn) return;
+
+        var emailInput = document.getElementById("email");
+        var phoneInput = document.getElementById("phone");
+        var modal      = document.getElementById("existingAccountModal");
+        var closeBtn   = document.getElementById("closeExistingAccountModal");
+        var guestBtn   = document.getElementById("continueAsGuestModalBtn");
+        var loginBtn   = document.getElementById("inlineLoginActionBtn");
+        var pwdGroup   = document.getElementById("inlinePasswordGroup");
+        var pwdInput   = document.getElementById("inlineLoginPassword");
+        var loginErr   = document.getElementById("inlineLoginError");
+
+        var hasPrompted = false;
+
+        async function checkCustomer(emailVal, phoneVal) {
+            if (hasPrompted || !window.__checkoutRoutes?.checkExistingUser) return;
+            if (!emailVal && !phoneVal) return;
+
+            try {
+                var resp = await fetch(window.__checkoutRoutes.checkExistingUser, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify({ email: emailVal || null, phone: phoneVal || null }),
+                });
+
+                var data = await resp.json();
+                if (data.exists && modal) {
+                    hasPrompted = true;
+                    var msgEl = document.getElementById("existingAccountMessage");
+                    if (msgEl && data.message) msgEl.textContent = data.message;
+                    modal.classList.remove("hidden");
+                }
+            } catch (e) {
+                console.warn("checkExistingUser error", e);
+            }
+        }
+
+        emailInput?.addEventListener("blur", function () {
+            var val = emailInput.value.trim();
+            if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                checkCustomer(val, null);
+            }
+        });
+
+        phoneInput?.addEventListener("blur", function () {
+            var val = phoneInput.value.trim();
+            if (val && val.length >= 8) {
+                checkCustomer(null, val);
+            }
+        });
+
+        function closeModal() {
+            if (modal) modal.classList.add("hidden");
+            if (pwdGroup) pwdGroup.classList.add("hidden");
+            if (pwdInput) pwdInput.value = "";
+            if (loginErr) loginErr.classList.add("hidden");
+            if (loginBtn) loginBtn.textContent = trans('Log In to Account');
+        }
+
+        closeBtn?.addEventListener("click", closeModal);
+        guestBtn?.addEventListener("click", closeModal);
+
+        loginBtn?.addEventListener("click", async function (e) {
+            e.preventDefault();
+            if (pwdGroup && pwdGroup.classList.contains("hidden")) {
+                pwdGroup.classList.remove("hidden");
+                pwdInput?.focus();
+                loginBtn.textContent = trans('Sign In');
+                return;
+            }
+
+            var emailVal = (emailInput ? emailInput.value : "").trim();
+            var pwdVal   = (pwdInput ? pwdInput.value : "").trim();
+
+            if (!pwdVal) {
+                if (loginErr) {
+                    loginErr.textContent = trans('Password is required.');
+                    loginErr.classList.remove("hidden");
+                }
+                pwdInput?.focus();
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = trans('Signing in...');
+            if (loginErr) loginErr.classList.add("hidden");
+
+            try {
+                var resp = await fetch(window.__checkoutRoutes.inlineLogin, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify({ email: emailVal, password: pwdVal }),
+                });
+
+                var data = await resp.json();
+
+                if (resp.ok && data.success) {
+                    showToast(data.message || trans('Logged in successfully.'), "success");
+                    window.location.href = data.redirect || window.location.href;
+                } else {
+                    if (loginErr) {
+                        loginErr.textContent = data.message || trans('Your email or password is invalid.');
+                        loginErr.classList.remove("hidden");
+                    }
+                }
+            } catch (err) {
+                console.error("inlineLogin error", err);
+                if (loginErr) {
+                    loginErr.textContent = trans('Login failed. Please check your connection.');
+                    loginErr.classList.remove("hidden");
+                }
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = trans('Sign In');
+            }
+        });
+    }
+
+    function initPostOrderModal() {
+        var modal = document.getElementById("postOrderRegisterModal");
+        if (!modal) return;
+
+        var closeBtn   = document.getElementById("closePostOrderRegisterModal");
+        var dismissBtn = document.getElementById("dismissPostOrderModalBtn");
+
+        function closeModal() {
+            modal.classList.add("hidden");
+        }
+
+        closeBtn?.addEventListener("click", closeModal);
+        dismissBtn?.addEventListener("click", closeModal);
+
+        setTimeout(function () {
+            modal.classList.remove("hidden");
+        }, 700);
+    }
+
     function runStepInits() {
         initShippingAddressSelect();
         initBillingAddressSelect();
         initBillingToggle();
         initPaymentMethodToggle();
         syncCardDetailsVisibility();
+        initGuestOtpVerification();
+        initExistingAccountCheck();
+        initRecaptchaWidget();
+        initPostOrderModal();
     }
 
     // --- Click Listeners (Injected Max Stock) ---

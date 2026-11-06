@@ -1,6 +1,7 @@
 @php
     $step = $step ?? 1;
     $cart = $cart ?? null;
+    $order = $order ?? null;
     $itemCount = $cart ? $cart->items->sum('quantity') : 0;
     $sym = config('app.CURRENCY_SYMBOL', '$');
     $appliedCoupon = $appliedCoupon ?? null;
@@ -91,30 +92,46 @@
                 @if ($isProceedDisabled)
                     <button type="button" id="proceedToCheckoutBtn" disabled
                         class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg transition-all duration-300 mt-2 opacity-60 cursor-not-allowed pointer-events-none">
-                        {{ statictranslations('Proceed to Checkout') }}
-                        <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </button>
-                @elseif ($isUserLoggedIn)
-                    <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
-                        class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
-                        {{ statictranslations('Proceed to Checkout') }}
+                        {{ !Auth::check() ? statictranslations('Proceed as Guest') : statictranslations('Proceed to Checkout') }}
                         <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </button>
                 @else
-                    <a href="{{ route('checkout', ['step' => 2]) }}"
-                        class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
-                        {{ statictranslations('Proceed to Checkout') }}
-                        <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </a>
+                    @if (!Auth::check())
+                        {{-- Guest customer: Proceed as Guest + Log In option --}}
+                        <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
+                            class="block w-full px-6 py-4 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                            <span>{{ statictranslations('Proceed as Guest') }}</span>
+                            <svg class="w-5 h-5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </button>
+                        <div class="relative my-3">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div class="relative flex justify-center text-xs">
+                                <span class="px-2.5 bg-white text-gray-500 font-medium">{{ statictranslations('Or') }}</span>
+                            </div>
+                        </div>
+                        <a href="{{ route('login', ['checkout' => 1]) }}"
+                            class="block w-full px-6 py-3.5 border-2 border-primary text-primary hover:bg-primary hover:text-white text-center font-bold rounded-2xl shadow-xs transition-all duration-300 text-sm">
+                            {{ statictranslations('Log In to Account') }}
+                        </a>
+                    @else
+                        {{-- Registered customer --}}
+                        <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
+                            class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
+                            {{ statictranslations('Proceed to Checkout') }}
+                            <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </button>
+                    @endif
                 @endif
                 <p id="checkout-stock-block-message" data-stock-block="{{ $hasBlockingStockIssue ? '1' : '0' }}"
                     class="mt-3 text-sm font-medium text-red-600 {{ $isProceedDisabled ? '' : 'hidden' }}">
@@ -153,6 +170,33 @@
         {{-- Left – Forms --}}
         <div class="lg:col-span-2 space-y-6">
 
+            @if (!Auth::check())
+                <div class="bg-blue-50/80 border border-blue-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-blue-700">{{ statictranslations('Guest Checkout') }}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">{{ statictranslations('No password required') }}</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-0.5">
+                                {{ statictranslations('Already have an account?') }}
+                                <a href="{{ route('login', ['checkout' => 1]) }}" class="font-bold text-primary hover:underline ml-1">
+                                    {{ statictranslations('Log in to continue') }} &rarr;
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white border border-blue-200 text-blue-700 shadow-2xs self-start sm:self-auto">
+                        {{ statictranslations('Proceeding as Guest') }}
+                    </span>
+                </div>
+            @endif
+
             {{-- Contact Information --}}
             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -164,9 +208,51 @@
                         <label for="email"
                             class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address *') }}</label>
                         <input type="email" id="email" name="email"
-                            value="{{ Auth::check() ? Auth::user()->email : '' }}" required
+                            value="{{ Auth::check() ? Auth::user()->email : (session('guest_email_verified') ?? '') }}" required
                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
+
+                        @if (!Auth::check())
+                            <div id="guest-email-otp-container" class="mt-2">
+                                {{-- Initial state: button to send code --}}
+                                <div id="otp-send-action" class="{{ session('guest_email_verified') ? 'hidden' : 'flex' }} items-center gap-2 mt-2">
+                                    <button type="button" id="sendOtpBtn"
+                                        class="px-3.5 py-2 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        <span>{{ statictranslations('Verify Email') }}</span>
+                                    </button>
+                                    <span class="text-xs text-gray-500">{{ statictranslations('Verification code required for guests') }}</span>
+                                </div>
+
+                                {{-- OTP Input block (revealed after send) --}}
+                                <div id="otp-input-block" class="hidden mt-3 p-4 bg-blue-50/60 border border-blue-200 rounded-2xl">
+                                    <p class="text-xs font-medium text-gray-700 mb-2">
+                                        {{ statictranslations('Enter the 6-digit code sent to your email:') }}
+                                    </p>
+                                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                        <input type="text" id="guest_otp_code" maxlength="6" pattern="\d{6}" placeholder="123456"
+                                            class="w-32 px-3 py-2 text-center tracking-widest text-base font-bold bg-white border-2 border-gray-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20">
+                                        <button type="button" id="verifyOtpBtn"
+                                            class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-sm">
+                                            {{ statictranslations('Verify Code') }}
+                                        </button>
+                                        <button type="button" id="resendOtpBtn" disabled
+                                            class="px-3 py-2 text-xs text-gray-500 font-medium hover:text-gray-700 disabled:opacity-50 transition-colors">
+                                            <span id="resendOtpCountdown">{{ statictranslations('Resend in 60s') }}</span>
+                                        </button>
+                                    </div>
+                                    <p id="otp-feedback-msg" class="text-xs font-medium mt-2 hidden"></p>
+                                </div>
+
+                                {{-- Verified badge --}}
+                                <div id="otp-verified-badge" class="{{ session('guest_email_verified') ? 'flex' : 'hidden' }} items-center text-green-600 text-xs font-semibold mt-2 bg-green-50 px-3 py-2 rounded-xl border border-green-200">
+                                    <svg class="w-4 h-4 mr-1.5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>{{ statictranslations('Email verified successfully') }}</span>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                     <div>
                         <label for="phone"
@@ -201,7 +287,7 @@
                     <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                         <input type="radio" name="payment_method" value="card"
                             class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
-                        <span class="ml-4 font-semibold text-gray-900">NAPS</span>
+                        <span class="ml-4 font-semibold text-gray-900">{{ statictranslations('Carte bancaire') }}</span>
                     </label>
                     <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                         <input type="radio" name="payment_method" value="cod"
@@ -266,6 +352,14 @@
                     'totals' => $totals,
                     'idPrefix' => '-step2',
                 ])
+
+                @if (!Auth::check())
+                    <div class="mb-5 flex flex-col items-center">
+                        <div id="g-recaptcha-container" class="g-recaptcha"
+                            data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                        <span id="recaptcha-error-msg" class="text-xs text-red-500 mt-1.5 hidden font-medium text-center"></span>
+                    </div>
+                @endif
 
                 <button type="button" id="placeOrderBtn"
                     class="w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
@@ -406,12 +500,56 @@
                             class="flex-1 px-8 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                             {{ statictranslations('Continue Shopping') }}
                         </a>
-                        <a href="{{ route('order-detail', ['order' => $order->id]) }}"
+                        @php
+                            $orderDetailUrl = $order->isGuest()
+                                ? \Illuminate\Support\Facades\URL::signedRoute('guest.order-detail', ['order' => $order->order_number])
+                                : route('order-detail', ['order' => $order->id]);
+                        @endphp
+                        <a href="{{ $orderDetailUrl }}"
                             class="flex-1 px-8 py-5 border-2 border-primary text-primary text-center font-bold rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105">
                             {{ statictranslations('View Order Details') }}
                         </a>
                     </div>
                 </div>
+
+                {{-- SOW #5: Post-Order Registration Prompt Card --}}
+                @if ($order && ($order->isGuest() || !Auth::check()))
+                    @php
+                        $shippingData = is_array($order->shipping_address) ? $order->shipping_address : json_decode($order->shipping_address, true);
+                        $prefillName = $order->guestUser?->name ?? ($shippingData['name'] ?? '');
+                        $prefillEmail = $order->email ?? ($order->guestUser?->email ?? '');
+                        $prefillPhone = $order->phone_no ?? ($order->guestUser?->phone ?? ($shippingData['phone'] ?? ''));
+                        $registerUrl = route('register', array_filter([
+                            'email' => $prefillEmail,
+                            'name'  => $prefillName,
+                            'phone' => $prefillPhone,
+                        ]));
+                    @endphp
+                    <div class="bg-linear-to-br from-primary/5 via-blue-50/40 to-white rounded-3xl shadow-lg border-2 border-primary/20 p-8 text-left">
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                            <div class="space-y-2">
+                                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    {{ statictranslations('Create an Account') }}
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900">{{ statictranslations('Track Your Order & Save Time Next Time') }}</h3>
+                                <p class="text-sm text-gray-600 max-w-xl leading-relaxed">
+                                    {{ statictranslations('Register an account with') }} <strong class="text-gray-900">{{ $prefillEmail }}</strong>. {{ statictranslations('Once your email is verified, this order and any past guest orders will be automatically linked to your account.') }}
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-xs text-gray-600 font-medium">
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Live order tracking') }}</div>
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Saved delivery addresses') }}</div>
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Exclusive member promotions') }}</div>
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Faster 1-click checkout') }}</div>
+                                </div>
+                            </div>
+                            <a href="{{ $registerUrl }}"
+                                class="shrink-0 w-full md:w-auto px-6 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all transform hover:scale-105 text-center">
+                                {{ statictranslations('Create Account') }} &rarr;
+                            </a>
+                        </div>
+                    </div>
+                @endif
 
                 @if ($order->shipping_address)
                     @php
@@ -514,4 +652,104 @@
             </div>
         </div>
     @endif
+@endif
+
+{{-- SOW #11: Existing Account Detected Modal --}}
+<div id="existingAccountModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative">
+        <button type="button" id="closeExistingAccountModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ statictranslations('Account Already Registered') }}</h3>
+            <p class="text-sm text-gray-600 leading-relaxed" id="existingAccountMessage">
+                {{ statictranslations('This email address or mobile number is already registered. Please log in using your existing account to continue.') }}
+            </p>
+        </div>
+
+        {{-- Inline Login / Continue as Guest Form --}}
+        <form id="inlineLoginForm" class="space-y-4">
+            <div id="inlinePasswordGroup" class="hidden space-y-2">
+                <label for="inlineLoginPassword" class="block text-xs font-semibold text-gray-700">{{ statictranslations('Password') }} *</label>
+                <input type="password" id="inlineLoginPassword" placeholder="••••••••"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm">
+                <p id="inlineLoginError" class="text-xs text-red-500 hidden"></p>
+            </div>
+
+            <div class="space-y-3 pt-2">
+                <button type="button" id="inlineLoginActionBtn"
+                    class="w-full py-3.5 bg-primary text-white font-semibold text-sm rounded-xl hover:bg-primary/90 transition-all shadow-md">
+                    {{ statictranslations('Log In to Account') }}
+                </button>
+                <button type="button" id="continueAsGuestModalBtn"
+                    class="w-full py-3 bg-gray-100 text-gray-700 font-semibold text-sm rounded-xl hover:bg-gray-200 transition-colors">
+                    {{ statictranslations('Continue as Guest') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- SOW #5: Post-Order Registration Prompt Modal --}}
+@if (!empty($order) && ($order->isGuest() || !Auth::check()))
+    @php
+        $shippingData = is_array($order->shipping_address) ? $order->shipping_address : json_decode($order->shipping_address, true);
+        $prefillName = $order->guestUser?->name ?? ($shippingData['name'] ?? '');
+        $prefillEmail = $order->email ?? ($order->guestUser?->email ?? '');
+        $prefillPhone = $order->phone_no ?? ($order->guestUser?->phone ?? ($shippingData['phone'] ?? ''));
+        $registerModalUrl = route('register', array_filter([
+            'email' => $prefillEmail,
+            'name'  => $prefillName,
+            'phone' => $prefillPhone,
+        ]));
+    @endphp
+    <div id="postOrderRegisterModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative">
+            <button type="button" id="closePostOrderRegisterModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors" aria-label="{{ statictranslations('Close') }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ statictranslations('Order Confirmed!') }}</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    {{ statictranslations('Create your account now to track your order live, manage delivery addresses, and enjoy faster future checkout.') }}
+                </p>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-200/60 space-y-3">
+                <div class="flex items-center text-xs text-gray-700">
+                    <svg class="w-4 h-4 text-green-500 mr-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>{{ statictranslations('Auto-link past and current orders after email verification') }}</span>
+                </div>
+                <div class="flex items-center text-xs text-gray-700">
+                    <svg class="w-4 h-4 text-green-500 mr-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>{{ statictranslations('Real-time order tracking in your account') }}</span>
+                </div>
+                <div class="flex items-center text-xs text-gray-700">
+                    <svg class="w-4 h-4 text-green-500 mr-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>{{ statictranslations('Saved addresses for quick 1-click ordering') }}</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <a href="{{ $registerModalUrl }}"
+                    class="w-full py-3.5 bg-primary text-white font-bold text-sm text-center block rounded-xl hover:bg-primary/90 transition-all shadow-md">
+                    {{ statictranslations('Create Account') }}
+                </a>
+                <button type="button" id="dismissPostOrderModalBtn"
+                    class="w-full py-3 bg-gray-100 text-gray-700 font-semibold text-sm text-center rounded-xl hover:bg-gray-200 transition-colors">
+                    {{ statictranslations('Continue Shopping') }}
+                </button>
+            </div>
+        </div>
+    </div>
 @endif

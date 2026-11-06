@@ -190,11 +190,14 @@ class CartController extends Controller
         $cart   = $cartService->getCart($cartId);
         $logger->info('Showing cart', ['cart_id' => $cart->id ?? null]);
 
+        if (!Auth::check()) {
+            $sessionCoupon->remove();
+        }
         $totals           = $cart ? $priceService->calculate($cart) : $this->emptyTotals();
         $addresses        = Auth::check() ? $addressRepo->getAddressesByUserId(Auth::id()) : collect();
         $billingAddresses = collect();
         $cities           = $addressRepo->getActiveCities() ?: collect();
-        $appliedCoupon    = $cart ? $sessionCoupon->getForCart($cart->id) : null;
+        $appliedCoupon    = (Auth::check() && $cart) ? $sessionCoupon->getForCart($cart->id) : null;
 
         $itemsForView = $cart ? $cart->items : collect();
         $ga4Ecommerce = Ga4Ecommerce::cartPayload($cart, $totals);
@@ -397,6 +400,13 @@ class CartController extends Controller
         LoggerInterface $logger,
         PriceCalculatorService $priceService
     ) {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => statictranslations('Coupon codes are exclusive to registered members. Please log in to apply coupons.'),
+            ]);
+        }
+
         $cartId = CartIdentifier::fromRequest($request);
         $cart   = $cartService->getCart($cartId);
 
@@ -439,6 +449,13 @@ class CartController extends Controller
         LoggerInterface $logger,
         PriceCalculatorService $priceService
     ) {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => statictranslations('Coupon codes are exclusive to registered members. Please log in to apply coupons.'),
+            ]);
+        }
+
         $cartId = CartIdentifier::fromRequest($request);
         $cart   = $cartService->getCart($cartId);
 

@@ -589,7 +589,7 @@
                         @endphp
 
                         <div class="text-sm text-gray-700 space-y-1">
-                            <p class="font-semibold text-gray-900">{{ $addr['name'] ?? ($order->user->name ?? '—') }}</p>
+                            <p class="font-semibold text-gray-900">{{ $addr['name'] ?? ($order->user?->name ?? ($order->guestUser?->name ?? '—')) }}</p>
                             @if (!empty($addr['street']))
                                 <p>{{ $addr['street'] }}</p>
                             @endif

@@ -9,7 +9,15 @@ class OrderShowRequest extends FormRequest
 {
     public function authorize()
     {
-        return Auth::check();
+        // Allow both guest customers and authenticated users to view checkout steps
+        return true;
+    }
+
+    protected function prepareForValidation()
+    {
+        if (!$this->has('step')) {
+            $this->merge(['step' => 1]);
+        }
     }
 
     public function rules(): array

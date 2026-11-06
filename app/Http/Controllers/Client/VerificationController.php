@@ -24,7 +24,15 @@ class VerificationController extends Controller
     {
         $request->fulfill();
 
-        return redirect()->route('home')->with('success', 'Your email has been verified!');
+        if ($request->user()) {
+            try {
+                app(\App\Repositories\Client\Interfaces\GuestUserRepositoryInterface::class)->linkGuestOrdersToUser($request->user());
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Error linking guest orders in VerificationController: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('home')->with('success', statictranslations('Your email has been verified!'));
     }
 
     // 3. Resend Verification Email

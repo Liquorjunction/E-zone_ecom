@@ -60,5 +60,21 @@ class ClientComposer
         $view->with('cartItemCount', $cartItemCount);
         $view->with('wishlistCount', $wishlistCount);
         $view->with('compareCount', $compareCount);
+
+        $returningGuest = false;
+        if (!Auth::check()) {
+            $guestToken = request()->cookie('ezone_guest');
+            if ($guestToken) {
+                try {
+                    $guestUser = \App\Models\GuestUser::where('token', $guestToken)->first();
+                    if ($guestUser && !$guestUser->isLinked()) {
+                        $returningGuest = true;
+                    }
+                } catch (\Throwable $e) {
+                    $returningGuest = false;
+                }
+            }
+        }
+        $view->with('returningGuest', $returningGuest);
     }
 }

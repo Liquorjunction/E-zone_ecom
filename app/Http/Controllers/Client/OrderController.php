@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\DTOs\CartIdentifier;
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Http\Requests\Client\Orders\OrderCheckoutRequest;
 use App\Http\Requests\Client\Orders\OrderShowRequest;
 use App\Http\Requests\Client\Orders\OrderCancelRequest;
@@ -16,6 +17,7 @@ use App\Services\PriceCalculatorService;
 use App\Support\Ga4Ecommerce;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface as AddressRepo;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface as OrderRepo;
@@ -77,21 +79,6 @@ class OrderController extends Controller
         $isBuyNowFlow = $request->boolean('buy_now');
         $request->session()->put('checkout_mode', $isBuyNowFlow ? 'buy_now' : 'normal');
 
-        if ($step === 2 && !Auth::check()) {
-            $loginUrl = route('login');
-
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success'  => false,
-                    'redirect' => $loginUrl,
-                    'message'  => statictranslations('Please login to continue checkout.'),
-                ], 401);
-            }
-
-            return redirect()->guest($loginUrl)
-                ->with('warning', statictranslations('Please login to continue checkout.'));
-        }
-
         if ($isBuyNowFlow) {
             $cart = $cartService->getActiveBuyNowCart();
         } else {
@@ -133,6 +120,9 @@ class OrderController extends Controller
             }
         }
 
+        if (!Auth::check()) {
+            $sessionCoupon->remove();
+        }
         $shippingMethod = $request->input('shipping_method', 'standard');
         if ($cart) {
             $totals = $priceCalculator->calculate($cart, $shippingMethod);
@@ -143,7 +133,7 @@ class OrderController extends Controller
         }
 
         $itemsForView = $cart ? $cart->items : ($order ? $order->items : collect());
-        $appliedCoupon = $cart ? $sessionCoupon->getForCart($cart->id) : null;
+        $appliedCoupon = (Auth::check() && $cart) ? $sessionCoupon->getForCart($cart->id) : null;
         $ga4Ecommerce = in_array($step, [1, 2], true)
             ? Ga4Ecommerce::cartPayload($cart, $totals)
             : null;
@@ -186,21 +176,6 @@ class OrderController extends Controller
         AddressRepo            $addressRepo,
         PriceCalculatorService $priceCalculator
     ) {
-        if (!Auth::check()) {
-            $loginUrl = route('login');
-
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success'  => false,
-                    'redirect' => $loginUrl,
-                    'message'  => statictranslations('Please login to place your order.'),
-                ], 401);
-            }
-
-            return redirect()->guest($loginUrl)
-                ->with('warning', statictranslations('Please login to place your order.'));
-        }
-
         $cartId = CartIdentifier::fromRequest($request);
         $checkoutMode = (string) $request->session()->get('checkout_mode', 'normal');
         $cart = $checkoutMode === 'buy_now'
@@ -215,14 +190,31 @@ class OrderController extends Controller
         }
 
         try {
+            $userEmail = Auth::check() ? Auth::user()?->email : ($request->input('email'));
             $order = $orderService->processCheckout(
                 $cart,
                 $request->validated(),
                 Auth::id(),
-                Auth::user()?->email
+                $userEmail
             );
 
-            Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id()]);
+            if ($order->isGuest() && $order->guestUser?->token) {
+                Cookie::queue(
+                    Cookie::make(
+                        'ezone_guest',
+                        $order->guestUser->token,
+                        60 * 24 * 60, // 60 days
+                        null,
+                        null,
+                        true, // secure
+                        true, // httpOnly
+                        false,
+                        'lax' // SameSite
+                    )
+                );
+            }
+
+            Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id(), 'client_type' => $order->client_type]);
             $request->session()->forget('checkout_mode');
 
             if ($checkoutMode === 'buy_now') {
@@ -250,13 +242,17 @@ class OrderController extends Controller
                     'cities', 'totals', 'orders'
                 ))->with('appliedCoupon', null)->render();
 
+                $orderDetailUrl = $order->isGuest()
+                    ? \Illuminate\Support\Facades\URL::signedRoute('guest.order-detail', ['order' => $order->order_number])
+                    : route('order-detail', ['order' => $order->id]);
+
                 return response()->json([
                     'success'          => true,
                     'step'             => 3,
                     'html'             => $html,
                     'order_id'         => $order->id,
                     'order_number'     => $order->order_number,
-                    'order_detail_url' => route('order-detail', ['order' => $order->id]),
+                    'order_detail_url' => $orderDetailUrl,
                     'ecommerce'        => Ga4Ecommerce::purchasePayload($order),
                 ]);
             }
@@ -312,22 +308,47 @@ class OrderController extends Controller
 
     public function addressSection(Request $request, AddressRepo $addressRepo)
     {
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $type   = $request->input('type', 'shipping'); // 'shipping' or 'billing'
         $cities = $addressRepo->getActiveCities() ?: collect();
 
+        $addresses        = collect();
+        $billingAddresses = collect();
+
+        if (Auth::check()) {
+            if ($type === 'billing') {
+                $billingAddresses = $addressRepo->getAddressesByType(Auth::id(), 'billing');
+            } else {
+                $addresses = $addressRepo->getAddressesByType(Auth::id(), 'shipping');
+            }
+        }
+
         if ($type === 'billing') {
-            $billingAddresses = $addressRepo->getAddressesByType(Auth::id(), 'billing');
             $html = view('client.pages.checkout.partials._billing-address-section', compact('billingAddresses','cities'))->render();
         } else {
-            $addresses = $addressRepo->getAddressesByType(Auth::id(), 'shipping');
             $html = view('client.pages.checkout.partials._shipping-address-section', compact('addresses','cities'))->render();
         }
 
         return response()->json(['success' => true, 'html' => $html, 'type' => $type]);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Guest order detail (Signed URL tracking for guests)
+    // ─────────────────────────────────────────────────────────────
+
+    public function guestOrderDetail(Order $order, \App\Services\OrderStatusService $orderStatusService)
+    {
+        // If order belongs to a registered customer and authenticated user doesn't match, handle gracefully
+        if ($order->isRegistered() && (!Auth::check() || Auth::id() !== $order->user_id)) {
+            if (!Auth::check()) {
+                return redirect()->route('login')->with('info', statictranslations('This order is linked to your registered account. Please log in to view details.'));
+            }
+            abort(403, 'Access denied.');
+        }
+
+        $order->loadMissing(['items.product', 'items.variant', 'shippingAddressRecord', 'billingAddressRecord', 'guestUser']);
+        $userReviews = [];
+
+        return view('client.pages.order-detail', compact('order', 'userReviews', 'orderStatusService'));
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -18,8 +18,14 @@ class MailTriggerService
             return false;
         }
 
+        $toEmail = $order->email ?? $order->user?->email;
+        if (empty($toEmail)) {
+            Log::warning("Cannot send {$newStatus} email for Order #{$order->order_number}: no recipient email found.");
+            return false;
+        }
+
         try {
-            Mail::to($order->user->email)->queue(
+            Mail::to($toEmail)->queue(
                 new OrderStatusMail($order->user, $order, $newStatus)
             );
             return true;

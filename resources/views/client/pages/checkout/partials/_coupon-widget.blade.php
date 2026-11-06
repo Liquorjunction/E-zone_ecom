@@ -18,7 +18,36 @@
         {{ statictranslations('Have a Coupon Code?') }}
     </h3>
 
-    @if ($appliedCoupon)
+    @if (!Auth::check())
+        {{-- Guest restriction: Coupons reserved for registered members --}}
+        <div class="bg-white/90 rounded-2xl p-4 border border-blue-200">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-bold text-gray-900">
+                        {{ statictranslations('Coupons are exclusive to registered members.') }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">
+                        {{ statictranslations('Log in or create an account to use promotional discounts.') }}
+                    </p>
+                    <div class="mt-3 flex items-center gap-3">
+                        <a href="{{ route('login', ['checkout' => 1]) }}"
+                            class="px-3.5 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors shadow-2xs">
+                            {{ statictranslations('Log In to Apply') }}
+                        </a>
+                        <a href="{{ route('register') }}"
+                            class="text-xs text-primary font-semibold hover:underline">
+                            {{ statictranslations('Create Account') }} &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @elseif ($appliedCoupon)
         {{-- Coupon already applied (from session) --}}
         <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display{{ $suffix }}">
             <div class="flex items-center justify-between">
@@ -43,6 +72,12 @@
         {{-- Coupon input form --}}
         <div class="flex gap-3" id="coupon-input-form{{ $suffix }}">
             <input type="text" id="coupon-code-input{{ $suffix }}"
+                name="coupon_code"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                value=""
                 placeholder="{{ statictranslations('Enter coupon code') }}"
                 class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
             <button type="button" id="apply-coupon-btn{{ $suffix }}"

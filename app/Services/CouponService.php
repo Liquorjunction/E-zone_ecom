@@ -28,6 +28,15 @@ class CouponService
 
     public function validateAndApplyCoupon(string $code, Cart $cart): array
     {
+        // Restriction: Guest users cannot use coupon codes
+        if (!Auth::check()) {
+            return [
+                'success' => false,
+                'message' => statictranslations('Coupon codes are exclusive to registered members. Please log in to apply coupons.'),
+                'discount' => null,
+            ];
+        }
+
         // Remove coupon if cart is empty
         if ($cart->items()->count() === 0) {
             $this->sessionCoupon->remove();
