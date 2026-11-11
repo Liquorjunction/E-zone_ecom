@@ -163,7 +163,7 @@
                         <input type="text" id="name" name="name" required readonly
                             value="{{ old('name', auth()->user()->name) }}"
                             class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
-                            placeholder="Enter your full name">
+                            placeholder="{{ statictranslations('Enter your full name') }}">
                     </div>
                     <div class="error-message text-xs text-red-600 mt-1.5 hidden" data-error-for="name"></div>
                 </div>

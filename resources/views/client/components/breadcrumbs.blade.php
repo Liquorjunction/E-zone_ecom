@@ -5,7 +5,7 @@
 
 <div class="mb-0">
     <nav class="flex text-sm" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <ol class="inline-flex items-center gap-1 md:gap-3">
             {{ Breadcrumbs::render() }}
         </ol>
     </nav>

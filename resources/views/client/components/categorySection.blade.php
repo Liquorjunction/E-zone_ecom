@@ -120,7 +120,7 @@
             {{-- Left Nav Button --}}
             <button @click="prev()" :disabled="!canGoPrev" :class="!canGoPrev ? 'opacity-30 cursor-not-allowed' : ''"
                 class="nav-btn hidden md:flex shrink-0 w-11 h-11 rounded-full border-2 border-gray-200 bg-white items-center justify-center shadow-sm transition-shadow hover:shadow-md">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-gray-600 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
@@ -128,7 +128,7 @@
             {{-- Slides --}}
             <div class="flex-1 overflow-hidden">
                 <div class="flex transition-transform duration-500 ease-in-out"
-                    :style="`transform: translateX(-${currentSlide * 100}%)`">
+                    :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                     @foreach ($categoryChunks as $categoryChunk)
                         @if ($categoryChunk->count() > 0)
                             <div class="w-full shrink-0">
@@ -180,7 +180,7 @@
             {{-- Right Nav Button --}}
             <button @click="next()" :disabled="!canGoNext" :class="!canGoNext ? 'opacity-30 cursor-not-allowed' : ''"
                 class="nav-btn hidden md:flex shrink-0 w-11 h-11 rounded-full border-2 border-gray-200 bg-white items-center justify-center shadow-sm transition-shadow hover:shadow-md">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-gray-600 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
@@ -193,7 +193,7 @@
             {{-- Mobile prev --}}
             <button @click="prev()" :disabled="!canGoPrev" :class="!canGoPrev ? 'opacity-30 cursor-not-allowed' : ''"
                 class="md:hidden nav-btn w-9 h-9 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center shadow-sm">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-gray-500 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
@@ -213,7 +213,7 @@
             {{-- Mobile next --}}
             <button @click="next()" :disabled="!canGoNext" :class="!canGoNext ? 'opacity-30 cursor-not-allowed' : ''"
                 class="md:hidden nav-btn w-9 h-9 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center shadow-sm">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-gray-500 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                 </svg>
             </button>

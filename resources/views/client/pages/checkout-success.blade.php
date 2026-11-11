@@ -112,7 +112,7 @@
               <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">2</div>
               <div>
                 <h4 class="font-semibold text-gray-900">{{ statictranslations('Shipping') }}</h4>
-                <p class="text-sm text-gray-600">{{ statictranslations('Your order will be shipped within 2-3 business days. You\'ll receive tracking information via email and SMS.') }}</p>
+                <p class="text-sm text-gray-600">{{ statictranslations("Your order will be shipped within 2-3 business days. You'll receive tracking information via email and SMS.") }}</p>
               </div>
             </div>
 
@@ -175,7 +175,7 @@
                 <img src="{{ $it->product->image_url ?? ($it->image ?? 'https://via.placeholder.com/80x80') }}" alt="{{ $it->product->name ?? ($it->name ?? 'Product') }}" class="w-20 h-20 object-cover rounded-lg">
                 <div class="flex-1">
                   <h3 class="font-semibold text-gray-900 text-sm mb-1">{{ $it->product->name ?? ($it->name ?? 'Product') }}</h3>
-                  <p class="text-xs text-gray-500 mb-2">Qty: {{ $it->quantity }}</p>
+                  <p class="text-xs text-gray-500 mb-2">{{ statictranslations('Qty:') }} {{ $it->quantity }}</p>
                   <p class="font-bold text-primary">{{ money_format_number(($it->unit_price ?? ($it->price ?? 0)) * $it->quantity) }}</p>
                 </div>
               </div>

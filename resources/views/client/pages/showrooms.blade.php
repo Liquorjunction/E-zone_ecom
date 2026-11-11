@@ -31,7 +31,7 @@
                     <div class="flex-1">
                         <div class="relative">
                             <input type="text" name="search" value="{{ request('search') }}"
-                                placeholder="Search by city, state, country, or zip code..."
+                                placeholder="{{ statictranslations('Search by city, state, country, or zip code...') }}"
                                 class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
                             <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@
                     <div class="lg:w-64">
                         <select name="country"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
-                            <option value="">Filter by Country</option>
+                            <option value="">{{ statictranslations('Filter by Country') }}</option>
                             @foreach ($countries as $country)
                                 <option value="{{ $country }}" @selected(request('country') === $country)>
                                     {{ $country }}
@@ -56,7 +56,7 @@
                     <div class="lg:w-40">
                         <button type="submit"
                             class="w-full px-6 py-3 bg-primary text-white font-bold rounded-xl transition-all duration-300 hover:bg-primary/90">
-                            Search
+                            {{ statictranslations('Search') }}
                         </button>
                     </div>
                 </div>
@@ -113,18 +113,18 @@
                         @if (!empty($showroom->slug))
                             <a href="{{ route('showrooms.show', $showroom->slug) }}"
                                 class="block w-full px-6 py-3 bg-primary/10 text-primary text-center font-bold rounded-xl transition-all duration-300 hover:bg-primary hover:text-white mt-6">
-                                View Details
+                                {{ statictranslations('View Details') }}
                             </a>
                         @else
                             <span
                                 class="block w-full px-6 py-3 bg-gray-100 text-gray-500 text-center font-bold rounded-xl mt-6">
-                                View Details
+                                {{ statictranslations('View Details') }}
                             </span>
                         @endif
                     </div>
                 @empty
                     <div class="col-span-full bg-white rounded-2xl border-2 border-gray-100 p-8 text-center text-gray-600">
-                        No showrooms found for the selected filters.
+                        {{ statictranslations('No showrooms found for the selected filters.') }}
                     </div>
                 @endforelse
 

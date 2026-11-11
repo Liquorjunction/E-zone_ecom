@@ -10,7 +10,7 @@
             class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         </div>
         @if ($productDiscountInfo['has_discount'] || $master->created_at > now()->subDays(30) || $isBestseller)
-            <div class="absolute top-3 left-3 flex flex-col gap-2 z-10">
+            <div class="absolute top-3 left-3 rtl:left-auto rtl:right-3 flex flex-col gap-2 z-10">
                 @if ($productDiscountInfo['has_discount'])
                     <span
                         class="inline-flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
@@ -53,7 +53,7 @@
 
         <button type="button" aria-label="{{ statictranslations('Add to wishlist') }}" data-product-variant-id="{{ $variantId }}"
             data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}" data-toast-ignore
-            class="wishlist-btn no-toast absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none {{ $isWishlisted ? 'opacity-100 is-wishlisted' : 'opacity-0 group-hover:opacity-100' }}"
+            class="wishlist-btn no-toast absolute top-3 right-3 rtl:right-auto rtl:left-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 z-10 focus:outline-none {{ $isWishlisted ? 'opacity-100 is-wishlisted' : 'opacity-0 group-hover:opacity-100' }}"
             @if (!$variantId) disabled @endif>
             @if ($isWishlisted)
                 <svg class="w-5 h-5 text-red-500 drop-shadow-sm transition-all duration-200" fill="currentColor"

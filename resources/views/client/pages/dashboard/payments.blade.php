@@ -59,9 +59,9 @@
         <p class="text-sm lg:text-base">{{ statictranslations('Expires:') }} <span class="font-medium">08/2026</span></p>
       </div>
       <div class="flex items-center gap-2 mt-4 lg:mt-6 pt-4 lg:pt-6 border-t-2 border-gray-100">
-        <button class="text-sm font-semibold text-primary hover:opacity-80 transition-opacity">Edit</button>
+        <button class="text-sm font-semibold text-primary hover:opacity-80 transition-opacity">{{ statictranslations('Edit') }}</button>
         <span class="text-gray-300">|</span>
-        <button class="text-sm font-semibold text-red-500 hover:opacity-80 transition-opacity">Delete</button>
+        <button class="text-sm font-semibold text-red-500 hover:opacity-80 transition-opacity">{{ statictranslations('Delete') }}</button>
       </div>
     </div>
 
@@ -70,7 +70,7 @@
       <svg class="w-12 h-12 lg:w-16 lg:h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
-      <span class="font-semibold mt-2 text-sm lg:text-base">Add New Payment Method</span>
+      <span class="font-semibold mt-2 text-sm lg:text-base">{{ statictranslations('Add New Payment Method') }}</span>
     </a>
   </div>
 @endsection

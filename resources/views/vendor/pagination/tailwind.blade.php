@@ -25,7 +25,7 @@
                 <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200
                              bg-gray-50 text-gray-300 cursor-not-allowed select-none"
                       aria-disabled="true">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </span>
@@ -35,7 +35,7 @@
                    class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200
                           bg-white text-gray-500 hover:bg-primary hover:text-white hover:border-primary
                           transition-all duration-150 shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </a>
@@ -84,7 +84,7 @@
                    class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200
                           bg-white text-gray-500 hover:bg-primary hover:text-white hover:border-primary
                           transition-all duration-150 shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
@@ -92,7 +92,7 @@
                 <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200
                              bg-gray-50 text-gray-300 cursor-not-allowed select-none"
                       aria-disabled="true">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>
                 </span>

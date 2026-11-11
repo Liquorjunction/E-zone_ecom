@@ -109,8 +109,14 @@ class OrderCheckoutRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             if (!Auth::check()) {
-                // 1. Mandatory Email OTP Verification Check
                 $submittedEmail = strtolower(trim((string) $this->input('email', '')));
+
+                // 1. Block registered users from creating guest orders
+                if (!empty($submittedEmail) && \App\Models\User::where('email', $submittedEmail)->exists()) {
+                    $validator->errors()->add('email', statictranslations('You are already registered. Please log in to your account to place an order.'));
+                }
+
+                // 2. Mandatory Email OTP Verification Check
                 $verifiedEmail  = (string) session('guest_email_verified', '');
 
                 if (empty($submittedEmail)) {
@@ -132,6 +138,25 @@ class OrderCheckoutRequest extends FormRequest
                 }
             }
         });
+    }
+
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        if ($this->expectsJson()) {
+            $submittedEmail = strtolower(trim((string) $this->input('email', '')));
+            $isRegistered = !Auth::check() && !empty($submittedEmail) && \App\Models\User::where('email', $submittedEmail)->exists();
+
+            $response = response()->json([
+                'success'       => false,
+                'is_registered' => $isRegistered,
+                'message'       => $validator->errors()->first(),
+                'errors'        => $validator->errors(),
+            ], 422);
+
+            throw new \Illuminate\Validation\ValidationException($validator, $response);
+        }
+
+        parent::failedValidation($validator);
     }
 
     protected function verifyRecaptcha(string $token, string $secret): bool

@@ -521,7 +521,7 @@
                                                 </div>
                                                 @if ($variant->is_bestseller)
                                                     <span
-                                                        class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-bold border border-amber-200 shrink-0">BEST</span>
+                                                        class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-bold border border-amber-200 shrink-0">{{ statictranslations('BEST') }}</span>
                                                 @endif
                                             </div>
                                             <div class="flex items-center justify-between gap-2">
@@ -584,7 +584,7 @@
                                     class="flex items-center border-2 border-gray-200 hover:border-primary/40 rounded-xl w-fit bg-white transition-colors shadow-sm">
                                     <button type="button" id="qty-decrease"
                                         class="w-11 h-11 text-gray-500 hover:text-primary hover:bg-gray-50 transition-colors rounded-l-xl flex items-center justify-center"
-                                        aria-label="Decrease quantity">
+                                        aria-label="{{ statictranslations('Decrease quantity') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M20 12H4" />
@@ -593,10 +593,10 @@
                                     <input type="number" name="quantity" id="cart-quantity" value="1"
                                         class="w-12 text-center text-base font-bold text-gray-900 border-x-2 border-gray-200 focus:outline-none bg-transparent"
                                         min="1" @if ($totalStock > 0) max="{{ $totalStock }}" @endif
-                                        aria-label="Quantity">
+                                        aria-label="{{ statictranslations('Quantity') }}">
                                     <button type="button" id="qty-increase"
                                         class="w-11 h-11 text-gray-500 hover:text-primary hover:bg-gray-50 transition-colors rounded-r-xl flex items-center justify-center"
-                                        aria-label="Increase quantity">
+                                        aria-label="{{ statictranslations('Increase quantity') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M12 4v16m8-8H4" />

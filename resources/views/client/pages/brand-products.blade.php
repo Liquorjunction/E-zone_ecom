@@ -32,7 +32,7 @@
 
     $brandIntroText = $brand ? $brand->getTranslation('description', app()->getLocale(), false) : '';
     if (empty($brandIntroText)) {
-        $brandIntroText = 'Explore all products and innovative technologies from ' . $brandName . '.';
+        $brandIntroText = statictranslations('Explore all products and innovative technologies from') . ' ' . $brandName . '.';
     }
 
     // 3. Dynamic Category Showcase Cards (Only display if configured in Admin)
@@ -65,8 +65,8 @@
     }
 @endphp
 
-@section('title', statictranslations($brandName . ' Products in Morocco — Ezone'))
-@section('description', statictranslations('Explore a focused collection of ' . $brandName . ' home appliances and electronics at Ezone Retails Morocco, with products selected to make brand-specific browsing simple and efficient. You can review available items, compare options, and move through the catalog with the same shopping tools used across the site, including clear product cards, pagination, and responsive layout support. This page is useful when you want to see everything we currently carry from ' . $brandName . ' in one place, whether you are searching for a replacement item, comparing models, or discovering new additions. Availability, pricing, and product assortment may change over time to reflect current stock and featured selections.'))
+@section('title', $brandName . ' — ' . statictranslations('Products in Morocco — Ezone'))
+@section('description', $brandIntroText)
 
 @section('content')
     <div class="bg-linear-to-br from-gray-50 to-white min-h-screen pb-12">
@@ -154,7 +154,7 @@
                     class="slider-nav-btn absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-30
                            hidden sm:flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full
                            bg-white/20 hover:bg-white/35 text-white backdrop-blur-md border border-white/25 shadow-lg transition-all duration-200 cursor-pointer"
-                    aria-label="Previous Slide">
+                    aria-label="{{ statictranslations('Previous Slide') }}">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
                     </svg>
@@ -163,7 +163,7 @@
                     class="slider-nav-btn absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-30
                            hidden sm:flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full
                            bg-white/20 hover:bg-white/35 text-white backdrop-blur-md border border-white/25 shadow-lg transition-all duration-200 cursor-pointer"
-                    aria-label="Next Slide">
+                    aria-label="{{ statictranslations('Next Slide') }}">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                     </svg>

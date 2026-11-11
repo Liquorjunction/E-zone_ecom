@@ -18,14 +18,14 @@
                     bg-linear-to-t from-black/20 to-transparent pointer-events-none"></div>
 
         {{-- ── Badges (top-left) ── --}}
-        <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
+        <div class="absolute top-2 left-2 rtl:left-auto rtl:right-2 flex flex-col gap-1 z-10">
             @if ($productDiscountInfo['has_discount'])
                 <span class="inline-flex items-center gap-0.5 bg-red-500 text-white
                              text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm leading-none">
                     @if ($productDiscountInfo['discount_percentage'] > 0)
-                        {{ number_format($productDiscountInfo['discount_percentage'], 0) }}% OFF
+                        {{ number_format($productDiscountInfo['discount_percentage'], 0) }}% {{ statictranslations('OFF') }}
                     @else
-                        {{ money_format_number($productDiscountInfo['discount_amount']) }} OFF
+                        {{ money_format_number($productDiscountInfo['discount_amount']) }} {{ statictranslations('OFF') }}
                     @endif
                 </span>
             @endif
@@ -44,7 +44,7 @@
         </div>
 
         {{-- ── Stock indicator (top-right) ── --}}
-        <div class="absolute top-2 right-2 z-10">
+        <div class="absolute top-2 right-2 rtl:right-auto rtl:left-2 z-10">
             @if ($stock > 0)
                 <span class="flex items-center gap-1 bg-white/90 backdrop-blur-sm
                              text-green-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm leading-none">

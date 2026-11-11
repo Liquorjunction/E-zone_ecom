@@ -208,6 +208,9 @@
                         <label for="email"
                             class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address *') }}</label>
                         <input type="email" id="email" name="email"
+                            autocomplete="email"
+                            data-lpignore="true"
+                            data-form-type="other"
                             value="{{ Auth::check() ? Auth::user()->email : (session('guest_email_verified') ?? '') }}" required
                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
@@ -231,6 +234,7 @@
                                     </p>
                                     <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                         <input type="text" id="guest_otp_code" maxlength="6" pattern="\d{6}" placeholder="123456"
+                                            autocomplete="one-time-code"
                                             class="w-32 px-3 py-2 text-center tracking-widest text-base font-bold bg-white border-2 border-gray-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20">
                                         <button type="button" id="verifyOtpBtn"
                                             class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-sm">
@@ -627,7 +631,7 @@
                         @endif
                         <div class="border-t-2 border-gray-100 pt-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-gray-900">Total</span>
+                                <span class="text-xl font-bold text-gray-900">{{ statictranslations('Total') }}</span>
                                 <span
                                     class="text-xl font-bold bg-linear-to-r from-green-500 to-green-400 bg-clip-text text-transparent">
                                     {{ money_format_number($order->total ?? 0) }}
@@ -654,45 +658,6 @@
     @endif
 @endif
 
-{{-- SOW #11: Existing Account Detected Modal --}}
-<div id="existingAccountModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative">
-        <button type="button" id="closeExistingAccountModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-
-        <div class="text-center mb-6">
-            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ statictranslations('Account Already Registered') }}</h3>
-            <p class="text-sm text-gray-600 leading-relaxed" id="existingAccountMessage">
-                {{ statictranslations('This email address or mobile number is already registered. Please log in using your existing account to continue.') }}
-            </p>
-        </div>
-
-        {{-- Inline Login / Continue as Guest Form --}}
-        <form id="inlineLoginForm" class="space-y-4">
-            <div id="inlinePasswordGroup" class="hidden space-y-2">
-                <label for="inlineLoginPassword" class="block text-xs font-semibold text-gray-700">{{ statictranslations('Password') }} *</label>
-                <input type="password" id="inlineLoginPassword" placeholder="••••••••"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm">
-                <p id="inlineLoginError" class="text-xs text-red-500 hidden"></p>
-            </div>
-
-            <div class="space-y-3 pt-2">
-                <button type="button" id="inlineLoginActionBtn"
-                    class="w-full py-3.5 bg-primary text-white font-semibold text-sm rounded-xl hover:bg-primary/90 transition-all shadow-md">
-                    {{ statictranslations('Log In to Account') }}
-                </button>
-                <button type="button" id="continueAsGuestModalBtn"
-                    class="w-full py-3 bg-gray-100 text-gray-700 font-semibold text-sm rounded-xl hover:bg-gray-200 transition-colors">
-                    {{ statictranslations('Continue as Guest') }}
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 {{-- SOW #5: Post-Order Registration Prompt Modal --}}
 @if (!empty($order) && ($order->isGuest() || !Auth::check()))

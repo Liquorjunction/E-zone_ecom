@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 </div>
                                 <button type="button" id="remove-coupon-btn${suffix}"
                                     class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
-                                    Remove
+                                    ${trans('Remove')}
                                 </button>
                             </div>
                         </div>`;
@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     showMessage(response.data.message, "error", messageEl);
                     btn.disabled = false;
-                    btn.textContent = "Remove";
+                    btn.textContent = trans('Remove');
                 }
             })
             .catch(function () {
@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     messageEl,
                 );
                 btn.disabled = false;
-                btn.textContent = "Remove";
+                btn.textContent = trans('Remove');
             });
     });
 

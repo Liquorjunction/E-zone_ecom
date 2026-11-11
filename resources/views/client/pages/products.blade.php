@@ -48,7 +48,7 @@
                             @foreach($brands as $brand)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-brand="{{ $brand }}">
                                     <span class="capitalize">{{ str_replace('-', ' ', $brand) }}</span>
-                                    <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="brand" data-filter-value="{{ $brand }}">
+                                    <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="brand" data-filter-value="{{ $brand }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </span>
@@ -59,7 +59,7 @@
                             @foreach($cats as $c)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-category="{{ $c }}">
                                     <span class="capitalize">{{ str_replace('-', ' ', $c) }}</span>
-                                    <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="category" data-filter-value="{{ $c }}">
+                                    <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="category" data-filter-value="{{ $c }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </span>
@@ -70,7 +70,7 @@
                             @foreach($subs as $sub)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-subcategory="{{ $sub }}">
                                     <span>{{ statictranslations('Subcategory:') }} {{ $subcategoryLookup[$sub] ?? str_replace('-', ' ', $sub) }}</span>
-                                    <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="subcategory" data-filter-value="{{ $sub }}">
+                                    <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="subcategory" data-filter-value="{{ $sub }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </span>
@@ -81,7 +81,7 @@
                             @foreach($avail as $a)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-availability="{{ $a }}">
                                     <span class="capitalize">{{ str_replace('_', ' ', $a) }}</span>
-                                    <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="availability" data-filter-value="{{ $a }}">
+                                    <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="availability" data-filter-value="{{ $a }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </span>
@@ -92,7 +92,7 @@
                             @foreach($ratings as $rating)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-rating="{{ $rating }}">
                                     <span>{{ $rating }} {{ statictranslations('Star') }}{{ $rating != '1' ? 's' : '' }} {{ statictranslations('and up') }}</span>
-                                    <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="rating" data-filter-value="{{ $rating }}">
+                                    <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="rating" data-filter-value="{{ $rating }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </span>
@@ -103,7 +103,7 @@
                             @foreach($discounts as $disc)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-discount="{{ $disc }}">
                                     <span>{{ $disc }}% {{ statictranslations('off or more') }}</span>
-                                    <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="discount" data-filter-value="{{ $disc }}">
+                                    <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="discount" data-filter-value="{{ $disc }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </span>
@@ -112,7 +112,7 @@
                         @if(request('min_price') || request('max_price'))
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-price="true">
                                 <span>${{ request('min_price', 0) }} - ${{ request('max_price', 5000) }}</span>
-                                <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="price">
+                                <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="price">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
                             </span>
@@ -181,7 +181,7 @@
             </div>
 
             <!-- Mobile Filter Button -->
-            <button id="mobile-filter-btn" class="lg:hidden fixed bottom-6 right-6 z-50 px-6 py-4 bg-primary text-white rounded-full shadow-2xl transition-all duration-300 hover:shadow-3xl transform hover:scale-110 flex items-center space-x-2">
+            <button id="mobile-filter-btn" class="lg:hidden fixed bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 px-6 py-4 bg-primary text-white rounded-full shadow-2xl transition-all duration-300 hover:shadow-3xl transform hover:scale-110 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />

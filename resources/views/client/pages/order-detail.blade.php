@@ -523,7 +523,7 @@
                         </div>
 
                         <div class="flex items-center justify-between mb-4">
-                            <span class="text-base lg:text-lg font-bold text-gray-900">Total</span>
+                            <span class="text-base lg:text-lg font-bold text-gray-900">{{ statictranslations('Total') }}</span>
                             <span class="text-xl lg:text-2xl font-bold text-primary">{{ money_format_number($total) }}</span>
                         </div>
 

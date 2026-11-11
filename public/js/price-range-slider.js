@@ -57,17 +57,31 @@
 
         function pixelToValue(clientX) {
             const rect  = trackWrap.getBoundingClientRect();
-            const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+            const isRtl = document.documentElement.dir === 'rtl' || container.closest('[dir="rtl"]') !== null;
+            const diff  = isRtl ? (rect.right - clientX) : (clientX - rect.left);
+            const ratio = Math.min(Math.max(diff / rect.width, 0), 1);
             return Math.round(FLOOR + ratio * (CEIL - FLOOR));
         }
 
         function paint() {
+            const isRtl = document.documentElement.dir === 'rtl' || container.closest('[dir="rtl"]') !== null;
             const lPct = toPercent(curMin);
             const rPct = toPercent(curMax);
-            track.style.left       = lPct + '%';
-            track.style.right      = (100 - rPct) + '%';
-            thumbMin.style.left    = lPct + '%';
-            thumbMax.style.left    = rPct + '%';
+            if (isRtl) {
+                track.style.right      = lPct + '%';
+                track.style.left       = (100 - rPct) + '%';
+                thumbMin.style.right   = lPct + '%';
+                thumbMin.style.left    = 'auto';
+                thumbMax.style.right   = rPct + '%';
+                thumbMax.style.left    = 'auto';
+            } else {
+                track.style.left       = lPct + '%';
+                track.style.right      = (100 - rPct) + '%';
+                thumbMin.style.left    = lPct + '%';
+                thumbMin.style.right   = 'auto';
+                thumbMax.style.left    = rPct + '%';
+                thumbMax.style.right   = 'auto';
+            }
         }
 
         function syncInputs() {

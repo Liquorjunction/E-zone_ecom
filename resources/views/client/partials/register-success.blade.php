@@ -186,7 +186,7 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-medium text-gray-900">📧 Find the Email</h4>
+                            <h4 class="text-sm font-medium text-gray-900">📧 {{ statictranslations('Find the Email') }}</h4>
                             <p class="mt-1 text-sm text-gray-600">{{ statictranslations('Check your inbox (and spam folder just in case) for an email from Ezone with the subject "Verify Your Ezone Account"') }}</p>
                         </div>
                     </div>
@@ -199,7 +199,7 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-medium text-gray-900">✓ Click the Link</h4>
+                            <h4 class="text-sm font-medium text-gray-900">✓ {{ statictranslations('Click the Link') }}</h4>
                             <p class="mt-1 text-sm text-gray-600">{{ statictranslations("Click the verification link to confirm your email and activate your account. That's it!") }}</p>
                         </div>
                     </div>
@@ -228,7 +228,7 @@
                     @if (session('token'))
                         <a href="{{ route('register.edit', ['token' => session('token')]) }}"
                             class="flex-1 flex justify-center items-center px-6 py-3.5 text-base font-semibold text-primary bg-gray-100 rounded-xl shadow-lg hover:bg-gray-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
-                            title="Modify your registration details">
+                            title="{{ statictranslations('Modify your registration details') }}">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>

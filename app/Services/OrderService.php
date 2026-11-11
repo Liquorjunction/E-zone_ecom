@@ -111,6 +111,10 @@ class OrderService
                 $guestPhone = $shippingAddress['phone'] ?? $data['phone'] ?? $data['phone_no'] ?? null;
                 $guestEmail = strtolower(trim($data['email'] ?? ''));
 
+                if (!empty($guestEmail) && \App\Models\User::where('email', $guestEmail)->exists()) {
+                    throw new \DomainException(statictranslations('You are already registered. Please log in to your account to place an order.'));
+                }
+
                 $guestUser = $this->guestUserRepo->createOrUpdateGuest([
                     'email' => $guestEmail,
                     'name'  => $guestName ?: 'Guest Customer',

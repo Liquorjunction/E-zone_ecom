@@ -211,7 +211,7 @@
                     $whatsappNumber = preg_replace('/[^0-9]/', '', get_site_setting('phone', ''));
                 @endphp
                 <a href="https://wa.me/{{ $whatsappNumber }}?text=Bonjour, je souhaite obtenir des informations sur vos produits."
-                    target="_blank" rel="noopener" aria-label="Chat on WhatsApp"
+                    target="_blank" rel="noopener" aria-label="{{ statictranslations('Chat on WhatsApp') }}"
                     class="fixed z-50 bottom-6 right-6 md:bottom-8 md:right-8 rtl:right-auto rtl:left-6 rtl:md:left-8 bg-green-500 hover:bg-green-600 rounded-full shadow-lg p-3 flex items-center justify-center transition-colors duration-300"
                     style="box-shadow: 0 4px 16px rgba(0,0,0,0.18);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"

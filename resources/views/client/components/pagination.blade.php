@@ -8,7 +8,7 @@
         </p>
 
         <!-- Pagination Controls -->
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center gap-2">
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())
                 <button class="px-4 py-2 border-2 border-gray-200 rounded-lg text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>

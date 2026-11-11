@@ -21,7 +21,7 @@
 
         {{-- Badges ── top left --}}
         @if ($productDiscountInfo['has_discount'] || $master->created_at > now()->subDays(30) || $isBestseller)
-            <div class="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
+            <div class="absolute top-2.5 left-2.5 rtl:left-auto rtl:right-2.5 flex flex-col gap-1.5 z-10">
                 @if ($productDiscountInfo['has_discount'])
                     <span class="inline-flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg">
                         <svg class="w-2.5 h-2.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -59,7 +59,7 @@
                 data-product-variant-id="{{ $variantId }}"
                 data-init-wishlisted="{{ $isWishlisted ? '1' : '0' }}"
                 data-toast-ignore
-                class="wishlist-btn no-toast absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white shadow-md
+                class="wishlist-btn no-toast absolute top-2.5 right-2.5 rtl:right-auto rtl:left-2.5 w-8 h-8 rounded-full bg-white shadow-md
                        flex items-center justify-center transition-all duration-200 hover:scale-110 z-10
                        focus:outline-none {{ $isWishlisted ? 'opacity-100 is-wishlisted' : 'opacity-0 group-hover:opacity-100' }}"
                 @if (!$variantId) disabled @endif>

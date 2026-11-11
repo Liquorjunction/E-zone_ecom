@@ -8,9 +8,13 @@ if (typeof window.trans !== 'function') {
     };
 }
 
+window.__checkoutSubmitting = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('addAddressModal');
-    if(modal) document.body.appendChild(modal);
+    if (modal) document.body.appendChild(modal);
+    const existingModal = document.getElementById('existingAccountModal');
+    if (existingModal) document.body.appendChild(existingModal);
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -586,14 +590,24 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!paymentMethod) { showToast(trans('Please select a payment method.'), "error"); hasErrors = true; }
 
         if (!window.__isUserLoggedIn) {
-            // Check OTP verification
-            var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
             var currentEmail  = (email ? email.value : "").toLowerCase().trim();
 
-            if (!verifiedEmail || verifiedEmail !== currentEmail) {
+            if (window.__registeredGuestEmail && currentEmail === window.__registeredGuestEmail) {
                 var emailContainer = document.getElementById("guest-email-otp-container") || email;
-                showValidationError(emailContainer, trans('Please verify your email address with the verification code before placing your order.'));
+                showValidationError(emailContainer, trans('You are already registered. Please log in to your account.'));
+                if (typeof window.showExistingAccountModal === "function") {
+                    window.showExistingAccountModal(currentEmail);
+                }
                 hasErrors = true;
+            } else {
+                // Check OTP verification
+                var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
+
+                if (!verifiedEmail || verifiedEmail !== currentEmail) {
+                    var emailContainer = document.getElementById("guest-email-otp-container") || email;
+                    showValidationError(emailContainer, trans('Please verify your email address with the verification code before placing your order.'));
+                    hasErrors = true;
+                }
             }
 
             // Check Google reCAPTCHA token
@@ -731,6 +745,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.scrollTo({ top: 0, behavior: "smooth" });
                 initPostOrderModal();
             } else {
+                if (data.is_registered) {
+                    if (typeof window.showExistingAccountModal === "function") {
+                        window.showExistingAccountModal(formData.get("email") || "", data.message);
+                    }
+                }
                 if (data.errors) {
                     renderValidationErrors(data.errors);
                 }
@@ -1167,17 +1186,37 @@ document.addEventListener("DOMContentLoaded", function () {
         var feedbackMsg = document.getElementById("otp-feedback-msg");
 
         if (!emailInput) return;
+        if (emailInput.dataset.otpBound) return;
+        emailInput.dataset.otpBound = "1";
 
-        // Reset verification state if email changes
+        var sentEmail = (emailInput.dataset.sentEmail || "").trim();
+
+        // Reset verification state if email changes, and guard against password manager autofill injection
         emailInput.addEventListener("input", function () {
-            var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
             var currentEmail = emailInput.value.toLowerCase().trim();
+            // If autofill injected 'superadmin' while waiting for OTP, revert it
+            if (sentEmail && currentEmail === "superadmin") {
+                emailInput.value = sentEmail;
+                return;
+            }
+            if (window.__registeredGuestEmail && currentEmail !== window.__registeredGuestEmail) {
+                window.__registeredGuestEmail = "";
+                clearAllValidationErrors();
+            }
+            var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
             if (verifiedEmail && currentEmail !== verifiedEmail) {
                 window.__guestEmailVerified = "";
                 document.getElementById("otp-verified-badge")?.classList.add("hidden");
                 document.getElementById("otp-send-action")?.classList.remove("hidden");
                 document.getElementById("otp-send-action")?.classList.add("flex");
                 document.getElementById("otp-input-block")?.classList.add("hidden");
+            }
+        });
+
+        // Additional guard against browser autofill populating 'superadmin' on blur/change
+        emailInput.addEventListener("change", function () {
+            if (sentEmail && emailInput.value.trim().toLowerCase() === "superadmin") {
+                emailInput.value = sentEmail;
             }
         });
 
@@ -1203,11 +1242,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
         async function handleSendOtp() {
             var emailVal = emailInput.value.trim();
+            if (emailVal.toLowerCase() === "superadmin") {
+                emailInput.value = sentEmail || "";
+                emailVal = emailInput.value.trim();
+            }
             if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
                 showValidationError(emailInput, trans('Please enter a valid email address first.'));
                 emailInput.focus();
                 return;
             }
+
+            if (window.__registeredGuestEmail && emailVal.toLowerCase() === window.__registeredGuestEmail) {
+                if (typeof window.showExistingAccountModal === "function") {
+                    window.showExistingAccountModal(emailVal);
+                }
+                return;
+            }
+
+            sentEmail = emailVal;
+            emailInput.dataset.sentEmail = emailVal;
 
             if (sendOtpBtn) {
                 sendOtpBtn.disabled = true;
@@ -1229,6 +1282,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 var data = await resp.json();
 
                 if (resp.ok && data.success) {
+                    if (emailInput.value.trim().toLowerCase() === "superadmin") {
+                        emailInput.value = sentEmail;
+                    }
                     showToast(data.message || trans('Verification code sent to your email.'), "success");
                     document.getElementById("otp-send-action")?.classList.add("hidden");
                     document.getElementById("otp-send-action")?.classList.remove("flex");
@@ -1238,6 +1294,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         otpCodeInput.focus();
                     }
                     startOtpCooldown(data.cooldown || 60);
+                } else if (data && data.is_registered) {
+                    if (typeof window.showExistingAccountModal === "function") {
+                        window.showExistingAccountModal(emailVal, data.message);
+                    }
+                    showToast(data.message || trans('You are already registered. Please log in to your account.'), "error");
                 } else if (resp.status === 429) {
                     showToast(data.message || trans('Please wait before requesting another code.'), "error");
                     document.getElementById("otp-send-action")?.classList.add("hidden");
@@ -1259,7 +1320,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         async function handleVerifyOtp() {
-            var emailVal = emailInput.value.trim();
+            var emailVal = (sentEmail || emailInput.value).trim();
+            if (emailInput.value.trim().toLowerCase() === "superadmin" && sentEmail) {
+                emailInput.value = sentEmail;
+                emailVal = sentEmail;
+            }
             var codeVal  = (otpCodeInput ? otpCodeInput.value : "").trim();
 
             if (!codeVal || codeVal.length !== 6) {
@@ -1299,6 +1364,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("otp-verified-badge")?.classList.remove("hidden");
                     document.getElementById("otp-verified-badge")?.classList.add("flex");
                 } else {
+                    if (data && data.is_registered) {
+                        if (typeof window.showExistingAccountModal === "function") {
+                            window.showExistingAccountModal(emailVal, data.message);
+                        }
+                    }
                     if (feedbackMsg) {
                         feedbackMsg.textContent = data.message || trans('Invalid code.');
                         feedbackMsg.className = "text-xs font-medium mt-2 text-red-500";
@@ -1335,16 +1405,137 @@ document.addEventListener("DOMContentLoaded", function () {
         var phoneInput = document.getElementById("phone");
         var modal      = document.getElementById("existingAccountModal");
         var closeBtn   = document.getElementById("closeExistingAccountModal");
-        var guestBtn   = document.getElementById("continueAsGuestModalBtn");
+        var diffEmailBtn = document.getElementById("useDifferentEmailModalBtn");
         var loginBtn   = document.getElementById("inlineLoginActionBtn");
         var pwdGroup   = document.getElementById("inlinePasswordGroup");
         var pwdInput   = document.getElementById("inlineLoginPassword");
+        var inlineEmail = document.getElementById("inlineLoginEmail");
         var loginErr   = document.getElementById("inlineLoginError");
 
-        var hasPrompted = false;
+        if (!modal) return;
+
+        window.showExistingAccountModal = function(emailVal, message) {
+            var currEmail = (emailVal || (emailInput ? emailInput.value : "")).trim();
+            if (currEmail) {
+                window.__registeredGuestEmail = currEmail.toLowerCase();
+                if (inlineEmail) inlineEmail.value = currEmail;
+            }
+
+            var msgEl = document.getElementById("existingAccountMessage");
+            if (msgEl) {
+                msgEl.textContent = message || trans('You are already registered. Please log in to your account.');
+            }
+
+            if (loginErr) loginErr.classList.add("hidden");
+            if (pwdInput) pwdInput.value = "";
+            if (pwdGroup) pwdGroup.classList.remove("hidden");
+
+            // Prevent OTP verification for registered email
+            document.getElementById("otp-send-action")?.classList.add("hidden");
+            document.getElementById("otp-send-action")?.classList.remove("flex");
+            document.getElementById("otp-input-block")?.classList.add("hidden");
+            document.getElementById("otp-verified-badge")?.classList.add("hidden");
+            window.__guestEmailVerified = "";
+
+            modal.classList.remove("hidden");
+            setTimeout(function () {
+                pwdInput?.focus();
+            }, 150);
+        };
+
+        if (!modal.dataset.bound) {
+            modal.dataset.bound = "1";
+
+            function closeModal() {
+                modal.classList.add("hidden");
+                if (pwdInput) pwdInput.value = "";
+                if (loginErr) loginErr.classList.add("hidden");
+                var activeEmailInput = document.getElementById("email");
+                if (activeEmailInput && window.__registeredGuestEmail) {
+                    var emailContainer = document.getElementById("guest-email-otp-container") || activeEmailInput;
+                    showValidationError(emailContainer, trans('This email is already registered. Please log in or use a different email address.'));
+                }
+            }
+
+            function handleUseDifferentEmail() {
+                modal.classList.add("hidden");
+                if (pwdInput) pwdInput.value = "";
+                if (loginErr) loginErr.classList.add("hidden");
+                window.__registeredGuestEmail = "";
+                window.__guestEmailVerified = "";
+
+                var activeEmailInput = document.getElementById("email");
+                if (activeEmailInput) {
+                    activeEmailInput.value = "";
+                    activeEmailInput.dataset.sentEmail = "";
+                    clearAllValidationErrors();
+                    activeEmailInput.focus();
+                }
+
+                document.getElementById("otp-send-action")?.classList.remove("hidden");
+                document.getElementById("otp-send-action")?.classList.add("flex");
+                document.getElementById("otp-input-block")?.classList.add("hidden");
+                document.getElementById("otp-verified-badge")?.classList.add("hidden");
+            }
+
+            closeBtn?.addEventListener("click", closeModal);
+            diffEmailBtn?.addEventListener("click", handleUseDifferentEmail);
+
+            loginBtn?.addEventListener("click", async function (e) {
+                e.preventDefault();
+                var emailVal = (inlineEmail && inlineEmail.value ? inlineEmail.value : (document.getElementById("email") ? document.getElementById("email").value : "")).trim();
+                var pwdVal   = (pwdInput ? pwdInput.value : "").trim();
+
+                if (!pwdVal) {
+                    if (loginErr) {
+                        loginErr.textContent = trans('Password is required.');
+                        loginErr.classList.remove("hidden");
+                    }
+                    pwdInput?.focus();
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                loginBtn.textContent = trans('Signing in...');
+                if (loginErr) loginErr.classList.add("hidden");
+
+                try {
+                    var resp = await fetch(window.__checkoutRoutes.inlineLogin, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+                            "Accept": "application/json",
+                        },
+                        body: JSON.stringify({ email: emailVal, password: pwdVal }),
+                    });
+
+                    var data = await resp.json();
+
+                    if (resp.ok && data.success) {
+                        showToast(data.message || trans('Logged in successfully.'), "success");
+                        window.location.href = data.redirect || window.location.href;
+                    } else {
+                        if (loginErr) {
+                            loginErr.textContent = data.message || trans('Your email or password is invalid.');
+                            loginErr.classList.remove("hidden");
+                        }
+                    }
+                } catch (err) {
+                    console.error("inlineLogin error", err);
+                    if (loginErr) {
+                        loginErr.textContent = trans('Login failed. Please check your connection.');
+                        loginErr.classList.remove("hidden");
+                    }
+                } finally {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = trans('Log In to Account');
+                }
+            });
+        }
 
         async function checkCustomer(emailVal, phoneVal) {
-            if (hasPrompted || !window.__checkoutRoutes?.checkExistingUser) return;
+            if (!window.__checkoutRoutes?.checkExistingUser) return;
             if (!emailVal && !phoneVal) return;
 
             try {
@@ -1359,105 +1550,40 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 var data = await resp.json();
-                if (data.exists && modal) {
-                    hasPrompted = true;
-                    var msgEl = document.getElementById("existingAccountMessage");
-                    if (msgEl && data.message) msgEl.textContent = data.message;
-                    modal.classList.remove("hidden");
+                if ((data.exists || data.is_registered) && modal) {
+                    window.showExistingAccountModal(data.email || emailVal, data.message);
                 }
             } catch (e) {
                 console.warn("checkExistingUser error", e);
             }
         }
 
-        emailInput?.addEventListener("blur", function () {
-            var val = emailInput.value.trim();
-            if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-                checkCustomer(val, null);
-            }
-        });
-
-        phoneInput?.addEventListener("blur", function () {
-            var val = phoneInput.value.trim();
-            if (val && val.length >= 8) {
-                checkCustomer(null, val);
-            }
-        });
-
-        function closeModal() {
-            if (modal) modal.classList.add("hidden");
-            if (pwdGroup) pwdGroup.classList.add("hidden");
-            if (pwdInput) pwdInput.value = "";
-            if (loginErr) loginErr.classList.add("hidden");
-            if (loginBtn) loginBtn.textContent = trans('Log In to Account');
+        if (emailInput && !emailInput.dataset.existingBound) {
+            emailInput.dataset.existingBound = "1";
+            emailInput.addEventListener("blur", function () {
+                var val = emailInput.value.trim();
+                if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    checkCustomer(val, null);
+                }
+            });
         }
 
-        closeBtn?.addEventListener("click", closeModal);
-        guestBtn?.addEventListener("click", closeModal);
-
-        loginBtn?.addEventListener("click", async function (e) {
-            e.preventDefault();
-            if (pwdGroup && pwdGroup.classList.contains("hidden")) {
-                pwdGroup.classList.remove("hidden");
-                pwdInput?.focus();
-                loginBtn.textContent = trans('Sign In');
-                return;
-            }
-
-            var emailVal = (emailInput ? emailInput.value : "").trim();
-            var pwdVal   = (pwdInput ? pwdInput.value : "").trim();
-
-            if (!pwdVal) {
-                if (loginErr) {
-                    loginErr.textContent = trans('Password is required.');
-                    loginErr.classList.remove("hidden");
+        if (phoneInput && !phoneInput.dataset.existingBound) {
+            phoneInput.dataset.existingBound = "1";
+            phoneInput.addEventListener("blur", function () {
+                var val = phoneInput.value.trim();
+                if (val && val.length >= 8) {
+                    checkCustomer(null, val);
                 }
-                pwdInput?.focus();
-                return;
-            }
-
-            loginBtn.disabled = true;
-            loginBtn.textContent = trans('Signing in...');
-            if (loginErr) loginErr.classList.add("hidden");
-
-            try {
-                var resp = await fetch(window.__checkoutRoutes.inlineLogin, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
-                        "Accept": "application/json",
-                    },
-                    body: JSON.stringify({ email: emailVal, password: pwdVal }),
-                });
-
-                var data = await resp.json();
-
-                if (resp.ok && data.success) {
-                    showToast(data.message || trans('Logged in successfully.'), "success");
-                    window.location.href = data.redirect || window.location.href;
-                } else {
-                    if (loginErr) {
-                        loginErr.textContent = data.message || trans('Your email or password is invalid.');
-                        loginErr.classList.remove("hidden");
-                    }
-                }
-            } catch (err) {
-                console.error("inlineLogin error", err);
-                if (loginErr) {
-                    loginErr.textContent = trans('Login failed. Please check your connection.');
-                    loginErr.classList.remove("hidden");
-                }
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.textContent = trans('Sign In');
-            }
-        });
+            });
+        }
     }
 
     function initPostOrderModal() {
         var modal = document.getElementById("postOrderRegisterModal");
         if (!modal) return;
+        if (modal.dataset.bound) return;
+        modal.dataset.bound = "1";
 
         var closeBtn   = document.getElementById("closePostOrderRegisterModal");
         var dismissBtn = document.getElementById("dismissPostOrderModalBtn");

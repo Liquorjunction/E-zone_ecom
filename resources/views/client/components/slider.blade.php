@@ -11,6 +11,12 @@
         transform-origin: left;
     }
 
+    [dir="rtl"] .slider-progress-bar {
+        left: auto;
+        right: 0;
+        transform-origin: right;
+    }
+
     @keyframes slideProgress {
         from { width: 0%; }
         to   { width: 100%; }
@@ -77,7 +83,8 @@
 
             if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
 
-            if (deltaX < 0) this.next();
+            const isRtl = document.documentElement.dir === 'rtl';
+            if ((isRtl ? -deltaX : deltaX) < 0) this.next();
             else this.prev();
         }
     }"
@@ -107,11 +114,10 @@
                     alt="{{ $slider->title }}"
                     class="absolute inset-0 w-full h-full object-fill z-0">
 
-                {{-- Gradient overlays: bottom-heavy + subtle left vignette --}}
+                {{-- Gradient overlays: bottom-heavy + subtle horizontal vignette --}}
                 <div class="absolute inset-0 z-10 pointer-events-none"
                      style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 45%, transparent 75%);"></div>
-                <div class="absolute inset-0 z-10 pointer-events-none"
-                     style="background: linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 60%);"></div>
+                <div class="absolute inset-0 z-10 pointer-events-none bg-linear-to-r rtl:bg-linear-to-l from-black/45 to-transparent to-60%"></div>
 
                 {{-- Content --}}
                 <div class="absolute bottom-0 left-0 w-full z-20 pb-14 sm:pb-20 md:pb-32 px-4">
@@ -154,7 +160,7 @@
                                               shadow-[0_4px_24px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.35)]
                                               transition-all duration-300 hover:-translate-y-0.5 text-sm sm:text-base">
                                         {{ $slider->button_text }}
-                                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                                         </svg>
                                     </a>
@@ -174,24 +180,24 @@
 
     {{-- Navigation Arrows --}}
     <button @click="prev()"
-        class="slider-nav-btn absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-30
+        class="slider-nav-btn absolute left-4 sm:left-6 rtl:left-auto rtl:right-4 sm:rtl:right-6 top-1/2 -translate-y-1/2 z-30
                hidden md:flex items-center justify-center w-11 h-11 rounded-full
                bg-white/15 text-white">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
         </svg>
     </button>
     <button @click="next()"
-        class="slider-nav-btn absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-30
+        class="slider-nav-btn absolute right-4 sm:right-6 rtl:right-auto rtl:left-4 sm:rtl:left-6 top-1/2 -translate-y-1/2 z-30
                hidden md:flex items-center justify-center w-11 h-11 rounded-full
                bg-white/15 text-white">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
         </svg>
     </button>
 
     {{-- Pagination Dots --}}
-    <div class="absolute bottom-5 right-6 z-30 flex items-center gap-2">
+    <div class="absolute bottom-5 right-6 rtl:right-auto rtl:left-6 z-30 flex items-center gap-2">
         @foreach ($sliders as $index => $slider)
             <button @click="goTo({{ $index }})"
                 class="rounded-full transition-all duration-300 cursor-pointer"

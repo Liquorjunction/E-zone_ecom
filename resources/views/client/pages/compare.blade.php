@@ -222,7 +222,7 @@
 
                                     <th class="sticky left-0 bg-white p-6 min-w-50 z-10">
                                         <h3 class="text-xl font-bold text-gray-900">{{ statictranslations('Features') }}</h3>
-                                        <p class="text-gray-500 text-sm">{{ statictranslations('Products') }} ({{ $products->count() }} of {{ $maxCompare }})</p>
+                                        <p class="text-gray-500 text-sm">{{ statictranslations('Products') }} ({{ $products->count() }} {{ statictranslations('of') }} {{ $maxCompare }})</p>
                                     </th>
 
                                     @foreach ($products as $product)
@@ -231,7 +231,7 @@
                                                 <form action="{{ route('compare.remove') }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="product_variant_id" value="{{ $product['id'] }}">
-                                                    <button class="text-gray-400 hover:text-red-500 transition-colors" type="submit" aria-label="Remove from compare">
+                                                    <button class="text-gray-400 hover:text-red-500 transition-colors" type="submit" aria-label="{{ statictranslations('Remove from compare') }}">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>

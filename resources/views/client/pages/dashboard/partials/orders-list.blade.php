@@ -20,7 +20,7 @@
                         @if (request('search'))
                             <button type="button" id="clear-search-btn"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                aria-label="Clear search">
+                                aria-label="{{ statictranslations('Clear search') }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12" />
@@ -449,7 +449,7 @@
     </div>
     @if ($orders->hasPages())
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <nav class="gap-4" aria-label="Pagination">
+            <nav class="gap-4" aria-label="{{ statictranslations('Pagination') }}">
                 <div class="w-full sm:w-auto">
                     {{ $orders->withQueryString()->links() }}
                 </div>

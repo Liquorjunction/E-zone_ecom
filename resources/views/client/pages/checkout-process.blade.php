@@ -71,16 +71,16 @@
                         </p>
                     </div>
                     <div class="mt-4 md:mt-0">
-                        <div class="flex items-center space-x-2 text-sm text-gray-500 bg-white px-4 py-2 rounded-full shadow-sm" id="checkout-breadcrumb">
+                        <div class="flex items-center gap-2 text-sm text-gray-500 bg-white px-4 py-2 rounded-full shadow-sm" id="checkout-breadcrumb">
                             <a href="#" class="hover:text-primary transition-colors">{{ statictranslations('Home') }}</a>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             @if ($step > 1)
                                 <a href="#" data-spa-step="1" class="hover:text-primary transition-colors cursor-pointer">{{ statictranslations('Cart') }}</a>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             @endif
                             @if ($step == 3)
                                 <span class="hover:text-primary transition-colors">{{ statictranslations('Checkout') }}</span>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             @endif
                             <span id="breadcrumb-current" class="text-primary font-semibold">
                                 @if ($step == 1) {{ statictranslations('Cart') }}
@@ -210,14 +210,14 @@
                                 {{ statictranslations('Address Label') }}
                                 <span class="text-gray-400 font-normal">{{ statictranslations('(Optional)') }}</span>
                             </label>
-                            <input id="modal_address_label" name="address_label" placeholder="e.g., Home, Office"
+                            <input id="modal_address_label" name="address_label" placeholder="{{ statictranslations('e.g., Home, Office') }}"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"/>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Full Name') }} *</label>
-                            <input id="modal_name" name="name" required placeholder="John Doe"
+                            <input id="modal_name" name="name" required placeholder="{{ statictranslations('John Doe') }}"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"/>
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
@@ -229,7 +229,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Street Address') }} *</label>
-                        <input id="modal_street" name="street" required placeholder="123 Main Street"
+                        <input id="modal_street" name="street" required placeholder="{{ statictranslations('123 Main Street') }}"
                             class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"/>
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                     </div>
@@ -290,59 +290,55 @@
             </form>
         </div>
     </div>
+
+    {{-- ══════════ EXISTING ACCOUNT DETECTED MODAL (SOW #11) ══════════ --}}
+    <div id="existingAccountModal" style="z-index:99999"
+        class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative">
+            <button type="button" id="closeExistingAccountModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ statictranslations('Account Already Registered') }}</h3>
+                <p class="text-sm text-gray-600 leading-relaxed" id="existingAccountMessage">
+                    {{ statictranslations('You are already registered. Please log in to your account.') }}
+                </p>
+            </div>
+
+            {{-- Inline Login Form --}}
+            <form id="inlineLoginForm" class="space-y-4" autocomplete="on">
+                <div class="space-y-1">
+                    <label for="inlineLoginEmail" class="block text-xs font-semibold text-gray-700">{{ statictranslations('Email Address') }}</label>
+                    <input type="email" id="inlineLoginEmail" name="email" autocomplete="username" readonly
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-sm">
+                </div>
+                <div id="inlinePasswordGroup" class="space-y-2 mt-3">
+                    <label for="inlineLoginPassword" class="block text-xs font-semibold text-gray-700">{{ statictranslations('Password') }} *</label>
+                    <input type="password" id="inlineLoginPassword" name="inline_login_password" autocomplete="current-password" placeholder="••••••••"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm">
+                    <p id="inlineLoginError" class="text-xs text-red-500 hidden"></p>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <button type="button" id="inlineLoginActionBtn"
+                        class="w-full py-3.5 bg-primary text-white font-semibold text-sm rounded-xl hover:bg-primary/90 transition-all shadow-md">
+                        {{ statictranslations('Log In to Account') }}
+                    </button>
+                    <button type="button" id="useDifferentEmailModalBtn"
+                        class="w-full py-3 bg-gray-100 text-gray-700 font-semibold text-sm rounded-xl hover:bg-gray-200 transition-colors">
+                        {{ statictranslations('Use Different Email') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script src="{{ asset('js/coupon.js') }}"></script>
     <script src="{{ asset('js/checkout-process.js') }}"></script>
-    <script src="{{ asset('js/checkout-address-dropdown.js') }}"></script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        window.__checkoutSubmitting = false;
-
-        // ── Warn before unload when coupon is active ──────────────────────────
-        let allowNavigation = false;
-
-        function isCouponApplied() {
-            return !!document.querySelector('[id^="applied-coupon-display"], [id^="remove-coupon-btn"]');
-        }
-
-        window.addEventListener('beforeunload', function (e) {
-            if (isCouponApplied() && !allowNavigation) {
-                e.preventDefault(); e.returnValue = '';
-            }
-        });
-
-        // Real form submits (non-AJAX fallback) allow navigation
-        document.addEventListener('submit', function (e) {
-            if (e.target instanceof HTMLFormElement &&
-                e.target.action === window.__checkoutRoutes.process) {
-                allowNavigation = true;
-                window.__checkoutSubmitting = true;
-            }
-        }, true);
-
-        // SPA links: warn before leaving if coupon applied
-        document.addEventListener('click', function (e) {
-            const link = e.target.closest('a[href]');
-            if (!link || !isCouponApplied() || allowNavigation) return;
-            const href = link.getAttribute('href');
-            if (!href || href === '#' || href.startsWith('#') || href === window.location.pathname) return;
-
-            e.preventDefault();
-            if (typeof showUniversalPopup === 'function') {
-                showUniversalPopup(
-                    trans('You have a coupon applied. Leave without completing your purchase?'),
-                    'error', 0, {
-                        confirmation: true,
-                        confirmText : 'Yes, Leave',
-                        cancelText  : 'No, Stay',
-                        onConfirm   : () => { allowNavigation = true; window.location.href = href; }
-                    }
-                );
-            }
-        }, true);
-    });
-    </script>
 @endpush

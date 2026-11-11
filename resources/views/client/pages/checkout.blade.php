@@ -14,16 +14,16 @@
                         <p class="text-gray-600">Complete your purchase securely</p>
                     </div>
                     <div class="mt-4 md:mt-0">
-                        <div class="flex items-center space-x-2 text-sm text-gray-500">
-                            <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Home</a>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <a href="{{ route('home') }}" class="hover:text-primary transition-colors">{{ statictranslations('Home') }}</a>
+                            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            <a href="{{ route('cart') }}" class="hover:text-primary transition-colors">Cart</a>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <a href="{{ route('cart') }}" class="hover:text-primary transition-colors">{{ statictranslations('Cart') }}</a>
+                            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            <span class="text-primary font-medium">Checkout</span>
+                            <span class="text-primary font-medium">{{ statictranslations('Checkout') }}</span>
                         </div>
                     </div>
                 </div>

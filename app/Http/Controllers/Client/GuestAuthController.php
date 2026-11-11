@@ -27,6 +27,15 @@ class GuestAuthController extends Controller
         ]);
 
         $email = strtolower(trim($request->input('email')));
+
+        if (User::where('email', $email)->exists()) {
+            return response()->json([
+                'success'       => false,
+                'is_registered' => true,
+                'message'       => statictranslations('You are already registered. Please log in to your account.'),
+            ], 422);
+        }
+
         $emailHash = sha1($email);
         $cooldownKey = 'guest_otp_cooldown:' . $emailHash;
 
@@ -75,6 +84,15 @@ class GuestAuthController extends Controller
         ]);
 
         $email = strtolower(trim($request->input('email')));
+
+        if (User::where('email', $email)->exists()) {
+            return response()->json([
+                'success'       => false,
+                'is_registered' => true,
+                'message'       => statictranslations('You are already registered. Please log in to your account.'),
+            ], 422);
+        }
+
         $emailHash = sha1($email);
         $otpKey = 'guest_otp:' . $emailHash;
         $attemptsKey = 'guest_otp_attempts:' . $emailHash;
@@ -152,10 +170,11 @@ class GuestAuthController extends Controller
         }
 
         return response()->json([
-            'exists'  => $exists,
-            'email'   => $email,
-            'message' => $exists
-                ? statictranslations('This email address or mobile number is already registered. Please log in using your existing account to continue.')
+            'exists'        => $exists,
+            'is_registered' => $exists,
+            'email'         => $email,
+            'message'       => $exists
+                ? statictranslations('You are already registered. Please log in to your account.')
                 : null,
         ]);
     }

@@ -67,7 +67,8 @@
             this.touchStartY = null;
 
             if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-            if (deltaX < 0) this.next();
+            const isRtl = document.documentElement.dir === 'rtl';
+            if ((isRtl ? -deltaX : deltaX) < 0) this.next();
             else this.prev();
         }
     }"
@@ -81,7 +82,7 @@
 
             <div class="relative overflow-hidden">
                 <div class="flex transition-transform duration-300 ease-out"
-                    :style="`transform: translateX(-${currentSlide * 100}%)`">
+                    :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                     @php $categoryChunks = $categories->chunk(3); @endphp
                     @foreach ($categoryChunks as $chunk)
                         <div class="w-full shrink-0">
@@ -151,7 +152,8 @@
             this.touchStartY = null;
 
             if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-            if (deltaX < 0) this.next();
+            const isRtl = document.documentElement.dir === 'rtl';
+            if ((isRtl ? -deltaX : deltaX) < 0) this.next();
             else this.prev();
         }
     }"
@@ -165,7 +167,7 @@
 
             <div class="relative overflow-hidden rounded-xl">
                 <div class="flex transition-transform duration-500 ease-out"
-                    :style="`transform: translateX(-${currentSlide * 100}%)`">
+                    :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                     @foreach ($cards->take(4) as $card)
                         <div class="w-full shrink-0">
                             <a href="{{ $card->link ?? '#' }}" class="block relative h-48 rounded-xl overflow-hidden">
@@ -230,7 +232,8 @@
                 this.touchStartY = null;
 
                 if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-                if (deltaX < 0) this.next();
+                const isRtl = document.documentElement.dir === 'rtl';
+                if ((isRtl ? -deltaX : deltaX) < 0) this.next();
                 else this.prev();
             },
             touchStartX: null,
@@ -246,7 +249,7 @@
 
                 <div class="relative overflow-hidden">
                     <div class="flex transition-transform duration-500 ease-out"
-                        :style="`transform: translateX(-${currentSlide * 100}%)`">
+                        :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                         @foreach ($mobileDealsChunks as $chunk)
                             <div class="w-full shrink-0">
                                 <div class="grid grid-cols-2 gap-3">
@@ -302,7 +305,8 @@
             this.touchStartY = null;
 
             if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-            if (deltaX < 0) this.next();
+            const isRtl = document.documentElement.dir === 'rtl';
+            if ((isRtl ? -deltaX : deltaX) < 0) this.next();
             else this.prev();
         }
     }"
@@ -316,7 +320,7 @@
 
             <div class="relative overflow-hidden">
                 <div class="flex transition-transform duration-500 ease-out"
-                    :style="`transform: translateX(-${currentSlide * 100}%)`">
+                    :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                     @php $newArrivalsChunks = ($newArrivals ?? collect())->chunk(2); @endphp
                     @foreach ($newArrivalsChunks as $chunk)
                         <div class="w-full shrink-0">
@@ -369,7 +373,8 @@
                 this.touchStartY = null;
 
                 if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-                if (deltaX < 0) this.next();
+                const isRtl = document.documentElement.dir === 'rtl';
+                if ((isRtl ? -deltaX : deltaX) < 0) this.next();
                 else this.prev();
             }
         }"
@@ -383,7 +388,7 @@
 
                 <div class="relative overflow-hidden">
                     <div class="flex transition-transform duration-500 ease-out"
-                        :style="`transform: translateX(-${currentSlide * 100}%)`">
+                        :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                         @php $bestSellerChunks = ($bestSellers ?? collect())->chunk(2); @endphp
                         @foreach ($bestSellerChunks as $chunk)
                             <div class="w-full shrink-0">
@@ -440,7 +445,8 @@
             this.touchStartY = null;
 
             if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-            if (deltaX < 0) this.next();
+            const isRtl = document.documentElement.dir === 'rtl';
+            if ((isRtl ? -deltaX : deltaX) < 0) this.next();
             else this.prev();
         }
     }"
@@ -454,7 +460,7 @@
 
             <div class="relative overflow-hidden">
                 <div class="flex transition-transform duration-500 ease-out"
-                    :style="`transform: translateX(-${currentSlide * 100}%)`">
+                    :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                     @foreach ($brandChunks as $chunk)
                         <div class="w-full shrink-0 flex justify-center">
                             <div class="grid grid-cols-3 gap-3 w-fit">
@@ -516,7 +522,8 @@
             this.touchStartY = null;
 
             if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
-            if (deltaX < 0) this.next();
+            const isRtl = document.documentElement.dir === 'rtl';
+            if ((isRtl ? -deltaX : deltaX) < 0) this.next();
             else this.prev();
         }
     }"
@@ -531,7 +538,7 @@
             @if ($whyShopWithUs->isNotEmpty())
                 <div class="relative overflow-hidden">
                     <div class="flex transition-transform duration-500 ease-out"
-                        :style="`transform: translateX(-${currentSlide * 100}%)`">
+                        :style="`transform: translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * currentSlide * 100}%)`">
                         @foreach ($whyShopChunks as $chunk)
                             <div class="w-full shrink-0">
                                 <div class="grid grid-cols-2 gap-3">

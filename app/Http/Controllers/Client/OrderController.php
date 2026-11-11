@@ -190,6 +190,22 @@ class OrderController extends Controller
         }
 
         try {
+            if (!Auth::check()) {
+                $guestEmail = strtolower(trim((string) $request->input('email')));
+                if (!empty($guestEmail) && \App\Models\User::where('email', $guestEmail)->exists()) {
+                    $msg = statictranslations('You are already registered. Please log in to your account to place an order.');
+                    if ($request->ajax() || $request->wantsJson()) {
+                        return response()->json([
+                            'success'       => false,
+                            'is_registered' => true,
+                            'message'       => $msg,
+                            'errors'        => ['email' => [$msg]],
+                        ], 422);
+                    }
+                    return back()->withErrors(['email' => $msg]);
+                }
+            }
+
             $userEmail = Auth::check() ? Auth::user()?->email : ($request->input('email'));
             $order = $orderService->processCheckout(
                 $cart,

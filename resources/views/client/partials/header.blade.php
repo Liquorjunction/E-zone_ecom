@@ -28,7 +28,7 @@
                         autocomplete="off">
                     <button type="button" data-search-clear="universal-search-input"
                         class="hidden absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
-                        aria-label="Clear search">
+                        aria-label="{{ statictranslations('Clear search') }}">
                         <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
                     </button>
                     <div id="universal-search-results"
@@ -264,7 +264,7 @@
                           transition-all duration-200">
             <button type="button" data-search-clear="universal-search-input-mobile"
                 class="hidden absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150"
-                aria-label="Clear search">
+                aria-label="{{ statictranslations('Clear search') }}">
                 <i class="fa-solid fa-xmark w-4 h-4 mx-auto"></i>
             </button>
             <div id="universal-search-results-mobile"

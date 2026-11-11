@@ -14,20 +14,20 @@
           <p class="text-gray-600">Complete information about your order</p>
         </div>
         <div class="mt-4 md:mt-0">
-          <div class="flex items-center space-x-2 text-sm text-gray-500">
-            <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Home</a>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-2 text-sm text-gray-500">
+            <a href="{{ route('home') }}" class="hover:text-primary transition-colors">{{ statictranslations('Home') }}</a>
+            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-            <a href="{{ route('dashboard.overview') }}" class="hover:text-primary transition-colors">Profile</a>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('dashboard.overview') }}" class="hover:text-primary transition-colors">{{ statictranslations('Profile') }}</a>
+            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-            <a href="{{ route('dashboard.orders') }}" class="hover:text-primary transition-colors">My Orders</a>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('dashboard.orders') }}" class="hover:text-primary transition-colors">{{ statictranslations('My Orders') }}</a>
+            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-            <span class="text-primary font-medium">Order Details</span>
+            <span class="text-primary font-medium">{{ statictranslations('Order Details') }}</span>
           </div>
         </div>
       </div>

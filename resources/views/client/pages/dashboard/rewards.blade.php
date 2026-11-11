@@ -62,18 +62,18 @@
           </tr>
           <tr class="border-b-2 border-gray-100">
             <td class="p-4 text-gray-700">Oct 25, 2025</td>
-            <td class="p-4 font-medium text-gray-900">Wrote a product review</td>
+            <td class="p-4 font-medium text-gray-900">{{ statictranslations('Wrote a product review') }}</td>
             <td class="p-4 font-semibold text-green-600">+50</td>
             <td class="p-4">
-              <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Available</span>
+              <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations('Available') }}</span>
             </td>
           </tr>
           <tr class="border-b-2 border-gray-100">
             <td class="p-4 text-gray-700">Oct 22, 2025</td>
-            <td class="p-4 font-medium text-gray-900">Sign Up Bonus</td>
+            <td class="p-4 font-medium text-gray-900">{{ statictranslations('Sign Up Bonus') }}</td>
             <td class="p-4 font-semibold text-green-600">+100</td>
             <td class="p-4">
-              <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Available</span>
+              <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations('Available') }}</span>
             </td>
           </tr>
         </tbody>
