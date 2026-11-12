@@ -32,7 +32,11 @@
                     <!-- Active Filters -->
                     @php
                         $subcategoryLookup = [];
+                        $categoryLookup = [];
                         foreach ($categories as $cat) {
+                            if (is_object($cat) && isset($cat->slug)) {
+                                $categoryLookup[$cat->slug] = $cat->{'category-name'} ?? $cat->slug;
+                            }
                             if (!is_object($cat) || !$cat->subcategories) continue;
                             foreach ($cat->subcategories as $sub) {
                                 if (is_object($sub) && isset($sub->slug)) {
@@ -40,14 +44,22 @@
                                 }
                             }
                         }
+                        $brandLookup = [];
+                        if (isset($brands) && (is_array($brands) || is_iterable($brands))) {
+                            foreach ($brands as $b) {
+                                if (is_object($b) && isset($b->slug)) {
+                                    $brandLookup[$b->slug] = $b->name ?? $b->slug;
+                                }
+                            }
+                        }
                     @endphp
                     <div id="active-filters-container" class="mb-6 flex flex-wrap items-center gap-2">
                         <span class="text-sm font-medium text-gray-700">{{ statictranslations('Active Filters:') }}</span>
                         @if(request('brand'))
-                            @php $brands = (array) request('brand'); @endphp
-                            @foreach($brands as $brand)
+                            @php $activeBrands = (array) request('brand'); @endphp
+                            @foreach($activeBrands as $brand)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-brand="{{ $brand }}">
-                                    <span class="capitalize">{{ str_replace('-', ' ', $brand) }}</span>
+                                    <span class="capitalize">{{ $brandLookup[$brand] ?? str_replace('-', ' ', $brand) }}</span>
                                     <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="brand" data-filter-value="{{ $brand }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
@@ -58,7 +70,7 @@
                             @php $cats = (array) request('category'); @endphp
                             @foreach($cats as $c)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary hover:cursor-pointer hover:opacity-80 transition-opacity" data-filter-category="{{ $c }}">
-                                    <span class="capitalize">{{ str_replace('-', ' ', $c) }}</span>
+                                    <span class="capitalize">{{ $categoryLookup[$c] ?? str_replace('-', ' ', $c) }}</span>
                                     <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="category" data-filter-value="{{ $c }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>

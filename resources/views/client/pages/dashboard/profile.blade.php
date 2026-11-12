@@ -7,9 +7,9 @@
     <div
         class="bg-linear-to-br from-primary/5 via-primary/8 to-primary/10 rounded-2xl shadow-md border border-primary/20 p-6 md:p-8 mb-6 overflow-hidden relative">
         {{-- Decorative Background Elements --}}
-        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
+        <div class="absolute top-0 end-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 rtl:-translate-x-1/2 translate-x-1/2">
         </div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2">
+        <div class="absolute bottom-0 start-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl translate-y-1/2 rtl:translate-x-1/2 -translate-x-1/2">
         </div>
 
         <div class="relative z-10">
@@ -38,7 +38,7 @@
                         </button>
                         {{-- Online Status Badge --}}
                         <div
-                            class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-lg">
+                            class="absolute bottom-2 end-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-lg">
                             <div class="w-full h-full rounded-full bg-green-500 animate-ping opacity-75"></div>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                     </div>
                     {{-- Online Status Badge --}}
                     <div
-                        class="absolute bottom-2 right-2 w-7 h-7 bg-green-500 border-4 border-white rounded-full shadow-lg">
+                        class="absolute bottom-2 end-2 w-7 h-7 bg-green-500 border-4 border-white rounded-full shadow-lg">
                         <div class="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75"></div>
                     </div>
                 </div>
@@ -99,12 +99,12 @@
                         @if (auth()->user()->is_premium)
                             <span
                                 class="px-4 py-2 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-full shadow-md">
-                                ✨ Premium Member
+                                ✨ {{ statictranslations('Premium Member') }}
                             </span>
                         @endif
                         <span
                             class="px-4 py-2 bg-white text-gray-700 text-sm font-semibold rounded-full border border-gray-200 shadow-sm">
-                            📅 Member since {{ auth()->user()->created_at->format('Y') }}
+                            📅 {{ statictranslations('Member since') }} {{ auth()->user()->created_at->format('Y') }}
                         </span>
                     </div>
                 </div>
@@ -153,7 +153,7 @@
                         {{ statictranslations('Full Name') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -162,7 +162,7 @@
                         </div>
                         <input type="text" id="name" name="name" required readonly
                             value="{{ old('name', auth()->user()->name) }}"
-                            class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
+                            class="w-full ps-12 pe-4 py-3.5 border-2 border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
                             placeholder="{{ statictranslations('Enter your full name') }}">
                     </div>
                     <div class="error-message text-xs text-red-600 mt-1.5 hidden" data-error-for="name"></div>
@@ -174,7 +174,7 @@
                         {{ statictranslations('Email Address') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -183,9 +183,9 @@
                         </div>
                         <input type="email" id="email" name="email" disabled required
                             value="{{ old('email', auth()->user()->email) }}"
-                            class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 bg-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
+                            class="w-full ps-12 pe-12 py-3.5 border-2 border-gray-200 bg-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
                             placeholder="{{ statictranslations('your.email@example.com') }}">
-                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                        <div class="absolute inset-y-0 end-0 pe-4 flex items-center pointer-events-none">
                             <svg fill="#6B7280" width="24px" height="24px" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24">
                                 <path
@@ -202,7 +202,7 @@
                         {{ statictranslations('Phone Number') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -211,7 +211,7 @@
                         </div>
                         <input type="tel" id="phone" name="phone" required readonly
                             value="{{ old('phone', auth()->user()->phone) }}"
-                            class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
+                            class="w-full ps-12 pe-4 py-3.5 border-2 border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm md:text-base placeholder:text-gray-400"
                             placeholder="{{ statictranslations('+1 (555) 000-0000') }}">
                     </div>
                     <div class="error-message text-xs text-red-600 mt-1.5 hidden" data-error-for="phone"></div>

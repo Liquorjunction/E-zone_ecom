@@ -1,6 +1,6 @@
 @unless ($breadcrumbs->isEmpty())
     <nav aria-label="Breadcrumb">
-        <ol class="flex items-center space-x-2 text-sm text-gray-500">
+        <ol class="flex items-center gap-2 text-sm text-gray-500">
             @foreach ($breadcrumbs as $breadcrumb)
 
                 {{-- If it's a link and not the last item --}}

@@ -96,14 +96,14 @@
             {{-- ══════════ STEP PROGRESS BAR (updated by JS) ══════════ --}}
             <div class="mb-12 bg-white rounded-3xl shadow-lg border border-gray-100 p-8" id="checkout-progress">
                 <div class="flex items-center justify-between relative max-w-3xl mx-auto">
-                    <div class="absolute top-6 left-0 right-0 h-1 bg-gray-200 z-0" style="margin:0 8%"></div>
+                    <div class="absolute top-6 start-0 end-0 h-1 bg-gray-200 z-0" style="margin:0 8%"></div>
                     <div id="progress-bar-fill"
-                        class="absolute top-6 left-0 h-1 z-0 transition-all duration-700 ease-in-out
-                        @if ($step == 2) bg-linear-to-r from-primary to-primary/80
-                        @elseif ($step == 3 && (!isset($order) || $errors->has('checkout'))) bg-linear-to-r from-red-500 to-red-400
-                        @elseif ($step == 3) bg-linear-to-r from-green-500 to-green-400
+                        class="absolute top-6 start-0 h-1 z-0 transition-all duration-700 ease-in-out
+                        @if ($step == 2) bg-linear-to-r rtl:bg-linear-to-l from-primary to-primary/80
+                        @elseif ($step == 3 && (!isset($order) || $errors->has('checkout'))) bg-linear-to-r rtl:bg-linear-to-l from-red-500 to-red-400
+                        @elseif ($step == 3) bg-linear-to-r rtl:bg-linear-to-l from-green-500 to-green-400
                         @endif"
-                        style="@if ($step == 2) width:calc(50% - 8%);margin-left:8%; @elseif ($step == 3) width:calc(100% - 16%);margin-left:8%; @endif">
+                        style="@if ($step == 2) width:calc(50% - 8%);margin-inline-start:8%; @elseif ($step == 3) width:calc(100% - 16%);margin-inline-start:8%; @endif">
                     </div>
                     @foreach ([['label' => 'Shopping Cart','num' => 1],['label' => 'Checkout','num' => 2],['label' => 'Order Complete','num' => 3]] as $s)
                         <div class="flex flex-col items-center z-10 flex-1 transition-all duration-500" data-step-indicator="{{ $s['num'] }}">
@@ -196,12 +196,12 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Address Type') }}</label>
                             <div class="relative">
                                 <select id="modal_address_type" name="type" required
-                                    class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+                                    class="block w-full ps-4 pe-10 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
                                     <option value="">{{ statictranslations('Select Address Type') }}</option>
                                     <option value="billing">{{ statictranslations('Billing') }}</option>
                                     <option value="shipping">{{ statictranslations('Shipping') }}</option>
                                 </select>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <svg class="absolute end-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </div>
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
@@ -238,7 +238,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }} *</label>
                             <div class="relative">
                                 <select id="modal_city_id" name="city_id" required
-                                    class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+                                    class="block w-full ps-4 pe-10 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
                                     <option value="">{{ statictranslations('Select city') }}</option>
                                     @foreach ($cities ?? collect() as $city)
                                         <option value="{{ $city->id }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">
@@ -246,7 +246,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <svg class="absolute end-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </div>
                             <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
@@ -268,7 +268,7 @@
                     <div>
                         <label class="inline-flex items-center">
                             <input id="modal_is_default" name="is_default" type="checkbox" value="1"
-                                class="form-checkbox h-4 w-4 text-primary rounded mr-3">
+                                class="form-checkbox h-4 w-4 text-primary rounded me-3">
                             <span class="text-sm font-medium text-gray-700">{{ statictranslations('Set as default address') }}</span>
                         </label>
                     </div>
@@ -295,7 +295,7 @@
     <div id="existingAccountModal" style="z-index:99999"
         class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative">
-            <button type="button" id="closeExistingAccountModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors">
+            <button type="button" id="closeExistingAccountModal" class="absolute top-5 end-5 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 

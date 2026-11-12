@@ -502,7 +502,7 @@
             <tr>
                 <td style="width: 50%; text-align: left;">
                 <span class="invoice-chip">
-                    {{ statictranslations('Placed') }}: <span>{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('F j, Y') }}</span>
+                    {{ statictranslations('Placed') }}: <span><bdi>{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('d F Y') }}</bdi></span>
                 </span>
                 </td>
                 <td style="width: 50%; text-align: right;">

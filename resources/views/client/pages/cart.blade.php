@@ -101,7 +101,7 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                         <!-- Quantity Controller -->
                                         <div class="flex items-center">
-                                            <span class="text-sm font-medium text-gray-700 mr-4">{{ statictranslations('Quantity:') }}</span>
+                                            <span class="text-sm font-medium text-gray-700 me-4">{{ statictranslations('Quantity:') }}</span>
                                             <div
                                                 class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                                                 <button

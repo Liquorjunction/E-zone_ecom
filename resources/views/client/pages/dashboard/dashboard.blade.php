@@ -56,7 +56,7 @@
                             </div>
                         </div>
                         <span class="font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</span>
-                        <div class="flex items-center gap-2 ml-4">
+                        <div class="flex items-center gap-2 ms-4">
                             <a href="{{ route('order-detail', ['order' => $order->id]) }}"
                                 class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors">{{ statictranslations('View Details') }}</a>
                             @if (Auth::check() && $order->user_id === Auth::id() && $canCancel)
@@ -114,7 +114,7 @@
                                     class="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full">{{ statictranslations('Returned') }}</span>
                             @else
                                 <span
-                                    class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ ucfirst($status) }}</span>
+                                    class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations(ucfirst($status)) }}</span>
                             @endif
                         </div>
                         @php
@@ -168,7 +168,7 @@
     <div id="cancel-order-modal" class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-40 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
             <button type="button"
-                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
+                class="absolute top-3 end-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>

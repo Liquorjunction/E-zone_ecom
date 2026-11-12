@@ -16,7 +16,7 @@
         <label class="inline-flex items-center px-4 py-2 bg-blue-50 rounded-xl border-2 border-blue-200 cursor-pointer hover:bg-blue-100 transition-all">
             <input type="checkbox" id="billingSameAsShipping" name="billing_same_as_shipping"
                 value="1" class="form-checkbox h-4 w-4 text-primary rounded" checked>
-            <span class="ml-2 text-sm font-semibold text-gray-700">{{ statictranslations('Same as shipping') }}</span>
+            <span class="ms-2 text-sm font-semibold text-gray-700">{{ statictranslations('Same as shipping') }}</span>
         </label>
     </div>
 
@@ -26,7 +26,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <label for="billingAddressSelect" class="block text-sm font-semibold text-gray-700">
                         {{ statictranslations('Select Billing Address') }}
-                        <span class="text-xs font-normal text-gray-500 ml-1">({{ $billingAddresses->count() }} {{ statictranslations('available') }})</span>
+                        <span class="text-xs font-normal text-gray-500 ms-1">({{ $billingAddresses->count() }} {{ statictranslations('available') }})</span>
                     </label>
                     <button type="button" id="addBillingAddressBtn"
                         class="px-4 py-2.5 bg-linear-to-r from-primary to-primary/90 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2">
@@ -38,7 +38,7 @@
                 </div>
                 <div class="relative">
                     <select id="billingAddressSelect" name="saved_billing_address_id"
-                        class="block w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none bg-white pr-12 text-gray-900 font-medium">
+                        class="block w-full ps-4 pe-12 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none bg-white text-gray-900 font-medium">
                         <option value="">-- {{ statictranslations('Select billing address') }} --</option>
                         @foreach ($billingAddresses as $addr)
                             <option value="{{ $addr->id }}"
@@ -54,7 +54,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
@@ -121,7 +121,7 @@
                         @if(isset($cities) && $cities->count() > 0)
                             <div class="relative">
                                 <select id="billing_city" name="billing_city"
-                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white pr-10">
+                                    class="w-full ps-4 pe-10 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
                                     <option value="">{{ statictranslations('Select city') }}</option>
                                     @foreach ($cities as $c)
                                         <option value="{{ $c->getTranslation('city_name', app()->getLocale()) }}"
@@ -130,7 +130,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <svg class="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </div>
                         @else
                             <input type="text" id="billing_city" name="billing_city"

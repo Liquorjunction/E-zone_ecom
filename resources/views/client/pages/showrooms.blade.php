@@ -41,9 +41,9 @@
                         </div>
                     </div>
 
-                    <div class="lg:w-64">
+                    <div class="relative lg:w-64">
                         <select name="country"
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
+                            class="w-full ps-4 pe-10 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white appearance-none cursor-pointer">
                             <option value="">{{ statictranslations('Filter by Country') }}</option>
                             @foreach ($countries as $country)
                                 <option value="{{ $country }}" @selected(request('country') === $country)>
@@ -51,6 +51,11 @@
                                 </option>
                             @endforeach
                         </select>
+                        <div class="pointer-events-none absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
                     </div>
 
                     <div class="lg:w-40">

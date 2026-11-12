@@ -214,7 +214,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const proceedButton = document.getElementById('proceedToCheckoutBtn') || root.querySelector('[data-spa-step="2"]');
         const blockedByStock = hasBlockingStockIssue();
         const countText = document.getElementById('item-total-count')?.textContent || '0';
-        const itemCount = parseInt(String(countText).trim(), 10);
+        const countMatch = String(countText).match(/\d+/);
+        const itemCount = countMatch ? parseInt(countMatch[0], 10) : 0;
         const blockedByEmptyCart = Number.isNaN(itemCount) ? false : itemCount <= 0;
         const blocked = blockedByStock || blockedByEmptyCart;
 
@@ -436,14 +437,15 @@ document.addEventListener("DOMContentLoaded", function () {
         var fill = document.getElementById("progress-bar-fill");
         if (fill) {
             fill.className = fill.className.replace(/bg-linear[^\s]*/g, "").replace(/from-[^\s]*/g, "").replace(/to-[^\s]*/g, "").trim();
+            fill.style.marginInlineStart = "8%";
+            fill.style.marginLeft = "";
+            fill.style.marginRight = "";
             if (step === 2) {
-                fill.classList.add("bg-linear-to-r", "from-primary", "to-primary/80");
+                fill.classList.add("bg-linear-to-r", "rtl:bg-linear-to-l", "from-primary", "to-primary/80");
                 fill.style.width = "calc(50% - 8%)";
-                fill.style.marginLeft = "8%";
             } else if (step === 3) {
-                fill.classList.add("bg-linear-to-r", "from-green-500", "to-green-400");
+                fill.classList.add("bg-linear-to-r", "rtl:bg-linear-to-l", "from-green-500", "to-green-400");
                 fill.style.width = "calc(100% - 16%)";
-                fill.style.marginLeft = "8%";
             } else {
                 fill.style.width = "0";
             }
@@ -459,6 +461,35 @@ document.addEventListener("DOMContentLoaded", function () {
                 circle.classList.add("bg-gray-200", "text-gray-600");
             }
         });
+        document.querySelectorAll("[data-step-label]").forEach(function (label) {
+            var num = parseInt(label.dataset.stepLabel);
+            label.className = label.className.replace(/text-(?:primary|green-500|gray-500|red-500)/g, "").trim();
+            if (num === step) {
+                label.classList.add("text-primary");
+            } else if (num < step) {
+                label.classList.add("text-green-500");
+            } else {
+                label.classList.add("text-gray-500");
+            }
+        });
+        var titleEl = document.getElementById("checkout-title");
+        var subtitleEl = document.getElementById("checkout-subtitle");
+        var breadcrumbCurrent = document.getElementById("breadcrumb-current");
+        if (titleEl && subtitleEl) {
+            if (step === 1) {
+                titleEl.textContent = trans("Shopping Cart");
+                subtitleEl.textContent = trans("Review your items before proceeding");
+                if (breadcrumbCurrent) breadcrumbCurrent.textContent = trans("Cart");
+            } else if (step === 2) {
+                titleEl.textContent = trans("Checkout");
+                subtitleEl.textContent = trans("Complete your purchase securely");
+                if (breadcrumbCurrent) breadcrumbCurrent.textContent = trans("Checkout");
+            } else if (step === 3) {
+                titleEl.textContent = trans("Order Placed");
+                subtitleEl.textContent = trans("Thank you for your order!");
+                if (breadcrumbCurrent) breadcrumbCurrent.textContent = trans("Order Placed");
+            }
+        }
         root.dataset.step = step;
     }
 
@@ -819,7 +850,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Update main Item Count Span
         const countEl = document.getElementById("item-total-count");
         if (countEl && summary.itemCount !== undefined) {
-            countEl.textContent = summary.itemCount + (summary.itemCount === 1 ? " Item" : " Items");
+            const count = Number(summary.itemCount || 0);
+            const label = count === 1 ? trans("Item") : trans("Items");
+            countEl.textContent = `${count} ${label}`;
         }
 
         updateForwardNavigationState();

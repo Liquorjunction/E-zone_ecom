@@ -67,7 +67,7 @@
 
                 {{-- Mobile Slide-out Menu --}}
                 <div id="mobile-menu" class="hidden lg:hidden fixed left-0 right-0 bottom-0 bg-black/45 backdrop-blur-[1px] z-60" style="top: var(--header-height);" onclick="this.classList.add('hidden')">
-                    <div class="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-2xl rounded-l-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+                    <div class="absolute end-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-2xl rounded-s-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
                         <div class="p-5 border-b border-gray-100 bg-gray-50/70">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-center gap-3 min-w-0">
@@ -81,7 +81,7 @@
                                         <p class="text-sm text-gray-500 truncate">{{ Auth::user()->email }}</p>
                                     </div>
                                 </div>
-                                <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-gray-500 hover:text-gray-700 p-1 -mr-1">
+                                <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-gray-500 hover:text-gray-700 p-1 -me-1">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -118,7 +118,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
-                                    class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium rounded-xl transition-colors w-full text-left">
+                                    class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium rounded-xl transition-colors w-full text-start">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -232,7 +232,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
-                                    class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium rounded-xl transition-colors w-full text-left">
+                                    class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium rounded-xl transition-colors w-full text-start">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

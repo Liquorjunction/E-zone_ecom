@@ -110,7 +110,7 @@
                                     </label>
                                     <div class="relative">
                                         <select id="subject" name="subject" required
-                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 appearance-none bg-white cursor-pointer @error('subject') border-red-400 @enderror">
+                                            class="w-full ps-4 pe-10 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300 appearance-none bg-white cursor-pointer @error('subject') border-red-400 @enderror">
                                             <option value="" disabled {{ old('subject') ? '' : 'selected' }}>
                                                 {{ statictranslations('— Select a subject —') }}</option>
                                             <option value="product_inquiry"
@@ -141,7 +141,7 @@
                                                 {{ statictranslations('Other') }}</option>
                                         </select>
                                         <span
-                                            class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                            class="pointer-events-none absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-gray-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M19 9l-7 7-7-7" />

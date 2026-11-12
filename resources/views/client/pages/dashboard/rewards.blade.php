@@ -1,6 +1,6 @@
 @extends('client.pages.dashboard-layout')
 
-@section('dashboard-title', 'My Rewards')
+@section('dashboard-title', statictranslations('My Rewards'))
 
 @section('dashboard-content')
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -17,9 +17,9 @@
     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
       <h3 class="text-lg font-bold text-gray-900 mb-3">{{ statictranslations('How to Earn Points') }}</h3>
       <ul class="space-y-2 text-gray-700">
-        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>{{ statictranslations('Earn 1 point for every $1 spent') }}</li>
-        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>{{ statictranslations('Earn 50 points for writing a review') }}</li>
-        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>{{ statictranslations('Earn 100 points on your birthday') }}</li>
+        <li class="flex items-center"><svg class="w-4 h-4 me-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>{{ statictranslations('Earn 1 point for every $1 spent') }}</li>
+        <li class="flex items-center"><svg class="w-4 h-4 me-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>{{ statictranslations('Earn 50 points for writing a review') }}</li>
+        <li class="flex items-center"><svg class="w-4 h-4 me-2 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>{{ statictranslations('Earn 100 points on your birthday') }}</li>
       </ul>
     </div>
   </div>
@@ -36,7 +36,7 @@
     <div class="overflow-x-auto">
       <table class="w-full min-w-max">
         <thead>
-          <tr class="text-left text-sm font-semibold text-gray-600 border-b-2 border-gray-100">
+          <tr class="text-start text-sm font-semibold text-gray-600 border-b-2 border-gray-100">
             <th class="p-4">{{ statictranslations('Date') }}</th>
             <th class="p-4">{{ statictranslations('Activity') }}</th>
             <th class="p-4">{{ statictranslations('Points') }}</th>

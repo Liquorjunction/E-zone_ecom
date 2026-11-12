@@ -55,7 +55,7 @@
             <button type="button"
                 class="remove-item-btn flex items-center text-red-500 hover:text-red-700 transition-colors duration-200"
                 data-item-id="{{ $item->id }}">
-                <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-5 w-5 me-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
@@ -73,7 +73,7 @@
             <p class="mb-5 text-sm text-red-600 font-medium">{{ statictranslations('This item is currently unavailable. Remove it to continue checkout.') }}</p>
         @else
             <p class="flex items-center text-sm text-gray-600 mb-5">
-                <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5 me-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
                 <span class="font-medium">{{ statictranslations('In Stock') }}</span>
@@ -83,7 +83,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {{-- Quantity controls --}}
             <div class="flex items-center">
-                <span class="text-sm font-semibold text-gray-700 mr-4">{{ statictranslations('Quantity:') }}</span>
+                <span class="text-sm font-semibold text-gray-700 me-4">{{ statictranslations('Quantity:') }}</span>
                 <div class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm {{ $isOutOfStock ? 'opacity-50 pointer-events-none' : '' }}">
                     <button type="button"
                         class="qty-decrease px-5 py-3 bg-gray-50 hover:bg-primary hover:text-white text-gray-700 font-bold transition-all duration-300"
@@ -104,13 +104,13 @@
             </div>
 
             {{-- Price display --}}
-            <div class="text-right">
+            <div class="text-right rtl:text-left">
                 @if ($hasDiscount)
                     <div class="text-lg text-gray-400 line-through mb-1">{{ money_format_number($lineTotal) }}</div>
 
                     @if ($lineDiscount > 0)
                         <div class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1">
-                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
                                 <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>

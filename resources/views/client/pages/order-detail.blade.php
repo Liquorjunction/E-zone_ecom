@@ -94,7 +94,7 @@
                             class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-40 hidden">
                             <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
                                 <button type="button"
-                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
+                                    class="absolute top-3 end-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M6 18L18 6M6 6l12 12" />
@@ -477,7 +477,7 @@
                             @if ($itemDiscount > 0)
                                 <div class="flex items-center justify-between text-sm bg-green-50 px-3 py-2 rounded-lg">
                                     <span class="text-gray-600 flex items-center">
-                                        <svg class="w-4 h-4 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg class="w-4 h-4 me-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                                             <path fill-rule="evenodd"
                                                 d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -492,7 +492,7 @@
                             @if ($couponDiscount > 0)
                                 <div class="flex items-center justify-between text-sm bg-purple-50 px-3 py-2 rounded-lg">
                                     <span class="text-gray-600 flex items-center">
-                                        <svg class="w-4 h-4 mr-1 text-purple-600" fill="currentColor"
+                                        <svg class="w-4 h-4 me-1 text-purple-600" fill="currentColor"
                                             viewBox="0 0 20 20">
                                             <path
                                                 d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -569,7 +569,7 @@
                     {{-- Shipping Address --}}
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor"
+                            <svg class="w-5 h-5 me-2 text-primary" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

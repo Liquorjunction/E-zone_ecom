@@ -29,16 +29,21 @@
         </div>
 
         <!-- Sort Dropdown -->
-        <div class="lg:w-64">
+        <div class="relative lg:w-64">
             <select
                 name="sort"
                 id="products-sort"
                 form="filter-form"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white">
+                class="w-full ps-4 pe-10 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 bg-white appearance-none cursor-pointer">
                 <option value="newest" @selected(request('sort') === 'newest' || !request('sort'))>{{ statictranslations('Sort by: Newest') }}</option>
                 <option value="price_asc" @selected(request('sort') === 'price_asc')>{{ statictranslations('Price: Low to High') }}</option>
                 <option value="price_desc" @selected(request('sort') === 'price_desc')>{{ statictranslations('Price: High to Low') }}</option>
             </select>
+            <div class="pointer-events-none absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
         </div>
 
         <!-- View Toggle (Mobile Hidden) -->

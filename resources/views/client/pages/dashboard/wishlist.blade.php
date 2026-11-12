@@ -46,7 +46,7 @@
               data-init-wishlisted="1"
               data-toast-ignore
               aria-pressed="t   rue"
-              class="wishlist-btn no-toast is-wishlisted opacity-100 absolute top-2 right-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
+              class="wishlist-btn no-toast is-wishlisted opacity-100 absolute top-2 end-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
               title="{{ statictranslations('Remove from wishlist') }}"
             >
               <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -59,7 +59,7 @@
               @php
                 $discount = round((($originalPrice - $price) / $originalPrice) * 100);
               @endphp
-              <div class="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg">
+              <div class="absolute top-2 start-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg">
                 -{{ $discount }}%
               </div>
             @endif
@@ -88,7 +88,7 @@
               <div class="flex items-center text-yellow-400 text-xs lg:text-sm">
                 ★★★★☆
               </div>
-              <span class="ml-1.5 text-xs text-gray-500">({{ rand(10, 100) }})</span>
+              <span class="ms-1.5 text-xs text-gray-500">({{ rand(10, 100) }})</span>
             </div>
 
             {{-- Price --}}
@@ -154,7 +154,7 @@
               href="{{ route('products.index') }}"
               class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-primary text-white font-semibold rounded-xl shadow-lg hover:bg-primary/90 hover:shadow-xl transition-all text-sm lg:text-base group"
             >
-              <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 me-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               {{ statictranslations('Discover Products') }}
@@ -191,7 +191,7 @@
             href="{{ route('products.index') }}"
             class="inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-primary text-white font-semibold rounded-xl shadow-lg hover:bg-primary/90 hover:shadow-xl transition-all text-sm lg:text-base group"
           >
-            <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 me-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
             {{ statictranslations('Discover Products') }}

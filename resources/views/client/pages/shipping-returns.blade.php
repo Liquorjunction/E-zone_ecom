@@ -1,5 +1,8 @@
 @extends('client.layouts.app')
 
+@section('title', statictranslations('Shipping & Returns — Ezone Morocco'))
+@section('description', statictranslations('Learn about our shipping options, delivery timelines, and our 30-day return policy.'))
+
 @section('content')
     <div class="bg-gray-50 min-h-screen pb-16 relative overflow-hidden">
 
@@ -33,7 +36,7 @@
                             {{-- Header Section --}}
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-8 border-b border-gray-100">
                                 <div>
-                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ statictranslations('Shipping & Returns') }}</h1>
+                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $policy->title ?? statictranslations('Shipping & Returns') }}</h1>
                                     <p class="text-gray-500">{{ statictranslations('Agreement between User and') }} {{ config('app.name') }}</p>
                                 </div>
 
@@ -41,22 +44,35 @@
                                 <div class="inline-flex items-center px-4 py-2 bg-gray-50 border border-gray-100 rounded-full">
                                     <div class="w-2 h-2 rounded-full bg-green-500 me-2.5 shrink-0 animate-pulse"></div>
                                     <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide me-2">{{ statictranslations('Last Updated') }}:</span>
-                                    <span class="text-sm font-bold text-gray-900">{{ $policy->updated_at->locale(app()->getLocale())->translatedFormat('M d, Y') }}</span>
+                                    <span class="text-sm font-bold text-gray-900"><bdi>{{ $policy->updated_at->locale(app()->getLocale())->translatedFormat('d F Y') }}</bdi></span>
                                 </div>
                             </div>
 
                              {{-- Dynamic Content (Prose) --}}
                             <div class="prose-content">
-
                                 {!! $policy->description ?? $policy->content !!}
                             </div>
                         @else
-                            <div class="prose prose-lg max-w-none">
-                                <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ statictranslations('Shipping & Returns') }}</h2>
-                                <p class="text-gray-500">{{ statictranslations('Agreement between User and') }} {{ config('app.name') }}</p>
+                            {{-- Empty State --}}
+                            <div class="text-center py-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm mb-4">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900">{{ statictranslations('Policy Unavailable') }}</h3>
+                                <p class="text-gray-500 mt-2 max-w-sm mx-auto">{{ statictranslations('We are currently updating our shipping and returns policy. Please check back later.') }}</p>
                             </div>
                         @endif
                     </div>
+
+                    {{-- Card Footer --}}
+                    <div class="bg-gray-50 px-8 py-6 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <p class="text-sm text-gray-500">
+                            {{ statictranslations('Questions?') }} <a href="{{ route('contact') }}" class="text-primary font-semibold hover:underline">{{ statictranslations('Contact Us') }}</a>
+                        </p>
+                    </div>
+
                 </div>
             </div>
         </div>

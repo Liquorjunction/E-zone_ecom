@@ -79,8 +79,8 @@ $countActiveVariants = function ($products) {
 
                     {{-- Static label row --}}
                     <div class="flex items-center justify-between text-sm text-gray-500">
-                        <span>{{ money_format_number(0, 0) }}</span>
-                        <span>{{ money_format_number($maxPrice, 0) }}+</span>
+                        <span><bdi dir="ltr">{{ money_format_number(0, 0) }}</bdi></span>
+                        <span><bdi dir="ltr">{{ money_format_number($maxPrice, 0) }}+</bdi></span>
                     </div>
 
                     {{--
@@ -116,8 +116,8 @@ $countActiveVariants = function ($products) {
 
                     {{-- Number inputs — free-form, validated on blur / Enter --}}
                     <div class="flex items-center gap-2">
-                        <div class="flex flex-1 items-center bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 focus-within:border-primary">
-                            <span class="text-sm text-gray-500 me-1 whitespace-nowrap">{{ config('app.CURRENCY_SYMBOL') }}</span>
+                        <div dir="ltr" class="flex flex-1 items-center bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 focus-within:border-primary">
+                            <span class="text-sm text-gray-500 mr-1.5 whitespace-nowrap select-none">{{ config('app.CURRENCY_SYMBOL') }}</span>
                             <input type="number"
                                    min="0"
                                    max="{{ $maxPrice }}"
@@ -125,11 +125,11 @@ $countActiveVariants = function ($products) {
                                    data-input="min"
                                    data-name="min_price"
                                    value="{{ request('min_price', '') }}"
-                                   class="w-full bg-transparent border-none outline-none focus:ring-0 text-sm">
+                                   class="w-full bg-transparent border-none outline-none focus:ring-0 text-sm text-left p-0">
                         </div>
-                        <span class="text-gray-300 font-light">—</span>
-                        <div class="flex flex-1 items-center bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 focus-within:border-primary">
-                            <span class="text-sm text-gray-500 me-1 whitespace-nowrap">{{ config('app.CURRENCY_SYMBOL') }}</span>
+                        <span class="text-gray-300 font-light select-none">—</span>
+                        <div dir="ltr" class="flex flex-1 items-center bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 focus-within:border-primary">
+                            <span class="text-sm text-gray-500 mr-1.5 whitespace-nowrap select-none">{{ config('app.CURRENCY_SYMBOL') }}</span>
                             <input type="number"
                                    min="0"
                                    max="{{ $maxPrice }}"
@@ -137,7 +137,7 @@ $countActiveVariants = function ($products) {
                                    data-input="max"
                                    data-name="max_price"
                                    value="{{ request('max_price', '') }}"
-                                   class="w-full bg-transparent border-none outline-none focus:ring-0 text-sm">
+                                   class="w-full bg-transparent border-none outline-none focus:ring-0 text-sm text-left p-0">
                         </div>
                     </div>
                 </div>
@@ -149,10 +149,10 @@ $countActiveVariants = function ($products) {
                     <span class="w-1 h-5 rounded-full bg-primary me-2"></span>
                     {{ statictranslations('Brand') }}
                 </h3>
-                <div class="space-y-2 max-h-48 overflow-y-auto">
+                <div class="space-y-2 max-h-48 overflow-y-auto px-2 py-1">
                     @foreach ($brands as $brand)
                         @if (is_object($brand) && $countActiveVariants($brand->products) > 0)
-                            <label class="flex items-center group cursor-pointer">
+                            <label class="flex items-center group cursor-pointer py-0.5">
                                 <input type="checkbox" name="brand[]" value="{{ $brand->slug }}"
                                     {{ in_array($brand->slug, (array) request('brand', [])) ? 'checked' : '' }}
                                     class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
@@ -172,54 +172,19 @@ $countActiveVariants = function ($products) {
                     <span class="w-1 h-5 rounded-full bg-primary me-2"></span>
                     {{ statictranslations('Category') }}
                 </h3>
-                <div class="space-y-2">
+                <div class="space-y-2 px-2">
                     @foreach ($categories as $category)
                         @if (is_object($category) && $countActiveVariants($category->products) > 0)
-                            <div class="category-item">
-                                <label class="flex items-center group cursor-pointer">
-                                    <input type="checkbox" name="category[]" value="{{ $category->slug }}"
-                                        {{ in_array($category->slug, (array) request('category', [])) ? 'checked' : '' }}
-                                        class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary category-checkbox"
-                                        data-category-slug="{{ $category->slug }}">
-                                    <span
-                                        class="ms-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ $category->{'category-name'} }}</span>
-                                    <span
-                                        class="ms-auto text-xs text-gray-400">({{ $countActiveVariants($category->products) }})</span>
-                                    @if ($category->subcategories && $category->subcategories->count() > 0)
-                                        <button type="button"
-                                            class="ms-2 text-gray-400 hover:text-primary transition-colors toggle-subcategories"
-                                            data-category-id="{{ $category->id }}"
-                                            data-category-slug="{{ $category->slug }}">
-                                            <svg class="w-4 h-4 transform transition-transform" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
-                                    @endif
-                                </label>
-                                @if ($category->subcategories && $category->subcategories->count() > 0)
-                                    <div class="subcategories-container ms-7 mt-2 space-y-1 hidden"
-                                        data-category-slug="{{ $category->slug }}">
-                                        @foreach ($category->subcategories as $subcategory)
-                                            @if ($countActiveVariants($subcategory->products) > 0)
-                                                <label class="flex items-center group cursor-pointer">
-                                                    <input type="checkbox" name="subcategory[]"
-                                                        value="{{ $subcategory->slug }}"
-                                                        {{ in_array($subcategory->slug, (array) request('subcategory', [])) ? 'checked' : '' }}
-                                                        class="w-3 h-3 text-primary border-gray-300 rounded focus:ring-primary subcategory-checkbox"
-                                                        data-category-slug="{{ $category->slug }}"
-                                                        data-subcategory-id="{{ $subcategory->id }}">
-                                                    <span
-                                                        class="ms-3 text-xs text-gray-600 group-hover:text-primary transition-colors">{{ $subcategory->{'sub-category-name'} }}</span>
-                                                    <span
-                                                        class="ms-auto text-xs text-gray-400">({{ $countActiveVariants($subcategory->products) }})</span>
-                                                </label>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </div>
+                            <label class="flex items-center group cursor-pointer">
+                                <input type="checkbox" name="category[]" value="{{ $category->slug }}"
+                                    {{ in_array($category->slug, (array) request('category', [])) ? 'checked' : '' }}
+                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary category-checkbox"
+                                    data-category-slug="{{ $category->slug }}">
+                                <span
+                                    class="ms-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ $category->{'category-name'} }}</span>
+                                <span
+                                    class="ms-auto text-xs text-gray-400">({{ $countActiveVariants($category->products) }})</span>
+                            </label>
                         @endif
                     @endforeach
                 </div>

@@ -7,7 +7,7 @@
     <h2 class="text-xl lg:text-2xl font-bold text-gray-900">{{ statictranslations('Manage Your Payment Methods') }}</h2>
     <button class="px-4 lg:px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-colors">
       <span class="flex items-center justify-center">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
         {{ statictranslations('Add New Card') }}

@@ -6,7 +6,7 @@
     <!-- Modal Content -->
     <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 p-8 transform scale-95 opacity-0 transition-all duration-300 ease-out border-2 border-gray-100">
         <!-- Close Button -->
-        <button type="button" id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-full p-1.5 transition-all duration-200 hover:bg-gray-100 group">
+        <button type="button" id="closeModalBtn" class="absolute top-4 end-4 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-full p-1.5 transition-all duration-200 hover:bg-gray-100 group">
             <svg class="w-5 h-5 transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -33,7 +33,7 @@
         <!-- Success Message (Hidden by default) -->
         <div id="successMessage" class="hidden mb-4 bg-green-50 border border-green-200 p-4 rounded-xl">
             <div class="flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="text-sm text-green-700 font-semibold">{{ statictranslations('If an account exists with that email, you will receive an email with password reset Link.') }}</p>
@@ -43,7 +43,7 @@
         <!-- Error Message (Hidden by default) -->
         <div id="errorMessage" class="hidden mb-4 bg-red-50 border border-red-200 p-4 rounded-xl">
             <div class="flex items-center justify-center">
-                <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-red-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="text-sm text-red-700 font-semibold" id="errorText">{{ statictranslations('Something went wrong. Please try again.') }}</p>
@@ -58,7 +58,7 @@
                     {{ statictranslations('Email Address') }}
                 </label>
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                         </svg>
@@ -68,7 +68,7 @@
                         name="email"
                         type="email"
                         required
-                        class="appearance-none block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/30 focus:border-primary transition-all duration-300"
+                        class="appearance-none block w-full ps-12 pe-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/30 focus:border-primary transition-all duration-300"
                         placeholder="{{ statictranslations('you@example.com') }}">
                 </div>
             </div>
@@ -80,10 +80,10 @@
                     id="submitBtn"
                     class="w-full px-6 py-3 text-base font-semibold text-white bg-primary rounded-full shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95 flex items-center justify-center">
                     <span id="submitBtnText">{{ statictranslations('Send Reset Link') }}</span>
-                    <svg id="submitBtnIcon" class="ml-2 w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="submitBtnIcon" class="ms-2 w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                    <svg id="submitBtnSpinner" class="hidden ml-2 w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg id="submitBtnSpinner" class="hidden ms-2 w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -101,7 +101,7 @@
         <div class="mt-6 text-center">
             <p class="text-xs text-gray-500">
                 {{ statictranslations('Remember your password?') }}
-                <button type="button" id="backToLoginBtn" class="font-semibold text-primary hover:opacity-80 transition-opacity">
+                <button type="button" id="backToLoginBtn" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
                     {{ statictranslations('Back to Login') }}
                 </button>
             </p>

@@ -43,3 +43,20 @@
         font-size: 0.95rem;
     }
 }
+
+[dir="rtl"] .iti--separate-dial-code .iti__selected-flag {
+    border-radius: 0 0.75rem 0.75rem 0;
+    border: 2px solid #e5e7eb;
+    border-left: none;
+    border-right: 2px solid #e5e7eb;
+}
+
+[dir="rtl"] .iti__tel-input,
+[dir="rtl"] .iti--separate-dial-code .iti__tel-input {
+    border-radius: 0.75rem 0 0 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-right: none;
+    border-left: 2px solid #e5e7eb;
+    text-align: right;
+    direction: ltr;
+}

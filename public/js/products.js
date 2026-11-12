@@ -98,6 +98,17 @@ const updateSidebarActiveState = (url) => {
     });
 };
 
+const getBrandLabel = (value) => {
+    const input = document.querySelector(
+        `input[name="brand[]"][value="${value}"]`
+    );
+    if (!input) return value.replace(/-/g, " ");
+    const label = input.closest("label");
+    if (!label) return value.replace(/-/g, " ");
+    const span = label.querySelector("span.ms-3, span.ml-3, span[data-localized]");
+    return span ? span.textContent.trim() : label.textContent.trim();
+};
+
 const getSubcategoryLabel = (value) => {
     const input = document.querySelector(
         `input[name="subcategory[]"][value="${value}"]`
@@ -105,7 +116,7 @@ const getSubcategoryLabel = (value) => {
     if (!input) return value;
     const label = input.closest("label");
     if (!label) return value;
-    const span = label.querySelector("span.ml-3");
+    const span = label.querySelector("span.ms-3, span.ml-3, span[data-localized]");
     return span ? span.textContent.trim() : value;
 };
 
@@ -116,7 +127,7 @@ const getCategoryLabel = (value) => {
     if (!input) return value.replace(/-/g, " ");
     const label = input.closest("label");
     if (!label) return value.replace(/-/g, " ");
-    const span = label.querySelector("span.ml-3, span[data-localized]");
+    const span = label.querySelector("span.ms-3, span.ml-3, span[data-localized]");
     return span ? span.textContent.trim() : label.textContent.trim();
 };
 
@@ -131,14 +142,14 @@ const updateActiveFilters = (url) => {
         hasFilters = true;
         return `<span class="inline-flex items-center px-3 py-1 rounded-full text-sm ${color} hover:cursor-pointer hover:opacity-80 transition-opacity">
             <span>${label}</span>
-            <button type="button" class="ml-2 hover:opacity-70 remove-filter" data-filter-type="${type}" ${value ? `data-filter-value="${value}"` : ""}>
+            <button type="button" class="ms-2 hover:opacity-70 remove-filter" data-filter-type="${type}" ${value ? `data-filter-value="${value}"` : ""}>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </span>`;
     };
 
     params.getAll("brand[]").forEach((v) =>
-        (html += makeChip(`<span class="capitalize">${v.replace(/-/g, " ")}</span>`, "bg-blue-100 text-blue-700", "brand", v))
+        (html += makeChip(`<span class="capitalize">${getBrandLabel(v)}</span>`, "bg-blue-100 text-blue-700", "brand", v))
     );
 
     params.getAll("category[]").forEach((v) =>
@@ -146,28 +157,29 @@ const updateActiveFilters = (url) => {
     );
 
     params.getAll("subcategory[]").forEach((v) =>
-        (html += makeChip(`Subcategory: ${getSubcategoryLabel(v)}`, "bg-indigo-100 text-indigo-700", "subcategory", v))
+        (html += makeChip(`${trans("Subcategory:")} ${getSubcategoryLabel(v)}`, "bg-indigo-100 text-indigo-700", "subcategory", v))
     );
 
     params.getAll("availability[]").forEach((v) =>
-        (html += makeChip(`<span class="capitalize">${v.replace(/_/g, " ")}</span>`, "bg-green-100 text-green-700", "availability", v))
+        (html += makeChip(`<span class="capitalize">${trans(v === "in_stock" ? "In Stock" : "Out of Stock")}</span>`, "bg-green-100 text-green-700", "availability", v))
     );
 
-    params.getAll("rating[]").forEach((v) =>
-        (html += makeChip(`${v} Star${v !== "1" ? "s" : ""} and up`, "bg-yellow-100 text-yellow-700", "rating", v))
-    );
+    params.getAll("rating[]").forEach((v) => {
+        const ratingText = v === "5" ? trans("5 stars") : trans(`${v} stars and up`);
+        html += makeChip(ratingText, "bg-yellow-100 text-yellow-700", "rating", v);
+    });
 
     params.getAll("discount[]").forEach((v) =>
-        (html += makeChip(`${v}% off or more`, "bg-red-100 text-red-700", "discount", v))
+        (html += makeChip(trans(`${v}% or more`), "bg-red-100 text-red-700", "discount", v))
     );
 
     // ─── FIX: use window.CURRENCY_SYMBOL with safe fallback
-    const currency = window.CURRENCY_SYMBOL || "";
+    const currency = window.CURRENCY_SYMBOL || "MAD";
     const minPrice = params.get("min_price");
     const maxPrice = params.get("max_price");
     if (minPrice || maxPrice) {
         html += makeChip(
-            `${currency}${minPrice || 0} – ${currency}${maxPrice || "max"}`,
+            `${trans("Price:")} ${currency} ${minPrice || 0} – ${currency} ${maxPrice || "max"}`,
             "bg-purple-100 text-purple-700",
             "price"
         );

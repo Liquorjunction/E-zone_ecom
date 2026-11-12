@@ -8,10 +8,10 @@
                     </label>
                     <div class="relative">
                         <input type="text" name="search" id="search"
-                            class="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+                            class="w-full ps-10 pe-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                             placeholder="{{ statictranslations('Order number, product name...') }}" value="{{ request('search', '') }}"
                             autocomplete="off">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                        <div class="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -19,7 +19,7 @@
                         </div>
                         @if (request('search'))
                             <button type="button" id="clear-search-btn"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                 aria-label="{{ statictranslations('Clear search') }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -36,7 +36,7 @@
                         </label>
                         <div class="relative">
                             <select name="status" id="status"
-                                class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white cursor-pointer">
+                                class="w-full ps-3 pe-8 py-2.5 text-sm border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white cursor-pointer">
                                 <option value="">{{ statictranslations('All Statuses') }}</option>
                                 <option value="pending"
                                     @if (request('status') == 'pending') selected @endif>{{ statictranslations('Pending') }}</option>
@@ -62,7 +62,7 @@
                                         {{ statictranslations('Cancelled') }}
                                     </option>
                             </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <div class="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -76,7 +76,7 @@
                         </label>
                         <div class="relative">
                             <select name="sort" id="sort"
-                                class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white cursor-pointer">
+                                class="w-full ps-3 pe-8 py-2.5 text-sm border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white cursor-pointer">
                                 <option value="latest" @if (request('sort', 'latest') == 'latest') selected @endif>{{ statictranslations('Newest First') }}
                                 </option>
                                 <option value="oldest" @if (request('sort') == 'oldest') selected @endif>{{ statictranslations('Oldest First') }}
@@ -86,7 +86,7 @@
                                 <option value="amount_low" @if (request('sort') == 'amount_low') selected @endif>{{ statictranslations('Lowest Amount') }}
                                 </option>
                             </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <div class="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -132,7 +132,7 @@
                             <input type="date" name="date_from" id="date_from"
                                 class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                                 value="{{ request('date_from', '') }}">
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <div class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -148,7 +148,7 @@
                             <input type="date" name="date_to" id="date_to"
                                 class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                                 value="{{ request('date_to', '') }}">
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <div class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -254,7 +254,7 @@
             @endphp
             <div
                 class="flex items-center border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-all duration-200 p-4">
-                <div class="flex-1 min-w-0 pr-4">
+                <div class="flex-1 min-w-0 pe-4">
                     <div class="font-semibold text-gray-900 text-base mb-2 truncate">{{ $itemsLabel }}</div>
                     <div class="flex flex-wrap items-center gap-3 text-sm">
                         <span class="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -274,7 +274,7 @@
                         <span
                             class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full {{ $statusStyles[0] }}">
                             <span class="w-1.5 h-1.5 rounded-full {{ $statusStyles[1] }}"></span>
-                            {{ $statusLabel }}
+                            {{ statictranslations($statusLabel) }}
                         </span>
                     </div>
                 </div>
@@ -389,7 +389,7 @@
                     <span
                         class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full {{ $statusStyles[0] }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ $statusStyles[1] }}"></span>
-                        {{ $statusLabel }}
+                        {{ statictranslations($statusLabel) }}
                     </span>
                 </div>
                 <div class="mb-4">
@@ -462,7 +462,7 @@
 <div id="cancel-order-modal" class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-40 hidden">
     <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
         <button type="button"
-            class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
+            class="absolute top-3 end-3 text-gray-400 hover:text-gray-600 close-cancel-modal-btn">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>

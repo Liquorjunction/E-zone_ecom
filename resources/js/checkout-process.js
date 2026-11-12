@@ -155,7 +155,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const itemTotalCountEl = document.getElementById("item-total-count");
             if (itemTotalCountEl && typeof summary.itemCount !== "undefined") {
                 const count = Number(summary.itemCount || 0);
-                itemTotalCountEl.textContent = `${count} ${count === 1 ? "Item" : "Items"}`;
+                const label = count === 1 ? trans("Item") : trans("Items");
+                itemTotalCountEl.textContent = `${count} ${label}`;
             }
 
             syncProceedButtonState(summary.itemCount);
@@ -201,9 +202,8 @@ document.addEventListener("DOMContentLoaded", function () {
         messageEl.classList.add("hidden");
     }
 
-    const initialItemCount = Number(
-        document.getElementById("item-total-count")?.textContent?.trim().split(" ")[0] || 0
-    );
+    const countMatch = document.getElementById("item-total-count")?.textContent?.match(/\d+/);
+    const initialItemCount = Number(countMatch ? countMatch[0] : 0);
     syncProceedButtonState(initialItemCount);
 
     // Update single item via AJAX
@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             if (priceContainer) {
                                 const newBadge = document.createElement('div');
                                 newBadge.className = 'inline-flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full mb-1';
-                                newBadge.innerHTML = `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
+                                newBadge.innerHTML = `<svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Save ${ window.env?.CURRENCY_SYMBOL || '$' } ${ (data.item.discount.discount_amount * data.item.quantity).toFixed(2) }`;
                                 priceContainer.insertBefore(newBadge, priceContainer.firstChild);
                             }
                         }

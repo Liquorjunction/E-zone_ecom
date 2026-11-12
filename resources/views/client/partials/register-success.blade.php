@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="utf-8" />
@@ -28,7 +28,7 @@
                 <div class="space-y-6">
                     <a href="{{ url('/') }}"
                         class="inline-flex items-center text-white hover:opacity-80 transition-opacity">
-                        <svg class="w-6 h-6 mr-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 me-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                         <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
@@ -48,7 +48,7 @@
 
                     <!-- Features -->
                     <div class="space-y-4 mt-12">
-                        <div class="flex items-start space-x-3">
+                        <div class="flex items-start gap-3">
                             <div class="shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -60,7 +60,7 @@
                                 <p class="text-sm text-white/80 mt-1">{{ statictranslations('Your Ezone account awaits email verification') }}</p>
                             </div>
                         </div>
-                        <div class="flex items-start space-x-3">
+                        <div class="flex items-start gap-3">
                             <div class="shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -72,7 +72,7 @@
                                 <p class="text-sm text-white/80 mt-1">{{ statictranslations('Verify your email to complete your registration') }}</p>
                             </div>
                         </div>
-                        <div class="flex items-start space-x-3">
+                        <div class="flex items-start gap-3">
                             <div class="shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -88,16 +88,16 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center space-x-6 text-sm text-white/80">
+                <div class="flex items-center gap-6 text-sm text-white/80">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         {{ statictranslations('Secure & Encrypted') }}
                     </div>
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
@@ -115,7 +115,7 @@
                 <div class="lg:hidden mb-6">
                     <a href="{{ url('/') }}"
                         class="inline-flex items-center text-primary hover:opacity-80 transition-opacity">
-                        <svg class="w-5 h-5 mr-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 me-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                         <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
@@ -148,7 +148,7 @@
                 </div>
 
                 <!-- Success Message -->
-                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-6">
+                <div class="bg-green-50 border-s-4 border-green-500 p-4 rounded-lg mb-6">
                     <div class="flex items-start">
                         <div class="shrink-0">
                             <svg class="h-5 w-5 text-green-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -157,7 +157,7 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <div class="ml-3">
+                        <div class="ms-3">
                             <p class="text-sm font-semibold text-green-800">{{ statictranslations('Welcome!') }} ✓</p>
                             <p class="text-sm text-green-700 mt-1">{{ statictranslations("Great! We've received your registration. We've sent a confirmation email to verify your address. Simply click the link in that email, and you'll be ready to explore our amazing electronics collection!") }}</p>
                         </div>
@@ -165,7 +165,7 @@
                 </div>
 
                 <!-- Email Display -->
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
+                <div class="bg-blue-50 border-s-4 border-blue-500 p-4 rounded-lg mb-6">
                     <p class="text-sm text-blue-700">
                         <span class="font-semibold">{{ statictranslations('Confirmation Email Sent To:') }}</span><br>
                         <span
@@ -185,7 +185,7 @@
                                 1
                             </div>
                         </div>
-                        <div class="ml-4">
+                        <div class="ms-4">
                             <h4 class="text-sm font-medium text-gray-900">📧 {{ statictranslations('Find the Email') }}</h4>
                             <p class="mt-1 text-sm text-gray-600">{{ statictranslations('Check your inbox (and spam folder just in case) for an email from Ezone with the subject "Verify Your Ezone Account"') }}</p>
                         </div>
@@ -198,7 +198,7 @@
                                 2
                             </div>
                         </div>
-                        <div class="ml-4">
+                        <div class="ms-4">
                             <h4 class="text-sm font-medium text-gray-900">✓ {{ statictranslations('Click the Link') }}</h4>
                             <p class="mt-1 text-sm text-gray-600">{{ statictranslations("Click the verification link to confirm your email and activate your account. That's it!") }}</p>
                         </div>
@@ -206,7 +206,7 @@
                 </div>
 
                 <!-- Warning -->
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg mb-6">
+                <div class="bg-yellow-50 border-s-4 border-yellow-400 p-4 rounded-lg mb-6">
                     <div class="flex">
                         <div class="shrink-0">
                             <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -215,7 +215,7 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <div class="ml-3">
+                        <div class="ms-3">
                             <p class="text-sm text-yellow-700">
                                 <strong>{{ statictranslations('⏰ Time remaining:') }} <span id="timer" data-timer-seconds="300" data-expired-label="0:00" data-timer-storage-key="register-success-{{ md5((string) (session('token') ?? session('email') ?? request()->path())) }}" data-expired-message-target="register-timer-message" data-expired-message="{{ statictranslations('The verification window has ended. Please register again to receive a fresh verification email.') }}">5:00</span></strong><span class="mx-1">-</span><span id="register-timer-message">{{ statictranslations('Please complete verification before the timer ends.') }}</span>
                             </p>
@@ -229,7 +229,7 @@
                         <a href="{{ route('register.edit', ['token' => session('token')]) }}"
                             class="flex-1 flex justify-center items-center px-6 py-3.5 text-base font-semibold text-primary bg-gray-100 rounded-xl shadow-lg hover:bg-gray-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
                             title="{{ statictranslations('Modify your registration details') }}">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             {{ statictranslations('Edit Details') }}
@@ -244,7 +244,7 @@
                     </p>
                     <div class="space-y-2 text-sm text-gray-600">
                         <div class="flex items-start">
-                            <svg class="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" fill="currentColor"
+                            <svg class="h-4 w-4 text-gray-400 me-2 mt-0.5 shrink-0" fill="currentColor"
                                 viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -253,7 +253,7 @@
                             <span><strong>{{ statictranslations('Check Spam:') }}</strong> {{ statictranslations('Emails sometimes hide in the spam folder - look there first!') }}</span>
                         </div>
                         <div class="flex items-start">
-                            <svg class="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" fill="currentColor"
+                            <svg class="h-4 w-4 text-gray-400 me-2 mt-0.5 shrink-0" fill="currentColor"
                                 viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"

@@ -52,7 +52,7 @@
                 </button>
               @endfor
             </div>
-            <span id="rating-text" class="text-sm font-medium text-gray-600 ml-2"></span>
+            <span id="rating-text" class="text-sm font-medium text-gray-600 ms-2"></span>
           </div>
           <p id="review-rating-error" class="mt-2 text-xs text-red-600 hidden">{{ statictranslations('Please select a rating.') }}</p>
           <input type="hidden" name="rating" id="review-rating" value="" required>

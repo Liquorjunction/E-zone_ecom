@@ -1,6 +1,6 @@
 @extends('client.pages.dashboard-layout')
 
-@section('dashboard-title', 'Security')
+@section('dashboard-title', statictranslations('Security'))
 
 @section('dashboard-content')
     {{-- Change Password Section --}}
@@ -22,16 +22,16 @@
                     {{ statictranslations('Current Password') }} *
                 </label>
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </div>
                     <input type="password" id="current_password" name="current_password" required
-                        class="w-full pl-12 pr-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
+                        class="w-full ps-12 pe-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
                         placeholder="{{ statictranslations('Enter your current password') }}">
-                    <button type="button" class="absolute inset-y-0 right-0 pr-4 flex items-center js-toggle-password"
+                    <button type="button" class="absolute inset-y-0 end-0 pe-4 flex items-center js-toggle-password"
                         data-target="current_password">
                         <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -50,16 +50,16 @@
                     {{ statictranslations('New Password') }} *
                 </label>
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </div>
                     <input type="password" id="new_password" name="new_password" required
-                        class="w-full pl-12 pr-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
+                        class="w-full ps-12 pe-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
                         placeholder="{{ statictranslations('Enter your new password') }}">
-                    <button type="button" class="absolute inset-y-0 right-0 pr-4 flex items-center js-toggle-password"
+                    <button type="button" class="absolute inset-y-0 end-0 pe-4 flex items-center js-toggle-password"
                         data-target="new_password">
                         <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -126,17 +126,17 @@
                     {{ statictranslations('Confirm New Password') }} *
                 </label>
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <input type="password" id="confirm_password" name="new_password_confirmation" required
-                        class="w-full pl-12 pr-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
+                        class="w-full ps-12 pe-12 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm lg:text-base"
                         placeholder="{{ statictranslations('Confirm your new password') }}">
                     <p class="js-confirm-msg text-xs mt-1"></p>
-                    <button type="button" class="absolute inset-y-0 right-0 pr-4 flex items-center js-toggle-password"
+                    <button type="button" class="absolute inset-y-0 end-0 pe-4 flex items-center js-toggle-password"
                         data-target="confirm_password">
                         <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">

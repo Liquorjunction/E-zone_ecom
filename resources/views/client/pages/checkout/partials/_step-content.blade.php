@@ -69,7 +69,7 @@
                         <span class="text-sm font-semibold text-gray-700">{{ statictranslations('Item Total:') }}</span>
                         <span id="item-total-count"
                             class="text-sm font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                            {{ $itemCount }} {{ $itemCount === 1 ? 'Item' : 'Items' }}
+                            {{ $itemCount }} {{ $itemCount === 1 ? statictranslations('Item') : statictranslations('Items') }}
                         </span>
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                     <button type="button" id="proceedToCheckoutBtn" disabled
                         class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg transition-all duration-300 mt-2 opacity-60 cursor-not-allowed pointer-events-none">
                         {{ !Auth::check() ? statictranslations('Proceed as Guest') : statictranslations('Proceed to Checkout') }}
-                        <svg class="w-5 h-5 inline-block ml-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 inline-block ms-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -104,7 +104,7 @@
                         <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
                             class="block w-full px-6 py-4 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
                             <span>{{ statictranslations('Proceed as Guest') }}</span>
-                            <svg class="w-5 h-5 inline-block ml-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 inline-block ms-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
@@ -126,7 +126,7 @@
                         <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
                             class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
                             {{ statictranslations('Proceed to Checkout') }}
-                            <svg class="w-5 h-5 inline-block ml-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 inline-block ms-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -154,7 +154,7 @@
             class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm">
             <p class="font-semibold">{{ statictranslations('Please fix the highlighted fields before continuing.') }}
             </p>
-            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+            <ul class="mt-2 list-disc space-y-1 ps-5 text-sm">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -185,7 +185,7 @@
                             </div>
                             <p class="text-xs text-gray-600 mt-0.5">
                                 {{ statictranslations('Already have an account?') }}
-                                <a href="{{ route('login', ['checkout' => 1]) }}" class="font-bold text-primary hover:underline ml-1 inline-flex items-center gap-1">
+                                <a href="{{ route('login', ['checkout' => 1]) }}" class="font-bold text-primary hover:underline ms-1 inline-flex items-center gap-1">
                                     <span>{{ statictranslations('Log in to continue') }}</span>
                                     <span class="inline-block rtl:rotate-180">&rarr;</span>
                                 </a>
@@ -251,7 +251,7 @@
 
                                 {{-- Verified badge --}}
                                 <div id="otp-verified-badge" class="{{ session('guest_email_verified') ? 'flex' : 'hidden' }} items-center text-green-600 text-xs font-semibold mt-2 bg-green-50 px-3 py-2 rounded-xl border border-green-200">
-                                    <svg class="w-4 h-4 mr-1.5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="w-4 h-4 me-1.5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                     </svg>
                                     <span>{{ statictranslations('Email verified successfully') }}</span>
@@ -292,13 +292,13 @@
                     <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                         <input type="radio" name="payment_method" value="card"
                             class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
-                        <span class="ml-4 font-semibold text-gray-900">{{ statictranslations('Carte bancaire') }}</span>
+                        <span class="ms-4 font-semibold text-gray-900">{{ statictranslations('Carte bancaire') }}</span>
                     </label>
                     <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                         <input type="radio" name="payment_method" value="cod"
                             class="w-5 h-5 text-primary focus:ring-4 focus:ring-primary/20">
                         <span
-                            class="ml-4 font-semibold text-gray-900">{{ statictranslations('Cash on Delivery') }}</span>
+                            class="ms-4 font-semibold text-gray-900">{{ statictranslations('Cash on Delivery') }}</span>
                     </label>
                 </div>
                 <div id="cardDetails" class="space-y-5">
@@ -369,13 +369,13 @@
                 <button type="button" id="placeOrderBtn"
                     class="w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
                     {{ statictranslations('Place Secure Order') }}
-                    <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 inline-block ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </button>
                 <p class="text-xs text-center text-gray-500 mt-4 flex items-center justify-center">
-                    <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 inline-block me-1" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                             clip-rule="evenodd" />
@@ -391,7 +391,24 @@
     {{--  STEP 3 – ORDER CONFIRMED / FAILED        --}}
     {{-- ══════════════════════════════════════════ --}}
 @elseif ($step == 3)
-    @php $itemCount = $order ? $order->items->sum('quantity') : 0; @endphp
+    @php
+        $itemCount = $order ? $order->items->sum('quantity') : 0;
+        $orderDate = $order?->created_at
+            ? $order->created_at->locale(app()->getLocale())->translatedFormat('d M Y')
+            : now()->locale(app()->getLocale())->translatedFormat('d M Y');
+
+        $paymentMethodLabel = match (strtolower((string) ($order?->payment_method ?? ''))) {
+            'cod' => statictranslations('Cash on Delivery'),
+            'card', 'credit_card', 'stripe' => statictranslations('Online Payment'),
+            default => $order?->payment_method ? statictranslations($order->payment_method) : '—',
+        };
+
+        $shippingMethodLabel = match (strtolower((string) ($order?->shipping_method ?? ''))) {
+            'express' => statictranslations('Express Shipping'),
+            'standard', 'standard shipping', '' => statictranslations('Standard Shipping'),
+            default => $order?->shipping_method ? statictranslations($order->shipping_method) : statictranslations('Standard Shipping'),
+        };
+    @endphp
 
     @if (!$order || $errors->has('checkout'))
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -410,10 +427,10 @@
                     <p class="text-xl text-red-700 mb-2" id="checkout-error-message">
                         {{ $errors->first('checkout') ?? statictranslations('Your payment could not be processed. Please try again.') }}
                     </p>
-                    <div class="bg-white rounded-2xl shadow-lg p-8 text-left mt-8 border border-gray-100">
+                    <div class="bg-white rounded-2xl shadow-lg p-8 text-start mt-8 border border-gray-100">
                         <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ statictranslations('What can you do?') }}
                         </h3>
-                        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+                        <ul class="list-disc ps-6 text-gray-700 space-y-2">
                             <li>{{ statictranslations('Check your payment details and try again.') }}</li>
                             <li>{{ statictranslations('Try a different payment method.') }}</li>
                             <li>{{ statictranslations('If the problem persists, contact support.') }}</li>
@@ -423,7 +440,7 @@
                 <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                     <div class="flex flex-col sm:flex-row gap-4">
                         <button type="button" data-spa-step="2"
-                            class="flex-1 px-8 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                            class="flex-1 px-8 py-5 bg-linear-to-r rtl:bg-linear-to-l from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                             {{ statictranslations('Try Again') }}
                         </button>
                         <a href="{{ route('cart') }}"
@@ -447,9 +464,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div
-                    class="bg-linear-to-br from-green-50 to-white rounded-3xl shadow-xl border-2 border-green-200 p-12 text-center">
+                    class="bg-linear-to-br rtl:bg-linear-to-bl from-green-50 to-white rounded-3xl shadow-xl border-2 border-green-200 p-12 text-center">
                     <div
-                        class="w-24 h-24 mx-auto mb-6 rounded-full bg-linear-to-br from-green-500 to-green-400 flex items-center justify-center shadow-2xl animate-bounce-slow">
+                        class="w-24 h-24 mx-auto mb-6 rounded-full bg-linear-to-br rtl:bg-linear-to-bl from-green-500 to-green-400 flex items-center justify-center shadow-2xl animate-bounce-slow">
                         <svg class="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                 d="M5 13l4 4L19 7" />
@@ -463,28 +480,28 @@
                     <p class="text-lg text-gray-600">{{ statictranslations('Order') }} #<span
                             class="font-bold text-primary">{{ $order->order_number ?? '#' . $order->id }}</span></p>
 
-                    <div class="bg-white rounded-2xl shadow-lg p-8 text-left mt-8 border border-gray-100">
+                    <div class="bg-white rounded-2xl shadow-lg p-8 text-start mt-8 border border-gray-100">
                         <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ statictranslations('Order Details') }}
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-base">
                             <div><span
-                                    class="font-semibold text-gray-700 mr-2">{{ statictranslations('Order Number') }}:</span>{{ $order->order_number ?? '—' }}
+                                    class="font-semibold text-gray-700 me-2">{{ statictranslations('Order Number') }}:</span><span class="font-medium text-gray-900">{{ $order->order_number ?? '—' }}</span>
                             </div>
                             <div><span
-                                    class="font-semibold text-gray-700 mr-2">{{ statictranslations('Order Date') }}:</span>{{ $order?->created_at?->format('M d, Y') ?? date('M d, Y') }}
+                                    class="font-semibold text-gray-700 me-2">{{ statictranslations('Order Date') }}:</span><span class="font-medium text-gray-900">{{ $orderDate }}</span>
                             </div>
                             <div><span
-                                    class="font-semibold text-gray-700 mr-2">{{ statictranslations('Payment Method') }}:</span>{{ $order->payment_method ?? '—' }}
+                                    class="font-semibold text-gray-700 me-2">{{ statictranslations('Payment Method') }}:</span><span class="font-medium text-gray-900">{{ $paymentMethodLabel }}</span>
                             </div>
                             <div><span
-                                    class="font-semibold text-gray-700 mr-2">{{ statictranslations('Shipping Method') }}:</span>{{ $order->shipping_method ?? 'Standard Shipping' }}
+                                    class="font-semibold text-gray-700 me-2">{{ statictranslations('Shipping Method') }}:</span><span class="font-medium text-gray-900">{{ $shippingMethodLabel }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mt-6 text-left">
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mt-6 text-start">
                         <div class="flex items-start">
-                            <svg class="w-6 h-6 text-blue-600 mr-3 mt-1 shrink-0" fill="none"
+                            <svg class="w-6 h-6 text-blue-600 me-3 mt-1 shrink-0 rtl:rotate-180" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -502,7 +519,7 @@
                 <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="{{ route('home') }}"
-                            class="flex-1 px-8 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                            class="flex-1 px-8 py-5 bg-linear-to-r rtl:bg-linear-to-l from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                             {{ statictranslations('Continue Shopping') }}
                         </a>
                         @php
@@ -530,11 +547,11 @@
                             'phone' => $prefillPhone,
                         ]));
                     @endphp
-                    <div class="bg-linear-to-br from-primary/5 via-blue-50/40 to-white rounded-3xl shadow-lg border-2 border-primary/20 p-8 text-left">
+                    <div class="bg-linear-to-br rtl:bg-linear-to-bl from-primary/5 via-blue-50/40 to-white rounded-3xl shadow-lg border-2 border-primary/20 p-8 text-start">
                         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                             <div class="space-y-2">
                                 <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
-                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                     {{ statictranslations('Create an Account') }}
                                 </div>
                                 <h3 class="text-xl font-bold text-gray-900">{{ statictranslations('Track Your Order & Save Time Next Time') }}</h3>
@@ -542,10 +559,10 @@
                                     {{ statictranslations('Register an account with') }} <strong class="text-gray-900">{{ $prefillEmail }}</strong>. {{ statictranslations('Once your email is verified, this order and any past guest orders will be automatically linked to your account.') }}
                                 </p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-xs text-gray-600 font-medium">
-                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Live order tracking') }}</div>
-                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Saved delivery addresses') }}</div>
-                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Exclusive member promotions') }}</div>
-                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Faster 1-click checkout') }}</div>
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Live order tracking') }}</div>
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Saved delivery addresses') }}</div>
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Exclusive member promotions') }}</div>
+                                    <div class="flex items-center"><svg class="w-4 h-4 text-green-500 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ statictranslations('Faster 1-click checkout') }}</div>
                                 </div>
                             </div>
                             <a href="{{ $registerUrl }}"
@@ -566,14 +583,14 @@
                     <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                         <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200 mb-5">
                             <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 me-2 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                                     <path
                                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 {{ statictranslations('Shipping Address') }}
                             </h3>
-                            <div class="bg-white rounded-xl p-4 space-y-1 text-sm text-gray-700">
+                            <div class="bg-white rounded-xl p-4 space-y-1 text-sm text-gray-700 text-start">
                                 @if ($addr && isset($addr['name']))
                                     <p class="font-semibold text-gray-900">{{ $addr['name'] }}</p>
                                     @if (isset($addr['street']))
@@ -635,7 +652,7 @@
                             <div class="flex justify-between items-center">
                                 <span class="text-xl font-bold text-gray-900">{{ statictranslations('Total') }}</span>
                                 <span
-                                    class="text-xl font-bold bg-linear-to-r from-green-500 to-green-400 bg-clip-text text-transparent">
+                                    class="text-xl font-bold bg-linear-to-r rtl:bg-linear-to-l from-green-500 to-green-400 bg-clip-text text-transparent">
                                     {{ money_format_number($order->total ?? 0) }}
                                 </span>
                             </div>
@@ -644,7 +661,7 @@
                     @if (($order->payment_method ?? '') !== 'cod')
                         <div class="bg-green-50 rounded-xl p-4 border border-green-200">
                             <div class="flex items-center text-green-700">
-                                <svg class="w-5 h-5 mr-2 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 me-2 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                         clip-rule="evenodd" />
@@ -675,8 +692,8 @@
         ]));
     @endphp
     <div id="postOrderRegisterModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative">
-            <button type="button" id="closePostOrderRegisterModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors" aria-label="{{ statictranslations('Close') }}">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative text-start">
+            <button type="button" id="closePostOrderRegisterModal" class="absolute top-5 end-5 text-gray-400 hover:text-gray-600 transition-colors" aria-label="{{ statictranslations('Close') }}">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
@@ -694,15 +711,15 @@
 
             <div class="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-200/60 space-y-3">
                 <div class="flex items-center text-xs text-gray-700">
-                    <svg class="w-4 h-4 text-green-500 mr-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-green-500 me-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span>{{ statictranslations('Auto-link past and current orders after email verification') }}</span>
                 </div>
                 <div class="flex items-center text-xs text-gray-700">
-                    <svg class="w-4 h-4 text-green-500 mr-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-green-500 me-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span>{{ statictranslations('Real-time order tracking in your account') }}</span>
                 </div>
                 <div class="flex items-center text-xs text-gray-700">
-                    <svg class="w-4 h-4 text-green-500 mr-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-green-500 me-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span>{{ statictranslations('Saved addresses for quick 1-click ordering') }}</span>
                 </div>
             </div>

@@ -260,7 +260,7 @@
                             <p class="text-xs font-semibold tracking-widest uppercase text-cyan-300 mt-1">{{ statictranslations('Order') }}
                                 #{{ $orderNum }}</p>
                         </div>
-                        <div class="text-right text-xs text-slate-200 leading-relaxed">
+                        <div class="text-end text-xs text-slate-200 leading-relaxed">
                             <div>{{ $siteContent->address ?? statictranslations('Not available') }}</div>
                             @if ($siteContent->phone ?? null)
                                 <div>{{ $siteContent->phone }}</div>
@@ -274,7 +274,7 @@
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
                         {{ statictranslations('Placed') }}: <span
-                            class="font-semibold text-slate-700">{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('F j, Y') }}</span>
+                            class="font-semibold text-slate-700"><bdi>{{ optional($order->created_at)?->locale(app()->getLocale())->translatedFormat('d F Y') }}</bdi></span>
                     </div>
                     <div
                         class="text-slate-500 inline-flex items-center gap-1.5 bg-white/90 rounded-full px-3 py-1 border border-slate-200 invoice-chip">
@@ -345,25 +345,25 @@
 
             <!-- Order Items -->
             <div class="mb-10 print-mb-4 invoice-section">
-                <h3 class="font-semibold text-gray-800 mb-3 text-lg border-l-4 border-primary pl-2">{{ statictranslations('Order Items') }}</h3>
+                <h3 class="font-semibold text-gray-800 mb-3 text-lg border-s-4 border-primary ps-2">{{ statictranslations('Order Items') }}</h3>
                 <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm invoice-items-wrap">
                     <table class="min-w-full bg-white invoice-items">
                         <thead class="bg-gray-50/80 invoice-items-head">
                             <tr>
                                 <th
-                                    class="px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    class="px-4 py-2.5 text-start text-[11px] font-semibold tracking-wide uppercase text-gray-600">
                                     {{ statictranslations('Product') }}</th>
                                 <th
-                                    class="px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    class="px-4 py-2.5 text-start text-[11px] font-semibold tracking-wide uppercase text-gray-600">
                                     {{ statictranslations('SKU') }}</th>
                                 <th
                                     class="px-4 py-2.5 text-center text-[11px] font-semibold tracking-wide uppercase text-gray-600">
                                     {{ statictranslations('Qty') }}</th>
                                 <th
-                                    class="px-4 py-2.5 text-right text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    class="px-4 py-2.5 text-end text-[11px] font-semibold tracking-wide uppercase text-gray-600">
                                     {{ statictranslations('Unit Price') }}</th>
                                 <th
-                                    class="px-4 py-2.5 text-right text-[11px] font-semibold tracking-wide uppercase text-gray-600">
+                                    class="px-4 py-2.5 text-end text-[11px] font-semibold tracking-wide uppercase text-gray-600">
                                     {{ statictranslations('Total') }}</th>
                             </tr>
                         </thead>
@@ -395,13 +395,13 @@
                                     </td>
                                     <td class="px-4 py-2 text-xs text-gray-400">{{ $sku }}</td>
                                     <td class="px-4 py-2 text-center text-gray-600">{{ $qty }}</td>
-                                    <td class="px-4 py-2 text-right text-gray-700">
+                                    <td class="px-4 py-2 text-end text-gray-700">
                                         @if ($lineDiscount > 0)
-                                            <span class="text-xs text-gray-400 line-through mr-1">{{ money_format_number($originalUnitPrice) }}</span>
+                                            <span class="text-xs text-gray-400 line-through me-1">{{ money_format_number($originalUnitPrice) }}</span>
                                         @endif
                                         <span>{{ money_format_number($unitPrice) }}</span>
                                     </td>
-                                    <td class="px-4 py-2 text-right text-gray-900 font-semibold">
+                                    <td class="px-4 py-2 text-end text-gray-900 font-semibold">
                                         <span>{{ money_format_number($lineTotal) }}</span>
                                     </td>
                                 </tr>
@@ -457,7 +457,7 @@
                             <span class="text-gray-600">
                                 {{ statictranslations('Coupon Discount') }}:
                                 <span
-                                    class="ml-1 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">{{ strtoupper($couponCode) }}</span>
+                                    class="ms-1 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">{{ strtoupper($couponCode) }}</span>
                             </span>
                             <span
                                 class="text-green-600 font-medium">{{ $couponDiscount > 0 ? '− ' . money_format_number($couponDiscount) : '-' }}</span>
@@ -488,7 +488,10 @@
                     {{ statictranslations('Print Invoice') }}
                 </button>
                 <a href="{{ route('dashboard.overview') }}"
-                    class="text-sm text-gray-500 hover:text-primary underline">&larr; {{ statictranslations('Back to dashboard') }}</a>
+                    class="text-sm text-gray-500 hover:text-primary underline flex items-center gap-1">
+                    <span class="inline-block rtl:rotate-180">&larr;</span>
+                    <span>{{ statictranslations('Back to dashboard') }}</span>
+                </a>
             </div>
 
             <div class="mt-6 text-center text-xs text-gray-400 print-footer-bottom">

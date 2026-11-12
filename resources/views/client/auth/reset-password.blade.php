@@ -25,7 +25,7 @@
                 <!-- Logo and Back Button -->
                 <div class="space-y-6">
                     <a href="{{ url('/') }}" class="inline-flex items-center text-white hover:opacity-80 transition-opacity">
-                        <svg class="w-6 h-6 mr-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 me-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                         <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
@@ -44,12 +44,11 @@
 
                     <!-- Security Tips -->
                     <div class="space-y-4 mt-12">
-                        <div class="flex items-start space-x-3">
+                        <div class="flex items-start gap-3">
                             <div class="shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
                                 </svg>
                             </div>
                             <div>
@@ -57,12 +56,11 @@
                                 <p class="text-white/80">{{ statictranslations('Use 8+ characters with mixed case & numbers') }}</p>
                             </div>
                         </div>
-                        <div class="flex items-start space-x-3">
+                        <div class="flex items-start gap-3">
                             <div class="shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
                                 </svg>
                             </div>
                             <div>
@@ -70,12 +68,11 @@
                                 <p class="text-white/80">{{ statictranslations('Your data is protected with encryption') }}</p>
                             </div>
                         </div>
-                        <div class="flex items-start space-x-3">
+                        <div class="flex items-start gap-3">
                             <div class="shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
                                 </svg>
                             </div>
                             <div>
@@ -87,15 +84,15 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center space-x-6 text-sm text-white/80">
+                <div class="flex items-center gap-6 text-sm text-white/80">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         {{ statictranslations('Secure & Encrypted') }}
                     </div>
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         {{ statictranslations('SSL Protected') }}
@@ -111,7 +108,7 @@
                 <!-- Mobile Back Button -->
                 <div class="lg:hidden mb-6">
                     <a href="{{ url('/') }}" class="inline-flex items-center text-primary hover:opacity-80 transition-opacity">
-                        <svg class="w-5 h-5 mr-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 me-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                         <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
@@ -131,14 +128,14 @@
 
                 {{-- Display Validation Errors --}}
                 @if ($errors->any())
-                    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                    <div class="mb-6 bg-red-50 border-s-4 border-red-500 p-4 rounded-lg">
                         <div class="flex">
                             <div class="shrink-0">
                                 <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <div class="ml-3">
+                            <div class="ms-3">
                                 <ul class="mt-1 list-disc list-inside text-sm text-red-600">
                                     @foreach ($errors->all() as $error)
                                         <li>{{ $error }}</li>
@@ -151,14 +148,14 @@
 
                 {{-- Success Message --}}
                 @if (session('success'))
-                    <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+                    <div class="mb-6 bg-green-50 border-s-4 border-green-500 p-4 rounded-lg">
                         <div class="flex">
                             <div class="shrink-0">
                                 <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <div class="ml-3">
+                            <div class="ms-3">
                                 <p class="text-sm text-green-700">{{ session('success') }}</p>
                             </div>
                         </div>
@@ -177,13 +174,13 @@
                     <div>
                         <label for="email_display" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address') }}</label>
                         <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                                 </svg>
                             </div>
                             <input id="email_display" type="email" disabled value="{{ $email }}"
-                                class="appearance-none block w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-600 bg-gray-50 placeholder-gray-400 focus:outline-none transition-all duration-200 cursor-not-allowed">
+                                class="appearance-none block w-full ps-12 pe-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-600 bg-gray-50 placeholder-gray-400 focus:outline-none transition-all duration-200 cursor-not-allowed">
                         </div>
                     </div>
 
@@ -191,16 +188,16 @@
                     <div>
                         <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('New Password') }}</label>
                         <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
                             <input id="password" name="password" type="password" required
-                                class="appearance-none block w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
+                                class="appearance-none block w-full ps-12 pe-12 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                                 placeholder="{{ statictranslations('Enter your new password') }}">
                             <button type="button" id="togglePassword" tabindex="-1"
-                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                class="absolute inset-y-0 end-0 pe-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                                 aria-label="{{ statictranslations('Toggle password visibility') }}">
                                 <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -226,16 +223,16 @@
                     <div>
                         <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Confirm New Password') }}</label>
                         <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
                             <input id="password_confirmation" name="password_confirmation" type="password" required
-                                class="appearance-none block w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
+                                class="appearance-none block w-full ps-12 pe-12 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                                 placeholder="{{ statictranslations('Re-enter your new password') }}">
                             <button type="button" id="togglePasswordConfirm" tabindex="-1"
-                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                class="absolute inset-y-0 end-0 pe-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                                 aria-label="{{ statictranslations('Toggle confirm password visibility') }}">
                                 <svg id="eyeIconConfirm" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -246,14 +243,14 @@
                     </div>
 
                     <!-- Info Notice -->
-                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                    <div class="bg-blue-50 border-s-4 border-blue-500 p-4 rounded-lg">
                         <div class="flex">
                             <div class="shrink-0">
                                 <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2z" clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <div class="ml-3">
+                            <div class="ms-3">
                                 <p class="text-sm text-blue-700">{{ statictranslations('This reset link will expire in 5 minutes. If it has expired, request a new one.') }}</p>
                             </div>
                         </div>
@@ -264,7 +261,7 @@
                         <button type="submit"
                             class="w-full flex justify-center items-center px-6 py-3.5 text-base font-semibold text-white bg-primary rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-50">
                             <span>{{ statictranslations('Reset Password') }}</span>
-                            <svg class="ml-2 w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="ms-2 w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
                         </button>
@@ -275,7 +272,7 @@
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <p class="text-center text-sm text-gray-600">
                         {{ statictranslations('Password reset link invalid or expired?') }}
-                        <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ml-1">
+                        <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
                             {{ statictranslations('Request a new one') }} <span class="inline-block rtl:rotate-180">→</span>
                         </a>
                     </p>

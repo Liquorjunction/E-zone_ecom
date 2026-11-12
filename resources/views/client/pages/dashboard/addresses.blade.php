@@ -98,11 +98,11 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Address Type') }}</label>
                             <div class="relative">
-                                <select id="field-type" name="type" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white" required>
+                                <select id="field-type" name="type" class="block w-full ps-4 pe-10 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white" required>
                                     <option value="billing">{{ statictranslations('Billing') }}</option>
                                     <option value="shipping">{{ statictranslations('Shipping') }}</option>
                                 </select>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
@@ -134,7 +134,7 @@
                         <div class="md:col-span-2">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }}</label>
                             <div class="relative">
-                                <select id="field-city" name="city_id" class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white" required>
+                                <select id="field-city" name="city_id" class="block w-full ps-4 pe-10 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white" required>
                                     <option value="">{{ statictranslations('Select city') }}</option>
                                     @foreach(($cities ?? collect()) as $city)
                                         <option value="{{ $city->id }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">
@@ -142,7 +142,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
@@ -199,11 +199,11 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Address Type') }}</label>
                     <div class="relative">
-                        <select id="mobile-field-type" name="type" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base" required>
+                        <select id="mobile-field-type" name="type" class="block w-full ps-4 pe-10 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base" required>
                             <option value="billing">{{ statictranslations('Billing') }}</option>
                             <option value="shipping">{{ statictranslations('Shipping') }}</option>
                         </select>
-                        <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
@@ -232,7 +232,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('City') }}</label>
                     <div class="relative">
-                        <select id="mobile-field-city" name="city_id" class="block w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base" required>
+                        <select id="mobile-field-city" name="city_id" class="block w-full ps-4 pe-10 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white text-base" required>
                             <option value="">{{ statictranslations('Select city') }}</option>
                             @foreach(($cities ?? collect()) as $city)
                                 <option value="{{ $city->id }}" data-country="{{ $city->getTranslation('country_name', app()->getLocale()) }}">
@@ -240,7 +240,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
@@ -268,7 +268,7 @@
         </div>
     </div>
 
-    <button type="button" onclick="openAddModal()" style="z-index: 9998;" class="sm:hidden fixed bottom-6 right-6 bg-primary text-white p-5 rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+    <button type="button" onclick="openAddModal()" style="z-index: 9998;" class="sm:hidden fixed bottom-6 end-6 bg-primary text-white p-5 rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group">
         <svg class="w-7 h-7 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
     </button>
 
