@@ -75,7 +75,15 @@ class ProductRepository implements ProductRepositoryInterface
         $categories    = $request->filled('category')    ? (array) $request->category    : [];
         $subcategories = $request->filled('subcategory') ? (array) $request->subcategory : [];
 
-        if (!empty($subcategories)) {
+        if (!empty($subcategories) && !empty($categories)) {
+            $query->where(function (Builder $q) use ($categories, $subcategories) {
+                $q->whereHas('product.subCategory', fn (Builder $sq) =>
+                    $sq->whereIn('slug', $subcategories)->where('status', 'active')
+                )->orWhereHas('product.category', fn (Builder $cq) =>
+                    $cq->whereIn('slug', $categories)->where('status', 'active')
+                );
+            });
+        } elseif (!empty($subcategories)) {
             $query->whereHas('product.subCategory', fn (Builder $q) =>
                 $q->whereIn('slug', $subcategories)->where('status', 'active')
             );

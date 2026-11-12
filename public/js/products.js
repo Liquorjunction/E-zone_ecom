@@ -74,6 +74,8 @@ const syncFormsData = (sourceForm = getFilterForm()) => {
                 targetPriceRange._sliderCommitFromInputs({ silent: true });
             }
         }
+
+        autoExpandCheckedCategories(form);
     });
 };
 
@@ -116,7 +118,7 @@ const getSubcategoryLabel = (value) => {
     if (!input) return value;
     const label = input.closest("label");
     if (!label) return value;
-    const span = label.querySelector("span.ms-3, span.ml-3, span[data-localized]");
+    const span = label.querySelector("[data-label], span[data-localized], span.truncate, span.ms-3, span.ms-2\\.5, span.ml-3");
     return span ? span.textContent.trim() : value;
 };
 
@@ -127,7 +129,7 @@ const getCategoryLabel = (value) => {
     if (!input) return value.replace(/-/g, " ");
     const label = input.closest("label");
     if (!label) return value.replace(/-/g, " ");
-    const span = label.querySelector("span.ms-3, span.ml-3, span[data-localized]");
+    const span = label.querySelector("[data-label], span[data-localized], span.truncate, span.ms-3, span.ms-2\\.5, span.ml-3");
     return span ? span.textContent.trim() : label.textContent.trim();
 };
 
@@ -341,26 +343,28 @@ const attachRemoveFilterListeners = () => {
             const filterType  = fresh.dataset.filterType;
             const filterValue = fresh.dataset.filterValue;
 
-            document.querySelectorAll("#filter-form").forEach((form) => {
+            getFilterForms().forEach((form) => {
                 if (filterType === "price") {
                     const priceRange = form.querySelector("[data-price-range]");
                     if (priceRange && typeof priceRange._sliderReset === "function") {
                         priceRange._sliderReset();
                     }
+                } else if (filterType === "category") {
+                    const catCb = form.querySelector(`input[name="category[]"][value="${filterValue}"]`);
+                    if (catCb) {
+                        catCb.checked = false;
+                        handleCategoryCheckboxChange(catCb, form);
+                    }
+                } else if (filterType === "subcategory") {
+                    const subCb = form.querySelector(`input[name="subcategory[]"][value="${filterValue}"]`);
+                    if (subCb) {
+                        subCb.checked = false;
+                        handleSubcategoryCheckboxChange(subCb, form);
+                    }
                 } else {
                     form.querySelectorAll(`input[name="${filterType}[]"]`).forEach((input) => {
                         if (input.value === filterValue) {
                             input.checked = false;
-                            // ─── FIX: if removing a subcategory, update parent checkbox state
-                            if (filterType === "subcategory") {
-                                updateParentCategoryCheckbox(input.dataset.categorySlug, form);
-                            }
-                            // ─── FIX: if removing a category, uncheck all its subcategories too
-                            if (filterType === "category") {
-                                form.querySelectorAll(
-                                    `input[name="subcategory[]"][data-category-slug="${filterValue}"]`
-                                ).forEach((sub) => (sub.checked = false));
-                            }
                         }
                     });
                 }
@@ -374,55 +378,95 @@ const attachRemoveFilterListeners = () => {
 // CATEGORY / SUBCATEGORY LOGIC
 // ─────────────────────────────────────────────
 
-// ─── FIX: extracted helper so any code path can call it
+function handleCategoryCheckboxChange(checkbox, form) {
+    const slug = checkbox.dataset.categorySlug || checkbox.value;
+    if (!slug) return;
+    const isChecked = checkbox.checked;
+
+    // Auto-select or auto-deselect ALL child subcategories in this form
+    form.querySelectorAll(`.subcategory-checkbox[data-category-slug="${slug}"]`).forEach((sub) => {
+        sub.checked = isChecked;
+    });
+
+    // Expand or collapse container
+    const item = checkbox.closest(".category-item");
+    const container = item
+        ? item.querySelector(".subcategories-container")
+        : form.querySelector(`.subcategories-container[data-category-slug="${slug}"]`);
+    const toggleSvg = item
+        ? item.querySelector(".toggle-subcategories svg")
+        : form.querySelector(`.toggle-subcategories[data-category-slug="${slug}"] svg`);
+
+    if (container) {
+        if (isChecked) {
+            container.classList.remove("hidden");
+            if (toggleSvg) toggleSvg.classList.add("rotate-180");
+        } else {
+            container.classList.add("hidden");
+            if (toggleSvg) toggleSvg.classList.remove("rotate-180");
+        }
+    }
+}
+
+function handleSubcategoryCheckboxChange(checkbox, form) {
+    const slug = checkbox.dataset.categorySlug;
+    if (!slug) return;
+
+    const checkedSubs = form.querySelectorAll(`.subcategory-checkbox[data-category-slug="${slug}"]:checked`);
+    const parentCheckbox = form.querySelector(`.category-checkbox[data-category-slug="${slug}"]`)
+                         || form.querySelector(`.category-checkbox[value="${slug}"]`);
+
+    if (parentCheckbox) {
+        parentCheckbox.checked = checkedSubs.length > 0;
+        parentCheckbox.indeterminate = false;
+    }
+
+    const item = checkbox.closest(".category-item");
+    const container = item
+        ? item.querySelector(".subcategories-container")
+        : form.querySelector(`.subcategories-container[data-category-slug="${slug}"]`);
+    const toggleSvg = item
+        ? item.querySelector(".toggle-subcategories svg")
+        : form.querySelector(`.toggle-subcategories[data-category-slug="${slug}"] svg`);
+
+    if (container && checkedSubs.length > 0) {
+        container.classList.remove("hidden");
+        if (toggleSvg) toggleSvg.classList.add("rotate-180");
+    }
+}
+
 function updateParentCategoryCheckbox(categorySlug, container = document) {
     if (!categorySlug) return;
     const parentCheckbox = container.querySelector(
         `.category-checkbox[data-category-slug="${categorySlug}"]`
-    );
+    ) || container.querySelector(`.category-checkbox[value="${categorySlug}"]`);
     if (!parentCheckbox) return;
-    const allSubs     = container.querySelectorAll(`.subcategory-checkbox[data-category-slug="${categorySlug}"]`);
-    const checkedSubs = container.querySelectorAll(`.subcategory-checkbox[data-category-slug="${categorySlug}"]:checked`);
-    // ─── FIX: use indeterminate visually; fully checked only when ALL subs checked
-    parentCheckbox.checked       = allSubs.length > 0 && checkedSubs.length === allSubs.length;
-    parentCheckbox.indeterminate = checkedSubs.length > 0 && checkedSubs.length < allSubs.length;
+
+    const checkedSubs = container.querySelectorAll(
+        `.subcategory-checkbox[data-category-slug="${categorySlug}"]:checked`
+    );
+    const allSubs = container.querySelectorAll(
+        `.subcategory-checkbox[data-category-slug="${categorySlug}"]`
+    );
+    if (allSubs.length > 0) {
+        parentCheckbox.checked = checkedSubs.length > 0;
+        parentCheckbox.indeterminate = false;
+    }
 }
 
-const subCategoryCheckboxes = document.querySelectorAll(".subcategory-checkbox");
-subCategoryCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", function () {
-        updateParentCategoryCheckbox(this.dataset.categorySlug);
-    });
-});
-
-const categoryCheckboxes = document.querySelectorAll(".category-checkbox");
-categoryCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", function () {
-        const slug    = this.dataset.categorySlug;
-        const related = document.querySelectorAll(`.subcategory-checkbox[data-category-slug="${slug}"]`);
-
-        // ─── FIX: when unchecking a category, also uncheck ALL its subcategories
-        related.forEach((sub) => (sub.checked = this.checked));
-
-        const container = document.querySelector(`.subcategories-container[data-category-slug="${slug}"]`);
-        if (container) {
-            container.classList.toggle("hidden", !this.checked);
-            const toggleSvg = document.querySelector(`.toggle-subcategories[data-category-slug="${slug}"] svg`);
-            if (toggleSvg) toggleSvg.classList.toggle("rotate-180", this.checked);
-        }
-    });
-});
-
-const toggleButtons = document.querySelectorAll(".toggle-subcategories");
-toggleButtons.forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        const slug = this.dataset.categorySlug;
-        const container = document.querySelector(`.subcategories-container[data-category-slug="${slug}"]`);
-        if (!container) return;
-        container.classList.toggle("hidden");
-        this.querySelector("svg")?.classList.toggle("rotate-180");
-    });
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".toggle-subcategories");
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const slug = btn.dataset.categorySlug;
+    const item = btn.closest(".category-item");
+    const container = item
+        ? item.querySelector(".subcategories-container")
+        : document.querySelector(`.subcategories-container[data-category-slug="${slug}"]`);
+    if (!container) return;
+    container.classList.toggle("hidden");
+    btn.querySelector("svg")?.classList.toggle("rotate-180");
 });
 
 // ─────────────────────────────────────────────
@@ -430,22 +474,16 @@ toggleButtons.forEach((btn) => {
 // ─────────────────────────────────────────────
 
 function autoExpandCheckedCategories(container = document) {
-    // expand if any sub is checked
-    container.querySelectorAll(".subcategory-checkbox:checked").forEach((cb) => {
-        const slug = cb.dataset.categorySlug;
-        container.querySelectorAll(`.subcategories-container[data-category-slug="${slug}"]`)
-            .forEach((el) => el.classList.remove("hidden"));
-        container.querySelectorAll(`.toggle-subcategories[data-category-slug="${slug}"] svg`)
-            .forEach((svg) => svg.classList.add("rotate-180"));
-    });
+    container.querySelectorAll(".category-item").forEach((item) => {
+        const hasCheckedCat = !!item.querySelector(".category-checkbox:checked");
+        const hasCheckedSub = !!item.querySelector(".subcategory-checkbox:checked");
+        const containerEl = item.querySelector(".subcategories-container");
+        const toggleSvg = item.querySelector(".toggle-subcategories svg");
 
-    // expand if parent category is checked
-    container.querySelectorAll(".category-checkbox:checked").forEach((cb) => {
-        const slug = cb.dataset.categorySlug;
-        container.querySelectorAll(`.subcategories-container[data-category-slug="${slug}"]`)
-            .forEach((el) => el.classList.remove("hidden"));
-        container.querySelectorAll(`.toggle-subcategories[data-category-slug="${slug}"] svg`)
-            .forEach((svg) => svg.classList.add("rotate-180"));
+        if (containerEl && (hasCheckedCat || hasCheckedSub)) {
+            containerEl.classList.remove("hidden");
+            if (toggleSvg) toggleSvg.classList.add("rotate-180");
+        }
     });
 }
 
@@ -462,6 +500,12 @@ if (filterForms.length) {
             // Ignore changes on data-input elements mid-typing (blur/Enter handled by slider)
             if (e.target.matches('[data-input="min"], [data-input="max"]')) return;
             if (e.target.matches("input, select")) {
+                if (e.target.matches(".category-checkbox")) {
+                    handleCategoryCheckboxChange(e.target, form);
+                } else if (e.target.matches(".subcategory-checkbox")) {
+                    handleSubcategoryCheckboxChange(e.target, form);
+                }
+
                 syncFormsData(form);
                 submitFilters(e);
             }
@@ -543,14 +587,19 @@ sortSelect?.addEventListener("change", submitFilters);
 // CLEAR ALL FILTERS
 // ─────────────────────────────────────────────
 
-// ─── FIX: the old "Clear All" was an <a> tag that did a full page reload,
-//         losing JS state. We intercept the button here and do a clean reset.
-if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener("click", (e) => {
+// Intercept Clear All buttons and do a clean reset across all forms
+document.querySelectorAll("#clear-filters, .clear-filters-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
         e.preventDefault();
 
-        document.querySelectorAll("#filter-form").forEach((form) => {
+        getFilterForms().forEach((form) => {
             form.reset();
+
+            // Explicitly uncheck all checkboxes
+            form.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach((cb) => {
+                cb.checked = false;
+                cb.indeterminate = false;
+            });
 
             // Reset custom price slider via its public API
             form.querySelectorAll("[data-price-range]").forEach((pr) => {
@@ -572,7 +621,7 @@ if (clearFiltersBtn) {
 
         submitFilters();
     });
-}
+});
 
 // ─────────────────────────────────────────────
 // APPLY (MOBILE)
@@ -608,22 +657,20 @@ document.querySelectorAll(".category-sidebar-link").forEach((link) => {
     link.addEventListener("click", (e) => {
         e.preventDefault();
         const categorySlug = link.dataset.categoryLink;
-        const forms = document.querySelectorAll("#filter-form");
+        const forms = getFilterForms();
 
         forms.forEach((form) => {
             form.querySelectorAll('input[name="category[]"]').forEach((cb) => (cb.checked = false));
             form.querySelectorAll('input[name="subcategory[]"]').forEach((cb) => (cb.checked = false));
 
             const cb = form.querySelector(`input[name="category[]"][value="${categorySlug}"]`);
-            if (cb) cb.checked = true;
-
-            // ─── FIX: also check all subcategories of the selected category
-            form.querySelectorAll(
-                `input[name="subcategory[]"][data-category-slug="${categorySlug}"]`
-            ).forEach((sub) => (sub.checked = true));
+            if (cb) {
+                cb.checked = true;
+                handleCategoryCheckboxChange(cb, form);
+            }
         });
 
-        setTimeout(submitFilters, 50);
+        submitFilters();
     });
 });
 
@@ -632,20 +679,20 @@ document.querySelectorAll(".subcategory-sidebar-link").forEach((link) => {
         e.preventDefault();
         const subcategorySlug = link.dataset.subcategorySlug;
         const categorySlug    = link.dataset.categorySlug;
-        const forms           = document.querySelectorAll("#filter-form");
+        const forms           = getFilterForms();
 
         forms.forEach((form) => {
             form.querySelectorAll('input[name="category[]"]').forEach((cb) => (cb.checked = false));
             form.querySelectorAll('input[name="subcategory[]"]').forEach((cb) => (cb.checked = false));
 
-            const catCb = form.querySelector(`input[name="category[]"][value="${categorySlug}"]`);
-            if (catCb) catCb.checked = true;
-
             const subCb = form.querySelector(`input[name="subcategory[]"][value="${subcategorySlug}"]`);
-            if (subCb) subCb.checked = true;
+            if (subCb) {
+                subCb.checked = true;
+                handleSubcategoryCheckboxChange(subCb, form);
+            }
         });
 
-        setTimeout(submitFilters, 50);
+        submitFilters();
     });
 });
 
@@ -663,10 +710,28 @@ if (initialViewInput) setActiveView(initialViewInput.value || "grid");
 // Hide loading overlay (safety net)
 if (loadingOverlay) loadingOverlay.classList.add("hidden");
 
+// Synchronize initial state:
+getFilterForms().forEach((form) => {
+    // 1. If parent category is checked on load, ensure all child subcategories are checked
+    form.querySelectorAll(".category-checkbox:checked").forEach((parent) => {
+        const slug = parent.dataset.categorySlug || parent.value;
+        if (slug) {
+            form.querySelectorAll(`.subcategory-checkbox[data-category-slug="${slug}"]`).forEach((sub) => {
+                sub.checked = true;
+            });
+        }
+    });
+
+    // 2. If any subcategory is checked on load, ensure parent category is checked
+    form.querySelectorAll(".subcategory-checkbox:checked").forEach((sub) => {
+        const slug = sub.dataset.categorySlug;
+        if (slug) {
+            const parent = form.querySelector(`.category-checkbox[data-category-slug="${slug}"]`)
+                        || form.querySelector(`.category-checkbox[value="${slug}"]`);
+            if (parent) parent.checked = true;
+        }
+    });
+});
+
 // Auto-expand categories that are already checked (e.g. from URL params)
 autoExpandCheckedCategories();
-
-// Initialise indeterminate state for partially-checked categories
-document.querySelectorAll(".category-checkbox").forEach((cb) =>
-    updateParentCategoryCheckbox(cb.dataset.categorySlug)
-);

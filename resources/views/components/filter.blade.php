@@ -50,7 +50,8 @@ $countActiveVariants = function ($products) {
                 {{ statictranslations('Filters') }}
             </h2>
             <a href="{{ route('products.index') }}"
-                class="text-sm font-medium text-primary hover:opacity-80 transition-opacity cursor-pointer hover:underline">
+                id="clear-filters"
+                class="clear-filters-btn text-sm font-medium text-primary hover:opacity-80 transition-opacity cursor-pointer hover:underline">
                 {{ statictranslations('Clear All') }}
             </a>
         </div>
@@ -175,16 +176,60 @@ $countActiveVariants = function ($products) {
                 <div class="space-y-2 px-2">
                     @foreach ($categories as $category)
                         @if (is_object($category) && $countActiveVariants($category->products) > 0)
-                            <label class="flex items-center group cursor-pointer">
-                                <input type="checkbox" name="category[]" value="{{ $category->slug }}"
-                                    {{ in_array($category->slug, (array) request('category', [])) ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary category-checkbox"
-                                    data-category-slug="{{ $category->slug }}">
-                                <span
-                                    class="ms-3 text-sm text-gray-700 group-hover:text-primary transition-colors">{{ $category->{'category-name'} }}</span>
-                                <span
-                                    class="ms-auto text-xs text-gray-400">({{ $countActiveVariants($category->products) }})</span>
-                            </label>
+                            @php
+                                $hasActiveSubcategories = $category->subcategories && $category->subcategories->filter(fn($sub) => $countActiveVariants($sub->products) > 0)->isNotEmpty();
+                                $isCategoryChecked = in_array($category->slug, (array) request('category', []));
+                                $hasCheckedSub = $category->subcategories && $category->subcategories->some(fn($sub) => in_array($sub->slug, (array) request('subcategory', [])));
+                                $isExpanded = $isCategoryChecked || $hasCheckedSub;
+                            @endphp
+                            <div class="category-item py-0.5">
+                                <div class="flex items-center justify-between group">
+                                    <label class="flex items-center flex-1 min-w-0 cursor-pointer">
+                                        <input type="checkbox" name="category[]" value="{{ $category->slug }}"
+                                            {{ $isCategoryChecked ? 'checked' : '' }}
+                                            class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary category-checkbox shrink-0"
+                                            data-category-slug="{{ $category->slug }}">
+                                        <span data-label="true"
+                                            class="ms-3 text-sm text-gray-700 group-hover:text-primary transition-colors truncate">{{ $category->{'category-name'} }}</span>
+                                        <span
+                                            class="ms-auto text-xs text-gray-400 shrink-0 me-2">({{ $countActiveVariants($category->products) }})</span>
+                                    </label>
+                                    @if ($hasActiveSubcategories)
+                                        <button type="button"
+                                            class="p-1 text-gray-400 hover:text-primary transition-colors toggle-subcategories shrink-0"
+                                            data-category-id="{{ $category->id }}"
+                                            data-category-slug="{{ $category->slug }}"
+                                            aria-label="{{ statictranslations('Toggle subcategories') }}">
+                                            <svg class="w-4 h-4 transform transition-transform duration-200 {{ $isExpanded ? 'rotate-180' : '' }}" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                                @if ($hasActiveSubcategories)
+                                    <div class="subcategories-container ms-6 mt-1.5 space-y-1.5 {{ $isExpanded ? '' : 'hidden' }}"
+                                        data-category-slug="{{ $category->slug }}">
+                                        @foreach ($category->subcategories as $subcategory)
+                                            @if ($countActiveVariants($subcategory->products) > 0)
+                                                <label class="flex items-center group cursor-pointer py-0.5">
+                                                    <input type="checkbox" name="subcategory[]"
+                                                        value="{{ $subcategory->slug }}"
+                                                        {{ in_array($subcategory->slug, (array) request('subcategory', [])) ? 'checked' : '' }}
+                                                        class="w-3.5 h-3.5 text-primary border-gray-300 rounded focus:ring-primary subcategory-checkbox shrink-0"
+                                                        data-category-slug="{{ $category->slug }}"
+                                                        data-subcategory-id="{{ $subcategory->id }}">
+                                                    <span data-label="true"
+                                                        class="ms-2.5 text-xs text-gray-600 group-hover:text-primary transition-colors truncate">{{ $subcategory->{'sub-category-name'} }}</span>
+                                                    <span
+                                                        class="ms-auto text-xs text-gray-400 shrink-0">({{ $countActiveVariants($subcategory->products) }})</span>
+                                                </label>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
                         @endif
                     @endforeach
                 </div>
