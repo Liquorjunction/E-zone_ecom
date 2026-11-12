@@ -25,7 +25,7 @@
                 <!-- Logo and Back Button -->
                 <div class="space-y-6">
                     <a href="{{ url('/') }}" class="inline-flex items-center text-white hover:opacity-80 transition-opacity">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 mr-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                         <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
@@ -108,7 +108,7 @@
                 <!-- Mobile Back Button -->
                 <div class="lg:hidden mb-6">
                     <a href="{{ url('/') }}" class="inline-flex items-center text-primary hover:opacity-80 transition-opacity">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                         <span class="font-semibold">{{ statictranslations('Back to Home') }}</span>
@@ -250,7 +250,7 @@
                     <p class="text-center text-sm text-gray-600">
                         {{ statictranslations('Already have an account?') }}
                         <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ml-1">
-                            {{ statictranslations('Sign in here') }} →
+                            {{ statictranslations('Sign in here') }} <span class="inline-block rtl:rotate-180">→</span>
                         </a>
                     </p>
                 </div>

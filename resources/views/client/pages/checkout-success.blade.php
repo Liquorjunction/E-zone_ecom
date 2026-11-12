@@ -2,7 +2,7 @@
   // Legacy view removed — always use the multi-step checkout (step=3)
   abort(404);
 @endphp
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
             <span class="text-primary font-medium">{{ statictranslations('Order Confirmed') }}</span>
@@ -95,7 +95,7 @@
 
         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
           <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-            <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+            <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
             What's Next?
           </h3>
 
@@ -152,7 +152,7 @@
       <div class="lg:col-span-1">
         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 sticky top-24">
           <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+            <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
             {{ statictranslations('Order Summary') }}
           </h2>
 

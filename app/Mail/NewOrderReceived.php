@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -15,15 +16,41 @@ class NewOrderReceived extends Mailable
     public $order;
     public $user;
     public $orderUrl;
+    public $customerName;
+    public $customerEmail;
+    public $customerPhone;
+    public $isGuest;
 
     /**
      * Create a new message instance.
      */
     public function __construct($order, $orderUrl)
     {
+        $this->afterCommit();
+
         $this->order = $order;
-        $this->user = $order->user;
+        $this->user = $order->user ?? null;
         $this->orderUrl = $orderUrl;
+
+        $shipping = $order->shipping_address ?? [];
+        $this->isGuest = method_exists($order, 'isGuest')
+            ? $order->isGuest()
+            : (($order->client_type ?? '') === 'guest' || is_null($order->user_id));
+
+        $this->customerName = $this->user?->name
+            ?? $order->guestUser?->name
+            ?? $order->shippingAddressRecord?->name
+            ?? ($shipping['name'] ?? ($this->isGuest ? 'Client Invité' : 'Client'));
+
+        $this->customerEmail = $order->email
+            ?? $this->user?->email
+            ?? $order->guestUser?->email
+            ?? ($shipping['email'] ?? '—');
+
+        $this->customerPhone = $order->phone_no
+            ?? $this->user?->phone
+            ?? $order->guestUser?->phone
+            ?? ($shipping['phone'] ?? '');
     }
 
     /**
@@ -44,9 +71,13 @@ class NewOrderReceived extends Mailable
         return new Content(
             view: 'admin.emails.new_orderReceived',
             with: [
-                'order' => $this->order,
-                'user' => $this->user,
-                'orderUrl' => $this->orderUrl,
+                'order'         => $this->order,
+                'user'          => $this->user,
+                'orderUrl'      => $this->orderUrl,
+                'customerName'  => $this->customerName,
+                'customerEmail' => $this->customerEmail,
+                'customerPhone' => $this->customerPhone,
+                'isGuest'       => $this->isGuest,
             ],
         );
     }

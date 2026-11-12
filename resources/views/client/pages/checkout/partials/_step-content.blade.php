@@ -61,7 +61,7 @@
             <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sticky top-24">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                        <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                        <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 me-3 shrink-0"></span>
                         {{ statictranslations('Order Summary') }}
                     </h2>
                     <div
@@ -93,7 +93,7 @@
                     <button type="button" id="proceedToCheckoutBtn" disabled
                         class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg transition-all duration-300 mt-2 opacity-60 cursor-not-allowed pointer-events-none">
                         {{ !Auth::check() ? statictranslations('Proceed as Guest') : statictranslations('Proceed to Checkout') }}
-                        <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 inline-block ml-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -104,7 +104,7 @@
                         <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
                             class="block w-full px-6 py-4 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
                             <span>{{ statictranslations('Proceed as Guest') }}</span>
-                            <svg class="w-5 h-5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 inline-block ml-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
@@ -126,7 +126,7 @@
                         <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
                             class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
                             {{ statictranslations('Proceed to Checkout') }}
-                            <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 inline-block ml-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -185,8 +185,9 @@
                             </div>
                             <p class="text-xs text-gray-600 mt-0.5">
                                 {{ statictranslations('Already have an account?') }}
-                                <a href="{{ route('login', ['checkout' => 1]) }}" class="font-bold text-primary hover:underline ml-1">
-                                    {{ statictranslations('Log in to continue') }} &rarr;
+                                <a href="{{ route('login', ['checkout' => 1]) }}" class="font-bold text-primary hover:underline ml-1 inline-flex items-center gap-1">
+                                    <span>{{ statictranslations('Log in to continue') }}</span>
+                                    <span class="inline-block rtl:rotate-180">&rarr;</span>
                                 </a>
                             </p>
                         </div>
@@ -200,7 +201,7 @@
             {{-- Contact Information --}}
             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 me-3 shrink-0"></span>
                     {{ statictranslations('Contact Information') }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -284,7 +285,7 @@
             {{-- Payment Method --}}
             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 me-3 shrink-0"></span>
                     {{ statictranslations('Payment Method') }}
                 </h2>
                 <div class="space-y-4 mb-6">
@@ -341,7 +342,7 @@
 
             <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sticky top-24">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 me-3 shrink-0"></span>
                     {{ statictranslations('Order Summary') }}
                 </h2>
                 <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">
@@ -435,7 +436,7 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sticky top-24 text-center">
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center justify-center">
-                        <span class="w-1.5 h-8 rounded-full bg-red-500 mr-3"></span>
+                        <span class="w-1.5 h-8 rounded-full bg-red-500 me-3 shrink-0"></span>
                         {{ statictranslations('Order Summary') }}
                     </h2>
                     <p class="text-gray-500">{{ statictranslations('No order was placed.') }}</p>
@@ -548,8 +549,9 @@
                                 </div>
                             </div>
                             <a href="{{ $registerUrl }}"
-                                class="shrink-0 w-full md:w-auto px-6 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all transform hover:scale-105 text-center">
-                                {{ statictranslations('Create Account') }} &rarr;
+                                class="shrink-0 w-full md:w-auto px-6 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all transform hover:scale-105 text-center inline-flex items-center justify-center gap-1.5">
+                                <span>{{ statictranslations('Create Account') }}</span>
+                                <span class="inline-block rtl:rotate-180">&rarr;</span>
                             </a>
                         </div>
                     </div>
@@ -596,7 +598,7 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sticky top-24">
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-green-500 to-green-400 mr-3"></span>
+                        <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-green-500 to-green-400 me-3 shrink-0"></span>
                         {{ statictranslations('Order Summary') }}
                     </h2>
                     <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100 max-h-64 overflow-y-auto">

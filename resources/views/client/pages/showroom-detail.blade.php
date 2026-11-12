@@ -168,16 +168,16 @@
                                                 @php
                                                     $hours = $data['hours'];
                                                     $isClosed = false;
+                                                    $displayHours = '';
                                                     if (is_array($hours)) {
-                                                        if (isset($hours['is_closed']) && $hours['is_closed']) {
+                                                        if (isset($hours['is_closed']) && filter_var($hours['is_closed'], FILTER_VALIDATE_BOOLEAN)) {
                                                             $displayHours = statictranslations('Closed');
                                                             $isClosed = true;
                                                         } else {
                                                             $open = $hours['open'] ?? '';
                                                             $close = $hours['close'] ?? '';
                                                             if ($open && $close) {
-                                                                // Format times slightly better if possible, or just concat
-                                                                $displayHours = $open . ' - ' . $close;
+                                                                $displayHours = format_business_hours($open, $close);
                                                             } else {
                                                                 $displayHours = statictranslations('Closed');
                                                                 $isClosed = true;
@@ -195,7 +195,7 @@
                                                         }
                                                     }
                                                 @endphp
-                                                <span class="{{ $isClosed ? 'text-red-600 font-semibold' : '' }}">{{ $displayHours }}</span>
+                                                <span class="{{ $isClosed ? 'text-red-600 font-semibold' : '' }}"><bdi>{{ $displayHours }}</bdi></span>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -220,7 +220,13 @@
                                     </span>
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900">{{ statictranslations('Phone') }}</p>
-                                        <p class="text-sm">{{ $showroom->phone ?? statictranslations('Not available') }}</p>
+                                        <p class="text-sm">
+                                            @if (!empty($showroom->phone))
+                                                <a href="tel:{{ $showroom->phone }}" dir="ltr" class="hover:text-primary transition inline-block">{{ $showroom->phone }}</a>
+                                            @else
+                                                {{ statictranslations('Not available') }}
+                                            @endif
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -233,7 +239,13 @@
                                     </span>
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900">{{ statictranslations('Email') }}</p>
-                                        <p class="text-sm">{{ $showroom->email ?? statictranslations('Not available') }}</p>
+                                        <p class="text-sm">
+                                            @if (!empty($showroom->email))
+                                                <a href="mailto:{{ $showroom->email }}" dir="ltr" class="hover:text-primary transition inline-block break-all">{{ $showroom->email }}</a>
+                                            @else
+                                                {{ statictranslations('Not available') }}
+                                            @endif
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -269,16 +281,53 @@
                             </div>
                         </div>
 
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">{{ statictranslations('Map') }}</h3>
-                        @if (!empty($showroom->map_iframe))
-                            <div class="rounded-2xl overflow-hidden border border-gray-100">
-                                {!! $showroom->map_iframe !!}
+                        @php
+                            $mapIframeRaw = trim((string) ($showroom->map_iframe ?? ''));
+                            $mapUrl = null;
+                            if ($mapIframeRaw !== '') {
+                                if (
+                                    stripos($mapIframeRaw, '<iframe') !== false &&
+                                    preg_match('/src=["\']([^"\']+)["\']/i', $mapIframeRaw, $iframeSrcMatch)
+                                ) {
+                                    $mapUrl = $iframeSrcMatch[1];
+                                } elseif (filter_var($mapIframeRaw, FILTER_VALIDATE_URL)) {
+                                    $mapUrl = $mapIframeRaw;
+                                }
+                            }
+                        @endphp
+
+                        <div class="rounded-[28px] border border-gray-100 bg-white/95 shadow-xl p-4 sm:p-6 ez-fade-up ez-delay-3">
+                            <div class="flex items-center justify-between gap-3 mb-4">
+                                <h3 class="text-xl font-bold text-gray-900">{{ statictranslations('Map') }}</h3>
+                                @if (!empty($mapUrl))
+                                    <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition">
+                                        <span>{{ statictranslations('Open in Maps') }}</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-xs rtl:-scale-x-100"></i>
+                                    </a>
+                                @endif
                             </div>
-                        @else
-                            <div class="bg-gray-100 rounded-2xl h-64 flex items-center justify-center text-gray-500">
-                                {{ statictranslations('Map placeholder') }}
-                            </div>
-                        @endif
+
+                            @if (!empty($mapUrl))
+                                <div class="rounded-2xl overflow-hidden border border-gray-200/80 w-full h-[460px] sm:h-[520px] lg:h-[580px] bg-gray-100 relative shadow-inner">
+                                    <iframe src="{{ $mapUrl }}"
+                                        class="w-full h-full border-0 block"
+                                        allowfullscreen=""
+                                        loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade"
+                                        title="{{ $name }} {{ statictranslations('Map') }}">
+                                    </iframe>
+                                </div>
+                            @elseif (!empty($showroom->map_iframe))
+                                <div class="rounded-2xl overflow-hidden border border-gray-200/80 w-full h-[460px] sm:h-[520px] lg:h-[580px] bg-gray-100 relative shadow-inner [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0 [&>iframe]:block">
+                                    {!! $showroom->map_iframe !!}
+                                </div>
+                            @else
+                                <div class="bg-gray-100 rounded-2xl h-[300px] flex items-center justify-center text-gray-500">
+                                    {{ statictranslations('Map placeholder') }}
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

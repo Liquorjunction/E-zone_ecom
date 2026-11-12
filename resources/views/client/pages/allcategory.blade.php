@@ -109,7 +109,7 @@
                             </div>
 
                             {{-- Info --}}
-                            <div class="flex-1 min-w-0" :class="view === 'list' ? 'text-left' : 'text-center'">
+                            <div class="flex-1 min-w-0" :class="view === 'list' ? 'text-left rtl:text-right' : 'text-center'">
                                 <h2
                                     class="text-base sm:text-lg font-semibold text-gray-700 group-hover:text-primary transition-colors truncate">
                                     {{ $category->getTranslation('category-name', app()->getLocale()) }}
@@ -118,7 +118,7 @@
                                     <span
                                         class="inline-flex items-center text-sm font-semibold text-primary group-hover:text-primary-dark transition-colors">
                                         <span>{{ statictranslations('Browse Collection') }}</span>
-                                        <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"
+                                        <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180"
                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M17 8l4 4m0 0l-4 4m4-4H3"></path>

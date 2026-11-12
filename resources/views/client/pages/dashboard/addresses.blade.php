@@ -179,7 +179,7 @@
         <div class="sticky top-0 z-10 bg-linear-to-r from-primary/5 to-primary/10 border-b border-gray-200">
             <div class="flex items-center justify-between px-4 py-4">
                 <button type="button" onclick="closeMobileForm()" class="p-2 hover:bg-white/50 rounded-lg transition-colors">
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-gray-700 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>

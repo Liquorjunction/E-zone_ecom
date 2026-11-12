@@ -31,7 +31,7 @@
                                     <a href="#section-{{ $index }}"
                                         class="group flex items-start py-2 px-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-primary transition-all duration-200">
                                         <span
-                                            class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 mr-3 group-hover:bg-primary transition-colors"></span>
+                                            class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 me-3 shrink-0 group-hover:bg-primary transition-colors"></span>
                                         {{ $content->title }}
                                     </a>
                                 @endforeach

@@ -177,10 +177,10 @@
                                 <div class="absolute bottom-0 left-0 right-0 p-4">
                                     @php
                                         $tags = !empty($card->tags) ? json_decode($card->tags, true) : [];
-                                        $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
+                                        $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'Featured';
                                     @endphp
                                     <span class="inline-block bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full mb-2">
-                                        {{ $firstTag }}
+                                        {{ statictranslations($firstTag) }}
                                     </span>
                                     <h3 class="text-base font-bold text-white mb-1 line-clamp-2">{{ $card->title }}</h3>
                                     <p class="text-xs text-white/90 line-clamp-1">{{ $card->description }}</p>

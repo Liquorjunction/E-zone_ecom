@@ -18,7 +18,7 @@
                             <span>{{ strtoupper(substr($subcategory->getTranslation('sub-category-name', app()->getLocale()), 0, 1)) }}</span>
                         </div>
                     @endif
-                    <div class="flex-1 text-center md:text-left">
+                    <div class="flex-1 text-center md:text-left rtl:md:text-right">
                         <h1 class="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">{{ $subcategory->getTranslation('sub-category-name', app()->getLocale()) }}</h1>
                         <p class="text-lg text-gray-600 mb-2">{{ statictranslations('Explore all products from') }} <span class="font-semibold">{{ $subcategory->getTranslation('sub-category-name', app()->getLocale()) }}</span>.</p>
                         @if(!empty($subcategory->description))

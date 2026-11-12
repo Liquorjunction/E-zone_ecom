@@ -8,7 +8,7 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-                <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 me-3 shrink-0"></span>
                 {{ statictranslations('Billing Address') }}
             </h2>
             <p class="text-gray-500 text-sm mt-1">{{ statictranslations('Payment and billing information') }}</p>

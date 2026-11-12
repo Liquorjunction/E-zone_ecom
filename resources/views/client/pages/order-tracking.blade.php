@@ -43,7 +43,7 @@
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 mb-4 border-b-2 border-gray-100">
             <div>
               <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center">
-                <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                 Order #ORD-123456789
               </h2>
               <p class="text-sm text-gray-600">Placed on <span class="font-semibold">November 10, 2025</span> at <span class="font-semibold">10:30 AM</span></p>
@@ -83,7 +83,7 @@
         <!-- Order Progress Timeline -->
         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
           <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-            <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+            <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
             Order Timeline
           </h3>
 
@@ -189,7 +189,7 @@
         <!-- Order Items -->
         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
           <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-            <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+            <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
             Order Items (2)
           </h3>
 
@@ -268,7 +268,7 @@
           <!-- Order Summary -->
           <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
             <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-              <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+              <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
               Order Summary
             </h3>
 
@@ -362,10 +362,10 @@
     <!-- Back Button -->
     <div class="mt-8">
       <a href="{{ route('dashboard.orders') }}" class="inline-flex items-center px-6 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-primary hover:text-primary transition-all duration-300">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 mr-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to My Orders
+        <span>{{ statictranslations('Back to My Orders') }}</span>
       </a>
     </div>
 

@@ -133,7 +133,7 @@
         <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8 mb-6">
             <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                 <h3 class="text-xl md:text-2xl font-bold text-gray-900 flex items-center">
-                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 mr-3"></span>
+                    <span class="w-1.5 h-8 rounded-full bg-linear-to-b from-primary to-primary/60 me-3 shrink-0"></span>
                     {{ statictranslations('Personal Information') }}
                 </h3>
                 <button type="button" id="editBtn"

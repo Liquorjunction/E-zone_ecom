@@ -42,17 +42,17 @@
                     data-route="{{ route('admin.orders.data') }}">
                     <thead class="bg-light text-uppercase small">
                         <tr>
-                            <th>Order ID</th>
-                            <th>Customer Name</th>
-                            <th>Client Type</th>
-                            <th>Email</th>
-                            <th>Amount</th>
-                            <th>Date</th>
-                            <th>Order Status</th>
-                            <th>Cancelled By</th>
-                            <th>Payment Mode</th>
-                            <th>Payment Status</th>
-                            <th class="text-center" style="width: 100px;">Actions</th>
+                            <th class="text-nowrap">Order ID</th>
+                            <th class="text-nowrap">Customer Name</th>
+                            <th class="text-nowrap text-center">Client Type</th>
+                            <th class="text-nowrap">Email</th>
+                            <th class="text-nowrap">Amount</th>
+                            <th class="text-nowrap">Date</th>
+                            <th class="text-nowrap">Order Status</th>
+                            <th class="text-nowrap">Cancelled By</th>
+                            <th class="text-nowrap">Payment Mode</th>
+                            <th class="text-nowrap">Payment Status</th>
+                            <th class="text-center text-nowrap" style="min-width: 120px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,7 +68,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('admin_assets/js/datatableJs/orders.js') }}"></script>
+    <script src="{{ asset('admin_assets/js/datatableJs/orders.js') }}?v={{ file_exists(public_path('admin_assets/js/datatableJs/orders.js')) ? filemtime(public_path('admin_assets/js/datatableJs/orders.js')) : time() }}"></script>
     <script src="{{ asset('admin_assets/js/orderFilterBar.js') }}"></script>
     <script src="{{ asset('admin_assets/js/orderNapsStatusModal.js') }}"></script>
 @endpush

@@ -39,8 +39,8 @@
 
                                 {{-- Date Badge --}}
                                 <div class="inline-flex items-center px-4 py-2 bg-gray-50 border border-gray-100 rounded-full">
-                                    <div class="w-2 h-2 rounded-full bg-green-500 mr-2.5 animate-pulse"></div>
-                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-2">{{ statictranslations('Last Updated') }}:</span>
+                                    <div class="w-2 h-2 rounded-full bg-green-500 me-2.5 shrink-0 animate-pulse"></div>
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide me-2">{{ statictranslations('Last Updated') }}:</span>
                                     <span class="text-sm font-bold text-gray-900">{{ $policy->updated_at->locale(app()->getLocale())->translatedFormat('M d, Y') }}</span>
                                 </div>
                             </div>

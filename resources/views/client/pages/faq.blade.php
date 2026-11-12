@@ -32,7 +32,7 @@
                                     @if(isset($category->faqs) && $category->faqs->isNotEmpty())
                                         <a href="#category-{{ $category->id }}"
                                            class="group flex items-start py-2 px-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-primary transition-all duration-200">
-                                            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 mr-3 group-hover:bg-primary transition-colors"></span>
+                                            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 me-3 shrink-0 group-hover:bg-primary transition-colors"></span>
                                             {{ $category->name }}
                                         </a>
                                     @endif
@@ -44,8 +44,9 @@
                         <div class="mt-6 bg-blue-50 rounded-xl p-6 border border-blue-100">
                             <h4 class="text-blue-900 font-semibold mb-2">{{ statictranslations('Still need help?') }}</h4>
                             <p class="text-sm text-blue-700 mb-4">{{ statictranslations("Can't find the answer you're looking for?") }}</p>
-                            <a href="{{ route('contact') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
-                                {{ statictranslations('Contact Support') }} &rarr;
+                            <a href="{{ route('contact') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1.5">
+                                <span>{{ statictranslations('Contact Support') }}</span>
+                                <span class="inline-block rtl:rotate-180">&rarr;</span>
                             </a>
                         </div>
                     </div>
@@ -74,7 +75,7 @@
 
                                         {{-- Category Title --}}
                                         <div class="flex items-center mb-6 pb-4 border-b border-gray-100">
-                                            <span class="w-1.5 h-6 rounded-full bg-primary mr-3"></span>
+                                            <span class="w-1.5 h-6 rounded-full bg-primary me-3 shrink-0"></span>
                                             <h2 class="text-2xl font-bold text-gray-900">{{ $category->name }}</h2>
                                         </div>
 
@@ -83,7 +84,7 @@
                                             @foreach ($category->faqs ?? [] as $faq)
                                                 <details class="group bg-gray-50 rounded-lg border border-transparent hover:border-gray-200 transition-all duration-200 open:bg-white open:border-gray-200 open:shadow-sm">
                                                     <summary class="flex justify-between items-center cursor-pointer p-4 list-none">
-                                                        <span class="font-semibold text-gray-700 group-hover:text-primary group-open:text-primary transition-colors pr-4">
+                                                        <span class="font-semibold text-gray-700 group-hover:text-primary group-open:text-primary transition-colors pe-4">
                                                             {{ $faq->question }}
                                                         </span>
                                                         <span class="text-gray-400 group-hover:text-primary group-open:text-primary group-open:rotate-180 transition-transform duration-200 shrink-0">

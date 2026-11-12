@@ -26,9 +26,9 @@
             <!-- Order Info -->
             <td width="48%" valign="top" style="background-color: #f8f9fe; border: 1px solid #e0e4f0; border-radius: 8px; padding: 16px 18px;">
                 <p style="margin: 0 0 6px 0; padding: 0; color: #9ca3af; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: Arial, Helvetica, sans-serif;">Informations de Commande</p>
-                <p style="margin: 0 0 4px 0; padding: 0; color: #1a1a2e; font-size: 14px; font-weight: 700; font-family: Arial, Helvetica, sans-serif;">#{{ $order->order_number }}</p>
-                <p style="margin: 0 0 4px 0; padding: 0; color: #6b7280; font-size: 13px; font-family: Arial, Helvetica, sans-serif;">{{ $order->created_at->format('d M Y, h:i A') }}</p>
-                <p style="margin: 0 0 4px 0; padding: 0; color: #6b7280; font-size: 13px; font-family: Arial, Helvetica, sans-serif;">{{ $order->payment_method }}</p>
+                <p style="margin: 0 0 4px 0; padding: 0; color: #1a1a2e; font-size: 14px; font-weight: 700; font-family: Arial, Helvetica, sans-serif;">#{{ $order->order_number ?? ('ORD-' . $order->id) }}</p>
+                <p style="margin: 0 0 4px 0; padding: 0; color: #6b7280; font-size: 13px; font-family: Arial, Helvetica, sans-serif;">{{ optional($order->created_at)->format('d M Y, h:i A') ?? now()->format('d M Y, h:i A') }}</p>
+                <p style="margin: 0 0 4px 0; padding: 0; color: #6b7280; font-size: 13px; font-family: Arial, Helvetica, sans-serif;">{{ strtoupper($order->payment_method ?? 'COD') }}</p>
                 <!-- Payment Status Badge -->
                 @php
                     $isPaid = in_array(strtolower($order->payment_status ?? ''), ['paid', 'completed', 'success']);
@@ -40,12 +40,27 @@
             <td width="4%"></td>
             <!-- Customer Info -->
             <td width="48%" valign="top" style="background-color: #f8f9fe; border: 1px solid #e0e4f0; border-radius: 8px; padding: 16px 18px;">
-                <p style="margin: 0 0 6px 0; padding: 0; color: #9ca3af; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: Arial, Helvetica, sans-serif;">Client</p>
-                <p style="margin: 0 0 4px 0; padding: 0; color: #1a1a2e; font-size: 14px; font-weight: 700; font-family: Arial, Helvetica, sans-serif;">{{ $user->name }}</p>
-                <p style="margin: 0 0 4px 0; padding: 0; color: #6b7280; font-size: 13px; font-family: Arial, Helvetica, sans-serif;">{{ $user->email }}</p>
+                @php
+                    $isOrderGuest = $isGuest ?? (method_exists($order, 'isGuest') ? $order->isGuest() : (($order->client_type ?? '') === 'guest' || is_null($order->user_id)));
+                    $displayName = $customerName ?? ($user->name ?? ($order->guestUser->name ?? ($order->shippingAddressRecord->name ?? ($order->shipping_address['name'] ?? ($isOrderGuest ? 'Client Invité' : 'Client')))));
+                    $displayEmail = $customerEmail ?? ($order->email ?? ($user->email ?? ($order->guestUser->email ?? ($order->shipping_address['email'] ?? '—'))));
+                    $displayPhone = $customerPhone ?? ($order->phone_no ?? ($order->shipping_address['phone'] ?? ''));
+                    $shippingCity = $order->shipping_address['city'] ?? '';
+                    $shippingState = $order->shipping_address['state'] ?? '';
+                @endphp
+                <p style="margin: 0 0 6px 0; padding: 0; color: #9ca3af; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: Arial, Helvetica, sans-serif;">
+                    Client
+                    @if($isOrderGuest)
+                        <span style="display: inline-block; background-color: #e5e7eb; color: #4b5563; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 4px;">Invité</span>
+                    @else
+                        <span style="display: inline-block; background-color: #e0e7ff; color: #4338ca; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 4px;">Inscrit</span>
+                    @endif
+                </p>
+                <p style="margin: 0 0 4px 0; padding: 0; color: #1a1a2e; font-size: 14px; font-weight: 700; font-family: Arial, Helvetica, sans-serif;">{{ $displayName }}</p>
+                <p style="margin: 0 0 4px 0; padding: 0; color: #6b7280; font-size: 13px; font-family: Arial, Helvetica, sans-serif;">{{ $displayEmail }}</p>
                 <p style="margin: 0; padding: 0; color: #1a1a2e; font-size: 14px; font-weight: 600; line-height: 1.6; font-family: Arial, Helvetica, sans-serif;">
-                    {{ $order->shipping_address['city'] ?? '' }}@if(!empty($order->shipping_address['state'])), {{ $order->shipping_address['state'] }}@endif<br>
-                    <span style="color: #6b7280; font-weight: 400; font-size: 13px;">{{ $order->phone_no ?? '' }}</span>
+                    {{ $shippingCity }}@if(!empty($shippingState)), {{ $shippingState }}@endif<br>
+                    <span style="color: #6b7280; font-weight: 400; font-size: 13px;">{{ $displayPhone }}</span>
                 </p>
             </td>
         </tr>
@@ -68,10 +83,20 @@
         </tr>
 
         <!-- Items -->
-        @foreach ($order->orderItems as $i => $item)
+        @foreach ($order->orderItems ?? [] as $i => $item)
             @php
-                $itemName = $item->product->name ?? $item->product_name ?? $item->name ?? '—';
-                $variantName = $item->variant->variant_name ?? $item->variant_name ?? null;
+                if ($item->product && method_exists($item->product, 'getTranslation')) {
+                    $itemName = $item->product->getTranslation('name', 'fr') ?? $item->product->name ?? $item->product_name ?? $item->name ?? '—';
+                } else {
+                    $itemName = $item->product?->name ?? $item->product_name ?? $item->name ?? '—';
+                }
+
+                if ($item->variant && method_exists($item->variant, 'getTranslation')) {
+                    $variantName = $item->variant->getTranslation('variant_name', 'fr') ?? $item->variant->variant_name ?? $item->variant_name ?? null;
+                } else {
+                    $variantName = $item->variant?->variant_name ?? $item->variant_name ?? null;
+                }
+
                 $rowBg = $i % 2 === 0 ? '#ffffff' : '#f8f9fe';
             @endphp
             <tr style="background-color: {{ $rowBg }}; border-top: 1px solid #e0e4f0;">

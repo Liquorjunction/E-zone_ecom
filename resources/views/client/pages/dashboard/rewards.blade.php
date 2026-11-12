@@ -27,7 +27,7 @@
   <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 mt-6">
     <div class="flex items-center justify-between p-6 border-b-2 border-gray-100">
       <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-        <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+        <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
         {{ statictranslations('Rewards History') }}
       </h2>
       <a href="#" class="text-sm font-semibold text-primary hover:opacity-80 transition-opacity">{{ statictranslations('Learn More') }}</a>

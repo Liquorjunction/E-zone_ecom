@@ -151,26 +151,26 @@
             @if (count($brandBanners) > 1)
                 {{-- Navigation Arrows (frosted glass like home slider) --}}
                 <button @click="prev()"
-                    class="slider-nav-btn absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-30
+                    class="slider-nav-btn absolute left-4 sm:left-6 rtl:left-auto rtl:right-4 sm:rtl:right-6 top-1/2 -translate-y-1/2 z-30
                            hidden sm:flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full
                            bg-white/20 hover:bg-white/35 text-white backdrop-blur-md border border-white/25 shadow-lg transition-all duration-200 cursor-pointer"
                     aria-label="{{ statictranslations('Previous Slide') }}">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
                 <button @click="next()"
-                    class="slider-nav-btn absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-30
+                    class="slider-nav-btn absolute right-4 sm:right-6 rtl:right-auto rtl:left-4 sm:rtl:left-6 top-1/2 -translate-y-1/2 z-30
                            hidden sm:flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full
                            bg-white/20 hover:bg-white/35 text-white backdrop-blur-md border border-white/25 shadow-lg transition-all duration-200 cursor-pointer"
                     aria-label="{{ statictranslations('Next Slide') }}">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
 
                 {{-- Pagination Dots (Pills) at Bottom Right --}}
-                <div class="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 z-30 flex items-center gap-2">
+                <div class="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 rtl:right-auto rtl:left-4 sm:rtl:left-8 z-30 flex items-center gap-2">
                     @foreach ($brandBanners as $index => $banner)
                         <button @click="goTo({{ $index }})"
                             class="rounded-full transition-all duration-300 cursor-pointer shadow-xs"
@@ -211,7 +211,7 @@
                             <span>{{ strtoupper(substr($brand->name, 0, 1)) }}</span>
                         </div>
                     @endif
-                    <div class="flex-1 text-center md:text-left">
+                    <div class="flex-1 text-center md:text-left rtl:md:text-right">
                         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight mb-3">
                             {{-- {{ strtoupper($brand->name) }} --}}
                             <span class="block text-primary text-xl sm:text-2xl lg:text-3xl font-bold mt-1 tracking-normal">
@@ -330,6 +330,12 @@
             animation: brandSlideProgress 5s linear forwards;
             z-index: 40;
             transform-origin: left;
+        }
+
+        [dir="rtl"] .brand-slider-progress {
+            left: auto;
+            right: 0;
+            transform-origin: right;
         }
 
         @keyframes brandSlideProgress {

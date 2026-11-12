@@ -76,7 +76,7 @@
                         <!-- Contact Information -->
                         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+                                <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
                                 Contact Information
                             </h2>
 
@@ -122,7 +122,7 @@
                         <!-- Shipping Address -->
                         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+                                <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
                                 Shipping Address
                             </h2>
 
@@ -216,7 +216,7 @@
                         <!-- Shipping Method -->
                         {{-- <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+                                <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
                                 Shipping Method
                             </h2>
 
@@ -271,7 +271,7 @@
                         <!-- Payment Method -->
                         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span class="w-1 h-6 rounded-full bg-primary mr-3"></span>
+                                <span class="w-1 h-6 rounded-full bg-primary me-3 shrink-0"></span>
                                 Payment Method
                             </h2>
 
@@ -377,7 +377,7 @@
                     <div class="lg:col-span-1">
                         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 sticky top-24">
                             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                                <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                                 Order Summary
                             </h2>
 

@@ -40,8 +40,9 @@
                             {{ statictranslations('Log In to Apply') }}
                         </a>
                         <a href="{{ route('register') }}"
-                            class="text-xs text-primary font-semibold hover:underline">
-                            {{ statictranslations('Create Account') }} &rarr;
+                            class="text-xs text-primary font-semibold hover:underline inline-flex items-center gap-1">
+                            <span>{{ statictranslations('Create Account') }}</span>
+                            <span class="inline-block rtl:rotate-180">&rarr;</span>
                         </a>
                     </div>
                 </div>
@@ -52,7 +53,7 @@
         <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display{{ $suffix }}">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center me-3 shrink-0">
                         <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                         </svg>

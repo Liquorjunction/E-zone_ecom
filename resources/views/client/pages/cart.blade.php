@@ -169,7 +169,7 @@
                     <div class="lg:col-span-1">
                         <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 sticky top-24">
                             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                                <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                                 {{ statictranslations('Order Summary') }}
                             </h2>
 
@@ -201,7 +201,7 @@
                                 <a href="{{ route('checkout', ['step' => 2, 'mode' => 'guest']) }}"
                                     class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-2 flex items-center justify-center gap-2">
                                     <span>{{ statictranslations('Proceed as Guest') }}</span>
-                                    <svg class="w-5 h-5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 inline-block ml-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>
                                 </a>

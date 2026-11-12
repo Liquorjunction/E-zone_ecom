@@ -127,7 +127,7 @@
             <!-- Price Range Filter -->
             <div class="border-b border-gray-100 pb-6">
               <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
-                <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
+                <span class="w-1 h-5 rounded-full bg-primary me-2 shrink-0"></span>
                 Price Range
               </h3>
               <div class="space-y-3">
@@ -147,7 +147,7 @@
             <!-- Brand Filter -->
             <div class="border-b border-gray-100 pb-6">
               <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
-                <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
+                <span class="w-1 h-5 rounded-full bg-primary me-2 shrink-0"></span>
                 Brand
               </h3>
               <div class="space-y-2">
@@ -182,7 +182,7 @@
             <!-- Condition Filter -->
             <div class="border-b border-gray-100 pb-6">
               <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
-                <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
+                <span class="w-1 h-5 rounded-full bg-primary me-2 shrink-0"></span>
                 Condition
               </h3>
               <div class="space-y-2">
@@ -207,7 +207,7 @@
             <!-- Category Filter -->
             <div class="border-b border-gray-100 pb-6">
               <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
-                <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
+                <span class="w-1 h-5 rounded-full bg-primary me-2 shrink-0"></span>
                 Category
               </h3>
               <div class="space-y-2">
@@ -237,7 +237,7 @@
             <!-- Rating Filter -->
             <div class="border-b border-gray-100 pb-6">
               <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
-                <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
+                <span class="w-1 h-5 rounded-full bg-primary me-2 shrink-0"></span>
                 Customer Rating
               </h3>
               <div class="space-y-2">
@@ -268,7 +268,7 @@
             <!-- Availability Filter -->
             <div class="pb-2">
               <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
-                <span class="w-1 h-5 rounded-full bg-primary mr-2"></span>
+                <span class="w-1 h-5 rounded-full bg-primary me-2 shrink-0"></span>
                 Availability
               </h3>
               <div class="space-y-2">
@@ -440,7 +440,7 @@
           <div class="flex items-center space-x-2">
             <!-- Previous Button -->
             <button class="px-4 py-2 border-2 border-gray-200 rounded-lg text-gray-700 font-medium hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>

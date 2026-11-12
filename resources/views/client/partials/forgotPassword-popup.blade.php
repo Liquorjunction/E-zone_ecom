@@ -80,7 +80,7 @@
                     id="submitBtn"
                     class="w-full px-6 py-3 text-base font-semibold text-white bg-primary rounded-full shadow-lg hover:shadow-xl hover:scale-105 focus:ring-4 focus:ring-primary/30 focus:outline-none border border-primary/20 transition-all duration-200 active:scale-95 flex items-center justify-center">
                     <span id="submitBtnText">{{ statictranslations('Send Reset Link') }}</span>
-                    <svg id="submitBtnIcon" class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="submitBtnIcon" class="ml-2 w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                     <svg id="submitBtnSpinner" class="hidden ml-2 w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

@@ -23,6 +23,8 @@ class OrderStatusMail extends Mailable
 
     public function __construct(?User $user, Order $order, $status)
     {
+        $this->afterCommit();
+
         $this->user = $user;
         $this->order = $order;
         $this->status = strtolower($status);

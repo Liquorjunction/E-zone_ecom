@@ -1033,6 +1033,54 @@ input[type="email"]:focus {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   RTL ICON & BUTTON ALIGNMENT (ARABIC SUPPORT)
+   Keep icons on the left side of buttons & links in RTL
+   ═══════════════════════════════════════════════════════════════ */
+[dir="rtl"] button:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> svg:first-child),
+[dir="rtl"] button:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> i:first-child),
+[dir="rtl"] button:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> span:first-child > svg),
+[dir="rtl"] button:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> span:first-child > i),
+[dir="rtl"] a:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> svg:first-child),
+[dir="rtl"] a:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> i:first-child),
+[dir="rtl"] a:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> span:first-child > svg),
+[dir="rtl"] a:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> span:first-child > i),
+[dir="rtl"] label:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> svg:first-child),
+[dir="rtl"] label:is(.flex, .inline-flex):not(aside *):not(.category-sidebar-link):not(.no-rtl-reverse):not(.flex-col):has(> i:first-child),
+[dir="rtl"] :is(button, a):not(aside *):not(.category-sidebar-link) > span:is(.flex, .inline-flex):not(.no-rtl-reverse):not(.flex-col):has(> svg:first-child),
+[dir="rtl"] :is(button, a):not(aside *):not(.category-sidebar-link) > span:is(.flex, .inline-flex):not(.no-rtl-reverse):not(.flex-col):has(> i:first-child) {
+    flex-direction: row-reverse !important;
+}
+
+/* Directional icon mirroring in RTL */
+[dir="rtl"] .rtl-flip,
+[dir="rtl"] [data-rtl-flip],
+[dir="rtl"] .fa-right-to-bracket,
+[dir="rtl"] .fa-right-from-bracket,
+[dir="rtl"] .fa-arrow-left,
+[dir="rtl"] .fa-arrow-right,
+[dir="rtl"] .fa-chevron-left,
+[dir="rtl"] .fa-chevron-right {
+    transform: scaleX(-1);
+}
+
+/* Margin normalization for trailing icons in RTL */
+[dir="rtl"] button > svg.ml-2,
+[dir="rtl"] a > svg.ml-2 {
+    margin-left: 0 !important;
+    margin-right: 0.5rem !important;
+}
+[dir="rtl"] button > svg.ml-1,
+[dir="rtl"] a > svg.ml-1 {
+    margin-left: 0 !important;
+    margin-right: 0.25rem !important;
+}
+
+/* Responsive iframe & embedded maps */
+iframe {
+    max-width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    TOASTS
    ═══════════════════════════════════════════════════════════════ */
 #global-toasts,

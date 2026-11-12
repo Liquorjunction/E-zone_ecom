@@ -38,8 +38,8 @@ class MailTriggerService
     public function sendAdminNewOrderMail(Order $order)
     {
         try {
-            $adminEmail = config('mail.admin_address', config('mail.from.address'));
-            $orderUrl = route('admin.orders.show', $order->id);
+            $adminEmail = config('mail.admin_address') ?: config('mail.from.address');
+            $orderUrl = route('admin.orders.show', ['id' => $order->id]);
             Mail::to($adminEmail)->queue(new \App\Mail\NewOrderReceived($order, $orderUrl));
             return true;
         } catch (\Exception $e) {

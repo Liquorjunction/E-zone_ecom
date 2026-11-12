@@ -77,7 +77,11 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <i class="fas fa-phone text-primary shrink-0 text-lg"></i>
-                        <a href="tel:{{ $siteContent->phone ?? '' }}" class="hover:text-white transition-colors">{{ $siteContent->phone ?? statictranslations('N/A') }}</a>
+                        @if (!empty($siteContent->phone))
+                            <a href="tel:{{ $siteContent->phone }}" dir="ltr" class="hover:text-white transition-colors inline-block">{{ $siteContent->phone }}</a>
+                        @else
+                            <span class="hover:text-white transition-colors">{{ statictranslations('N/A') }}</span>
+                        @endif
                     </div>
                     <div class="flex items-center gap-3">
                         <i class="fas fa-envelope text-primary shrink-0 text-lg"></i>

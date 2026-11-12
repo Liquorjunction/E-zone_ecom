@@ -16,7 +16,7 @@
 
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                        <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                         {{ statictranslations('Main Pages') }}
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -65,7 +65,7 @@
 
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                        <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                         {{ statictranslations('Product Collections') }}
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -98,7 +98,7 @@
 
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                        <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                         {{ statictranslations('Checkout Process') }}
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -131,7 +131,7 @@
 
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                        <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                         {{ statictranslations('My Account') }}
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -246,7 +246,7 @@
 
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                        <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                         {{ statictranslations('Company & Help') }}
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

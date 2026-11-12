@@ -60,7 +60,7 @@
 
             <div class="mt-8 bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                    <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                     {{ statictranslations('All Information & Policies') }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

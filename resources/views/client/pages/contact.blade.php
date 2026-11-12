@@ -56,7 +56,7 @@
                         @csrf
 
                         <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                            <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                            <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                             {{ statictranslations('Send Us a Message') }}
                         </h2>
 
@@ -339,7 +339,7 @@
                     {{-- Contact Info --}}
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-5 flex items-center">
-                            <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                            <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                             {{ statictranslations('Contact Info') }}
                         </h2>
                         <div class="space-y-4">
@@ -375,7 +375,8 @@
                                     <h3 class="font-semibold text-gray-900 text-sm">{{ statictranslations('Phone') }}</h3>
                                     @if ($hasPhone)
                                         <a href="tel:{{ preg_replace('/\s+/', '', $phoneText) }}"
-                                            class="text-primary text-sm hover:underline">{{ $phoneText }}</a>
+                                            dir="ltr"
+                                            class="text-primary text-sm hover:underline inline-block">{{ $phoneText }}</a>
                                     @else
                                         <p class="text-gray-600 text-sm">{{ statictranslations('N/A') }}</p>
                                     @endif
@@ -423,7 +424,7 @@
                     {{-- Showroom Details --}}
                     <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-6 md:p-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-5 flex items-center">
-                            <span class="w-1 h-7 rounded-full bg-primary mr-3"></span>
+                            <span class="w-1 h-7 rounded-full bg-primary me-3 shrink-0"></span>
                             {{ statictranslations('Visit Our Showroom') }}
                         </h2>
 
@@ -488,17 +489,17 @@
                                                 $openTime = $dayInfo['open'] ?? null;
                                                 $closeTime = $dayInfo['close'] ?? null;
 
-                                                $timeLabel = statictranslations('Closed');
-                                                if (!$isClosed && !empty($openTime) && !empty($closeTime)) {
-                                                    $formattedOpen = date('g:i A', strtotime($openTime));
-                                                    $formattedClose = date('g:i A', strtotime($closeTime));
-                                                    $timeLabel = $formattedOpen . ' – ' . $formattedClose;
+                                                if ($isClosed || empty($openTime) || empty($closeTime)) {
+                                                    $isClosed = true;
+                                                    $timeLabel = statictranslations('Closed');
+                                                } else {
+                                                    $timeLabel = format_business_hours($openTime, $closeTime);
                                                 }
                                             @endphp
                                             <div class="flex justify-between items-center">
                                                 <span class="text-gray-600">{{ $dayLabel }}</span>
                                                 <span
-                                                    class="font-medium {{ $timeLabel === statictranslations('Closed') ? 'text-red-500' : 'text-gray-900' }}">{{ $timeLabel }}</span>
+                                                    class="font-medium {{ $isClosed ? 'text-red-500' : 'text-gray-900' }}"><bdi>{{ $timeLabel }}</bdi></span>
                                             </div>
                                         @endforeach
                                     @else

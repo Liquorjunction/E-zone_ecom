@@ -136,7 +136,7 @@
                     {{-- Order Tracking --}}
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
                         <h2 class="text-lg lg:text-xl font-bold text-gray-900 mb-6 flex items-center">
-                            <span class="w-1 h-6 lg:h-7 rounded-full bg-primary mr-3"></span>
+                            <span class="w-1 h-6 lg:h-7 rounded-full bg-primary me-3 shrink-0"></span>
                             {{ statictranslations('Order Tracking') }}
                         </h2>
 
@@ -293,7 +293,7 @@
                     {{-- Order Items --}}
                     <div class="bg-white rounded-xl lg:rounded-2xl shadow-sm border-2 border-gray-100 p-4 lg:p-6">
                         <h2 class="text-lg lg:text-xl font-bold text-gray-900 mb-4 lg:mb-6 flex items-center">
-                            <span class="w-1 h-6 lg:h-7 rounded-full bg-primary mr-3"></span>
+                            <span class="w-1 h-6 lg:h-7 rounded-full bg-primary me-3 shrink-0"></span>
                             {{ statictranslations('Order Items') }} ({{ $order->items->count() }})
                         </h2>
 

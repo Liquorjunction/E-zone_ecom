@@ -225,9 +225,9 @@
                         class="hidden md:flex items-center gap-2 h-9 px-4 rounded-xl text-sm font-semibold text-white
                               bg-primary shadow-md shadow-primary/25
                               hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-px
-                              transition-all duration-150 active:translate-y-0 active:shadow-sm">
+                              transition-all duration-150 active:translate-y-0 active:shadow-sm rtl:flex-row-reverse">
                         <i class="fa-solid fa-right-to-bracket w-4 text-center shrink-0"></i>
-                        {{ statictranslations('Login') }}
+                        <span>{{ statictranslations('Login') }}</span>
                     </a>
                 @endauth
 
@@ -324,9 +324,9 @@
             <div class="border-t border-gray-100 pt-3">
                 <a href="{{ route('login') }}"
                     class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold
-                          text-white bg-primary shadow-md shadow-primary/25 hover:bg-primary-dark transition-all duration-150">
+                          text-white bg-primary shadow-md shadow-primary/25 hover:bg-primary-dark transition-all duration-150 rtl:flex-row-reverse">
                     <i class="fa-solid fa-right-to-bracket w-4 text-center"></i>
-                    {{ statictranslations('Login') }}
+                    <span>{{ statictranslations('Login') }}</span>
                 </a>
             </div>
         @endauth

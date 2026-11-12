@@ -106,7 +106,7 @@
                                             @foreach ($chunk as $card)
                                                 @php
                                                     $tags     = !empty($card->tags) ? json_decode($card->tags, true) : [];
-                                                    $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'FEATURED';
+                                                    $firstTag = is_array($tags) && count($tags) > 0 ? $tags[0] : 'Featured';
                                                 @endphp
                                                 <a href="{{ $card->link ?? '#' }}"
                                                     class="promo-card group relative overflow-hidden rounded-2xl bg-gray-900 min-h-70 sm:min-h-80 flex items-center
@@ -116,7 +116,7 @@
                                                         class="absolute inset-0 w-full h-full object-fill z-0">
                                                     <div class="relative z-10 p-8 sm:p-10 lg:p-12">
                                                         <span class="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-wide">
-                                                            {{ $firstTag }}
+                                                            {{ statictranslations($firstTag) }}
                                                         </span>
                                                         <h3 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
                                                             {{ $card->title }}
@@ -127,7 +127,7 @@
                                                         @if ($card->link_text)
                                                             <span class="promo-cta-arrow">
                                                                 {{ $card->link_text }}
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                                                 </svg>
                                                             </span>

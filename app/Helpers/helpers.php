@@ -18,3 +18,41 @@ if (! function_exists('money_format_number')) {
         return ($symbol !== null && $symbol !== '') ? $symbol . ' ' . $formatted : $formatted;
     }
 }
+
+if (! function_exists('format_business_hours')) {
+    /**
+     * Format opening hours range localized by locale.
+     *
+     * @param  string|null  $openTime
+     * @param  string|null  $closeTime
+     * @param  string|null  $locale
+     * @return string
+     */
+    function format_business_hours($openTime, $closeTime, $locale = null)
+    {
+        if (empty($openTime) || empty($closeTime)) {
+            return '';
+        }
+
+        $locale = $locale ?: app()->getLocale();
+
+        try {
+            $openCarbon = \Carbon\Carbon::parse($openTime);
+            $closeCarbon = \Carbon\Carbon::parse($closeTime);
+
+            if ($locale === 'ar') {
+                $openFormatted = $openCarbon->locale('ar')->translatedFormat('g:i A');
+                $closeFormatted = $closeCarbon->locale('ar')->translatedFormat('g:i A');
+                return $openFormatted . ' – ' . $closeFormatted;
+            }
+
+            if ($locale === 'fr') {
+                return $openCarbon->format('H:i') . ' – ' . $closeCarbon->format('H:i');
+            }
+
+            return $openCarbon->format('g:i A') . ' – ' . $closeCarbon->format('g:i A');
+        } catch (\Throwable $e) {
+            return $openTime . ' – ' . $closeTime;
+        }
+    }
+}

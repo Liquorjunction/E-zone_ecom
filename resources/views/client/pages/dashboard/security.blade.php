@@ -9,7 +9,7 @@
         @csrf
         <div class="flex items-center justify-between mb-4 lg:mb-6">
             <h3 class="text-lg lg:text-xl font-bold text-gray-900 flex items-center">
-                <span class="w-1 h-6 lg:h-7 rounded-full bg-primary mr-3"></span>
+                <span class="w-1 h-6 lg:h-7 rounded-full bg-primary me-3 shrink-0"></span>
                 {{ statictranslations('Change Password') }}
             </h3>
             <span class="text-xs text-gray-500">{{ statictranslations('Last updated:') }} {{ $lastPasswordUpdate ? \Carbon\Carbon::parse($lastPasswordUpdate)->diffForHumans() : statictranslations('Never') }}</span>
