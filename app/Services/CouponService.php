@@ -150,7 +150,7 @@ class CouponService
         ];
     }
 
-    protected function calculateDiscountAmount($coupon, float $subtotal): float
+    public function calculateDiscountAmount($coupon, float $subtotal): float
     {
         $discount = 0;
 
@@ -167,6 +167,69 @@ class CouponService
         $discount = min($discount, $subtotal);
 
         return round($discount, 2);
+    }
+
+    public function recalculateDiscountForCart(Cart $cart, float $subtotal): float
+    {
+        $applied = $this->sessionCoupon->getForCart($cart->id);
+        if (!$applied) {
+            return 0.0;
+        }
+
+        // Restriction: Guest users cannot use coupon codes
+        if (!Auth::check()) {
+            $this->sessionCoupon->remove();
+            return 0.0;
+        }
+
+        $items = $cart->relationLoaded('items') ? $cart->items : $cart->items()->get();
+        if ($items->isEmpty() || $subtotal <= 0) {
+            $this->sessionCoupon->remove();
+            return 0.0;
+        }
+
+        $coupon = null;
+        if (!empty($applied['id'])) {
+            $coupon = $this->couponRepo->getCouponById($applied['id']);
+        }
+        if (!$coupon && !empty($applied['code'])) {
+            $coupon = $this->getCouponByCode($applied['code']);
+        }
+
+        if (!$coupon || !$coupon->status) {
+            $this->sessionCoupon->remove();
+            return 0.0;
+        }
+
+        $now = Carbon::now();
+        if ($coupon->starts_at && $now->lt($coupon->starts_at)) {
+            $this->sessionCoupon->remove();
+            return 0.0;
+        }
+
+        if ($coupon->ends_at && $now->gt($coupon->ends_at)) {
+            $this->sessionCoupon->remove();
+            return 0.0;
+        }
+
+        $hasDiscountedItems = $items->contains(function ($item) {
+            return ($item->discount_amount ?? 0) > 0;
+        });
+
+        if ($hasDiscountedItems) {
+            $this->sessionCoupon->remove();
+            return 0.0;
+        }
+
+        if ($coupon->min_order_amount && $subtotal < $coupon->min_order_amount) {
+            $this->sessionCoupon->remove();
+            return 0.0;
+        }
+
+        $discount = $this->calculateDiscountAmount($coupon, $subtotal);
+        $this->sessionCoupon->updateDiscountAmount($discount, $cart->id);
+
+        return $discount;
     }
 
     public function removeCoupon(Cart $cart): bool

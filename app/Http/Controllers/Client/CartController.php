@@ -41,6 +41,7 @@ class CartController extends Controller
             'total'                        => round($totals['final_total'] ?? 0, 2),
             'itemCount'                    => $cart ? (int) $cart->items->sum('quantity') : 0,
             'items'                        => $totals['items'] ?? [],
+            'coupon'                       => ($cart && Auth::check()) ? app(SessionCouponService::class)->getForCart($cart->id) : null,
         ];
     }
 

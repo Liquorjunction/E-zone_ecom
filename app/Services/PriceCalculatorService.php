@@ -11,11 +11,16 @@ class PriceCalculatorService
 {
     protected CartRepositoryInterface $cartRepo;
     protected SessionCouponService $sessionCoupon;
+    protected ?CouponService $couponService;
 
-    public function __construct(CartRepositoryInterface $cartRepo, SessionCouponService $sessionCoupon)
-    {
+    public function __construct(
+        CartRepositoryInterface $cartRepo,
+        SessionCouponService $sessionCoupon,
+        ?CouponService $couponService = null
+    ) {
         $this->cartRepo = $cartRepo;
         $this->sessionCoupon = $sessionCoupon;
+        $this->couponService = $couponService;
     }
 
     public function calculate(Cart|Order $cartOrOrder, string $shippingMethod = 'standard'): array
@@ -38,8 +43,9 @@ class PriceCalculatorService
 
         $subtotalAfterItemDiscount = $cartTotals['total'] ?? 0;
 
-        // Get coupon discount from session instead of database
-        $couponDiscount = $this->sessionCoupon->getDiscountAmount($cart->id);
+        // Recalculate coupon discount dynamically from current cart state
+        $couponService = $this->couponService ?? app(CouponService::class);
+        $couponDiscount = $couponService->recalculateDiscountForCart($cart, (float) $subtotalAfterItemDiscount);
         $totalAfterCoupon = max(0, $subtotalAfterItemDiscount - $couponDiscount);
 
         $taxRate = config('tax.rate', 20.0);
