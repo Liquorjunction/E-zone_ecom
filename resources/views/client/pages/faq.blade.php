@@ -46,7 +46,7 @@
                             <p class="text-sm text-blue-700 mb-4">{{ statictranslations("Can't find the answer you're looking for?") }}</p>
                             <a href="{{ route('contact') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1.5">
                                 <span>{{ statictranslations('Contact Support') }}</span>
-                                <span class="inline-block rtl:rotate-180">&rarr;</span>
+                                <span class="inline-block rtl:-scale-x-100">&rarr;</span>
                             </a>
                         </div>
                     </div>

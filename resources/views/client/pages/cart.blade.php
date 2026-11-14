@@ -198,21 +198,20 @@
 
                             <!-- Checkout Button -->
                             @if (!Auth::check())
-                                <a href="{{ route('checkout', ['step' => 2, 'mode' => 'guest']) }}"
-                                    class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-2 flex items-center justify-center gap-2">
-                                    <span>{{ statictranslations('Proceed as Guest') }}</span>
-                                    <svg class="w-5 h-5 inline-block ml-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <a href="{{ route('login', ['checkout' => 'guest']) }}"
+                                    class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-3 flex items-center justify-center gap-2">
+                                    <span>{{ statictranslations('Proceed to Checkout') }}</span>
+                                    <svg class="w-5 h-5 inline-block ms-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>
                                 </a>
-                                <a href="{{ route('login', ['checkout' => 1]) }}"
-                                    class="block w-full px-6 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white text-center font-bold rounded-xl transition-all duration-300 mb-3 text-sm">
-                                    {{ statictranslations('Log In to Checkout') }}
-                                </a>
                             @else
                                 <a href="{{ route('checkout') }}"
-                                    class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-3">
-                                    {{ statictranslations('Proceed to Checkout') }}
+                                    class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-3 flex items-center justify-center gap-2">
+                                    <span>{{ statictranslations('Proceed to Checkout') }}</span>
+                                    <svg class="w-5 h-5 inline-block ms-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
                                 </a>
                             @endif
 

@@ -247,7 +247,7 @@
                     <p class="text-center text-sm text-gray-600">
                         {{ statictranslations('Already have an account?') }}
                         <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
-                            {{ statictranslations('Sign in here') }} <span class="inline-block rtl:rotate-180">→</span>
+                            {{ statictranslations('Sign in here') }} <span class="inline-block rtl:-scale-x-100">→</span>
                         </a>
                     </p>
                 </div>

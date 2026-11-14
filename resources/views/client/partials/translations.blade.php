@@ -218,6 +218,7 @@
         'This email is already registered. Please log in or use a different email address.' => statictranslations('This email is already registered. Please log in or use a different email address.'),
         'Use Different Email' => statictranslations('Use Different Email'),
         'Log In' => statictranslations('Log In'),
+        'Click to zoom' => statictranslations('Click to zoom'),
     ];
 @endphp
 <script>

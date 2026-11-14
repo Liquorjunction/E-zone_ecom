@@ -1061,7 +1061,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/product-image-gallery.js') }}"></script>
+    <script src="{{ asset('js/product-image-gallery.js') }}?v={{ file_exists(public_path('js/product-image-gallery.js')) ? filemtime(public_path('js/product-image-gallery.js')) : time() }}"></script>
     <script src="{{ asset('js/product-detail.js') }}"></script>
     <script src="{{ asset('js/product-reviews.js') }}"></script>
 @endpush

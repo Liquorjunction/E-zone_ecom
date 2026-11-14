@@ -630,15 +630,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     window.showExistingAccountModal(currentEmail);
                 }
                 hasErrors = true;
-            } else {
-                // Check OTP verification
-                var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
-
-                if (!verifiedEmail || verifiedEmail !== currentEmail) {
-                    var emailContainer = document.getElementById("guest-email-otp-container") || email;
-                    showValidationError(emailContainer, trans('Please verify your email address with the verification code before placing your order.'));
-                    hasErrors = true;
-                }
             }
 
             // Check Google reCAPTCHA token
@@ -1176,6 +1167,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (err) err.classList.add("hidden");
         var container = document.getElementById("g-recaptcha-container");
         if (container) clearValidationErrorFor(container);
+
+        var btn = document.getElementById("placeOrderBtn");
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        }
     };
 
     window.onRecaptchaExpired = function () {
@@ -1183,6 +1180,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (err) {
             err.textContent = trans('Security verification expired. Please tick the checkbox again.');
             err.classList.remove("hidden");
+        }
+
+        var btn = document.getElementById("placeOrderBtn");
+        if (btn && !window.__isUserLoggedIn) {
+            btn.disabled = true;
+            btn.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
         }
     };
 
@@ -1192,11 +1195,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function initRecaptchaWidget() {
         var container = document.getElementById("g-recaptcha-container");
+        var btn = document.getElementById("placeOrderBtn");
+        var siteKey = container ? (container.dataset.sitekey || window.__recaptchaSiteKey) : window.__recaptchaSiteKey;
+
+        if (!siteKey) {
+            if (btn) {
+                btn.disabled = false;
+                btn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            }
+            return;
+        }
+
         if (container && window.grecaptcha && typeof window.grecaptcha.render === "function") {
             try {
                 if (container.dataset.rendered === "1") return;
-                var siteKey = container.dataset.sitekey || window.__recaptchaSiteKey;
-                if (!siteKey) return;
 
                 window.__recaptchaWidgetId = window.grecaptcha.render(container, {
                     sitekey: siteKey,
@@ -1618,6 +1630,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (modal.dataset.bound) return;
         modal.dataset.bound = "1";
 
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+
         var closeBtn   = document.getElementById("closePostOrderRegisterModal");
         var dismissBtn = document.getElementById("dismissPostOrderModalBtn");
 
@@ -1630,7 +1646,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         setTimeout(function () {
             modal.classList.remove("hidden");
-        }, 700);
+        }, 500);
     }
 
     function runStepInits() {

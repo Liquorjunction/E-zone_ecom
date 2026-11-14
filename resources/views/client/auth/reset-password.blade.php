@@ -273,7 +273,7 @@
                     <p class="text-center text-sm text-gray-600">
                         {{ statictranslations('Password reset link invalid or expired?') }}
                         <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
-                            {{ statictranslations('Request a new one') }} <span class="inline-block rtl:rotate-180">→</span>
+                            {{ statictranslations('Request a new one') }} <span class="inline-block rtl:-scale-x-100">→</span>
                         </a>
                     </p>
                 </div>

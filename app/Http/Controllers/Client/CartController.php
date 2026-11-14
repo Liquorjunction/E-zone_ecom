@@ -157,6 +157,10 @@ class CartController extends Controller
             'item_id' => $item->id ?? null,
         ]);
 
+        $redirectUrl = !Auth::check()
+            ? route('login', ['checkout' => 'guest', 'buy_now' => 1])
+            : route('checkout', ['step' => 2, 'buy_now' => 1]);
+
         if ($request->wantsJson() || $request->ajax()) {
             $itemCount = $buyNowCart ? (int) $buyNowCart->items->sum('quantity') : 0;
 
@@ -165,12 +169,12 @@ class CartController extends Controller
                 'message' => statictranslations('Item added. Proceed to checkout.'),
                 'item_id' => $item->id ?? null,
                 'buy_now' => true,
-                'redirect_to' => route('checkout', ['step' => 2, 'buy_now' => 1]),
+                'redirect_to' => $redirectUrl,
                 'summary' => ['itemCount' => $itemCount],
             ]);
         }
 
-        return redirect()->route('checkout', ['step' => 2, 'buy_now' => 1])
+        return redirect()->to($redirectUrl)
             ->with('success', statictranslations('Item added. Proceed to checkout.'));
     }
 

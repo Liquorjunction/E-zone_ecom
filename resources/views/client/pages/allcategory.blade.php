@@ -26,7 +26,7 @@
             <div
                 class="bg-white rounded-lg shadow-md border border-gray-100 p-4 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="relative w-full md:max-w-md">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -34,10 +34,10 @@
                     </div>
                     <input x-model="search" type="text"
                         placeholder="{{ statictranslations('Search for a category...') }}"
-                        class="w-full pl-10 pr-9 py-2.5 bg-gray-50 border-gray-200 border rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm placeholder-gray-400">
+                        class="w-full ps-10 pe-10 py-2.5 bg-gray-50 border-gray-200 border rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm placeholder-gray-400">
                     {{-- Clear button --}}
                     <button x-show="search !== ''" @click="search = ''" type="button"
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
+                        class="absolute inset-y-0 end-0 pe-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -118,7 +118,7 @@
                                     <span
                                         class="inline-flex items-center text-sm font-semibold text-primary group-hover:text-primary-dark transition-colors">
                                         <span>{{ statictranslations('Browse Collection') }}</span>
-                                        <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180"
+                                        <svg class="w-4 h-4 ms-1 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180"
                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M17 8l4 4m0 0l-4 4m4-4H3"></path>

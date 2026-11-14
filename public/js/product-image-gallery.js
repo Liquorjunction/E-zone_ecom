@@ -137,13 +137,23 @@
                 const counter = document.createElement('div');
                 counter.id        = 'pdg-counter';
                 counter.className = 'absolute bottom-4 left-4 z-10 pointer-events-none bg-black/55 text-white text-xs font-semibold px-2.5 py-1 rounded-lg backdrop-blur-sm';
+                counter.setAttribute('dir', 'ltr');
+                counter.style.direction = 'ltr';
+                counter.style.unicodeBidi = 'isolate';
                 counter.textContent = `1 / ${images.length}`;
                 imageWrapper.appendChild(counter);
             }
 
             // Update the "Click to zoom" hint
-            const hint = imageWrapper.querySelector('.absolute.bottom-4.right-4');
-            if (hint) hint.textContent = 'Click to zoom';
+            const hint = imageWrapper.querySelector('.absolute.bottom-4.right-4, .zoom-hint');
+            if (hint) {
+                const current = (hint.textContent || '').trim();
+                if (!current || current === 'Click to zoom') {
+                    if (typeof window.trans === 'function') {
+                        hint.textContent = window.trans('Click to zoom');
+                    }
+                }
+            }
 
             // Click main image → open lightbox
             imageWrapper.addEventListener('click', function (e) {
@@ -249,6 +259,12 @@
                     font-size:0.8rem;
                     white-space:nowrap;
                     pointer-events:none;
+                    direction:ltr !important;
+                    unicode-bidi:isolate;
+                }
+                #pdg-counter {
+                    direction:ltr !important;
+                    unicode-bidi:isolate;
                 }
             `;
             document.head.appendChild(style);
@@ -270,7 +286,7 @@
                     <button id="pdlb-next" type="button" class="pdlb-nav" aria-label="Next" style="right:-1.75rem">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
-                    <div id="pdlb-counter"></div>
+                    <div id="pdlb-counter" dir="ltr" style="direction:ltr;unicode-bidi:isolate;"></div>
                 </div>
             `;
             document.body.appendChild(el);

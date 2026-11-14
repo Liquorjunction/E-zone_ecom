@@ -121,6 +121,14 @@ class AuthController extends Controller
                 ]);
             }
 
+            if ($request->filled('buy_now')) {
+                return redirect()->route('checkout', ['step' => 2, 'buy_now' => 1]);
+            }
+
+            if ($request->filled('checkout')) {
+                return redirect()->route('checkout', ['step' => 2]);
+            }
+
             return redirect()->intended(route('home'));
         }
 

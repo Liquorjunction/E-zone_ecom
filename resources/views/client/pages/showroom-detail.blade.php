@@ -108,7 +108,7 @@
                                         <img id="main-product-image" src="{{ asset('storage/' . $images->first()->image) }}"
                                             alt="{{ $name }}" class="w-full h-full object-cover" style="cursor: zoom-in;">
                                         <div
-                                            class="absolute bottom-4 right-4 text-xs font-semibold px-3 py-1 rounded-lg backdrop-blur-sm bg-black/55 text-white opacity-0 group-hover:opacity-100 transition">
+                                            class="absolute bottom-4 right-4 text-xs font-semibold px-3 py-1 rounded-lg backdrop-blur-sm bg-black/55 text-white opacity-0 group-hover:opacity-100 transition zoom-hint">
                                             {{ statictranslations('Click to zoom') }}
                                         </div>
                                     </div>
@@ -195,7 +195,7 @@
                                                         }
                                                     }
                                                 @endphp
-                                                <span class="{{ $isClosed ? 'text-red-600 font-semibold' : '' }}"><bdi>{{ $displayHours }}</bdi></span>
+                                                <span class="{{ $isClosed ? 'text-red-600 font-semibold' : '' }}" @if(!$isClosed) dir="ltr" @endif><bdi>{{ $displayHours }}</bdi></span>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -336,4 +336,4 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/product-image-gallery.js') }}"></script>
+<script src="{{ asset('js/product-image-gallery.js') }}?v={{ file_exists(public_path('js/product-image-gallery.js')) ? filemtime(public_path('js/product-image-gallery.js')) : time() }}"></script>

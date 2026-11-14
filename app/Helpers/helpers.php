@@ -43,7 +43,7 @@ if (! function_exists('format_business_hours')) {
             if ($locale === 'ar') {
                 $openFormatted = $openCarbon->locale('ar')->translatedFormat('g:i A');
                 $closeFormatted = $closeCarbon->locale('ar')->translatedFormat('g:i A');
-                return $openFormatted . ' – ' . $closeFormatted;
+                return "\u{200E}" . $openFormatted . "\u{200E} \u{200E}–\u{200E} \u{200E}" . $closeFormatted . "\u{200E}";
             }
 
             if ($locale === 'fr') {
@@ -52,6 +52,9 @@ if (! function_exists('format_business_hours')) {
 
             return $openCarbon->format('g:i A') . ' – ' . $closeCarbon->format('g:i A');
         } catch (\Throwable $e) {
+            if ($locale === 'ar') {
+                return "\u{200E}" . $openTime . "\u{200E} \u{200E}–\u{200E} \u{200E}" . $closeTime . "\u{200E}";
+            }
             return $openTime . ' – ' . $closeTime;
         }
     }

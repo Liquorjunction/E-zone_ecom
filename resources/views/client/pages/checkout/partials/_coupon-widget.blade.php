@@ -42,7 +42,7 @@
                         <a href="{{ route('register') }}"
                             class="text-xs text-primary font-semibold hover:underline inline-flex items-center gap-1">
                             <span>{{ statictranslations('Create Account') }}</span>
-                            <span class="inline-block rtl:rotate-180">&rarr;</span>
+                            <span class="inline-block rtl:-scale-x-100">&rarr;</span>
                         </a>
                     </div>
                 </div>

@@ -499,7 +499,7 @@
                                             <div class="flex justify-between items-center">
                                                 <span class="text-gray-600">{{ $dayLabel }}</span>
                                                 <span
-                                                    class="font-medium {{ $isClosed ? 'text-red-500' : 'text-gray-900' }}"><bdi>{{ $timeLabel }}</bdi></span>
+                                                    class="font-medium {{ $isClosed ? 'text-red-500' : 'text-gray-900' }}" @if(!$isClosed) dir="ltr" @endif><bdi>{{ $timeLabel }}</bdi></span>
                                             </div>
                                         @endforeach
                                     @else

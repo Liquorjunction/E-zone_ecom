@@ -187,7 +187,7 @@
                                 {{ statictranslations('Already have an account?') }}
                                 <a href="{{ route('login', ['checkout' => 1]) }}" class="font-bold text-primary hover:underline ms-1 inline-flex items-center gap-1">
                                     <span>{{ statictranslations('Log in to continue') }}</span>
-                                    <span class="inline-block rtl:rotate-180">&rarr;</span>
+                                    <span class="inline-block rtl:-scale-x-100">&rarr;</span>
                                 </a>
                             </p>
                         </div>
@@ -212,52 +212,9 @@
                             autocomplete="email"
                             data-lpignore="true"
                             data-form-type="other"
-                            value="{{ Auth::check() ? Auth::user()->email : (session('guest_email_verified') ?? '') }}" required
+                            value="{{ Auth::check() ? Auth::user()->email : old('email', '') }}" required
                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
-
-                        @if (!Auth::check())
-                            <div id="guest-email-otp-container" class="mt-2">
-                                {{-- Initial state: button to send code --}}
-                                <div id="otp-send-action" class="{{ session('guest_email_verified') ? 'hidden' : 'flex' }} items-center gap-2 mt-2">
-                                    <button type="button" id="sendOtpBtn"
-                                        class="px-3.5 py-2 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                        <span>{{ statictranslations('Verify Email') }}</span>
-                                    </button>
-                                    <span class="text-xs text-gray-500">{{ statictranslations('Verification code required for guests') }}</span>
-                                </div>
-
-                                {{-- OTP Input block (revealed after send) --}}
-                                <div id="otp-input-block" class="hidden mt-3 p-4 bg-blue-50/60 border border-blue-200 rounded-2xl">
-                                    <p class="text-xs font-medium text-gray-700 mb-2">
-                                        {{ statictranslations('Enter the 6-digit code sent to your email:') }}
-                                    </p>
-                                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                                        <input type="text" id="guest_otp_code" maxlength="6" pattern="\d{6}" placeholder="123456"
-                                            autocomplete="one-time-code"
-                                            class="w-32 px-3 py-2 text-center tracking-widest text-base font-bold bg-white border-2 border-gray-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20">
-                                        <button type="button" id="verifyOtpBtn"
-                                            class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-sm">
-                                            {{ statictranslations('Verify Code') }}
-                                        </button>
-                                        <button type="button" id="resendOtpBtn" disabled
-                                            class="px-3 py-2 text-xs text-gray-500 font-medium hover:text-gray-700 disabled:opacity-50 transition-colors">
-                                            <span id="resendOtpCountdown">{{ statictranslations('Resend in 60s') }}</span>
-                                        </button>
-                                    </div>
-                                    <p id="otp-feedback-msg" class="text-xs font-medium mt-2 hidden"></p>
-                                </div>
-
-                                {{-- Verified badge --}}
-                                <div id="otp-verified-badge" class="{{ session('guest_email_verified') ? 'flex' : 'hidden' }} items-center text-green-600 text-xs font-semibold mt-2 bg-green-50 px-3 py-2 rounded-xl border border-green-200">
-                                    <svg class="w-4 h-4 me-1.5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                    <span>{{ statictranslations('Email verified successfully') }}</span>
-                                </div>
-                            </div>
-                        @endif
                     </div>
                     <div>
                         <label for="phone"
@@ -367,7 +324,8 @@
                 @endif
 
                 <button type="button" id="placeOrderBtn"
-                    class="w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
+                    @if (!Auth::check() && config('services.recaptcha.site_key')) disabled @endif
+                    class="w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 @if (!Auth::check() && config('services.recaptcha.site_key')) opacity-50 cursor-not-allowed pointer-events-none @endif">
                     {{ statictranslations('Place Secure Order') }}
                     <svg class="w-5 h-5 inline-block ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -568,7 +526,7 @@
                             <a href="{{ $registerUrl }}"
                                 class="shrink-0 w-full md:w-auto px-6 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all transform hover:scale-105 text-center inline-flex items-center justify-center gap-1.5">
                                 <span>{{ statictranslations('Create Account') }}</span>
-                                <span class="inline-block rtl:rotate-180">&rarr;</span>
+                                <span class="inline-block rtl:-scale-x-100">&rarr;</span>
                             </a>
                         </div>
                     </div>
@@ -691,7 +649,7 @@
             'phone' => $prefillPhone,
         ]));
     @endphp
-    <div id="postOrderRegisterModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div id="postOrderRegisterModal" style="z-index: 99999;" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-gray-100 relative text-start">
             <button type="button" id="closePostOrderRegisterModal" class="absolute top-5 end-5 text-gray-400 hover:text-gray-600 transition-colors" aria-label="{{ statictranslations('Close') }}">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>

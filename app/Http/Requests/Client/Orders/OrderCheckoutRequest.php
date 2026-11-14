@@ -116,15 +116,6 @@ class OrderCheckoutRequest extends FormRequest
                     $validator->errors()->add('email', statictranslations('You are already registered. Please log in to your account to place an order.'));
                 }
 
-                // 2. Mandatory Email OTP Verification Check
-                $verifiedEmail  = (string) session('guest_email_verified', '');
-
-                if (empty($submittedEmail)) {
-                    $validator->errors()->add('email', statictranslations('Email address is required.'));
-                } elseif (empty($verifiedEmail) || $verifiedEmail !== $submittedEmail) {
-                    $validator->errors()->add('email', statictranslations('Please verify your email address with the verification code sent to your inbox before placing the order.'));
-                }
-
                 // 2. Mandatory CAPTCHA Verification Check (Google reCAPTCHA)
                 $secret = config('services.recaptcha.secret_key');
                 $token  = (string) $this->input('g-recaptcha-response', '');

@@ -148,8 +148,8 @@
                                     class="shrink-0 mr-2.5 rtl:ml-2.5 rtl:mr-0 w-6 h-6 flex items-center justify-center rounded-lg
                                            text-gray-400 group-hover/item:text-primary
                                            hover:bg-primary/10 transition-all duration-150">
-                                <svg class="w-3.5 h-3.5 transition-transform duration-250 rtl:rotate-180"
-                                     :class="{ 'rotate-90 rtl:rotate-90': open }"
+                                <svg class="w-3.5 h-3.5 transition-transform duration-250"
+                                     :class="open ? 'rotate-90' : 'rtl:rotate-180'"
                                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                                 </svg>
@@ -356,8 +356,8 @@
                                     type="button"
                                     class="shrink-0 mr-2.5 rtl:ml-2.5 rtl:mr-0 w-6 h-6 flex items-center justify-center rounded-lg
                                            text-gray-400 group-hover/item:text-primary hover:bg-primary/10 transition-all duration-150">
-                                <svg class="w-3.5 h-3.5 transition-transform duration-250 rtl:rotate-180"
-                                     :class="{ 'rotate-90 rtl:rotate-90': open }"
+                                <svg class="w-3.5 h-3.5 transition-transform duration-250"
+                                     :class="open ? 'rotate-90' : 'rtl:rotate-180'"
                                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                                 </svg>

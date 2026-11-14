@@ -179,6 +179,13 @@
                 <form class="space-y-5" action="{{ route('login.store') }}" method="POST">
                     @csrf
 
+                    @if (request('checkout'))
+                        <input type="hidden" name="checkout" value="{{ request('checkout') }}">
+                    @endif
+                    @if (request('buy_now'))
+                        <input type="hidden" name="buy_now" value="{{ request('buy_now') }}">
+                    @endif
+
                     <!-- Email Field -->
                     <div>
                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Email Address') }}</label>
@@ -242,7 +249,13 @@
                         </button>
                     </div>
 
-                    @if (request()->has('checkout') || (isset($cartItemCount) && $cartItemCount > 0))
+                    @if (request()->has('checkout'))
+                        @php
+                            $guestCheckoutParams = ['step' => 2, 'mode' => 'guest'];
+                            if (request('buy_now')) {
+                                $guestCheckoutParams['buy_now'] = 1;
+                            }
+                        @endphp
                         <div class="relative my-4">
                             <div class="absolute inset-0 flex items-center">
                                 <div class="w-full border-t border-gray-200"></div>
@@ -253,9 +266,9 @@
                         </div>
 
                         <div>
-                            <a href="{{ route('checkout', ['step' => 2, 'mode' => 'guest']) }}"
+                            <a href="{{ route('checkout', $guestCheckoutParams) }}"
                                 class="w-full flex justify-center items-center px-6 py-3.5 border-2 border-primary/20 text-base font-bold text-primary bg-primary/5 rounded-xl shadow-xs transition-all duration-200 hover:bg-primary hover:text-white focus:outline-none">
-                                <span>{{ statictranslations('Proceed as Guest') }}</span>
+                                <span>{{ statictranslations('Guest Checkout') }}</span>
                                 <svg class="ms-2 w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
@@ -268,8 +281,8 @@
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <p class="text-center text-sm text-gray-600">
                         {{ statictranslations("Don't have an account?") }}
-                        <a href="{{ route('register') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
-                            {{ statictranslations('Create one now') }} <span class="inline-block rtl:rotate-180">→</span>
+                        <a href="{{ route('register', array_filter(['checkout' => request('checkout'), 'buy_now' => request('buy_now')])) }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
+                            {{ statictranslations('Create one now') }} <span class="inline-block rtl:-scale-x-100">→</span>
                         </a>
                     </p>
                 </div>
