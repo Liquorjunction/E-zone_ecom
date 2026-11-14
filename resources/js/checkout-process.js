@@ -1473,7 +1473,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (window.__isUserLoggedIn) return;
 
         var emailInput = document.getElementById("email");
-        var phoneInput = document.getElementById("phone");
         var modal      = document.getElementById("existingAccountModal");
         var closeBtn   = document.getElementById("closeExistingAccountModal");
         var diffEmailBtn = document.getElementById("useDifferentEmailModalBtn");
@@ -1487,10 +1486,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         window.showExistingAccountModal = function(emailVal, message) {
             var currEmail = (emailVal || (emailInput ? emailInput.value : "")).trim();
-            if (currEmail) {
-                window.__registeredGuestEmail = currEmail.toLowerCase();
-                if (inlineEmail) inlineEmail.value = currEmail;
-            }
+            if (!currEmail) return;
+
+            window.__registeredGuestEmail = currEmail.toLowerCase();
+            if (inlineEmail) inlineEmail.value = currEmail;
 
             var msgEl = document.getElementById("existingAccountMessage");
             if (msgEl) {
@@ -1534,12 +1533,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (loginErr) loginErr.classList.add("hidden");
                 window.__registeredGuestEmail = "";
                 window.__guestEmailVerified = "";
+                lastCheckedEmail = "";
 
                 var activeEmailInput = document.getElementById("email");
                 if (activeEmailInput) {
                     activeEmailInput.value = "";
                     activeEmailInput.dataset.sentEmail = "";
-                    clearAllValidationErrors();
+                    clearValidationErrorFor(activeEmailInput);
+                    var emailContainer = document.getElementById("guest-email-otp-container");
+                    if (emailContainer) clearValidationErrorFor(emailContainer);
                     activeEmailInput.focus();
                 }
 
@@ -1551,6 +1553,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             closeBtn?.addEventListener("click", closeModal);
             diffEmailBtn?.addEventListener("click", handleUseDifferentEmail);
+
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
 
             loginBtn?.addEventListener("click", async function (e) {
                 e.preventDefault();
@@ -1605,9 +1613,12 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        async function checkCustomer(emailVal, phoneVal) {
+        var lastCheckedEmail = "";
+        async function checkCustomer(emailVal) {
             if (!window.__checkoutRoutes?.checkExistingUser) return;
-            if (!emailVal && !phoneVal) return;
+            if (!emailVal) return;
+            var normalizedEmail = emailVal.trim().toLowerCase();
+            if (!normalizedEmail || normalizedEmail === lastCheckedEmail) return;
 
             try {
                 var resp = await fetch(window.__checkoutRoutes.checkExistingUser, {
@@ -1617,12 +1628,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
                         "Accept": "application/json",
                     },
-                    body: JSON.stringify({ email: emailVal || null, phone: phoneVal || null }),
+                    body: JSON.stringify({ email: normalizedEmail }),
                 });
 
                 var data = await resp.json();
-                if ((data.exists || data.is_registered) && modal) {
-                    window.showExistingAccountModal(data.email || emailVal, data.message);
+                lastCheckedEmail = normalizedEmail;
+                if (data && (data.exists || data.is_registered) && data.email && modal) {
+                    window.showExistingAccountModal(data.email, data.message);
                 }
             } catch (e) {
                 console.warn("checkExistingUser error", e);
@@ -1634,17 +1646,18 @@ document.addEventListener("DOMContentLoaded", function () {
             emailInput.addEventListener("blur", function () {
                 var val = emailInput.value.trim();
                 if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-                    checkCustomer(val, null);
+                    checkCustomer(val);
                 }
             });
-        }
 
-        if (phoneInput && !phoneInput.dataset.existingBound) {
-            phoneInput.dataset.existingBound = "1";
-            phoneInput.addEventListener("blur", function () {
-                var val = phoneInput.value.trim();
-                if (val && val.length >= 8) {
-                    checkCustomer(null, val);
+            emailInput.addEventListener("input", function () {
+                var currentEmail = emailInput.value.toLowerCase().trim();
+                if (window.__registeredGuestEmail && currentEmail !== window.__registeredGuestEmail) {
+                    window.__registeredGuestEmail = "";
+                    lastCheckedEmail = "";
+                    clearValidationErrorFor(emailInput);
+                    var emailContainer = document.getElementById("guest-email-otp-container");
+                    if (emailContainer) clearValidationErrorFor(emailContainer);
                 }
             });
         }

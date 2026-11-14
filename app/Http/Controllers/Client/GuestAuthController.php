@@ -143,30 +143,19 @@ class GuestAuthController extends Controller
     }
 
     /**
-     * SOW #11: Check whether an email or phone number is registered to an existing account.
+     * SOW #11: Check whether an email is registered to an existing account.
      */
     public function checkExistingUser(Request $request): JsonResponse
     {
         $request->validate([
             'email' => ['nullable', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:30'],
         ]);
 
         $email = $request->filled('email') ? strtolower(trim($request->input('email'))) : null;
-        $rawPhone = $request->filled('phone') ? trim($request->input('phone')) : null;
-        $normalizedPhone = $rawPhone ? preg_replace('/[^\d+]/', '', $rawPhone) : null;
-
         $exists = false;
 
         if ($email) {
             $exists = User::where('email', $email)->exists();
-        }
-
-        if (!$exists && !empty($normalizedPhone)) {
-            $exists = User::where(function ($query) use ($normalizedPhone) {
-                $query->where('phone', $normalizedPhone)
-                      ->orWhere('phone', 'like', '%' . substr($normalizedPhone, -9));
-            })->exists();
         }
 
         return response()->json([
