@@ -25,7 +25,34 @@
                         $itemsCount = $order->items->count();
                         $itemsLabel = $itemsCount > 1 ? $title . ' + ' . ($itemsCount - 1) . ' more' : $title;
                         $status = strtolower($order->status ?? 'pending');
-                        $canCancel = in_array($status, ['pending'], true);
+                        $canCancel = in_array($status, ['pending', 'paid'], true);
+                        $statusLabel = match ($status) {
+                            'pending' => 'Pending',
+                            'paid' => 'Paid',
+                            'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => 'Order Confirmation',
+                            'processing' => 'Processing',
+                            'shipped' => 'Shipped',
+                            'out_for_delivery' => 'Out for Delivery',
+                            'delivered', 'completed' => 'Delivered',
+                            'cancelled' => 'Cancelled',
+                            'returned' => 'Returned',
+                            'refunded' => 'Refunded',
+                            'failed_delivery' => 'Failed Delivery',
+                            default => ucwords(str_replace('_', ' ', $status)),
+                        };
+                        $statusClass = match ($status) {
+                            'pending' => 'text-yellow-700 bg-yellow-100',
+                            'paid' => 'text-emerald-700 bg-emerald-100',
+                            'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => 'text-yellow-700 bg-yellow-100',
+                            'processing' => 'text-blue-700 bg-blue-100',
+                            'shipped' => 'text-amber-700 bg-amber-100',
+                            'out_for_delivery' => 'text-indigo-700 bg-indigo-100',
+                            'delivered', 'completed' => 'text-green-700 bg-green-100',
+                            'cancelled' => 'text-red-700 bg-red-100',
+                            'returned' => 'text-purple-700 bg-purple-100',
+                            'refunded' => 'text-rose-700 bg-rose-100',
+                            default => 'text-gray-700 bg-gray-100',
+                        };
                     @endphp
                     <div class="flex items-center border-b-2 border-gray-100 hover:bg-gray-50 transition-colors py-4 px-6">
                         <div class="flex-1 min-w-0">
@@ -34,25 +61,8 @@
                                 <span
                                     class="font-semibold text-primary">{{ $order->order_number ?? '#' . $order->id }}</span>
                                 <span>{{ optional($order->created_at)->format('M d, Y') }}</span>
-                                @if ($status === 'processing')
-                                    <span
-                                        class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">{{ statictranslations('Processing') }}</span>
-                                @elseif($status === 'cancelled')
-                                    <span
-                                        class="px-3 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">{{ statictranslations('Cancelled') }}</span>
-                                @elseif($status === 'shipped')
-                                    <span
-                                        class="px-3 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full">{{ statictranslations('Shipped') }}</span>
-                                @elseif($status === 'delivered')
-                                    <span
-                                        class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations('Delivered') }}</span>
-                                @elseif($status === 'returned')
-                                    <span
-                                        class="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full">{{ statictranslations('Returned') }}</span>
-                                @else
-                                    <span
-                                        class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations(ucfirst($status)) }}</span>
-                                @endif
+                                <span
+                                    class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">{{ statictranslations($statusLabel) }}</span>
                             </div>
                         </div>
                         <span class="font-semibold text-gray-900">{{ money_format_number($order->total ?? 0) }}</span>
@@ -95,27 +105,37 @@
                             </div>
                             @php
                                 $status = strtolower($order->status ?? 'pending');
-                                $canCancel = in_array($status, ['pending'], true);
+                                $canCancel = in_array($status, ['pending', 'paid'], true);
+                                $statusLabel = match ($status) {
+                                    'pending' => 'Pending',
+                                    'paid' => 'Paid',
+                                    'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => 'Order Confirmation',
+                                    'processing' => 'Processing',
+                                    'shipped' => 'Shipped',
+                                    'out_for_delivery' => 'Out for Delivery',
+                                    'delivered', 'completed' => 'Delivered',
+                                    'cancelled' => 'Cancelled',
+                                    'returned' => 'Returned',
+                                    'refunded' => 'Refunded',
+                                    'failed_delivery' => 'Failed Delivery',
+                                    default => ucwords(str_replace('_', ' ', $status)),
+                                };
+                                $statusClass = match ($status) {
+                                    'pending' => 'text-yellow-700 bg-yellow-100',
+                                    'paid' => 'text-emerald-700 bg-emerald-100',
+                                    'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => 'text-yellow-700 bg-yellow-100',
+                                    'processing' => 'text-blue-700 bg-blue-100',
+                                    'shipped' => 'text-amber-700 bg-amber-100',
+                                    'out_for_delivery' => 'text-indigo-700 bg-indigo-100',
+                                    'delivered', 'completed' => 'text-green-700 bg-green-100',
+                                    'cancelled' => 'text-red-700 bg-red-100',
+                                    'returned' => 'text-purple-700 bg-purple-100',
+                                    'refunded' => 'text-rose-700 bg-rose-100',
+                                    default => 'text-gray-700 bg-gray-100',
+                                };
                             @endphp
-                            @if ($status === 'processing')
-                                <span
-                                    class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">{{ statictranslations('Processing') }}</span>
-                            @elseif($status === 'cancelled')
-                                <span
-                                    class="px-3 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">{{ statictranslations('Cancelled') }}</span>
-                            @elseif($status === 'shipped')
-                                <span
-                                    class="px-3 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full">{{ statictranslations('Shipped') }}</span>
-                            @elseif($status === 'delivered')
-                                <span
-                                    class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations('Delivered') }}</span>
-                            @elseif($status === 'returned')
-                                <span
-                                    class="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full">{{ statictranslations('Returned') }}</span>
-                            @else
-                                <span
-                                    class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ statictranslations(ucfirst($status)) }}</span>
-                            @endif
+                            <span
+                                class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">{{ statictranslations($statusLabel) }}</span>
                         </div>
                         @php
                             $firstItem = $order->items->first();

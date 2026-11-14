@@ -42,7 +42,7 @@ class OrderController extends Controller
         $status  = $request->query('status');
         $filters = ['user_id' => Auth::id()];
 
-        if ($status && in_array($status, ['pending','order_confirmation','shipped','out_for_delivery','delivered','cancelled'], true)) {
+        if ($status && in_array($status, ['pending', 'paid', 'order_confirmation', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'], true)) {
             $filters['status'] = $status;
         }
 

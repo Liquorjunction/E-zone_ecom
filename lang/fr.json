@@ -1252,5 +1252,19 @@
     "You are already registered. Please log in to your account.": "Vous êtes déjà inscrit. Veuillez vous connecter à votre compte.",
     "You are already registered. Please log in to your account to place an order.": "Vous êtes déjà inscrit. Veuillez vous connecter à votre compte pour passer commande.",
     "This email is already registered. Please log in or use a different email address.": "Cette adresse e-mail est déjà enregistrée. Veuillez vous connecter ou utiliser une autre adresse e-mail.",
-    "Use Different Email": "Utiliser un autre e-mail"
+    "Use Different Email": "Utiliser un autre e-mail",
+    "Paid": "Payé",
+    "Order_confirmation": "Confirmation de commande",
+    "Partially Dispatched": "Partiellement expédié",
+    "Partially Shipped": "Partiellement expédié",
+    "partially_shipped": "Partiellement expédié",
+    "Dispatched": "Expédié",
+    "Ready to Ship": "Prêt à être expédié",
+    "processing": "En cours de traitement",
+    "Completed": "Terminé",
+    "Refunded": "Remboursé",
+    "Failed Delivery": "Échec de la livraison",
+    "Payment Status": "Statut du paiement",
+    "payment_status": "Statut du paiement",
+    "order_status": "Statut de la commande"
 }

@@ -40,27 +40,20 @@
                                 <option value="">{{ statictranslations('All Statuses') }}</option>
                                 <option value="pending"
                                     @if (request('status') == 'pending') selected @endif>{{ statictranslations('Pending') }}</option>
-                                    <option value="order_confirmation"
-                                        @if (request('status') == 'order_confirmation') selected @endif>{{ statictranslations('Order Confirmation') }}</option>
-                                    <option value="shipped" @if (request('status') == 'shipped') selected @endif>{{ statictranslations('Shipped') }}
-                                    </option>
-                                    <option value="out_for_delivery" @if (request('status') == 'out_for_delivery') selected @endif>
-                                        {{ statictranslations('Out For Delivery') }}</option>
-                                    <option value="delivered" @if (request('status') == 'delivered') selected @endif>
-                                        {{ statictranslations('Delivered') }}</option>
-                                    <option value="cancelled" @if (request('status') == 'cancelled') selected @endif>
-                                        {{ statictranslations('Cancelled') }}</option>
-                                    <option value="processing" @if (request('status') == 'processing') selected @endif>
-                                        {{ statictranslations('Processing') }}
-                                    </option>
-                                    <option value="shipped" @if (request('status') == 'shipped') selected @endif>{{ statictranslations('Shipped') }}
-                                    </option>
-                                    <option value="delivered" @if (request('status') == 'delivered') selected @endif>
-                                        {{ statictranslations('Delivered') }}
-                                    </option>
-                                    <option value="cancelled" @if (request('status') == 'cancelled') selected @endif>
-                                        {{ statictranslations('Cancelled') }}
-                                    </option>
+                                <option value="paid"
+                                    @if (request('status') == 'paid') selected @endif>{{ statictranslations('Paid') }}</option>
+                                <option value="order_confirmation"
+                                    @if (request('status') == 'order_confirmation') selected @endif>{{ statictranslations('Order Confirmation') }}</option>
+                                <option value="processing"
+                                    @if (request('status') == 'processing') selected @endif>{{ statictranslations('Processing') }}</option>
+                                <option value="shipped"
+                                    @if (request('status') == 'shipped') selected @endif>{{ statictranslations('Shipped') }}</option>
+                                <option value="out_for_delivery"
+                                    @if (request('status') == 'out_for_delivery') selected @endif>{{ statictranslations('Out for Delivery') }}</option>
+                                <option value="delivered"
+                                    @if (request('status') == 'delivered') selected @endif>{{ statictranslations('Delivered') }}</option>
+                                <option value="cancelled"
+                                    @if (request('status') == 'cancelled') selected @endif>{{ statictranslations('Cancelled') }}</option>
                             </select>
                             <div class="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,31 +219,33 @@
                 $itemsCount = $order->items->count();
                 $itemsLabel = $itemsCount > 1 ? $title . ' + ' . ($itemsCount - 1) . ' more' : $title;
                 $status = strtolower($order->status ?? 'pending');
-                $statusLabel =
-                    [
-                        'pending' => 'Pending',
-                        'order_confirmation' => 'Order Confirmation',
-                        'partially_dispatched' => 'Order Confirmation',
-                        'dispatched' => 'Order Confirmation',
-                        'ready_to_ship' => 'Order Confirmation',
-                        'shipped' => 'Shipped',
-                        'out_for_delivery' => 'Out For Delivery',
-                        'delivered' => 'Delivered',
-                        'completed' => 'Delivered',
-                        'cancelled' => 'Cancelled',
-                    ][$status] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $status));
-                $statusStyles = [
+                $statusLabel = match ($status) {
+                    'pending' => 'Pending',
+                    'paid' => 'Paid',
+                    'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => 'Order Confirmation',
+                    'processing' => 'Processing',
+                    'shipped' => 'Shipped',
+                    'out_for_delivery' => 'Out for Delivery',
+                    'delivered', 'completed' => 'Delivered',
+                    'cancelled' => 'Cancelled',
+                    'returned' => 'Returned',
+                    'refunded' => 'Refunded',
+                    'failed_delivery' => 'Failed Delivery',
+                    default => ucwords(str_replace('_', ' ', $status)),
+                };
+                $statusStyles = match ($status) {
                     'pending' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'order_confirmation' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'partially_dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'ready_to_ship' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'paid' => ['text-emerald-700 bg-emerald-100', 'bg-emerald-600'],
+                    'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'processing' => ['text-blue-700 bg-blue-100', 'bg-blue-600'],
                     'shipped' => ['text-amber-700 bg-amber-100', 'bg-amber-600'],
                     'out_for_delivery' => ['text-indigo-700 bg-indigo-100', 'bg-indigo-600'],
-                    'delivered' => ['text-green-700 bg-green-100', 'bg-green-600'],
-                    'completed' => ['text-green-700 bg-green-100', 'bg-green-600'],
+                    'delivered', 'completed' => ['text-green-700 bg-green-100', 'bg-green-600'],
                     'cancelled' => ['text-red-700 bg-red-100', 'bg-red-600'],
-                ][$status] ?? ['text-gray-700 bg-gray-100', 'bg-gray-600'];
+                    'returned' => ['text-purple-700 bg-purple-100', 'bg-purple-600'],
+                    'refunded' => ['text-rose-700 bg-rose-100', 'bg-rose-600'],
+                    default => ['text-gray-700 bg-gray-100', 'bg-gray-600'],
+                };
             @endphp
             <div
                 class="flex items-center border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-all duration-200 p-4">
@@ -347,31 +342,33 @@
                         : $firstName)
                     : $itemsCount . ' item' . ($itemsCount > 1 ? 's' : '');
                 $status = strtolower($order->status ?? 'pending');
-                $statusLabel =
-                    [
-                        'pending' => 'Pending',
-                        'order_confirmation' => 'Order Confirmation',
-                        'partially_dispatched' => 'Order Confirmation',
-                        'dispatched' => 'Order Confirmation',
-                        'ready_to_ship' => 'Order Confirmation',
-                        'shipped' => 'Shipped',
-                        'out_for_delivery' => 'Out For Delivery',
-                        'delivered' => 'Delivered',
-                        'completed' => 'Delivered',
-                        'cancelled' => 'Cancelled',
-                    ][$status] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $status));
-                $statusStyles = [
+                $statusLabel = match ($status) {
+                    'pending' => 'Pending',
+                    'paid' => 'Paid',
+                    'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => 'Order Confirmation',
+                    'processing' => 'Processing',
+                    'shipped' => 'Shipped',
+                    'out_for_delivery' => 'Out for Delivery',
+                    'delivered', 'completed' => 'Delivered',
+                    'cancelled' => 'Cancelled',
+                    'returned' => 'Returned',
+                    'refunded' => 'Refunded',
+                    'failed_delivery' => 'Failed Delivery',
+                    default => ucwords(str_replace('_', ' ', $status)),
+                };
+                $statusStyles = match ($status) {
                     'pending' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'order_confirmation' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'partially_dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'dispatched' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
-                    'ready_to_ship' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'paid' => ['text-emerald-700 bg-emerald-100', 'bg-emerald-600'],
+                    'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => ['text-yellow-700 bg-yellow-100', 'bg-yellow-600'],
+                    'processing' => ['text-blue-700 bg-blue-100', 'bg-blue-600'],
                     'shipped' => ['text-amber-700 bg-amber-100', 'bg-amber-600'],
                     'out_for_delivery' => ['text-indigo-700 bg-indigo-100', 'bg-indigo-600'],
-                    'delivered' => ['text-green-700 bg-green-100', 'bg-green-600'],
-                    'completed' => ['text-green-700 bg-green-100', 'bg-green-600'],
+                    'delivered', 'completed' => ['text-green-700 bg-green-100', 'bg-green-600'],
                     'cancelled' => ['text-red-700 bg-red-100', 'bg-red-600'],
-                ][$status] ?? ['text-gray-700 bg-gray-100', 'bg-gray-600'];
+                    'returned' => ['text-purple-700 bg-purple-100', 'bg-purple-600'],
+                    'refunded' => ['text-rose-700 bg-rose-100', 'bg-rose-600'],
+                    default => ['text-gray-700 bg-gray-100', 'bg-gray-600'],
+                };
             @endphp
             <div
                 class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">

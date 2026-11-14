@@ -13,10 +13,14 @@
                 $status = strtolower($order->status ?? 'pending');
                 $statusClass = match ($status) {
                     'delivered', 'completed' => 'text-green-700 bg-green-100',
+                    'paid' => 'text-emerald-700 bg-emerald-100',
+                    'processing' => 'text-blue-700 bg-blue-100',
                     'shipped', 'out_for_delivery' => 'text-primary bg-primary/10',
                     'pending', 'order_confirmation' => 'text-yellow-700 bg-yellow-100',
                     'partially_dispatched', 'dispatched', 'ready_to_ship' => 'text-yellow-700 bg-yellow-100',
                     'cancelled' => 'text-red-700 bg-red-100',
+                    'returned' => 'text-purple-700 bg-purple-100',
+                    'refunded' => 'text-rose-700 bg-rose-100',
                     default => 'text-gray-700 bg-gray-100',
                 };
                 $clientStatus = in_array($status, ['partially_dispatched', 'dispatched', 'ready_to_ship'], true)
@@ -28,19 +32,23 @@
                 // Use OrderStatusService for translated status label if available
                 $statusLabel = isset($orderStatusService)
                     ? $orderStatusService->getTranslatedStatus($clientStatus)
-                    : \Illuminate\Support\Str::title(str_replace('_', ' ', $clientStatus));
+                    : statictranslations(match ($clientStatus) {
+                        'order_confirmation' => 'Order Confirmation',
+                        'out_for_delivery' => 'Out for Delivery',
+                        default => ucwords(str_replace('_', ' ', $clientStatus)),
+                    });
                 $stages = ['pending', 'order_confirmation', 'shipped', 'out_for_delivery', 'delivered'];
                 $stageLabels = [
                     'pending' => 'Pending',
                     'order_confirmation' => 'Order Confirmation',
                     'shipped' => 'Shipped',
-                    'out_for_delivery' => 'Out For Delivery',
+                    'out_for_delivery' => 'Out for Delivery',
                     'delivered' => 'Delivered',
                 ];
-                $cancelableStatuses = ['pending'];
+                $cancelableStatuses = ['pending', 'paid'];
                 $currentIndex = array_search($clientStatus, $stages, true);
                 if ($currentIndex === false) {
-                    $currentIndex = 0;
+                    $currentIndex = $clientStatus === 'paid' ? 0 : 0;
                 }
                 $progressPct = (($currentIndex + 1) / count($stages)) * 100;
             @endphp

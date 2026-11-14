@@ -223,6 +223,17 @@
         'Use Different Email' => statictranslations('Use Different Email'),
         'Log In' => statictranslations('Log In'),
         'Click to zoom' => statictranslations('Click to zoom'),
+        'Pending' => statictranslations('Pending'),
+        'Paid' => statictranslations('Paid'),
+        'Order Confirmation' => statictranslations('Order Confirmation'),
+        'Processing' => statictranslations('Processing'),
+        'Shipped' => statictranslations('Shipped'),
+        'Out for Delivery' => statictranslations('Out for Delivery'),
+        'Delivered' => statictranslations('Delivered'),
+        'Cancelled' => statictranslations('Cancelled'),
+        'Returned' => statictranslations('Returned'),
+        'Refunded' => statictranslations('Refunded'),
+        'Completed' => statictranslations('Completed'),
     ];
 @endphp
 <script>

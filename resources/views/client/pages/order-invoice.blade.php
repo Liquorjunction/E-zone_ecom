@@ -29,7 +29,22 @@
         $couponCode = $order->coupon_code ?? null;
         $paymentMethod = ucfirst(str_replace('_', ' ', $order->payment_method ?? 'N/A'));
         $paymentStatus = ucfirst($order->payment_status ?? 'Pending');
-        $orderStatus = ucfirst($order->status ?? 'Processing');
+        $rawStatus = strtolower($order->status ?? 'processing');
+        $statusKey = match ($rawStatus) {
+            'pending' => 'Pending',
+            'paid' => 'Paid',
+            'order_confirmation', 'partially_dispatched', 'dispatched', 'ready_to_ship' => 'Order Confirmation',
+            'processing' => 'Processing',
+            'shipped' => 'Shipped',
+            'out_for_delivery' => 'Out for Delivery',
+            'delivered', 'completed' => 'Delivered',
+            'cancelled' => 'Cancelled',
+            'returned' => 'Returned',
+            'refunded' => 'Refunded',
+            'failed_delivery' => 'Failed Delivery',
+            default => ucwords(str_replace('_', ' ', $rawStatus)),
+        };
+        $orderStatus = statictranslations($statusKey);
 
         $paymentMethodRaw = strtolower((string) ($order->payment_method ?? ''));
         $paymentMethodKey = match ($paymentMethodRaw) {

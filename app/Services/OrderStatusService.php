@@ -42,7 +42,27 @@ class OrderStatusService
 
     public function getTranslatedStatus(string $status): string
     {
-        return $this->statusTranslations[$status] ?? ucfirst(str_replace('_', ' ', $status));
+        $statusKey = match (strtolower($status)) {
+            'pending' => 'Pending',
+            'paid' => 'Paid',
+            'order_confirmation' => 'Order Confirmation',
+            'partially_dispatched' => 'Partially Dispatched',
+            'partially_shipped' => 'Partially Shipped',
+            'dispatched' => 'Dispatched',
+            'ready_to_ship' => 'Ready to Ship',
+            'processing' => 'Processing',
+            'shipped' => 'Shipped',
+            'out_for_delivery' => 'Out for Delivery',
+            'delivered' => 'Delivered',
+            'completed' => 'Completed',
+            'cancelled' => 'Cancelled',
+            'refunded' => 'Refunded',
+            'returned' => 'Returned',
+            'failed_delivery' => 'Failed Delivery',
+            default => ucwords(str_replace('_', ' ', $status)),
+        };
+
+        return statictranslations($statusKey);
     }
 
     public function __construct(MailTriggerService $mailTriggerService)
