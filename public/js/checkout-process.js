@@ -310,6 +310,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function showValidationError(element, message) {
         clearValidationErrorFor(element);
+        if (element.id === "g-recaptcha-container") {
+            var recaptchaErr = document.getElementById("recaptcha-error-msg");
+            if (recaptchaErr) {
+                recaptchaErr.textContent = message;
+                recaptchaErr.classList.remove("hidden");
+                return;
+            }
+        }
         var errorDiv = document.createElement("p");
         errorDiv.className = "validation-error mt-2 text-sm text-red-600 font-semibold flex items-center gap-1";
         errorDiv.innerHTML =
@@ -419,6 +427,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if (existing) existing.remove();
         element.classList.remove("border-red-500", "border-2", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
         element.classList.add("border-gray-200");
+        if (element.id === "g-recaptcha-container") {
+            var recaptchaErr = document.getElementById("recaptcha-error-msg");
+            if (recaptchaErr) {
+                recaptchaErr.textContent = "";
+                recaptchaErr.classList.add("hidden");
+            }
+        }
     }
 
     function clearAllValidationErrors() {
@@ -430,6 +445,11 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll("[aria-invalid='true']").forEach(function (el) {
             el.removeAttribute('aria-invalid');
         });
+        var recaptchaErr = document.getElementById("recaptcha-error-msg");
+        if (recaptchaErr) {
+            recaptchaErr.textContent = "";
+            recaptchaErr.classList.add("hidden");
+        }
         showValidationSummary([]);
     }
 
@@ -656,8 +676,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (recaptchaErr) {
                     recaptchaErr.textContent = trans('Please complete the security CAPTCHA verification.');
                     recaptchaErr.classList.remove("hidden");
+                    if (recaptchaContainer) {
+                        clearValidationErrorFor(recaptchaContainer);
+                    }
+                } else if (recaptchaContainer) {
+                    showValidationError(recaptchaContainer, trans('Please complete the security verification.'));
                 }
-                showValidationError(recaptchaContainer, trans('Please complete the security verification.'));
                 hasErrors = true;
             }
         }
@@ -1178,9 +1202,11 @@ document.addEventListener("DOMContentLoaded", function () {
     window.onRecaptchaExpired = function () {
         var err = document.getElementById("recaptcha-error-msg");
         if (err) {
-            err.textContent = trans('Security verification expired. Please tick the checkbox again.');
-            err.classList.remove("hidden");
+            err.textContent = "";
+            err.classList.add("hidden");
         }
+        var container = document.getElementById("g-recaptcha-container");
+        if (container) clearValidationErrorFor(container);
 
         var btn = document.getElementById("placeOrderBtn");
         if (btn && !window.__isUserLoggedIn) {
