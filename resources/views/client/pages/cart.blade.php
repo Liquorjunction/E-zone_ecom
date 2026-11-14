@@ -147,9 +147,6 @@
                             @if (!Auth::check())
                                 <p class="text-xs text-gray-500">
                                     {{ statictranslations('Coupons are exclusive to registered members.') }}
-                                    <a href="{{ route('login', ['checkout' => 1]) }}" class="text-primary font-bold hover:underline ml-1">
-                                        {{ statictranslations('Log in to apply') }}
-                                    </a>
                                 </p>
                             @else
                                 <div class="flex gap-3">

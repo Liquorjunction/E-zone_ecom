@@ -205,11 +205,17 @@ document.addEventListener("DOMContentLoaded", function () {
                         const inputHtml = `
                         <div class="flex gap-3" id="coupon-input-form${suffix}">
                             <input type="text" id="coupon-code-input${suffix}"
-                                placeholder="Enter coupon code"
+                                name="coupon_code"
+                                autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="characters"
+                                spellcheck="false"
+                                value=""
+                                placeholder="${trans('Enter coupon code')}"
                                 class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
                             <button type="button" id="apply-coupon-btn${suffix}"
                                 class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                Apply
+                                ${trans('Apply')}
                             </button>
                         </div>`;
 
@@ -318,6 +324,61 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            // Sync the coupon widget state (auto-remove applied view if coupon is null/removed)
+            const appliedDisplay = document.getElementById("applied-coupon-display" + s);
+            const inputForm      = document.getElementById("coupon-input-form" + s);
+            const msgEl          = document.getElementById("coupon-message" + s);
+            const hasCoupon      = !!(summary.coupon && summary.coupon.code);
+
+            if (!hasCoupon && appliedDisplay) {
+                const inputHtml = `
+                <div class="flex gap-3" id="coupon-input-form${s}">
+                    <input type="text" id="coupon-code-input${s}"
+                        name="coupon_code"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                        value=""
+                        placeholder="${trans('Enter coupon code')}"
+                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                    <button type="button" id="apply-coupon-btn${s}"
+                        class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        ${trans('Apply')}
+                    </button>
+                </div>`;
+                appliedDisplay.outerHTML = inputHtml;
+
+                if (summary.coupon_removal && summary.coupon_removal.message && msgEl) {
+                    msgEl.textContent = summary.coupon_removal.message;
+                    msgEl.className = "mt-3 text-sm text-red-600 font-medium";
+                    msgEl.classList.remove("hidden");
+                }
+            } else if (hasCoupon && inputForm) {
+                const appliedHtml = `
+                <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display${s}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center me-3 shrink-0">
+                                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">${summary.coupon.code}</p>
+                                <p class="text-xs text-gray-600">${trans('Coupon Applied')}</p>
+                            </div>
+                        </div>
+                        <button type="button" id="remove-coupon-btn${s}"
+                            class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
+                            ${trans('Remove')}
+                        </button>
+                    </div>
+                </div>`;
+                inputForm.outerHTML = appliedHtml;
+                if (msgEl) msgEl.classList.add("hidden");
+            }
+
             // Shipping (supports both `shipping` and legacy `shipping_cost`)
             const shippingValue =
                 summary.shipping !== undefined
@@ -348,4 +409,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const el = document.getElementById(id);
         if (el) el.textContent = text;
     }
+
+    // Sync coupon summary state on any cart:changed event
+    window.addEventListener("cart:changed", function (e) {
+        if (e.detail && e.detail.summary) {
+            updateOrderSummary(e.detail.summary);
+        }
+    });
 });

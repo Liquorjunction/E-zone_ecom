@@ -34,17 +34,6 @@
                     <p class="text-xs text-gray-500 mt-1 leading-relaxed">
                         {{ statictranslations('Log in or create an account to use promotional discounts.') }}
                     </p>
-                    <div class="mt-3 flex items-center gap-3">
-                        <a href="{{ route('login', ['checkout' => 1]) }}"
-                            class="px-3.5 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors shadow-2xs">
-                            {{ statictranslations('Log In to Apply') }}
-                        </a>
-                        <a href="{{ route('register') }}"
-                            class="text-xs text-primary font-semibold hover:underline inline-flex items-center gap-1">
-                            <span>{{ statictranslations('Create Account') }}</span>
-                            <span class="inline-block rtl:-scale-x-100">&rarr;</span>
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

@@ -24,6 +24,10 @@ class OrderCheckoutRequest extends FormRequest
             'cvv' => $this->cvv ? preg_replace('/\D/', '', $this->cvv) : null,
         ]);
 
+        if ($this->has('phone') && is_string($this->phone)) {
+            $this->merge(['phone' => trim($this->phone)]);
+        }
+
         if ($this->filled('billing_address_id') && !$this->filled('saved_billing_address_id')) {
             $this->merge([
                 'saved_billing_address_id' => $this->input('billing_address_id'),
@@ -62,7 +66,9 @@ class OrderCheckoutRequest extends FormRequest
             'zip' => ['nullable', 'regex:/^\d{1,10}$/'],
             'postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'country' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
-            'phone' => Auth::check() ? ['nullable', 'string', 'max:20'] : ['required', 'string', 'max:20'],
+            'phone' => Auth::check()
+                ? ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/']
+                : ['required', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],
 
             'shipping_address' => ['nullable', 'array'],
             'shipping_address.name' => ['required_with:shipping_address', 'string', 'max:255'],
@@ -71,7 +77,7 @@ class OrderCheckoutRequest extends FormRequest
             'shipping_address.state' => ['nullable', 'string', 'max:255'],
             'shipping_address.postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'shipping_address.country' => ['required_with:shipping_address', 'string', 'max:255'],
-            'shipping_address.phone' => ['nullable', 'string', 'max:20'],
+            'shipping_address.phone' => ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],
 
             'billing_address' => ['nullable', 'array'],
             'billing_address.name' => ['required_with:billing_address', 'string', 'max:255'],
@@ -80,7 +86,7 @@ class OrderCheckoutRequest extends FormRequest
             'billing_address.state' => ['nullable', 'string', 'max:255'],
             'billing_address.postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'billing_address.country' => ['required_with:billing_address', 'string', 'max:255'],
-            'billing_address.phone' => ['nullable', 'string', 'max:20'],
+            'billing_address.phone' => ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],
 
             'billing_firstName' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
             'billing_lastName' => ['nullable', 'string', 'max:255'],
@@ -90,7 +96,7 @@ class OrderCheckoutRequest extends FormRequest
             'billing_zip' => ['nullable', 'regex:/^\d{1,10}$/'],
             'billing_postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'billing_country' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
-            'billing_phone' => ['nullable', 'string', 'max:20'],
+            'billing_phone' => ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],
 
             'email' => Auth::check() ? ['nullable', 'email'] : ['required', 'email'],
 
@@ -199,9 +205,18 @@ class OrderCheckoutRequest extends FormRequest
             'billing_address_line.required_without_all' => 'Billing address is required.',
             'billing_city.required_without_all' => 'Billing city is required.',
             'billing_country.required_without_all' => 'Billing country is required.',
-            '*.regex' => 'The postal code must be up to 10 digits.',
+            'zip.regex' => 'The postal code must be up to 10 digits.',
+            'postal_code.regex' => 'The postal code must be up to 10 digits.',
+            'shipping_address.postal_code.regex' => 'The postal code must be up to 10 digits.',
+            'billing_address.postal_code.regex' => 'The postal code must be up to 10 digits.',
+            'billing_zip.regex' => 'The postal code must be up to 10 digits.',
+            'billing_postal_code.regex' => 'The postal code must be up to 10 digits.',
 
             'phone.required' => 'Phone number is required.',
+            'phone.regex' => 'Please enter a valid phone number.',
+            'shipping_address.phone.regex' => 'Please enter a valid phone number.',
+            'billing_address.phone.regex' => 'Please enter a valid phone number.',
+            'billing_phone.regex' => 'Please enter a valid phone number.',
             'email.required' => 'Email address is required.',
             'email.email' => 'Please enter a valid email address.',
 

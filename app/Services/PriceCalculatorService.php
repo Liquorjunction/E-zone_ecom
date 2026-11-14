@@ -47,6 +47,7 @@ class PriceCalculatorService
         $couponService = $this->couponService ?? app(CouponService::class);
         $couponDiscount = $couponService->recalculateDiscountForCart($cart, (float) $subtotalAfterItemDiscount);
         $totalAfterCoupon = max(0, $subtotalAfterItemDiscount - $couponDiscount);
+        $couponRemoval = $couponService->getLastRemoval();
 
         $taxRate = config('tax.rate', 20.0);
 
@@ -67,6 +68,7 @@ class PriceCalculatorService
 
             'coupon_discount' => round($couponDiscount, 2),
             'total_after_coupon' => round($totalAfterCoupon, 2),
+            'coupon_removal' => $couponRemoval,
 
             'tax_rate' => $taxRate,
             'tax_amount' => round($taxAmount, 2),

@@ -42,6 +42,7 @@ class CartController extends Controller
             'itemCount'                    => $cart ? (int) $cart->items->sum('quantity') : 0,
             'items'                        => $totals['items'] ?? [],
             'coupon'                       => ($cart && Auth::check()) ? app(SessionCouponService::class)->getForCart($cart->id) : null,
+            'coupon_removal'               => $totals['coupon_removal'] ?? null,
         ];
     }
 
@@ -53,6 +54,7 @@ class CartController extends Controller
             'subtotal_after_item_discount' => 0,
             'coupon_discount'              => 0,
             'total_after_coupon'           => 0,
+            'coupon_removal'               => null,
             'shipping_method'              => $shippingMethod,
             'shipping_cost'                => 0,
             'final_total'                  => 0,
@@ -251,6 +253,7 @@ class CartController extends Controller
                 'message' => statictranslations('Summary refreshed.'),
                 'item'    => null,
                 'summary' => $summary,
+                'coupon_removal' => $totals['coupon_removal'] ?? null,
             ]);
         }
 
@@ -336,6 +339,7 @@ class CartController extends Controller
                     'max_stock'                 => $getStock($item),
                 ],
                 'summary' => $summary,
+                'coupon_removal' => $totals['coupon_removal'] ?? null,
             ]);
         }
 
@@ -388,6 +392,7 @@ class CartController extends Controller
                 'success' => (bool) $ok,
                 'message' => $ok ? statictranslations('Item removed from cart.') : statictranslations('Failed to remove item.'),
                 'summary' => $summary,
+                'coupon_removal' => $totals['coupon_removal'] ?? null,
             ]);
         }
 

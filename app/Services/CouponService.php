@@ -15,6 +15,7 @@ class CouponService
     protected CartRepositoryInterface $cartRepo;
     protected SessionCouponService $sessionCoupon;
     protected CouponRepositoryInterface $couponRepo;
+    protected ?array $lastRemoval = null;
 
     public function __construct(
         CartRepositoryInterface $cartRepo,
@@ -171,20 +172,34 @@ class CouponService
 
     public function recalculateDiscountForCart(Cart $cart, float $subtotal): float
     {
+        $this->lastRemoval = null;
+
         $applied = $this->sessionCoupon->getForCart($cart->id);
         if (!$applied) {
             return 0.0;
         }
 
+        $code = (string) ($applied['code'] ?? '');
+
         // Restriction: Guest users cannot use coupon codes
         if (!Auth::check()) {
             $this->sessionCoupon->remove();
+            $this->lastRemoval = [
+                'code'    => $code,
+                'type'    => 'auth_required',
+                'message' => statictranslations('Coupon codes are exclusive to registered members. Please log in to apply coupons.'),
+            ];
             return 0.0;
         }
 
         $items = $cart->relationLoaded('items') ? $cart->items : $cart->items()->get();
         if ($items->isEmpty() || $subtotal <= 0) {
             $this->sessionCoupon->remove();
+            $this->lastRemoval = [
+                'code'    => $code,
+                'type'    => 'empty_cart',
+                'message' => statictranslations('Coupon removed because cart is empty.'),
+            ];
             return 0.0;
         }
 
@@ -198,17 +213,32 @@ class CouponService
 
         if (!$coupon || !$coupon->status) {
             $this->sessionCoupon->remove();
+            $this->lastRemoval = [
+                'code'    => $code,
+                'type'    => 'inactive',
+                'message' => statictranslations('This coupon is no longer active and was removed.'),
+            ];
             return 0.0;
         }
 
         $now = Carbon::now();
         if ($coupon->starts_at && $now->lt($coupon->starts_at)) {
             $this->sessionCoupon->remove();
+            $this->lastRemoval = [
+                'code'    => $code,
+                'type'    => 'not_active_yet',
+                'message' => statictranslations('This coupon is not yet active.'),
+            ];
             return 0.0;
         }
 
         if ($coupon->ends_at && $now->gt($coupon->ends_at)) {
             $this->sessionCoupon->remove();
+            $this->lastRemoval = [
+                'code'    => $code,
+                'type'    => 'expired',
+                'message' => sprintf(statictranslations('Coupon %s has expired and was removed.'), $code),
+            ];
             return 0.0;
         }
 
@@ -218,11 +248,29 @@ class CouponService
 
         if ($hasDiscountedItems) {
             $this->sessionCoupon->remove();
+            $this->lastRemoval = [
+                'code'    => $code,
+                'type'    => 'discounted_items',
+                'message' => sprintf(statictranslations('Coupon %s was removed: cannot be applied to cart with discounted items.'), $code),
+            ];
             return 0.0;
         }
 
-        if ($coupon->min_order_amount && $subtotal < $coupon->min_order_amount) {
+        if ($coupon->min_order_amount && (float) $subtotal < (float) $coupon->min_order_amount) {
+            $minAmount = money_format_number((float) $coupon->min_order_amount, 2, '');
+            $currency  = config('app.CURRENCY_SYMBOL', 'MAD');
             $this->sessionCoupon->remove();
+            $this->lastRemoval = [
+                'code'             => $code,
+                'type'             => 'min_order_amount',
+                'min_order_amount' => (float) $coupon->min_order_amount,
+                'message'          => sprintf(
+                    statictranslations('Coupon %s was removed: Minimum order amount of %s%s is required.'),
+                    $code,
+                    $currency,
+                    $minAmount
+                ),
+            ];
             return 0.0;
         }
 
@@ -230,6 +278,16 @@ class CouponService
         $this->sessionCoupon->updateDiscountAmount($discount, $cart->id);
 
         return $discount;
+    }
+
+    public function getLastRemoval(): ?array
+    {
+        return $this->lastRemoval;
+    }
+
+    public function clearLastRemoval(): void
+    {
+        $this->lastRemoval = null;
     }
 
     public function removeCoupon(Cart $cart): bool

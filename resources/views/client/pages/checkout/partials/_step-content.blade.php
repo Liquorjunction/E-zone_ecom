@@ -100,27 +100,15 @@
                     </button>
                 @else
                     @if (!Auth::check())
-                        {{-- Guest customer: Proceed as Guest + Log In option --}}
+                        {{-- Guest customer: Proceed as Guest --}}
                         <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
-                            class="block w-full px-6 py-4 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                            class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
                             <span>{{ statictranslations('Proceed as Guest') }}</span>
                             <svg class="w-5 h-5 inline-block ms-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </button>
-                        <div class="relative my-3">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-gray-200"></div>
-                            </div>
-                            <div class="relative flex justify-center text-xs">
-                                <span class="px-2.5 bg-white text-gray-500 font-medium">{{ statictranslations('Or') }}</span>
-                            </div>
-                        </div>
-                        <a href="{{ route('login', ['checkout' => 1]) }}"
-                            class="block w-full px-6 py-3.5 border-2 border-primary text-primary hover:bg-primary hover:text-white text-center font-bold rounded-2xl shadow-xs transition-all duration-300 text-sm">
-                            {{ statictranslations('Log In to Account') }}
-                        </a>
                     @else
                         {{-- Registered customer --}}
                         <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
@@ -183,13 +171,6 @@
                                 <span class="text-xs font-bold uppercase tracking-wider text-blue-700">{{ statictranslations('Guest Checkout') }}</span>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">{{ statictranslations('No password required') }}</span>
                             </div>
-                            <p class="text-xs text-gray-600 mt-0.5">
-                                {{ statictranslations('Already have an account?') }}
-                                <a href="{{ route('login', ['checkout' => 1]) }}" class="font-bold text-primary hover:underline ms-1 inline-flex items-center gap-1">
-                                    <span>{{ statictranslations('Log in to continue') }}</span>
-                                    <span class="inline-block rtl:-scale-x-100">&rarr;</span>
-                                </a>
-                            </p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white border border-blue-200 text-blue-700 shadow-2xs self-start sm:self-auto">
@@ -220,6 +201,9 @@
                         <label for="phone"
                             class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone Number *') }}</label>
                         <input type="tel" id="phone" name="phone"
+                            inputmode="tel"
+                            autocomplete="tel"
+                            placeholder="{{ statictranslations('e.g. +212 612345678') }}"
                             value="{{ Auth::check() ? Auth::user()->phone : '' }}" required pattern="[0-9\s\+\-\(\)]+"
                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>

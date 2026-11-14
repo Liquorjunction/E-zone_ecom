@@ -112,6 +112,9 @@
                                             </svg>
                                         </div>
                                         <input type="tel" id="phone" name="phone" required
+                                            inputmode="tel"
+                                            autocomplete="tel"
+                                            pattern="[0-9\s\+\-\(\)]+"
                                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
                                             placeholder="+1 (555) 000-0000">
                                     </div>

@@ -223,7 +223,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">{{ statictranslations('Phone') }}</label>
-                            <input id="modal_phone" name="phone" type="tel" placeholder="+1 (555) 123-4567"
+                            <input id="modal_phone" name="phone" type="tel"
+                                inputmode="tel"
+                                autocomplete="tel"
+                                pattern="[0-9\s\+\-\(\)]+"
+                                placeholder="{{ statictranslations('e.g. +212 612345678') }}"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"/>
                         </div>
                     </div>

@@ -19,7 +19,7 @@ class StoreAddressRequest extends FormRequest
             'type' => ['required','in:billing,shipping'],
             'is_default' => ['nullable','boolean'],
             'address_label' => ['nullable','string','max:255'],
-            'phone' => ['nullable','string','max:30'],
+            'phone' => ['nullable','string','max:30','regex:/^[\d\s\+\-\(\)]{8,30}$/'],
             'name' => ['required','string','max:255'],
             'street' => ['required','string','max:255'],
             'city_id' => ['required','exists:cities,id'],
@@ -31,6 +31,10 @@ class StoreAddressRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+        if ($this->has('phone') && is_string($this->phone)) {
+            $this->merge(['phone' => trim($this->phone)]);
+        }
+
         if ($this->has('type')) {
             $t = strtolower($this->input('type'));
             if (in_array($t, ['home','work','other'])) {
@@ -47,6 +51,7 @@ class StoreAddressRequest extends FormRequest
             'type.in' => 'The type must be billing or shipping.',
             'is_default.boolean' => 'The is default must be a boolean.',
             'address_label.max' => 'The address label must not be greater than 255 characters.',
+            'phone.regex' => 'Please enter a valid phone number.',
             'name.required' => 'The name field is required.',
             'name.max' => 'The name must not be greater than 255 characters.',
             'street.required' => 'The street field is required.',

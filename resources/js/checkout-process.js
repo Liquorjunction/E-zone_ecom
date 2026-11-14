@@ -328,6 +328,8 @@ document.addEventListener("DOMContentLoaded", function () {
         element.classList.remove("border-gray-200");
         if (element.parentElement) element.parentElement.appendChild(errorDiv);
     }
+    window.showValidationError = showValidationError;
+    window.clearValidationErrorFor = clearValidationErrorFor;
 
     function getValidationSummaryBox() {
         var box = document.getElementById("checkout-validation-summary");
@@ -584,7 +586,19 @@ document.addEventListener("DOMContentLoaded", function () {
         var phone = document.getElementById("phone");
 
         if (email && !email.value.trim()) { showValidationError(email, trans('Email address is required')); hasErrors = true; }
-        if (phone && !phone.value.trim()) { showValidationError(phone, trans('Phone number is required.')); hasErrors = true; }
+        if (phone) {
+            var phoneVal = phone.value.trim();
+            if (!phoneVal) {
+                showValidationError(phone, trans('Phone number is required.'));
+                hasErrors = true;
+            } else if (/[a-zA-Z]/.test(phoneVal) || !/^[\d\s\+\-\(\)]+$/.test(phoneVal)) {
+                showValidationError(phone, trans('Please enter a valid phone number.'));
+                hasErrors = true;
+            } else if (phoneVal.replace(/\D/g, '').length < 8) {
+                showValidationError(phone, trans('Please enter a valid phone number.'));
+                hasErrors = true;
+            }
+        }
 
         var shippingSelect = document.getElementById("shippingAddressSelect");
         var manualFirst    = document.getElementById("firstName");
@@ -855,12 +869,73 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            // Sync coupon widget display (auto-remove applied state if coupon was removed)
+            const appliedDisplay = document.getElementById("applied-coupon-display" + suffix);
+            const inputForm      = document.getElementById("coupon-input-form" + suffix);
+            const msgEl          = document.getElementById("coupon-message" + suffix);
+            const hasCoupon      = !!(summary.coupon && summary.coupon.code);
+
+            if (!hasCoupon && appliedDisplay) {
+                const inputHtml = `
+                <div class="flex gap-3" id="coupon-input-form${suffix}">
+                    <input type="text" id="coupon-code-input${suffix}"
+                        name="coupon_code"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                        value=""
+                        placeholder="${trans('Enter coupon code')}"
+                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                    <button type="button" id="apply-coupon-btn${suffix}"
+                        class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        ${trans('Apply')}
+                    </button>
+                </div>`;
+                appliedDisplay.outerHTML = inputHtml;
+
+                if (summary.coupon_removal && summary.coupon_removal.message) {
+                    if (msgEl) {
+                        msgEl.textContent = summary.coupon_removal.message;
+                        msgEl.className = "mt-3 text-sm text-red-600 font-medium";
+                        msgEl.classList.remove("hidden");
+                    }
+                }
+            } else if (hasCoupon && inputForm) {
+                const appliedHtml = `
+                <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display${suffix}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center me-3 shrink-0">
+                                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">${summary.coupon.code}</p>
+                                <p class="text-xs text-gray-600">${trans('Coupon Applied')}</p>
+                            </div>
+                        </div>
+                        <button type="button" id="remove-coupon-btn${suffix}"
+                            class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
+                            ${trans('Remove')}
+                        </button>
+                    </div>
+                </div>`;
+                inputForm.outerHTML = appliedHtml;
+                if (msgEl) msgEl.classList.add("hidden");
+            }
+
             const elShip = document.getElementById("order-shipping" + suffix);
             if (elShip) elShip.textContent = shipCost > 0 ? formatMoney(shipCost) : trans("FREE");
 
             const elTot = document.getElementById("order-total" + suffix);
             if (elTot) elTot.textContent = formatMoney(finalTot);
         });
+
+        if (summary.coupon_removal && summary.coupon_removal.message) {
+            showToast(summary.coupon_removal.message, "error");
+        }
 
         // Update main Item Count Span
         const countEl = document.getElementById("item-total-count");
@@ -1979,6 +2054,19 @@ document.addEventListener("DOMContentLoaded", function () {
                         field.classList.remove('border-red-500', 'bg-red-50');
                     }
                 });
+
+            var modalPhone = form.querySelector('[name="phone"]');
+            if (modalPhone && modalPhone.value.trim()) {
+                var mpVal = modalPhone.value.trim();
+                var mpDigits = mpVal.replace(/\D/g, '');
+                if (/[a-zA-Z]/.test(mpVal) || !/^[\d\s\+\-\(\)]+$/.test(mpVal) || mpDigits.length < 8) {
+                    modalPhone.classList.add('border-red-500', 'bg-red-50');
+                    isValid = false;
+                } else {
+                    modalPhone.classList.remove('border-red-500', 'bg-red-50');
+                }
+            }
+
             if (!isValid) return;
 
             if (submitBtn) {
@@ -2054,11 +2142,105 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  REAL-TIME INPUT FORMATTING (Card Data)
+//  REAL-TIME INPUT FORMATTING & RESTRICTION (Card Data & Phone)
 // ═══════════════════════════════════════════════════════════════
 (function() {
-    // Format card number with spaces every 4 digits
+    function isPhoneField(el) {
+        if (!el || el.tagName !== 'INPUT') return false;
+        var type = (el.type || '').toLowerCase();
+        var id   = (el.id || '').toLowerCase();
+        var name = (el.name || '').toLowerCase();
+        return type === 'tel' ||
+               id === 'phone' ||
+               id === 'modal_phone' ||
+               id === 'field-phone' ||
+               id === 'mobile-field-phone' ||
+               name === 'phone' ||
+               name === 'billing_phone';
+    }
+
+    function normalizeDigits(str) {
+        var arabicIndic = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+        var easternPersian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        return String(str || '')
+            .replace(/[٠-٩]/g, function(d) { return arabicIndic.indexOf(d); })
+            .replace(/[۰-۹]/g, function(d) { return easternPersian.indexOf(d); });
+    }
+
+    function sanitizePhone(val) {
+        if (!val) return '';
+        var normalized = normalizeDigits(val);
+        // Strip any character that is not a digit, whitespace, +, -, (, )
+        var cleaned = normalized.replace(/[^\d\s\+\-\(\)]/g, '');
+        // Allow at most one leading '+'
+        if (cleaned.indexOf('+') !== -1) {
+            var hasLeadingPlus = cleaned.trimStart().startsWith('+');
+            cleaned = cleaned.replace(/\+/g, '');
+            if (hasLeadingPlus) {
+                cleaned = '+' + cleaned.trimStart();
+            }
+        }
+        return cleaned;
+    }
+
+    // Intercept keyboard events to block alphabetic and disallowed characters immediately
+    document.addEventListener('keypress', function(e) {
+        if (!isPhoneField(e.target)) return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.key && e.key.length === 1) {
+            if (/[a-zA-Z]/.test(e.key) || !/[\d\s\+\-\(\)٠-٩۰-۹]/.test(e.key)) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    // Handle beforeinput for mobile virtual keyboards & auto-fill
+    document.addEventListener('beforeinput', function(e) {
+        if (!isPhoneField(e.target)) return;
+        if (e.data && /[a-zA-Z]/.test(e.data)) {
+            e.preventDefault();
+            var target = e.target;
+            var insert = sanitizePhone(e.data);
+            if (insert) {
+                var start = target.selectionStart || 0;
+                var end = target.selectionEnd || 0;
+                var oldVal = target.value;
+                target.value = sanitizePhone(oldVal.slice(0, start) + insert + oldVal.slice(end));
+                var newPos = start + insert.length;
+                try { target.setSelectionRange(newPos, newPos); } catch (err) {}
+                target.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+    });
+
+    // Real-time input listener (handles typing, paste, autofill)
     document.addEventListener('input', function(e) {
+        if (isPhoneField(e.target)) {
+            var original = e.target.value;
+            var cleaned = sanitizePhone(original);
+            if (original !== cleaned) {
+                var start = e.target.selectionStart;
+                var diff = original.length - cleaned.length;
+                e.target.value = cleaned;
+                if (start !== null) {
+                    var newPos = Math.max(0, start - diff);
+                    try { e.target.setSelectionRange(newPos, newPos); } catch (err) {}
+                }
+            }
+            // Clear red error highlight once phone becomes valid
+            if (e.target.classList.contains('border-red-500')) {
+                var digits = cleaned.replace(/\D/g, '');
+                if (digits.length >= 8 && !/[a-zA-Z]/.test(cleaned)) {
+                    if (typeof clearValidationErrorFor === 'function') {
+                        clearValidationErrorFor(e.target);
+                    } else {
+                        e.target.classList.remove('border-red-500', 'bg-red-50');
+                    }
+                }
+            }
+        }
+
+        // Format card number with spaces every 4 digits
         if (e.target.id === 'cardNumber' || e.target.name === 'cardNumber') {
             let value = e.target.value.replace(/\s/g, '');
             e.target.value = value.match(/.{1,4}/g)?.join(' ') || value;
@@ -2071,4 +2253,32 @@ document.addEventListener("DOMContentLoaded", function () {
             e.target.value = value;
         }
     });
+
+    // Validate on blur for immediate feedback
+    document.addEventListener('blur', function(e) {
+        if (!isPhoneField(e.target)) return;
+        var val = (e.target.value || '').trim();
+        if (!val) {
+            if (e.target.id === 'phone' && e.target.required) {
+                if (typeof window.showValidationError === 'function') {
+                    window.showValidationError(e.target, trans('Phone number is required.'));
+                }
+            }
+            return;
+        }
+        var digits = val.replace(/\D/g, '');
+        if (/[a-zA-Z]/.test(val) || !/^[\d\s\+\-\(\)]+$/.test(val) || digits.length < 8) {
+            if (typeof window.showValidationError === 'function') {
+                window.showValidationError(e.target, trans('Please enter a valid phone number.'));
+            } else {
+                e.target.classList.add('border-red-500', 'bg-red-50');
+            }
+        } else {
+            if (typeof window.clearValidationErrorFor === 'function') {
+                window.clearValidationErrorFor(e.target);
+            } else {
+                e.target.classList.remove('border-red-500', 'bg-red-50');
+            }
+        }
+    }, true);
 })();
