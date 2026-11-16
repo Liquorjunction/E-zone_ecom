@@ -1266,5 +1266,6 @@
     "Failed Delivery": "Échec de la livraison",
     "Payment Status": "Statut du paiement",
     "payment_status": "Statut du paiement",
-    "order_status": "Statut de la commande"
+    "order_status": "Statut de la commande",
+    "The postal code must be up to 10 digits.": "Le code postal doit comporter jusqu'à 10 chiffres."
 }

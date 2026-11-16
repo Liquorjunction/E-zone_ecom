@@ -197,6 +197,7 @@
                                             ZIP Code *
                                         </label>
                                         <input type="text" id="zip" name="zip" required
+                                            inputmode="numeric" pattern="\d*" maxlength="10"
                                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300"
                                             placeholder="10001">
                                     </div>

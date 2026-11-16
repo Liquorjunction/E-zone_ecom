@@ -610,6 +610,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 var f = document.getElementById(id);
                 if (f && !f.value.trim()) { showValidationError(f, trans('This field is required.')); hasErrors = true; }
             });
+            var zipField = document.getElementById("zip");
+            if (zipField && zipField.value.trim()) {
+                var zipVal = zipField.value.trim();
+                if (!/^\d{1,10}$/.test(zipVal)) {
+                    showValidationError(zipField, trans('The postal code must be up to 10 digits.'));
+                    hasErrors = true;
+                }
+            }
         }
 
         var billingSame    = document.getElementById("billingSameAsShipping");
@@ -632,6 +640,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         var f = document.getElementById(id);
                         if (f && !f.value.trim()) { showValidationError(f, trans('This field is required.')); hasErrors = true; }
                     });
+                    var billingZipField = document.getElementById("billing_zip");
+                    if (billingZipField && billingZipField.value.trim()) {
+                        var bZipVal = billingZipField.value.trim();
+                        if (!/^\d{1,10}$/.test(bZipVal)) {
+                            showValidationError(billingZipField, trans('The postal code must be up to 10 digits.'));
+                            hasErrors = true;
+                        }
+                    }
                 } else {
                     // Auth user with no saved billing addresses
                     var billingSection = document.getElementById("billingAddressSection");
@@ -2067,6 +2083,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            var modalPostal = form.querySelector('[name="postal_code"]');
+            if (modalPostal && modalPostal.value.trim()) {
+                var mpzVal = modalPostal.value.trim();
+                if (!/^\d{1,10}$/.test(mpzVal)) {
+                    modalPostal.classList.add('border-red-500', 'bg-red-50');
+                    isValid = false;
+                } else {
+                    modalPostal.classList.remove('border-red-500', 'bg-red-50');
+                }
+            }
+
             if (!isValid) return;
 
             if (submitBtn) {
@@ -2142,7 +2169,7 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  REAL-TIME INPUT FORMATTING & RESTRICTION (Card Data & Phone)
+//  REAL-TIME INPUT FORMATTING & RESTRICTION (Card Data, Phone & Postal Code)
 // ═══════════════════════════════════════════════════════════════
 (function() {
     function isPhoneField(el) {
@@ -2157,6 +2184,21 @@ document.addEventListener("DOMContentLoaded", function () {
                id === 'mobile-field-phone' ||
                name === 'phone' ||
                name === 'billing_phone';
+    }
+
+    function isPostalCodeField(el) {
+        if (!el || el.tagName !== 'INPUT') return false;
+        var id   = (el.id || '').toLowerCase();
+        var name = (el.name || '').toLowerCase();
+        return id === 'zip' ||
+               id === 'billing_zip' ||
+               id === 'modal_postal_code' ||
+               id === 'field-postal_code' ||
+               id === 'mobile-field-postal_code' ||
+               name === 'zip' ||
+               name === 'billing_zip' ||
+               name === 'postal_code' ||
+               name === 'billing_postal_code';
     }
 
     function normalizeDigits(str) {
@@ -2183,8 +2225,24 @@ document.addEventListener("DOMContentLoaded", function () {
         return cleaned;
     }
 
+    function sanitizePostalCode(val) {
+        if (!val) return '';
+        var normalized = normalizeDigits(val);
+        return normalized.replace(/\D/g, '').slice(0, 10);
+    }
+
     // Intercept keyboard events to block alphabetic and disallowed characters immediately
     document.addEventListener('keypress', function(e) {
+        if (isPostalCodeField(e.target)) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            if (e.key && e.key.length === 1) {
+                if (/[a-zA-Z]/.test(e.key) || !/[\d٠-٩۰-۹]/.test(e.key)) {
+                    e.preventDefault();
+                }
+            }
+            return;
+        }
+
         if (!isPhoneField(e.target)) return;
         if (e.ctrlKey || e.metaKey || e.altKey) return;
         if (e.key && e.key.length === 1) {
@@ -2196,6 +2254,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Handle beforeinput for mobile virtual keyboards & auto-fill
     document.addEventListener('beforeinput', function(e) {
+        if (isPostalCodeField(e.target)) {
+            if (e.data && /[^\d٠-٩۰-۹]/.test(e.data)) {
+                e.preventDefault();
+                var target = e.target;
+                var insert = sanitizePostalCode(e.data);
+                if (insert) {
+                    var start = target.selectionStart || 0;
+                    var end = target.selectionEnd || 0;
+                    var oldVal = target.value;
+                    target.value = (oldVal.slice(0, start) + insert + oldVal.slice(end)).slice(0, 10);
+                    var newPos = Math.min(10, start + insert.length);
+                    try { target.setSelectionRange(newPos, newPos); } catch (err) {}
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+            return;
+        }
+
         if (!isPhoneField(e.target)) return;
         if (e.data && /[a-zA-Z]/.test(e.data)) {
             e.preventDefault();
@@ -2215,6 +2291,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Real-time input listener (handles typing, paste, autofill)
     document.addEventListener('input', function(e) {
+        if (isPostalCodeField(e.target)) {
+            var original = e.target.value;
+            var cleaned = sanitizePostalCode(original);
+            if (original !== cleaned) {
+                var start = e.target.selectionStart;
+                var diff = original.length - cleaned.length;
+                e.target.value = cleaned;
+                if (start !== null) {
+                    var newPos = Math.max(0, start - diff);
+                    try { e.target.setSelectionRange(newPos, newPos); } catch (err) {}
+                }
+            }
+            if (e.target.classList.contains('border-red-500')) {
+                if (!cleaned || /^\d{1,10}$/.test(cleaned)) {
+                    if (typeof clearValidationErrorFor === 'function') {
+                        clearValidationErrorFor(e.target);
+                    } else {
+                        e.target.classList.remove('border-red-500', 'bg-red-50');
+                    }
+                }
+            }
+        }
+
         if (isPhoneField(e.target)) {
             var original = e.target.value;
             var cleaned = sanitizePhone(original);
@@ -2256,6 +2355,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Validate on blur for immediate feedback
     document.addEventListener('blur', function(e) {
+        if (isPostalCodeField(e.target)) {
+            var val = (e.target.value || '').trim();
+            if (val && (!/^\d{1,10}$/.test(val) || /[a-zA-Z]/.test(val))) {
+                if (typeof window.showValidationError === 'function') {
+                    window.showValidationError(e.target, trans('The postal code must be up to 10 digits.'));
+                } else {
+                    e.target.classList.add('border-red-500', 'bg-red-50');
+                }
+            } else {
+                if (typeof window.clearValidationErrorFor === 'function') {
+                    window.clearValidationErrorFor(e.target);
+                } else {
+                    e.target.classList.remove('border-red-500', 'bg-red-50');
+                }
+            }
+            return;
+        }
+
         if (!isPhoneField(e.target)) return;
         var val = (e.target.value || '').trim();
         if (!val) {

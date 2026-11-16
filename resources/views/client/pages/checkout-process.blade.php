@@ -261,6 +261,7 @@
                             </label>
                             <input id="modal_postal_code" name="postal_code" placeholder="20000"
                                 class="block w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" maxlength="10" inputmode="numeric" pattern="\d*"/>
+                            <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                         </div>
                     </div>
                     <div>
@@ -344,5 +345,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/coupon.js') }}"></script>
-    <script src="{{ asset('js/checkout-process.js') }}"></script>
+    <script src="{{ asset('js/checkout-process.js') }}?v={{ filemtime(public_path('js/checkout-process.js')) }}"></script>
 @endpush

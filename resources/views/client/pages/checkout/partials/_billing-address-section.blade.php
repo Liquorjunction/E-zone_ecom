@@ -145,6 +145,9 @@
                             <span class="text-gray-400 font-normal">({{ statictranslations('Optional') }})</span>
                         </label>
                         <input type="text" id="billing_zip" name="billing_zip"
+                            inputmode="numeric"
+                            pattern="\d*"
+                            maxlength="10"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                             placeholder="20000">
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>

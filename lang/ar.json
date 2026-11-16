@@ -1273,5 +1273,6 @@
     "Failed Delivery": "فشل التسليم",
     "Payment Status": "حالة الدفع",
     "payment_status": "حالة الدفع",
-    "order_status": "حالة الطلب"
+    "order_status": "حالة الطلب",
+    "The postal code must be up to 10 digits.": "يجب أن يتكون الرمز البريدي من 10 أرقام كحد أقصى."
 }

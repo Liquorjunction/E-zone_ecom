@@ -1247,5 +1247,6 @@
     "You are already registered. Please log in to your account.": "You are already registered. Please log in to your account.",
     "You are already registered. Please log in to your account to place an order.": "You are already registered. Please log in to your account to place an order.",
     "This email is already registered. Please log in or use a different email address.": "This email is already registered. Please log in or use a different email address.",
-    "Use Different Email": "Use Different Email"
+    "Use Different Email": "Use Different Email",
+    "The postal code must be up to 10 digits.": "The postal code must be up to 10 digits."
 }

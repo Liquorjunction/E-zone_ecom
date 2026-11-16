@@ -234,6 +234,7 @@
         'Returned' => statictranslations('Returned'),
         'Refunded' => statictranslations('Refunded'),
         'Completed' => statictranslations('Completed'),
+        'The postal code must be up to 10 digits.' => statictranslations('The postal code must be up to 10 digits.'),
     ];
 @endphp
 <script>
