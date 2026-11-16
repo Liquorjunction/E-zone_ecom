@@ -30,26 +30,11 @@ class UpdateShowroomRequest extends FormRequest
             'description.fr' => 'nullable|string',
             'description.ar' => 'nullable|string',
 
-            // -- Address --
+            // -- Address, City, State, Country --
             'address' => 'required|string|max:255',
-
-            // -- City --
-            'city' => 'required|array',
-            'city.en' => 'required|string',
-            'city.fr' => 'nullable|string',
-            'city.ar' => 'nullable|string',
-
-            // -- State --
-            'state' => 'required|array',
-            'state.en' => 'required|string',
-            'state.fr' => 'nullable|string',
-            'state.ar' => 'nullable|string',
-
-            // -- Country --
-            'country' => 'required|array',
-            'country.en' => 'required|string',
-            'country.fr' => 'nullable|string',
-            'country.ar' => 'nullable|string',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'country' => 'required|string|max:255',
 
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
@@ -81,11 +66,8 @@ class UpdateShowroomRequest extends FormRequest
             'name.en.required' => 'The English name is required.',
             'address.required' => 'The address field is required.',
             'city.required' => 'The city field is required.',
-            'city.en.required' => 'The English city is required.',
             'state.required' => 'The state field is required.',
-            'state.en.required' => 'The English state is required.',
             'country.required' => 'The country field is required.',
-            'country.en.required' => 'The English country is required.',
             'email.email' => 'The email must be a valid email address.',
             'cover_image.image' => 'The cover image must be an image file.',
             'cover_image.mimes' => 'The cover image must be a file of type: jpeg, png, jpg, gif, webp, bmp, ico, tiff, avif.',

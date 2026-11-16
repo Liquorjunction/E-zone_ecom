@@ -22,8 +22,8 @@
                             <p><strong>Phone:</strong> {{ $showroom->phone }}</p>
                             <p><strong>Address:</strong><br>
                                 {{ $showroom->address }},<br>
-                                {{ $showroom->getTranslation('city', 'en') }}, {{ $showroom->getTranslation('state', 'en') }}<br>
-                                {{ $showroom->getTranslation('country', 'en') }} - {{ $showroom->pincode }}
+                                {{ $showroom->city }}, {{ $showroom->state }}<br>
+                                {{ $showroom->country }} - {{ $showroom->pincode }}
                             </p>
                         </div>
                         <div class="col-md-8">

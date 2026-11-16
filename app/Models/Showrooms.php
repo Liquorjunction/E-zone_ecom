@@ -21,9 +21,6 @@ class Showrooms extends Model
     public $translatable = [
         'name',
         'description',
-        'city',
-        'state',
-        'country',
     ];
 
     protected $fillable = [
@@ -71,6 +68,63 @@ class Showrooms extends Model
             $value = $value['en'] ?? ($value['fr'] ?? ($value['ar'] ?? reset($value)));
         }
         $this->attributes['address'] = $value;
+    }
+
+    public function getCityAttribute($value)
+    {
+        if (is_string($value) && str_starts_with(trim($value), '{')) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded['en'] ?? ($decoded['fr'] ?? ($decoded['ar'] ?? reset($decoded)));
+            }
+        }
+        return $value;
+    }
+
+    public function setCityAttribute($value)
+    {
+        if (is_array($value)) {
+            $value = $value['en'] ?? ($value['fr'] ?? ($value['ar'] ?? reset($value)));
+        }
+        $this->attributes['city'] = $value;
+    }
+
+    public function getStateAttribute($value)
+    {
+        if (is_string($value) && str_starts_with(trim($value), '{')) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded['en'] ?? ($decoded['fr'] ?? ($decoded['ar'] ?? reset($decoded)));
+            }
+        }
+        return $value;
+    }
+
+    public function setStateAttribute($value)
+    {
+        if (is_array($value)) {
+            $value = $value['en'] ?? ($value['fr'] ?? ($value['ar'] ?? reset($value)));
+        }
+        $this->attributes['state'] = $value;
+    }
+
+    public function getCountryAttribute($value)
+    {
+        if (is_string($value) && str_starts_with(trim($value), '{')) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded['en'] ?? ($decoded['fr'] ?? ($decoded['ar'] ?? reset($decoded)));
+            }
+        }
+        return $value;
+    }
+
+    public function setCountryAttribute($value)
+    {
+        if (is_array($value)) {
+            $value = $value['en'] ?? ($value['fr'] ?? ($value['ar'] ?? reset($value)));
+        }
+        $this->attributes['country'] = $value;
     }
 
     public function getSlugOptions(): SlugOptions

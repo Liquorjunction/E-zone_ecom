@@ -48,9 +48,6 @@ class ShowroomRepository implements ShowroomRepositoryInterface
 
             $query->where(function (Builder $q) use ($like, $locale) {
                 $q->where("name->$locale", 'LIKE', $like)
-                    ->orWhere("city->$locale", 'LIKE', $like)
-                    ->orWhere("state->$locale", 'LIKE', $like)
-                    ->orWhere("country->$locale", 'LIKE', $like)
                     ->orWhere('name', 'LIKE', $like)
                     ->orWhere('city', 'LIKE', $like)
                     ->orWhere('state', 'LIKE', $like)
@@ -61,11 +58,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface
         }
 
         if ($request->filled('country')) {
-            $country = $request->get('country');
-            $query->where(function (Builder $q) use ($country, $locale) {
-                $q->where("country->$locale", $country)
-                    ->orWhere('country', $country);
-            });
+            $query->where('country', $request->get('country'));
         }
 
         return $query
@@ -83,14 +76,9 @@ class ShowroomRepository implements ShowroomRepositoryInterface
 
     public function getAvailableCountries(): Collection
     {
-        $locale = app()->getLocale();
-
         return Showrooms::query()
             ->where('status', 'active')
-            ->get()
-            ->map(function (Showrooms $showroom) use ($locale) {
-                return $showroom->getTranslation('country', $locale) ?? $showroom->country;
-            })
+            ->pluck('country')
             ->filter()
             ->unique()
             ->values();

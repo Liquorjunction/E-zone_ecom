@@ -14,7 +14,7 @@
                         <div class="card-action">
                             <button type="button" class="btn btn-sm btn-primary btn-translate-all" id="btn-translate-all"
                                 data-url="{{ route('admin.translate.batch') }}"
-                                data-fields='["name","description","city","state","country"]'>
+                                data-fields='["name","description"]'>
                                 <i class="bi bi-translate me-2"></i> Translate All Fields
                             </button>
                             <a href="{{ route('admin.showrooms.index') }}" class="btn btn-primary btn-sm">Back to List</a>
@@ -84,27 +84,6 @@
                                                             </div>
                                                             <textarea name="description[en]" id="description_en" class="form-control" rows="4">{{ $showroom->getTranslation('description', 'en') }}</textarea>
                                                         </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">City (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <input type="text" name="city[en]" id="city_en" class="form-control"
-                                                                value="{{ $showroom->getTranslation('city', 'en') }}"
-                                                                required>
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">State (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <input type="text" name="state[en]" id="state_en" class="form-control"
-                                                                value="{{ $showroom->getTranslation('state', 'en') }}"
-                                                                required>
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">Country (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <input type="text" name="country[en]" id="country_en" class="form-control"
-                                                                value="{{ $showroom->getTranslation('country', 'en') }}"
-                                                                required>
-                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -120,21 +99,6 @@
                                                             <label class="form-label">Description (FR)</label>
                                                             <textarea name="description[fr]" id="description_fr" class="form-control" rows="4">{{ $showroom->getTranslation('description', 'fr') }}</textarea>
                                                         </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">City (FR)</label>
-                                                            <input type="text" name="city[fr]" id="city_fr" class="form-control"
-                                                                value="{{ $showroom->getTranslation('city', 'fr') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">State (FR)</label>
-                                                            <input type="text" name="state[fr]" id="state_fr" class="form-control"
-                                                                value="{{ $showroom->getTranslation('state', 'fr') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">Country (FR)</label>
-                                                            <input type="text" name="country[fr]" id="country_fr" class="form-control"
-                                                                value="{{ $showroom->getTranslation('country', 'fr') }}">
-                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -149,21 +113,6 @@
                                                         <div class="col-md-12 mb-3">
                                                             <label class="form-label">Description (AR)</label>
                                                             <textarea name="description[ar]" id="description_ar" class="form-control" rows="4">{{ $showroom->getTranslation('description', 'ar') }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">City (AR)</label>
-                                                            <input type="text" name="city[ar]" id="city_ar" class="form-control"
-                                                                value="{{ $showroom->getTranslation('city', 'ar') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">State (AR)</label>
-                                                            <input type="text" name="state[ar]" id="state_ar" class="form-control"
-                                                                value="{{ $showroom->getTranslation('state', 'ar') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">Country (AR)</label>
-                                                            <input type="text" name="country[ar]" id="country_ar" class="form-control"
-                                                                value="{{ $showroom->getTranslation('country', 'ar') }}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -185,6 +134,21 @@
                                                         <label class="form-label">Address <span class="text-danger">*</span></label>
                                                         <textarea name="address" id="address" class="form-control" rows="2" required
                                                             placeholder="Showroom street address">{{ old('address', $showroom->address) }}</textarea>
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">City <span class="text-danger">*</span></label>
+                                                        <input type="text" name="city" id="city" class="form-control" required
+                                                            value="{{ old('city', $showroom->city) }}" placeholder="City">
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">State <span class="text-danger">*</span></label>
+                                                        <input type="text" name="state" id="state" class="form-control" required
+                                                            value="{{ old('state', $showroom->state) }}" placeholder="State / Region">
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">Country <span class="text-danger">*</span></label>
+                                                        <input type="text" name="country" id="country" class="form-control" required
+                                                            value="{{ old('country', $showroom->country) }}" placeholder="Country">
                                                     </div>
                                                     <div class="col-lg-4 col-md-4 mb-3">
                                                         <label class="form-label">Email</label>

@@ -5,9 +5,9 @@
         $locale = app()->getLocale();
         $name = $showroom->getTranslation('name', $locale) ?? (is_array($showroom->name) ? null : $showroom->name);
         $address = $showroom->address;
-        $city = $showroom->getTranslation('city', $locale) ?? (is_array($showroom->city) ? null : $showroom->city);
-        $state = $showroom->getTranslation('state', $locale) ?? (is_array($showroom->state) ? null : $showroom->state);
-        $country = $showroom->getTranslation('country', $locale) ?? (is_array($showroom->country) ? null : $showroom->country);
+        $city = $showroom->city;
+        $state = $showroom->state;
+        $country = $showroom->country;
         $description = $showroom->getTranslation('description', $locale) ?? (is_array($showroom->description) ? null : $showroom->description);
         $location = trim(implode(', ', array_filter([$address, $city, $state, $country, $showroom->pincode])));
         $mapQuery = urlencode($location);

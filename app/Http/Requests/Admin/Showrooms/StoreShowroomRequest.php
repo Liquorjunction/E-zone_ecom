@@ -28,26 +28,11 @@ class StoreShowroomRequest extends FormRequest
             'description.fr' => 'nullable|string',
             'description.ar' => 'nullable|string',
 
-            // -- Address -- Non-Translatable (Mandatory Step 1)
+            // -- Address, City, State, Country -- Non-Translatable (Mandatory Step 1)
             'address' => 'required|string|max:255',
-
-            // -- City -- Translatable (Mandatory Step 1)
-            'city' => 'required|array',
-            'city.en' => 'required|string',
-            'city.fr' => 'nullable|string',
-            'city.ar' => 'nullable|string',
-
-            // -- State -- Translatable (Mandatory Step 1)
-            'state' => 'required|array',
-            'state.en' => 'required|string',
-            'state.fr' => 'nullable|string',
-            'state.ar' => 'nullable|string',
-
-            // -- Country -- Translatable (Mandatory Step 1)
-            'country' => 'required|array',
-            'country.en' => 'required|string',
-            'country.fr' => 'nullable|string',
-            'country.ar' => 'nullable|string',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'country' => 'required|string|max:255',
 
             // Non-Translatable Fields
             'email' => 'nullable|email|max:255',
@@ -82,9 +67,6 @@ class StoreShowroomRequest extends FormRequest
     {
         return [
             'name.en' => 'English Name',
-            'city.en' => 'English City',
-            'state.en' => 'English State',
-            'country.en' => 'English Country',
             'description.en' => 'English Description',
         ];
     }

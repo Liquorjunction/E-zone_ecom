@@ -14,7 +14,7 @@
                         <div class="card-action">
                             <button type="button" class="btn btn-sm btn-primary btn-translate-all" id="btn-translate-all"
                                 data-url="{{ route('admin.translate.batch') }}"
-                                data-fields='["name","description","city","state","country"]'>
+                                data-fields='["name","description"]'>
                                 <i class="bi bi-translate me-2"></i> Translate All Fields
                             </button>
                             <a href="{{ route('admin.showrooms.index') }}" class="btn btn-primary btn-sm">Back to List</a>
@@ -89,24 +89,6 @@
                                                                 class="form-control"
                                                                 rows="4">{{ old('description.en') }}</textarea>
                                                         </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">City (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <input type="text" name="city[en]" class="form-control" required
-                                                                value="{{ old('city.en') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">State (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <input type="text" name="state[en]" class="form-control"
-                                                                required value="{{ old('state.en') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">Country (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <input type="text" name="country[en]" class="form-control"
-                                                                required value="{{ old('country.en') }}">
-                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -124,21 +106,6 @@
                                                                 class="form-control"
                                                                 rows="4">{{ old('description.fr') }}</textarea>
                                                         </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">City (FR)</label>
-                                                            <input type="text" name="city[fr]" class="form-control"
-                                                                value="{{ old('city.fr') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">State (FR)</label>
-                                                            <input type="text" name="state[fr]" class="form-control"
-                                                                value="{{ old('state.fr') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">Country (FR)</label>
-                                                            <input type="text" name="country[fr]" class="form-control"
-                                                                value="{{ old('country.fr') }}">
-                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -155,21 +122,6 @@
                                                             <textarea name="description[ar]" id="description_ar"
                                                                 class="form-control"
                                                                 rows="4">{{ old('description.ar') }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">City (AR)</label>
-                                                            <input type="text" name="city[ar]" class="form-control"
-                                                                value="{{ old('city.ar') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">State (AR)</label>
-                                                            <input type="text" name="state[ar]" class="form-control"
-                                                                value="{{ old('state.ar') }}">
-                                                        </div>
-                                                        <div class="col-md-4 mb-3">
-                                                            <label class="form-label">Country (AR)</label>
-                                                            <input type="text" name="country[ar]" class="form-control"
-                                                                value="{{ old('country.ar') }}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -191,6 +143,21 @@
                                                         <label class="form-label">Address <span class="text-danger">*</span></label>
                                                         <textarea name="address" class="form-control" rows="2" required
                                                             placeholder="Showroom street address">{{ old('address') }}</textarea>
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">City <span class="text-danger">*</span></label>
+                                                        <input type="text" name="city" class="form-control" required
+                                                            value="{{ old('city') }}" placeholder="City">
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">State <span class="text-danger">*</span></label>
+                                                        <input type="text" name="state" class="form-control" required
+                                                            value="{{ old('state') }}" placeholder="State / Region">
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 mb-3">
+                                                        <label class="form-label">Country <span class="text-danger">*</span></label>
+                                                        <input type="text" name="country" class="form-control" required
+                                                            value="{{ old('country') }}" placeholder="Country">
                                                     </div>
                                                     <div class="col-lg-4 col-md-4 mb-3">
                                                         <label class="form-label">Email <span class="text-danger">*</span></label>

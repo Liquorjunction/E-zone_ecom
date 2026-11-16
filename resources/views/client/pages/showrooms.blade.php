@@ -73,9 +73,9 @@
                     @php
                         $name = $showroom->getTranslation('name', $locale) ?? $showroom->name;
                         $address = $showroom->address;
-                        $city = $showroom->getTranslation('city', $locale) ?? $showroom->city;
-                        $state = $showroom->getTranslation('state', $locale) ?? $showroom->state;
-                        $country = $showroom->getTranslation('country', $locale) ?? $showroom->country;
+                        $city = $showroom->city;
+                        $state = $showroom->state;
+                        $country = $showroom->country;
                         $location = trim(implode(', ', array_filter([$address, $city, $state, $country, $showroom->pincode])));
                     @endphp
                     <div
