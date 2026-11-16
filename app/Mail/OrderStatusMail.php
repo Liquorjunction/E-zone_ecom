@@ -28,13 +28,8 @@ class OrderStatusMail extends Mailable
         $this->user = $user;
         $this->order = $order;
         $this->status = strtolower($status);
-        $this->recipientName = $user?->name ?? $order->shippingAddressRecord?->name ?? $order->guestUser?->name ?? ($order->shipping_address['name'] ?? 'Client');
-
-        if ($order->isGuest()) {
-            $this->reviewUrl = \Illuminate\Support\Facades\URL::signedRoute('guest.order-detail', ['order' => $order->order_number]);
-        } else {
-            $this->reviewUrl = route('order-detail', $order->order_number);
-        }
+        $this->recipientName = $user?->name ?? $order->shippingAddressRecord?->name ?? ($order->shipping_address['name'] ?? 'Client');
+        $this->reviewUrl = route('order-detail', $order->order_number);
 
         // Provide tracking URL for shipped and out_for_delivery mails
         if (in_array($this->status, ['shipped', 'out_for_delivery'])) {

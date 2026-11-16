@@ -11,8 +11,6 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'client_type',
-        'guest_user_id',
         'order_number',
         'subtotal',
         'discount_amount',
@@ -71,19 +69,14 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function guestUser()
-    {
-        return $this->belongsTo(GuestUser::class, 'guest_user_id');
-    }
-
     public function isGuest(): bool
     {
-        return ($this->client_type === 'guest') || is_null($this->user_id);
+        return false;
     }
 
     public function isRegistered(): bool
     {
-        return !$this->isGuest();
+        return true;
     }
 
     public function shippingAddressRecord()

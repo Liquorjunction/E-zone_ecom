@@ -281,7 +281,6 @@
     @stack('scripts')
     @include('client.components.universal-popup')
     @include('client.components._review_modal')
-    @include('client.partials.returning-guest-popup')
     <script src="{{ asset('js/reviews.js') }}"></script>
 </body>
 

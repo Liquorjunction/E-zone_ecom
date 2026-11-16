@@ -102,15 +102,6 @@ class AuthController extends Controller
         if ($authRepository->authenticateUser($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // SOW #8: Link previous guest orders if user's email is verified
-            if ($user && $user->email_verified_at) {
-                try {
-                    app(\App\Repositories\Client\Interfaces\GuestUserRepositoryInterface::class)->linkGuestOrdersToUser($user);
-                } catch (\Throwable $e) {
-                    Log::error('Error linking guest orders on login: ' . $e->getMessage());
-                }
-            }
-
             try {
                 $cartService->mergeSessionCartIntoUserCart((int) Auth::id(), $guestSessionId);
             } catch (\Throwable $e) {
@@ -259,13 +250,6 @@ class AuthController extends Controller
                     'email_verified_at' => now(),
                 ]);
 
-                // SOW #8: Link previous guest orders upon verified email
-                try {
-                    app(\App\Repositories\Client\Interfaces\GuestUserRepositoryInterface::class)->linkGuestOrdersToUser($user);
-                } catch (\Throwable $e) {
-                    Log::error('Error linking guest orders on pending registration verification: ' . $e->getMessage());
-                }
-
                 $this->clearPendingRegistration($token);
             } catch (\Throwable $e) {
                 Log::error('Pending registration verification error: ' . $e->getMessage(), [
@@ -290,16 +274,6 @@ class AuthController extends Controller
 
         if (!$isVerified) {
             return redirect()->route('login')->with('error', statictranslations('Unable to verify email. Please try again.'));
-        }
-
-        // SOW #8: Link previous guest orders upon verified email
-        $verifiedUser = User::where('email', strtolower(trim($email)))->first();
-        if ($verifiedUser) {
-            try {
-                app(\App\Repositories\Client\Interfaces\GuestUserRepositoryInterface::class)->linkGuestOrdersToUser($verifiedUser);
-            } catch (\Throwable $e) {
-                Log::error('Error linking guest orders on email verification: ' . $e->getMessage());
-            }
         }
 
         return redirect()->route('login')->with('success', statictranslations('Email verified successfully! You can now log in.'));
@@ -399,7 +373,6 @@ class AuthController extends Controller
 
             $cartService->clearBuyNowFlowState();
             $request->session()->forget('checkout_mode');
-            $request->session()->forget('guest_checkout');
         } catch (\Throwable $e) {
             Log::warning('Failed to clear transient checkout state during logout.', [
                 'user_id' => Auth::id(),

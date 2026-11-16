@@ -66,9 +66,7 @@ class OrderCheckoutRequest extends FormRequest
             'zip' => ['nullable', 'regex:/^\d{1,10}$/'],
             'postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'country' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
-            'phone' => Auth::check()
-                ? ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/']
-                : ['required', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],
+            'phone' => ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],
 
             'shipping_address' => ['nullable', 'array'],
             'shipping_address.name' => ['required_with:shipping_address', 'string', 'max:255'],
@@ -98,7 +96,7 @@ class OrderCheckoutRequest extends FormRequest
             'billing_country' => ['required_without_all:billing_address,billing_same_as_shipping', 'string', 'max:255'],
             'billing_phone' => ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],
 
-            'email' => Auth::check() ? ['nullable', 'email'] : ['required', 'email'],
+            'email' => ['nullable', 'email'],
 
             'payment_method' => ['required_without:payment', 'string', Rule::in($paymentMethods)],
             'payment' => ['nullable', 'string', Rule::in($paymentMethods)],
@@ -109,77 +107,6 @@ class OrderCheckoutRequest extends FormRequest
 
             'g-recaptcha-response' => ['nullable', 'string'],
         ];
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function ($validator) {
-            if (!Auth::check()) {
-                $submittedEmail = strtolower(trim((string) $this->input('email', '')));
-
-                // 1. Block registered users from creating guest orders
-                if (!empty($submittedEmail) && \App\Models\User::where('email', $submittedEmail)->exists()) {
-                    $validator->errors()->add('email', statictranslations('You are already registered. Please log in to your account to place an order.'));
-                }
-
-                // 2. Mandatory CAPTCHA Verification Check (Google reCAPTCHA)
-                $secret = config('services.recaptcha.secret_key');
-                $token  = (string) $this->input('g-recaptcha-response', '');
-
-                if (!empty($secret)) {
-                    if (empty($token)) {
-                        $validator->errors()->add('recaptcha', statictranslations('Please complete the security CAPTCHA verification before proceeding.'));
-                    } elseif (!$this->verifyRecaptcha($token, $secret)) {
-                        $validator->errors()->add('recaptcha', statictranslations('Security CAPTCHA verification failed. Please try again.'));
-                    }
-                }
-            }
-        });
-    }
-
-    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
-    {
-        if ($this->expectsJson()) {
-            $submittedEmail = strtolower(trim((string) $this->input('email', '')));
-            $isRegistered = !Auth::check() && !empty($submittedEmail) && \App\Models\User::where('email', $submittedEmail)->exists();
-
-            $response = response()->json([
-                'success'       => false,
-                'is_registered' => $isRegistered,
-                'message'       => $validator->errors()->first(),
-                'errors'        => $validator->errors(),
-            ], 422);
-
-            throw new \Illuminate\Validation\ValidationException($validator, $response);
-        }
-
-        parent::failedValidation($validator);
-    }
-
-    protected function verifyRecaptcha(string $token, string $secret): bool
-    {
-        try {
-            $response = Http::asForm()->timeout(5)->post('https://www.google.com/recaptcha/api/siteverify', [
-                'secret'   => $secret,
-                'response' => $token,
-                'remoteip' => $this->ip(),
-            ]);
-
-            $json = $response->json();
-            $success = (bool) ($json['success'] ?? false);
-            if (!$success) {
-                Log::warning('reCAPTCHA siteverify rejected token from Google', [
-                    'json' => $json,
-                    'token_preview' => substr($token, 0, 15) . '...',
-                    'ip' => $this->ip(),
-                ]);
-            }
-
-            return $success;
-        } catch (\Throwable $e) {
-            Log::error('reCAPTCHA verification request error: ' . $e->getMessage());
-            return app()->environment('local', 'testing');
-        }
     }
 
     // protected function prepareForValidation(): void

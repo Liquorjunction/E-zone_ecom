@@ -127,7 +127,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function resetFilters() {
         var statusSelect = el('status');
-        var clientTypeSelect = el('client_type');
         var paymentMethodSelect = el('payment_method');
         var paymentStatusSelect = el('payment_status');
         var startDate = document.querySelector("input[name='start_date']");
@@ -135,9 +134,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (statusSelect) {
             statusSelect.value = '';
-        }
-        if (clientTypeSelect) {
-            clientTypeSelect.value = '';
         }
         if (paymentMethodSelect) {
             paymentMethodSelect.value = '';

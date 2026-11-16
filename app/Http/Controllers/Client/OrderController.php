@@ -79,20 +79,12 @@ class OrderController extends Controller
         $isBuyNowFlow = $request->boolean('buy_now');
         $request->session()->put('checkout_mode', $isBuyNowFlow ? 'buy_now' : 'normal');
 
-        if ($step === 1) {
-            $request->session()->forget('guest_checkout');
-        }
-
         if ($step === 2 && !Auth::check()) {
-            if ($request->get('mode') === 'guest') {
-                $request->session()->put('guest_checkout', true);
-            } elseif (!$request->session()->get('guest_checkout')) {
-                $loginUrl = route('login', array_filter(['checkout' => 1, 'buy_now' => $isBuyNowFlow ? 1 : null]));
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json(['redirect' => $loginUrl], 302);
-                }
-                return redirect()->to($loginUrl);
+            $loginUrl = route('login', array_filter(['checkout' => 1, 'buy_now' => $isBuyNowFlow ? 1 : null]));
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['redirect' => $loginUrl], 302);
             }
+            return redirect()->to($loginUrl);
         }
 
         if ($isBuyNowFlow) {
@@ -205,24 +197,20 @@ class OrderController extends Controller
             return back()->withErrors(['cart' => 'Your cart is empty.']);
         }
 
-        try {
-            if (!Auth::check()) {
-                $guestEmail = strtolower(trim((string) $request->input('email')));
-                if (!empty($guestEmail) && \App\Models\User::where('email', $guestEmail)->exists()) {
-                    $msg = statictranslations('You are already registered. Please log in to your account to place an order.');
-                    if ($request->ajax() || $request->wantsJson()) {
-                        return response()->json([
-                            'success'       => false,
-                            'is_registered' => true,
-                            'message'       => $msg,
-                            'errors'        => ['email' => [$msg]],
-                        ], 422);
-                    }
-                    return back()->withErrors(['email' => $msg]);
-                }
+        if (!Auth::check()) {
+            $loginUrl = route('login', array_filter(['checkout' => 1, 'buy_now' => $checkoutMode === 'buy_now' ? 1 : null]));
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success'  => false,
+                    'redirect' => $loginUrl,
+                    'message'  => statictranslations('Please login to place your order.'),
+                ], 401);
             }
+            return redirect()->to($loginUrl);
+        }
 
-            $userEmail = Auth::check() ? Auth::user()?->email : ($request->input('email'));
+        try {
+            $userEmail = Auth::user()?->email;
             $order = $orderService->processCheckout(
                 $cart,
                 $request->validated(),
@@ -230,25 +218,8 @@ class OrderController extends Controller
                 $userEmail
             );
 
-            if ($order->isGuest() && $order->guestUser?->token) {
-                Cookie::queue(
-                    Cookie::make(
-                        'ezone_guest',
-                        $order->guestUser->token,
-                        60 * 24 * 60, // 60 days
-                        null,
-                        null,
-                        true, // secure
-                        true, // httpOnly
-                        false,
-                        'lax' // SameSite
-                    )
-                );
-            }
-
-            Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id(), 'client_type' => $order->client_type]);
+            Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id()]);
             $request->session()->forget('checkout_mode');
-            $request->session()->forget('guest_checkout');
 
             if ($checkoutMode === 'buy_now') {
                 $cartService->clearBuyNowFlowState();
@@ -275,17 +246,13 @@ class OrderController extends Controller
                     'cities', 'totals', 'orders'
                 ))->with('appliedCoupon', null)->render();
 
-                $orderDetailUrl = $order->isGuest()
-                    ? \Illuminate\Support\Facades\URL::signedRoute('guest.order-detail', ['order' => $order->order_number])
-                    : route('order-detail', ['order' => $order->id]);
-
                 return response()->json([
                     'success'          => true,
                     'step'             => 3,
                     'html'             => $html,
                     'order_id'         => $order->id,
                     'order_number'     => $order->order_number,
-                    'order_detail_url' => $orderDetailUrl,
+                    'order_detail_url' => route('order-detail', ['order' => $order->id]),
                     'ecommerce'        => Ga4Ecommerce::purchasePayload($order),
                 ]);
             }
@@ -341,47 +308,22 @@ class OrderController extends Controller
 
     public function addressSection(Request $request, AddressRepo $addressRepo)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $type   = $request->input('type', 'shipping'); // 'shipping' or 'billing'
         $cities = $addressRepo->getActiveCities() ?: collect();
 
-        $addresses        = collect();
-        $billingAddresses = collect();
-
-        if (Auth::check()) {
-            if ($type === 'billing') {
-                $billingAddresses = $addressRepo->getAddressesByType(Auth::id(), 'billing');
-            } else {
-                $addresses = $addressRepo->getAddressesByType(Auth::id(), 'shipping');
-            }
-        }
-
         if ($type === 'billing') {
+            $billingAddresses = $addressRepo->getAddressesByType(Auth::id(), 'billing');
             $html = view('client.pages.checkout.partials._billing-address-section', compact('billingAddresses','cities'))->render();
         } else {
+            $addresses = $addressRepo->getAddressesByType(Auth::id(), 'shipping');
             $html = view('client.pages.checkout.partials._shipping-address-section', compact('addresses','cities'))->render();
         }
 
         return response()->json(['success' => true, 'html' => $html, 'type' => $type]);
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // Guest order detail (Signed URL tracking for guests)
-    // ─────────────────────────────────────────────────────────────
-
-    public function guestOrderDetail(Order $order, \App\Services\OrderStatusService $orderStatusService)
-    {
-        // If order belongs to a registered customer and authenticated user doesn't match, handle gracefully
-        if ($order->isRegistered() && (!Auth::check() || Auth::id() !== $order->user_id)) {
-            if (!Auth::check()) {
-                return redirect()->route('login')->with('info', statictranslations('This order is linked to your registered account. Please log in to view details.'));
-            }
-            abort(403, 'Access denied.');
-        }
-
-        $order->loadMissing(['items.product', 'items.variant', 'shippingAddressRecord', 'billingAddressRecord', 'guestUser']);
-        $userReviews = [];
-
-        return view('client.pages.order-detail', compact('order', 'userReviews', 'orderStatusService'));
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -33,23 +33,18 @@ class NewOrderReceived extends Mailable
         $this->orderUrl = $orderUrl;
 
         $shipping = $order->shipping_address ?? [];
-        $this->isGuest = method_exists($order, 'isGuest')
-            ? $order->isGuest()
-            : (($order->client_type ?? '') === 'guest' || is_null($order->user_id));
+        $this->isGuest = false;
 
         $this->customerName = $this->user?->name
-            ?? $order->guestUser?->name
             ?? $order->shippingAddressRecord?->name
-            ?? ($shipping['name'] ?? ($this->isGuest ? 'Client Invité' : 'Client'));
+            ?? ($shipping['name'] ?? 'Client');
 
         $this->customerEmail = $order->email
             ?? $this->user?->email
-            ?? $order->guestUser?->email
             ?? ($shipping['email'] ?? '—');
 
         $this->customerPhone = $order->phone_no
             ?? $this->user?->phone
-            ?? $order->guestUser?->phone
             ?? ($shipping['phone'] ?? '');
     }
 

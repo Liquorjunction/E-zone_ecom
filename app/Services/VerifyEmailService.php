@@ -148,15 +148,6 @@ class VerifyEmailService
             $user->email_verification_expires_at = null;
             $user->save();
 
-            // SOW #8: Link previous guest orders upon verified email
-            if ($guardType === 'user') {
-                try {
-                    app(\App\Repositories\Client\Interfaces\GuestUserRepositoryInterface::class)->linkGuestOrdersToUser($user);
-                } catch (\Throwable $e) {
-                    Log::error('Error linking guest orders in VerifyEmailService: ' . $e->getMessage());
-                }
-            }
-
             DB::commit();
             return true;
         } catch (\Exception $e) {

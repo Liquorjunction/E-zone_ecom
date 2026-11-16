@@ -6,7 +6,6 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Repositories\Client\Interfaces\AddressRepositoryInterface;
 use App\Repositories\Client\Interfaces\CartRepositoryInterface;
-use App\Repositories\Client\Interfaces\GuestUserRepositoryInterface;
 use App\Repositories\Client\Interfaces\OrderRepositoryInterface;
 use App\Services\DispatchService;
 use Psr\Log\LoggerInterface;
@@ -33,7 +32,6 @@ class OrderService
     protected SessionCouponService $sessionCoupon;
     protected OrderStatusService $orderStatusService;
     protected DispatchService $dispatchService;
-    protected GuestUserRepositoryInterface $guestUserRepo;
 
     protected MXPlusService $mXPlusService;
 
@@ -49,8 +47,7 @@ class OrderService
         SessionCouponService $sessionCoupon,
         OrderStatusService $orderStatusService,
         LoggerInterface $logger,
-        MXPlusService $mXPlusService,
-        GuestUserRepositoryInterface $guestUserRepo
+        MXPlusService $mXPlusService
     ) {
         $this->orders = $orders;
         $this->cartRepo = $cartRepo;
@@ -64,7 +61,6 @@ class OrderService
         $this->orderStatusService = $orderStatusService;
         $this->logger = $logger;
         $this->mXPlusService = $mXPlusService;
-        $this->guestUserRepo = $guestUserRepo;
     }
 
     public function processCheckout(Cart $cart, array $data, ?int $userId, ?string $userEmail)
@@ -93,39 +89,11 @@ class OrderService
                 : $this->resolveBillingAddressRecord($data, $billingAddress, $userId);
 
             // Pull applied coupon from session BEFORE clearing cart/session.
-            // Guest users are strictly restricted from using coupon codes.
-            if (!$userId) {
-                $this->sessionCoupon->remove();
-                $appliedCoupon = null;
-                $pricing = $this->priceCalculator->calculate($cart, $shippingMethod);
-            } else {
-                $appliedCoupon = $this->sessionCoupon->getForCart($cart->id);
-            }
-
-            $guestUser = null;
-            $clientType = 'registered';
-
-            if (!$userId) {
-                $clientType = 'guest';
-                $guestName = $shippingAddress['name'] ?? trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? ''));
-                $guestPhone = $shippingAddress['phone'] ?? $data['phone'] ?? $data['phone_no'] ?? null;
-                $guestEmail = strtolower(trim($data['email'] ?? ''));
-
-                if (!empty($guestEmail) && \App\Models\User::where('email', $guestEmail)->exists()) {
-                    throw new \DomainException(statictranslations('You are already registered. Please log in to your account to place an order.'));
-                }
-
-                $guestUser = $this->guestUserRepo->createOrUpdateGuest([
-                    'email' => $guestEmail,
-                    'name'  => $guestName ?: 'Guest Customer',
-                    'phone' => $guestPhone,
-                ]);
-            }
+            // We do this here so the coupon_id / coupon_code are saved on the order.
+            $appliedCoupon = $this->sessionCoupon->getForCart($cart->id);
 
             $order = $this->orders->create([
                 'user_id' => $userId,
-                'client_type' => $clientType,
-                'guest_user_id' => $guestUser?->id,
                 'subtotal' => $pricing['subtotal'],
                 'discount_amount' => $pricing['total_item_discount'],
                 // Persist coupon info from session (not from cart DB columns – those are always null)

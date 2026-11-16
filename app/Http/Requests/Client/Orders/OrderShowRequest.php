@@ -25,7 +25,6 @@ class OrderShowRequest extends FormRequest
         return [
             'step' => 'required|integer|min:1|max:3',
             'order_id' => 'nullable|exists:orders,id',
-            'mode' => 'nullable|string|in:guest',
             'buy_now' => 'nullable',
         ];
     }
