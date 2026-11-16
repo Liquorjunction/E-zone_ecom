@@ -14,7 +14,7 @@
                         <div class="card-action">
                             <button type="button" class="btn btn-sm btn-primary btn-translate-all" id="btn-translate-all"
                                 data-url="{{ route('admin.translate.batch') }}"
-                                data-fields='["name","address","description","city","state","country"]'>
+                                data-fields='["name","description","city","state","country"]'>
                                 <i class="bi bi-translate me-2"></i> Translate All Fields
                             </button>
                             <a href="{{ route('admin.showrooms.index') }}" class="btn btn-primary btn-sm">Back to List</a>
@@ -70,11 +70,6 @@
                                                                 required>
                                                         </div>
                                                         <div class="col-md-12 mb-3">
-                                                            <label class="form-label">Address (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <textarea name="address[en]" id="address_en" class="form-control" rows="2" required>{{ $showroom->getTranslation('address', 'en') }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
                                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                                 <label class="form-label mb-0">Description (EN)</label>
                                                                 <div class="d-flex align-items-center gap-2">
@@ -122,10 +117,6 @@
                                                                 value="{{ $showroom->getTranslation('name', 'fr') }}">
                                                         </div>
                                                         <div class="col-md-12 mb-3">
-                                                            <label class="form-label">Address (FR)</label>
-                                                            <textarea name="address[fr]" id="address_fr" class="form-control" rows="2">{{ $showroom->getTranslation('address', 'fr') }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
                                                             <label class="form-label">Description (FR)</label>
                                                             <textarea name="description[fr]" id="description_fr" class="form-control" rows="4">{{ $showroom->getTranslation('description', 'fr') }}</textarea>
                                                         </div>
@@ -154,10 +145,6 @@
                                                             <label class="form-label">Name (AR)</label>
                                                             <input type="text" name="name[ar]" id="name_ar" class="form-control"
                                                                 value="{{ $showroom->getTranslation('name', 'ar') }}">
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
-                                                            <label class="form-label">Address (AR)</label>
-                                                            <textarea name="address[ar]" id="address_ar" class="form-control" rows="2">{{ $showroom->getTranslation('address', 'ar') }}</textarea>
                                                         </div>
                                                         <div class="col-md-12 mb-3">
                                                             <label class="form-label">Description (AR)</label>
@@ -194,6 +181,11 @@
                                                 </div>
 
                                                 <div class="row g-3">
+                                                    <div class="col-12 mb-3">
+                                                        <label class="form-label">Address <span class="text-danger">*</span></label>
+                                                        <textarea name="address" id="address" class="form-control" rows="2" required
+                                                            placeholder="Showroom street address">{{ old('address', $showroom->address) }}</textarea>
+                                                    </div>
                                                     <div class="col-lg-4 col-md-4 mb-3">
                                                         <label class="form-label">Email</label>
                                                         <input type="email" name="email" class="form-control"

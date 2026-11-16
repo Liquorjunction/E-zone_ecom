@@ -31,10 +31,7 @@ class UpdateShowroomRequest extends FormRequest
             'description.ar' => 'nullable|string',
 
             // -- Address --
-            'address' => 'required|array',
-            'address.en' => 'required|string',
-            'address.fr' => 'nullable|string',
-            'address.ar' => 'nullable|string',
+            'address' => 'required|string|max:255',
 
             // -- City --
             'city' => 'required|array',
@@ -83,7 +80,6 @@ class UpdateShowroomRequest extends FormRequest
             'name.required' => 'The name field is required.',
             'name.en.required' => 'The English name is required.',
             'address.required' => 'The address field is required.',
-            'address.en.required' => 'The English address is required.',
             'city.required' => 'The city field is required.',
             'city.en.required' => 'The English city is required.',
             'state.required' => 'The state field is required.',

@@ -14,7 +14,7 @@
                         <div class="card-action">
                             <button type="button" class="btn btn-sm btn-primary btn-translate-all" id="btn-translate-all"
                                 data-url="{{ route('admin.translate.batch') }}"
-                                data-fields='["name","address","description","city","state","country"]'>
+                                data-fields='["name","description","city","state","country"]'>
                                 <i class="bi bi-translate me-2"></i> Translate All Fields
                             </button>
                             <a href="{{ route('admin.showrooms.index') }}" class="btn btn-primary btn-sm">Back to List</a>
@@ -69,12 +69,6 @@
                                                                 value="{{ old('name.en') }}">
                                                         </div>
                                                         <div class="col-md-12 mb-3">
-                                                            <label class="form-label">Address (EN) <span
-                                                                    class="text-danger">*</span></label>
-                                                            <textarea name="address[en]" class="form-control" rows="2"
-                                                                required>{{ old('address.en') }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
                                                             <div
                                                                 class="d-flex justify-content-between align-items-center mb-2">
                                                                 <label class="form-label mb-0">Description (EN)</label>
@@ -125,11 +119,6 @@
                                                                 placeholder="Nom du magasin" value="{{ old('name.fr') }}">
                                                         </div>
                                                         <div class="col-md-12 mb-3">
-                                                            <label class="form-label">Address (FR)</label>
-                                                            <textarea name="address[fr]" class="form-control"
-                                                                rows="2">{{ old('address.fr') }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
                                                             <label class="form-label">Description (FR)</label>
                                                             <textarea name="description[fr]" id="description_fr"
                                                                 class="form-control"
@@ -160,11 +149,6 @@
                                                             <label class="form-label">Name (AR)</label>
                                                             <input type="text" name="name[ar]" class="form-control"
                                                                 placeholder="اسم المعرض" value="{{ old('name.ar') }}">
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
-                                                            <label class="form-label">Address (AR)</label>
-                                                            <textarea name="address[ar]" class="form-control"
-                                                                rows="2">{{ old('address.ar') }}</textarea>
                                                         </div>
                                                         <div class="col-md-12 mb-3">
                                                             <label class="form-label">Description (AR)</label>
@@ -203,6 +187,11 @@
                                                 </div>
 
                                                 <div class="row g-3">
+                                                    <div class="col-12 mb-3">
+                                                        <label class="form-label">Address <span class="text-danger">*</span></label>
+                                                        <textarea name="address" class="form-control" rows="2" required
+                                                            placeholder="Showroom street address">{{ old('address') }}</textarea>
+                                                    </div>
                                                     <div class="col-lg-4 col-md-4 mb-3">
                                                         <label class="form-label">Email <span class="text-danger">*</span></label>
                                                         <input type="email" name="email" class="form-control" required

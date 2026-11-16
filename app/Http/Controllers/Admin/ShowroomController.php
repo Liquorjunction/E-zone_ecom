@@ -61,7 +61,7 @@ class ShowroomController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            $attributes = ['name', 'description', 'address', 'city', 'state', 'country'];
+            $attributes = ['name', 'description', 'city', 'state', 'country'];
 
             foreach ($attributes as $field) {
                 if (! isset($data[$field]['en'])) {
@@ -106,7 +106,7 @@ class ShowroomController extends Controller
             $data = $request->validated();
 
             // --- Smart Auto-Translate Logic ---
-            $attributes = ['name', 'description', 'address', 'city', 'state', 'country'];
+            $attributes = ['name', 'description', 'city', 'state', 'country'];
             foreach ($attributes as $field) {
                 if (! isset($data[$field]['en'])) {
                     continue;

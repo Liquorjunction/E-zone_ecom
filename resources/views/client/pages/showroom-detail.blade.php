@@ -4,7 +4,7 @@
     @php
         $locale = app()->getLocale();
         $name = $showroom->getTranslation('name', $locale) ?? (is_array($showroom->name) ? null : $showroom->name);
-        $address = $showroom->getTranslation('address', $locale) ?? (is_array($showroom->address) ? null : $showroom->address);
+        $address = $showroom->address;
         $city = $showroom->getTranslation('city', $locale) ?? (is_array($showroom->city) ? null : $showroom->city);
         $state = $showroom->getTranslation('state', $locale) ?? (is_array($showroom->state) ? null : $showroom->state);
         $country = $showroom->getTranslation('country', $locale) ?? (is_array($showroom->country) ? null : $showroom->country);

@@ -21,7 +21,7 @@
                             <p><strong>Email:</strong> {{ $showroom->email }}</p>
                             <p><strong>Phone:</strong> {{ $showroom->phone }}</p>
                             <p><strong>Address:</strong><br>
-                                {{ $showroom->getTranslation('address', 'en') }},<br>
+                                {{ $showroom->address }},<br>
                                 {{ $showroom->getTranslation('city', 'en') }}, {{ $showroom->getTranslation('state', 'en') }}<br>
                                 {{ $showroom->getTranslation('country', 'en') }} - {{ $showroom->pincode }}
                             </p>

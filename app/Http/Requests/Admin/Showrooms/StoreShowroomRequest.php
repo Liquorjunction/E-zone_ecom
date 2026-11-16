@@ -28,11 +28,8 @@ class StoreShowroomRequest extends FormRequest
             'description.fr' => 'nullable|string',
             'description.ar' => 'nullable|string',
 
-            // -- Address -- Translatable (Mandatory Step 1)
-            'address' => 'required|array',
-            'address.en' => 'required|string',
-            'address.fr' => 'nullable|string',
-            'address.ar' => 'nullable|string',
+            // -- Address -- Non-Translatable (Mandatory Step 1)
+            'address' => 'required|string|max:255',
 
             // -- City -- Translatable (Mandatory Step 1)
             'city' => 'required|array',
@@ -85,7 +82,6 @@ class StoreShowroomRequest extends FormRequest
     {
         return [
             'name.en' => 'English Name',
-            'address.en' => 'English Address',
             'city.en' => 'English City',
             'state.en' => 'English State',
             'country.en' => 'English Country',

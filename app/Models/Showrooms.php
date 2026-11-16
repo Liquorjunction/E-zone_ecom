@@ -21,7 +21,6 @@ class Showrooms extends Model
     public $translatable = [
         'name',
         'description',
-        'address',
         'city',
         'state',
         'country',
@@ -54,6 +53,25 @@ class Showrooms extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function getAddressAttribute($value)
+    {
+        if (is_string($value) && str_starts_with(trim($value), '{')) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded['en'] ?? ($decoded['fr'] ?? ($decoded['ar'] ?? reset($decoded)));
+            }
+        }
+        return $value;
+    }
+
+    public function setAddressAttribute($value)
+    {
+        if (is_array($value)) {
+            $value = $value['en'] ?? ($value['fr'] ?? ($value['ar'] ?? reset($value)));
+        }
+        $this->attributes['address'] = $value;
+    }
 
     public function getSlugOptions(): SlugOptions
     {

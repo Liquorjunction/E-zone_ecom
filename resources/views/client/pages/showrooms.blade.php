@@ -72,7 +72,7 @@
                 @forelse ($showrooms as $showroom)
                     @php
                         $name = $showroom->getTranslation('name', $locale) ?? $showroom->name;
-                        $address = $showroom->getTranslation('address', $locale) ?? $showroom->address;
+                        $address = $showroom->address;
                         $city = $showroom->getTranslation('city', $locale) ?? $showroom->city;
                         $state = $showroom->getTranslation('state', $locale) ?? $showroom->state;
                         $country = $showroom->getTranslation('country', $locale) ?? $showroom->country;

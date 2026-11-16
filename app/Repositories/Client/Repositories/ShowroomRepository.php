@@ -51,7 +51,6 @@ class ShowroomRepository implements ShowroomRepositoryInterface
                     ->orWhere("city->$locale", 'LIKE', $like)
                     ->orWhere("state->$locale", 'LIKE', $like)
                     ->orWhere("country->$locale", 'LIKE', $like)
-                    ->orWhere("address->$locale", 'LIKE', $like)
                     ->orWhere('name', 'LIKE', $like)
                     ->orWhere('city', 'LIKE', $like)
                     ->orWhere('state', 'LIKE', $like)
