@@ -9,7 +9,7 @@
 
 @php $suffix = $idSuffix ?? ''; @endphp
 
-<div class="mb-6 bg-linear-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-6">
+<div class="mb-6 bg-linear-to-r from-primary/5 to-blue-50 rounded-3xl shadow-lg border border-primary/20 p-5 sm:p-6 overflow-hidden">
     <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center">
         <svg class="w-5 h-5 me-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -60,7 +60,7 @@
         </div>
     @else
         {{-- Coupon input form --}}
-        <div class="flex gap-3" id="coupon-input-form{{ $suffix }}">
+        <div class="flex items-center gap-2 sm:gap-2.5 w-full min-w-0" id="coupon-input-form{{ $suffix }}">
             <input type="text" id="coupon-code-input{{ $suffix }}"
                 name="coupon_code"
                 autocomplete="off"
@@ -69,10 +69,10 @@
                 spellcheck="false"
                 value=""
                 placeholder="{{ statictranslations('Enter coupon code') }}"
-                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                class="flex-1 min-w-0 w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-xs uppercase font-medium placeholder:text-xs sm:placeholder:text-sm">
             <button type="button" id="apply-coupon-btn{{ $suffix }}"
-                class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                {{ statictranslations('Apply') }}
+                class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 sm:py-3 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-xl hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center min-w-[76px]">
+                <span>{{ statictranslations('Apply') }}</span>
             </button>
         </div>
     @endif

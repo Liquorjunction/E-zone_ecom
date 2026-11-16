@@ -93,6 +93,7 @@
         'Remove' => statictranslations('Remove'),
         'Coupon removed.' => statictranslations('Coupon removed.'),
         'Applying...' => statictranslations('Applying...'),
+        'Removing...' => statictranslations('Removing...'),
         'Coupon Applied!' => statictranslations('Coupon Applied!'),
         'Coupon Applied' => statictranslations('Coupon Applied'),
         'Invalid coupon code.' => statictranslations('Invalid coupon code.'),

@@ -79,6 +79,22 @@ class OrderController extends Controller
         $isBuyNowFlow = $request->boolean('buy_now');
         $request->session()->put('checkout_mode', $isBuyNowFlow ? 'buy_now' : 'normal');
 
+        if ($step === 1) {
+            $request->session()->forget('guest_checkout');
+        }
+
+        if ($step === 2 && !Auth::check()) {
+            if ($request->get('mode') === 'guest') {
+                $request->session()->put('guest_checkout', true);
+            } elseif (!$request->session()->get('guest_checkout')) {
+                $loginUrl = route('login', array_filter(['checkout' => 1, 'buy_now' => $isBuyNowFlow ? 1 : null]));
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['redirect' => $loginUrl], 302);
+                }
+                return redirect()->to($loginUrl);
+            }
+        }
+
         if ($isBuyNowFlow) {
             $cart = $cartService->getActiveBuyNowCart();
         } else {
@@ -232,6 +248,7 @@ class OrderController extends Controller
 
             Log::info('Client order created', ['order_id' => $order->id ?? null, 'user' => Auth::id(), 'client_type' => $order->client_type]);
             $request->session()->forget('checkout_mode');
+            $request->session()->forget('guest_checkout');
 
             if ($checkoutMode === 'buy_now') {
                 $cartService->clearBuyNowFlowState();

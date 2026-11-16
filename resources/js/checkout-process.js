@@ -220,14 +220,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const blocked = blockedByStock || blockedByEmptyCart;
 
         if (proceedButton) {
-            proceedButton.disabled = blocked;
+            if (proceedButton.tagName === 'BUTTON') {
+                proceedButton.disabled = blocked;
+            }
             proceedButton.classList.toggle('opacity-60', blocked);
             proceedButton.classList.toggle('cursor-not-allowed', blocked);
             proceedButton.classList.toggle('pointer-events-none', blocked);
             if (blocked) {
                 proceedButton.removeAttribute('data-spa-step');
             } else {
-                proceedButton.setAttribute('data-spa-step', '2');
+                if (window.__isUserLoggedIn) {
+                    proceedButton.setAttribute('data-spa-step', '2');
+                } else {
+                    proceedButton.removeAttribute('data-spa-step');
+                }
             }
             if (blockedByStock) {
                 proceedButton.title = trans('Please remove out-of-stock items before continuing to checkout.');
@@ -525,6 +531,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (step > currentStep && hasBlockingStockIssue()) {
             showToast(trans('Please remove out-of-stock items before continuing to checkout.'), 'error');
             syncCheckoutActionStates();
+            return;
+        }
+
+        if (step === 2 && !window.__isUserLoggedIn) {
+            const loginUrl = (window.__checkoutRoutes && window.__checkoutRoutes.loginCheckout) || '/login?checkout=1';
+            window.location.href = loginUrl;
             return;
         }
 
@@ -893,7 +905,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!hasCoupon && appliedDisplay) {
                 const inputHtml = `
-                <div class="flex gap-3" id="coupon-input-form${suffix}">
+                <div class="flex items-center gap-2 sm:gap-2.5 w-full min-w-0" id="coupon-input-form${suffix}">
                     <input type="text" id="coupon-code-input${suffix}"
                         name="coupon_code"
                         autocomplete="off"
@@ -902,10 +914,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         spellcheck="false"
                         value=""
                         placeholder="${trans('Enter coupon code')}"
-                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                        class="flex-1 min-w-0 w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-xs uppercase font-medium placeholder:text-xs sm:placeholder:text-sm">
                     <button type="button" id="apply-coupon-btn${suffix}"
-                        class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                        ${trans('Apply')}
+                        class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 sm:py-3 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-xl hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center min-w-[76px]">
+                        <span>${trans('Apply')}</span>
                     </button>
                 </div>`;
                 appliedDisplay.outerHTML = inputHtml;
@@ -1793,6 +1805,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- Click Listeners (Injected Max Stock) ---
     root.addEventListener("click", function (e) {
+        var proceedBtn = e.target.closest("#proceedToCheckoutBtn");
+        if (proceedBtn) {
+            if (hasBlockingStockIssue()) {
+                e.preventDefault();
+                showToast(trans('Please remove out-of-stock items before continuing to checkout.'), 'error');
+                return;
+            }
+            const countText = document.getElementById('item-total-count')?.textContent || '0';
+            const countMatch = String(countText).match(/\d+/);
+            const itemCount = countMatch ? parseInt(countMatch[0], 10) : 0;
+            if (itemCount <= 0) {
+                e.preventDefault();
+                showToast(trans('Your cart is empty. Add items to continue to checkout.'), 'error');
+                return;
+            }
+            if (!window.__isUserLoggedIn) {
+                e.preventDefault();
+                var loginUrl = proceedBtn.getAttribute('href') || (window.__checkoutRoutes && window.__checkoutRoutes.loginCheckout) || '/login?checkout=1';
+                window.location.href = loginUrl;
+                return;
+            }
+        }
+
         var spaBtn = e.target.closest("[data-spa-step]");
         if (spaBtn) { e.preventDefault(); goToStep(parseInt(spaBtn.dataset.spaStep, 10)); return; }
 

@@ -149,11 +149,11 @@
                                     {{ statictranslations('Coupons are exclusive to registered members.') }}
                                 </p>
                             @else
-                                <div class="flex gap-3">
+                                <div class="flex items-center gap-2 sm:gap-2.5 w-full min-w-0">
                                     <input type="text" placeholder="{{ statictranslations('Enter coupon code') }}"
-                                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300">
+                                        class="flex-1 min-w-0 w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-opacity-20 focus:border-primary transition-all duration-300 placeholder:text-xs sm:placeholder:text-sm">
                                     <button
-                                        class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
+                                        class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 sm:py-3 text-sm bg-primary text-white font-semibold rounded-xl hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 min-w-[76px] flex items-center justify-center">
                                         {{ statictranslations('Apply') }}
                                     </button>
                                 </div>
@@ -195,7 +195,7 @@
 
                             <!-- Checkout Button -->
                             @if (!Auth::check())
-                                <a href="{{ route('login', ['checkout' => 'guest']) }}"
+                                <a href="{{ route('login', ['checkout' => 1]) }}"
                                     class="block w-full px-6 py-4 bg-primary text-white text-center font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl mb-3 flex items-center justify-center gap-2">
                                     <span>{{ statictranslations('Proceed to Checkout') }}</span>
                                     <svg class="w-5 h-5 inline-block ms-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">

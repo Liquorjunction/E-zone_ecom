@@ -246,7 +246,7 @@
                 <div class="mt-8 pt-6 border-t border-gray-200 @if (session('success')) hidden @endif">
                     <p class="text-center text-sm text-gray-600">
                         {{ statictranslations('Already have an account?') }}
-                        <a href="{{ route('login') }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
+                        <a href="{{ route('login', array_filter(['checkout' => request('checkout'), 'buy_now' => request('buy_now')])) }}" class="font-semibold text-primary hover:opacity-80 transition-opacity ms-1">
                             {{ statictranslations('Sign in here') }} <span class="inline-block rtl:-scale-x-100">→</span>
                         </a>
                     </p>

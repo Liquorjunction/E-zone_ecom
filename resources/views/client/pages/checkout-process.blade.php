@@ -27,6 +27,7 @@
             show    : @json(route('checkout')),
             process : @json(route('checkout.process')),
             cart    : @json(route('cart')),
+            loginCheckout: @json(route('login', array_filter(['checkout' => 1, 'buy_now' => request('buy_now')]))),
             addresses: @json(url('/client/addresses')),
             addressSectionShipping: @json(route('checkout.address-section', ['type' => 'shipping'])),
             addressSectionBilling : @json(route('checkout.address-section', ['type' => 'billing'])),

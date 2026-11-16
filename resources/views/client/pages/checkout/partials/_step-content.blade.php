@@ -92,7 +92,7 @@
                 @if ($isProceedDisabled)
                     <button type="button" id="proceedToCheckoutBtn" disabled
                         class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg transition-all duration-300 mt-2 opacity-60 cursor-not-allowed pointer-events-none">
-                        {{ !Auth::check() ? statictranslations('Proceed as Guest') : statictranslations('Proceed to Checkout') }}
+                        {{ statictranslations('Proceed to Checkout') }}
                         <svg class="w-5 h-5 inline-block ms-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -100,20 +100,20 @@
                     </button>
                 @else
                     @if (!Auth::check())
-                        {{-- Guest customer: Proceed as Guest --}}
-                        <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
+                        {{-- Guest customer: Proceed to Login / Guest choice screen --}}
+                        <a href="{{ route('login', array_filter(['checkout' => 1, 'buy_now' => request('buy_now')])) }}" id="proceedToCheckoutBtn"
                             class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
-                            <span>{{ statictranslations('Proceed as Guest') }}</span>
+                            <span>{{ statictranslations('Proceed to Checkout') }}</span>
                             <svg class="w-5 h-5 inline-block ms-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
-                        </button>
+                        </a>
                     @else
                         {{-- Registered customer --}}
                         <button type="button" data-spa-step="2" id="proceedToCheckoutBtn"
-                            class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2">
-                            {{ statictranslations('Proceed to Checkout') }}
+                            class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                            <span>{{ statictranslations('Proceed to Checkout') }}</span>
                             <svg class="w-5 h-5 inline-block ms-2 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 7l5 5m0 0l-5 5m5-5H6" />

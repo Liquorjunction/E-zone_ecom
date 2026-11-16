@@ -199,6 +199,7 @@ class CartController extends Controller
 
         if (!Auth::check()) {
             $sessionCoupon->remove();
+            $request->session()->forget('guest_checkout');
         }
         $totals           = $cart ? $priceService->calculate($cart) : $this->emptyTotals();
         $addresses        = Auth::check() ? $addressRepo->getAddressesByUserId(Auth::id()) : collect();

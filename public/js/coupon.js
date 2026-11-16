@@ -95,7 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         btn.disabled = true;
-        btn.textContent = trans('Applying...');
+        btn.classList.add("opacity-75", "cursor-not-allowed");
+        btn.innerHTML = `<svg class="animate-spin w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
         axios
             .post(
@@ -152,16 +153,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     showMessage(response.data.message, "error", messageEl);
                     btn.disabled = false;
-                    btn.textContent = "Apply";
+                    btn.classList.remove("opacity-75", "cursor-not-allowed");
+                    btn.innerHTML = `<span>${trans('Apply')}</span>`;
                 }
             })
             .catch(function (error) {
                 const msg =
                     error.response?.data?.message ||
-                    "Failed to apply coupon. Please try again.";
+                    trans("Failed to apply coupon. Please try again.");
                 showMessage(msg, "error", messageEl);
                 btn.disabled = false;
-                btn.textContent = "Apply";
+                btn.classList.remove("opacity-75", "cursor-not-allowed");
+                btn.innerHTML = `<span>${trans('Apply')}</span>`;
             });
     });
 
@@ -176,7 +179,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const messageEl = document.getElementById("coupon-message" + suffix);
 
         btn.disabled = true;
-        btn.textContent = "Removing...";
+        btn.classList.add("opacity-75", "cursor-not-allowed");
+        btn.innerHTML = `<svg class="animate-spin w-4 h-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
         axios
             .post(
@@ -203,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     setTimeout(function () {
                         const inputHtml = `
-                        <div class="flex gap-3" id="coupon-input-form${suffix}">
+                        <div class="flex items-center gap-2 sm:gap-2.5 w-full min-w-0" id="coupon-input-form${suffix}">
                             <input type="text" id="coupon-code-input${suffix}"
                                 name="coupon_code"
                                 autocomplete="off"
@@ -212,10 +216,10 @@ document.addEventListener("DOMContentLoaded", function () {
                                 spellcheck="false"
                                 value=""
                                 placeholder="${trans('Enter coupon code')}"
-                                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                                class="flex-1 min-w-0 w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-xs uppercase font-medium placeholder:text-xs sm:placeholder:text-sm">
                             <button type="button" id="apply-coupon-btn${suffix}"
-                                class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                ${trans('Apply')}
+                                class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 sm:py-3 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-xl hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center min-w-[76px]">
+                                <span>${trans('Apply')}</span>
                             </button>
                         </div>`;
 
@@ -227,7 +231,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     showMessage(response.data.message, "error", messageEl);
                     btn.disabled = false;
-                    btn.textContent = trans('Remove');
+                    btn.classList.remove("opacity-75", "cursor-not-allowed");
+                    btn.innerHTML = `<span>${trans('Remove')}</span>`;
                 }
             })
             .catch(function () {
@@ -237,7 +242,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     messageEl,
                 );
                 btn.disabled = false;
-                btn.textContent = trans('Remove');
+                btn.classList.remove("opacity-75", "cursor-not-allowed");
+                btn.innerHTML = `<span>${trans('Remove')}</span>`;
             });
     });
 
@@ -332,7 +338,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!hasCoupon && appliedDisplay) {
                 const inputHtml = `
-                <div class="flex gap-3" id="coupon-input-form${s}">
+                <div class="flex items-center gap-2 sm:gap-2.5 w-full min-w-0" id="coupon-input-form${s}">
                     <input type="text" id="coupon-code-input${s}"
                         name="coupon_code"
                         autocomplete="off"
@@ -341,10 +347,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         spellcheck="false"
                         value=""
                         placeholder="${trans('Enter coupon code')}"
-                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-sm uppercase">
+                        class="flex-1 min-w-0 w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-xs uppercase font-medium placeholder:text-xs sm:placeholder:text-sm">
                     <button type="button" id="apply-coupon-btn${s}"
-                        class="px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                        ${trans('Apply')}
+                        class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 sm:py-3 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-xl hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center min-w-[76px]">
+                        <span>${trans('Apply')}</span>
                     </button>
                 </div>`;
                 appliedDisplay.outerHTML = inputHtml;

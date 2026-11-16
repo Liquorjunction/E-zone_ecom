@@ -399,6 +399,7 @@ class AuthController extends Controller
 
             $cartService->clearBuyNowFlowState();
             $request->session()->forget('checkout_mode');
+            $request->session()->forget('guest_checkout');
         } catch (\Throwable $e) {
             Log::warning('Failed to clear transient checkout state during logout.', [
                 'user_id' => Auth::id(),
