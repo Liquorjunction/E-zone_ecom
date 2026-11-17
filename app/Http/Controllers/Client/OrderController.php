@@ -79,14 +79,10 @@ class OrderController extends Controller
         $isBuyNowFlow = $request->boolean('buy_now');
         $request->session()->put('checkout_mode', $isBuyNowFlow ? 'buy_now' : 'normal');
 
-        if ($step === 1) {
-            $request->session()->forget('guest_checkout');
-        }
-
         if ($step === 2 && !Auth::check()) {
-            if ($request->get('mode') === 'guest') {
+            if ($request->get('mode') === 'guest' || $request->session()->get('guest_checkout')) {
                 $request->session()->put('guest_checkout', true);
-            } elseif (!$request->session()->get('guest_checkout')) {
+            } else {
                 $loginUrl = route('login', array_filter(['checkout' => 1, 'buy_now' => $isBuyNowFlow ? 1 : null]));
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json(['redirect' => $loginUrl], 302);

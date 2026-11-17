@@ -315,6 +315,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function showValidationError(element, message) {
+        if (!element) return;
         clearValidationErrorFor(element);
         if (element.id === "g-recaptcha-container") {
             var recaptchaErr = document.getElementById("recaptcha-error-msg");
@@ -332,6 +333,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "</svg>" + message;
         element.classList.add("border-red-500", "border-2", "bg-red-50");
         element.classList.remove("border-gray-200");
+        element.setAttribute("aria-invalid", "true");
         if (element.parentElement) element.parentElement.appendChild(errorDiv);
     }
     window.showValidationError = showValidationError;
@@ -372,6 +374,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function resolveValidationTarget(field) {
         var candidates = [field, field.replace(/\./g, '_')];
+        if (field === 'postal_code') candidates.push('zip');
+        if (field === 'billing_postal_code') candidates.push('billing_zip');
+        if (field === 'payment') candidates.push('payment_method');
         for (var i = 0; i < candidates.length; i++) {
             var candidate = candidates[i];
             var byId = document.getElementById(candidate);
@@ -380,7 +385,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (byName) return byName;
         }
 
-        if (field.indexOf('payment_method') === 0) {
+        if (field.indexOf('payment_method') === 0 || field === 'payment') {
             var paymentInput = document.querySelector('input[name="payment_method"]');
             return paymentInput ? paymentInput.closest('.space-y-4') || paymentInput : null;
         }
@@ -426,15 +431,25 @@ document.addEventListener("DOMContentLoaded", function () {
         var firstError = document.querySelector(".validation-error");
         if (firstError) {
             firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+            var targetInput = firstError.matches("input, select, textarea")
+                ? firstError
+                : firstError.parentElement ? firstError.parentElement.querySelector("input, select, textarea") : null;
+            if (targetInput && typeof targetInput.focus === "function") {
+                try { targetInput.focus(); } catch (e) {}
+            }
         }
     }
 
     function clearValidationErrorFor(element) {
-        if (!element || !element.parentElement) return;
-        var existing = element.parentElement.querySelector(".validation-error");
-        if (existing) existing.remove();
-        element.classList.remove("border-red-500", "border-2", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
-        element.classList.add("border-gray-200");
+        if (!element) return;
+        if (element.parentElement) {
+            element.parentElement.querySelectorAll(".validation-error").forEach(function(e) { e.remove(); });
+        }
+        var childErrors = element.querySelectorAll ? element.querySelectorAll(".validation-error") : [];
+        childErrors.forEach(function (e) { e.remove(); });
+        element.classList.remove("border-red-500", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
+        element.classList.add("border-2", "border-gray-200");
+        element.removeAttribute("aria-invalid");
         if (element.id === "g-recaptcha-container") {
             var recaptchaErr = document.getElementById("recaptcha-error-msg");
             if (recaptchaErr) {
@@ -447,8 +462,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function clearAllValidationErrors() {
         document.querySelectorAll(".validation-error").forEach(function (e) { e.remove(); });
         document.querySelectorAll(".border-red-500").forEach(function (f) {
-            f.classList.remove("border-red-500", "border-2", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
-            f.classList.add("border-gray-200");
+            f.classList.remove("border-red-500", "bg-red-50", "focus:border-red-500", "focus:ring-red-500");
+            f.classList.add("border-2", "border-gray-200");
         });
         document.querySelectorAll("[aria-invalid='true']").forEach(function (el) {
             el.removeAttribute('aria-invalid');
@@ -535,8 +550,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (step === 2 && !window.__isUserLoggedIn) {
-            const loginUrl = (window.__checkoutRoutes && window.__checkoutRoutes.loginCheckout) || '/login?checkout=1';
-            window.location.href = loginUrl;
+            const guestCheckoutUrl = (window.__checkoutRoutes && window.__checkoutRoutes.show) ? (window.__checkoutRoutes.show + '?step=2&mode=guest') : '/checkout?step=2&mode=guest';
+            window.location.href = guestCheckoutUrl;
             return;
         }
 
@@ -590,6 +605,216 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 250); // 250ms debounce
 }
 
+    function validateField(element) {
+        if (!element) return true;
+        var id = element.id || element.name || "";
+        var val = (element.value || "").trim();
+
+        // 1. Email validation
+        if (id === "email") {
+            if (!val) {
+                showValidationError(element, trans('Email address is required'));
+                return false;
+            }
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+            if (!emailRegex.test(val)) {
+                showValidationError(element, trans('Please enter a valid email address.'));
+                return false;
+            }
+            if (!window.__isUserLoggedIn && window.__registeredGuestEmail && val.toLowerCase() === window.__registeredGuestEmail) {
+                showValidationError(element, trans('You are already registered. Please log in to your account.'));
+                if (typeof window.showExistingAccountModal === "function") {
+                    window.showExistingAccountModal(val);
+                }
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 2. Phone validation (shipping phone or billing phone)
+        if (id === "phone" || id === "billing_phone") {
+            if (id === "phone" && element.required && !val) {
+                showValidationError(element, trans('Phone number is required.'));
+                return false;
+            }
+            if (val) {
+                var digits = val.replace(/\D/g, '');
+                if (/[a-zA-Z]/.test(val) || !/^[\d\s\+\-\(\)]+$/.test(val) || digits.length < 8 || digits.length > 20) {
+                    showValidationError(element, trans('Please enter a valid phone number.'));
+                    return false;
+                }
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 3. First name / Last name
+        if (id === "firstName" || id === "billing_firstName") {
+            if (!val) {
+                showValidationError(element, trans('This field is required.'));
+                return false;
+            }
+            if (val.length < 2) {
+                showValidationError(element, trans('Full name should only contain letters'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        if (id === "lastName") {
+            if (!val) {
+                showValidationError(element, trans('This field is required.'));
+                return false;
+            }
+            if (val.length < 2) {
+                showValidationError(element, trans('Full name should only contain letters'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // Note: billing_lastName is optional. If filled, validate min length
+        if (id === "billing_lastName") {
+            if (val && val.length < 2) {
+                showValidationError(element, trans('Full name should only contain letters'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 4. Street address
+        if (id === "address" || id === "billing_address_line") {
+            if (!val) {
+                showValidationError(element, trans('Street address is required'));
+                return false;
+            }
+            if (val.length < 5) {
+                showValidationError(element, trans('Street address must be at least 5 characters'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 5. City
+        if (id === "city" || id === "billing_city") {
+            if (!val) {
+                showValidationError(element, element.tagName === "SELECT" ? trans('Please select a city') : trans('This field is required.'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 6. Country
+        if (id === "country" || id === "billing_country") {
+            if (!val) {
+                showValidationError(element, trans('Country is required'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 7. Postal code (zip / billing_zip)
+        if (id === "zip" || id === "billing_zip") {
+            if (val) {
+                if (!/^\d{1,10}$/.test(val) || /[a-zA-Z]/.test(val)) {
+                    showValidationError(element, trans('The postal code must be up to 10 digits.'));
+                    return false;
+                }
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 8. Saved address select
+        if (id === "shippingAddressSelect") {
+            if (!val) {
+                showValidationError(element, trans('Please select a shipping address'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        if (id === "billingAddressSelect") {
+            if (!val) {
+                showValidationError(element, trans('Please select a billing address'));
+                return false;
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        // 9. Card payment fields
+        if (id === "cardNumber") {
+            var selectedPayment = document.querySelector('input[name="payment_method"]:checked')?.value;
+            if (selectedPayment === "card") {
+                var cardDigits = val.replace(/\s+/g, '');
+                if (!cardDigits) {
+                    showValidationError(element, trans('Card number is required'));
+                    return false;
+                }
+                if (!/^\d{12,19}$/.test(cardDigits)) {
+                    showValidationError(element, trans('Card number must be between 13 and 19 digits'));
+                    return false;
+                }
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        if (id === "expiry") {
+            var selectedPayment = document.querySelector('input[name="payment_method"]:checked')?.value;
+            if (selectedPayment === "card") {
+                if (!val) {
+                    showValidationError(element, trans('Expiry date is required'));
+                    return false;
+                }
+                var expMatch = val.match(/^(0[1-9]|1[0-2])\/(\d{2})$/);
+                if (!expMatch) {
+                    showValidationError(element, trans('Format should be MM/YY'));
+                    return false;
+                }
+                var expMonth = parseInt(expMatch[1], 10);
+                var expYear = 2000 + parseInt(expMatch[2], 10);
+                var now = new Date();
+                var curYear = now.getFullYear();
+                var curMonth = now.getMonth() + 1;
+                if (expYear < curYear || (expYear === curYear && expMonth < curMonth)) {
+                    showValidationError(element, trans('Expiry date is required'));
+                    return false;
+                }
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        if (id === "cvv") {
+            var selectedPayment = document.querySelector('input[name="payment_method"]:checked')?.value;
+            if (selectedPayment === "card") {
+                if (!val) {
+                    showValidationError(element, trans('CVV is required'));
+                    return false;
+                }
+                if (!/^\d{3,4}$/.test(val)) {
+                    showValidationError(element, trans('CVV must be 3 or 4 digits'));
+                    return false;
+                }
+            }
+            clearValidationErrorFor(element);
+            return true;
+        }
+
+        return true;
+    }
+    window.validateField = validateField;
+
     function validateStep2() {
         clearAllValidationErrors();
         var hasErrors = false;
@@ -597,39 +822,19 @@ document.addEventListener("DOMContentLoaded", function () {
         var email = document.getElementById("email");
         var phone = document.getElementById("phone");
 
-        if (email && !email.value.trim()) { showValidationError(email, trans('Email address is required')); hasErrors = true; }
-        if (phone) {
-            var phoneVal = phone.value.trim();
-            if (!phoneVal) {
-                showValidationError(phone, trans('Phone number is required.'));
-                hasErrors = true;
-            } else if (/[a-zA-Z]/.test(phoneVal) || !/^[\d\s\+\-\(\)]+$/.test(phoneVal)) {
-                showValidationError(phone, trans('Please enter a valid phone number.'));
-                hasErrors = true;
-            } else if (phoneVal.replace(/\D/g, '').length < 8) {
-                showValidationError(phone, trans('Please enter a valid phone number.'));
-                hasErrors = true;
-            }
-        }
+        if (email && !validateField(email)) { hasErrors = true; }
+        if (phone && !validateField(phone)) { hasErrors = true; }
 
         var shippingSelect = document.getElementById("shippingAddressSelect");
         var manualFirst    = document.getElementById("firstName");
 
         if (shippingSelect) {
-            if (!shippingSelect.value) { showValidationError(shippingSelect, trans('Please select a shipping address')); hasErrors = true; }
+            if (!validateField(shippingSelect)) { hasErrors = true; }
         } else if (manualFirst) {
-            ["firstName", "lastName", "address", "city", "country"].forEach(function (id) {
+            ["firstName", "lastName", "address", "city", "country", "zip"].forEach(function (id) {
                 var f = document.getElementById(id);
-                if (f && !f.value.trim()) { showValidationError(f, trans('This field is required.')); hasErrors = true; }
+                if (f && !validateField(f)) { hasErrors = true; }
             });
-            var zipField = document.getElementById("zip");
-            if (zipField && zipField.value.trim()) {
-                var zipVal = zipField.value.trim();
-                if (!/^\d{1,10}$/.test(zipVal)) {
-                    showValidationError(zipField, trans('The postal code must be up to 10 digits.'));
-                    hasErrors = true;
-                }
-            }
         }
 
         var billingSame    = document.getElementById("billingSameAsShipping");
@@ -640,26 +845,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (billingVisible && billingFields && !billingFields.classList.contains("hidden")) {
             if (billingSelect) {
-                // Auth user with saved billing addresses - one must be selected.
-                if (!billingSelect.value) {
-                    showValidationError(billingSelect, trans('Please select a billing address'));
+                if (!validateField(billingSelect)) {
                     hasErrors = true;
                 }
             } else {
                 var manualBillingFirst = document.getElementById("billing_firstName");
                 if (manualBillingFirst && manualBillingFirst.type !== "hidden") {
-                    ["billing_firstName", "billing_lastName", "billing_address_line", "billing_city", "billing_country"].forEach(function (id) {
+                    ["billing_firstName", "billing_lastName", "billing_address_line", "billing_city", "billing_country", "billing_zip", "billing_phone"].forEach(function (id) {
                         var f = document.getElementById(id);
-                        if (f && !f.value.trim()) { showValidationError(f, trans('This field is required.')); hasErrors = true; }
+                        if (f && !validateField(f)) { hasErrors = true; }
                     });
-                    var billingZipField = document.getElementById("billing_zip");
-                    if (billingZipField && billingZipField.value.trim()) {
-                        var bZipVal = billingZipField.value.trim();
-                        if (!/^\d{1,10}$/.test(bZipVal)) {
-                            showValidationError(billingZipField, trans('The postal code must be up to 10 digits.'));
-                            hasErrors = true;
-                        }
-                    }
                 } else {
                     // Auth user with no saved billing addresses
                     var billingSection = document.getElementById("billingAddressSection");
@@ -680,14 +875,28 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        if (!paymentMethod) { showToast(trans('Please select a payment method.'), "error"); hasErrors = true; }
+        if (!paymentMethod) {
+            var pmContainer = document.querySelector('input[name="payment_method"]')?.closest('.space-y-4');
+            if (pmContainer) {
+                showValidationError(pmContainer, trans('Please select a payment method.'));
+            } else {
+                showToast(trans('Please select a payment method.'), "error");
+            }
+            hasErrors = true;
+        } else if (paymentMethod.value === "card") {
+            ["cardNumber", "expiry", "cvv"].forEach(function (id) {
+                var f = document.getElementById(id);
+                if (f && !validateField(f)) { hasErrors = true; }
+            });
+        }
 
         if (!window.__isUserLoggedIn) {
             var currentEmail  = (email ? email.value : "").toLowerCase().trim();
 
             if (window.__registeredGuestEmail && currentEmail === window.__registeredGuestEmail) {
-                var emailContainer = document.getElementById("guest-email-otp-container") || email;
-                showValidationError(emailContainer, trans('You are already registered. Please log in to your account.'));
+                if (email) {
+                    showValidationError(email, trans('You are already registered. Please log in to your account.'));
+                }
                 if (typeof window.showExistingAccountModal === "function") {
                     window.showExistingAccountModal(currentEmail);
                 }
@@ -729,8 +938,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (hasErrors) {
-            var firstError = document.querySelector(".validation-error");
-            if (firstError) firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+            var firstError = document.querySelector(".validation-error, .border-red-500");
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+                var targetInput = firstError.matches("input, select, textarea")
+                    ? firstError
+                    : firstError.parentElement ? firstError.parentElement.querySelector("input, select, textarea") : null;
+                if (targetInput && typeof targetInput.focus === "function") {
+                    try { targetInput.focus(); } catch (e) {}
+                }
+            }
         }
         return !hasErrors;
     }
@@ -897,63 +1114,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
-            // Sync coupon widget display (auto-remove applied state if coupon was removed)
-            const appliedDisplay = document.getElementById("applied-coupon-display" + suffix);
-            const inputForm      = document.getElementById("coupon-input-form" + suffix);
-            const msgEl          = document.getElementById("coupon-message" + suffix);
-            const hasCoupon      = !!(summary.coupon && summary.coupon.code);
-
-            if (!hasCoupon && appliedDisplay) {
-                const inputHtml = `
-                <div class="flex items-center gap-2 sm:gap-2.5 w-full min-w-0" id="coupon-input-form${suffix}">
-                    <input type="text" id="coupon-code-input${suffix}"
-                        name="coupon_code"
-                        autocomplete="off"
-                        autocorrect="off"
-                        autocapitalize="characters"
-                        spellcheck="false"
-                        value=""
-                        placeholder="${trans('Enter coupon code')}"
-                        class="flex-1 min-w-0 w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 bg-white shadow-xs uppercase font-medium placeholder:text-xs sm:placeholder:text-sm">
-                    <button type="button" id="apply-coupon-btn${suffix}"
-                        class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 sm:py-3 bg-linear-to-r from-primary to-primary/80 text-white text-sm font-semibold rounded-xl hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center min-w-[76px]">
-                        <span>${trans('Apply')}</span>
-                    </button>
-                </div>`;
-                appliedDisplay.outerHTML = inputHtml;
-
-                if (summary.coupon_removal && summary.coupon_removal.message) {
-                    if (msgEl) {
-                        msgEl.textContent = summary.coupon_removal.message;
-                        msgEl.className = "mt-3 text-sm text-red-600 font-medium";
-                        msgEl.classList.remove("hidden");
-                    }
-                }
-            } else if (hasCoupon && inputForm) {
-                const appliedHtml = `
-                <div class="bg-white rounded-xl p-4 border-2 border-purple-200" id="applied-coupon-display${suffix}">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center me-3 shrink-0">
-                                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-900 text-sm">${summary.coupon.code}</p>
-                                <p class="text-xs text-gray-600">${trans('Coupon Applied')}</p>
-                            </div>
-                        </div>
-                        <button type="button" id="remove-coupon-btn${suffix}"
-                            class="text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50 text-sm font-semibold">
-                            ${trans('Remove')}
-                        </button>
-                    </div>
-                </div>`;
-                inputForm.outerHTML = appliedHtml;
-                if (msgEl) msgEl.classList.add("hidden");
-            }
-
             const elShip = document.getElementById("order-shipping" + suffix);
             if (elShip) elShip.textContent = shipCost > 0 ? formatMoney(shipCost) : trans("FREE");
 
@@ -964,6 +1124,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (summary.coupon_removal && summary.coupon_removal.message) {
             showToast(summary.coupon_removal.message, "error");
         }
+
+        // Notify coupon.js to update coupon widget state cleanly without fighting DOM replaces
+        window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: summary } }));
 
         // Update main Item Count Span
         const countEl = document.getElementById("item-total-count");
@@ -1285,37 +1448,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    //  PHASE 2: GUEST OTP & RECAPTCHA & SOW #11 EXISTING ACCOUNT
+    //  PHASE 2: RECAPTCHA & SOW #11 EXISTING ACCOUNT
     // ═══════════════════════════════════════════════════════════════
-    var otpTimerInterval = null;
-
     window.onRecaptchaSuccess = function (token) {
         var err = document.getElementById("recaptcha-error-msg");
         if (err) err.classList.add("hidden");
         var container = document.getElementById("g-recaptcha-container");
         if (container) clearValidationErrorFor(container);
-
-        var btn = document.getElementById("placeOrderBtn");
-        if (btn) {
-            btn.disabled = false;
-            btn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        }
     };
 
     window.onRecaptchaExpired = function () {
         var err = document.getElementById("recaptcha-error-msg");
         if (err) {
-            err.textContent = "";
-            err.classList.add("hidden");
+            err.textContent = trans('Security verification expired. Please tick the checkbox again.');
+            err.classList.remove("hidden");
         }
         var container = document.getElementById("g-recaptcha-container");
         if (container) clearValidationErrorFor(container);
-
-        var btn = document.getElementById("placeOrderBtn");
-        if (btn && !window.__isUserLoggedIn) {
-            btn.disabled = true;
-            btn.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        }
     };
 
     window.onRecaptchaLoaded = function () {
@@ -1324,18 +1473,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function initRecaptchaWidget() {
         var container = document.getElementById("g-recaptcha-container");
-        var btn = document.getElementById("placeOrderBtn");
         var siteKey = container ? (container.dataset.sitekey || window.__recaptchaSiteKey) : window.__recaptchaSiteKey;
 
-        if (!siteKey) {
-            if (btn) {
-                btn.disabled = false;
-                btn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-            }
-            return;
-        }
+        if (!siteKey || !container) return;
 
-        if (container && window.grecaptcha && typeof window.grecaptcha.render === "function") {
+        if (window.grecaptcha && typeof window.grecaptcha.render === "function") {
             try {
                 if (container.dataset.rendered === "1") return;
 
@@ -1349,227 +1491,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.warn("reCAPTCHA render error", e);
             }
         }
-    }
-
-    function initGuestOtpVerification() {
-        var emailInput = document.getElementById("email");
-        var sendOtpBtn = document.getElementById("sendOtpBtn");
-        var verifyOtpBtn = document.getElementById("verifyOtpBtn");
-        var resendOtpBtn = document.getElementById("resendOtpBtn");
-        var otpCodeInput = document.getElementById("guest_otp_code");
-        var feedbackMsg = document.getElementById("otp-feedback-msg");
-
-        if (!emailInput) return;
-        if (emailInput.dataset.otpBound) return;
-        emailInput.dataset.otpBound = "1";
-
-        var sentEmail = (emailInput.dataset.sentEmail || "").trim();
-
-        // Reset verification state if email changes, and guard against password manager autofill injection
-        emailInput.addEventListener("input", function () {
-            var currentEmail = emailInput.value.toLowerCase().trim();
-            // If autofill injected 'superadmin' while waiting for OTP, revert it
-            if (sentEmail && currentEmail === "superadmin") {
-                emailInput.value = sentEmail;
-                return;
-            }
-            if (window.__registeredGuestEmail && currentEmail !== window.__registeredGuestEmail) {
-                window.__registeredGuestEmail = "";
-                clearAllValidationErrors();
-            }
-            var verifiedEmail = (window.__guestEmailVerified || "").toLowerCase().trim();
-            if (verifiedEmail && currentEmail !== verifiedEmail) {
-                window.__guestEmailVerified = "";
-                document.getElementById("otp-verified-badge")?.classList.add("hidden");
-                document.getElementById("otp-send-action")?.classList.remove("hidden");
-                document.getElementById("otp-send-action")?.classList.add("flex");
-                document.getElementById("otp-input-block")?.classList.add("hidden");
-            }
-        });
-
-        // Additional guard against browser autofill populating 'superadmin' on blur/change
-        emailInput.addEventListener("change", function () {
-            if (sentEmail && emailInput.value.trim().toLowerCase() === "superadmin") {
-                emailInput.value = sentEmail;
-            }
-        });
-
-        function startOtpCooldown(seconds) {
-            if (otpTimerInterval) clearInterval(otpTimerInterval);
-            var countdownEl = document.getElementById("resendOtpCountdown");
-            if (resendOtpBtn) resendOtpBtn.disabled = true;
-
-            var remaining = seconds;
-            if (countdownEl) countdownEl.textContent = trans('Resend in ') + remaining + 's';
-
-            otpTimerInterval = setInterval(function () {
-                remaining--;
-                if (remaining <= 0) {
-                    clearInterval(otpTimerInterval);
-                    if (resendOtpBtn) resendOtpBtn.disabled = false;
-                    if (countdownEl) countdownEl.textContent = trans('Resend Code');
-                } else {
-                    if (countdownEl) countdownEl.textContent = trans('Resend in ') + remaining + 's';
-                }
-            }, 1000);
-        }
-
-        async function handleSendOtp() {
-            var emailVal = emailInput.value.trim();
-            if (emailVal.toLowerCase() === "superadmin") {
-                emailInput.value = sentEmail || "";
-                emailVal = emailInput.value.trim();
-            }
-            if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-                showValidationError(emailInput, trans('Please enter a valid email address first.'));
-                emailInput.focus();
-                return;
-            }
-
-            if (window.__registeredGuestEmail && emailVal.toLowerCase() === window.__registeredGuestEmail) {
-                if (typeof window.showExistingAccountModal === "function") {
-                    window.showExistingAccountModal(emailVal);
-                }
-                return;
-            }
-
-            sentEmail = emailVal;
-            emailInput.dataset.sentEmail = emailVal;
-
-            if (sendOtpBtn) {
-                sendOtpBtn.disabled = true;
-                sendOtpBtn.textContent = trans('Sending...');
-            }
-            if (feedbackMsg) feedbackMsg.classList.add("hidden");
-
-            try {
-                var resp = await fetch(window.__checkoutRoutes.sendOtp, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
-                        "Accept": "application/json",
-                    },
-                    body: JSON.stringify({ email: emailVal }),
-                });
-
-                var data = await resp.json();
-
-                if (resp.ok && data.success) {
-                    if (emailInput.value.trim().toLowerCase() === "superadmin") {
-                        emailInput.value = sentEmail;
-                    }
-                    showToast(data.message || trans('Verification code sent to your email.'), "success");
-                    document.getElementById("otp-send-action")?.classList.add("hidden");
-                    document.getElementById("otp-send-action")?.classList.remove("flex");
-                    document.getElementById("otp-input-block")?.classList.remove("hidden");
-                    if (otpCodeInput) {
-                        otpCodeInput.value = "";
-                        otpCodeInput.focus();
-                    }
-                    startOtpCooldown(data.cooldown || 60);
-                } else if (data && data.is_registered) {
-                    if (typeof window.showExistingAccountModal === "function") {
-                        window.showExistingAccountModal(emailVal, data.message);
-                    }
-                    showToast(data.message || trans('You are already registered. Please log in to your account.'), "error");
-                } else if (resp.status === 429) {
-                    showToast(data.message || trans('Please wait before requesting another code.'), "error");
-                    document.getElementById("otp-send-action")?.classList.add("hidden");
-                    document.getElementById("otp-send-action")?.classList.remove("flex");
-                    document.getElementById("otp-input-block")?.classList.remove("hidden");
-                    startOtpCooldown(data.cooldown || 60);
-                } else {
-                    showToast(data.message || trans('Failed to send verification code.'), "error");
-                }
-            } catch (err) {
-                console.error("sendOtp error", err);
-                showToast(trans('Failed to send verification code. Please check your connection.'), "error");
-            } finally {
-                if (sendOtpBtn) {
-                    sendOtpBtn.disabled = false;
-                    sendOtpBtn.innerHTML = '<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>' + trans('Verify Email');
-                }
-            }
-        }
-
-        async function handleVerifyOtp() {
-            var emailVal = (sentEmail || emailInput.value).trim();
-            if (emailInput.value.trim().toLowerCase() === "superadmin" && sentEmail) {
-                emailInput.value = sentEmail;
-                emailVal = sentEmail;
-            }
-            var codeVal  = (otpCodeInput ? otpCodeInput.value : "").trim();
-
-            if (!codeVal || codeVal.length !== 6) {
-                if (feedbackMsg) {
-                    feedbackMsg.textContent = trans('Please enter the 6-digit code.');
-                    feedbackMsg.className = "text-xs font-medium mt-2 text-red-500";
-                    feedbackMsg.classList.remove("hidden");
-                }
-                otpCodeInput?.focus();
-                return;
-            }
-
-            if (verifyOtpBtn) {
-                verifyOtpBtn.disabled = true;
-                verifyOtpBtn.textContent = trans('Verifying...');
-            }
-            if (feedbackMsg) feedbackMsg.classList.add("hidden");
-
-            try {
-                var resp = await fetch(window.__checkoutRoutes.verifyOtp, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
-                        "Accept": "application/json",
-                    },
-                    body: JSON.stringify({ email: emailVal, otp: codeVal }),
-                });
-
-                var data = await resp.json();
-
-                if (resp.ok && data.success) {
-                    window.__guestEmailVerified = (data.verified_email || emailVal).toLowerCase().trim();
-                    showToast(data.message || trans('Email verified successfully.'), "success");
-                    document.getElementById("otp-input-block")?.classList.add("hidden");
-                    document.getElementById("otp-send-action")?.classList.add("hidden");
-                    document.getElementById("otp-verified-badge")?.classList.remove("hidden");
-                    document.getElementById("otp-verified-badge")?.classList.add("flex");
-                } else {
-                    if (data && data.is_registered) {
-                        if (typeof window.showExistingAccountModal === "function") {
-                            window.showExistingAccountModal(emailVal, data.message);
-                        }
-                    }
-                    if (feedbackMsg) {
-                        feedbackMsg.textContent = data.message || trans('Invalid code.');
-                        feedbackMsg.className = "text-xs font-medium mt-2 text-red-500";
-                        feedbackMsg.classList.remove("hidden");
-                    }
-                    if (data.locked) {
-                        if (resendOtpBtn) resendOtpBtn.disabled = false;
-                    }
-                }
-            } catch (err) {
-                console.error("verifyOtp error", err);
-                if (feedbackMsg) {
-                    feedbackMsg.textContent = trans('Verification failed. Please check your connection.');
-                    feedbackMsg.className = "text-xs font-medium mt-2 text-red-500";
-                    feedbackMsg.classList.remove("hidden");
-                }
-            } finally {
-                if (verifyOtpBtn) {
-                    verifyOtpBtn.disabled = false;
-                    verifyOtpBtn.textContent = trans('Verify Code');
-                }
-            }
-        }
-
-        sendOtpBtn?.addEventListener("click", handleSendOtp);
-        resendOtpBtn?.addEventListener("click", handleSendOtp);
-        verifyOtpBtn?.addEventListener("click", handleVerifyOtp);
     }
 
     function initExistingAccountCheck() {
@@ -1603,13 +1524,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (pwdInput) pwdInput.value = "";
             if (pwdGroup) pwdGroup.classList.remove("hidden");
 
-            // Prevent OTP verification for registered email
-            document.getElementById("otp-send-action")?.classList.add("hidden");
-            document.getElementById("otp-send-action")?.classList.remove("flex");
-            document.getElementById("otp-input-block")?.classList.add("hidden");
-            document.getElementById("otp-verified-badge")?.classList.add("hidden");
-            window.__guestEmailVerified = "";
-
             modal.classList.remove("hidden");
             setTimeout(function () {
                 pwdInput?.focus();
@@ -1625,8 +1539,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (loginErr) loginErr.classList.add("hidden");
                 var activeEmailInput = document.getElementById("email");
                 if (activeEmailInput && window.__registeredGuestEmail) {
-                    var emailContainer = document.getElementById("guest-email-otp-container") || activeEmailInput;
-                    showValidationError(emailContainer, trans('This email is already registered. Please log in or use a different email address.'));
+                    showValidationError(activeEmailInput, trans('This email is already registered. Please log in or use a different email address.'));
                 }
             }
 
@@ -1635,7 +1548,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (pwdInput) pwdInput.value = "";
                 if (loginErr) loginErr.classList.add("hidden");
                 window.__registeredGuestEmail = "";
-                window.__guestEmailVerified = "";
                 lastCheckedEmail = "";
 
                 var activeEmailInput = document.getElementById("email");
@@ -1643,15 +1555,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     activeEmailInput.value = "";
                     activeEmailInput.dataset.sentEmail = "";
                     clearValidationErrorFor(activeEmailInput);
-                    var emailContainer = document.getElementById("guest-email-otp-container");
-                    if (emailContainer) clearValidationErrorFor(emailContainer);
                     activeEmailInput.focus();
                 }
-
-                document.getElementById("otp-send-action")?.classList.remove("hidden");
-                document.getElementById("otp-send-action")?.classList.add("flex");
-                document.getElementById("otp-input-block")?.classList.add("hidden");
-                document.getElementById("otp-verified-badge")?.classList.add("hidden");
             }
 
             closeBtn?.addEventListener("click", closeModal);
@@ -1759,8 +1664,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     window.__registeredGuestEmail = "";
                     lastCheckedEmail = "";
                     clearValidationErrorFor(emailInput);
-                    var emailContainer = document.getElementById("guest-email-otp-container");
-                    if (emailContainer) clearValidationErrorFor(emailContainer);
                 }
             });
         }
@@ -1797,7 +1700,6 @@ document.addEventListener("DOMContentLoaded", function () {
         initBillingToggle();
         initPaymentMethodToggle();
         syncCardDetailsVisibility();
-        initGuestOtpVerification();
         initExistingAccountCheck();
         initRecaptchaWidget();
         initPostOrderModal();
@@ -2287,43 +2189,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Handle beforeinput for mobile virtual keyboards & auto-fill
-    document.addEventListener('beforeinput', function(e) {
-        if (isPostalCodeField(e.target)) {
-            if (e.data && /[^\d٠-٩۰-۹]/.test(e.data)) {
-                e.preventDefault();
-                var target = e.target;
-                var insert = sanitizePostalCode(e.data);
-                if (insert) {
-                    var start = target.selectionStart || 0;
-                    var end = target.selectionEnd || 0;
-                    var oldVal = target.value;
-                    target.value = (oldVal.slice(0, start) + insert + oldVal.slice(end)).slice(0, 10);
-                    var newPos = Math.min(10, start + insert.length);
-                    try { target.setSelectionRange(newPos, newPos); } catch (err) {}
-                    target.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-            }
-            return;
-        }
-
-        if (!isPhoneField(e.target)) return;
-        if (e.data && /[a-zA-Z]/.test(e.data)) {
-            e.preventDefault();
-            var target = e.target;
-            var insert = sanitizePhone(e.data);
-            if (insert) {
-                var start = target.selectionStart || 0;
-                var end = target.selectionEnd || 0;
-                var oldVal = target.value;
-                target.value = sanitizePhone(oldVal.slice(0, start) + insert + oldVal.slice(end));
-                var newPos = start + insert.length;
-                try { target.setSelectionRange(newPos, newPos); } catch (err) {}
-                target.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        }
-    });
-
     // Real-time input listener (handles typing, paste, autofill)
     document.addEventListener('input', function(e) {
         if (isPostalCodeField(e.target)) {
@@ -2344,6 +2209,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         clearValidationErrorFor(e.target);
                     } else {
                         e.target.classList.remove('border-red-500', 'bg-red-50');
+                        e.target.classList.add('border-2', 'border-gray-200');
                     }
                 }
             }
@@ -2369,68 +2235,64 @@ document.addEventListener("DOMContentLoaded", function () {
                         clearValidationErrorFor(e.target);
                     } else {
                         e.target.classList.remove('border-red-500', 'bg-red-50');
+                        e.target.classList.add('border-2', 'border-gray-200');
                     }
                 }
             }
         }
 
-        // Format card number with spaces every 4 digits
+        // Format card number with spaces every 4 digits, digits only, max 19 digits
         if (e.target.id === 'cardNumber' || e.target.name === 'cardNumber') {
-            let value = e.target.value.replace(/\s/g, '');
-            e.target.value = value.match(/.{1,4}/g)?.join(' ') || value;
+            let digits = e.target.value.replace(/\D/g, '').slice(0, 19);
+            e.target.value = digits.match(/.{1,4}/g)?.join(' ') || digits;
         }
 
         // Format expiry MM/YY automatically
         if (e.target.id === 'expiry' || e.target.name === 'expiry') {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
-            e.target.value = value;
+            let digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+            if (digits.length >= 2) digits = digits.slice(0, 2) + '/' + digits.slice(2, 4);
+            e.target.value = digits;
+        }
+
+        // Format CVV digits only max 4
+        if (e.target.id === 'cvv' || e.target.name === 'cvv') {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        }
+
+        // Real-time error clearing on input when field is being corrected
+        if (e.target.classList && e.target.classList.contains('border-red-500')) {
+            if (typeof window.validateField === 'function') {
+                window.validateField(e.target);
+            }
         }
     });
 
-    // Validate on blur for immediate feedback
-    document.addEventListener('blur', function(e) {
-        if (isPostalCodeField(e.target)) {
-            var val = (e.target.value || '').trim();
-            if (val && (!/^\d{1,10}$/.test(val) || /[a-zA-Z]/.test(val))) {
-                if (typeof window.showValidationError === 'function') {
-                    window.showValidationError(e.target, trans('The postal code must be up to 10 digits.'));
-                } else {
-                    e.target.classList.add('border-red-500', 'bg-red-50');
-                }
-            } else {
-                if (typeof window.clearValidationErrorFor === 'function') {
-                    window.clearValidationErrorFor(e.target);
-                } else {
-                    e.target.classList.remove('border-red-500', 'bg-red-50');
-                }
+    document.addEventListener('change', function(e) {
+        if (!e.target) return;
+        if (e.target.name === 'payment_method') {
+            var pmContainer = e.target.closest('.space-y-4');
+            if (pmContainer && typeof window.clearValidationErrorFor === 'function') {
+                window.clearValidationErrorFor(pmContainer);
             }
-            return;
         }
+        if (e.target.tagName === 'SELECT' && e.target.classList.contains('border-red-500')) {
+            if (typeof window.validateField === 'function') {
+                window.validateField(e.target);
+            }
+        }
+    });
 
-        if (!isPhoneField(e.target)) return;
-        var val = (e.target.value || '').trim();
-        if (!val) {
-            if (e.target.id === 'phone' && e.target.required) {
-                if (typeof window.showValidationError === 'function') {
-                    window.showValidationError(e.target, trans('Phone number is required.'));
-                }
-            }
-            return;
-        }
-        var digits = val.replace(/\D/g, '');
-        if (/[a-zA-Z]/.test(val) || !/^[\d\s\+\-\(\)]+$/.test(val) || digits.length < 8) {
-            if (typeof window.showValidationError === 'function') {
-                window.showValidationError(e.target, trans('Please enter a valid phone number.'));
-            } else {
-                e.target.classList.add('border-red-500', 'bg-red-50');
-            }
-        } else {
-            if (typeof window.clearValidationErrorFor === 'function') {
-                window.clearValidationErrorFor(e.target);
-            } else {
-                e.target.classList.remove('border-red-500', 'bg-red-50');
-            }
+    // Validate on blur for immediate feedback (capture phase is required for blur)
+    document.addEventListener('blur', function(e) {
+        if (!e.target || !e.target.matches('input, select, textarea')) return;
+        var form = e.target.closest('#checkout-form');
+        if (!form) return;
+
+        // Skip non-data inputs
+        if (e.target.type === 'button' || e.target.type === 'submit' || e.target.type === 'radio' || e.target.type === 'checkbox' || e.target.type === 'hidden') return;
+
+        if (typeof window.validateField === 'function') {
+            window.validateField(e.target);
         }
     }, true);
 })();

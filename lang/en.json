@@ -1249,5 +1249,9 @@
     "You are already registered. Please log in to your account to place an order.": "You are already registered. Please log in to your account to place an order.",
     "This email is already registered. Please log in or use a different email address.": "This email is already registered. Please log in or use a different email address.",
     "Use Different Email": "Use Different Email",
-    "The postal code must be up to 10 digits.": "The postal code must be up to 10 digits."
+    "The postal code must be up to 10 digits.": "The postal code must be up to 10 digits.",
+    "Please complete the security CAPTCHA verification.": "Please complete the security CAPTCHA verification.",
+    "Please complete the security CAPTCHA verification before proceeding.": "Please complete the security CAPTCHA verification before proceeding.",
+    "We've sent a confirmation email to your inbox.": "We've sent a confirmation email to your inbox.",
+    "We've sent a confirmation email to your inbox. You can track your order status after registering for an account.": "We've sent a confirmation email to your inbox. You can track your order status after registering for an account."
 }

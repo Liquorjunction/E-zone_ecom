@@ -159,6 +159,17 @@
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                     </div>
                 </div>
+
+                <div>
+                    <label for="billing_phone" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {{ statictranslations('Billing Phone') }}
+                        <span class="text-gray-400 font-normal">({{ statictranslations('Optional') }})</span>
+                    </label>
+                    <input type="tel" id="billing_phone" name="billing_phone"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        placeholder="{{ statictranslations('Phone Number') }}">
+                    <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
+                </div>
             </div>
         @endif
 

@@ -1268,5 +1268,9 @@
     "Payment Status": "Statut du paiement",
     "payment_status": "Statut du paiement",
     "order_status": "Statut de la commande",
-    "The postal code must be up to 10 digits.": "Le code postal doit comporter jusqu'à 10 chiffres."
+    "The postal code must be up to 10 digits.": "Le code postal doit comporter jusqu'à 10 chiffres.",
+    "Please complete the security CAPTCHA verification.": "Veuillez effectuer la vérification de sécurité CAPTCHA.",
+    "Please complete the security CAPTCHA verification before proceeding.": "Veuillez effectuer la vérification de sécurité CAPTCHA avant de continuer.",
+    "We've sent a confirmation email to your inbox.": "Nous avons envoyé un e-mail de confirmation dans votre boîte de réception.",
+    "We've sent a confirmation email to your inbox. You can track your order status after registering for an account.": "Nous avons envoyé un e-mail de confirmation dans votre boîte de réception. Vous pouvez suivre l'état de votre commande après avoir créé un compte."
 }

@@ -100,8 +100,13 @@
                     </button>
                 @else
                     @if (!Auth::check())
-                        {{-- Guest customer: Proceed to Login / Guest choice screen --}}
-                        <a href="{{ route('login', array_filter(['checkout' => 1, 'buy_now' => request('buy_now')])) }}" id="proceedToCheckoutBtn"
+                        {{-- Guest customer: Proceed to Login / Guest choice screen or directly to step 2 if already in guest mode --}}
+                        @php
+                            $guestProceedUrl = session('guest_checkout')
+                                ? route('checkout', array_filter(['step' => 2, 'mode' => 'guest', 'buy_now' => request('buy_now')]))
+                                : route('login', array_filter(['checkout' => 1, 'buy_now' => request('buy_now')]));
+                        @endphp
+                        <a href="{{ $guestProceedUrl }}" id="proceedToCheckoutBtn"
                             class="block w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
                             <span>{{ statictranslations('Proceed to Checkout') }}</span>
                             <svg class="w-5 h-5 inline-block ms-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,8 +198,9 @@
                             autocomplete="email"
                             data-lpignore="true"
                             data-form-type="other"
+                            placeholder="{{ statictranslations('Enter your email address') }}"
                             value="{{ Auth::check() ? Auth::user()->email : old('email', '') }}" required
-                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
+                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300 placeholder:text-gray-400">
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                     </div>
                     <div>
@@ -308,8 +314,7 @@
                 @endif
 
                 <button type="button" id="placeOrderBtn"
-                    @if (!Auth::check() && config('services.recaptcha.site_key')) disabled @endif
-                    class="w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 @if (!Auth::check() && config('services.recaptcha.site_key')) opacity-50 cursor-not-allowed pointer-events-none @endif">
+                    class="w-full px-6 py-5 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5">
                     {{ statictranslations('Place Secure Order') }}
                     <svg class="w-5 h-5 inline-block ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -451,7 +456,11 @@
                             <div>
                                 <h4 class="font-bold text-blue-900 mb-1">{{ statictranslations("What's Next?") }}</h4>
                                 <p class="text-sm text-blue-800">
-                                    {{ statictranslations("We've sent a confirmation email to your inbox. You can track your order status in your account dashboard.") }}
+                                    @if ($order && ($order->isGuest() || !Auth::check()))
+                                        {{ statictranslations("We've sent a confirmation email to your inbox. You can track your order status after registering for an account.") }}
+                                    @else
+                                        {{ statictranslations("We've sent a confirmation email to your inbox. You can track your order status in your account dashboard.") }}
+                                    @endif
                                 </p>
                             </div>
                         </div>
@@ -464,15 +473,12 @@
                             class="flex-1 px-8 py-5 bg-linear-to-r rtl:bg-linear-to-l from-primary to-primary/80 text-white text-center font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                             {{ statictranslations('Continue Shopping') }}
                         </a>
-                        @php
-                            $orderDetailUrl = $order->isGuest()
-                                ? \Illuminate\Support\Facades\URL::signedRoute('guest.order-detail', ['order' => $order->order_number])
-                                : route('order-detail', ['order' => $order->id]);
-                        @endphp
-                        <a href="{{ $orderDetailUrl }}"
-                            class="flex-1 px-8 py-5 border-2 border-primary text-primary text-center font-bold rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105">
-                            {{ statictranslations('View Order Details') }}
-                        </a>
+                        @if (!($order && ($order->isGuest() || !Auth::check())))
+                            <a href="{{ route('order-detail', ['order' => $order->id]) }}"
+                                class="flex-1 px-8 py-5 border-2 border-primary text-primary text-center font-bold rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105">
+                                {{ statictranslations('View Order Details') }}
+                            </a>
+                        @endif
                     </div>
                 </div>
 
@@ -642,12 +648,12 @@
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ statictranslations('Order Confirmed!') }}</h3>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ statictranslations('Create an Account') }}</h3>
                 <p class="text-sm text-gray-600 leading-relaxed">
-                    {{ statictranslations('Create your account now to track your order live, manage delivery addresses, and enjoy faster future checkout.') }}
+                    {{ statictranslations('Create an account with your email to track your past orders, manage saved addresses, and enjoy faster checkout.') }}
                 </p>
             </div>
 

@@ -20,7 +20,6 @@
             CURRENCY_CODE   : @json(config('app.CURRENCY_CODE',   'USD')),
         };
         window.__isUserLoggedIn = @json(Auth::check());
-        window.__guestEmailVerified = @json(session('guest_email_verified', ''));
         window.__ga4Checkout = @json($ga4Ecommerce ?? null);
         window.__ga4Purchase = @json($ga4Purchase ?? null);
         window.__checkoutRoutes = {
@@ -31,8 +30,6 @@
             addresses: @json(url('/client/addresses')),
             addressSectionShipping: @json(route('checkout.address-section', ['type' => 'shipping'])),
             addressSectionBilling : @json(route('checkout.address-section', ['type' => 'billing'])),
-            sendOtp : @json(route('checkout.guest.send-otp')),
-            verifyOtp : @json(route('checkout.guest.verify-otp')),
             checkExistingUser : @json(route('checkout.check-existing-user')),
             inlineLogin : @json(route('checkout.inline-login')),
         };

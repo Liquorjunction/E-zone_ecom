@@ -236,6 +236,8 @@
         'Refunded' => statictranslations('Refunded'),
         'Completed' => statictranslations('Completed'),
         'The postal code must be up to 10 digits.' => statictranslations('The postal code must be up to 10 digits.'),
+        'Please complete the security CAPTCHA verification.' => statictranslations('Please complete the security CAPTCHA verification.'),
+        'Please complete the security CAPTCHA verification before proceeding.' => statictranslations('Please complete the security CAPTCHA verification before proceeding.'),
     ];
 @endphp
 <script>
