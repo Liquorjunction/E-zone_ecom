@@ -31,10 +31,10 @@
             addresses: @json(url('/client/addresses')),
             addressSectionShipping: @json(route('checkout.address-section', ['type' => 'shipping'])),
             addressSectionBilling : @json(route('checkout.address-section', ['type' => 'billing'])),
-            sendOtp : @json(route('checkout.guest.send-otp')),
-            verifyOtp : @json(route('checkout.guest.verify-otp')),
-            checkExistingUser : @json(route('checkout.check-existing-user')),
-            inlineLogin : @json(route('checkout.inline-login')),
+            sendOtp : null,
+            verifyOtp : null,
+            checkExistingUser : null,
+            inlineLogin : null,
         };
         window.__recaptchaSiteKey = @json(config('services.recaptcha.site_key'));
     </script>
