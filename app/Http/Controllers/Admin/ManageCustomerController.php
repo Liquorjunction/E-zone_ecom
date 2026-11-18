@@ -104,7 +104,11 @@ class ManageCustomerController extends Controller
             return DataTables::eloquent($query)
                 ->addIndexColumn()
                 ->filterColumn('name', function ($query, $keyword) {
-                    $query->where('name', 'like', "%{$keyword}%");
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%{$keyword}%")
+                            ->orWhere('email', 'like', "%{$keyword}%")
+                            ->orWhere('phone', 'like', "%{$keyword}%");
+                    });
                 })
                 ->addColumn('batch_checkbox', function ($customer) {
                     return '<input type="checkbox" class="customer-checkbox" value="' . $customer->id . '">';
