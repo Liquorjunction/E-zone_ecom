@@ -41,6 +41,14 @@ document.addEventListener("DOMContentLoaded", function () {
         return currency() + " " + parseFloat(amount).toFixed(2);
     }
 
+    function isBuyNowMode() {
+        const root = document.getElementById("checkout-root");
+        if (root && typeof root.dataset.buyNow !== "undefined") {
+            return root.dataset.buyNow === "1";
+        }
+        return new URLSearchParams(window.location.search).get("buy_now") === "1";
+    }
+
     function getShippingMethod() {
         return (
             document.querySelector('input[name="shipping_method"]:checked')
@@ -101,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
         axios
             .post(
                 APPLY_URL,
-                { code, shipping_method: getShippingMethod() },
+                { code, shipping_method: getShippingMethod(), buy_now: isBuyNowMode() ? 1 : 0 },
                 {
                     headers: {
                         "X-CSRF-TOKEN": csrfToken,
@@ -185,7 +193,7 @@ document.addEventListener("DOMContentLoaded", function () {
         axios
             .post(
                 REMOVE_URL,
-                { shipping_method: getShippingMethod() },
+                { shipping_method: getShippingMethod(), buy_now: isBuyNowMode() ? 1 : 0 },
                 {
                     headers: {
                         "X-CSRF-TOKEN": csrfToken,
@@ -274,6 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 REMOVE_URL,
                 new URLSearchParams({
                     shipping_method: getShippingMethod(),
+                    buy_now: isBuyNowMode() ? "1" : "0",
                     _token: csrfToken,
                 }),
             );

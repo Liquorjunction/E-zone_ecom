@@ -1,10 +1,18 @@
 @extends('client.layouts.app')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/checkout-process.css') }}">
-@endpush
-
 @section('content')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/intl-tel-custom.css') }}" />
+    <style>
+        #checkout-root .iti { width: 100%; display: block; }
+        #checkout-root .iti__flag-container { height: 100%; }
+        #checkout-root .iti--separate-dial-code .iti__selected-flag { height: 100%; border-radius: 0.75rem 0 0 0.75rem; }
+        #checkout-root .iti__tel-input { height: 60px; }
+        #checkout-root #billingFields .iti__tel-input { height: 52px; }
+        #checkout-root .iti__country-list { z-index: 60; }
+        #checkout-root .iti:has(.border-red-500) .iti__selected-flag { border-color: #ef4444; background-color: #fef2f2; }
+        [dir="rtl"] #checkout-root .iti--separate-dial-code .iti__selected-flag { border-radius: 0 0.75rem 0.75rem 0; }
+    </style>
     @php
         $step          = $step ?? (int) request()->get('step', 1);
         $cart          = $cart ?? null;
@@ -44,6 +52,7 @@
             data-update-url="{{ route('cart.update') }}"
             data-login-url="{{ route('login') }}"
             data-step="{{ $step }}"
+            data-buy-now="{{ request()->boolean('buy_now') ? '1' : '0' }}"
             data-shipping-method="{{ $totals['shipping_method'] ?? 'standard' }}">
 
             {{-- ══════════ PAGE HEADER (updated by JS on step change) ══════════ --}}
@@ -343,6 +352,7 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
     <script src="{{ asset('js/coupon.js') }}"></script>
     <script src="{{ asset('js/checkout-process.js') }}?v={{ filemtime(public_path('js/checkout-process.js')) }}"></script>
 @endpush

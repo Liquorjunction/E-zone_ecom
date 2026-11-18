@@ -262,6 +262,7 @@ function initSearch(inputEl, resultsEl) {
     }
     window.addEventListener('cart:changed', function (e) {
         var data = e && e.detail ? e.detail : null, count = null;
+        if (data && data.buyNow) return;
         try {
             if (data) {
                 if (data.summary && typeof data.summary.itemCount !== 'undefined') count = data.summary.itemCount;

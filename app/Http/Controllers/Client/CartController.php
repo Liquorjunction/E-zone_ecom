@@ -218,6 +218,16 @@ class CartController extends Controller
     // Update quantity
     // ─────────────────────────────────────────────────────────────
 
+    private function isBuyNowRequest(Request $request, CartService $cartService): bool
+    {
+        if ($request->has('buy_now')) {
+            return $request->boolean('buy_now');
+        }
+
+        return $request->session()->get('checkout_mode') === 'buy_now'
+            && $cartService->getActiveBuyNowCart() !== null;
+    }
+
     public function update(
         Request $request,
         CartService $cartService,
@@ -227,10 +237,11 @@ class CartController extends Controller
         $itemId         = (int) $request->input('item_id');
         $shippingMethod = $request->input('shipping_method', 'standard');
         $cartId         = CartIdentifier::fromRequest($request);
+        $isBuyNow       = $this->isBuyNowRequest($request, $cartService);
 
         // Support totals-only refresh requests (e.g. shipping method change on checkout step 2)
         if ($itemId <= 0 && ($request->wantsJson() || $request->ajax())) {
-            $cart   = $cartService->getCart($cartId);
+            $cart   = $cartService->resolveCheckoutCart($cartId, $isBuyNow);
             $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : $this->emptyTotals($shippingMethod);
 
             $itemsMap = [];
@@ -272,10 +283,10 @@ class CartController extends Controller
         };
 
         try {
-            $item = $cartService->updateItem($cartId, $itemId, $request->only(['quantity']));
+            $item = $cartService->updateItem($cartId, $itemId, $request->only(['quantity']), $isBuyNow);
         } catch (\Exception $e) {
             if ($request->wantsJson() || $request->ajax()) {
-                $cart        = $cartService->getCart($cartId);
+                $cart        = $cartService->resolveCheckoutCart($cartId, $isBuyNow);
                 $currentItem = $cart ? $cart->items->firstWhere('id', $itemId) : null;
                 $maxStock    = $getStock($currentItem);
 
@@ -289,9 +300,19 @@ class CartController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
 
-        $logger->info('Updated cart item via controller', ['item_id' => $item->id ?? null]);
+        if (! $item) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => statictranslations('Cart item not found.'),
+                ], 404);
+            }
+            return redirect()->back()->with('error', statictranslations('Cart item not found.'));
+        }
 
-        $cart   = $cartService->getCart($cartId);
+        $logger->info('Updated cart item via controller', ['item_id' => $item->id ?? null, 'buy_now' => $isBuyNow]);
+
+        $cart   = $cartService->resolveCheckoutCart($cartId, $isBuyNow);
         $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : $this->emptyTotals($shippingMethod);
 
         // Build per-item discount info for the updated item
@@ -365,10 +386,11 @@ class CartController extends Controller
 
         $cartId         = CartIdentifier::fromRequest($request);
         $shippingMethod = $request->input('shipping_method', 'standard');
-        $ok             = $cartService->removeItem($cartId, $itemId);
-        $logger->info('Removed cart item via controller', ['item_id' => $itemId, 'success' => $ok]);
+        $isBuyNow       = $this->isBuyNowRequest($request, $cartService);
+        $ok             = $cartService->removeItem($cartId, $itemId, $isBuyNow);
+        $logger->info('Removed cart item via controller', ['item_id' => $itemId, 'success' => $ok, 'buy_now' => $isBuyNow]);
 
-        $cart   = $cartService->getCart($cartId);
+        $cart   = $isBuyNow ? $cartService->getActiveBuyNowCart() : $cartService->getCart($cartId);
         $totals = $cart ? $priceService->calculate($cart, $shippingMethod) : $this->emptyTotals($shippingMethod);
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -418,8 +440,9 @@ class CartController extends Controller
             ]);
         }
 
-        $cartId = CartIdentifier::fromRequest($request);
-        $cart   = $cartService->getCart($cartId);
+        $cartId   = CartIdentifier::fromRequest($request);
+        $isBuyNow = $this->isBuyNowRequest($request, $cartService);
+        $cart     = $cartService->resolveCheckoutCart($cartId, $isBuyNow);
 
         if (! $cart || $cart->items->isEmpty()) {
             return response()->json(['success' => false, 'message' => statictranslations('Your cart is empty.')]);
@@ -467,8 +490,9 @@ class CartController extends Controller
             ]);
         }
 
-        $cartId = CartIdentifier::fromRequest($request);
-        $cart   = $cartService->getCart($cartId);
+        $cartId   = CartIdentifier::fromRequest($request);
+        $isBuyNow = $this->isBuyNowRequest($request, $cartService);
+        $cart     = $cartService->resolveCheckoutCart($cartId, $isBuyNow);
 
         if (! $cart) {
             return response()->json(['success' => false, 'message' => statictranslations('Cart not found.')]);

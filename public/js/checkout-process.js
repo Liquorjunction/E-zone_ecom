@@ -314,6 +314,14 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
+    function getValidationErrorContainer(element) {
+        if (!element || !element.parentElement) return null;
+        if (element.parentElement.classList && element.parentElement.classList.contains("iti")) {
+            return element.parentElement.parentElement;
+        }
+        return element.parentElement;
+    }
+
     function showValidationError(element, message) {
         if (!element) return;
         clearValidationErrorFor(element);
@@ -334,7 +342,8 @@ document.addEventListener("DOMContentLoaded", function () {
         element.classList.add("border-red-500", "border-2", "bg-red-50");
         element.classList.remove("border-gray-200");
         element.setAttribute("aria-invalid", "true");
-        if (element.parentElement) element.parentElement.appendChild(errorDiv);
+        var container = getValidationErrorContainer(element);
+        if (container) container.appendChild(errorDiv);
     }
     window.showValidationError = showValidationError;
     window.clearValidationErrorFor = clearValidationErrorFor;
@@ -442,7 +451,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function clearValidationErrorFor(element) {
         if (!element) return;
-        if (element.parentElement) {
+        var container = getValidationErrorContainer(element);
+        if (container) {
+            container.querySelectorAll(".validation-error").forEach(function(e) { e.remove(); });
+        }
+        if (element.parentElement && element.parentElement !== container) {
             element.parentElement.querySelectorAll(".validation-error").forEach(function(e) { e.remove(); });
         }
         var childErrors = element.querySelectorAll ? element.querySelectorAll(".validation-error") : [];
@@ -536,6 +549,13 @@ document.addEventListener("DOMContentLoaded", function () {
         root.dataset.step = step;
     }
 
+    function isBuyNowMode() {
+        if (root && typeof root.dataset.buyNow !== "undefined") {
+            return root.dataset.buyNow === "1";
+        }
+        return new URLSearchParams(window.location.search).get("buy_now") === "1";
+    }
+
     async function goToStep(step) {
     // Debounce: prevent rapid multiple calls
     if (goToStepTimer) {
@@ -549,8 +569,12 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        var buyNowQuery = (step === 2 && isBuyNowMode()) ? '&buy_now=1' : '';
+
         if (step === 2 && !window.__isUserLoggedIn) {
-            const guestCheckoutUrl = (window.__checkoutRoutes && window.__checkoutRoutes.show) ? (window.__checkoutRoutes.show + '?step=2&mode=guest') : '/checkout?step=2&mode=guest';
+            const guestCheckoutUrl = (window.__checkoutRoutes && window.__checkoutRoutes.show)
+                ? (window.__checkoutRoutes.show + '?step=2&mode=guest' + buyNowQuery)
+                : ('/checkout?step=2&mode=guest' + buyNowQuery);
             window.location.href = guestCheckoutUrl;
             return;
         }
@@ -569,7 +593,7 @@ document.addEventListener("DOMContentLoaded", function () {
             content.appendChild(stepLoader);
         }
         try {
-            var resp = await fetch(showUrl + "?step=" + step, {
+            var resp = await fetch(showUrl + "?step=" + step + buyNowQuery, {
                 credentials: "same-origin",
                 headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json", "X-CSRF-TOKEN": csrf },
             });
@@ -589,6 +613,17 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.redirect) { window.location.href = data.redirect; return; }
             if (data.html) {
                 if (content) content.innerHTML = data.html;
+                if (step === 1) {
+                    root.dataset.buyNow = "0";
+                    try {
+                        var currentUrl = new URL(window.location.href);
+                        if (currentUrl.searchParams.has("buy_now")) {
+                            currentUrl.searchParams.delete("buy_now");
+                            currentUrl.searchParams.set("step", "1");
+                            window.history.replaceState({}, "", currentUrl.toString());
+                        }
+                    } catch (e) {}
+                }
                 updateProgressBar(step);
                 if (Object.prototype.hasOwnProperty.call(data, "ecommerce")) {
                     window.__ga4Checkout = data.ecommerce;
@@ -607,6 +642,96 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function normalizePhoneKey(val) {
         return String(val || "").replace(/[\s\-\(\)]+/g, "").trim();
+    }
+
+    function getItiInstance(input) {
+        if (!input || !window.intlTelInputGlobals || typeof window.intlTelInputGlobals.getInstance !== "function") {
+            return null;
+        }
+        try {
+            return window.intlTelInputGlobals.getInstance(input) || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function getSelectedDialCode(input) {
+        var iti = getItiInstance(input);
+        if (!iti || typeof iti.getSelectedCountryData !== "function") return "";
+        var data = iti.getSelectedCountryData();
+        return data && data.dialCode ? "+" + data.dialCode : "";
+    }
+
+    function getFullPhoneNumber(input) {
+        if (!input) return "";
+        var raw = (input.value || "").trim();
+        if (!raw) return "";
+
+        var iti = getItiInstance(input);
+        if (iti) {
+            var full = "";
+            try { full = iti.getNumber(); } catch (e) {}
+            if (full && full.indexOf("+") === 0) {
+                return full;
+            }
+            var dialCode = getSelectedDialCode(input);
+            var digits = raw.replace(/\D/g, "");
+            if (dialCode && digits) {
+                if (raw.indexOf("+") === 0) {
+                    return "+" + digits;
+                }
+                var cleanDigits = digits.indexOf("0") === 0 ? digits.slice(1) : digits;
+                return dialCode + cleanDigits;
+            }
+        }
+        return raw;
+    }
+
+    function setPhoneFieldValue(input, val) {
+        if (!input) return;
+        var iti = getItiInstance(input);
+        if (iti && val) {
+            try {
+                iti.setNumber(String(val));
+                syncCountryCodeHidden(input);
+                return;
+            } catch (e) {}
+        }
+        input.value = val || "";
+    }
+
+    function syncCountryCodeHidden(phoneInput) {
+        if (!phoneInput || phoneInput.id !== "phone") return;
+        var hiddenCode = document.getElementById("country_code");
+        if (hiddenCode) {
+            hiddenCode.value = getSelectedDialCode(phoneInput);
+        }
+    }
+
+    function initCheckoutPhoneInputs() {
+        if (!window.intlTelInput) return;
+        ["phone", "billing_phone"].forEach(function (id) {
+            var input = document.getElementById(id);
+            if (!input || input.type === "hidden") return;
+            if (getItiInstance(input)) {
+                syncCountryCodeHidden(input);
+                return;
+            }
+            window.intlTelInput(input, {
+                initialCountry: "ma",
+                preferredCountries: ["ma", "us", "in", "gb", "ae", "au"],
+                utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/utils.js",
+                nationalMode: false,
+                separateDialCode: true,
+            });
+            syncCountryCodeHidden(input);
+            if (id === "phone" && !input.dataset.countrySyncBound) {
+                input.dataset.countrySyncBound = "1";
+                input.addEventListener("countrychange", function () {
+                    syncCountryCodeHidden(input);
+                });
+            }
+        });
     }
 
     function validateField(element) {
@@ -643,12 +768,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 return false;
             }
             if (val) {
-                var digits = val.replace(/\D/g, '');
-                if (/[a-zA-Z]/.test(val) || !/^[\d\s\+\-\(\)]+$/.test(val) || digits.length < 8 || digits.length > 20) {
+                var fullPhone = getFullPhoneNumber(element);
+                var rawDigits = val.replace(/\D/g, '');
+                var fullDigits = fullPhone.replace(/\D/g, '');
+                var hasIti = !!getItiInstance(element);
+                var minLocalDigits = hasIti ? 6 : 8;
+
+                if (
+                    /[a-zA-Z]/.test(val) ||
+                    !/^[\d\s\+\-\(\)]+$/.test(val) ||
+                    rawDigits.length < minLocalDigits ||
+                    fullDigits.length < 8 ||
+                    fullDigits.length > 20
+                ) {
                     showValidationError(element, trans('Please enter a valid phone number.'));
                     return false;
                 }
-                if (id === "phone" && !window.__isUserLoggedIn && window.__registeredGuestPhone && normalizePhoneKey(val) === window.__registeredGuestPhone) {
+                if (id === "phone" && !window.__isUserLoggedIn && window.__registeredGuestPhone && normalizePhoneKey(fullPhone) === window.__registeredGuestPhone) {
                     showValidationError(element, trans('This phone number is already registered. Please log in or use a different phone number.'));
                     return false;
                 }
@@ -958,7 +1094,7 @@ document.addEventListener("DOMContentLoaded", function () {
             billing_city:         document.getElementById("city")?.value         || "",
             billing_zip:          document.getElementById("zip")?.value          || "",
             billing_country:      document.getElementById("country")?.value      || "Morocco",
-            billing_phone:        document.getElementById("phone")?.value        || "",
+            billing_phone:        getFullPhoneNumber(document.getElementById("phone")) || "",
         };
 
         Object.entries(map).forEach(function ([name, val]) {
@@ -1002,6 +1138,27 @@ document.addEventListener("DOMContentLoaded", function () {
         var processUrl = routes.process || form.action;
 
         var formData = new FormData(form);
+
+        // Attach full international phone numbers with STD dial codes
+        var phoneEl = document.getElementById("phone");
+        if (phoneEl) {
+            var fullPhoneVal = getFullPhoneNumber(phoneEl);
+            if (fullPhoneVal) {
+                formData.set("phone", fullPhoneVal);
+            }
+            var dialCodeVal = getSelectedDialCode(phoneEl);
+            if (dialCodeVal) {
+                formData.set("country_code", dialCodeVal);
+                syncCountryCodeHidden(phoneEl);
+            }
+        }
+        var billingPhoneEl = document.getElementById("billing_phone");
+        if (billingPhoneEl && billingPhoneEl.type !== "hidden" && billingPhoneEl.value.trim()) {
+            var fullBillingPhone = getFullPhoneNumber(billingPhoneEl);
+            if (fullBillingPhone) {
+                formData.set("billing_phone", fullBillingPhone);
+            }
+        }
 
         // Ensure valid reCAPTCHA token is attached to formData
         if (window.grecaptcha && typeof window.grecaptcha.getResponse === "function") {
@@ -1131,7 +1288,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Notify coupon.js to update coupon widget state cleanly without fighting DOM replaces
-        window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: summary } }));
+        window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: summary, buyNow: isBuyNowMode() } }));
 
         // Update main Item Count Span
         const countEl = document.getElementById("item-total-count");
@@ -1146,16 +1303,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function updateItem(itemId, quantity) {
         if (!updateUrl) return;
+        var buyNowFlag = isBuyNowMode();
         try {
             var resp = await fetch(updateUrl, {
                 method: "POST", credentials: "same-origin",
                 headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
-                body: JSON.stringify({ item_id: itemId, quantity: Number(quantity), shipping_method: getCurrentShippingMethod() }),
+                body: JSON.stringify({
+                    item_id: itemId,
+                    quantity: Number(quantity),
+                    shipping_method: getCurrentShippingMethod(),
+                    buy_now: buyNowFlag ? 1 : 0,
+                }),
             });
             var data = await resp.json();
             if (!data || !data.success) {
-                if (data && data.item && data.item.max_stock !== undefined) {
-                    applyStockStateToItem(itemId, data.item.max_stock);
+                if (data && data.item) {
+                    if (data.item.max_stock !== undefined) {
+                        applyStockStateToItem(itemId, data.item.max_stock);
+                    }
+                    if (data.item.quantity !== undefined && data.item.quantity !== null) {
+                        document.querySelectorAll('[data-summary-item-id="' + itemId + '"] .summary-quantity')
+                            .forEach(function (el) { el.textContent = data.item.quantity; });
+                        var mi = root.querySelector('.cart-quantity-input[data-item-id="' + itemId + '"]');
+                        if (mi) mi.value = data.item.quantity;
+                    }
                 }
                 if (data && data.message) {
                     showToast(data.message, "error");
@@ -1168,6 +1339,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var calculatedLineTotal = data?.item?.discount?.line_total_after_discount
                 ?? data?.item?.line_total
                 ?? data?.item?.line_total_before_discount;
+            var originalLineTotal = data?.item?.line_total_before_discount;
 
             if (lineEl && calculatedLineTotal !== undefined && calculatedLineTotal !== null) {
                 lineEl.textContent = formatMoney(calculatedLineTotal);
@@ -1178,6 +1350,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         el.textContent = formatMoney(calculatedLineTotal);
                     }
                 });
+            if (originalLineTotal !== undefined && originalLineTotal !== null) {
+                document.querySelectorAll('[data-summary-item-id="' + itemId + '"] .summary-item-original-price')
+                    .forEach(function (el) {
+                        el.textContent = formatMoney(originalLineTotal);
+                    });
+            }
             document.querySelectorAll('[data-summary-item-id="' + itemId + '"] .summary-quantity')
                 .forEach(function (el) { el.textContent = quantity; });
 
@@ -1209,7 +1387,7 @@ document.addEventListener("DOMContentLoaded", function () {
             syncCheckoutActionStates();
 
             if (data.summary && typeof data.summary.itemCount !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
+                window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary, buyNow: buyNowFlag } }));
             }
         } catch (e) { console.error("updateItem failed", e); }
     }
@@ -1225,7 +1403,10 @@ document.addEventListener("DOMContentLoaded", function () {
             var resp = await fetch(updateUrl, {
                 method: "POST", credentials: "same-origin",
                 headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
-                body: JSON.stringify({ shipping_method: getCurrentShippingMethod() }),
+                body: JSON.stringify({
+                    shipping_method: getCurrentShippingMethod(),
+                    buy_now: isBuyNowMode() ? 1 : 0,
+                }),
             });
             var data = await resp.json();
             if (resp.ok && data && data.success) {
@@ -1237,11 +1418,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function removeItem(itemId) {
         if (!removeUrl) return submitFallback(itemId);
+        var buyNowFlag = isBuyNowMode();
         try {
             var resp = await fetch(removeUrl, {
                 method: "POST", credentials: "same-origin",
                 headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
-                body: JSON.stringify({ item_id: itemId, shipping_method: getCurrentShippingMethod() }),
+                body: JSON.stringify({
+                    item_id: itemId,
+                    shipping_method: getCurrentShippingMethod(),
+                    buy_now: buyNowFlag ? 1 : 0,
+                }),
             });
             var data = await resp.json();
             if (data && data.success) {
@@ -1252,7 +1438,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateSummary(data.summary);
 
                 if (data.summary && typeof data.summary.itemCount !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary } }));
+                    window.dispatchEvent(new CustomEvent('cart:changed', { detail: { summary: data.summary, buyNow: buyNowFlag } }));
                 }
                 syncCheckoutActionStates();
                 showToast(data.message || "Item removed from cart.", "success");
@@ -1285,6 +1471,12 @@ document.addEventListener("DOMContentLoaded", function () {
             iid.type = "hidden"; iid.name = "item_id"; iid.value = itemId;
             form.appendChild(iid);
 
+            if (isBuyNowMode()) {
+                var bn = document.createElement("input");
+                bn.type = "hidden"; bn.name = "buy_now"; bn.value = "1";
+                form.appendChild(bn);
+            }
+
             document.body.appendChild(form);
             form.submit();
         } catch (e) { console.error("submitFallback failed", e); }
@@ -1314,7 +1506,7 @@ document.addEventListener("DOMContentLoaded", function () {
             setFieldValue("city",      addr.city);
             setFieldValue("zip",       addr.postalCode);
             setFieldValue("country",   addr.country);
-            setFieldValue("phone",     addr.phone);
+            setPhoneFieldValue(document.getElementById("phone"), addr.phone);
 
             if (display) {
                 var nameEl   = document.getElementById("displayShippingName");
@@ -1805,21 +1997,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (phoneInput && !phoneInput.dataset.existingBound) {
             phoneInput.dataset.existingBound = "1";
-            phoneInput.addEventListener("blur", function () {
-                var val = phoneInput.value.trim();
-                var digits = val.replace(/\D/g, "");
-                if (val && /^[\d\s\+\-\(\)]+$/.test(val) && digits.length >= 8 && digits.length <= 20) {
-                    checkCustomer({ phone: val });
+
+            function triggerPhoneExistingCheck() {
+                var rawVal = phoneInput.value.trim();
+                var fullPhone = getFullPhoneNumber(phoneInput);
+                var rawDigits = rawVal.replace(/\D/g, "");
+                var fullDigits = fullPhone.replace(/\D/g, "");
+                var hasIti = !!getItiInstance(phoneInput);
+                var minLocalDigits = hasIti ? 6 : 8;
+
+                if (
+                    rawVal &&
+                    /^[\d\s\+\-\(\)]+$/.test(rawVal) &&
+                    rawDigits.length >= minLocalDigits &&
+                    fullDigits.length >= 8 &&
+                    fullDigits.length <= 20
+                ) {
+                    checkCustomer({ phone: fullPhone });
                 }
-            });
+            }
+
+            phoneInput.addEventListener("blur", triggerPhoneExistingCheck);
 
             phoneInput.addEventListener("input", function () {
-                var currentPhoneKey = normalizePhoneKey(phoneInput.value);
+                var currentPhoneKey = normalizePhoneKey(getFullPhoneNumber(phoneInput));
                 if (window.__registeredGuestPhone && currentPhoneKey !== window.__registeredGuestPhone) {
                     window.__registeredGuestPhone = "";
                     lastCheckedPhone = "";
                     clearValidationErrorFor(phoneInput);
                 }
+            });
+
+            phoneInput.addEventListener("countrychange", function () {
+                var currentPhoneKey = normalizePhoneKey(getFullPhoneNumber(phoneInput));
+                if (window.__registeredGuestPhone && currentPhoneKey !== window.__registeredGuestPhone) {
+                    window.__registeredGuestPhone = "";
+                    clearValidationErrorFor(phoneInput);
+                }
+                lastCheckedPhone = "";
+                triggerPhoneExistingCheck();
             });
         }
     }
@@ -1850,6 +2066,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function runStepInits() {
+        initCheckoutPhoneInputs();
         initShippingAddressSelect();
         initBillingAddressSelect();
         initBillingToggle();
@@ -2382,17 +2599,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     try { e.target.setSelectionRange(newPos, newPos); } catch (err) {}
                 }
             }
-            // Clear red error highlight once phone becomes valid
-            if (e.target.classList.contains('border-red-500')) {
-                var digits = cleaned.replace(/\D/g, '');
-                if (digits.length >= 8 && !/[a-zA-Z]/.test(cleaned)) {
-                    if (typeof clearValidationErrorFor === 'function') {
-                        clearValidationErrorFor(e.target);
-                    } else {
-                        e.target.classList.remove('border-red-500', 'bg-red-50');
-                        e.target.classList.add('border-2', 'border-gray-200');
-                    }
-                }
+            // Re-validate phone via window.validateField when currently marked invalid
+            if (e.target.classList.contains('border-red-500') && typeof window.validateField === 'function') {
+                window.validateField(e.target);
             }
         }
 

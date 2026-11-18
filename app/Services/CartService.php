@@ -242,9 +242,25 @@ class CartService
         return $sessionId . ':buy-now';
     }
 
-    public function updateItem(CartIdentifier $cartId, int $itemId, array $data)
+    public function resolveCheckoutCart(CartIdentifier $cartId, bool $isBuyNow = false): ?Cart
     {
-        $cart = $this->repo->getCartForUserOrSession($cartId);
+        if ($isBuyNow) {
+            $buyNowCart = $this->getActiveBuyNowCart();
+            if ($buyNowCart) {
+                return $buyNowCart;
+            }
+        }
+
+        return $this->getCart($cartId);
+    }
+
+    public function updateItem(CartIdentifier $cartId, int $itemId, array $data, bool $isBuyNow = false)
+    {
+        $cart = $this->resolveCheckoutCart($cartId, $isBuyNow);
+        if (!$cart) {
+            return null;
+        }
+
         $item = $cart->items->firstWhere('id', $itemId);
         if ($item) {
             $variant = $item->variant ?? null;
@@ -258,13 +274,26 @@ class CartService
             }
         }
         $item = $this->repo->updateItem($cart, $itemId, $data);
-        $this->logger->info('Cart item updated', ['cart_id' => $cart->id ?? null, 'item_id' => $item->id ?? null]);
+
+        if ($isBuyNow && $item) {
+            $context = $this->getBuyNowContext();
+            if ($context && (int) ($context['buy_now_cart_id'] ?? 0) === (int) $cart->id) {
+                $context['payload']['quantity'] = (int) $item->quantity;
+                session()->put(self::SESSION_KEY_BUY_NOW_CONTEXT, $context);
+            }
+        }
+
+        $this->logger->info('Cart item updated', ['cart_id' => $cart->id ?? null, 'item_id' => $item->id ?? null, 'buy_now' => $isBuyNow]);
         return $item;
     }
 
-    public function removeItem(CartIdentifier $cartId, int $itemId)
+    public function removeItem(CartIdentifier $cartId, int $itemId, bool $isBuyNow = false)
     {
-        $cart = $this->repo->getCartForUserOrSession($cartId);
+        $cart = $this->resolveCheckoutCart($cartId, $isBuyNow);
+        if (!$cart) {
+            return false;
+        }
+
         $ok = $this->repo->removeItem($cart, $itemId);
 
         if ($ok && $cart) {
@@ -281,7 +310,7 @@ class CartService
             }
         }
 
-        $this->logger->info('Cart item removed', ['cart_id' => $cart->id ?? null, 'item_id' => $itemId, 'success' => $ok]);
+        $this->logger->info('Cart item removed', ['cart_id' => $cart->id ?? null, 'item_id' => $itemId, 'success' => $ok, 'buy_now' => $isBuyNow]);
         return $ok;
     }
 

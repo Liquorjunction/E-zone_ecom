@@ -26,7 +26,17 @@ class OrderCheckoutRequest extends FormRequest
         ]);
 
         if ($this->has('phone') && is_string($this->phone)) {
-            $this->merge(['phone' => trim($this->phone)]);
+            $phone = trim($this->phone);
+            $countryCode = is_string($this->input('country_code')) ? trim($this->input('country_code')) : '';
+            if ($phone !== '' && $countryCode !== '' && !str_starts_with($phone, '+')) {
+                $normalizedCode = str_starts_with($countryCode, '+') ? $countryCode : '+' . preg_replace('/\D+/', '', $countryCode);
+                $digits = preg_replace('/\D+/', '', $phone);
+                if ($digits !== '') {
+                    $cleanDigits = str_starts_with($digits, '0') ? substr($digits, 1) : $digits;
+                    $phone = $normalizedCode . $cleanDigits;
+                }
+            }
+            $this->merge(['phone' => $phone]);
         }
 
         if ($this->filled('billing_address_id') && !$this->filled('saved_billing_address_id')) {
@@ -67,6 +77,7 @@ class OrderCheckoutRequest extends FormRequest
             'zip' => ['nullable', 'regex:/^\d{1,10}$/'],
             'postal_code' => ['nullable', 'regex:/^\d{1,10}$/'],
             'country' => ['required_without_all:shipping_address,saved_address_id', 'string', 'max:255'],
+            'country_code' => ['nullable', 'string', 'max:10'],
             'phone' => Auth::check()
                 ? ['nullable', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/']
                 : ['required', 'string', 'max:30', 'regex:/^[\d\s\+\-\(\)]{8,30}$/'],

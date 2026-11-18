@@ -136,3 +136,39 @@ input.success-state:focus {
   border-color: #16a34a;
   box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
 }
+
+/* intl-tel-input alignment for checkout phone inputs */
+#checkout-root .iti {
+  width: 100%;
+  display: block;
+}
+
+#checkout-root .iti__flag-container {
+  height: 100%;
+}
+
+#checkout-root .iti--separate-dial-code .iti__selected-flag {
+  height: 100%;
+  border-radius: 0.75rem 0 0 0.75rem;
+}
+
+#checkout-root .iti__tel-input {
+  height: 60px;
+}
+
+#checkout-root #billingFields .iti__tel-input {
+  height: 52px;
+}
+
+#checkout-root .iti__country-list {
+  z-index: 60;
+}
+
+#checkout-root .iti:has(.border-red-500) .iti__selected-flag {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+[dir="rtl"] #checkout-root .iti--separate-dial-code .iti__selected-flag {
+  border-radius: 0 0.75rem 0.75rem 0;
+}

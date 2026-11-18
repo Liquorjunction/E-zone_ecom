@@ -67,7 +67,7 @@
             @endif
 
             @if ($hasDiscount)
-                <span class="text-xs text-gray-400 line-through">{{ money_format_number($lineTotal) }}<br/></span>
+                <span class="summary-item-original-price text-xs text-gray-400 line-through block">{{ money_format_number($lineTotal) }}</span>
                 <span class="summary-item-price text-sm font-bold text-red-600">
                     {{ money_format_number($lineFinal) }}
                 </span>

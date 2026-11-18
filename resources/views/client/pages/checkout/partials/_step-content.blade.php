@@ -212,6 +212,7 @@
                             placeholder="{{ statictranslations('e.g. +212 612345678') }}"
                             value="{{ Auth::check() ? Auth::user()->phone : '' }}" required pattern="[0-9\s\+\-\(\)]+"
                             class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300">
+                        <input type="hidden" name="country_code" id="country_code" value="">
                         <span class="error-message text-red-500 text-sm mt-1 font-medium hidden"></span>
                     </div>
                 </div>
