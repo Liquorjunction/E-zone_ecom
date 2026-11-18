@@ -173,9 +173,7 @@ Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout.p
 Route::get('/checkout/address-section', [OrderController::class, 'addressSection'])->name('checkout.address-section');
 Route::get('/guest/order/{order:order_number}', [OrderController::class, 'guestOrderDetail'])->name('guest.order-detail')->where('order', '.*')->middleware('signed');
 
-// Guest Checkout Security & Validation (OTP, Existing User Check, Inline Login)
-Route::post('/checkout/guest/send-otp', [GuestAuthController::class, 'sendOtp'])->name('checkout.guest.send-otp')->middleware('throttle:5,1');
-Route::post('/checkout/guest/verify-otp', [GuestAuthController::class, 'verifyOtp'])->name('checkout.guest.verify-otp')->middleware('throttle:10,1');
+// Guest Checkout Security & Validation (Existing User Check, Inline Login)
 Route::post('/checkout/check-existing-user', [GuestAuthController::class, 'checkExistingUser'])->name('checkout.check-existing-user')->middleware('throttle:60,1');
 Route::post('/checkout/inline-login', [GuestAuthController::class, 'inlineLogin'])->name('checkout.inline-login')->middleware('throttle:5,1');
 

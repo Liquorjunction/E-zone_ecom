@@ -150,6 +150,7 @@ class OrderController extends Controller
             return DataTables::of($orderRepo->getDataForDataTable($request->all()))
                 ->filterColumn('order_number', function ($query, $keyword) {
                     $query->where(function ($q) use ($keyword) {
+                        $trimmedKeyword = strtolower(trim((string) $keyword));
                         $q->where('order_number', 'like', "%{$keyword}%")
                             ->orWhere('email', 'like', "%{$keyword}%")
                             ->orWhere('id', 'like', "%{$keyword}%")
@@ -157,12 +158,13 @@ class OrderController extends Controller
                                 $userQuery->where('name', 'like', "%{$keyword}%")
                                     ->orWhere('email', 'like', "%{$keyword}%");
                             });
+                        if (strlen($trimmedKeyword) >= 3 && str_starts_with('guest user', $trimmedKeyword)) {
+                            $q->orWhere('client_type', 'guest')->orWhereNull('user_id');
+                        }
                     });
                 })
                 ->addColumn('order_number', fn($order) => $order->order_number ?? 'N/A')
-                ->addColumn('customer_name', function ($order) use ($orderRepo) {
-                    return $orderRepo->getCustomerNameByOrderId($order->id) ?? 'N/A';
-                })
+                ->addColumn('customer_name', fn($order) => $order->customer_display_name)
                 ->addColumn('client_type', function ($order) {
                     if (($order->client_type ?? 'registered') === 'guest' || (method_exists($order, 'isGuest') && $order->isGuest())) {
                         return '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Guest</span>';

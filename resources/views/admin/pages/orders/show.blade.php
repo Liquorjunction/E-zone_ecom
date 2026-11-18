@@ -104,8 +104,7 @@
                                     </tr>
                                     <tr>
                                         <th>Name</th>
-                                        <td>{{ $order->user->name ?? ($order->guestUser->name ?? ($order->customer_name ?? ($shipping['name'] ?? 'N/A'))) }}
-                                        </td>
+                                        <td>{{ $order->customer_display_name }}</td>
                                     </tr>
                                     <tr>
                                         <th>Email</th>

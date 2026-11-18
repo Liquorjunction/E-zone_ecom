@@ -35,7 +35,9 @@ class GuestUserRepository implements GuestUserRepositoryInterface
         $guest = GuestUser::where('email', $normalizedEmail)->first();
 
         if ($guest) {
-            $guest->name = trim($data['name'] ?? $guest->name);
+            if (!$guest->isLinked()) {
+                $guest->name = 'Guest User';
+            }
             if (isset($data['phone'])) {
                 $guest->phone = trim($data['phone']);
             }
@@ -47,7 +49,7 @@ class GuestUserRepository implements GuestUserRepositoryInterface
         } else {
             $guest = GuestUser::create([
                 'email'         => $normalizedEmail,
-                'name'          => trim($data['name'] ?? ''),
+                'name'          => 'Guest User',
                 'phone'         => isset($data['phone']) ? trim($data['phone']) : null,
                 'token'         => Str::random(40),
                 'orders_count'  => 1,
@@ -75,6 +77,7 @@ class GuestUserRepository implements GuestUserRepositoryInterface
             if ($guest) {
                 $guest->update([
                     'registered_user_id' => $user->id,
+                    'name'               => $user->name,
                 ]);
             }
 

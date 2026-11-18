@@ -37,10 +37,9 @@ class NewOrderReceived extends Mailable
             ? $order->isGuest()
             : (($order->client_type ?? '') === 'guest' || is_null($order->user_id));
 
-        $this->customerName = $this->user?->name
-            ?? $order->guestUser?->name
-            ?? $order->shippingAddressRecord?->name
-            ?? ($shipping['name'] ?? ($this->isGuest ? 'Client Invité' : 'Client'));
+        $this->customerName = $this->isGuest
+            ? 'Guest User'
+            : ($this->user?->name ?? ($this->user?->email ?? 'Client'));
 
         $this->customerEmail = $order->email
             ?? $this->user?->email

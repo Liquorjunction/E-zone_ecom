@@ -317,6 +317,7 @@
                 <div class="space-y-1">
                     <label for="inlineLoginEmail" class="block text-xs font-semibold text-gray-700">{{ statictranslations('Email Address') }}</label>
                     <input type="email" id="inlineLoginEmail" name="email" autocomplete="username" readonly
+                        placeholder="{{ statictranslations('Enter your email address') }}"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-sm">
                 </div>
                 <div id="inlinePasswordGroup" class="space-y-2 mt-3">

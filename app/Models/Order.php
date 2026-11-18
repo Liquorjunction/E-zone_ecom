@@ -86,6 +86,21 @@ class Order extends Model
         return !$this->isGuest();
     }
 
+    /**
+     * Resolve the customer display name without binding to shipping address or mutable guest_users.name.
+     * Guest orders always display "Guest User"; once linked to a registered user, displays the user's registered name.
+     */
+    public function getCustomerDisplayNameAttribute(): string
+    {
+        if ($this->isGuest()) {
+            return 'Guest User';
+        }
+
+        $user = $this->relationLoaded('user') ? $this->getRelation('user') : $this->user()->first();
+
+        return $user?->name ?? ($user?->email ?? 'Guest User');
+    }
+
     public function shippingAddressRecord()
     {
         return $this->belongsTo(Address::class, 'shipping_address_id');

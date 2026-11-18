@@ -37,7 +37,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getDataForDataTable($request)
     {
-        $query = Order::with(['cancelledBy:id,name'])
+        $query = Order::with(['user:id,name,email', 'cancelledBy:id,name'])
             ->select(['id', 'order_number', 'user_id', 'client_type', 'guest_user_id', 'email', 'total', 'status', 'payment_method', 'transaction_id', 'cancel_reason', 'cancelled_by', 'created_at'])
             ->orderBy('created_at', 'desc');
 
@@ -103,20 +103,12 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getCustomerNameByOrderId($orderId)
     {
-        $order = Order::with(['user', 'guestUser', 'shippingAddressRecord'])->find($orderId);
-        if (! $order) {
+        $order = Order::with(['user:id,name,email'])->find($orderId);
+        if (!$order) {
             return null;
         }
 
-        if ($order->user) {
-            return $order->user->name ?? ($order->user->email ?? 'N/A');
-        }
-
-        if ($order->guestUser) {
-            return $order->guestUser->name ?? ($order->guestUser->email ?? 'Guest');
-        }
-
-        return $order->customer_name ?? ($order->shipping_address['name'] ?? 'Guest');
+        return $order->customer_display_name;
     }
 
     public function findOrderWithRelations(int $orderId, array $relations = [])

@@ -28,7 +28,9 @@ class OrderStatusMail extends Mailable
         $this->user = $user;
         $this->order = $order;
         $this->status = strtolower($status);
-        $this->recipientName = $user?->name ?? $order->shippingAddressRecord?->name ?? $order->guestUser?->name ?? ($order->shipping_address['name'] ?? 'Client');
+        $this->recipientName = $order->isGuest()
+            ? 'Guest User'
+            : ($user?->name ?? 'Client');
 
         if ($order->isGuest()) {
             $this->reviewUrl = \Illuminate\Support\Facades\URL::signedRoute('guest.order-detail', ['order' => $order->order_number]);

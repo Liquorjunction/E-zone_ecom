@@ -23,7 +23,54 @@ class AuthRepository implements AuthRepositoryInterface
 
     public function findUserByEmail(string $email): ?User
     {
-        return User::where('email', $email)->first();
+        $normalized = strtolower(trim($email));
+        if ($normalized === '') {
+            return null;
+        }
+
+        return User::whereRaw('LOWER(email) = ?', [$normalized])->first();
+    }
+
+    public function findUserByPhone(string $phone): ?User
+    {
+        $trimmed = trim($phone);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        $stripped = preg_replace('/[\s\-\(\)]+/', '', $trimmed);
+        $digits   = preg_replace('/\D+/', '', $trimmed);
+
+        $candidates = array_filter(array_unique([
+            $trimmed,
+            $stripped,
+            $digits,
+            $digits !== '' ? '+' . $digits : '',
+        ]));
+
+        // Handle Moroccan local (0XXXXXXXXX) <-> international (+212XXXXXXXXX / 212XXXXXXXXX)
+        if (strlen($digits) === 10 && str_starts_with($digits, '0')) {
+            $local = substr($digits, 1);
+            $candidates[] = '+212' . $local;
+            $candidates[] = '212' . $local;
+        } elseif (strlen($digits) === 12 && str_starts_with($digits, '212')) {
+            $candidates[] = '0' . substr($digits, 3);
+        }
+
+        $candidates = array_values(array_unique($candidates));
+        if (empty($candidates)) {
+            return null;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($candidates), '?'));
+
+        return User::whereNotNull('phone')
+            ->where('phone', '!=', '')
+            ->whereRaw(
+                "REPLACE(REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '(', ''), ')', '') IN ({$placeholders})",
+                $candidates
+            )
+            ->first();
     }
 
     public function authenticateUser(array $credentials, bool $remember): bool

@@ -605,6 +605,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 250); // 250ms debounce
 }
 
+    function normalizePhoneKey(val) {
+        return String(val || "").replace(/[\s\-\(\)]+/g, "").trim();
+    }
+
     function validateField(element) {
         if (!element) return true;
         var id = element.id || element.name || "";
@@ -622,9 +626,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 return false;
             }
             if (!window.__isUserLoggedIn && window.__registeredGuestEmail && val.toLowerCase() === window.__registeredGuestEmail) {
-                showValidationError(element, trans('You are already registered. Please log in to your account.'));
+                showValidationError(element, trans('This email is already registered. Please log in or use a different email address.'));
                 if (typeof window.showExistingAccountModal === "function") {
-                    window.showExistingAccountModal(val);
+                    window.showExistingAccountModal({ email: val, matchedBy: "email" });
                 }
                 return false;
             }
@@ -642,6 +646,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 var digits = val.replace(/\D/g, '');
                 if (/[a-zA-Z]/.test(val) || !/^[\d\s\+\-\(\)]+$/.test(val) || digits.length < 8 || digits.length > 20) {
                     showValidationError(element, trans('Please enter a valid phone number.'));
+                    return false;
+                }
+                if (id === "phone" && !window.__isUserLoggedIn && window.__registeredGuestPhone && normalizePhoneKey(val) === window.__registeredGuestPhone) {
+                    showValidationError(element, trans('This phone number is already registered. Please log in or use a different phone number.'));
                     return false;
                 }
             }
@@ -891,18 +899,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (!window.__isUserLoggedIn) {
-            var currentEmail  = (email ? email.value : "").toLowerCase().trim();
-
-            if (window.__registeredGuestEmail && currentEmail === window.__registeredGuestEmail) {
-                if (email) {
-                    showValidationError(email, trans('You are already registered. Please log in to your account.'));
-                }
-                if (typeof window.showExistingAccountModal === "function") {
-                    window.showExistingAccountModal(currentEmail);
-                }
-                hasErrors = true;
-            }
-
             // Check Google reCAPTCHA token
             var recaptchaContainer = document.getElementById("g-recaptcha-container");
             var siteKey = recaptchaContainer ? (recaptchaContainer.dataset.sitekey || window.__recaptchaSiteKey) : window.__recaptchaSiteKey;
@@ -1050,9 +1046,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.scrollTo({ top: 0, behavior: "smooth" });
                 initPostOrderModal();
             } else {
-                if (data.is_registered) {
+                if (data.phone_exists) {
+                    window.__registeredGuestPhone = normalizePhoneKey(formData.get("phone") || "");
+                }
+                var matchedBy = data.matched_by || (data.phone_exists && !data.email_exists ? "phone" : "email");
+                if (data.is_registered && matchedBy !== "phone") {
                     if (typeof window.showExistingAccountModal === "function") {
-                        window.showExistingAccountModal(formData.get("email") || "", data.message);
+                        window.showExistingAccountModal({
+                            email: formData.get("email") || "",
+                            phone: formData.get("phone") || "",
+                            matchedBy: matchedBy,
+                            message: data.message,
+                        });
                     }
                 }
                 if (data.errors) {
@@ -1496,28 +1501,80 @@ document.addEventListener("DOMContentLoaded", function () {
     function initExistingAccountCheck() {
         if (window.__isUserLoggedIn) return;
 
-        var emailInput = document.getElementById("email");
-        var modal      = document.getElementById("existingAccountModal");
-        var closeBtn   = document.getElementById("closeExistingAccountModal");
+        var emailInput   = document.getElementById("email");
+        var phoneInput   = document.getElementById("phone");
+        var modal        = document.getElementById("existingAccountModal");
+        var closeBtn     = document.getElementById("closeExistingAccountModal");
         var diffEmailBtn = document.getElementById("useDifferentEmailModalBtn");
-        var loginBtn   = document.getElementById("inlineLoginActionBtn");
-        var pwdGroup   = document.getElementById("inlinePasswordGroup");
-        var pwdInput   = document.getElementById("inlineLoginPassword");
-        var inlineEmail = document.getElementById("inlineLoginEmail");
-        var loginErr   = document.getElementById("inlineLoginError");
+        var loginBtn     = document.getElementById("inlineLoginActionBtn");
+        var pwdGroup     = document.getElementById("inlinePasswordGroup");
+        var pwdInput     = document.getElementById("inlineLoginPassword");
+        var inlineEmail  = document.getElementById("inlineLoginEmail");
+        var loginErr     = document.getElementById("inlineLoginError");
 
         if (!modal) return;
 
-        window.showExistingAccountModal = function(emailVal, message) {
-            var currEmail = (emailVal || (emailInput ? emailInput.value : "")).trim();
-            if (!currEmail) return;
+        var currentMatchedBy = "email";
+        var lastCheckedEmail = "";
+        var lastCheckedPhone = "";
 
-            window.__registeredGuestEmail = currEmail.toLowerCase();
-            if (inlineEmail) inlineEmail.value = currEmail;
+        window.showExistingAccountModal = function(optsOrEmail, legacyMessage) {
+            var opts = (optsOrEmail && typeof optsOrEmail === "object")
+                ? optsOrEmail
+                : { email: optsOrEmail || "", message: legacyMessage || "", matchedBy: "email" };
+
+            var activeEmailEl = document.getElementById("email");
+            var activePhoneEl = document.getElementById("phone");
+            var matchedBy     = opts.matchedBy || "email";
+            var currEmail     = (opts.email || (activeEmailEl ? activeEmailEl.value : "")).trim();
+            var currPhone     = (opts.phone || (activePhoneEl ? activePhoneEl.value : "")).trim();
+
+            if (matchedBy === "email" && !currEmail) return;
+            if (matchedBy === "phone" && !currPhone) return;
+            if (matchedBy === "both" && !currEmail && !currPhone) return;
+
+            currentMatchedBy = matchedBy;
+
+            if (matchedBy === "email" || matchedBy === "both") {
+                window.__registeredGuestEmail = currEmail.toLowerCase();
+            }
+            if (matchedBy === "phone" || matchedBy === "both") {
+                window.__registeredGuestPhone = normalizePhoneKey(currPhone);
+            }
+
+            if (inlineEmail) {
+                if (matchedBy === "phone") {
+                    // Phone matched: allow the user to type their registered email (do not expose stored email)
+                    inlineEmail.removeAttribute("readonly");
+                    inlineEmail.classList.remove("bg-gray-50");
+                    inlineEmail.classList.add("bg-white", "focus:border-primary", "focus:ring-2", "focus:ring-primary/20");
+                    inlineEmail.value = currEmail;
+                } else {
+                    inlineEmail.setAttribute("readonly", "readonly");
+                    inlineEmail.classList.add("bg-gray-50");
+                    inlineEmail.classList.remove("bg-white", "focus:border-primary", "focus:ring-2", "focus:ring-primary/20");
+                    inlineEmail.value = currEmail;
+                }
+            }
+
+            if (diffEmailBtn) {
+                if (matchedBy === "phone") {
+                    diffEmailBtn.textContent = trans('Use Different Phone Number');
+                } else if (matchedBy === "both") {
+                    diffEmailBtn.textContent = trans('Use Different Email / Phone');
+                } else {
+                    diffEmailBtn.textContent = trans('Use Different Email');
+                }
+            }
 
             var msgEl = document.getElementById("existingAccountMessage");
             if (msgEl) {
-                msgEl.textContent = message || trans('You are already registered. Please log in to your account.');
+                var defaultMsg = matchedBy === "phone"
+                    ? trans('This phone number is already registered. Please log in or use a different phone number.')
+                    : (matchedBy === "both"
+                        ? trans('This email address or mobile number is already registered. Please log in using your existing account to continue.')
+                        : trans('You are already registered. Please log in to your account.'));
+                msgEl.textContent = opts.message || defaultMsg;
             }
 
             if (loginErr) loginErr.classList.add("hidden");
@@ -1526,7 +1583,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             modal.classList.remove("hidden");
             setTimeout(function () {
-                pwdInput?.focus();
+                if (matchedBy === "phone" && inlineEmail && !inlineEmail.value.trim()) {
+                    inlineEmail.focus();
+                } else {
+                    pwdInput?.focus();
+                }
             }, 150);
         };
 
@@ -1538,29 +1599,62 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (pwdInput) pwdInput.value = "";
                 if (loginErr) loginErr.classList.add("hidden");
                 var activeEmailInput = document.getElementById("email");
+                var activePhoneInput = document.getElementById("phone");
                 if (activeEmailInput && window.__registeredGuestEmail) {
                     showValidationError(activeEmailInput, trans('This email is already registered. Please log in or use a different email address.'));
                 }
+                if (activePhoneInput && window.__registeredGuestPhone) {
+                    showValidationError(activePhoneInput, trans('This phone number is already registered. Please log in or use a different phone number.'));
+                }
             }
 
-            function handleUseDifferentEmail() {
+            function handleUseDifferentCredential() {
                 modal.classList.add("hidden");
                 if (pwdInput) pwdInput.value = "";
                 if (loginErr) loginErr.classList.add("hidden");
-                window.__registeredGuestEmail = "";
-                lastCheckedEmail = "";
 
                 var activeEmailInput = document.getElementById("email");
+                var activePhoneInput = document.getElementById("phone");
+
+                if (currentMatchedBy === "phone") {
+                    window.__registeredGuestPhone = "";
+                    lastCheckedPhone = "";
+                    if (activePhoneInput) {
+                        activePhoneInput.value = "";
+                        clearValidationErrorFor(activePhoneInput);
+                        activePhoneInput.focus();
+                    }
+                    return;
+                }
+
+                if (currentMatchedBy === "both") {
+                    window.__registeredGuestEmail = "";
+                    window.__registeredGuestPhone = "";
+                    lastCheckedEmail = "";
+                    lastCheckedPhone = "";
+                    if (activePhoneInput) {
+                        activePhoneInput.value = "";
+                        clearValidationErrorFor(activePhoneInput);
+                    }
+                    if (activeEmailInput) {
+                        activeEmailInput.value = "";
+                        clearValidationErrorFor(activeEmailInput);
+                        activeEmailInput.focus();
+                    }
+                    return;
+                }
+
+                window.__registeredGuestEmail = "";
+                lastCheckedEmail = "";
                 if (activeEmailInput) {
                     activeEmailInput.value = "";
-                    activeEmailInput.dataset.sentEmail = "";
                     clearValidationErrorFor(activeEmailInput);
                     activeEmailInput.focus();
                 }
             }
 
             closeBtn?.addEventListener("click", closeModal);
-            diffEmailBtn?.addEventListener("click", handleUseDifferentEmail);
+            diffEmailBtn?.addEventListener("click", handleUseDifferentCredential);
 
             modal.addEventListener("click", function (e) {
                 if (e.target === modal) {
@@ -1572,6 +1666,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 e.preventDefault();
                 var emailVal = (inlineEmail && inlineEmail.value ? inlineEmail.value : (document.getElementById("email") ? document.getElementById("email").value : "")).trim();
                 var pwdVal   = (pwdInput ? pwdInput.value : "").trim();
+
+                if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal)) {
+                    if (loginErr) {
+                        loginErr.textContent = !emailVal ? trans('Email address is required') : trans('Please enter a valid email address.');
+                        loginErr.classList.remove("hidden");
+                    }
+                    inlineEmail?.focus();
+                    return;
+                }
 
                 if (!pwdVal) {
                     if (loginErr) {
@@ -1621,12 +1724,23 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        var lastCheckedEmail = "";
-        async function checkCustomer(emailVal) {
+        async function checkCustomer(payload) {
             if (!window.__checkoutRoutes?.checkExistingUser) return;
-            if (!emailVal) return;
-            var normalizedEmail = emailVal.trim().toLowerCase();
-            if (!normalizedEmail || normalizedEmail === lastCheckedEmail) return;
+            var body = {};
+
+            if (payload.email) {
+                var normalizedEmail = payload.email.trim().toLowerCase();
+                if (!normalizedEmail || normalizedEmail === lastCheckedEmail) return;
+                body.email = normalizedEmail;
+            }
+
+            if (payload.phone) {
+                var normalizedPhone = normalizePhoneKey(payload.phone);
+                if (!normalizedPhone || normalizedPhone === lastCheckedPhone) return;
+                body.phone = payload.phone.trim();
+            }
+
+            if (!body.email && !body.phone) return;
 
             try {
                 var resp = await fetch(window.__checkoutRoutes.checkExistingUser, {
@@ -1636,13 +1750,34 @@ document.addEventListener("DOMContentLoaded", function () {
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
                         "Accept": "application/json",
                     },
-                    body: JSON.stringify({ email: normalizedEmail }),
+                    body: JSON.stringify(body),
                 });
 
+                if (!resp.ok) return;
                 var data = await resp.json();
-                lastCheckedEmail = normalizedEmail;
-                if (data && (data.exists || data.is_registered) && data.email && modal) {
-                    window.showExistingAccountModal(data.email, data.message);
+
+                if (body.email) lastCheckedEmail = body.email;
+                if (body.phone) lastCheckedPhone = normalizePhoneKey(body.phone);
+
+                if (data && (data.exists || data.is_registered)) {
+                    var matchedBy = data.matched_by || (data.phone_exists && !data.email_exists ? "phone" : "email");
+                    if (matchedBy === "phone") {
+                        window.__registeredGuestPhone = normalizePhoneKey(data.phone || body.phone || "");
+                        var activePhoneEl = document.getElementById("phone");
+                        if (activePhoneEl) {
+                            showValidationError(
+                                activePhoneEl,
+                                data.message || trans('This phone number is already registered. Please log in or use a different phone number.')
+                            );
+                        }
+                    } else if (modal) {
+                        window.showExistingAccountModal({
+                            email: data.email || (body.email || ""),
+                            phone: data.phone || (body.phone || ""),
+                            matchedBy: matchedBy,
+                            message: data.message,
+                        });
+                    }
                 }
             } catch (e) {
                 console.warn("checkExistingUser error", e);
@@ -1653,8 +1788,8 @@ document.addEventListener("DOMContentLoaded", function () {
             emailInput.dataset.existingBound = "1";
             emailInput.addEventListener("blur", function () {
                 var val = emailInput.value.trim();
-                if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-                    checkCustomer(val);
+                if (val && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val)) {
+                    checkCustomer({ email: val });
                 }
             });
 
@@ -1664,6 +1799,26 @@ document.addEventListener("DOMContentLoaded", function () {
                     window.__registeredGuestEmail = "";
                     lastCheckedEmail = "";
                     clearValidationErrorFor(emailInput);
+                }
+            });
+        }
+
+        if (phoneInput && !phoneInput.dataset.existingBound) {
+            phoneInput.dataset.existingBound = "1";
+            phoneInput.addEventListener("blur", function () {
+                var val = phoneInput.value.trim();
+                var digits = val.replace(/\D/g, "");
+                if (val && /^[\d\s\+\-\(\)]+$/.test(val) && digits.length >= 8 && digits.length <= 20) {
+                    checkCustomer({ phone: val });
+                }
+            });
+
+            phoneInput.addEventListener("input", function () {
+                var currentPhoneKey = normalizePhoneKey(phoneInput.value);
+                if (window.__registeredGuestPhone && currentPhoneKey !== window.__registeredGuestPhone) {
+                    window.__registeredGuestPhone = "";
+                    lastCheckedPhone = "";
+                    clearValidationErrorFor(phoneInput);
                 }
             });
         }

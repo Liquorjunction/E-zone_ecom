@@ -486,12 +486,10 @@
                 @if ($order && ($order->isGuest() || !Auth::check()))
                     @php
                         $shippingData = is_array($order->shipping_address) ? $order->shipping_address : json_decode($order->shipping_address, true);
-                        $prefillName = $order->guestUser?->name ?? ($shippingData['name'] ?? '');
                         $prefillEmail = $order->email ?? ($order->guestUser?->email ?? '');
                         $prefillPhone = $order->phone_no ?? ($order->guestUser?->phone ?? ($shippingData['phone'] ?? ''));
                         $registerUrl = route('register', array_filter([
                             'email' => $prefillEmail,
-                            'name'  => $prefillName,
                             'phone' => $prefillPhone,
                         ]));
                     @endphp
@@ -630,12 +628,10 @@
 @if (!empty($order) && ($order->isGuest() || !Auth::check()))
     @php
         $shippingData = is_array($order->shipping_address) ? $order->shipping_address : json_decode($order->shipping_address, true);
-        $prefillName = $order->guestUser?->name ?? ($shippingData['name'] ?? '');
         $prefillEmail = $order->email ?? ($order->guestUser?->email ?? '');
         $prefillPhone = $order->phone_no ?? ($order->guestUser?->phone ?? ($shippingData['phone'] ?? ''));
         $registerModalUrl = route('register', array_filter([
             'email' => $prefillEmail,
-            'name'  => $prefillName,
             'phone' => $prefillPhone,
         ]));
     @endphp

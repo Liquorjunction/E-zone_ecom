@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Client\Orders;
 
+use App\Repositories\Client\Interfaces\AuthRepositoryInterface;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -115,11 +116,17 @@ class OrderCheckoutRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             if (!Auth::check()) {
+                $authRepository = app(AuthRepositoryInterface::class);
                 $submittedEmail = strtolower(trim((string) $this->input('email', '')));
+                $submittedPhone = trim((string) $this->input('phone', ''));
 
-                // 1. Block registered users from creating guest orders
-                if (!empty($submittedEmail) && \App\Models\User::where('email', $submittedEmail)->exists()) {
+                // 1. Block registered users (by email or phone) from creating guest orders
+                if (!empty($submittedEmail) && $authRepository->findUserByEmail($submittedEmail)) {
                     $validator->errors()->add('email', statictranslations('You are already registered. Please log in to your account to place an order.'));
+                }
+
+                if (!empty($submittedPhone) && $authRepository->findUserByPhone($submittedPhone)) {
+                    $validator->errors()->add('phone', statictranslations('This phone number is already registered. Please log in or use a different phone number.'));
                 }
 
                 // 2. Mandatory CAPTCHA Verification Check (Google reCAPTCHA)
@@ -140,12 +147,29 @@ class OrderCheckoutRequest extends FormRequest
     protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         if ($this->expectsJson()) {
-            $submittedEmail = strtolower(trim((string) $this->input('email', '')));
-            $isRegistered = !Auth::check() && !empty($submittedEmail) && \App\Models\User::where('email', $submittedEmail)->exists();
+            $emailExists = false;
+            $phoneExists = false;
+
+            if (!Auth::check()) {
+                $authRepository = app(AuthRepositoryInterface::class);
+                $submittedEmail = strtolower(trim((string) $this->input('email', '')));
+                $submittedPhone = trim((string) $this->input('phone', ''));
+
+                $emailExists = !empty($submittedEmail) && (bool) $authRepository->findUserByEmail($submittedEmail);
+                $phoneExists = !empty($submittedPhone) && (bool) $authRepository->findUserByPhone($submittedPhone);
+            }
+
+            $isRegistered = $emailExists || $phoneExists;
+            $matchedBy = ($emailExists && $phoneExists)
+                ? 'both'
+                : ($emailExists ? 'email' : ($phoneExists ? 'phone' : null));
 
             $response = response()->json([
                 'success'       => false,
                 'is_registered' => $isRegistered,
+                'email_exists'  => $emailExists,
+                'phone_exists'  => $phoneExists,
+                'matched_by'    => $matchedBy,
                 'message'       => $validator->errors()->first(),
                 'errors'        => $validator->errors(),
             ], 422);

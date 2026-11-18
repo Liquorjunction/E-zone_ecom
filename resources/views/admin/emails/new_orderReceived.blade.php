@@ -42,7 +42,7 @@
             <td width="48%" valign="top" style="background-color: #f8f9fe; border: 1px solid #e0e4f0; border-radius: 8px; padding: 16px 18px;">
                 @php
                     $isOrderGuest = $isGuest ?? (method_exists($order, 'isGuest') ? $order->isGuest() : (($order->client_type ?? '') === 'guest' || is_null($order->user_id)));
-                    $displayName = $customerName ?? ($user->name ?? ($order->guestUser->name ?? ($order->shippingAddressRecord->name ?? ($order->shipping_address['name'] ?? ($isOrderGuest ? 'Client Invité' : 'Client')))));
+                    $displayName = $customerName ?? ($isOrderGuest ? 'Guest User' : ($user->name ?? ($user->email ?? 'Client')));
                     $displayEmail = $customerEmail ?? ($order->email ?? ($user->email ?? ($order->guestUser->email ?? ($order->shipping_address['email'] ?? '—'))));
                     $displayPhone = $customerPhone ?? ($order->phone_no ?? ($order->shipping_address['phone'] ?? ''));
                     $shippingCity = $order->shipping_address['city'] ?? '';

@@ -107,17 +107,20 @@ class OrderService
 
             if (!$userId) {
                 $clientType = 'guest';
-                $guestName = $shippingAddress['name'] ?? trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? ''));
                 $guestPhone = $shippingAddress['phone'] ?? $data['phone'] ?? $data['phone_no'] ?? null;
                 $guestEmail = strtolower(trim($data['email'] ?? ''));
 
-                if (!empty($guestEmail) && \App\Models\User::where('email', $guestEmail)->exists()) {
+                $authRepo = app(\App\Repositories\Client\Interfaces\AuthRepositoryInterface::class);
+                if (!empty($guestEmail) && $authRepo->findUserByEmail($guestEmail)) {
                     throw new \DomainException(statictranslations('You are already registered. Please log in to your account to place an order.'));
+                }
+                if (!empty($guestPhone) && $authRepo->findUserByPhone($guestPhone)) {
+                    throw new \DomainException(statictranslations('This phone number is already registered. Please log in or use a different phone number.'));
                 }
 
                 $guestUser = $this->guestUserRepo->createOrUpdateGuest([
                     'email' => $guestEmail,
-                    'name'  => $guestName ?: 'Guest Customer',
+                    'name'  => 'Guest User',
                     'phone' => $guestPhone,
                 ]);
             }
